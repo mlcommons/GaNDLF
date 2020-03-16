@@ -47,11 +47,14 @@ class TumorSegmentationDataset(Dataset):
         imshape = image.shape
         if imshape[0]>psize[0]:
             xshift = random.randint(0,imshape[0]-psize[0])
+            image = image[xshift:xshift+psize[0],:,:]
         if imshape[1]>psize[1]:
             yshift = random.randint(0,imshape[1]-psize[1])
+            image = image[:,yshift:yshift+psize[1],:]
         if imshape[2]>psize[2]:
             zshift = random.randint(0,imshape[2]-psize[2])
-            
+            image = image[:,:,zshift:zshift+psize[2]]
+    
         return image
 
     def __getitem__(self, index):
