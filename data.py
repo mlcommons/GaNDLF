@@ -70,9 +70,8 @@ class TumorSegmentationDataset(Dataset):
             im_stack[n] = image                
         gt = nib.load(self.df.iloc[index,dim-1]).get_fdata()
         im_stack,gt = self.rcrop(im_stack,gt,psize)
-        gt = one_hot(gt)
-
         im_stack, gt = self.transform(im_stack, gt, dim)
+        gt = one_hot(gt)
         sample = {'image': im_stack, 'gt' : gt}
         return sample
 
