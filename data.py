@@ -63,7 +63,6 @@ class TumorSegmentationDataset(Dataset):
         psize = self.psize
         imshape = nib.load(self.df.iloc[index,n]).get_fdata().shape
         dim = self.df.shape[1]
-        dim_gt = dim - 1
         im_stack =  np.zeros((dim-1,*psize),dtype=int)
         for n in range(0,dim-1):
             image = self.df.iloc[index,n]
@@ -73,7 +72,7 @@ class TumorSegmentationDataset(Dataset):
             image = np.expand_dims(image,axis = 0)
             im_stack[n] = image
                  
-        gt_path = self.df.iloc[index,dim_gt]
+        gt_path = self.df.iloc[index,dim-1]
         gt = nib.load(gt_path).get_fdata()
         gt = gt[xshift:xshift+psize[0],yshift:yshift+psize[1],:]   
         gt = one_hot(gt)
