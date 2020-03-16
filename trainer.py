@@ -29,6 +29,7 @@ args = parser.parse_args()
 
 train_parameters = args.train
 model_parameters = args.model
+dev = args.dev
 
 df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
@@ -112,12 +113,11 @@ val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1
 
 print("Training Data Samples: ", len(train_loader.dataset))
 sys.stdout.flush()
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device(dev)
 print("Current Device : ", torch.cuda.current_device())
 print("Device Count on Machine : ", torch.cuda.device_count())
 print("Device Name : ", torch.cuda.get_device_name(device))
 print("Cuda Availibility : ", torch.cuda.is_available())
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('Using device:', device)
 if device.type == 'cuda':
     print('Memory Usage:')
@@ -126,7 +126,7 @@ if device.type == 'cuda':
     print('Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
 
 sys.stdout.flush()
-model.cuda()
+model = model.to(device)
 ##################### SETTING THE OPTIMIZER ########################
 if opt == 'sgd':
     optimizer = optim.SGD(model.parameters(),
