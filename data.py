@@ -57,14 +57,14 @@ class TumorSegmentationDataset(Dataset):
             zshift = random.randint(0,imshape[2]-psize[2])
             image = image[:,:,:,zshift:zshift+psize[2]]
             gt = gt[:,:,zshift:zshift+psize[2]]
-        return image
+        return image,gt
 
     def __getitem__(self, index):
         psize = self.psize
-        z = nib.load(self.df.iloc[index,0]).get_fdata().shape[2]
+        imshape = nib.load(self.df.iloc[index,n]).get_fdata().shape
         dim = self.df.shape[1]
         dim_gt = dim - 1
-        im_stack =  np.zeros((dim-1,*psize,z),dtype=int)
+        im_stack =  np.zeros((dim-1,*psize),dtype=int)
         for n in range(0,dim-1):
             image = self.df.iloc[index,n]
             image = nib.load(image).get_fdata()
