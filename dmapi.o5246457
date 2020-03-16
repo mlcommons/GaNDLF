@@ -1,0 +1,17 @@
+
+Hostname   :2118ffn004
+Training Data Samples:  117
+Current Device :  0
+Device Count on Machine :  1
+Device Name :  Tesla P100-PCIE-12GB
+Cuda Availibility :  True
+Using device: cuda
+Memory Usage:
+Allocated: 0.0 GB
+Cached:  0.0 GB
+Starting Learning rate is: 0.001
+
+
+Epoch Started at: 2020-03-16 12:45:57.229833
+Epoch # :  0
+Learning rate: 0.001
