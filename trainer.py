@@ -67,7 +67,6 @@ n_channels = int(params['numberOfInputChannels'])
 model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
 psize = params['patch_size']
-print("ds",psize)
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
 #Changing the channels into a proper dataframe for training data
