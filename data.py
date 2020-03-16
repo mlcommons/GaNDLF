@@ -72,7 +72,6 @@ class TumorSegmentationDataset(Dataset):
         im_stack,gt = self.rcrop(im_stack,gt,psize)
         gt = one_hot(gt)
         im_stack, gt = self.transform(im_stack, gt, dim)
-        print(im_stack.shape,gt.shape)
         sample = {'image': im_stack, 'gt' : gt}
         return sample
 
