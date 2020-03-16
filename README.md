@@ -1,2 +1,2 @@
 # deep-semantic-seg
-iiiiCheck if commit is working kdkdkdk 
+Check if commit is working
