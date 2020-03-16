@@ -22,9 +22,10 @@ import sys
 import ast 
 import datetime
 
-parser = argparse.ArgumentParser(description = "Medical Image Semantic Segmentation using Deep Learning")
+parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument("-model", help = 'model configuration file')
 parser.add_argument("-train", help = 'train configuration file')
+parser.add_argument("-dev", help = 'choose device')
 args = parser.parse_args()
 
 train_parameters = args.train
@@ -172,7 +173,7 @@ for ep in range(num_epochs):
         image = subject['image']
         mask = subject['gt']
         # Loading images into the GPU and ignoring the affine
-        image, mask = image.float().cuda(), mask.float().cuda()
+        image, mask = image.float().to(device), mask.float().to(device)
         #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
         image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
         # Making sure that the optimizer has been reset
@@ -214,7 +215,7 @@ for ep in range(num_epochs):
         with torch.no_grad():
             image = subject['image']
             mask = subject['gt']
-            image, mask = image.cuda(), mask.cuda()
+            image, mask = image.to(device), mask.to(device)
             output = model(image.float())
             curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
             total_loss+=curr_loss
