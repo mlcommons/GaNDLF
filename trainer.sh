@@ -17,4 +17,4 @@ module load pytorch/1.0.1
 module load python/anaconda/3
 module unload gcc
 module load gcc/5.2.0
-python trainer.py -train /cbica/home/bhaleram/comp_space/brets/dm_like_api/train/train.cfg -model /cbica/home/bhaleram/comp_space/brets/dm_like_api/model/model.cfg 
+python trainer.py -train ./train/train.cfg -model ./model/model.cfg 

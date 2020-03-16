@@ -67,9 +67,9 @@ n_channels = int(params['numberOfInputChannels'])
 model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
 psize = params['patch_size']
+print("ds",psize)
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
-print("patchsize insside traein:"psize)
 #Changing the channels into a proper dataframe for training data
 df_final_train = pd.read_csv(channelsTr[0])
 df_labels_train = pd.read_csv(labelsTr)
