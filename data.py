@@ -43,10 +43,11 @@ class TumorSegmentationDataset(Dataset):
 
         return img,gt
         
-    def rcrop(self,imshape,psize):        
+    def rcrop(self,image,psize):        
         xshift = random.randint(0,imshape[0]-psize[0])
         yshift = random.randint(0,imshape[1]-psize[1]) 
-        return xshift, yshift
+        zshift = random.randint(0,imshape[2]-psize[2])
+        return image
 
     def __getitem__(self, index):
         psize = self.psize
