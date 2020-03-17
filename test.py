@@ -43,25 +43,13 @@ for i in range(df_test.shape[0]):
     params[df_test.iloc[i, 0]] = df_test.iloc[i, 1]
 
 # Extrating the training parameters from the dictionary
-num_epochs = int(params['num_epochs'])
 batch = int(params['batch_size'])
-learning_rate = int(params['learning_rate'])
 which_loss = params['loss_function']
-opt = str(params['opt'])
-save_best = int(params['save_best'])
-# Defining the channels for training and validation
-channelsTr = params['channelsTraining']
+channelsTe = params['channelsTesting']
 channelsTr = ast.literal_eval(channelsTr) 
-labelsTr = str(params['gtLabelsTraining'])
+labelsTe = str(params['gtLabelsTesting'])
 channelsVal = params['channelsValidation']
 channelsVal = ast.literal_eval(channelsVal) 
-labelsVal = str(params['gtLabelsValidation'])
-# Extracting the model parameters from the dictionary
-n_classes = int(params['numberOfOutputClasses'])
-base_filters = int(params['base_filters'])
-n_channels = int(params['numberOfInputChannels'])
-model_path = str(params['folderForOutput'])
-which_model = str(params['modelName'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
