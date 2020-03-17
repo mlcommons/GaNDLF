@@ -23,21 +23,17 @@ import ast
 import datetime
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
-parser.add_argument("-train", help = 'train configuration file')
+parser.add_argument("-test", help = 'test configuration file')
 parser.add_argument("-load", help = 'load model weight file')
 
 parser.add_argument("-dev", help = 'choose device')
 args = parser.parse_args()
 
 train_parameters = args.train
-model_parameters = args.model
+model_parameters = args.load
 dev = args.dev
 
 df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
-                         comment='#', skip_blank_lines=True,
-                         engine='python').fillna(' ')
-
-df_model = pd.read_csv(model_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
                          engine='python').fillna(' ')
 
