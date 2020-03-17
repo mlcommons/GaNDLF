@@ -23,8 +23,9 @@ import ast
 import datetime
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
-parser.add_argument("-model", help = 'model configuration file')
 parser.add_argument("-train", help = 'train configuration file')
+parser.add_argument("-load", help = 'load model weight file')
+
 parser.add_argument("-dev", help = 'choose device')
 args = parser.parse_args()
 
