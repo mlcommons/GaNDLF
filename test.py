@@ -29,21 +29,18 @@ parser.add_argument("-load", help = 'load model weight file')
 parser.add_argument("-dev", help = 'choose device')
 args = parser.parse_args()
 
-train_parameters = args.train
-model_parameters = args.load
+test_parameters = args.test
+model_path = args.load
 dev = args.dev
 
-df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
+df_test = pd.read_csv(test_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
                          engine='python').fillna(' ')
 
 #Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
 params = {}
-for i in range(df_train.shape[0]):
-    params[df_train.iloc[i, 0]] = df_train.iloc[i, 1]
-
-for j in range(df_model.shape[0]):
-    params[df_model.iloc[j, 0]] = df_model.iloc[j, 1]
+for i in range(df_test.shape[0]):
+    params[df_test.iloc[i, 0]] = df_test.iloc[i, 1]
 
 # Extrating the training parameters from the dictionary
 num_epochs = int(params['num_epochs'])
