@@ -16,7 +16,7 @@ from utils import *
 import random
 import scipy
 
-class TumorSegmentationDataset_val(Dataset):
+class TumorSegmentationDataset_test(Dataset):
     def __init__(self,df,psize):
         self.df = df
         self.psize = psize

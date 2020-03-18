@@ -66,18 +66,17 @@ df_final_test = pd.concat([df_final_test,df_labels_test],axis=1)
 model =  torch.load(model_path)
 ################################ PRINTING SOME STUFF ######################
 
-training_start_time = time.asctime()
+testing_start_time = time.asctime()
 startstamp = time.time()
 print("\nHostname   :" + str(os.getenv("HOSTNAME")))
 sys.stdout.flush()
 
 # Setting up the train and validation loader
-dataset_train = TumorSegmentationDataset(df_final_train,psize)
-train_loader = DataLoader(dataset_train,batch_size= batch,shuffle=True,num_workers=1)
-dataset_valid = TumorSegmentationDataset_val(df_final_val,psize)
-val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1)
+dataset_test = TumorSegmentationDataset_test(df_final_test,psize)
+test_loader = DataLoader(dataset_test,batch_size= batch,shuffle=True,num_workers=1)
 
-print("Training Data Samples: ", len(train_loader.dataset))
+
+print("Testing Data Samples: ", len(test_loader.dataset))
 sys.stdout.flush()
 device = torch.device(dev)
 print("Current Device : ", torch.cuda.current_device())
@@ -93,19 +92,7 @@ if device.type == 'cuda':
 
 sys.stdout.flush()
 model = model.to(device)
-##################### SETTING THE OPTIMIZER ########################
-if opt == 'sgd':
-    optimizer = optim.SGD(model.parameters(),
-                               lr= learning_rate,
-                               momentum = 0.9)
-if opt == 'adam':    
-    optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
 
-step_size = 4*batch*len(train_loader.dataset)
-clr = cyclical_lr(step_size, min_lr = 0.000001, max_lr = 0.001)
-scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-print("Starting Learning rate is:",clr(2*step_size))
-sys.stdout.flush()
 ############### CHOOSING THE LOSS FUNCTION ###################
 if which_loss == 'dc':
     loss_fn  = MCD_loss
