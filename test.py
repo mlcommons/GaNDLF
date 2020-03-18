@@ -103,15 +103,8 @@ if which_loss == 'ce':
 if which_loss == 'mse':
     loss_fn = MCD_MSE_loss
 ############## STORING THE HISTORY OF THE LOSSES #################
-avg_val_loss = 0
-total_val_loss = 0
-best_val_loss = 2000
-best_tr_loss = 2000
 total_loss = 0
-total_dice = 0
-best_idx = 0
-best_n_val_list = []
-val_avg_loss_list = []   
+average_loss = 0
 for batch_idx, (subject) in enumerate(test_loader):
     with torch.no_grad():
         image_1 = subject['image_1']
