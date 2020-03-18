@@ -11,7 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
 from data import TumorSegmentationDataset
-from data_val import TumorSegmentationDataset_val
+from data_test import TumorSegmentationDataset_test
 from schd import *
 from new_models import fcn,unet,resunet
 import gc
@@ -46,10 +46,8 @@ for i in range(df_test.shape[0]):
 batch = int(params['batch_size'])
 which_loss = params['loss_function']
 channelsTe = params['channelsTesting']
-channelsTr = ast.literal_eval(channelsTr) 
+channelsTe = ast.literal_eval(channelsTe) 
 labelsTe = str(params['gtLabelsTesting'])
-channelsVal = params['channelsValidation']
-channelsVal = ast.literal_eval(channelsVal) 
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
@@ -105,15 +103,15 @@ if which_loss == 'mse':
 ############## STORING THE HISTORY OF THE LOSSES #################
 total_loss = 0
 average_loss = 0
+total_dice = 0
+average_dice = 0
 for batch_idx, (subject) in enumerate(test_loader):
     with torch.no_grad():
-        image_1 = subject['image']
+        image = subject['image']
         mask = subject['gt']
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
         output = model(image.float())
-
-
         curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
         total_loss+=curr_loss
         # Computing the average loss
