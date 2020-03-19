@@ -124,7 +124,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
         print("Current Dice is: ", curr_dice)
-        
+        output = output.cpu().data.item()
 
 
 print("Average dice is: ", average_dice)
