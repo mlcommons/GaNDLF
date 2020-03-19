@@ -36,8 +36,6 @@ dev = args.dev
 df_test = pd.read_csv(test_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
                          engine='python').fillna(' ')
-print(df_test)
-
 #Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
 params = {}
 for i in range(df_test.shape[0]):
@@ -54,6 +52,8 @@ psize = ast.literal_eval(psize)
 psize = np.array(psize)
 save_path = str(params['path_save_seg'])
 #Changing the channels into a proper dataframe for training data
+if labelste == ".":
+    print("Wokting fine")
 df_final_test = pd.read_csv(channelsTe[0])
 df_labels_test = pd.read_csv(labelsTe)
 for channel in channelsTe:
@@ -112,6 +112,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         image = subject['image']
         mask = subject['gt']
         aff = subject['aff']
+        pname = subject['pname']
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
         output = model(image.float())
@@ -126,8 +127,9 @@ for batch_idx, (subject) in enumerate(test_loader):
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
         print("Current Dice is: ", curr_dice)
-        output = output.cpu().data.item()
-        nib.save(nib.Nifti1Image(output,affine),save_path)
+        #output = output.cpu().data.item()
+        #nib.save(nib.Nifti1Image(output,affine),save_path)
+        print(pname)
 
 
 print("Average dice is: ", average_dice)
