@@ -52,6 +52,7 @@ labelsTe = str(params['gtLabelsTesting'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
+save_path = str(params['path_save_seg'])
 #Changing the channels into a proper dataframe for training data
 df_final_test = pd.read_csv(channelsTe[0])
 df_labels_test = pd.read_csv(labelsTe)
@@ -126,6 +127,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         average_dice = total_dice/(batch_idx + 1)
         print("Current Dice is: ", curr_dice)
         output = output.cpu().data.item()
+        nib.save(nib.Nifti1Image(output,affine),save_path)
 
 
 print("Average dice is: ", average_dice)

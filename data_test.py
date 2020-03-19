@@ -57,6 +57,7 @@ class TumorSegmentationDataset_test(Dataset):
 
     def __getitem__(self, index):
         psize = self.psize
+        patient_name = self.df.iloc[index,0]
         image = nib.load(self.df.iloc[index,0])
         imshape = image.get_fdata().shape
         aff = image.affine
@@ -70,7 +71,7 @@ class TumorSegmentationDataset_test(Dataset):
         im_stack,gt = self.rcrop(im_stack,gt,psize)
         gt = one_hot(gt)
         #im_stack, gt = self.transform(im_stack, gt, dim)
-        sample = {'image': im_stack, 'gt' : gt, 'aff' : aff}
+        sample = {'image': im_stack, 'gt' : gt, 'aff' : aff, 'pname' : patient_name}
         return sample
 
 
