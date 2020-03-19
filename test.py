@@ -52,7 +52,7 @@ psize = ast.literal_eval(psize)
 psize = np.array(psize)
 save_path = str(params['path_save_seg'])
 #Changing the channels into a proper dataframe for training data
-if labelste == ".":
+if labelsTe == ".":
     print("Wokting fine")
 df_final_test = pd.read_csv(channelsTe[0])
 df_labels_test = pd.read_csv(labelsTe)
@@ -70,7 +70,6 @@ testing_start_time = time.asctime()
 startstamp = time.time()
 print("\nHostname   :" + str(os.getenv("HOSTNAME")))
 sys.stdout.flush()
-
 # Setting up the train and validation loader
 dataset_test = TumorSegmentationDataset_test(df_final_test,psize)
 test_loader = DataLoader(dataset_test,batch_size= batch,shuffle=True,num_workers=1)
@@ -111,8 +110,9 @@ for batch_idx, (subject) in enumerate(test_loader):
     with torch.no_grad():
         image = subject['image']
         mask = subject['gt']
-        aff = subject['aff']
+        aff = subject['aff'].cpu().detach().numpy()
         pname = subject['pname']
+        #pname = ast.literal_eval(pname) 
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
         output = model(image.float())
@@ -129,7 +129,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         print("Current Dice is: ", curr_dice)
         #output = output.cpu().data.item()
         #nib.save(nib.Nifti1Image(output,affine),save_path)
-        print(pname)
+        
 
 
 print("Average dice is: ", average_dice)

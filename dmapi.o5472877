@@ -1,0 +1,11 @@
+
+Hostname   :211affn020
+Testing Data Samples:  32
+Current Device :  0
+Device Count on Machine :  1
+Device Name :  Tesla P100-PCIE-12GB
+Cuda Availibility :  True
+Using device: cuda:0
+Memory Usage:
+Allocated: 0.1 GB
+Cached:  0.1 GB
