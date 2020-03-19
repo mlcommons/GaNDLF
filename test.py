@@ -108,6 +108,7 @@ average_dice = 0
 for batch_idx, (subject) in enumerate(test_loader):
     with torch.no_grad():
         image = subject['image']
+        print(image.shape)
         mask = subject['gt']
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
