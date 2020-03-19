@@ -110,6 +110,7 @@ for batch_idx, (subject) in enumerate(test_loader):
     with torch.no_grad():
         image = subject['image']
         mask = subject['gt']
+        aff = subject['aff']
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
         output = model(image.float())
