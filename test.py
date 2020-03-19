@@ -36,6 +36,7 @@ dev = args.dev
 df_test = pd.read_csv(test_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
                          engine='python').fillna(' ')
+print(df_test)
 
 #Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
 params = {}
@@ -46,7 +47,7 @@ for i in range(df_test.shape[0]):
 batch = int(params['batch_size'])
 which_loss = params['loss_function']
 channelsTe = params['channelsTesting']
-channelsTe = ast.literal_eval(channelsTe) 
+channelsTe = ast.literal_eval(channelsTe)
 labelsTe = str(params['gtLabelsTesting'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
@@ -123,6 +124,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
         print("Current Dice is: ", curr_dice)
+        
 
 
 print("Average dice is: ", average_dice)
