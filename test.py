@@ -112,7 +112,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         mask = subject['gt']
         aff = subject['aff'].cpu().detach().numpy()
         pname = subject['pname']
-        print(os.path.basename(pname[0]))
+        pname = os.path.basename(pname[0]).replace("")
         #pname = ast.literal_eval(pname) 
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
