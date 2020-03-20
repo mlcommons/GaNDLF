@@ -61,7 +61,7 @@ df_final_test = pd.read_csv(channelsTe[0])
 if labelsTe != ".":
     df_labels_test = pd.read_csv(labelsTe)
 if labelsTe == ".":
-    df_lables_test = pd.read_csv(channelsTe[0])
+    df_labels_test = pd.read_csv(channelsTe[0])
 
 
 for channel in channelsTe:
