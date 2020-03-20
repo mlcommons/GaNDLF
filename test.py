@@ -111,7 +111,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         image = subject['image']
         mask = subject['gt']
         aff = subject['aff'].cpu().detach().numpy()
-        print(aff)
+        print(aff.shape)
         pname = subject['pname']
         #pname = ast.literal_eval(pname) 
         b,c,x,y,z = mask.shape
@@ -131,6 +131,4 @@ for batch_idx, (subject) in enumerate(test_loader):
         #output = output.cpu().data.item()
         #nib.save(nib.Nifti1Image(output,affine),save_path)
         
-
-
 print("Average dice is: ", average_dice)
