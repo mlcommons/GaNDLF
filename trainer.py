@@ -169,6 +169,7 @@ for ep in range(num_epochs):
     print("Learning rate:", optimizer.param_groups[0]['lr'])
     model.train
     for batch_idx, (subject) in enumerate(train_loader):
+        
         # Load the subject and its ground truth
         image = subject['image']
         mask = subject['gt']
