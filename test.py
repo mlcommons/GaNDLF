@@ -51,6 +51,7 @@ psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
 save_path = str(params['path_save_seg'])
+to_replace = str(params['redundant_string'])
 #Changing the channels into a proper dataframe for training data
 if labelsTe == ".":
     print("Wokting fine")
@@ -111,9 +112,9 @@ for batch_idx, (subject) in enumerate(test_loader):
         image = subject['image']
         mask = subject['gt']
         aff = subject['aff'].cpu().detach().numpy()
+        aff = aff[0]
         pname = subject['pname']
-        pname = os.path.basename(pname[0]).replace("")
-        #pname = ast.literal_eval(pname) 
+        pname = str(os.path.basename(pname[0])).replace(to_replace,"")
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
         output = model(image.float())
@@ -128,7 +129,7 @@ for batch_idx, (subject) in enumerate(test_loader):
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
         print("Current Dice is: ", curr_dice)
-        #output = output.cpu().data.item()
-        #nib.save(nib.Nifti1Image(output,affine),save_path)
+        output = output.cpu().detach().numpy()
+        nib.save(nib.Nifti1Image(output,aff),save_path + pname + "_pmask.nii")
         
 print("Average dice is: ", average_dice)
