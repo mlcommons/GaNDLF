@@ -17,4 +17,4 @@ module load pytorch/1.0.1
 module load python/anaconda/3
 module unload gcc
 module load gcc/5.2.0
-python test.py -test ./test/test.cfg -load ../data/resunet0.pt -dev cuda:0
+python test.py -test ./test/test.cfg -load ../data/resunet0.pt -dev cuda:\$CUDA_VISIBLE_DEVICES
