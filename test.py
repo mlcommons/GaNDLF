@@ -53,15 +53,24 @@ psize = np.array(psize)
 save_path = str(params['path_save_seg'])
 to_replace = str(params['redundant_string'])
 #Changing the channels into a proper dataframe for training data
+# Somehow handling the case when the GT labels are not provided
+
 if labelsTe == ".":
-    print("Wokting fine")
+    print("Working fine")
 df_final_test = pd.read_csv(channelsTe[0])
-df_labels_test = pd.read_csv(labelsTe)
+if labelsTe != ".":
+    df_labels_test = pd.read_csv(labelsTe)
+if labelsTe == ".":
+    df_lables_test = pd.read_csv(channelsTe[0])
+
+
 for channel in channelsTe:
     df = pd.read_csv(channel)
     df_final_test = pd.concat([df_final_test,df],axis=1)
 df_final_test = df_final_test.drop(df.columns[[0]],axis=1)
 df_final_test = pd.concat([df_final_test,df_labels_test],axis=1)
+
+
 
 #Defining our model here according to parameters mentioned in the configuration file : 
 model =  torch.load(model_path)
@@ -118,17 +127,21 @@ for batch_idx, (subject) in enumerate(test_loader):
         b,c,x,y,z = mask.shape
         image, mask = image.to(device), mask.to(device)
         output = model(image.float())
-        curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
-        total_loss+=curr_loss
-        # Computing the average loss
-        average_loss = total_loss/(batch_idx + 1)
-        #Computing the dice score 
-        curr_dice = 1 - curr_loss
-        #Computing the total dice
-        total_dice+= curr_dice
-        #Computing the average dice
-        average_dice = total_dice/(batch_idx + 1)
-        print("Current Dice is: ", curr_dice)
+        if labelsTe != ".":
+            curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()                        
+            total_loss+=curr_loss
+            # Computing the average loss
+            average_loss = total_loss/(batch_idx + 1)
+            #Computing the dice score 
+            curr_dice = 1 - curr_loss
+            #Computing the total dice
+            total_dice+= curr_dice
+            #Computing the average dice
+            average_dice = total_dice/(batch_idx + 1)
+            print("Current Dice is: ", curr_dice)
+        if labelsTe == ".":
+            print("Sorry, GT label not provided and  hence loss can not be calculated")
+
         output = output.cpu().detach().numpy()
         nib.save(nib.Nifti1Image(output,aff),save_path + pname + "_pmask.nii")
         
