@@ -5,7 +5,15 @@ from seg_modules import in_conv, DownsamplingModule, EncodingModule, InceptionMo
 from seg_modules import UpsamplingModule, DecodingModule,IncDownsamplingModule,IncConv
 from seg_modules import out_conv, FCNUpsamplingModule, IncDropout,IncUpsamplingModule
 
+"""
+The smaller individual modules of these networks (the ones defined below), are taken from the seg_modules files as seen in the imports above.
 
+"""
+'''
+This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf - without the residual connections. The Downsampling, Encoding, Decoding modules
+are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
+and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+'''
 class unet(nn.Module):
     def __init__(self, n_channels, n_classes, base_filters):
         super(unet, self).__init__()
@@ -50,7 +58,11 @@ class unet(nn.Module):
         x = self.out(x, x1)
         return x
 
-
+'''
+This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The Downsampling, Encoding, Decoding modules
+are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
+and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+'''
 class resunet(nn.Module):
     def __init__(self, n_channels, n_classes, base_filters):
         super(resunet, self).__init__()
@@ -94,7 +106,11 @@ class resunet(nn.Module):
         x = self.us_0(x)
         x = self.out(x, x1)
         return x
-
+'''
+This is the standard FCN (Fully Convolutional Network) architecture : https://arxiv.org/abs/1411.4038 . The Downsampling, Encoding, Decoding modules
+are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
+and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+'''
 
 class fcn(nn.Module):
     def __init__(self, n_channels, n_classes, base_filters):
@@ -138,10 +154,13 @@ class fcn(nn.Module):
         x = self.conv_0(x)
         return F.softmax(x,dim=1)
 
-#defining the inception net class which inherits from the nn.module class - which is I think to basically tell the program that this is a pytorch network model that I am defining 
-#the res parameter is for the addition of the initial feature map with the final feature map after performance of the convolutions - for the decoding module, not the initial input but the input after the first convolution is addded to the final output since the initial input and the final one do not have the same dimensions
-#In the init function we just define the operations that are going to be performed in the forward pass of the network - and in the forward method we actually substitute the values in the defined operations
-        
+'''
+This is the implementation of the following paper: https://arxiv.org/abs/1907.02110 (from CBICA). Please look at the seg_module files (towards the end), to get 
+a better sense of the Inception Module implemented
+The res parameter is for the addition of the initial feature map with the final feature map after performance of the convolution. 
+For the decoding module, not the initial input but the input after the first convolution is addded to the final output since the initial input and 
+the final one do not have the same dimensions. 
+'''     
 class uinc(nn.Module):
     def __init__(self,n_channels,n_classes,base_filters):
         super(uinc,self).__init__()
