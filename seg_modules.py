@@ -435,10 +435,15 @@ class out_conv(nn.Module):
         x = F.softmax(self.conv3(x),dim=1)
         return x
  
-#the operations in the initialization functions just define these functions and then they are used in the forward method 
-#Here the number of input and output channels are the same as this is the encoding inception module - in the decoding inception module they will differ - input # of features will be twice the output # of features
+''' 
+Link to the paper (CBICA): https://arxiv.org/pdf/1907.02110.pdf. Below implemented are the smaller modules that are integrated to form the larger Inc U Net arch.
+Architecture is defined on Page 5 Figure 1 of the paper. 
+'''
         
-
+'''
+This is the modeule implementation on Page 6 Figure 2 (diagram on the right) of the above mentioned paper. In summary, this consists of 4 parallel pathways each with f/4 feature maps (f is the
+number of feature maps of the input to the InceptionModule. These 4 feature maps (or channels) are concatenated after being processed by the Inception Module)
+'''
 class InceptionModule(nn.Module):
     def __init__(self,input_channels,output_channels,dropout_p=0.3,leakiness=1e-2,conv_bias=True,inst_norm_affine=True,res=False,lrelu_inplace=True):
         nn.Module.__init__(self)
@@ -483,6 +488,10 @@ class InceptionModule(nn.Module):
         
         return x 
 
+   '''
+   This is the implementation of the Page 6 Figure 2 (diagram on the left)
+   '''
+    
 class ResNetModule(nn.Module):
     def __init__(self,input_channels,output_channels,dropout_p=0.3,leakiness=1e-2,conv_bias=True,inst_norm_affine=True,res=False,lrelu_inplace=True):
         nn.Module.__init__(self)
@@ -504,7 +513,11 @@ class ResNetModule(nn.Module):
         x = x + skip
         x = F.leaky_relu(x,negative_slope = self.leakiness, inplace = self.lrelu_inplace)
         return x 
-    
+
+  ''''
+  The Upsampling and Downsampling modules given below are same as the ones used above. Just used a different name for clarity, since the overall architecture of 
+  the Inception U-Net is significantly different from the other U-net variants. 
+  '''
     
 class IncDownsamplingModule(nn.Module):
     def __init__(self, input_channels, output_channels, leakiness=1e-2, kernel_size=1, conv_bias=True, 
