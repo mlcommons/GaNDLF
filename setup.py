@@ -44,7 +44,7 @@ setup(
   keywords='segmentation, semantic, brain, breast',
   name='deep-seg',
   dependency_links=['https://github.com/sarthakpati/torchio/tarball/master#egg=repo-v0.17.9'],
-  # url='https://github.com/fepegar/torchio',
+  # url='https://github.com/meghbhalerao/deep-semantic-seg',
   version='0.0.1',
   zip_safe=False,
 )
