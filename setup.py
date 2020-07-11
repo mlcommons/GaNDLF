@@ -15,6 +15,7 @@ requirements = [
   'torch>=1.2',
   'torchvision',
   'tqdm',
+  'torchio==0.17.9'
 ]
 
 setup(
@@ -42,8 +43,8 @@ setup(
   include_package_data=True,
   keywords='segmentation, semantic, brain, breast',
   name='deep-seg',
-  dependency_links=['https://github.com/fepegar/torchio/archive/v0.17.9.zip'],
-  # url='https://github.com/fepegar/torchio',
+  dependency_links=['https://github.com/sarthakpati/torchio/tarball/master#egg=repo-v0.17.9'],
+  # url='https://github.com/meghbhalerao/deep-semantic-seg',
   version='0.0.1',
   zip_safe=False,
 )
