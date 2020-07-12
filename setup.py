@@ -15,6 +15,7 @@ requirements = [
   'torch>=1.2',
   'torchvision',
   'tqdm',
+  'torchio==0.17.9'
 ]
 
 setup(
