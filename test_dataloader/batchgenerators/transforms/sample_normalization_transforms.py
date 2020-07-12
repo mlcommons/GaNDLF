@@ -19,7 +19,7 @@ from batchgenerators.transforms.abstract_transforms import AbstractTransform
 
 
 class RangeTransform(AbstractTransform):
-    '''Rescales data into the specified range
+    """Rescales data into the specified range
 
     Args:
         rnge (tuple of float): The range to which the data is scaled
@@ -27,7 +27,7 @@ class RangeTransform(AbstractTransform):
         per_channel (bool): determines whether the min and max values used for the rescaling are computed over the whole
         sample or separately for each channel
 
-    '''
+    """
 
     def __init__(self, rnge=(0, 1), per_channel=True, data_key="data", label_key="seg"):
         self.data_key = data_key

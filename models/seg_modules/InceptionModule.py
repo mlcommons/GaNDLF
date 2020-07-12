@@ -46,7 +46,7 @@ class InceptionModule(nn.Module):
         
         return x 
 
-   '''
+   """
    This is the implementation of the Page 6 Figure 2 (diagram on the left)
-   '''
+   """
   

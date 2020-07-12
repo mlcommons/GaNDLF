@@ -7,13 +7,13 @@ from seg_modules import out_conv, FCNUpsamplingModule, IncDropout,IncUpsamplingM
 
    
 class uinc(nn.Module):
-    '''
+    """
     This is the implementation of the following paper: https://arxiv.org/abs/1907.02110 (from CBICA). Please look at the seg_module files (towards the end), to get 
     a better sense of the Inception Module implemented
     The res parameter is for the addition of the initial feature map with the final feature map after performance of the convolution. 
     For the decoding module, not the initial input but the input after the first convolution is addded to the final output since the initial input and 
     the final one do not have the same dimensions. 
-    '''  
+    """  
     def __init__(self,n_channels,n_classes,base_filters):
         super(uinc,self).__init__()
         self.n_channels = n_channels

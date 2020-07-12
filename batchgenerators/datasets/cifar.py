@@ -10,11 +10,11 @@ from batchgenerators.utilities.file_and_folder_operations import join
 
 
 def unpickle(file):
-    '''
+    """
     taken from http://www.cs.toronto.edu/~kriz/cifar.html
     :param file:
     :return:
-    '''
+    """
     import pickle
 
     with open(file, 'rb') as fo:
@@ -23,13 +23,13 @@ def unpickle(file):
 
 
 def maybe_download_and_prepare_cifar(target_dir, cifar=10):
-    '''
+    """
     Checks if cifar is already present in target_dir and downloads it if not.
     CIFAR comes in 5 batches that need to be unpickled. What a mess.
     We stack all 5 batches together to one single npy array. No idea why they are being so complicated
     :param target_dir:
     :return:
-    '''
+    """
     if not os.path.isfile(os.path.join(target_dir, 'cifar%d_test_data.npz' % cifar)) or not \
             os.path.isfile(os.path.join(target_dir, 'cifar%d_training_data.npz' % cifar)):
         print('downloading CIFAR%d...' % cifar)

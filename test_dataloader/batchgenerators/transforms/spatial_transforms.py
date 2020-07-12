@@ -456,12 +456,12 @@ class SpatialTransform_2(AbstractTransform):
 
 class TransposeAxesTransform(AbstractTransform):
     def __init__(self, transpose_any_of_these=(0, 1, 2), data_key="data", label_key="seg", p_per_sample=1):
-        '''
+        """
         This transform will randomly shuffle the axes of transpose_any_of_these.
         :param transpose_any_of_these: spatial dimensions to transpose, 0=x, 1=y, 2=z. Must be a tuple/list of len>=2
         :param data_key:
         :param label_key:
-        '''
+        """
         self.p_per_sample = p_per_sample
         self.data_key = data_key
         self.label_key = label_key

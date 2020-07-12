@@ -7,11 +7,11 @@ from seg_modules import UpsamplingModule, DecodingModule,IncDownsamplingModule,I
 from seg_modules import out_conv, FCNUpsamplingModule, IncDropout,IncUpsamplingModule
 
 class unet(nn.Module):
-    '''
+    """
     This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf - without the residual connections. The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
     and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
-    '''
+    """
     def __init__(self, n_channels, n_classes, base_filters):
         super(unet, self).__init__()
         self.n_channels = n_channels
@@ -55,8 +55,8 @@ class unet(nn.Module):
         x = self.out(x, x1)
         return x
 
-'''
+"""
 This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The Downsampling, Encoding, Decoding modules
 are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
 and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
-'''
+"""

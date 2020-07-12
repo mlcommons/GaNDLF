@@ -73,10 +73,10 @@ class TestCrop(unittest.TestCase):
                                             " happened here!")
 
     def test_random_crop_with_cropsize_larger_image(self):
-        '''
+        """
         should fall back to center crop
         :return:
-        '''
+        """
         data = [np.random.random((4, 64+i, 56+i)) for i in range(32)]
         seg = [np.random.random((4, 64+i, 56+i)) for i in range(32)]
 
