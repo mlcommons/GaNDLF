@@ -4,7 +4,7 @@ import torch
 
 def add_conv_block(in_ch=1, out_ch=1, kernel_size=3, dilate=1, last=False, volumetric=True):
     """
-    Helpder function
+    Helper function
     """
     if volumetric:
         Conv = nn.Conv3d
