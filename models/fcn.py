@@ -1,7 +1,9 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from seg_modules import *
+from seg_modules.DownsamplingModule import DownsamplingModule
+from seg_modules.EncodingModule import EncodingModule
+from seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
 
 class fcn(nn.Module):
     """
