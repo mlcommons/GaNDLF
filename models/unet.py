@@ -2,7 +2,14 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from seg_modules import *
+from models.seg_modules.DownsamplingModule import DownsamplingModule
+from models.seg_modules.EncodingModule import EncodingModule
+from models.seg_modules.DecodingModule import DecodingModule
+from models.seg_modules.UpsamplingModule import UpsamplingModule
+from models.seg_modules.in_conv import in_conv
+from models.seg_modules.out_conv import out_conv
+
+
 
 class unet(nn.Module):
     """

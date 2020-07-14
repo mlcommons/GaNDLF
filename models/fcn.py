@@ -1,9 +1,10 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from seg_modules.DownsamplingModule import DownsamplingModule
-from seg_modules.EncodingModule import EncodingModule
-from seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
+from models.seg_modules.DownsamplingModule import DownsamplingModule
+from models.seg_modules.EncodingModule import EncodingModule
+from models.seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
+from models.seg_modules.in_conv import in_conv
 
 class fcn(nn.Module):
     """

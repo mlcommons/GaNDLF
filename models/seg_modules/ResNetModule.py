@@ -23,9 +23,3 @@ class ResNetModule(nn.Module):
         x = x + skip
         x = F.leaky_relu(x,negative_slope = self.leakiness, inplace = self.lrelu_inplace)
         return x 
-
-  """'
-  The Upsampling and Downsampling modules given below are same as the ones used above. Just used a different name for clarity, since the overall architecture of 
-  the Inception U-Net is significantly different from the other U-net variants. 
-  """
-   

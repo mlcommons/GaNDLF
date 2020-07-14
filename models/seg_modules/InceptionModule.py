@@ -44,9 +44,4 @@ class InceptionModule(nn.Module):
         x = x + skip
         x = F.leaky_relu(x,negative_slope = self.leakiness,inplace = self.lrelu_inplace)
         
-        return x 
-
-   """
-   This is the implementation of the Page 6 Figure 2 (diagram on the left)
-   """
-  
+        return x  

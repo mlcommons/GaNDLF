@@ -13,7 +13,10 @@ from torch.autograd import Variable
 from data import TumorSegmentationDataset
 from data_val import TumorSegmentationDataset_val
 from schd import *
-from models import fcn,unet,resunet
+from models.fcn import fcn
+from models.unet import unet
+from models.resunet import resunet
+from models.uinc import uinc
 import gc
 from torchsummary import summary
 import nibabel as nib
@@ -71,7 +74,7 @@ which_model = str(params['modelName'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
-#Changing the channels into a proper dataframe for training data
+#Changing the channels into a proper dataframe for training da
 df_final_train = pd.read_csv(channelsTr[0])
 df_labels_train = pd.read_csv(labelsTr)
 for channel in channelsTr:
@@ -114,6 +117,7 @@ val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1
 
 print("Training Data Samples: ", len(train_loader.dataset))
 sys.stdout.flush()
+print(dev)
 device = torch.device(dev)
 print("Current Device : ", torch.cuda.current_device())
 print("Device Count on Machine : ", torch.cuda.device_count())

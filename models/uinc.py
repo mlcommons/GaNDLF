@@ -1,8 +1,13 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from seg_modules import *
-
+from models.seg_modules.ResNetModule import ResNetModule
+from models.seg_modules.InceptionModule import InceptionModule
+from models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
+from models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
+from models.seg_modules.IncConv import IncConv
+from models.seg_modules.ResNetModule import ResNetModule
+from models.seg_modules.IncDropout import IncDropout
    
 class uinc(nn.Module):
     """
