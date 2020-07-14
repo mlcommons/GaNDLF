@@ -14,3 +14,4 @@ pip install -e .
 - Single entry point for user (for both training and testing)
 - Add more models that could potentially handle sparse data better
 - Replace `batchgenerators` with `torchio` as it is easier to use and extend
+- Use iterative k-fold cross-validation in training
