@@ -250,10 +250,10 @@ class TransposeChannels(AbstractTransform):
 
 
 class RemoveLabelTransform(AbstractTransform):
-    '''
+    """
     Replaces all pixels in data_dict[input_key] that have value remove_label with replace_with and saves the result to
     data_dict[output_key]
-    '''
+    """
 
     def __init__(self, remove_label, replace_with=0, input_key="seg", output_key="seg"):
         self.output_key = output_key
@@ -269,9 +269,9 @@ class RemoveLabelTransform(AbstractTransform):
 
 
 class RenameTransform(AbstractTransform):
-    '''
+    """
     Saves the value of data_dict[in_key] to data_dict[out_key]. Optionally removes data_dict[in_key] from the dict.
-    '''
+    """
 
     def __init__(self, in_key, out_key, delete_old=False):
         self.delete_old = delete_old
@@ -357,9 +357,9 @@ class ReshapeTransform(AbstractTransform):
 
 
 class AddToDictTransform(AbstractTransform):
-    '''
+    """
     Add a value of data_dict[key].
-    '''
+    """
 
     def __init__(self, in_key, in_val, strict=False):
         self.strict = strict

@@ -88,9 +88,9 @@ class DataLoaderBase(object):
 
     @abstractmethod
     def generate_train_batch(self):
-        '''override this
+        """override this
         Generate your batch from self._data .Make sure you generate the correct batch size (self.BATCH_SIZE)
-        '''
+        """
         pass
 
 
@@ -127,9 +127,9 @@ class SlimDataLoaderBase(object):
 
     @abstractmethod
     def generate_train_batch(self):
-        '''override this
+        """override this
         Generate your batch from self._data .Make sure you generate the correct batch size (self.BATCH_SIZE)
-        '''
+        """
         pass
 
 
@@ -188,19 +188,19 @@ class DataLoader(SlimDataLoaderBase):
 
     @abstractmethod
     def generate_train_batch(self):
-        '''
+        """
         make use of self.get_indices() to know what indices to work on!
         :return:
-        '''
+        """
         pass
 
 
 def default_collate(batch):
-    '''
+    """
     heavily inspired by the default_collate function of pytorch
     :param batch:
     :return:
-    '''
+    """
     if isinstance(batch[0], np.ndarray):
         return np.vstack(batch)
     elif isinstance(batch[0], (int, np.int64)):
@@ -223,7 +223,7 @@ def default_collate(batch):
 class DataLoaderFromDataset(DataLoader):
     def __init__(self, data, batch_size, num_threads_in_multithreaded, seed_for_shuffle=1, collate_fn=default_collate,
                  return_incomplete=False, shuffle=True, infinite=False):
-        '''
+        """
         A simple dataloader that can take a Dataset as data.
         It is not super efficient because I cannot make too many hard assumptions about what data_dict will contain.
         If you know what you need, implement your own!
@@ -231,7 +231,7 @@ class DataLoaderFromDataset(DataLoader):
         :param batch_size:
         :param num_threads_in_multithreaded:
         :param seed_for_shuffle:
-        '''
+        """
         super(DataLoaderFromDataset, self).__init__(data, batch_size, num_threads_in_multithreaded, seed_for_shuffle,
                                                     return_incomplete=return_incomplete, shuffle=shuffle,
                                                     infinite=infinite)

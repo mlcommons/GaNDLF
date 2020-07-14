@@ -44,10 +44,10 @@ def create_zero_centered_coordinate_mesh(shape):
 
 
 def convert_seg_image_to_one_hot_encoding(image, classes=None):
-    '''
+    """
     Takes as input an nd array of a label map (any dimension). Outputs a one hot encoding of the label map.
     Example (3D): if input is of shape (x, y, z), the output will ne of shape (n_classes, x, y, z)
-    '''
+    """
     if classes is None:
         classes = np.unique(image)
     out_image = np.zeros([len(classes)]+list(image.shape), dtype=image.dtype)
@@ -68,13 +68,13 @@ def elastic_deform_coordinates(coordinates, alpha, sigma):
 
 
 def elastic_deform_coordinates_2(coordinates, sigmas, magnitudes):
-    '''
+    """
     magnitude can be a tuple/list
     :param coordinates:
     :param sigma:
     :param magnitude:
     :return:
-    '''
+    """
     if not isinstance(magnitudes, (tuple, list)):
         magnitudes = [magnitudes] * (len(coordinates) - 1)
     if not isinstance(sigmas, (tuple, list)):
@@ -468,7 +468,7 @@ def general_cc_var_num_channels(img, diff_order=0, mink_norm=1, sigma=1, mask_im
 
 def convert_seg_to_bounding_box_coordinates(data_dict, dim, get_rois_from_seg_flag=False, class_specific_seg_flag=False):
 
-        '''
+        """
         This function generates bounding box annotations from given pixel-wise annotations.
         :param data_dict: Input data dictionary as returned by the batch generator.
         :param dim: Dimension in which the model operates (2 or 3).
@@ -485,7 +485,7 @@ def convert_seg_to_bounding_box_coordinates(data_dict, dim, get_rois_from_seg_fl
         - 'roi_labels': corresponding class labels for each box (b, n_boxes, class_label)
         - 'roi_masks': corresponding binary segmentation mask for each lesion (box). Only used in Mask RCNN. (b, n_boxes, y, x, (z))
         - 'seg': now label map (see class_specific_seg_flag)
-        '''
+        """
 
         bb_target = []
         roi_masks = []
@@ -558,7 +558,7 @@ def transpose_channels(batch):
 
 
 def resize_segmentation(segmentation, new_shape, order=3, cval=0):
-    '''
+    """
     Resizes a segmentation map. Supports all orders (see skimage documentation). Will transform segmentation map to one
     hot encoding which is resized and transformed back to a segmentation map.
     This prevents interpolation artifacts ([0, 0, 2] -> [0, 1, 2])
@@ -566,7 +566,7 @@ def resize_segmentation(segmentation, new_shape, order=3, cval=0):
     :param new_shape:
     :param order:
     :return:
-    '''
+    """
     tpe = segmentation.dtype
     unique_labels = np.unique(segmentation)
     assert len(segmentation.shape) == len(new_shape), "new shape must have same dimensionality as segmentation"
@@ -582,14 +582,14 @@ def resize_segmentation(segmentation, new_shape, order=3, cval=0):
 
 
 def resize_multichannel_image(multichannel_image, new_shape, order=3):
-    '''
+    """
     Resizes multichannel_image. Resizes each channel in c separately and fuses results back together
 
     :param multichannel_image: c x x x y (x z)
     :param new_shape: x x y (x z)
     :param order:
     :return:
-    '''
+    """
     tpe = multichannel_image.dtype
     new_shp = [multichannel_image.shape[0]] + list(new_shape)
     result = np.zeros(new_shp, dtype=multichannel_image.dtype)

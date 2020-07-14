@@ -21,7 +21,7 @@ from batchgenerators.augmentations.utils import uniform
 
 def augment_linear_downsampling_scipy(data_sample, zoom_range=(0.5, 1), per_channel=True, p_per_channel=1,
                                       channels=None, order_downsample=1, order_upsample=0, ignore_axes=None):
-    '''
+    """
     Downsamples each sample (linearly) by a random factor and upsamples to original resolution again (nearest neighbor)
 
     Info:
@@ -48,7 +48,7 @@ def augment_linear_downsampling_scipy(data_sample, zoom_range=(0.5, 1), per_chan
 
         ignore_axes: tuple/list
 
-    '''
+    """
     if not isinstance(zoom_range, (list, tuple, np.ndarray)):
         zoom_range = [zoom_range]
 

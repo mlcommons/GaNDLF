@@ -10,7 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
 from data import TumorSegmentationDataset
-from new_models import *
+from models import *
 import gc
 import nibabel as nib
 from losses import *

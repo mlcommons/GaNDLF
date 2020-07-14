@@ -159,14 +159,14 @@ class TestMultiThreadedAugmenter(unittest.TestCase):
         assert all((i == j for i, j in zip(res, np.arange(0, 100))))
 
     def test_image_pipeline_and_pin_memory(self):
-        '''
+        """
         This just should not crash
         :return:
-        '''
+        """
         try:
             import torch
         except ImportError:
-            '''dont test if torch is not installed'''
+            """dont test if torch is not installed"""
             return
 
         from batchgenerators.transforms import MirrorTransform, NumpyToTensor, TransposeAxesTransform, Compose
@@ -192,10 +192,10 @@ class TestMultiThreadedAugmenter(unittest.TestCase):
         sleep(2)
 
     def test_image_pipeline(self):
-        '''
+        """
         This just should not crash
         :return:
-        '''
+        """
         from batchgenerators.transforms import MirrorTransform, TransposeAxesTransform, Compose
 
         tr_transforms = []

@@ -13,7 +13,7 @@ from torch.autograd import Variable
 from data import TumorSegmentationDataset
 from data_test import TumorSegmentationDataset_test
 from schd import *
-from new_models import fcn,unet,resunet
+from models import fcn,unet,resunet
 import gc
 from torchsummary import summary
 import nibabel as nib
