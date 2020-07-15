@@ -15,3 +15,4 @@ pip install -e .
 - Add more models that could potentially handle sparse data better
 - Replace `batchgenerators` with `torchio` as it is easier to use and extend
 - Use iterative k-fold cross-validation in training
+- Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
