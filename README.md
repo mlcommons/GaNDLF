@@ -16,3 +16,4 @@ pip install -e .
 - Replace `batchgenerators` with `torchio` as it is easier to use and extend
 - Use iterative k-fold cross-validation in training
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
+- Consistent data I/O in a separate module so that this can be expanded for different tasks
