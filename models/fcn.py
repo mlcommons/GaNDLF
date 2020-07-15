@@ -11,6 +11,8 @@ class fcn(nn.Module):
     This is the standard FCN (Fully Convolutional Network) architecture : https://arxiv.org/abs/1411.4038 . The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
     and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+
+    DOI: 10.1109/TPAMI.2016.2572683
     """
     def __init__(self, n_channels, n_classes, base_filters):
         super(fcn, self).__init__()

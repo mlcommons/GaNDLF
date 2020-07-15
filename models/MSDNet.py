@@ -9,6 +9,7 @@ class MSDNet(nn.Module):
     Paper: A mixed-scale dense convolutional neural network for image analysis
     Published: PNAS, Jan. 2018 
     Paper: http://www.pnas.org/content/early/2017/12/21/1715832114
+    DOI: 10.1073/pnas.1715832114
     Derived from Shubham Dokania's https://github.com/shubham1810/MS-D_Net_PyTorch
     """
     @staticmethod
