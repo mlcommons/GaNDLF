@@ -25,6 +25,7 @@ import sys
 import ast 
 import datetime
 from pathlib import Path
+from sklearn.model_selection import KFold
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument("-model", type=str, help = 'model configuration file', required=True)
@@ -80,14 +81,24 @@ base_filters = int(params['base_filters'])
 n_channels = int(params['numberOfInputChannels'])
 model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
+kfolds = int(params['kcross_validation'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
 
 ## read training dataset into data frame
 trainingData_full = pd.read_csv(file_trainingData_full)
+training_indeces_full = list(trainingData_full.index.values)
+kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
-## contruct the training and validation data from trainingCSV
+for train_index, test_index in kf.split(training_indeces_full):
+    trainingData = trainingData_full.iloc[train_index]
+    validationData = trainingData_full.iloc[test_index]
+
+    # read contents of trainingData and validataData into image arrays based on the header information
+
+    test = 1
+
 
 #Changing the channels into a proper dataframe for training da
 df_final_train = pd.DataFrame() # initialize the variable to hold the training channels
@@ -179,7 +190,7 @@ if which_loss == 'mse':
     loss_fn = MCD_MSE_loss
 else:
     print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
-    which_loss = 'dc':
+    which_loss = 'dc'
     loss_fn  = MCD_loss
 ############## STORING THE HISTORY OF THE LOSSES #################
 avg_val_loss = 0
