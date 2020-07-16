@@ -99,6 +99,10 @@ if which_model == 'fcn':
     model = fcn(n_channels,n_classes,base_filters)
 if which_model == 'uinc':
     model = uinc(n_channels,n_classes,base_filters)
+else:
+    print('Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead')
+    which_model = 'resunet'
+    model = resunet(n_channels,n_classes,base_filters)
 
 ################################ PRINTING SOME STUFF ######################
 
