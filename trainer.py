@@ -100,7 +100,7 @@ if which_model == 'fcn':
 if which_model == 'uinc':
     model = uinc(n_channels,n_classes,base_filters)
 else:
-    print('Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead')
+    print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
     model = resunet(n_channels,n_classes,base_filters)
 
