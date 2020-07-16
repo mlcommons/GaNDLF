@@ -17,7 +17,6 @@ pip install -e .
 ```
 
 ## To Do
-- Input/output paths to be controlled by configuration file(s)
 - Single entry point for user (for both training and testing)
 - Add more models that could potentially handle sparse data better
 - Replace `batchgenerators` with `torchio` as it is easier to use and extend
