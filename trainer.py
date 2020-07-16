@@ -156,6 +156,12 @@ if opt == 'sgd':
                                momentum = 0.9)
 if opt == 'adam':    
     optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
+else:
+    print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
+    opt = 'sgd'
+    optimizer = optim.SGD(model.parameters(),
+                               lr= learning_rate,
+                               momentum = 0.9)
 
 step_size = 4*batch*len(train_loader.dataset)
 clr = cyclical_lr(step_size, min_lr = 0.000001, max_lr = 0.001)
