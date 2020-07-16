@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
-from data import TumorSegmentationDataset
+from data import *
 from data_val import TumorSegmentationDataset_val
 from schd import *
 from models.fcn import fcn
@@ -59,12 +59,18 @@ which_loss = params['loss_function']
 opt = str(params['opt'])
 save_best = int(params['save_best'])
 # Defining the channels for training and validation
-channelsTr = params['channelsTraining']
-channelsTr = ast.literal_eval(channelsTr) 
-labelsTr = str(params['gtLabelsTraining'])
-channelsVal = params['channelsValidation']
-channelsVal = ast.literal_eval(channelsVal) 
-labelsVal = str(params['gtLabelsValidation'])
+# channelsTr = params['channelsTraining']
+# channelsTr = ast.literal_eval(channelsTr) 
+# labelsTr = str(params['gtLabelsTraining'])
+# channelsVal = params['channelsValidation']
+# channelsVal = ast.literal_eval(channelsVal) 
+# labelsVal = str(params['gtLabelsValidation'])
+
+## read the full training data
+trainingCSV = str(params['trainingDataset'])
+
+## contruct the training and validation data from trainingCSV
+
 # Extracting the model parameters from the dictionary
 n_classes = int(params['numberOfOutputClasses'])
 base_filters = int(params['base_filters'])
@@ -74,6 +80,8 @@ which_model = str(params['modelName'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
+## read training dataset into data frame
+trainingData_full = pd.read_csv(trainingCSV)
 #Changing the channels into a proper dataframe for training da
 df_final_train = pd.DataFrame() # initialize the variable to hold the training channels
 df_labels_train = pd.read_csv(labelsTr)
