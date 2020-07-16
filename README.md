@@ -17,6 +17,12 @@ pip install -e .
 ```
 
 ## To Do
+
+- Sanity check for input channels and labels (can be done easily from CaPTk):
+  - Voxel resolutions 
+  - Image resolutions 
+  - Origin
+  - Direction
 - Input/output paths to be controlled by configuration file(s)
 - Single entry point for user (for both training and testing)
 - Add more models that could potentially handle sparse data better
