@@ -15,7 +15,7 @@
 from builtins import range
 import numpy as np
 import random
-from skimage.transform import resize
+# from skimage.transform import resize
 from batchgenerators.augmentations.utils import uniform
 
 

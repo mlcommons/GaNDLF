@@ -20,7 +20,7 @@ from copy import deepcopy
 from scipy.ndimage import map_coordinates
 from scipy.ndimage.filters import gaussian_filter, gaussian_gradient_magnitude
 from scipy.ndimage.morphology import grey_dilation
-from skimage.transform import resize
+# from skimage.transform import resize
 from scipy.ndimage.measurements import label as lb
 
 
