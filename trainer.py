@@ -24,6 +24,7 @@ from losses import *
 import sys
 import ast 
 import datetime
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument("-model", type=str, help = 'model configuration file', required=True)
@@ -38,6 +39,9 @@ model_parameters = args.model
 dev = args.dev
 model_path = args.output
 mode = args.train
+
+# safe directory creation
+Path(model_path).mkdir(parents=True, exist_ok=True)
 
 df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
