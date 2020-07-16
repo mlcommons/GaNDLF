@@ -18,7 +18,8 @@ requirements = [
   'torchio==0.17.10',
   'pandas',
   'pylint',
-  'torchsummary'
+  'torchsummary',
+  'scikit-learn==0.23.1'
 ]
 
 setup(
