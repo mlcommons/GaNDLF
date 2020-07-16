@@ -83,12 +83,11 @@ for channel in channelsTr:
 df_final_train = pd.concat([df_final_train,df_labels_train],axis=1)
 
 #Changing the channels into a proper dataframe for Validation data
-df_final_val = pd.read_csv(channelsVal[0])
+df_final_val = pd.DataFrame()
 df_labels_val = pd.read_csv(labelsVal)
 for channel in channelsVal:
     df = pd.read_csv(channel)
     df_final_val = pd.concat([df_final_val,df],axis=1)
-df_final_val = df_final_val.drop(df.columns[[0]],axis=1)
 df_final_val = pd.concat([df_final_val,df_labels_val],axis=1)
 
 #Defining our model here according to parameters mentioned in the configuration file : 
