@@ -34,7 +34,7 @@ parser.add_argument("-train", default=1, type=int, help = '1 means training and 
 parser.add_argument("-dev", default=0, type=int, help = 'choose device', required=True)
 args = parser.parse_args()
 
-train_parameters = args.data
+file_trainingData_full = args.data
 model_parameters = args.model
 dev = args.dev
 model_path = args.output
@@ -43,9 +43,9 @@ mode = args.train
 # safe directory creation
 Path(model_path).mkdir(parents=True, exist_ok=True)
 
-df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
-                         comment='#', skip_blank_lines=True,
-                         engine='python').fillna(' ')
+# df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
+#                          comment='#', skip_blank_lines=True,
+#                          engine='python').fillna(' ')
 
 df_model = pd.read_csv(model_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
@@ -53,8 +53,8 @@ df_model = pd.read_csv(model_parameters, sep=' = ', names=['param_name', 'param_
 
 #Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
 params = {}
-for i in range(df_train.shape[0]):
-    params[df_train.iloc[i, 0]] = df_train.iloc[i, 1]
+# for i in range(df_train.shape[0]):
+#     params[df_train.iloc[i, 0]] = df_train.iloc[i, 1]
 
 for j in range(df_model.shape[0]):
     params[df_model.iloc[j, 0]] = df_model.iloc[j, 1]
@@ -74,11 +74,6 @@ save_best = int(params['save_best'])
 # channelsVal = ast.literal_eval(channelsVal) 
 # labelsVal = str(params['gtLabelsValidation'])
 
-## read the full training data
-trainingCSV = str(params['trainingDataset'])
-
-## contruct the training and validation data from trainingCSV
-
 # Extracting the model parameters from the dictionary
 n_classes = int(params['numberOfOutputClasses'])
 base_filters = int(params['base_filters'])
@@ -88,8 +83,12 @@ which_model = str(params['modelName'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
+
 ## read training dataset into data frame
-trainingData_full = pd.read_csv(trainingCSV)
+trainingData_full = pd.read_csv(file_trainingData_full)
+
+## contruct the training and validation data from trainingCSV
+
 #Changing the channels into a proper dataframe for training da
 df_final_train = pd.DataFrame() # initialize the variable to hold the training channels
 df_labels_train = pd.read_csv(labelsTr)
