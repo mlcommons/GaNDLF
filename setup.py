@@ -15,7 +15,10 @@ requirements = [
   'torch>=1.2',
   'torchvision',
   'tqdm',
-  'torchio==0.17.10'
+  'torchio==0.17.10',
+  'pandas',
+  'pylint',
+  'torchsummary'
 ]
 
 setup(
