@@ -28,3 +28,4 @@ pip install -e .
   - read this into a pandas data frame
   - pass df to data set loader
   - parser the df on a per-header basis, keeping certain headers as "required", such as "Label" or "Mask"
+- Use TorchIO to read this CSV
