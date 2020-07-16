@@ -75,12 +75,11 @@ psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
 #Changing the channels into a proper dataframe for training da
-df_final_train = pd.read_csv(channelsTr[0])
+df_final_train = pd.DataFrame() # initialize the variable to hold the training channels
 df_labels_train = pd.read_csv(labelsTr)
 for channel in channelsTr:
     df = pd.read_csv(channel)
     df_final_train = pd.concat([df_final_train,df],axis=1)
-df_final_train = df_final_train.drop(df.columns[[0]],axis=1)
 df_final_train = pd.concat([df_final_train,df_labels_train],axis=1)
 
 #Changing the channels into a proper dataframe for Validation data
