@@ -177,6 +177,10 @@ if which_loss == 'ce':
     loss_fn = CE
 if which_loss == 'mse':
     loss_fn = MCD_MSE_loss
+else:
+    print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
+    which_loss = 'dc':
+    loss_fn  = MCD_loss
 ############## STORING THE HISTORY OF THE LOSSES #################
 avg_val_loss = 0
 total_val_loss = 0
