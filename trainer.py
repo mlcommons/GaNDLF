@@ -31,7 +31,7 @@ parser.add_argument("-model", type=str, help = 'model configuration file', requi
 parser.add_argument("-data", type=str, help = 'data csv file that is used for training or testing', required=True)
 parser.add_argument("-output", type=str, help = 'output directory to save intermediate files and model weights', required=True)
 parser.add_argument("-train", default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible checkpoint saved in \'output\'', required=False)
-parser.add_argument("-dev", default=0, type=int, help = 'choose device', required=True)
+parser.add_argument("-dev", default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
 args = parser.parse_args()
 
 file_trainingData_full = args.data
