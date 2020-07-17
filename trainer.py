@@ -98,6 +98,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     validationData = trainingData_full.iloc[test_index]
 
     trainingDataForTorch = ImagesFromDataFrame(dataframe = trainingData, augmentations = augmentations)
+    validationDataForTorch = ImagesFromDataFrame(dataframe = validationData, augmentations = augmentations) # may or may not need to add augmentations here
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
