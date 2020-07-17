@@ -17,9 +17,9 @@ import random
 import scipy
 
 class TumorSegmentationDataset(Dataset):
-  '''
-  Documentation for the class goes here
-  '''
+    '''
+    Documentation for the class goes here
+    '''
     def __init__(self,df,psize):
         self.df = df
         self.psize = psize
