@@ -11,7 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
 import data
-from data import *
+from data.ImagesFromDataFrame import ImagesFromDataFrame
 from data_val import TumorSegmentationDataset_val
 from schd import *
 from models.fcn import fcn
@@ -97,7 +97,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
 
-    trainingDataForTorch = data.ImagesFromDataFrame(dataframe = trainingData, augmentations = augmentations)
+    trainingDataForTorch = ImagesFromDataFrame(dataframe = trainingData, augmentations = augmentations)
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
