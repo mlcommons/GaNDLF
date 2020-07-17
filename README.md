@@ -29,3 +29,4 @@ pip install -e .
 - Use TorchIO to read this CSV
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
 - Put downsampling as a parameter instead of hard-coding to 4
+- Generic multi-class segmentation support
