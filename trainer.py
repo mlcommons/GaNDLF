@@ -10,6 +10,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
+import data
 from data import *
 from data_val import TumorSegmentationDataset_val
 from schd import *
@@ -74,12 +75,13 @@ save_best = int(params['save_best'])
 # channelsVal = params['channelsValidation']
 # channelsVal = ast.literal_eval(channelsVal) 
 # labelsVal = str(params['gtLabelsValidation'])
+augmentations = ast.literal_eval(str(params['data_augmentation']))
 
 # Extracting the model parameters from the dictionary
 n_classes = int(params['numberOfOutputClasses'])
 base_filters = int(params['base_filters'])
 n_channels = int(params['numberOfInputChannels'])
-model_path = str(params['folderForOutput'])
+# model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
 kfolds = int(params['kcross_validation'])
 psize = params['patch_size']
@@ -94,6 +96,8 @@ kf = KFold(n_splits=kfolds) # initialize the kfold structure
 for train_index, test_index in kf.split(training_indeces_full):
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
+
+    trainingDataForTorch = data.ImagesFromDataFrame(dataframe = trainingData, augmentations = augmentations)
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
