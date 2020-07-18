@@ -14,6 +14,11 @@ import torchio
 from torchio.transforms import RandomAffine, RandomElasticDeformation, Compose
 from torchio import Image, Subject
 
+# Defining a dictionary - key is the string and the value is the augmentation object
+global_augs_dict = {}
+
+
+
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
@@ -33,13 +38,11 @@ def ImagesFromDataFrame(dataframe, psize, augmentations = None):
         for channel in range(num_channels):
             channel_path = str(dataframe[channel][patient])
             # assigining the dict key to the channel
-            subject_dict{channel_path:Image(channel_path,type = torchio.INTENSITY)}
-        subject_dict{'mask':Image(str(dataframe[num_channels][patient]),type = torchio.LABEL)}
+            subject_dict[channel_path] = Image(channel_path,type = torchio.INTENSITY)
+        subject_dict['mask'] = Image(str(dataframe[num_channels][patient]),type = torchio.LABEL)
         # Initializing the subject object using the dict
         subject = Subject(subject_dict) 
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
-
-
     return sample
 
