@@ -12,12 +12,15 @@ import random
 import scipy
 import torchio
 from torchio.transforms import RandomAffine, RandomElasticDeformation, Compose
-from torchio import Image
+from torchio import Image, Subject
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, augmentations = None):
-    # Finding the length of the dataframe for later iterations
-    n = len(dataframe)
+    # Finding the dimension of the dataframe for computational purposes later
+    num_row, num_col = dataframe.shape
+    # This list will later contain the list of subjects 
+    subjects_list = []
+    
     imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
     dim = self.df.shape[1]
     im_stack =  np.zeros((dim-1,*imshape),dtype=int)
