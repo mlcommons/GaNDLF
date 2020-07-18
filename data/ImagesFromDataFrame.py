@@ -31,9 +31,10 @@ def ImagesFromDataFrame(dataframe, psize, augmentations = None):
         subject_dict = {}
         # iterating through the channels/modalities/timepoint of the image
         for channel in range(num_channels):
-            dataframe[channel][patient]
-            
-
+            channel_path = str(dataframe[channel][patient])
+            # assigining the dict key to the channel
+            subject_dict{channel_path:Image(channel_path,type = torchio.INTENSITY)}
+        subject_dict{'mask':Image()}
     
     imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
     dim = self.df.shape[1]
