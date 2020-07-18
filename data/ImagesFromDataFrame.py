@@ -18,8 +18,22 @@ from torchio import Image, Subject
 def ImagesFromDataFrame(dataframe, psize, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
+    num_channels = num_col - 1
+    # changing the column indices to make it easier
+    dataframe.columns = range(0,num_col)
+    dataframe.index = range(0,num_row)
     # This list will later contain the list of subjects 
     subjects_list = []
+
+    # iterating through the dataframe
+    for patient in range(num_row):
+        # We need this dict for storing the meta data for eac subject such as different image modalities, labels, any other data
+        subject_dict = {}
+        # iterating through the channels/modalities/timepoint of the image
+        for channel in range(num_channels):
+            dataframe[channel][patient]
+            
+
     
     imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
     dim = self.df.shape[1]
