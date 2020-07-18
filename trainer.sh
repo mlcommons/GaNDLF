@@ -12,9 +12,4 @@
 ############################## END OF DEFAULT EMBEDDED SGE COMMANDS #######################
 CUDA_VISIBLE_DEVICES=`get_CUDA_VISIBLE_DEVICES` || exit
 export CUDA_VISIBLE_DEVICES 
-
-module load pytorch/1.0.1
-module load python/anaconda/3
-module unload gcc
-module load gcc/5.2.0
 python trainer.py --model ./configs/model/model.cfg --data ./configs/train/train.csv --output ./output_dir/ --train 1 --dev 0
