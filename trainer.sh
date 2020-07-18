@@ -17,4 +17,4 @@ module load pytorch/1.0.1
 module load python/anaconda/3
 module unload gcc
 module load gcc/5.2.0
-python trainer.py -train ./configs/train/train.cfg -model ./configs/model/model.cfg -dev cuda
+python trainer.py --model ./configs/model/model.cfg --data ./configs/train/train.csv --output ./output_dir/ --train 1 --dev 0

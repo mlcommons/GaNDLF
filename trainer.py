@@ -29,11 +29,11 @@ from pathlib import Path
 from sklearn.model_selection import KFold
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
-parser.add_argument("-model", type=str, help = 'model configuration file', required=True)
-parser.add_argument("-data", type=str, help = 'data csv file that is used for training or testing', required=True)
-parser.add_argument("-output", type=str, help = 'output directory to save intermediate files and model weights', required=True)
-parser.add_argument("-train", default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible checkpoint saved in \'output\'', required=False)
-parser.add_argument("-dev", default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
+parser.add_argument("--model", type=str, help = 'model configuration file', required=True)
+parser.add_argument("--data", type=str, help = 'data csv file that is used for training or testing', required=True)
+parser.add_argument("--output", type=str, help = 'output directory to save intermediate files and model weights', required=True)
+parser.add_argument("--train", default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible checkpoint saved in \'output\'', required=False)
+parser.add_argument("--dev", default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
 args = parser.parse_args()
 
 file_trainingData_full = args.data
@@ -41,7 +41,11 @@ model_parameters = args.model
 dev = args.dev
 model_path = args.output
 mode = args.train
-
+if dev>=0:
+    dev = 'cuda'
+if dev==-1:
+    dev = 'cpu'
+    
 # safe directory creation
 Path(model_path).mkdir(parents=True, exist_ok=True)
 
@@ -143,9 +147,9 @@ print("\nHostname   :" + str(os.getenv("HOSTNAME")))
 sys.stdout.flush()
 
 # Setting up the train and validation loader
-dataset_train = TumorSegmentationDataset(df_final_train,psize)
+#dataset_train = TumorSegmentationDataset(df_final_train,psize)
 train_loader = DataLoader(dataset_train,batch_size= batch,shuffle=True,num_workers=1)
-dataset_valid = TumorSegmentationDataset_val(df_final_val,psize)
+#dataset_valid = TumorSegmentationDataset_val(df_final_val,psize)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1)
 
 print("Training Data Samples: ", len(train_loader.dataset))
