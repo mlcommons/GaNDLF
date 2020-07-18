@@ -34,8 +34,13 @@ def ImagesFromDataFrame(dataframe, psize, augmentations = None):
             channel_path = str(dataframe[channel][patient])
             # assigining the dict key to the channel
             subject_dict{channel_path:Image(channel_path,type = torchio.INTENSITY)}
-        subject_dict{'mask':Image()}
-    
+        subject_dict{'mask':Image(str(dataframe[num_channels][patient]),type = torchio.LABEL)}
+        # Initializing the subject object using the dict
+        subject = Subject(subject_dict) 
+        # Appending this subject to the list of subjects
+        subjects_list.append(subject)
+
+
     imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
     dim = self.df.shape[1]
     im_stack =  np.zeros((dim-1,*imshape),dtype=int)
