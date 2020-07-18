@@ -83,9 +83,6 @@ trainingData_full = pd.read_csv(file_trainingData_full)
 training_indeces_full = list(trainingData_full.index.values)
 kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
-print(training_indeces_full)
-
-
 for train_index, test_index in kf.split(training_indeces_full):
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]

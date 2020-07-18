@@ -16,8 +16,8 @@ from torchio import Image
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, augmentations = None):
-    # 
-    psize = self.psize
+    # Finding the length of the dataframe for later iterations
+    n = len(dataframe)
     imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
     dim = self.df.shape[1]
     im_stack =  np.zeros((dim-1,*imshape),dtype=int)
