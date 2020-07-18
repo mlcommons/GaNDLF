@@ -83,12 +83,15 @@ trainingData_full = pd.read_csv(file_trainingData_full)
 training_indeces_full = list(trainingData_full.index.values)
 kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
+print(training_indeces_full)
+
+
 for train_index, test_index in kf.split(training_indeces_full):
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
 
-    trainingDataForTorch = ImagesFromDataFrame(dataframe = trainingData, psize, augmentations = augmentations)
-    validationDataForTorch = ImagesFromDataFrame(dataframe = validationData, psize, augmentations = augmentations) # may or may not need to add augmentations here
+    trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, augmentations)
+    validationDataForTorch = ImagesFromDataFrame(validationData, psize, augmentations) # may or may not need to add augmentations here
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
