@@ -10,7 +10,8 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
-from data import *
+import data
+from data.ImagesFromDataFrame import ImagesFromDataFrame
 from data_val import TumorSegmentationDataset_val
 from schd import *
 from models.fcn import fcn
@@ -78,12 +79,13 @@ save_best = int(params['save_best'])
 # channelsVal = params['channelsValidation']
 # channelsVal = ast.literal_eval(channelsVal) 
 # labelsVal = str(params['gtLabelsValidation'])
+augmentations = ast.literal_eval(str(params['data_augmentation']))
 
 # Extracting the model parameters from the dictionary
 n_classes = int(params['numberOfOutputClasses'])
 base_filters = int(params['base_filters'])
 n_channels = int(params['numberOfInputChannels'])
-model_path = str(params['folderForOutput'])
+# model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
 kfolds = int(params['kcross_validation'])
 psize = params['patch_size']
@@ -98,6 +100,9 @@ kf = KFold(n_splits=kfolds) # initialize the kfold structure
 for train_index, test_index in kf.split(training_indeces_full):
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
+
+    trainingDataForTorch = ImagesFromDataFrame(dataframe = trainingData, augmentations = augmentations)
+    validationDataForTorch = ImagesFromDataFrame(dataframe = validationData, augmentations = augmentations) # may or may not need to add augmentations here
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
@@ -142,9 +147,9 @@ print("\nHostname   :" + str(os.getenv("HOSTNAME")))
 sys.stdout.flush()
 
 # Setting up the train and validation loader
-dataset_train = TumorSegmentationDataset(df_final_train,psize)
+#dataset_train = TumorSegmentationDataset(df_final_train,psize)
 train_loader = DataLoader(dataset_train,batch_size= batch,shuffle=True,num_workers=1)
-dataset_valid = TumorSegmentationDataset_val(df_final_val,psize)
+#dataset_valid = TumorSegmentationDataset_val(df_final_val,psize)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1)
 
 print("Training Data Samples: ", len(train_loader.dataset))
