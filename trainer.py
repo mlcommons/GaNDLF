@@ -92,23 +92,6 @@ for train_index, test_index in kf.split(training_indeces_full):
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
-
-#Changing the channels into a proper dataframe for training da
-df_final_train = pd.DataFrame() # initialize the variable to hold the training channels
-df_labels_train = pd.read_csv(labelsTr)
-for channel in channelsTr:
-    df = pd.read_csv(channel)
-    df_final_train = pd.concat([df_final_train,df],axis=1)
-df_final_train = pd.concat([df_final_train,df_labels_train],axis=1)
-
-#Changing the channels into a proper dataframe for Validation data
-df_final_val = pd.DataFrame()
-df_labels_val = pd.read_csv(labelsVal)
-for channel in channelsVal:
-    df = pd.read_csv(channel)
-    df_final_val = pd.concat([df_final_val,df],axis=1)
-df_final_val = pd.concat([df_final_val,df_labels_val],axis=1)
-
 #Defining our model here according to parameters mentioned in the configuration file : 
 if which_model == 'resunet':
     model = resunet(n_channels,n_classes,base_filters)
