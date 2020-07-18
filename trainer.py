@@ -49,19 +49,12 @@ if dev==-1:
 # safe directory creation
 Path(model_path).mkdir(parents=True, exist_ok=True)
 
-# df_train = pd.read_csv(train_parameters, sep=' = ', names=['param_name', 'param_value'],
-#                          comment='#', skip_blank_lines=True,
-#                          engine='python').fillna(' ')
-
 df_model = pd.read_csv(model_parameters, sep=' = ', names=['param_name', 'param_value'],
                          comment='#', skip_blank_lines=True,
                          engine='python').fillna(' ')
 
 #Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
 params = {}
-# for i in range(df_train.shape[0]):
-#     params[df_train.iloc[i, 0]] = df_train.iloc[i, 1]
-
 for j in range(df_model.shape[0]):
     params[df_model.iloc[j, 0]] = df_model.iloc[j, 1]
 
@@ -72,13 +65,6 @@ learning_rate = int(params['learning_rate'])
 which_loss = params['loss_function']
 opt = str(params['opt'])
 save_best = int(params['save_best'])
-# Defining the channels for training and validation
-# channelsTr = params['channelsTraining']
-# channelsTr = ast.literal_eval(channelsTr) 
-# labelsTr = str(params['gtLabelsTraining'])
-# channelsVal = params['channelsValidation']
-# channelsVal = ast.literal_eval(channelsVal) 
-# labelsVal = str(params['gtLabelsValidation'])
 augmentations = ast.literal_eval(str(params['data_augmentation']))
 
 # Extracting the model parameters from the dictionary
@@ -101,12 +87,10 @@ for train_index, test_index in kf.split(training_indeces_full):
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
 
-    trainingDataForTorch = ImagesFromDataFrame(dataframe = trainingData, augmentations = augmentations)
-    validationDataForTorch = ImagesFromDataFrame(dataframe = validationData, augmentations = augmentations) # may or may not need to add augmentations here
+    trainingDataForTorch = ImagesFromDataFrame(dataframe = trainingData, psize, augmentations = augmentations)
+    validationDataForTorch = ImagesFromDataFrame(dataframe = validationData, psize, augmentations = augmentations) # may or may not need to add augmentations here
 
     # read contents of trainingData and validataData into image arrays based on the header information
-
-    test = 1
 
 
 #Changing the channels into a proper dataframe for training da
