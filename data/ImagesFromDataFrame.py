@@ -44,5 +44,6 @@ def ImagesFromDataFrame(dataframe, psize, augmentations = None):
         subject = Subject(subject_dict) 
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
-    return sample
+    
+    return subjects_list
 
