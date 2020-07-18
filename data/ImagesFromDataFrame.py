@@ -14,16 +14,9 @@ import torchio
 from torchio.transforms import RandomAffine, RandomElasticDeformation, Compose
 from torchio import Image
 
-class ImagesFromDataFrame():
-    """
-    This class takes a pandas dataframe as input and structures it into a data structure that can be passed to Torch
-    """
-    def __init__(self, dataframe, psize, augmentations = None):
-        self.input_df = dataframe
-        self.augmentations = augmentations
-        psize = self.psize
+# This function takes in a dataframe, with some other parameters and returns the dataloader
+def ImagesFromDataFrame(dataframe, psize, augmentations = None):
 
-    def __getitem__(self, index):
         psize = self.psize
         imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
         dim = self.df.shape[1]
