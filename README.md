@@ -17,6 +17,7 @@ pip install -e .
 ```
 
 ## To Do
+
 - Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Generic multi-class segmentation support
 - Data augmentation using `torchio`

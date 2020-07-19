@@ -80,7 +80,18 @@ psize = np.array(psize)
 
 ## read training dataset into data frame
 trainingData_full = pd.read_csv(file_trainingData_full)
+# shuffle the data - this is a useful level of randomization for the training process
+trainingData_full=trainingData_full.sample(frac=1).reset_index(drop=True)
+
+# get the indeces for kfold splitting
 training_indeces_full = list(trainingData_full.index.values)
+
+# check for single fold training
+singleFoldTraining = False
+if kfolds < 0: # if the user wants a single fold training
+    kfolds = abs(kfolds)
+    singleFoldTraining = True
+
 kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
 for train_index, test_index in kf.split(training_indeces_full):
@@ -91,6 +102,12 @@ for train_index, test_index in kf.split(training_indeces_full):
     validationDataForTorch = ImagesFromDataFrame(validationData, psize, augmentations) # may or may not need to add augmentations here
 
     # read contents of trainingData and validataData into image arrays based on the header information
+
+    ## do the actual training before this line
+    
+    # check for single fold training
+    if singleFoldTraining:
+        break
 
 #Defining our model here according to parameters mentioned in the configuration file : 
 if which_model == 'resunet':
