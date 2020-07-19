@@ -15,7 +15,7 @@ from torchio.transforms import *
 from torchio import Image, Subject
 
 # Defining a dictionary - key is the string and the value is the augmentation object
-global_augs_dict = {'affine':RandomAffine(image_interpolation='nearest'), 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2), 'motion':RandomMotion(degrees: float = 10, translation: float = 10, num_transforms: int = 2, image_interpolation: str = 'linear', p: float = 1, seed: Optional[int] = None) , 'ghosting': RandomGhosting(num_ghosts: Union[int, Tuple[int, int]] = (4, 10), axes: Union[int, Tuple[int, ...]] = (0, 1, 2), intensity: Union[float, Tuple[float, float]] = (0.5, 1), restore: float = 0.02, p: float = 1, seed: Optional[int] = None) , 'bias': RandomBiasField(coefficients: Union[float, Tuple[float, float]] = 0.5, order: int = 3, p: float = 1, seed: Optional[int] = None), 'blur': RandomBlur(std: Union[float, Tuple[float, float]] = (0, 4), p: float = 1, seed: Optional[int] = None), 'noise':RandomNoise(mean: Union[float, Tuple[float, float]] = 0, std: Union[float, Tuple[float, float]] = (0, 0.25), p: float = 1, seed: Optional[int] = None) , 'swap':RandomSwap(patch_size: Union[int, Tuple[int, int, int]] = 15, num_iterations: int = 100, p: float = 1, seed: Optional[int] = None) }
+global_augs_dict = {'affine':RandomAffine(image_interpolation='nearest'), 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p= 1., seed = None) , 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) }
 
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
@@ -56,5 +56,12 @@ def ImagesFromDataFrame(dataframe, psize, augmentations = None):
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
     
-    return subjects_list
+    augmentation_list = []
+    for aug in augmentations:
+        augmentation_list.append(global_augs_dict[str(aug)])
+            
+    transform = Compose(augmentation_list)
+    subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
+    
+    return subjects_dataset
 

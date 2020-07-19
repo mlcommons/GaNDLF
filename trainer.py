@@ -161,8 +161,8 @@ print("\nHostname   :" + str(os.getenv("HOSTNAME")))
 sys.stdout.flush()
 
 # Setting up the train and validation loader
-train_loader = DataLoader(dataset_train,batch_size= batch,shuffle=True,num_workers=1)
-val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1)
+train_loader = DataLoader(trainingDataForTorch,batch_size= batch,shuffle=True,num_workers=1)
+val_loader = DataLoader(validationDataForTorch, batch_size=1,shuffle=True,num_workers = 1)
 
 print("Training Data Samples: ", len(train_loader.dataset))
 sys.stdout.flush()
