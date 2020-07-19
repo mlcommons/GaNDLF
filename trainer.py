@@ -63,7 +63,7 @@ for j in range(df_model.shape[0]):
 num_epochs = int(params['num_epochs'])
 batch = int(params['batch_size'])
 learning_rate = int(params['learning_rate'])
-which_loss = params['loss_function']
+which_loss = str(params['loss_function'])
 opt = str(params['opt'])
 save_best = int(params['save_best'])
 augmentations = ast.literal_eval(str(params['data_augmentation']))
@@ -166,7 +166,6 @@ val_loader = DataLoader(validationDataForTorch, batch_size=1,shuffle=True,num_wo
 
 print("Training Data Samples: ", len(train_loader.dataset))
 sys.stdout.flush()
-print(dev)
 device = torch.device(dev)
 print("Current Device : ", torch.cuda.current_device())
 print("Device Count on Machine : ", torch.cuda.device_count())
@@ -224,6 +223,7 @@ best_idx = 0
 best_n_val_list = []
 val_avg_loss_list = []
 ################ TRAINING THE MODEL##############
+print(len(train_loader.dataset))
 for ep in range(num_epochs):
     start = time.time()
     print("\n")
@@ -232,7 +232,7 @@ for ep in range(num_epochs):
     print("Learning rate:", optimizer.param_groups[0]['lr'])
     model.train
     for batch_idx, (subject) in enumerate(train_loader):
-        
+        print(subject)
         # Load the subject and its ground truth
         image = subject['image']
         mask = subject['gt']
