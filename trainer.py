@@ -82,6 +82,8 @@ psize = np.array(psize)
 trainingData_full = pd.read_csv(file_trainingData_full)
 # shuffle the data - this is a useful level of randomization for the training process
 trainingData_full=trainingData_full.sample(frac=1).reset_index(drop=True)
+
+# get the indeces for kfold splitting
 training_indeces_full = list(trainingData_full.index.values)
 kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
