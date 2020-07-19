@@ -133,8 +133,6 @@ for train_index, test_index in kf.split(training_indeces_full):
     trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, augmentations)
     validationDataForTorch = ImagesFromDataFrame(validationData, psize, augmentations) # may or may not need to add augmentations here
 
-    # read contents of trainingData and validataData into image arrays based on the header information
-
     ## do the actual training before this line
 
     # check for single fold training
