@@ -1,7 +1,9 @@
+import os
+os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+
 from __future__ import print_function, division
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import argparse
-import os
 import sys
 import time
 import numpy as np
