@@ -43,14 +43,19 @@ args = parser.parse_args()
 
 file_trainingData_full = args.data
 model_parameters = args.model
-dev = args.dev
+dev = args.device
 model_path = args.output
 mode = args.train
 if dev>=0:
     dev = 'cuda'
 if dev==-1:
     dev = 'cpu'
-    
+sge_run = args.sge
+if sge_run == 0:
+    sge_run = False
+else:
+    sge_run = True
+
 # safe directory creation
 Path(model_path).mkdir(parents=True, exist_ok=True)
 
