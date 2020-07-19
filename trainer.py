@@ -94,7 +94,16 @@ if kfolds < 0: # if the user wants a single fold training
 
 kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
+currentFold = 0
 for train_index, test_index in kf.split(training_indeces_full):
+
+    # the output of the current fold is only needed if multi-fold training is happening
+    if singleFoldTraining:
+        currentOutputFolder = model_path
+    else:
+        currentOutputFolder = os.path.join(model_path, str(currentFold))
+        Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
+
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
 
@@ -104,7 +113,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     # read contents of trainingData and validataData into image arrays based on the header information
 
     ## do the actual training before this line
-    
+
     # check for single fold training
     if singleFoldTraining:
         break
