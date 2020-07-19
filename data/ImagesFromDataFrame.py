@@ -15,7 +15,16 @@ from torchio.transforms import *
 from torchio import Image, Subject
 
 # Defining a dictionary - key is the string and the value is the augmentation object
-global_augs_dict = {'affine':RandomAffine(image_interpolation='nearest'), 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p= 1., seed = None) , 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) }
+global_augs_dict = {
+    'affine':RandomAffine(image_interpolation = 'linear'), 
+    'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
+    'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p= 1., seed = None), 
+    'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
+    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
+    'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
+    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
+    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) 
+}
 
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
