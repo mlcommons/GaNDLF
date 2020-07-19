@@ -103,6 +103,12 @@ for train_index, test_index in kf.split(training_indeces_full):
 
     # read contents of trainingData and validataData into image arrays based on the header information
 
+    ## do the actual training before this line
+    
+    # check for single fold training
+    if singleFoldTraining:
+        break
+
 #Defining our model here according to parameters mentioned in the configuration file : 
 if which_model == 'resunet':
     model = resunet(n_channels,n_classes,base_filters)
