@@ -17,6 +17,7 @@ pip install -e .
 ```
 
 ## To Do
+- Generic multi-class segmentation support
 - Data augmentation using `torchio`
 - Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
 - Single entry point for user (for both training and testing)
@@ -30,4 +31,3 @@ pip install -e .
 - Use TorchIO to read this CSV
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
 - Put downsampling as a parameter instead of hard-coding to 4
-- Generic multi-class segmentation support
