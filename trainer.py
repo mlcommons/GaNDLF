@@ -85,6 +85,13 @@ trainingData_full=trainingData_full.sample(frac=1).reset_index(drop=True)
 
 # get the indeces for kfold splitting
 training_indeces_full = list(trainingData_full.index.values)
+
+# check for single fold training
+singleFoldTraining = False
+if kfolds < 0: # if the user wants a single fold training
+    kfolds = abs(kfolds)
+    singleFoldTraining = True
+
 kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
 for train_index, test_index in kf.split(training_indeces_full):
