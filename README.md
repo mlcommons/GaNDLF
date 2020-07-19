@@ -17,12 +17,12 @@ pip install -e .
 ```
 
 ## To Do
+- Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Generic multi-class segmentation support
 - Data augmentation using `torchio`
 - Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
 - Single entry point for user (for both training and testing)
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
-- Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
 - Put downsampling as a parameter instead of hard-coding to 4
