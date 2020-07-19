@@ -143,10 +143,18 @@ for train_index, test_index in kf.split(training_indeces_full):
     validationDataForTorch = ImagesFromDataFrame(validationData, psize, augmentations) # may or may not need to add augmentations here
 
     ## do the actual training before this line
+    if sge_run:
+        # call the training function as a qsub command and proceed with training in parallel
+        test = 1 # delete this
+    else:
+        # call the training function as a normal function and proceed with training serially
+        test = 2 # delete this
 
     # check for single fold training
     if singleFoldTraining:
         break
+
+    currentFold = currentFold + 1 # increment the fold
 
 #Defining our model here according to parameters mentioned in the configuration file : 
 if which_model == 'resunet':
