@@ -1,7 +1,8 @@
+
+from __future__ import print_function, division
 import os
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 
-from __future__ import print_function, division
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import argparse
 import sys
@@ -32,11 +33,12 @@ from sklearn.model_selection import KFold
 import pickle
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
-parser.add_argument("--model", type=str, help = 'model configuration file', required=True)
-parser.add_argument("--data", type=str, help = 'data csv file that is used for training or testing', required=True)
-parser.add_argument("--output", type=str, help = 'output directory to save intermediate files and model weights', required=True)
-parser.add_argument("--train", default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible checkpoint saved in \'output\'', required=False)
-parser.add_argument("--dev", default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
+parser.add_argument("-m", "--model", type=str, help = 'model configuration file', required=True)
+parser.add_argument("-d", "--data", type=str, help = 'data csv file that is used for training or testing', required=True)
+parser.add_argument("-o", "--output", type=str, help = 'output directory to save intermediate files and model weights', required=True)
+parser.add_argument("-t", "--train", default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible checkpoint saved in \'output\'', required=False)
+parser.add_argument("-dv", "--dev", default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
+parser.add_argument("-s", "--sge", default=0, type=int, help = 'Whether the training is running on SGE for parallel fold training across nodes', required=False) # todo: how to handle cpu training? would passing '-1' be considered cpu?
 args = parser.parse_args()
 
 file_trainingData_full = args.data
