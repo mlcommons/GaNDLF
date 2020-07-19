@@ -114,9 +114,7 @@ print("\nHostname   :" + str(os.getenv("HOSTNAME")))
 sys.stdout.flush()
 
 # Setting up the train and validation loader
-#dataset_train = TumorSegmentationDataset(df_final_train,psize)
 train_loader = DataLoader(dataset_train,batch_size= batch,shuffle=True,num_workers=1)
-#dataset_valid = TumorSegmentationDataset_val(df_final_val,psize)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1)
 
 print("Training Data Samples: ", len(train_loader.dataset))
