@@ -18,7 +18,6 @@ pip install -e .
 
 ## To Do
 
-- Separate fold output to different folders
 - Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Generic multi-class segmentation support
 - Data augmentation using `torchio`
