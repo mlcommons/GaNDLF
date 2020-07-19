@@ -11,12 +11,11 @@ from utils import *
 import random
 import scipy
 import torchio
-from torchio.transforms import RandomAffine, RandomElasticDeformation, Compose
+from torchio.transforms import *
 from torchio import Image, Subject
 
 # Defining a dictionary - key is the string and the value is the augmentation object
-global_augs_dict = {}
-
+global_augs_dict = {'affine':RandomAffine(image_interpolation='nearest'), 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2), 'motion':RandomMotion(degrees: float = 10, translation: float = 10, num_transforms: int = 2, image_interpolation: str = 'linear', p: float = 1, seed: Optional[int] = None) , 'ghosting': RandomGhosting(num_ghosts: Union[int, Tuple[int, int]] = (4, 10), axes: Union[int, Tuple[int, ...]] = (0, 1, 2), intensity: Union[float, Tuple[float, float]] = (0.5, 1), restore: float = 0.02, p: float = 1, seed: Optional[int] = None) , 'bias': RandomBiasField(coefficients: Union[float, Tuple[float, float]] = 0.5, order: int = 3, p: float = 1, seed: Optional[int] = None), 'blur': RandomBlur(std: Union[float, Tuple[float, float]] = (0, 4), p: float = 1, seed: Optional[int] = None), 'noise':RandomNoise(mean: Union[float, Tuple[float, float]] = 0, std: Union[float, Tuple[float, float]] = (0, 0.25), p: float = 1, seed: Optional[int] = None) , 'swap':RandomSwap(patch_size: Union[int, Tuple[int, int, int]] = 15, num_iterations: int = 100, p: float = 1, seed: Optional[int] = None) }
 
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
