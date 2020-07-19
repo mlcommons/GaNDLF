@@ -17,9 +17,10 @@ pip install -e .
 ```
 
 ## To Do
+- Data augmentation using `torchio`
+- Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
 - Single entry point for user (for both training and testing)
 - Add more models that could potentially handle sparse data better
-- Replace `batchgenerators` with `torchio` as it is easier to use and extend
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
 - Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Single CSV (see train.csv)
