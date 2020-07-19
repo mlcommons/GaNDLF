@@ -17,7 +17,7 @@ pip install -e .
 ```
 
 ## To Do
-- Single fold training will be required
+
 - Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Generic multi-class segmentation support
 - Data augmentation using `torchio`
