@@ -140,6 +140,17 @@ trainingData_full = pd.read_csv(file_trainingData_full)
 # shuffle the data - this is a useful level of randomization for the training process
 trainingData_full=trainingData_full.sample(frac=1).reset_index(drop=True)
 
+# find actual header locations for input channel and label
+# the user might put the label first and the channels afterwards 
+# or might do it completely randomly
+channelHeaders = []
+for col in trainingData_full.columns: 
+    # add appropriate headers to read here, as needed
+    if ('Channel' in col) or ('Modality' in col) or ('Image' in col):
+        channelHeaders.append(trainingData_full.columns.get_loc(col))
+    elif ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
+        labelHeader = trainingData_full.columns.get_loc(col)
+
 # get the indeces for kfold splitting
 training_indeces_full = list(trainingData_full.index.values)
 
@@ -189,8 +200,8 @@ for train_index, test_index in kf.split(training_indeces_full):
     # with open('/path/to/params.pkl', 'rb') as handle:
     #     params = pickle.load(handle)
 
-    trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, augmentations)
-    validationDataForTorch = ImagesFromDataFrame(validationData, psize, augmentations) # may or may not need to add augmentations here
+    trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, channelHeaders, labelHeader, augmentations)
+    validationDataForTorch = ImagesFromDataFrame(validationData, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
     
     training_start_time = time.asctime()
     startstamp = time.time()
