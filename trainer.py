@@ -333,4 +333,3 @@ for train_index, test_index in kf.split(training_indeces_full):
 
     currentFold = currentFold + 1 # increment the fold
 
-################################ PRINTING SOME STUFF ######################
