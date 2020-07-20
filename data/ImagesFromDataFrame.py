@@ -55,11 +55,10 @@ def ImagesFromDataFrame(dataframe, psize, augmentations = None):
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject such as different image modalities, labels, any other data
         subject_dict = {}
-        # iterating through the channels/modalities/timepoint of the image
+        # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaderIndeces:
-            channel_path = str(dataframe[channel][patient])
             # assigining the dict key to the channel
-            subject_dict[channel] = Image(channel_path,type = torchio.INTENSITY)
+            subject_dict[channel] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
         subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
         # Initializing the subject object using the dict
         subject = Subject(subject_dict) 
