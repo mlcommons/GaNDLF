@@ -15,6 +15,7 @@ from torchio.transforms import *
 from torchio import Image, Subject
 
 # Defining a dictionary - key is the string and the value is the augmentation object
+## todo: ability to change interpolation type from config file
 global_augs_dict = {
     'affine':RandomAffine(image_interpolation = 'linear'), 
     'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
