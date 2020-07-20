@@ -304,8 +304,10 @@ for train_index, test_index in kf.split(training_indeces_full):
         model.eval        
         for batch_idx, (subject) in enumerate(val_loader):
             with torch.no_grad():
-                image = subject['image']
-                mask = subject['gt']
+                # image = subject['image']
+                image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
+                # mask = subject['gt']
+                mask = batch['label'][torchio.DATA] # get the label image
                 image, mask = image.to(device), mask.to(device)
                 output = model(image.float())
                 curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
