@@ -15,6 +15,7 @@ Channel_0,Channel_1,...Channel_X,Label
 
 - `Channel` can be substituted with `Modality` or `Image`
 - `Label` can be substituted with `Mask` or `Segmentation`
+- Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
 ## Installation
 
