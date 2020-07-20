@@ -32,7 +32,7 @@ global_augs_dict = {
 def ImagesFromDataFrame(dataframe, psize, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
-    num_channels = num_col - 1 # for non-segmentation tasks, this might be different
+    # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
 
     # find actual header locations for input channel and label
     # the user might put the label first and the channels afterwards 
