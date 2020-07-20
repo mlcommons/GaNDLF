@@ -211,9 +211,8 @@ for train_index, test_index in kf.split(training_indeces_full):
     print('Using device:', device)
     if device.type == 'cuda':
         print('Memory Usage:')
-        print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3, 1),
-            'GB')
-        print('Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
+        print('  Allocated:', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
+        print('  Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
 
     sys.stdout.flush()
     model = model.to(device)
