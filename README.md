@@ -4,6 +4,18 @@
 
 - DeepSAGE: Deep SemAntic seGmEntator
 
+## Constructing the Data CSV
+
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./configs/train/train.csv](./configs/train/train.csv) and needs to be structured with the following header format:
+
+```
+Channel_0,Channel_1,...Channel_X,Label
+/full/path/0.nii.gz,/full/path/1.nii.gz,...,/full/path/X.nii.gz,/full/path/segmentation.nii.gz,
+```
+
+- `Channel` can be substituted with `Modality` or `Image`
+- `Label` can be substituted with `Mask` or `Segmentation`
+
 ## Installation
 
 ### Prerequisites
