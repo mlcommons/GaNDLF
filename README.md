@@ -1,5 +1,9 @@
 # deep-semantic-seg
 
+## Name candidates
+
+- DeepSAGE: Deep SemAntic seGmEntation
+
 ## Installation
 
 ### Prerequisites
