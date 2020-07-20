@@ -33,6 +33,7 @@ from sklearn.model_selection import KFold
 import pickle
 import pkg_resources
 from shutil import copyfile
+import torchio
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument('-m', '--model', type=str, help = 'model configuration file', required=True)
@@ -212,6 +213,9 @@ for train_index, test_index in kf.split(training_indeces_full):
     train_loader = DataLoader(trainingDataForTorch,batch_size= batch,shuffle=True,num_workers=1)
     val_loader = DataLoader(validationDataForTorch, batch_size=1,shuffle=True,num_workers = 1)
 
+    # get the channel keys
+    batch = next(iter(train_loader))
+
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
     device = torch.device(dev)
@@ -255,8 +259,10 @@ for train_index, test_index in kf.split(training_indeces_full):
         for batch_idx, (subject) in enumerate(train_loader):
             print(subject)
             # Load the subject and its ground truth
-            image = subject['image']
-            mask = subject['gt']
+            # image = subject['image']
+            image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
+            # mask = subject['gt']
+            mask = batch['label'][torchio.DATA] # get the label image
             # Loading images into the GPU and ignoring the affine
             image, mask = image.float().to(device), mask.float().to(device)
             #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
