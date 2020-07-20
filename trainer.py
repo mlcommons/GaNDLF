@@ -32,6 +32,7 @@ from pathlib import Path
 from sklearn.model_selection import KFold
 import pickle
 import pkg_resources
+from shutil import copyfile
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument('-m', '--model', type=str, help = 'model configuration file', required=True)
@@ -169,6 +170,9 @@ for train_index, test_index in kf.split(training_indeces_full):
 
     trainingData = trainingData_full.iloc[train_index]
     validationData = trainingData_full.iloc[test_index]
+
+    # save the current model configuration as a sanity check
+    copyfile(model_parameters, os.path.join(model_path,'model.cfg'))
 
     # pickle the data
     currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
