@@ -21,7 +21,7 @@ pip install -e .
 - Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Generic multi-class segmentation support
 - Data augmentation using `torchio`
-- Ability to change interpolation type from config file
+- Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
 - Separate training code to make training more efficient for multi-fold training. Can possibly use https://schedule.readthedocs.io/en/stable/
 - Single entry point for user (for both training and testing)
