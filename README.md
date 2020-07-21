@@ -52,3 +52,4 @@ pip install -e .
   - This would require additional dependencies, most notably CaPTk (which handles registration well and has a full suite of preprocessing tools)
   - Additional parameterization in the model configuration 
   - Sequence of operations are important
+- [Model pruning](https://pytorch.org/tutorials/intermediate/pruning_tutorial.html)
