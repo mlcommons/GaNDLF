@@ -48,3 +48,7 @@ pip install -e .
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
 - Put downsampling as a parameter instead of hard-coding to 4
 - Add option to train on multiple networks and then fuse results from all; basically some kind of ensemble
+- Full-fledged preprocessing would be amazing
+  - This would require additional dependencies, most notably CaPTk (which handles registration well and has a full suite of preprocessing tools)
+  - Additional parameterization in the model configuration 
+  - Sequence of operations are important
