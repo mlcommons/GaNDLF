@@ -6,3 +6,5 @@ __pycache__
 *.py.*
 *.pkl
 *.swp
+
+*DS_Store
