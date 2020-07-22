@@ -53,4 +53,6 @@ pip install -e .
   - Additional parameterization in the model configuration 
   - Sequence of operations are important
 - [Model pruning](https://pytorch.org/tutorials/intermediate/pruning_tutorial.html)
-- Add appropriate architectures from nnUnet
+- Add appropriate architectures
+  - from nnUnet
+  - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
