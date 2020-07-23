@@ -50,6 +50,8 @@ pip install -e .
 - Add option to train on multiple networks and then fuse results from all; basically some kind of ensemble
 - Full-fledged preprocessing would be amazing
   - This would require additional dependencies, most notably CaPTk (which handles registration well and has a full suite of preprocessing tools)
+    - Thinking more about this, it might _not_ be a great idea to do registration here, as it would be too opaque
+    - Perhaps having a mechanism for intensity standardization (probably (Z-scoring)[https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=intensity#torchio.transforms.ZNormalization] would be do)
   - Additional parameterization in the model configuration 
   - Sequence of operations are important
 - [Model pruning](https://pytorch.org/tutorials/intermediate/pruning_tutorial.html)
