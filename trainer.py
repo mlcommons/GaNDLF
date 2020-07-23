@@ -252,7 +252,6 @@ for train_index, test_index in kf.split(training_indeces_full):
     best_n_val_list = []
     val_avg_loss_list = []
     ################ TRAINING THE MODEL##############
-    print(len(train_loader.dataset))
     for ep in range(num_epochs):
         start = time.time()
         print("\n")
@@ -261,11 +260,10 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
         for batch_idx, (subject) in enumerate(train_loader):
-            print(subject)
             # Load the subject and its ground truth
-            # image = subject['image']
+            # read and concat the images
             image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
-            # mask = subject['gt']
+            # read the mask
             mask = batch['label'][torchio.DATA] # get the label image
             # Loading images into the GPU and ignoring the affine
             image, mask = image.float().to(device), mask.float().to(device)
