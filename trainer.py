@@ -234,8 +234,8 @@ for train_index, test_index in kf.split(training_indeces_full):
     sys.stdout.flush()
 
     # Setting up the train and validation loader
-    train_loader = DataLoader(trainingDataForTorch,batch_size=batch_size,shuffle=True,num_workers=1)
-    val_loader = DataLoader(validationDataForTorch, batch_size=1,shuffle=True,num_workers = 1)
+    train_loader = DataLoader(queue_training,batch_size=batch_size,shuffle=True,num_workers=1)
+    val_loader = DataLoader(queue_validation, batch_size=1,shuffle=True,num_workers = 1)
 
     # get the channel keys
     batch = next(iter(train_loader))
