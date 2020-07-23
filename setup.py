@@ -47,7 +47,7 @@ setup(
   long_description=readme,
   long_description_content_type='text/markdown',
   include_package_data=True,
-  keywords='segmentation, semantic, brain, breast',
+  keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
   name='deep-seg',
   # dependency_links=['https://github.com/sarthakpati/torchio/tarball/master#egg=repo-v0.17.10'],
   # url='https://github.com/fepegar/torchio',

@@ -102,11 +102,11 @@ psize = np.array(psize)
 # Defining our model here according to parameters mentioned in the configuration file : 
 if which_model == 'resunet':
     model = resunet(n_channels,n_classes,base_filters)
-if which_model == 'unet':
+elif which_model == 'unet':
     model = unet(n_channels,n_classes,base_filters)
-if which_model == 'fcn':
+elif which_model == 'fcn':
     model = fcn(n_channels,n_classes,base_filters)
-if which_model == 'uinc':
+elif which_model == 'uinc':
     model = uinc(n_channels,n_classes,base_filters)
 else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
@@ -118,7 +118,7 @@ if opt == 'sgd':
     optimizer = optim.SGD(model.parameters(),
                                lr= learning_rate,
                                momentum = 0.9)
-if opt == 'adam':    
+elif opt == 'adam':    
     optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
 else:
     print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
@@ -129,11 +129,11 @@ else:
 # setting the loss function
 if which_loss == 'dc':
     loss_fn  = MCD_loss
-if which_loss == 'dcce':
+elif which_loss == 'dcce':
     loss_fn  = DCCE
-if which_loss == 'ce':
+elif which_loss == 'ce':
     loss_fn = CE
-if which_loss == 'mse':
+elif which_loss == 'mse':
     loss_fn = MCD_MSE_loss
 else:
     print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
