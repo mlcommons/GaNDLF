@@ -47,7 +47,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentat
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
             # assigining the dict key to the channel
-            subject_dict[channel] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
+            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
         subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
         # Initializing the subject object using the dict
         subject = Subject(subject_dict) 
