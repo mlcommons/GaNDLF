@@ -210,7 +210,7 @@ for train_index, test_index in kf.split(training_indeces_full):
 
     # construct the data queue using pre-defined information
     # all of this needs to come from the config file
-    patch_size = 64 # Tuple of integers (d,h,w) to generate patches of size d×h×w. If a single number n is provided, d=h=w=n.
+    patch_size = 48 # Tuple of integers (d,h,w) to generate patches of size d×h×w. If a single number n is provided, d=h=w=n.
     queue_length = 100 # Maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches.
     samples_per_volume = 10 #  Number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower.
 
