@@ -39,7 +39,8 @@ parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation u
 parser.add_argument('-m', '--model', type=str, help = 'model configuration file', required=True)
 parser.add_argument('-d', '--data', type=str, help = 'data csv file that is used for training or testing', required=True)
 parser.add_argument('-o', '--output', type=str, help = 'output directory to save intermediate files and model weights', required=True)
-parser.add_argument('-tr', '--train', default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible checkpoint saved in \'output\'', required=False)
+parser.add_argument('-tr', '--train', default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
+parser.add_argument('-md', '--modelDir', type=str, help = 'The pre-trained model directory that is used for testing', required=False)
 parser.add_argument('-dv', '--device', default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
 parser.add_argument('-s', '--sge', default=0, type=int, help = 'Whether the training is running on SGE for parallel fold training across nodes', required=False) # todo: how to handle cpu training? would passing '-1' be considered cpu?
 parser.add_argument('-sm', '--sgeMem', default=64, type=int, help = 'The amount of memory requested per training job for SGE; used only when \'-s 1\' is passed', required=False) # todo: how to handle cpu training? would passing '-1' be considered cpu?
@@ -62,6 +63,9 @@ if sge_run == 0:
 else:
     sge_run = True
 sge_memory = args.sgeMem
+
+if mode == 0:
+    pretrainedModelPath = args.modelDir
 
 # safe directory creation
 Path(model_path).mkdir(parents=True, exist_ok=True)
@@ -184,7 +188,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     validationData = trainingData_full.iloc[test_index]
 
     # save the current model configuration as a sanity check
-    copyfile(model_parameters, os.path.join(model_path,'model.cfg'))
+    copyfile(model_parameters, os.path.join(currentOutputFolder,'model.cfg'))
 
     # pickle the data
     currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
