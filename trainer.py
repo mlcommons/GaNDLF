@@ -218,14 +218,14 @@ for train_index, test_index in kf.split(training_indeces_full):
         trainingDataForTorch,
         queue_length,
         samples_per_volume,
-        torchio.data.UniformSampler(psize[0],psize[1],psize[2]),
+        torchio.data.UniformSampler(patch_size),
     )
     
     queue_validation = torchio.Queue(
         validationDataForTorch,
         queue_length,
         samples_per_volume,
-        torchio.data.UniformSampler(psize[0],psize[1],psize[2]),
+        torchio.data.UniformSampler(patch_size),
     )
     
     training_start_time = time.asctime()
