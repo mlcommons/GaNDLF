@@ -81,7 +81,7 @@ for j in range(df_model.shape[0]):
 
 # Extrating the training parameters from the dictionary
 num_epochs = int(params['num_epochs'])
-batch = int(params['batch_size'])
+batch_size = int(params['batch_size'])
 learning_rate = int(params['learning_rate'])
 which_loss = str(params['loss_function'])
 opt = str(params['opt'])
@@ -214,7 +214,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     sys.stdout.flush()
 
     # Setting up the train and validation loader
-    train_loader = DataLoader(trainingDataForTorch,batch_size= batch,shuffle=True,num_workers=1)
+    train_loader = DataLoader(trainingDataForTorch,batch_size=batch_size,shuffle=True,num_workers=1)
     val_loader = DataLoader(validationDataForTorch, batch_size=1,shuffle=True,num_workers = 1)
 
     # get the channel keys
@@ -236,7 +236,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     sys.stdout.flush()
     model = model.to(device)
 
-    step_size = 4*batch*len(train_loader.dataset)
+    step_size = 4*batch_size*len(train_loader.dataset)
     clr = cyclical_lr(step_size, min_lr = 0.000001, max_lr = 0.001)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
     print("Starting Learning rate is:",clr(2*step_size))
@@ -252,7 +252,6 @@ for train_index, test_index in kf.split(training_indeces_full):
     best_n_val_list = []
     val_avg_loss_list = []
     ################ TRAINING THE MODEL##############
-    print(len(train_loader.dataset))
     for ep in range(num_epochs):
         start = time.time()
         print("\n")
@@ -261,11 +260,10 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
         for batch_idx, (subject) in enumerate(train_loader):
-            print(subject)
             # Load the subject and its ground truth
-            # image = subject['image']
+            # read and concat the images
             image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
-            # mask = subject['gt']
+            # read the mask
             mask = batch['label'][torchio.DATA] # get the label image
             # Loading images into the GPU and ignoring the affine
             image, mask = image.float().to(device), mask.float().to(device)
