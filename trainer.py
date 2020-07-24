@@ -190,12 +190,12 @@ for train_index, test_index in kf.split(training_indeces_full):
     # save the current model configuration as a sanity check
     copyfile(model_parameters, os.path.join(currentOutputFolder,'model.cfg'))
 
-    # pickle the data
-    currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
-    currentValidataionDataPickle = os.path.join(currentOutputFolder, 'validation.pkl')
-    trainingData.to_pickle(currentTrainingDataPickle)
-    validationData.to_pickle(currentValidataionDataPickle)
-
+    ### pickle/unpickle data
+    # # pickle the data
+    # currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
+    # currentValidataionDataPickle = os.path.join(currentOutputFolder, 'validation.pkl')
+    # trainingData.to_pickle(currentTrainingDataPickle)
+    # validationData.to_pickle(currentValidataionDataPickle)
 
     ### inside the training function
     ### for efficient processing, this can be passed off to sge as independant processes
@@ -204,6 +204,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     # paramsPickle = pd.read_pickle('/path/to/validation.pkl')
     # with open('/path/to/params.pkl', 'rb') as handle:
     #     params = pickle.load(handle)
+    ### pickle/unpickle data
 
     trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, channelHeaders, labelHeader, augmentations)
     validationDataForTorch = ImagesFromDataFrame(validationData, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
