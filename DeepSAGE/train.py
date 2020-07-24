@@ -14,20 +14,118 @@ from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
 from data.ImagesFromDataFrame import ImagesFromDataFrame
+from shutil import copyfile
+import time
+import sys
+import ast 
 
-# Defining a dictionary - key is the string and the value is the augmentation object
-## todo: ability to change interpolation type from config file
-global_augs_dict = {
-    'affine':RandomAffine(image_interpolation = 'linear'), 
-    'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
-    'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
-    'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
-    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
-    'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
-    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
-    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) 
-}
+def trainingLoop(train_loader, val_loader, parameters):
+  
+  # Extrating the training parameters from the dictionary
+  num_epochs = int(parameters['num_epochs'])
+  batch_size = int(parameters['batch_size'])
+  learning_rate = int(parameters['learning_rate'])
+  which_loss = str(parameters['loss_function'])
+  opt = str(parameters['opt'])
+  save_best = int(parameters['save_best'])
+  augmentations = ast.literal_eval(str(parameters['data_augmentation']))
 
+  # Extracting the model parameters from the dictionary
+  n_classes = int(parameters['numberOfOutputClasses'])
+  base_filters = int(parameters['base_filters'])
+  n_channels = int(parameters['numberOfInputChannels'])
+  # model_path = str(parameters['folderForOutput'])
+  which_model = str(parameters['modelName'])
+  kfolds = int(parameters['kcross_validation'])
+  psize = parameters['patch_size']
+  psize = ast.literal_eval(psize) 
+  psize = np.array(psize)
+
+  # Defining our model here according to parameters mentioned in the configuration file : 
+  if which_model == 'resunet':
+      model = resunet(n_channels,n_classes,base_filters)
+  elif which_model == 'unet':
+      model = unet(n_channels,n_classes,base_filters)
+  elif which_model == 'fcn':
+      model = fcn(n_channels,n_classes,base_filters)
+  elif which_model == 'uinc':
+      model = uinc(n_channels,n_classes,base_filters)
+  else:
+      print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
+      which_model = 'resunet'
+      model = resunet(n_channels,n_classes,base_filters)
+
+  # setting optimizer
+  if opt == 'sgd':
+      optimizer = optim.SGD(model.parameters(),
+                                lr= learning_rate,
+                                momentum = 0.9)
+  elif opt == 'adam':    
+      optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
+  else:
+      print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
+      opt = 'sgd'
+      optimizer = optim.SGD(model.parameters(),
+                                lr= learning_rate,
+                                momentum = 0.9)
+  # setting the loss function
+  if which_loss == 'dc':
+      loss_fn  = MCD_loss
+  elif which_loss == 'dcce':
+      loss_fn  = DCCE
+  elif which_loss == 'ce':
+      loss_fn = CE
+  elif which_loss == 'mse':
+      loss_fn = MCD_MSE_loss
+  else:
+      print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
+      which_loss = 'dc'
+      loss_fn  = MCD_loss
+
+  training_start_time = time.asctime()
+  startstamp = time.time()
+  print("\nHostname   :" + str(os.getenv("HOSTNAME")))
+  sys.stdout.flush()
+
+  # get the channel keys
+  batch = next(iter(train_loader))
+  channel_keys = list(batch.keys())
+  channel_keys.remove('index_ini')
+  channel_keys.remove('label')  
+
+  print("Training Data Samples: ", len(train_loader.dataset))
+  sys.stdout.flush()
+  device = torch.device(dev)
+  print("Current Device : ", torch.cuda.current_device())
+  print("Device Count on Machine : ", torch.cuda.device_count())
+  print("Device Name : ", torch.cuda.get_device_name(device))
+  print("Cuda Availibility : ", torch.cuda.is_available())
+  print('Using device:', device)
+  if device.type == 'cuda':
+      print('Memory Usage:')
+      print('  Allocated:', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
+      print('  Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
+
+  sys.stdout.flush()
+  model = model.to(device)
+
+  step_size = 4*batch_size*len(train_loader.dataset)
+  clr = cyclical_lr(step_size, min_lr = 0.000001, max_lr = 0.001)
+  scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
+  print("Starting Learning rate is:",clr(2*step_size))
+  sys.stdout.flush()
+  ############## STORING THE HISTORY OF THE LOSSES #################
+  avg_val_loss = 0
+  total_val_loss = 0
+  best_val_loss = 2000
+  best_tr_loss = 2000
+  total_loss = 0
+  total_dice = 0
+  best_idx = 0
+  best_n_val_list = []
+  val_avg_loss_list = []
+
+  test = 1
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def Trainer(dataframe, parameters):
@@ -68,4 +166,28 @@ def Trainer(dataframe, parameters):
       # save the current model configuration as a sanity check
       copyfile(model_parameters, os.path.join(currentOutputFolder,'model.cfg'))
 
+      ## pickle/unpickle data
+      # pickle the data
+      currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
+      currentValidataionDataPickle = os.path.join(currentOutputFolder, 'validation.pkl')
+      trainingData.to_pickle(currentTrainingDataPickle)
+      validationData.to_pickle(currentValidataionDataPickle)
+
+      ## inside the training function
+      ## for efficient processing, this can be passed off to sge as independant processes
+      trainingDataFromPickle = pd.read_pickle('/path/to/train.pkl')
+      validataionDataFromPickle = pd.read_pickle('/path/to/validation.pkl')
+      paramsPickle = pd.read_pickle('/path/to/validation.pkl')
+      with open('/path/to/params.pkl', 'rb') as handle:
+          params = pickle.load(handle)
+      ## pickle/unpickle data
+
+      trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, channelHeaders, labelHeader, augmentations)
+      validationDataForTorch = ImagesFromDataFrame(validationData, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+
+      train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
+      val_loader = DataLoader(validationDataForTorch, batch_size=1)
+
+      trainingLoop(train_loader, val_loader, parameters)
+  
   test = 1
