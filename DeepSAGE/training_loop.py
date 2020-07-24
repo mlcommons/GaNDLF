@@ -20,6 +20,7 @@ import ast
 import pickle
 from pathlib import Path
 import argparse
+import datetime
 
 
 from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -144,7 +145,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       print("Epoch # : ",ep)
       print("Learning rate:", optimizer.param_groups[0]['lr'])
       model.train
-      batch_iterator_train = iter(train_loader)
+    #   batch_iterator_train = iter(train_loader)
       for batch_idx, (subject) in enumerate(train_loader):
           # Load the subject and its ground truth
           # read and concat the images
@@ -190,10 +191,9 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       print("Best Training Epoch:", best_tr_idx)
       # Now we enter the evaluation/validation part of the epoch    
       model.eval        
-      batch_iterator_val = iter(val_loader)
+    #   batch_iterator_val = iter(val_loader)
       for batch_idx, (subject) in enumerate(val_loader):
-          with torch.no_grad():
-        
+          with torch.no_grad():        
               image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
               mask = subject['label'][torchio.DATA] # get the label image
               image, mask = image.to(device), mask.to(device)
