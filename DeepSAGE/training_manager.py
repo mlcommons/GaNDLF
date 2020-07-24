@@ -41,20 +41,6 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
 
     currentFold = 0
 
-    # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-    channelHeaderPickle = os.path.join(outputDir,'channelHeader.pkl')
-    with open(channelHeaderPickle, 'wb') as handle:
-        pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    labelHeaderPickle = os.path.join(outputDir,'labelHeader.pkl')
-    with open(labelHeaderPickle, 'wb') as handle:
-        pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    augmentationsPickle = os.path.join(outputDir,'labelHeader.pkl')
-    with open(augmentationsPickle, 'wb') as handle:
-        pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    psizePickle = os.path.join(outputDir,'psize.pkl')
-    with open(psizePickle, 'wb') as handle:
-        pickle.dump(psize, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
     # get the indeces for kfold splitting
     trainingData_full = dataframe
     training_indeces_full = list(trainingData_full.index.values)
@@ -84,9 +70,24 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
       validationData.to_pickle(currentValidataionDataPickle)
 
       if sge_run:
+          
+          # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+          channelHeaderPickle = os.path.join(outputDir,'channelHeader.pkl')
+          with open(channelHeaderPickle, 'wb') as handle:
+              pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
+          labelHeaderPickle = os.path.join(outputDir,'labelHeader.pkl')
+          with open(labelHeaderPickle, 'wb') as handle:
+              pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
+          augmentationsPickle = os.path.join(outputDir,'labelHeader.pkl')
+          with open(augmentationsPickle, 'wb') as handle:
+              pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
+          psizePickle = os.path.join(outputDir,'psize.pkl')
+          with open(psizePickle, 'wb') as handle:
+              pickle.dump(psize, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
           # call qsub here
-        #   qsubCommand = 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ' + outputDir + '/\$JOB_ID.stdout -e ' + outputDir + '/\$JOB_ID.stderr '
-          qsubCommand = ''
+          qsubCommand = 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ' + outputDir + '/\$JOB_ID.stdout -e ' + outputDir + '/\$JOB_ID.stderr '
+          # qsubCommand = ''
           command = qsubCommand + \
               'python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
               ' -val_loader_pickle ' + currentValidataionDataPickle + \
