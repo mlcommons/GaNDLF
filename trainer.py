@@ -279,12 +279,14 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Epoch # : ",ep)
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
-        for batch in enumerate(train_loader):
+        batch_iterator_train = iter(train_loader)
+        for batch_idx, (subject) in enumerate(train_loader):
             # Load the subject and its ground truth
             # read and concat the images
-            image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
+            batch_train = next(batch_iterator_train)
+            image = torch.cat([batch_train[key][torchio.DATA] for key in batch_train.keys()], dim=1) # concatenate channels 
             # read the mask
-            mask = batch['label'][torchio.DATA] # get the label image
+            mask = batch_train['label'][torchio.DATA] # get the label image
             # Loading images into the GPU and ignoring the affine
             image, mask = image.float().to(device), mask.float().to(device)
             #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
@@ -324,12 +326,14 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Best Training Epoch:", best_tr_idx)
         # Now we enter the evaluation/validation part of the epoch    
         model.eval        
+        batch_iterator_val = iter(val_loader)
         for batch_idx, (subject) in enumerate(val_loader):
             with torch.no_grad():
                 # image = subject['image']
-                image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
+                batch_val = next(batch_iterator_val)
+                image = torch.cat([batch_val[key][torchio.DATA] for key in batch_val.keys()], dim=1) # concatenate channels 
                 # mask = subject['gt']
-                mask = batch['label'][torchio.DATA] # get the label image
+                mask = batch_val['label'][torchio.DATA] # get the label image
                 image, mask = image.to(device), mask.to(device)
                 output = model(image.float())
                 curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
