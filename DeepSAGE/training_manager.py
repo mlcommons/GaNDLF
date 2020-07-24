@@ -28,14 +28,14 @@ from DeepSAGE.training_loop import trainingLoop
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,
     num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-    n_classes, base_filters, n_channels, which_model, sge_run):
+    n_classes, base_filters, n_channels, which_model, parallel_compute_command):
 
     # kfolds = int(parameters['kcross_validation'])
     # check for single fold training
     singleFoldTraining = False
     if kfolds < 0: # if the user wants a single fold training
-        kfolds = abs(kfolds)
-        singleFoldTraining = True
+      kfolds = abs(kfolds)
+      singleFoldTraining = True
 
     kf = KFold(n_splits=kfolds) # initialize the kfold structure
 
@@ -50,10 +50,10 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
 
       # the output of the current fold is only needed if multi-fold training is happening
       if singleFoldTraining:
-          currentOutputFolder = outputDir
+        currentOutputFolder = outputDir
       else:
-          currentOutputFolder = os.path.join(outputDir, str(currentFold))
-          Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
+        currentOutputFolder = os.path.join(outputDir, str(currentFold))
+        Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
 
       trainingData = trainingData_full.iloc[train_index]
       validationData = trainingData_full.iloc[test_index]
@@ -69,43 +69,42 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
       trainingData.to_pickle(currentTrainingDataPickle)
       validationData.to_pickle(currentValidataionDataPickle)
 
-      if sge_run:
-          
-          # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-          channelHeaderPickle = os.path.join(outputDir,'channelHeader.pkl')
-          with open(channelHeaderPickle, 'wb') as handle:
-              pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
-          labelHeaderPickle = os.path.join(outputDir,'labelHeader.pkl')
-          with open(labelHeaderPickle, 'wb') as handle:
-              pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
-          augmentationsPickle = os.path.join(outputDir,'labelHeader.pkl')
-          with open(augmentationsPickle, 'wb') as handle:
-              pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-          psizePickle = os.path.join(outputDir,'psize.pkl')
-          with open(psizePickle, 'wb') as handle:
-              pickle.dump(psize, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-          # call qsub here
-          qsubCommand = 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ' + outputDir + '/\$JOB_ID.stdout -e ' + outputDir + '/\$JOB_ID.stderr '
-          # qsubCommand = ''
-          command = qsubCommand + \
-              'python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
-              ' -val_loader_pickle ' + currentValidataionDataPickle + \
-              ' -num_epochs ' + str(num_epochs) + ' -batch_size ' + str(batch_size) + \
-              ' -learning_rate ' + str(learning_rate) + ' -which_loss ' + which_loss + \
-              ' -opt ' + opt + ' -save_best ' + str(save_best) + \
-              ' -n_classes ' + str(n_classes) + ' -base_filters ' + str(base_filters) + \
-              ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
-              ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
-              ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle
-              
-          subprocess.Popen(command, shell=True).wait()
+      if not parallel_compute_command: # parallel_compute_command is an empty string, thus no parallel computing requested
+        trainingLoop(train_loader_pickle = currentTrainingDataPickle, val_loader_pickle = currentValidataionDataPickle, 
+        num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
+        which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
+        base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
+        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations)
 
       else:
-            trainingLoop(train_loader_pickle = currentTrainingDataPickle, val_loader_pickle = currentValidataionDataPickle, 
-            num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
-            which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
-            base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-            channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations)
+        # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+        channelHeaderPickle = os.path.join(outputDir,'channelHeader.pkl')
+        with open(channelHeaderPickle, 'wb') as handle:
+            pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        labelHeaderPickle = os.path.join(outputDir,'labelHeader.pkl')
+        with open(labelHeaderPickle, 'wb') as handle:
+            pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        augmentationsPickle = os.path.join(outputDir,'labelHeader.pkl')
+        with open(augmentationsPickle, 'wb') as handle:
+            pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        psizePickle = os.path.join(outputDir,'psize.pkl')
+        with open(psizePickle, 'wb') as handle:
+            pickle.dump(psize, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # call qsub here
+        parallel_compute_command = parallel_compute_command.replace('${outputDir}', outputDir)
+        # qsubCommand = ''
+        command = parallel_compute_command + \
+            'python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
+            ' -val_loader_pickle ' + currentValidataionDataPickle + \
+            ' -num_epochs ' + str(num_epochs) + ' -batch_size ' + str(batch_size) + \
+            ' -learning_rate ' + str(learning_rate) + ' -which_loss ' + which_loss + \
+            ' -opt ' + opt + ' -save_best ' + str(save_best) + \
+            ' -n_classes ' + str(n_classes) + ' -base_filters ' + str(base_filters) + \
+            ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
+            ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
+            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle
+            
+        subprocess.Popen(command, shell=True).wait()
 
       currentFold = currentFold + 1 # increment the fold
