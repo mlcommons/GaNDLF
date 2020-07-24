@@ -26,7 +26,7 @@ import pkg_resources
 from shutil import copyfile
 import torchio
 
-from DeepSAGE.train import Trainer
+from DeepSAGE.training_manager import Trainer
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument('-mc', '--modelConfig', type=str, help = 'model configuration file', required=True)
