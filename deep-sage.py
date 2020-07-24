@@ -13,18 +13,12 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
-import data
-from data.ImagesFromDataFrame import ImagesFromDataFrame
+# import data
+# from data.ImagesFromDataFrame import ImagesFromDataFrame
 # from data_val import TumorSegmentationDataset_val
-from schd import *
-from models.fcn import fcn
-from models.unet import unet
-from models.resunet import resunet
-from models.uinc import uinc
 import gc
 from torchsummary import summary
 import nibabel as nib
-from losses import *
 import ast 
 import datetime
 from pathlib import Path
