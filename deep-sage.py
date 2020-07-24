@@ -149,9 +149,7 @@ for col in trainingData_full.columns:
     elif ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
         labelHeader = trainingData_full.columns.get_loc(col)
 
-# get the indeces for kfold splitting
-training_indeces_full = list(trainingData_full.index.values)
-
+Trainer(dataframe = trainingData_full, augmentations = augmentations, kfolds = kfolds, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters)
 # start the kFold train
 for train_index, test_index in kf.split(training_indeces_full):
 
