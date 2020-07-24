@@ -2,6 +2,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
 import torch.optim as optim
+from torch.autograd import Variable
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
@@ -33,7 +34,7 @@ from DeepSAGE.utils import *
 
 def trainingLoop(train_loader_pickle, val_loader_pickle, 
   num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-  n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations):
+  n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir):
   '''
   This is the main training loop
   '''
@@ -48,44 +49,44 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-      model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,n_classes,base_filters)
   elif which_model == 'unet':
-      model = unet(n_channels,n_classes,base_filters)
+    model = unet(n_channels,n_classes,base_filters)
   elif which_model == 'fcn':
-      model = fcn(n_channels,n_classes,base_filters)
+    model = fcn(n_channels,n_classes,base_filters)
   elif which_model == 'uinc':
-      model = uinc(n_channels,n_classes,base_filters)
+    model = uinc(n_channels,n_classes,base_filters)
   else:
-      print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
-      which_model = 'resunet'
-      model = resunet(n_channels,n_classes,base_filters)
+    print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
+    which_model = 'resunet'
+    model = resunet(n_channels,n_classes,base_filters)
 
   # setting optimizer
   if opt == 'sgd':
-      optimizer = optim.SGD(model.parameters(),
-                                lr= learning_rate,
-                                momentum = 0.9)
+    optimizer = optim.SGD(model.parameters(),
+                            lr= learning_rate,
+                            momentum = 0.9)
   elif opt == 'adam':    
-      optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
+    optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
   else:
-      print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
-      opt = 'sgd'
-      optimizer = optim.SGD(model.parameters(),
-                                lr= learning_rate,
-                                momentum = 0.9)
+    print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
+    opt = 'sgd'
+    optimizer = optim.SGD(model.parameters(),
+                            lr= learning_rate,
+                            momentum = 0.9)
   # setting the loss function
   if which_loss == 'dc':
-      loss_fn  = MCD_loss
+    loss_fn  = MCD_loss
   elif which_loss == 'dcce':
-      loss_fn  = DCCE
+    loss_fn  = DCCE
   elif which_loss == 'ce':
-      loss_fn = CE
+    loss_fn = CE
   elif which_loss == 'mse':
-      loss_fn = MCD_MSE_loss
+    loss_fn = MCD_MSE_loss
   else:
-      print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
-      which_loss = 'dc'
-      loss_fn  = MCD_loss
+    print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
+    which_loss = 'dc'
+    loss_fn  = MCD_loss
 
   training_start_time = time.asctime()
   startstamp = time.time()
@@ -209,14 +210,14 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
               average_dice = total_dice/(batch_idx + 1)
 
       print("Epoch Validation Dice: ", average_dice)
-      torch.save(model, model_path + which_model  + str(ep) + ".pt")
+      torch.save(model, outputDir + which_model  + str(ep) + ".pt")
       if ep > save_best:
           keep_list = np.argsort(np.array(val_avg_loss_list))
           keep_list = keep_list[0:save_best]
           for j in range(ep):
               if j not in keep_list:
-                  if os.path.isfile(os.path.join(model_path + which_model  + str(j) + ".pt")):
-                      os.remove(os.path.join(model_path + which_model  + str(j) + ".pt"))
+                  if os.path.isfile(os.path.join(outputDir + which_model  + str(j) + ".pt")):
+                      os.remove(os.path.join(outputDir + which_model  + str(j) + ".pt"))
           
           print("Best ",save_best," validation epochs:", keep_list)
 
@@ -248,6 +249,7 @@ if __name__ == "__main__":
     parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
     parser.add_argument('-augmentations_pickle', type=str, help = 'Augmentations pickle', required=True)
     parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
+    parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     
     args = parser.parse_args()
 
@@ -266,4 +268,5 @@ if __name__ == "__main__":
         psize = args.psize_pickle, 
         channelHeaders = args.channel_header_pickle, 
         labelHeader = args.label_header_pickle, 
-        augmentations = args.augmentations_pickle)
+        augmentations = args.augmentations_pickle,
+        outputDir = args.outputDir)
