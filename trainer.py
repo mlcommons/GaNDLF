@@ -36,7 +36,7 @@ from shutil import copyfile
 import torchio
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
-parser.add_argument('-m', '--model', type=str, help = 'model configuration file', required=True)
+parser.add_argument('-mc', '--modelConfig', type=str, help = 'model configuration file', required=True)
 parser.add_argument('-d', '--data', type=str, help = 'data csv file that is used for training or testing', required=True)
 parser.add_argument('-o', '--output', type=str, help = 'output directory to save intermediate files and model weights', required=True)
 parser.add_argument('-tr', '--train', default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
@@ -49,7 +49,7 @@ parser.add_argument('-v', '--version', action='version', version=pkg_resources.r
 args = parser.parse_args()
 
 file_trainingData_full = args.data
-model_parameters = args.model
+model_parameters = args.modelConfig
 dev = args.device
 model_path = args.output
 mode = args.train
