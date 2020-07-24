@@ -32,27 +32,8 @@ from utils import *
 
 def trainingLoop(train_loader, val_loader, 
   num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-  n_classes, base_filters, n_channels, which_model):
+  n_classes, base_filters, n_channels, which_model, psize):
   
-  # Extrating the training parameters from the dictionary
-  num_epochs = int(parameters['num_epochs'])
-  batch_size = int(parameters['batch_size'])
-  learning_rate = int(parameters['learning_rate'])
-  which_loss = str(parameters['loss_function'])
-  opt = str(parameters['opt'])
-  save_best = int(parameters['save_best'])
-
-  # Extracting the model parameters from the dictionary
-  n_classes = int(parameters['numberOfOutputClasses'])
-  base_filters = int(parameters['base_filters'])
-  n_channels = int(parameters['numberOfInputChannels'])
-  # model_path = str(parameters['folderForOutput'])
-  which_model = str(parameters['modelName'])
-  kfolds = int(parameters['kcross_validation'])
-  psize = parameters['patch_size']
-  psize = ast.literal_eval(psize) 
-  psize = np.array(psize)
-
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
       model = resunet(n_channels,n_classes,base_filters)
