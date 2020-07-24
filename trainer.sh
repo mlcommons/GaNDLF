@@ -12,5 +12,5 @@
 ############################## END OF DEFAULT EMBEDDED SGE COMMANDS #######################
 CUDA_VISIBLE_DEVICES=`get_CUDA_VISIBLE_DEVICES` || exit
 export CUDA_VISIBLE_DEVICES 
-source activate ../venv/
+conda activate ./venv/
 python trainer.py --model ./configs/model/model.cfg --data ./configs/train/train.csv --output ./output_dir/ --train 1 --dev 0
