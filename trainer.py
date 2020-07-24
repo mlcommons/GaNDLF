@@ -207,6 +207,26 @@ for train_index, test_index in kf.split(training_indeces_full):
 
     trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, channelHeaders, labelHeader, augmentations)
     validationDataForTorch = ImagesFromDataFrame(validationData, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+
+    # construct the data queue using pre-defined information
+    # all of this needs to come from the config file
+    patch_size = 48 # Tuple of integers (d,h,w) to generate patches of size d×h×w. If a single number n is provided, d=h=w=n.
+    queue_length = 100 # Maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches.
+    samples_per_volume = 10 #  Number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower.
+
+    queue_training = torchio.Queue(
+        trainingDataForTorch,
+        queue_length,
+        samples_per_volume,
+        torchio.data.UniformSampler(patch_size),
+    )
+    
+    queue_validation = torchio.Queue(
+        validationDataForTorch,
+        queue_length,
+        samples_per_volume,
+        torchio.data.UniformSampler(patch_size),
+    )
     
     training_start_time = time.asctime()
     startstamp = time.time()
@@ -214,6 +234,7 @@ for train_index, test_index in kf.split(training_indeces_full):
     sys.stdout.flush()
 
     # Setting up the train and validation loader
+<<<<<<< HEAD
     train_loader = DataLoader(trainingDataForTorch,batch_size=batch_size)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
 
@@ -222,6 +243,14 @@ for train_index, test_index in kf.split(training_indeces_full):
     channel_keys = list(batch.keys())
     channel_keys.remove('index_ini')
     channel_keys.remove('label')  
+=======
+    train_loader = DataLoader(queue_training,batch_size=batch_size,shuffle=True,num_workers=1)
+    val_loader = DataLoader(queue_validation, batch_size=1,shuffle=True,num_workers = 1)
+
+    # get the channel keys
+    # batch = next(iter(train_loader))
+
+>>>>>>> 43ba4075f77442a6673d97b04d78bd9c5f36d090
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
     device = torch.device(dev)
@@ -261,12 +290,18 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Epoch # : ",ep)
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
+        batch_iterator_train = iter(train_loader)
         for batch_idx, (subject) in enumerate(train_loader):
             # Load the subject and its ground truth
             # read and concat the images
+<<<<<<< HEAD
             image = torch.cat([batch[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+=======
+            batch_train = next(batch_iterator_train)
+            image = torch.cat([batch_train[key][torchio.DATA] for key in batch_train.keys()], dim=1) # concatenate channels 
+>>>>>>> 43ba4075f77442a6673d97b04d78bd9c5f36d090
             # read the mask
-            mask = batch['label'][torchio.DATA] # get the label image
+            mask = batch_train['label'][torchio.DATA] # get the label image
             # Loading images into the GPU and ignoring the affine
             image, mask = image.float().to(device), mask.float().to(device)
             #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
@@ -306,12 +341,14 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Best Training Epoch:", best_tr_idx)
         # Now we enter the evaluation/validation part of the epoch    
         model.eval        
+        batch_iterator_val = iter(val_loader)
         for batch_idx, (subject) in enumerate(val_loader):
             with torch.no_grad():
                 # image = subject['image']
-                image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
+                batch_val = next(batch_iterator_val)
+                image = torch.cat([batch_val[key][torchio.DATA] for key in batch_val.keys()], dim=1) # concatenate channels 
                 # mask = subject['gt']
-                mask = batch['label'][torchio.DATA] # get the label image
+                mask = batch_val['label'][torchio.DATA] # get the label image
                 image, mask = image.to(device), mask.to(device)
                 output = model(image.float())
                 curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
