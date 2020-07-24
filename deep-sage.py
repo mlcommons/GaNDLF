@@ -33,8 +33,6 @@ parser.add_argument('-o', '--output', type=str, help = 'output directory to save
 parser.add_argument('-tr', '--train', default=1, type=int, help = '1 means training and 0 means testing; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
 parser.add_argument('-md', '--modelDir', type=str, help = 'The pre-trained model directory that is used for testing', required=False)
 parser.add_argument('-dv', '--device', default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
-parser.add_argument('-s', '--sge', default=0, type=int, help = 'Whether the training is running on SGE for parallel fold training across nodes', required=False) # todo: how to handle cpu training? would passing '-1' be considered cpu?
-parser.add_argument('-sm', '--sgeMem', default=64, type=int, help = 'The amount of memory requested per training job for SGE; used only when \'-s 1\' is passed', required=False) # todo: how to handle cpu training? would passing '-1' be considered cpu?
 parser.add_argument('-v', '--version', action='version', version=pkg_resources.require('deep-seg')[0].version, help="Show program's version number and exit.")
                             
 args = parser.parse_args()
