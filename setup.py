@@ -28,6 +28,7 @@ setup(
   author="Megh Bhalerao, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
+  scripts=['deepsage'],
   classifiers=[
     'Development Status :: Pre-Alpha',
     'Intended Audience :: Science/Research',
