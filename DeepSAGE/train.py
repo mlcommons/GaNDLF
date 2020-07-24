@@ -5,10 +5,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import os
 import random
-from all_augmentations import *
-from utils import *
-import random
-import scipy
+# import scipy
 import torchio
 from torchio.transforms import *
 from torchio import Image, Subject
@@ -18,6 +15,15 @@ from shutil import copyfile
 import time
 import sys
 import ast 
+import pickle
+
+from schd import *
+from models.fcn import fcn
+from models.unet import unet
+from models.resunet import resunet
+from models.uinc import uinc
+from losses import *
+from utils import *
 
 def trainingLoop(train_loader, val_loader, parameters):
   
