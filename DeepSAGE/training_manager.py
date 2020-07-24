@@ -21,8 +21,8 @@ import pickle
 from pathlib import Path
 
 
-from data.ImagesFromDataFrame import ImagesFromDataFrame
-from training_loop import trainingLoop
+from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
+from DeepSAGE.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,

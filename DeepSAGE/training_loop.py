@@ -20,14 +20,14 @@ import pickle
 from pathlib import Path
 
 
-from data.ImagesFromDataFrame import ImagesFromDataFrame
-from schd import *
-from models.fcn import fcn
-from models.unet import unet
-from models.resunet import resunet
-from models.uinc import uinc
-from losses import *
-from utils import *
+from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
+from DeepSAGE.schd import *
+from DeepSAGE.models.fcn import fcn
+from DeepSAGE.models.unet import unet
+from DeepSAGE.models.resunet import resunet
+from DeepSAGE.models.uinc import uinc
+from DeepSAGE.losses import *
+from DeepSAGE.utils import *
 
 
 def trainingLoop(train_loader, val_loader, 
