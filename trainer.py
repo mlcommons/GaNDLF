@@ -15,7 +15,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 import data
 from data.ImagesFromDataFrame import ImagesFromDataFrame
-from data_val import TumorSegmentationDataset_val
+# from data_val import TumorSegmentationDataset_val
 from schd import *
 from models.fcn import fcn
 from models.unet import unet
