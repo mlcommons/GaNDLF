@@ -1,5 +1,8 @@
+
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
+import torch.optim as optim
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
@@ -17,6 +20,7 @@ import sys
 import ast 
 import pickle
 
+
 from schd import *
 from models.fcn import fcn
 from models.unet import unet
@@ -25,7 +29,9 @@ from models.uinc import uinc
 from losses import *
 from utils import *
 
-def trainingLoop(train_loader, val_loader, parameters):
+def trainingLoop(train_loader, val_loader, 
+  num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
+  n_classes, base_filters, n_channels, which_model, ):
   
   # Extrating the training parameters from the dictionary
   num_epochs = int(parameters['num_epochs'])
@@ -134,7 +140,7 @@ def trainingLoop(train_loader, val_loader, parameters):
   test = 1
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def Trainer(dataframe, parameters):
+def Trainer(dataframe, augmentations, kfolds, model_parameters_file):
 
   kfolds = int(parameters['kcross_validation'])
   # check for single fold training
@@ -170,7 +176,7 @@ def Trainer(dataframe, parameters):
       validationData = trainingData_full.iloc[test_index]
 
       # save the current model configuration as a sanity check
-      copyfile(model_parameters, os.path.join(currentOutputFolder,'model.cfg'))
+      copyfile(model_parameters_file, os.path.join(currentOutputFolder,'model.cfg'))
 
       ## pickle/unpickle data
       # pickle the data
