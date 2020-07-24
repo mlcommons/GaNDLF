@@ -46,12 +46,6 @@ if dev>=0:
     dev = 'cuda'
 if dev==-1:
     dev = 'cpu'
-sge_run = args.sge
-if sge_run == 0:
-    sge_run = False
-else:
-    sge_run = True
-sge_memory = args.sgeMem
 
 if mode == 0:
     pretrainedModelPath = args.modelDir
@@ -87,6 +81,9 @@ kfolds = int(params['kcross_validation'])
 psize = params['patch_size']
 psize = ast.literal_eval(psize) 
 psize = np.array(psize)
+parallel_compute_command = ''
+if 'parallel_compute_command' in params:
+    parallel_compute_command = params['parallel_compute_command']
 
 ## read training dataset into data frame
 trainingData_full = pd.read_csv(file_trainingData_full)
