@@ -61,7 +61,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentat
     transform = Compose(augmentation_list)
     subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
 
-    sampler = torchio.data.UniformSampler((144,144,16))
+    sampler = torchio.data.UniformSampler((144,144,16)) # this needs to be read from model.cfg
     patches_queue = torchio.Queue(subjects_dataset,max_length = 1,samples_per_volume  = 1,sampler = sampler,num_workers=4,shuffle_subjects=True, shuffle_patches=True) 
     
     return patches_queue
