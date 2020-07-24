@@ -13,7 +13,6 @@ import torchio
 from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
-from data.ImagesFromDataFrame import ImagesFromDataFrame
 from shutil import copyfile
 import time
 import sys
@@ -22,6 +21,7 @@ import pickle
 from pathlib import Path
 
 
+from data.ImagesFromDataFrame import ImagesFromDataFrame
 from schd import *
 from models.fcn import fcn
 from models.unet import unet
@@ -117,6 +117,103 @@ def trainingLoop(train_loader, val_loader,
   best_idx = 0
   best_n_val_list = []
   val_avg_loss_list = []
+
+  batch = next(iter(train_loader))
+  channel_keys = list(batch.keys())
+  channel_keys.remove('index_ini')
+  channel_keys.remove('label')  
+  
+  ################ TRAINING THE MODEL##############
+  for ep in range(num_epochs):
+      start = time.time()
+      print("\n")
+      print("Epoch Started at:", datetime.datetime.now())
+      print("Epoch # : ",ep)
+      print("Learning rate:", optimizer.param_groups[0]['lr'])
+      model.train
+      batch_iterator_train = iter(train_loader)
+      for batch_idx, (subject) in enumerate(train_loader):
+          # Load the subject and its ground truth
+          # read and concat the images
+          image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+          # read the mask
+          mask = subject['label'][torchio.DATA] # get the label image
+          # Loading images into the GPU and ignoring the affine
+          image, mask = image.float().to(device), mask.float().to(device)
+          #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
+          image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
+          # Making sure that the optimizer has been reset
+          optimizer.zero_grad()
+          # Forward Propagation to get the output from the models
+          torch.cuda.empty_cache()
+          output = model(image.float())
+          # Computing the loss
+          loss = loss_fn(output.double(), mask.double(),n_classes)
+          # Back Propagation for model to learn
+          loss.backward()
+          #Updating the weight values
+          optimizer.step()
+          #Pushing the dice to the cpu and only taking its value
+          curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
+          #train_loss_list.append(loss.cpu().data.item())
+          total_loss+=curr_loss
+          # Computing the average loss
+          average_loss = total_loss/(batch_idx + 1)
+          #Computing the dice score 
+          curr_dice = 1 - curr_loss
+          #Computing the total dice
+          total_dice+= curr_dice
+          #Computing the average dice
+          average_dice = total_dice/(batch_idx + 1)
+          scheduler.step()
+          torch.cuda.empty_cache()
+      print("Epoch Training dice:" , average_dice)      
+      if average_dice > 1-best_tr_loss:
+          best_tr_idx = ep
+          best_tr_loss = 1 - average_dice
+      total_dice = 0
+      total_loss = 0     
+      print("Best Training Dice:", 1-best_tr_loss)
+      print("Best Training Epoch:", best_tr_idx)
+      # Now we enter the evaluation/validation part of the epoch    
+      model.eval        
+      batch_iterator_val = iter(val_loader)
+      for batch_idx, (subject) in enumerate(val_loader):
+          with torch.no_grad():
+        
+              image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+              mask = subject['label'][torchio.DATA] # get the label image
+              image, mask = image.to(device), mask.to(device)
+              output = model(image.float())
+              curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
+              total_loss+=curr_loss
+              # Computing the average loss
+              average_loss = total_loss/(batch_idx + 1)
+              #Computing the dice score 
+              curr_dice = 1 - curr_loss
+              #Computing the total dice
+              total_dice+= curr_dice
+              #Computing the average dice
+              average_dice = total_dice/(batch_idx + 1)
+
+      print("Epoch Validation Dice: ", average_dice)
+      torch.save(model, model_path + which_model  + str(ep) + ".pt")
+      if ep > save_best:
+          keep_list = np.argsort(np.array(val_avg_loss_list))
+          keep_list = keep_list[0:save_best]
+          for j in range(ep):
+              if j not in keep_list:
+                  if os.path.isfile(os.path.join(model_path + which_model  + str(j) + ".pt")):
+                      os.remove(os.path.join(model_path + which_model  + str(j) + ".pt"))
+          
+          print("Best ",save_best," validation epochs:", keep_list)
+
+      total_dice = 0
+      total_loss = 0
+      stop = time.time()   
+      val_avg_loss_list.append(1-average_dice)  
+      print("Time for epoch:",(stop - start)/60,"mins")    
+      sys.stdout.flush()
 
   test = 1
 
