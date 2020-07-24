@@ -35,9 +35,7 @@ pip install -e .
 
 ## To Do
 
-- Consistent data I/O in a separate module so that this can be expanded for different tasks
 - Generic multi-class segmentation support
-- Data augmentation using `torchio`
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Add option to normalize on a per-channel basis, if required
 - Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
