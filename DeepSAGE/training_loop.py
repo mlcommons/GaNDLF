@@ -18,6 +18,7 @@ import sys
 import ast 
 import pickle
 from pathlib import Path
+import argparse
 
 
 from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -30,10 +31,21 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def trainingLoop(train_loader, val_loader, 
+def trainingLoop(train_loader_pickle, val_loader_pickle, 
   num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-  n_classes, base_filters, n_channels, which_model):
-  
+  n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations):
+  '''
+  This is the main training loop
+  '''
+  trainingDataFromPickle = pd.read_pickle(train_loader_pickle)
+  validataionDataFromPickle = pd.read_pickle(val_loader_pickle)
+
+  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
+  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+
+  train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
+  val_loader = DataLoader(validationDataForTorch, batch_size=1)
+
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
       model = resunet(n_channels,n_classes,base_filters)
@@ -214,3 +226,44 @@ def trainingLoop(train_loader, val_loader,
       val_avg_loss_list.append(1-average_dice)  
       print("Time for epoch:",(stop - start)/60,"mins")    
       sys.stdout.flush()
+
+
+if __name__ == "__main__":
+
+    # parse the cli arguments here
+    parser = argparse.ArgumentParser(description = "Training Loop of DeepSAGE")
+    parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
+    parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
+    parser.add_argument('-num_epochs', type=int, help = 'Number of epochs', required=True)
+    parser.add_argument('-batch_size', type=int, help = 'Batch size', required=True)
+    parser.add_argument('-learning_rate', type=float, help = 'Learning rate', required=True)
+    parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
+    parser.add_argument('-opt', type=str, help = 'Optimizer type', required=True)
+    parser.add_argument('-save_best', type=int, help = 'Number of best models to save', required=True)
+    parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
+    parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
+    parser.add_argument('-n_channels', type=int, help = 'Number of input channels', required=True)
+    parser.add_argument('-which_model', type=str, help = 'Model type', required=True)
+    parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
+    parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
+    parser.add_argument('-augmentations_pickle', type=str, help = 'Augmentations pickle', required=True)
+    parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
+    
+    args = parser.parse_args()
+
+    trainingLoop(train_loader_pickle = args.train_loader_pickle, 
+        val_loader_pickle = args.val_loader_pickle, 
+        num_epochs = args.num_epochs, 
+        batch_size = args.batch_size, 
+        learning_rate = args.learning_rate, 
+        which_loss = args.which_loss, 
+        opt = args.opt, 
+        save_best = args.save_best, 
+        n_classes = args.n_classes,
+        base_filters = args.base_filters, 
+        n_channels = args.n_channels, 
+        which_model = args.which_model, 
+        psize = args.psize_pickle, 
+        channelHeaders = args.channel_header_pickle, 
+        labelHeader = args.label_header_pickle, 
+        augmentations = args.augmentations_pickle)
