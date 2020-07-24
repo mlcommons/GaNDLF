@@ -25,7 +25,6 @@ import gc
 from torchsummary import summary
 import nibabel as nib
 from losses import *
-import sys
 import ast 
 import datetime
 from pathlib import Path
@@ -158,21 +157,6 @@ for col in trainingData_full.columns:
 
 # get the indeces for kfold splitting
 training_indeces_full = list(trainingData_full.index.values)
-
-# check for single fold training
-singleFoldTraining = False
-if kfolds < 0: # if the user wants a single fold training
-    kfolds = abs(kfolds)
-    singleFoldTraining = True
-
-kf = KFold(n_splits=kfolds) # initialize the kfold structure
-
-currentFold = 0
-
-# write parameters to pickle - this should not change for the different folds, so keeping is independent
-paramtersPickle = os.path.join(model_path,'params.pkl')
-with open(paramtersPickle, 'wb') as handle:
-    pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # start the kFold train
 for train_index, test_index in kf.split(training_indeces_full):
