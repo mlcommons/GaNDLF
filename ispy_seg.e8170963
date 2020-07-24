@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "trainer.py", line 312, in <module>
-    image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
-  File "trainer.py", line 312, in <listcomp>
-    image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
-IndexError: too many indices for tensor of dimension 2
