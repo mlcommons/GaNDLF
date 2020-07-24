@@ -33,4 +33,39 @@ global_augs_dict = {
 def Trainer(dataframe, parameters):
 
   kfolds = int(parameters['kcross_validation'])
+  # check for single fold training
+  singleFoldTraining = False
+  if kfolds < 0: # if the user wants a single fold training
+      kfolds = abs(kfolds)
+      singleFoldTraining = True
+
+  kf = KFold(n_splits=kfolds) # initialize the kfold structure
+
+  currentFold = 0
+
+  # write parameters to pickle - this should not change for the different folds, so keeping is independent
+  paramtersPickle = os.path.join(model_path,'params.pkl')
+  with open(paramtersPickle, 'wb') as handle:
+      pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+  # get the indeces for kfold splitting
+  trainingData_full = dataframe
+  training_indeces_full = list(trainingData_full.index.values)
+
+  # start the kFold train
+  for train_index, test_index in kf.split(training_indeces_full):
+
+      # the output of the current fold is only needed if multi-fold training is happening
+      if singleFoldTraining:
+          currentOutputFolder = model_path
+      else:
+          currentOutputFolder = os.path.join(model_path, str(currentFold))
+          Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
+
+      trainingData = trainingData_full.iloc[train_index]
+      validationData = trainingData_full.iloc[test_index]
+
+      # save the current model configuration as a sanity check
+      copyfile(model_parameters, os.path.join(currentOutputFolder,'model.cfg'))
+
   test = 1
