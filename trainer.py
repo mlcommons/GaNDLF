@@ -209,30 +209,6 @@ for train_index, test_index in kf.split(training_indeces_full):
     trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, channelHeaders, labelHeader, augmentations)
     validationDataForTorch = ImagesFromDataFrame(validationData, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
  
-    # # construct the data queue using pre-defined information
-    # # all of this needs to come from the config file
-    # patch_size = 16 # Tuple of integers (d,h,w) to generate patches of size d×h×w. If a single number n is provided, d=h=w=n. this needs to be the minimal number along [x,y,z] of input images
-    # queue_length = 100 # Maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches.
-    # samples_per_volume = 10 #  Number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower.
-
-    # queue_training = torchio.Queue(
-    #     trainingDataForTorch,
-    #     queue_length,
-    #     samples_per_volume,
-    #     torchio.data.UniformSampler(patch_size),
-    # )
-    
-    # queue_validation = torchio.Queue(
-    #     validationDataForTorch,
-    #     queue_length,
-    #     samples_per_volume,
-    #     torchio.data.UniformSampler(patch_size),
-    # )
-
-    # # Setting up the train and validation loader
-    # train_loader = DataLoader(queue_training, batch_size=batch_size)
-    # val_loader = DataLoader(queue_validation, batch_size=1)
-
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
 
