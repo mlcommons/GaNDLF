@@ -279,7 +279,7 @@ for train_index, test_index in kf.split(training_indeces_full):
         print("Epoch # : ",ep)
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
-        for batch, (subject) in enumerate(train_loader):
+        for batch in enumerate(train_loader):
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
