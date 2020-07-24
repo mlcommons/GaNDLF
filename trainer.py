@@ -214,12 +214,14 @@ for train_index, test_index in kf.split(training_indeces_full):
     sys.stdout.flush()
 
     # Setting up the train and validation loader
-    train_loader = DataLoader(trainingDataForTorch,batch_size=batch_size,shuffle=True,num_workers=1)
-    val_loader = DataLoader(validationDataForTorch, batch_size=1,shuffle=True,num_workers = 1)
+    train_loader = DataLoader(trainingDataForTorch,batch_size=batch_size)
+    val_loader = DataLoader(validationDataForTorch, batch_size=1)
 
     # get the channel keys
     batch = next(iter(train_loader))
-
+    channel_keys = list(batch.keys())
+    channel_keys.remove('index_ini')
+    channel_keys.remove('label')  
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
     device = torch.device(dev)
@@ -262,7 +264,7 @@ for train_index, test_index in kf.split(training_indeces_full):
         for batch_idx, (subject) in enumerate(train_loader):
             # Load the subject and its ground truth
             # read and concat the images
-            image = torch.cat([batch[key][torchio.DATA] for key in batch.keys()], dim=1) # concatenate channels 
+            image = torch.cat([batch[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
             # read the mask
             mask = batch['label'][torchio.DATA] # get the label image
             # Loading images into the GPU and ignoring the affine
