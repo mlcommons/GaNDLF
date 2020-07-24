@@ -22,7 +22,6 @@ from pathlib import Path
 from sklearn.model_selection import KFold
 import pickle
 import pkg_resources
-from shutil import copyfile
 import torchio
 
 from DeepSAGE.training_manager import Trainer
@@ -107,4 +106,4 @@ for col in trainingData_full.columns:
     elif ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
         labelHeader = trainingData_full.columns.get_loc(col)
 
-Trainer(dataframe = trainingData_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model)
+Trainer(dataframe = trainingData_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, sge_run = sge_run)
