@@ -16,7 +16,6 @@ from torch.autograd import Variable
 # from data_val import TumorSegmentationDataset_val
 import gc
 from torchsummary import summary
-import nibabel as nib
 import ast 
 import datetime
 from pathlib import Path
