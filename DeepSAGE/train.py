@@ -19,6 +19,7 @@ import time
 import sys
 import ast 
 import pickle
+from pathlib import Path
 
 
 from schd import *
@@ -31,7 +32,7 @@ from utils import *
 
 def trainingLoop(train_loader, val_loader, 
   num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-  n_classes, base_filters, n_channels, which_model, ):
+  n_classes, base_filters, n_channels, which_model):
   
   # Extrating the training parameters from the dictionary
   num_epochs = int(parameters['num_epochs'])
@@ -40,7 +41,6 @@ def trainingLoop(train_loader, val_loader,
   which_loss = str(parameters['loss_function'])
   opt = str(parameters['opt'])
   save_best = int(parameters['save_best'])
-  augmentations = ast.literal_eval(str(parameters['data_augmentation']))
 
   # Extracting the model parameters from the dictionary
   n_classes = int(parameters['numberOfOutputClasses'])
@@ -140,9 +140,9 @@ def trainingLoop(train_loader, val_loader,
   test = 1
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def Trainer(dataframe, augmentations, kfolds, model_parameters_file):
+def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir):
 
-  kfolds = int(parameters['kcross_validation'])
+  # kfolds = int(parameters['kcross_validation'])
   # check for single fold training
   singleFoldTraining = False
   if kfolds < 0: # if the user wants a single fold training
@@ -153,10 +153,10 @@ def Trainer(dataframe, augmentations, kfolds, model_parameters_file):
 
   currentFold = 0
 
-  # write parameters to pickle - this should not change for the different folds, so keeping is independent
-  paramtersPickle = os.path.join(model_path,'params.pkl')
-  with open(paramtersPickle, 'wb') as handle:
-      pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
+  # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+  # paramtersPickle = os.path.join(outputDir,'params.pkl')
+  # with open(paramtersPickle, 'wb') as handle:
+  #     pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
   # get the indeces for kfold splitting
   trainingData_full = dataframe
@@ -167,15 +167,16 @@ def Trainer(dataframe, augmentations, kfolds, model_parameters_file):
 
       # the output of the current fold is only needed if multi-fold training is happening
       if singleFoldTraining:
-          currentOutputFolder = model_path
+          currentOutputFolder = outputDir
       else:
-          currentOutputFolder = os.path.join(model_path, str(currentFold))
+          currentOutputFolder = os.path.join(outputDir, str(currentFold))
           Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
 
       trainingData = trainingData_full.iloc[train_index]
       validationData = trainingData_full.iloc[test_index]
 
       # save the current model configuration as a sanity check
+      # parametersFilePickle = os.path.join(currentOutputFolder,'model.cfg')
       copyfile(model_parameters_file, os.path.join(currentOutputFolder,'model.cfg'))
 
       ## pickle/unpickle data
@@ -187,15 +188,15 @@ def Trainer(dataframe, augmentations, kfolds, model_parameters_file):
 
       ## inside the training function
       ## for efficient processing, this can be passed off to sge as independant processes
-      trainingDataFromPickle = pd.read_pickle('/path/to/train.pkl')
-      validataionDataFromPickle = pd.read_pickle('/path/to/validation.pkl')
-      paramsPickle = pd.read_pickle('/path/to/validation.pkl')
-      with open('/path/to/params.pkl', 'rb') as handle:
-          params = pickle.load(handle)
+      trainingDataFromPickle = pd.read_pickle(currentTrainingDataPickle)
+      validataionDataFromPickle = pd.read_pickle(currentValidataionDataPickle)
+      # paramsPickle = pd.read_pickle(parametersFilePickle)
+      # with open('/path/to/params.pkl', 'rb') as handle:
+      #     params = pickle.load(handle)
       ## pickle/unpickle data
 
-      trainingDataForTorch = ImagesFromDataFrame(trainingData, psize, channelHeaders, labelHeader, augmentations)
-      validationDataForTorch = ImagesFromDataFrame(validationData, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+      trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
+      validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
 
       train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
       val_loader = DataLoader(validationDataForTorch, batch_size=1)
