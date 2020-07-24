@@ -1,6 +1,0 @@
-Conflicting module "cudnn/7.0" detected and automatically unloaded.
-
-Traceback (most recent call last):
-  File "trainer.py", line 214, in <module>
-    d['best_epoch'] = save_list[0]
-NameError: name 'save_list' is not defined

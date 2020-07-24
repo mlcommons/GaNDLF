@@ -11,11 +11,17 @@ requirements = [
   'nibabel',
   'numpy',
   'scipy',
-  'SimpleITK',
+  'SimpleITK==1.2.4',
   'torch>=1.2',
   'torchvision',
   'tqdm',
-  'torchio==0.17.10'
+  'torchio==0.17.10',
+  'pandas',
+  'pylint',
+  'torchsummary',
+  'scikit-learn==0.23.1',
+  'pickle5==0.0.11',
+  'setuptools'
 ]
 
 setup(
@@ -41,7 +47,7 @@ setup(
   long_description=readme,
   long_description_content_type='text/markdown',
   include_package_data=True,
-  keywords='segmentation, semantic, brain, breast',
+  keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
   name='deep-seg',
   # dependency_links=['https://github.com/sarthakpati/torchio/tarball/master#egg=repo-v0.17.10'],
   # url='https://github.com/fepegar/torchio',

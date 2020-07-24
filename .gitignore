@@ -2,3 +2,11 @@ venv/*
 __pycache__
 *.egg-info*
 */__pycache__/*
+.vscode
+*.py.*
+*.pkl
+*.swp
+
+*DS_Store
+*output*
+*experiment*
