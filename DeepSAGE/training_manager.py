@@ -74,25 +74,25 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
         which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
         base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations)
+        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder)
 
       else:
         # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-        channelHeaderPickle = os.path.join(outputDir,'channelHeader.pkl')
+        channelHeaderPickle = os.path.join(currentOutputFolder,'channelHeader.pkl')
         with open(channelHeaderPickle, 'wb') as handle:
             pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        labelHeaderPickle = os.path.join(outputDir,'labelHeader.pkl')
+        labelHeaderPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
         with open(labelHeaderPickle, 'wb') as handle:
             pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        augmentationsPickle = os.path.join(outputDir,'labelHeader.pkl')
+        augmentationsPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
         with open(augmentationsPickle, 'wb') as handle:
             pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        psizePickle = os.path.join(outputDir,'psize.pkl')
+        psizePickle = os.path.join(currentOutputFolder,'psize.pkl')
         with open(psizePickle, 'wb') as handle:
             pickle.dump(psize, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # call qsub here
-        parallel_compute_command = parallel_compute_command.replace('${outputDir}', outputDir)
+        parallel_compute_command = parallel_compute_command.replace('${outputDir}', currentOutputFolder)
         # todo: how to ensure that the correct python is picked up???
         command = parallel_compute_command + \
             ' python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
@@ -103,7 +103,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
             ' -n_classes ' + str(n_classes) + ' -base_filters ' + str(base_filters) + \
             ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
-            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle
+            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -outputDir ' + currentOutputFolder
             
         subprocess.Popen(command, shell=True).wait()
 
