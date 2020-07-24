@@ -3,7 +3,6 @@ from __future__ import print_function, division
 import os
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 import argparse
 import sys
 import time
@@ -11,7 +10,6 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
-import torch.optim as optim
 from torch.autograd import Variable
 # import data
 # from data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -27,6 +25,8 @@ import pickle
 import pkg_resources
 from shutil import copyfile
 import torchio
+
+from DeepSAGE import train
 
 parser = argparse.ArgumentParser(description = "3D Image Semantic Segmentation using Deep Learning")
 parser.add_argument('-mc', '--modelConfig', type=str, help = 'model configuration file', required=True)
