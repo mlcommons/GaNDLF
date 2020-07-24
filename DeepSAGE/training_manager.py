@@ -93,9 +93,9 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
 
         # call qsub here
         parallel_compute_command = parallel_compute_command.replace('${outputDir}', outputDir)
-        # qsubCommand = ''
+        # todo: how to ensure that the correct python is picked up???
         command = parallel_compute_command + \
-            'python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
+            ' python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
             ' -val_loader_pickle ' + currentValidataionDataPickle + \
             ' -num_epochs ' + str(num_epochs) + ' -batch_size ' + str(batch_size) + \
             ' -learning_rate ' + str(learning_rate) + ' -which_loss ' + which_loss + \
