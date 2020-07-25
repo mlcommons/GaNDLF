@@ -49,6 +49,7 @@ pip install -e .
 - Generic multi-class segmentation support
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Add option to normalize on a per-channel basis, if required
+- Multi-dimension architectures
 - Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
 - Separate training code to make training more efficient for multi-fold training. Can possibly use https://schedule.readthedocs.io/en/stable/
 - Single entry point for user (for both training and testing)
