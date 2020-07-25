@@ -44,6 +44,19 @@ conda install pytorch torchvision cudatoolkit=10.2 -c pytorch -y # install accor
 pip install -e .
 ```
 
+## Usage
+
+```powershell
+# continue from previous shell
+python deepsage.py \
+  --modelConfig ./experiment_0/model.cfg \ # model configuration
+  --data ./experiment_0/train.csv \ # data in CSV format 
+  --output ./experiment_0/output_dir/ \ # output directory
+  --train 1 \ # 1 == train, 0 == inference
+  --dev 0 # postive integer for GPU device, -1 for CPU
+  --modelDir /path/to/model/weights # used in inference mode
+```
+
 ## To Do
 
 - Generic multi-class segmentation support
