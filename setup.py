@@ -50,8 +50,6 @@ setup(
   include_package_data=True,
   keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
   name='DeepSAGE',
-  # dependency_links=['https://github.com/sarthakpati/torchio/tarball/master#egg=repo-v0.17.10'],
-  # url='https://github.com/fepegar/torchio',
   version='0.0.1',
   zip_safe=False,
 )
