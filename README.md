@@ -62,6 +62,7 @@ python deepsage.py \
 - Generic multi-class segmentation support
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Add option to normalize on a per-channel basis, if required
+- Multi-dimension architectures
 - Single entry point for user (for both training and testing)
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
