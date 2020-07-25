@@ -4,6 +4,15 @@
 
 - DeepSAGE: Deep SemAntic seGmEntator
 
+## Features
+
+- Multi-channel support
+- Multi-class segmentation training and inference
+- Multi-architecture support
+- Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)
+- Built-in cross validation, with support for parallel HPC-based computing
+- Leverages robust open source software
+
 ## Constructing the Data CSV
 
 This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./configs/sample_train.csv](./configs/sample_train.csv) and needs to be structured with the following header format:
