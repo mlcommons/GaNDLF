@@ -4,14 +4,16 @@
 
 - DeepSAGE: Deep SemAntic seGmEntator
 
-## Features
+## Why use this?
 
-- Multi-channel support
-- Multi-class segmentation training and inference
-- Multi-architecture support
+- Supports multiple
+  - Deep Learning model architectures
+  - Channels/modalities 
+  - Prediction classes
 - Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)
 - Built-in cross validation, with support for parallel HPC-based computing
 - Leverages robust open source software
+- No need to code to generate robust models
 
 ## Constructing the Data CSV
 
