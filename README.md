@@ -79,5 +79,3 @@ python deepsage.py \
 - Add appropriate architectures
   - from nnUnet
   - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
-- [Patch-based training](https://torchio.readthedocs.io/data/patch_training.html#patchsampler)
-  - option for size in configuration file
