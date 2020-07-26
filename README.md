@@ -75,6 +75,7 @@ python deepsage.py \
     - Perhaps having a mechanism for intensity standardization (probably (Z-scoring)[https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=intensity#torchio.transforms.ZNormalization] would be do)
   - Additional parameterization in the model configuration 
   - Sequence of operations are important
+  - As long as voxel resolutions match up, image dimensions don't need to, because the patch based processing will take care any inconsistencies. 
 - [Model pruning](https://pytorch.org/tutorials/intermediate/pruning_tutorial.html)
 - Add appropriate architectures
   - from nnUnet
