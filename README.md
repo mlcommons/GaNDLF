@@ -79,3 +79,4 @@ python deepsage.py \
 - Add appropriate architectures
   - from nnUnet
   - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
+- Regression example: https://github.com/wolny/pytorch-3dunet
