@@ -69,7 +69,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
       trainingData.to_pickle(currentTrainingDataPickle)
       validationData.to_pickle(currentValidataionDataPickle)
 
-      if not parallel_compute_command: # parallel_compute_command is an empty string, thus no parallel computing requested
+      if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
         trainingLoop(train_loader_pickle = currentTrainingDataPickle, val_loader_pickle = currentValidataionDataPickle, 
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
         which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
