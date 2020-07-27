@@ -50,12 +50,12 @@ pip install -e .
 ```powershell
 # continue from previous shell
 python deepsage.py \
-  --modelConfig ./experiment_0/model.cfg \ # model configuration
-  --data ./experiment_0/train.csv \ # data in CSV format 
-  --output ./experiment_0/output_dir/ \ # output directory
-  --train 1 \ # 1 == train, 0 == inference
-  --dev 0 # postive integer for GPU device, -1 for CPU
-  --modelDir /path/to/model/weights # used in inference mode
+  -config ./experiment_0/model.cfg \ # model configuration
+  -data ./experiment_0/train.csv \ # data in CSV format 
+  -output ./experiment_0/output_dir/ \ # output directory
+  -train 1 \ # 1 == train, 0 == inference
+  -dev 0 # postive integer for GPU device, -1 for CPU
+  -modelDir /path/to/model/weights # used in inference mode
 ```
 
 ## To Do
