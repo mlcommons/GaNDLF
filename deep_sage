@@ -47,8 +47,6 @@ model_parameters = args.config
 dev = args.device
 model_path = args.output
 mode = args.train
-if dev>=0:
-    dev = 'cuda'
 if dev==-1:
     dev = 'cpu'
 
