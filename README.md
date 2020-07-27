@@ -3,6 +3,7 @@
 ## Name candidates
 
 - DeepSAGE: Deep SemAntic seGmEntator
+- SEACAF: SEgmentation And ClassificAtion Framework
 
 ## Why use this?
 
@@ -17,9 +18,9 @@
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./configs/sample_train.csv](./configs/sample_train.csv) and needs to be structured with the following header format:
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./samples/sample_train.csv](./samples/sample_train.csv) and needs to be structured with the following header format:
 
-```
+```csv
 Channel_0,Channel_1,...,Channel_X,Label
 /full/path/0.nii.gz,/full/path/1.nii.gz,...,/full/path/X.nii.gz,/full/path/segmentation.nii.gz
 ```
@@ -44,19 +45,30 @@ conda install pytorch torchvision cudatoolkit=10.2 -c pytorch -y # install accor
 pip install -e .
 ```
 
+## Usage
+
+```powershell
+# continue from previous shell
+python deepsage.py \
+  -config ./experiment_0/model.cfg \ # model configuration
+  -data ./experiment_0/train.csv \ # data in CSV format 
+  -output ./experiment_0/output_dir/ \ # output directory
+  -train 1 \ # 1 == train, 0 == inference
+  -dev 0 # postive integer for GPU device, -1 for CPU
+  -modelDir /path/to/model/weights # used in inference mode
+```
+
 ## To Do
 
-- Generic multi-class segmentation support
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Add option to normalize on a per-channel basis, if required
 - Multi-dimension architectures
-- Separate the training route into a separate function that takes the training + validation data and parameters as pickled objects from the main function
-- Separate training code to make training more efficient for multi-fold training. Can possibly use https://schedule.readthedocs.io/en/stable/
-- Single entry point for user (for both training and testing)
+- Single entry point for user 
+  - Training: done
+  - Inference
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
-- Put downsampling as a parameter instead of hard-coding to 4
 - Add option to train on multiple networks and then fuse results from all; basically some kind of ensemble
 - Full-fledged preprocessing would be amazing
   - This would require additional dependencies, most notably CaPTk (which handles registration well and has a full suite of preprocessing tools)
@@ -64,9 +76,9 @@ pip install -e .
     - Perhaps having a mechanism for intensity standardization (probably (Z-scoring)[https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=intensity#torchio.transforms.ZNormalization] would be do)
   - Additional parameterization in the model configuration 
   - Sequence of operations are important
+  - As long as voxel resolutions match up, image dimensions don't need to, because the patch based processing will take care any inconsistencies. 
 - [Model pruning](https://pytorch.org/tutorials/intermediate/pruning_tutorial.html)
 - Add appropriate architectures
   - from nnUnet
   - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
-- [Patch-based training](https://torchio.readthedocs.io/data/patch_training.html#patchsampler)
-  - option for size in configuration file
+- Regression example: https://github.com/wolny/pytorch-3dunet

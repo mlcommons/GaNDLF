@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.seg_modules.Interpolate import Interpolate 
+from DeepSAGE.models.seg_modules.Interpolate import Interpolate 
 
 class UpsamplingModule(nn.Module): 
     def __init__(self, input_channels, output_channels, leakiness=1e-2, 
