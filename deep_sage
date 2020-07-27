@@ -31,19 +31,19 @@ from DeepSAGE.training_manager import Trainer
 
 copyrightMessage = "Contact: software@cbica.upenn.edu\n\n" + "This program is not FDA/CE approved, not intended for clinical use.\nCopyright (c) " + str(date.today().year) + " University of Pennsylvania. All rights reserved." 
 parser = argparse.ArgumentParser(prog='DeepSage', formatter_class=argparse.RawTextHelpFormatter, description = "3D Image Semantic Segmentation using Deep Learning.\n\n" + copyrightMessage)
-parser.add_argument('-mc', '--modelConfig', type=str, help = 'model configuration file', required=True)
-parser.add_argument('-d', '--data', type=str, help = 'data csv file that is used for training or testing', required=True)
-parser.add_argument('-o', '--output', type=str, help = 'output directory to save intermediate files and model weights', required=True)
-parser.add_argument('-tr', '--train', default=1, type=int, help = '1 == training and 0 == testing; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
-parser.add_argument('-md', '--modelDir', type=str, help = 'The pre-trained model directory that is used for testing', required=False)
-parser.add_argument('-dv', '--device', default=0, type=int, help = 'choose device', required=True) # todo: how to handle cpu training? would passing '-1' be considered cpu?
+parser.add_argument('-c', '--configuration', type=str, help = 'The configuration file (contains all the information related to the training/inference session)', required=True)
+parser.add_argument('-d', '--data', type=str, help = 'Data csv file that is used for training/inference', required=True)
+parser.add_argument('-o', '--output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
+parser.add_argument('-tr', '--train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
+parser.add_argument('-md', '--modelDir', type=str, help = 'The pre-trained model directory that is used for inference', required=False)
+parser.add_argument('-dv', '--device', default=0, type=int, help = 'Device to perform requested session on (\'-1\' == cpu and everything else denotes GPU ID)', required=True) 
 parser.add_argument('-v', '--version', action='version', 
     version= format(parser.prog) + ' v' + pkg_resources.require('deep-seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
                             
 args = parser.parse_args()
 
 file_trainingData_full = args.data
-model_parameters = args.modelConfig
+model_parameters = args.configuration
 dev = args.device
 model_path = args.output
 mode = args.train
