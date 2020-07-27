@@ -26,7 +26,7 @@ global_augs_dict = {
 
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentations = None, patch_size):
+def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, patch_size, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
