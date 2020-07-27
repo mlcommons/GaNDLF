@@ -74,7 +74,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
         which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
         base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder)
+        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device)
 
       else:
         # # write parameters to pickle - this should not change for the different folds, so keeping is independent
