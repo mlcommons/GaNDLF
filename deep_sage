@@ -36,7 +36,7 @@ parser.add_argument('-data', type=str, help = 'Data csv file that is used for tr
 parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
 parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
 parser.add_argument('-modelDir', type=str, help = 'The pre-trained model directory that is used for inference', required=False)
-parser.add_argument('-device', default=0, type=int, help = 'Device to perform requested session on (\'-1\' == cpu and everything else denotes GPU ID)', required=True) 
+parser.add_argument('-device', default=0, type=str, help = 'Device to perform requested session on (\'-1\' == cpu and everything else denotes GPU ID)', required=True) 
 parser.add_argument('-v', '--version', action='version', 
     version = format(parser.prog) + ' v' + pkg_resources.require('deep-seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
                             
