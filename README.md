@@ -18,7 +18,7 @@
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./configs/sample_train.csv](./configs/sample_train.csv) and needs to be structured with the following header format:
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./samples/sample_train.csv](./samples/sample_train.csv) and needs to be structured with the following header format:
 
 ```csv
 Channel_0,Channel_1,...,Channel_X,Label
