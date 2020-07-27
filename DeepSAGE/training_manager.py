@@ -94,6 +94,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
         # call qsub here
         parallel_compute_command = parallel_compute_command.replace('${outputDir}', currentOutputFolder)
         # todo: how to ensure that the correct python is picked up???
+        # todo: how to ensure the correct gpu device is passed, here?
         command = parallel_compute_command + \
             ' python -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
             ' -val_loader_pickle ' + currentValidataionDataPickle + \
