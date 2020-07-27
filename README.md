@@ -54,9 +54,13 @@ python deepsage.py \
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory
   -train 1 \ # 1 == train, 0 == inference
-  -dev 0 # postive integer for GPU device, -1 for CPU
+  -device 0 # postive integer for GPU device, -1 for CPU
   -modelDir /path/to/model/weights # used in inference mode
 ```
+
+### Multi-GPU systems
+
+Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/).
 
 ## To Do
 
