@@ -35,7 +35,7 @@ from DeepSAGE.utils import *
 
 def trainingLoop(train_loader_pickle, val_loader_pickle, 
   num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-  n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir):
+  n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
   '''
   This is the main training loop
   '''
@@ -102,6 +102,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
   print("Training Data Samples: ", len(train_loader.dataset))
   sys.stdout.flush()
+  dev = device
   device = torch.device(dev)
   print("Current Device : ", torch.cuda.current_device())
   print("Device Count on Machine : ", torch.cuda.device_count())
@@ -250,6 +251,7 @@ if __name__ == "__main__":
     parser.add_argument('-augmentations_pickle', type=str, help = 'Augmentations pickle', required=True)
     parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
+    parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
     
     args = parser.parse_args()
 
@@ -269,4 +271,5 @@ if __name__ == "__main__":
         channelHeaders = args.channel_header_pickle, 
         labelHeader = args.label_header_pickle, 
         augmentations = args.augmentations_pickle,
-        outputDir = args.outputDir)
+        outputDir = args.outputDir,
+        device = args.device)

@@ -28,7 +28,7 @@ from DeepSAGE.training_loop import trainingLoop
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,
     num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-    n_classes, base_filters, n_channels, which_model, parallel_compute_command):
+    n_classes, base_filters, n_channels, which_model, parallel_compute_command, device):
 
     # kfolds = int(parameters['kcross_validation'])
     # check for single fold training
@@ -103,7 +103,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
             ' -n_classes ' + str(n_classes) + ' -base_filters ' + str(base_filters) + \
             ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
-            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -outputDir ' + currentOutputFolder
+            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -device ' + str(device) + -outputDir ' + currentOutputFolder
             
         subprocess.Popen(command, shell=True).wait()
 
