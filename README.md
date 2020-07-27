@@ -3,6 +3,7 @@
 ## Name candidates
 
 - DeepSAGE: Deep SemAntic seGmEntator
+- SEACAF: SEgmentation And ClassificAtion Framework
 
 ## Why use this?
 
