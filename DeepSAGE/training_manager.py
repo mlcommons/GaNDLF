@@ -22,7 +22,7 @@ from pathlib import Path
 import subprocess
 
 
-from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
+# from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
 from DeepSAGE.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader

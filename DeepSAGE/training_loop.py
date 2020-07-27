@@ -42,8 +42,8 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
   trainingDataFromPickle = pd.read_pickle(train_loader_pickle)
   validataionDataFromPickle = pd.read_pickle(val_loader_pickle)
 
-  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
-  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations, patch_size = psize)
+  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations, patch_size = psize) # may or may not need to add augmentations here
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
