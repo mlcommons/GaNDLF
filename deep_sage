@@ -29,7 +29,7 @@ from datetime import date
 
 from DeepSAGE.training_manager import Trainer
 
-copyrightMessage = "Contact: software@cbica.upenn.edu\n\n" + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) " + str(date.today().year) + " University of Pennsylvania. All rights reserved." 
+copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
 parser = argparse.ArgumentParser(prog='DeepSage', formatter_class=argparse.RawTextHelpFormatter, description = "3D Image Semantic Segmentation using Deep Learning.\n\n" + copyrightMessage)
 parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session)', required=True)
 parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference', required=True)
