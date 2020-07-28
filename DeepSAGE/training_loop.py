@@ -89,8 +89,8 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
     which_loss = 'dc'
     loss_fn  = MCD_loss
 
-  training_start_time = time.asctime()
-  startstamp = time.time()
+  # training_start_time = time.asctime()
+  # startstamp = time.time()
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
@@ -191,6 +191,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       total_loss = 0     
       print("Best Training Dice:", 1-best_tr_loss)
       print("Best Training Epoch:", best_tr_idx)
+      print("Average Loss:", average_loss)
       # Now we enter the evaluation/validation part of the epoch    
       model.eval        
     #   batch_iterator_val = iter(val_loader)
@@ -212,6 +213,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
               average_dice = total_dice/(batch_idx + 1)
 
       print("Epoch Validation Dice: ", average_dice)
+      print("Average Loss:", average_loss)
       torch.save(model, outputDir + which_model  + str(ep) + ".pt")
       if ep > save_best:
           keep_list = np.argsort(np.array(val_avg_loss_list))
