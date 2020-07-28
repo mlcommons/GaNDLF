@@ -22,6 +22,8 @@ from pathlib import Path
 import argparse
 import datetime
 
+import GPUtil
+
 
 from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
 from DeepSAGE.schd import *
@@ -103,6 +105,15 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
   print("Training Data Samples: ", len(train_loader.dataset))
   sys.stdout.flush()
   dev = device
+  
+  # if GPU has been requested, ensure that the correct free GPU is found and used
+  if ('cuda' in dev) and (os.name != 'nt'): # this does not work correctly for windows
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    DEVICE_ID_LIST = GPUtil.getFirstAvailable()
+    DEVICE_ID = DEVICE_ID_LIST[0] # grab first element from list
+    if 'CUDA_VISIBLE_DEVICES' not in os.environ:
+      os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
+  
   device = torch.device(dev)
   print("Current Device : ", torch.cuda.current_device())
   print("Device Count on Machine : ", torch.cuda.device_count())
