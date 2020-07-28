@@ -9,9 +9,9 @@ def one_hot(segmask_array, largest_class):
     # do not consider background
     for idx, j in enumerate(np.arange(largest_class)):
         if j != 0:
-            tum_mask.append((segmask_array == j).astype(np.uint8))
+            tum_mask.append((segmask_array == j).astype(np.float32))
 
-    bag_mask = (segmask_array == 0).astype(np.uint8)
+    bag_mask = (segmask_array == 0).astype(np.float32)
     tum_mask.append(bag_mask)
     onehot_stack = np.asarray(tum_mask)
     return onehot_stack
