@@ -153,6 +153,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
           image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
           # read the mask
           mask = subject['label'][torchio.DATA] # get the label image
+          mask = torch.from_numpy(one_hot(mask.numpy(), n_classes))
           # Loading images into the GPU and ignoring the affine
           image, mask = image.float().to(device), mask.float().to(device)
           #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
