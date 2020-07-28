@@ -16,4 +16,4 @@
 CUDA_VISIBLE_DEVICES=`get_CUDA_VISIBLE_DEVICES` || exit
 export CUDA_VISIBLE_DEVICES 
 source activate ../venv/
-python ../deep_sage -config ./model.cfg -data ./train.csv -output ./output_dir/ -train 1 -device \$CUDA_VISIBLE_DEVICES
+python ../deep_sage -config ./model.cfg -data ./train.csv -output ./output_dir/ -train 1 -device cuda:\$CUDA_VISIBLE_DEVICES
