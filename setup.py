@@ -21,7 +21,8 @@ requirements = [
   'torchsummary',
   'scikit-learn==0.23.1',
   'pickle5==0.0.11',
-  'setuptools'
+  'setuptools',
+  'GPUtil'
 ]
 
 setup(
