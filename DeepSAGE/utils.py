@@ -13,5 +13,5 @@ def one_hot(segmask_array, largest_class):
             tum_mask = [tum_mask, (segmask_array == j).astype(np.uint8)]
     
     bag_mask = (segmask_array == 0).astype(np.uint8)
-    onehot_stack = np.array([tum_mask, bag_mask])
+    onehot_stack = np.asarray([tum_mask, bag_mask])
     return onehot_stack
