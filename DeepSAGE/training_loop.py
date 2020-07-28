@@ -154,9 +154,10 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
           # read the mask
           mask = subject['label'][torchio.DATA] # get the label image
           mask = one_hot(mask.float().numpy(), n_classes)
-          print("mask.shape:", mask.shape)
-          print("mask.dtype:", mask.dtype)
-          print("image.shape:", image.float().numpy().shape)
+          # print("mask.shape:", mask.shape)
+          # print("mask.dtype:", mask.dtype)
+          # print("image.shape:", image.float().numpy().shape)
+          # print("image.dtype:", image.float().numpy().dtype)
           mask = torch.from_numpy(mask)
           # Loading images into the GPU and ignoring the affine
           image, mask = image.float().to(device), mask.to(device)
