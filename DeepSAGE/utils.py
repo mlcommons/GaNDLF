@@ -10,7 +10,11 @@ def one_hot(segmask_array, largest_class):
     # do not consider background
     for idx, j in enumerate(np.arange(largest_class)):
         if j != 0:
-            tum_mask = np.concatenate((tum_mask, (segmask_array == j).astype(np.uint8)), axis=1)
+            mask_to_append = (segmask_array == j).astype(np.uint8)
+            if tum_mask.size == 0:
+                tum_mask = mask_to_append
+            else:
+                tum_mask = np.concatenate((tum_mask, mask_to_append), axis=1)
     
     bag_mask = (segmask_array == 0).astype(np.uint8)
     onehot_stack = np.concatenate((tum_mask, bag_mask), axis=1)
