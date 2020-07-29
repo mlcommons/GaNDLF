@@ -1,3 +1,6 @@
+import os
+os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
@@ -7,7 +10,6 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
-import os
 import random
 # import scipy
 import torchio
@@ -47,9 +49,11 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+  print('Finished Constructing data from torchio')
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
+  print('Finished Torch DataLoander')
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -290,6 +294,12 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
+    # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+    psize = pickle.load(open(args.psize_pickle,"rb"))
+    channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
+    label_header = pickle.load(open(args.label_header_pickle,"rb"))
+    augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
+
     trainingLoop(train_loader_pickle = args.train_loader_pickle, 
         val_loader_pickle = args.val_loader_pickle, 
         num_epochs = args.num_epochs, 
@@ -302,9 +312,9 @@ if __name__ == "__main__":
         base_filters = args.base_filters, 
         n_channels = args.n_channels, 
         which_model = args.which_model, 
-        psize = args.psize_pickle, 
-        channelHeaders = args.channel_header_pickle, 
-        labelHeader = args.label_header_pickle, 
-        augmentations = args.augmentations_pickle,
+        psize = psize, 
+        channelHeaders = channel_header, 
+        labelHeader = label_header, 
+        augmentations = augmentations,
         outputDir = args.outputDir,
         device = args.device)
