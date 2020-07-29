@@ -87,6 +87,8 @@ psize = np.array(psize)
 parallel_compute_command = ''
 if 'parallel_compute_command' in params:
     parallel_compute_command = params['parallel_compute_command']
+    parallel_compute_command = parallel_compute_command.replace('\'', '')
+    parallel_compute_command = parallel_compute_command.replace('\"', '')
 
 ## read training dataset into data frame
 trainingData_full = pd.read_csv(file_trainingData_full)
