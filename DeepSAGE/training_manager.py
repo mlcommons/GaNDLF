@@ -105,7 +105,8 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
             ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
             ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
-            
+        
+        print("Command:\n", command)
         subprocess.Popen(command, shell=True).wait()
 
       currentFold = currentFold + 1 # increment the fold
