@@ -84,7 +84,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
         labelHeaderPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
         with open(labelHeaderPickle, 'wb') as handle:
             pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        augmentationsPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
+        augmentationsPickle = os.path.join(currentOutputFolder,'augmentations.pkl')
         with open(augmentationsPickle, 'wb') as handle:
             pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
         psizePickle = os.path.join(currentOutputFolder,'psize.pkl')
@@ -105,7 +105,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
             ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
             ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
-            
+        
         subprocess.Popen(command, shell=True).wait()
 
       currentFold = currentFold + 1 # increment the fold

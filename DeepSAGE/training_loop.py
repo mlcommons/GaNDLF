@@ -1,12 +1,15 @@
+import os
+os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
 import torch.optim as optim
 from torch.autograd import Variable
+import torch.nn as nn
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
-import os
 import random
 # import scipy
 import torchio
@@ -21,6 +24,8 @@ import pickle
 from pathlib import Path
 import argparse
 import datetime
+
+import GPUtil
 
 
 from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -44,9 +49,11 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+  print('Finished Constructing data from torchio')
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
+  print('Finished Torch DataLoander')
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -103,6 +110,25 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
   print("Training Data Samples: ", len(train_loader.dataset))
   sys.stdout.flush()
   dev = device
+  
+  # if GPU has been requested, ensure that the correct free GPU is found and used
+  if 'cuda' in dev: # this does not work correctly for windows
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    DEVICE_ID_LIST = GPUtil.getAvailable()
+    if 'CUDA_VISIBLE_DEVICES' not in os.environ:
+      environment_variable = ''
+      if 'cuda-multi' in dev:
+        for ids in DEVICE_ID_LIST:
+          environment_variable = environment_variable + str(ids) + ','
+        
+        environment_variable[:-1] # delete last comma
+        dev = 'cuda' # remove the 'multi'
+
+      else:
+        environment_variable = str(DEVICE_ID_LIST[0])
+      os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
+  
+  print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
   device = torch.device(dev)
   print("Current Device : ", torch.cuda.current_device())
   print("Device Count on Machine : ", torch.cuda.device_count())
@@ -115,6 +141,11 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       print('  Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
 
   sys.stdout.flush()
+
+  # todo: test multi-gpu training
+  if ',' in os.environ["CUDA_VISIBLE_DEVICES"]: # if multiple free gpus are seen by the process
+    model = nn.DataParallel(model)
+  
   model = model.to(device)
 
   step_size = 4*batch_size*len(train_loader.dataset)
@@ -263,6 +294,12 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
+    # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+    psize = pickle.load(open(args.psize_pickle,"rb"))
+    channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
+    label_header = pickle.load(open(args.label_header_pickle,"rb"))
+    augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
+
     trainingLoop(train_loader_pickle = args.train_loader_pickle, 
         val_loader_pickle = args.val_loader_pickle, 
         num_epochs = args.num_epochs, 
@@ -275,9 +312,9 @@ if __name__ == "__main__":
         base_filters = args.base_filters, 
         n_channels = args.n_channels, 
         which_model = args.which_model, 
-        psize = args.psize_pickle, 
-        channelHeaders = args.channel_header_pickle, 
-        labelHeader = args.label_header_pickle, 
-        augmentations = args.augmentations_pickle,
+        psize = psize, 
+        channelHeaders = channel_header, 
+        labelHeader = label_header, 
+        augmentations = augmentations,
         outputDir = args.outputDir,
         device = args.device)
