@@ -84,7 +84,7 @@ def Trainer(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader
         labelHeaderPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
         with open(labelHeaderPickle, 'wb') as handle:
             pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        augmentationsPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
+        augmentationsPickle = os.path.join(currentOutputFolder,'augmentations.pkl')
         with open(augmentationsPickle, 'wb') as handle:
             pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
         psizePickle = os.path.join(currentOutputFolder,'psize.pkl')
