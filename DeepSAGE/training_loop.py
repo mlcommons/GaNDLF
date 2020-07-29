@@ -3,6 +3,7 @@ import torch
 from torch.utils.data.dataset import Dataset
 import torch.optim as optim
 from torch.autograd import Variable
+import torch.nn as nn
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
@@ -126,6 +127,11 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       print('  Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
 
   sys.stdout.flush()
+
+  # todo: test multi-gpu training
+  if ',' in os.environ["CUDA_VISIBLE_DEVICES"]: # if multiple free gpus are seen by the process
+    model = nn.DataParallel(model)
+  
   model = model.to(device)
 
   step_size = 4*batch_size*len(train_loader.dataset)
