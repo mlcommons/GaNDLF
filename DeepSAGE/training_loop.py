@@ -115,6 +115,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
     if 'CUDA_VISIBLE_DEVICES' not in os.environ:
       os.environ["CUDA_VISIBLE_DEVICES"] = str(DEVICE_ID)
   
+  print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
   device = torch.device(dev)
   print("Current Device : ", torch.cuda.current_device())
   print("Device Count on Machine : ", torch.cuda.device_count())
