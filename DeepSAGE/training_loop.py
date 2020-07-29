@@ -300,6 +300,11 @@ if __name__ == "__main__":
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
     augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
 
+    print('psize: ', psize)
+    print('channel_header: ', channel_header)
+    print('label_header: ', label_header)
+    print('augmentations: ', augmentations)
+
     trainingLoop(train_loader_pickle = args.train_loader_pickle, 
         val_loader_pickle = args.val_loader_pickle, 
         num_epochs = args.num_epochs, 
