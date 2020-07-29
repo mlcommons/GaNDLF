@@ -118,6 +118,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
           environment_variable = environment_variable + str(ids) + ','
         
         environment_variable[:-1] # delete last comma
+        dev = 'cuda' # remove the 'multi'
 
       else:
         environment_variable = str(DEVICE_ID_LIST[0])
