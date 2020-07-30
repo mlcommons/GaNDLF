@@ -115,14 +115,14 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
   if 'cuda' in dev: # this does not work correctly for windows
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     DEVICE_ID_LIST = GPUtil.getAvailable()
-    if 'CUDA_VISIBLE_DEVICES' not in os.environ:
-      environment_variable = ''
-      if 'cuda-multi' in dev:
-        for ids in DEVICE_ID_LIST:
-          environment_variable = environment_variable + str(ids) + ','
-        
-        environment_variable[:-1] # delete last comma
-        dev = 'cuda' # remove the 'multi'
+    if 'cuda-multi' in dev:
+      for ids in DEVICE_ID_LIST:
+        environment_variable = environment_variable + str(ids) + ','
+      
+      environment_variable[:-1] # delete last comma
+      dev = 'cuda' # remove the 'multi'
+    elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
+      environment_variable = ''i'
 
       else:
         environment_variable = str(DEVICE_ID_LIST[0])
