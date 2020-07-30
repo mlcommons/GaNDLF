@@ -49,11 +49,9 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
-  print('Finished Constructing data from torchio')
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
-  print('Finished Torch DataLoander')
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
