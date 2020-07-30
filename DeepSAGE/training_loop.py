@@ -123,10 +123,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       environment_variable[:-1] # delete last comma
       dev = 'cuda' # remove the 'multi'
     elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
-      environment_variable = ''i'
-
-      else:
-        environment_variable = str(DEVICE_ID_LIST[0])
+      environment_variable = str(DEVICE_ID_LIST[0])
       os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
   
   print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
