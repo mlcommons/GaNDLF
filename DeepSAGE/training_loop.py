@@ -250,7 +250,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
       print("Epoch Validation Dice: ", average_dice)
       print("Average Loss:", average_loss)
-      torch.save(model, outputDir + which_model  + str(ep) + ".pt")
+      torch.save(model, os.path.join(outputDir, which_model  + str(ep) + ".pt"))
       if ep > save_best:
           keep_list = np.argsort(np.array(val_avg_loss_list))
           keep_list = keep_list[0:save_best]
