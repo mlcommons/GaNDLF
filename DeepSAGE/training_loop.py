@@ -120,6 +120,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       
       environment_variable[:-1] # delete last comma
       dev = 'cuda' # remove the 'multi'
+      model = nn.DataParallel(model)
     elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
       environment_variable = str(DEVICE_ID_LIST[0])
       os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
@@ -138,10 +139,6 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
 
   sys.stdout.flush()
 
-  # todo: test multi-gpu training
-  if ',' in os.environ["CUDA_VISIBLE_DEVICES"]: # if multiple free gpus are seen by the process
-    model = nn.DataParallel(model)
-  
   model = model.to(device)
 
   step_size = 4*batch_size*len(train_loader.dataset)
