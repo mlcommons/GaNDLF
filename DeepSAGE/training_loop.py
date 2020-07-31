@@ -127,6 +127,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
     
     # only set the environment variable if there is something to set 
     if environment_variable != '':
+      print('environment_variable: ', environment_variable)
       os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
   
   print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
