@@ -112,7 +112,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
   # if GPU has been requested, ensure that the correct free GPU is found and used
   if 'cuda' in dev: # this does not work correctly for windows
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    DEVICE_ID_LIST = GPUtil.getAvailable()
+    DEVICE_ID_LIST = GPUtil.getAvailable(order = 'first', limit=10)
     print('GPU devices: ', DEVICE_ID_LIST)
     environment_variable = ''
     if 'cuda-multi' in dev:
