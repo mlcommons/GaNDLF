@@ -119,7 +119,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       for ids in DEVICE_ID_LIST:
         environment_variable = environment_variable + str(ids) + ','
       
-      environment_variable[:-1] # delete last comma
+      environment_variable = environment_variable[:-1] # delete last comma
       dev = 'cuda' # remove the 'multi'
       model = nn.DataParallel(model)
     elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
