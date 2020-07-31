@@ -121,6 +121,7 @@ def trainingLoop(train_loader_pickle, val_loader_pickle,
       
       environment_variable = environment_variable[:-1] # delete last comma
       dev = 'cuda' # remove the 'multi'
+      torch.cuda.set_device(len(DEVICE_ID_LIST))
       model = nn.DataParallel(model)
     elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
       environment_variable = str(DEVICE_ID_LIST[0])
