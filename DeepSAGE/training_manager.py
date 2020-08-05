@@ -63,7 +63,7 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
       copyfile(model_parameters_file, os.path.join(currentOutputFolder,'model.cfg'))
 
       if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
-        trainingLoop(train_loader_pickle = currentTrainingDataPickle, val_loader_pickle = currentValidataionDataPickle, 
+        trainingLoop(trainingDataFromPickle = trainingData, validataionDataFromPickle = validationData, 
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
         which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
         base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
