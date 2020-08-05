@@ -108,4 +108,6 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
         
         subprocess.Popen(command, shell=True).wait()
 
+      if singleFoldTraining:
+        break
       currentFold = currentFold + 1 # increment the fold
