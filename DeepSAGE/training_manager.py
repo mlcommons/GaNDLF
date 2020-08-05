@@ -8,7 +8,6 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import os
 import random
-# import scipy
 import torchio
 from torchio.transforms import *
 from torchio import Image, Subject
