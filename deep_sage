@@ -107,6 +107,6 @@ for col in trainingData_full.columns:
         labelHeader = trainingData_full.columns.get_loc(col)
 
 if mode != 0: # training mode
-    Trainer(dataframe = trainingData_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, parallel_compute_command = parallel_compute_command, device = args.device)
+    TrainingManager(dataframe = trainingData_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, parallel_compute_command = parallel_compute_command, device = args.device)
 else:
     # perform inference here
