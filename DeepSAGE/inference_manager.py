@@ -25,7 +25,7 @@ import subprocess
 from DeepSAGE.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,
+def InferenceManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,
     num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
     n_classes, base_filters, n_channels, which_model, parallel_compute_command, device):
 
