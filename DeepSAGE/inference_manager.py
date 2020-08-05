@@ -22,7 +22,7 @@ import subprocess
 
 
 # from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
-from DeepSAGE.training_loop import trainingLoop
+from DeepSAGE.inference_loop import inferenceLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def InferenceManager(dataframe, augmentations, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,batch_size, which_loss, n_classes, base_filters, n_channels, which_model, parallel_compute_command, device):
