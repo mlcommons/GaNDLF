@@ -106,6 +106,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   sys.stdout.flush()
   dev = device
   
+  ###
+  # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
+  ###
   # if GPU has been requested, ensure that the correct free GPU is found and used
   if 'cuda' in dev: # this does not work correctly for windows
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -118,7 +121,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       
       environment_variable = environment_variable[:-1] # delete last comma
       dev = 'cuda' # remove the 'multi'
-      model = nn.DataParallel(model)
+      model = nn.DataParallel(model, DEVICE_ID_LIST)
     elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
       environment_variable = str(DEVICE_ID_LIST[0])
     
