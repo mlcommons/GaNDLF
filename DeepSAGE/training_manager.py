@@ -62,13 +62,6 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
       # parametersFilePickle = os.path.join(currentOutputFolder,'model.cfg')
       copyfile(model_parameters_file, os.path.join(currentOutputFolder,'model.cfg'))
 
-      ## pickle/unpickle data
-      # pickle the data
-      currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
-      currentValidataionDataPickle = os.path.join(currentOutputFolder, 'validation.pkl')
-      trainingData.to_pickle(currentTrainingDataPickle)
-      validationData.to_pickle(currentValidataionDataPickle)
-
       if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
         trainingLoop(train_loader_pickle = currentTrainingDataPickle, val_loader_pickle = currentValidataionDataPickle, 
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
@@ -78,6 +71,13 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
 
       else:
         # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+        ## pickle/unpickle data
+        # pickle the data
+        currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
+        currentValidataionDataPickle = os.path.join(currentOutputFolder, 'validation.pkl')
+        trainingData.to_pickle(currentTrainingDataPickle)
+        validationData.to_pickle(currentValidataionDataPickle)
+
         channelHeaderPickle = os.path.join(currentOutputFolder,'channelHeader.pkl')
         with open(channelHeaderPickle, 'wb') as handle:
             pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
