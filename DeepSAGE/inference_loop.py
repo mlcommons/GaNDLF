@@ -38,9 +38,11 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   '''
   This is the main inference loop
   '''
+  # Setting up the inference loader
   inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
-
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
+  # aggregator for
+  aggregator = torchio.inference.GridAggregator(grid_sampler)
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
