@@ -58,7 +58,7 @@ def InferenceLoader(dataframe, psize, channelHeaders, labelHeader, augmentations
     transform = Compose(augmentation_list)
 
     # Using the grid sampler for inference since somtetimes the entire image can't fit in the GPU
-    grid_sampler = torchio.inference.GridSampler(subject_list, psize, patch_overlap = 4)
+    grid_sampler = torchio.inference.GridSampler(subjects_list, psize, patch_overlap = 4)
     
     return grid_sampler
 

@@ -180,14 +180,11 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
 if __name__ == "__main__":
 
     # parse the cli arguments here
-    parser = argparse.ArgumentParser(description = "Training Loop of DeepSAGE")
+    parser = argparse.ArgumentParser(description = "Inference Loop of DeepSAGE")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-num_epochs', type=int, help = 'Number of epochs', required=True)
     parser.add_argument('-batch_size', type=int, help = 'Batch size', required=True)
-    parser.add_argument('-learning_rate', type=float, help = 'Learning rate', required=True)
     parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
-    parser.add_argument('-opt', type=str, help = 'Optimizer type', required=True)
     parser.add_argument('-save_best', type=int, help = 'Number of best models to save', required=True)
     parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
     parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
