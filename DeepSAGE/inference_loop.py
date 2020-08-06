@@ -34,11 +34,11 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(DataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
   '''
   This is the main inference loop
   '''
-  trainingDataForTorch = InferenceLoader(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
+  inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
 
