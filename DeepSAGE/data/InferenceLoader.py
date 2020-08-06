@@ -38,9 +38,9 @@ def InferenceLoader(dataframe, psize, channelHeaders, labelHeader):
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
     
-    subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
+    subjects_dataset = torchio.ImagesDataset(subjects_list)
     # Using the grid sampler for inference since somtetimes the entire image can't fit in the GPU
-    grid_sampler = torchio.inference.GridSampler(subjects_list, psize, patch_overlap = 4)
+    grid_sampler = torchio.inference.GridSampler(subjects_dataset, psize, patch_overlap = 4)
     
     return grid_sampler
 
