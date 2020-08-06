@@ -34,5 +34,5 @@ def InferenceManager(dataframe, psize, channelHeaders, labelHeader, model_parame
     inferenceLoop(inferenceDataFromPickle = inferenceData_full, batch_size = batch_size,
             which_loss = which_loss, n_classes = n_classes,
             base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-            channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device)
+            channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = currentOutputFolder, device = device)
         
