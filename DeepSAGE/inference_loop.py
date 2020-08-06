@@ -74,12 +74,12 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   sys.stdout.flush()
 
   # get the channel keys
-  batch = next(iter(train_loader))
+  batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('index_ini')
   channel_keys.remove('label')  
 
-  print("Training Data Samples: ", len(train_loader.dataset))
+  print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   dev = device
   
@@ -138,7 +138,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   
   model.eval
   #   batch_iterator_train = iter(train_loader)
-  for batch_idx, (subject) in enumerate(train_loader):
+  for batch_idx, (subject) in enumerate(inference_loader):
       # Load the subject and its ground truth
       # read and concat the images
       image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     validataionDataFromPickle = pd.read_pickle(val_loader_pickle)
 
 
-    trainingLoop(train_loader_pickle = trainingDataFromPickle, 
+    inferenceLoop(train_loader_pickle = trainingDataFromPickle, 
         val_loader_pickle = validataionDataFromPickle, 
         num_epochs = args.num_epochs, 
         batch_size = args.batch_size, 
