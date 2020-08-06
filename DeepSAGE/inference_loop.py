@@ -177,16 +177,14 @@ if __name__ == "__main__":
 
     # parse the cli arguments here
     parser = argparse.ArgumentParser(description = "Inference Loop of DeepSAGE")
-    parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
+    parser.add_argument('-inference_loader_pickle', type=str, help = 'Inference loader pickle', required=True)
     parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
-    parser.add_argument('-save_best', type=int, help = 'Number of best models to save', required=True)
     parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
     parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
     parser.add_argument('-n_channels', type=int, help = 'Number of input channels', required=True)
     parser.add_argument('-which_model', type=str, help = 'Model type', required=True)
     parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
     parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
-    parser.add_argument('-augmentations_pickle', type=str, help = 'Augmentations pickle', required=True)
     parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
@@ -197,19 +195,12 @@ if __name__ == "__main__":
     psize = pickle.load(open(args.psize_pickle,"rb"))
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
-    augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
-    trainingDataFromPickle = pd.read_pickle(train_loader_pickle)
-    validataionDataFromPickle = pd.read_pickle(val_loader_pickle)
+    inferenceDataFromPickle = pd.read_pickle(train_loader_pickle)
 
 
-    inferenceLoop(train_loader_pickle = trainingDataFromPickle, 
-        val_loader_pickle = validataionDataFromPickle, 
-        num_epochs = args.num_epochs, 
+    inferenceLoop(train_loader_pickle = inferenceDataFromPickle, 
         batch_size = args.batch_size, 
-        learning_rate = args.learning_rate, 
         which_loss = args.which_loss, 
-        opt = args.opt, 
-        save_best = args.save_best, 
         n_classes = args.n_classes,
         base_filters = args.base_filters, 
         n_channels = args.n_channels, 
@@ -217,6 +208,5 @@ if __name__ == "__main__":
         psize = psize, 
         channelHeaders = channel_header, 
         labelHeader = label_header, 
-        augmentations = augmentations,
         outputDir = args.outputDir,
         device = args.device)
