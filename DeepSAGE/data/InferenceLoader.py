@@ -26,7 +26,7 @@ global_augs_dict = {
 
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def InferenceLoader(dataframe, psize, channelHeaders, labelHeader, augmentations = None):
+def InferenceLoader(dataframe, psize, channelHeaders, labelHeader):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -50,12 +50,6 @@ def InferenceLoader(dataframe, psize, channelHeaders, labelHeader, augmentations
         subject = Subject(subject_dict) 
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
-    
-    augmentation_list = []
-    for aug in augmentations:
-        augmentation_list.append(global_augs_dict[str(aug)])
-            
-    transform = Compose(augmentation_list)
 
     # Using the grid sampler for inference since somtetimes the entire image can't fit in the GPU
     grid_sampler = torchio.inference.GridSampler(subjects_list, psize, patch_overlap = 4)
