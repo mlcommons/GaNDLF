@@ -14,6 +14,7 @@ from torchio import Image, Subject
 # Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 global_augs_dict = {
+    'normalize':ZNormalization(),
     'affine':RandomAffine(image_interpolation = 'linear'), 
     'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
     'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
@@ -52,8 +53,13 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentat
         subjects_list.append(subject)
     
     augmentation_list = []
+    # we want normalize to come first
+    if 'normalize' in augmentations:
+        augmentation_list.append(global_augs_dict['normalize'])
+    
     for aug in augmentations:
-        augmentation_list.append(global_augs_dict[str(aug)])
+        if str(aug) != 'normalize':
+            augmentation_list.append(global_augs_dict[str(aug)])
             
     transform = Compose(augmentation_list)
     subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
