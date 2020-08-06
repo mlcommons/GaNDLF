@@ -41,8 +41,8 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   # Setting up the inference loader
   inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
-  # aggregator for
-  aggregator = torchio.inference.GridAggregator(grid_sampler)
+  # aggregator for the patches
+  aggregator = torchio.inference.GridAggregator(inference_loader)
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -133,7 +133,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   best_n_val_list = []
   val_avg_loss_list = []
 
-  batch = next(iter(train_loader))
+  batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('index_ini')
   channel_keys.remove('label')  
@@ -153,18 +153,13 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
       #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
       image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
       # Making sure that the optimizer has been reset
-      optimizer.zero_grad()
       # Forward Propagation to get the output from the models
       torch.cuda.empty_cache()
       output = model(image.float())
       # Computing the loss
       loss = loss_fn(output.double(), mask.double(),n_classes)
-      # Back Propagation for model to learn
-      loss.backward()
-      #Updating the weight values
-      optimizer.step()
       #Pushing the dice to the cpu and only taking its value
-      curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
+      curr_loss = loss.cpu().data.item()
       #train_loss_list.append(loss.cpu().data.item())
       total_loss+=curr_loss
       # Computing the average loss
@@ -175,7 +170,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
       total_dice+= curr_dice
       #Computing the average dice
       average_dice = total_dice/(batch_idx + 1)
-      scheduler.step()
       torch.cuda.empty_cache()
 
 
@@ -184,8 +178,6 @@ if __name__ == "__main__":
     # parse the cli arguments here
     parser = argparse.ArgumentParser(description = "Inference Loop of DeepSAGE")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
-    parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-batch_size', type=int, help = 'Batch size', required=True)
     parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
     parser.add_argument('-save_best', type=int, help = 'Number of best models to save', required=True)
     parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
