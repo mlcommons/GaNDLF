@@ -34,12 +34,12 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device):
   '''
   This is the main inference loop
   '''
   # Setting up the inference loader
-  inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
+  inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   # aggregator for the patches
   aggregator = torchio.inference.GridAggregator(inference_loader)
@@ -145,6 +145,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
       # read and concat the images
       image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
       # read the mask
+      locations = subject[torchio.LOCATION]
       mask = subject['label'][torchio.DATA] # get the label image
       mask = one_hot(mask.float().numpy(), n_classes)
       mask = torch.from_numpy(mask)
@@ -156,6 +157,8 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
       # Forward Propagation to get the output from the models
       torch.cuda.empty_cache()
       output = model(image.float())
+      # Aggregarting the patches
+      aggregator.add_batch(output, locations)
       # Computing the loss
       loss = loss_fn(output.double(), mask.double(),n_classes)
       #Pushing the dice to the cpu and only taking its value
@@ -195,7 +198,7 @@ if __name__ == "__main__":
     psize = pickle.load(open(args.psize_pickle,"rb"))
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
-    inferenceDataFromPickle = pd.read_pickle(train_loader_pickle)
+    inferenceDataFromPickle = pd.read_pickle(inference_loader_pickle)
 
 
     inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
