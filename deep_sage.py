@@ -35,6 +35,7 @@ parser.add_argument('-output', type=str, help = 'Output directory to save interm
 parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-md\'', required=False)
 parser.add_argument('-modelDir', type=str, help = 'The pre-trained model directory that is used for inference, needs to contain the configuration', required=False)
 parser.add_argument('-device', default=0, type=str, help = 'Device to perform requested session on (\'-1\' == cpu and everything else denotes GPU ID)', required=True) 
+
 #parser.add_argument('-v', '--version', action='version', 
 #      version = format(parser.prog) + ' v' + pkg_resources.require('deep_seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
                             
@@ -109,4 +110,4 @@ for col in data_full.columns:
 if mode != 0: # training mode
     TrainingManager(dataframe = data_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, parallel_compute_command = parallel_compute_command, device = args.device)
 else:
-    InferenceManager(dataframe = data_full, augmentations = augmentations, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = pretrainedModelPath, batch_size = batch_size, which_loss = which_loss, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, device = args.device)
+    InferenceManager(dataframe = data_full, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = pretrainedModelPath, batch_size = batch_size, which_loss = which_loss, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, device = args.device)
