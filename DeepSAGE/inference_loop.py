@@ -198,7 +198,7 @@ if __name__ == "__main__":
     psize = pickle.load(open(args.psize_pickle,"rb"))
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
-    inferenceDataFromPickle = pd.read_pickle(train_loader_pickle)
+    inferenceDataFromPickle = pd.read_pickle(inference_loader_pickle)
 
 
     inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
