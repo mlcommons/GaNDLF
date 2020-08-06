@@ -56,11 +56,9 @@ def InferenceLoader(dataframe, psize, channelHeaders, labelHeader, augmentations
         augmentation_list.append(global_augs_dict[str(aug)])
             
     transform = Compose(augmentation_list)
-    subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
 
-    sampler = torchio.data.UniformSampler(psize) 
-    # all of these need to be read from model.cfg
-    patches_queue = torchio.Queue(subjects_dataset,max_length = 1,samples_per_volume  = 1,sampler = sampler,num_workers=4,shuffle_subjects=False, shuffle_patches=True) 
+    # Using the grid sampler for inference since somtetimes the entire image can't fit in the GPU
+    grid_sampler = torchio.inference.GridSampler(sample, patch_size, patch_overlap)
     
     return patches_queue
 
