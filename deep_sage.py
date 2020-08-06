@@ -25,7 +25,7 @@ import torchio
 from datetime import date
 
 from DeepSAGE.training_manager import TrainingManager
-from DeepSAGE.inference_manage import InferenceManager 
+from DeepSAGE.inference_manager import InferenceManager 
 
 copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
 parser = argparse.ArgumentParser(prog='DeepSage', formatter_class=argparse.RawTextHelpFormatter, description = "3D Image Semantic Segmentation using Deep Learning.\n\n" + copyrightMessage)
@@ -110,4 +110,3 @@ if mode != 0: # training mode
     TrainingManager(dataframe = data_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, parallel_compute_command = parallel_compute_command, device = args.device)
 else:
     InferenceManager(dataframe = data_full, augmentations = augmentations, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = pretrainedModelPath, batch_size = batch_size, which_loss = which_loss, n_classes = n_classes, base_filters = base_filters, n_channels = n_channels, which_model = which_model, device = args.device)
-    

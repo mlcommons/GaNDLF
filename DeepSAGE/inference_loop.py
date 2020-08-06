@@ -198,7 +198,7 @@ if __name__ == "__main__":
     inferenceDataFromPickle = pd.read_pickle(train_loader_pickle)
 
 
-    inferenceLoop(train_loader_pickle = inferenceDataFromPickle, 
+    inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
         batch_size = args.batch_size, 
         which_loss = args.which_loss, 
         n_classes = args.n_classes,
