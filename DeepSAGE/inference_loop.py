@@ -24,7 +24,7 @@ from pathlib import Path
 import argparse
 import datetime
 import GPUtil
-from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
+from DeepSAGE.data.InferenceLoader import InferenceLoader
 from DeepSAGE.schd import *
 from DeepSAGE.models.fcn import fcn
 from DeepSAGE.models.unet import unet
