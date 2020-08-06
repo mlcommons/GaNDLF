@@ -197,7 +197,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           #Updating the weight values
           optimizer.step()
           #Pushing the dice to the cpu and only taking its value
-          curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
+          curr_loss = loss.cpu().data.item()
           #train_loss_list.append(loss.cpu().data.item())
           total_loss+=curr_loss
           # Computing the average loss
@@ -228,7 +228,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               mask = subject['label'][torchio.DATA] # get the label image
               image, mask = image.to(device), mask.to(device)
               output = model(image.float())
-              curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
+              curr_loss = loss_fn(output.double(), mask.double(),n_classes).cpu().data.item()
               total_loss+=curr_loss
               # Computing the average loss
               average_loss = total_loss/(batch_idx + 1)

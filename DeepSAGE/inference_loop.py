@@ -40,7 +40,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   '''
   inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
 
-  train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
+  inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -136,45 +136,45 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   channel_keys.remove('index_ini')
   channel_keys.remove('label')  
   
-    model.eval
-    #   batch_iterator_train = iter(train_loader)
-    for batch_idx, (subject) in enumerate(train_loader):
-        # Load the subject and its ground truth
-        # read and concat the images
-        image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-        # read the mask
-        mask = subject['label'][torchio.DATA] # get the label image
-        mask = one_hot(mask.float().numpy(), n_classes)
-        mask = torch.from_numpy(mask)
-        # Loading images into the GPU and ignoring the affine
-        image, mask = image.float().to(device), mask.to(device)
-        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
-        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
-        # Making sure that the optimizer has been reset
-        optimizer.zero_grad()
-        # Forward Propagation to get the output from the models
-        torch.cuda.empty_cache()
-        output = model(image.float())
-        # Computing the loss
-        loss = loss_fn(output.double(), mask.double(),n_classes)
-        # Back Propagation for model to learn
-        loss.backward()
-        #Updating the weight values
-        optimizer.step()
-        #Pushing the dice to the cpu and only taking its value
-        curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
-        #train_loss_list.append(loss.cpu().data.item())
-        total_loss+=curr_loss
-        # Computing the average loss
-        average_loss = total_loss/(batch_idx + 1)
-        #Computing the dice score 
-        curr_dice = 1 - curr_loss
-        #Computing the total dice
-        total_dice+= curr_dice
-        #Computing the average dice
-        average_dice = total_dice/(batch_idx + 1)
-        scheduler.step()
-        torch.cuda.empty_cache()
+  model.eval
+  #   batch_iterator_train = iter(train_loader)
+  for batch_idx, (subject) in enumerate(train_loader):
+      # Load the subject and its ground truth
+      # read and concat the images
+      image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+      # read the mask
+      mask = subject['label'][torchio.DATA] # get the label image
+      mask = one_hot(mask.float().numpy(), n_classes)
+      mask = torch.from_numpy(mask)
+      # Loading images into the GPU and ignoring the affine
+      image, mask = image.float().to(device), mask.to(device)
+      #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
+      image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
+      # Making sure that the optimizer has been reset
+      optimizer.zero_grad()
+      # Forward Propagation to get the output from the models
+      torch.cuda.empty_cache()
+      output = model(image.float())
+      # Computing the loss
+      loss = loss_fn(output.double(), mask.double(),n_classes)
+      # Back Propagation for model to learn
+      loss.backward()
+      #Updating the weight values
+      optimizer.step()
+      #Pushing the dice to the cpu and only taking its value
+      curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
+      #train_loss_list.append(loss.cpu().data.item())
+      total_loss+=curr_loss
+      # Computing the average loss
+      average_loss = total_loss/(batch_idx + 1)
+      #Computing the dice score 
+      curr_dice = 1 - curr_loss
+      #Computing the total dice
+      total_dice+= curr_dice
+      #Computing the average dice
+      average_dice = total_dice/(batch_idx + 1)
+      scheduler.step()
+      torch.cuda.empty_cache()
 
 
 if __name__ == "__main__":
