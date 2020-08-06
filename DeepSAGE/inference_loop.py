@@ -24,7 +24,7 @@ from pathlib import Path
 import argparse
 import datetime
 import GPUtil
-from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
+from DeepSAGE.data.InferenceLoader import InferenceLoader
 from DeepSAGE.schd import *
 from DeepSAGE.models.fcn import fcn
 from DeepSAGE.models.unet import unet
@@ -34,13 +34,15 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(trainingDataFromPickle, validataionDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
   '''
   This is the main inference loop
   '''
-  trainingDataForTorch = InferenceLoader(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
-
-  train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
+  # Setting up the inference loader
+  inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
+  inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
+  # aggregator for the patches
+  aggregator = torchio.inference.GridAggregator(inference_loader)
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -74,12 +76,12 @@ def inferenceLoop(trainingDataFromPickle, validataionDataFromPickle,batch_size, 
   sys.stdout.flush()
 
   # get the channel keys
-  batch = next(iter(train_loader))
+  batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('index_ini')
   channel_keys.remove('label')  
 
-  print("Training Data Samples: ", len(train_loader.dataset))
+  print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   dev = device
   
@@ -131,63 +133,52 @@ def inferenceLoop(trainingDataFromPickle, validataionDataFromPickle,batch_size, 
   best_n_val_list = []
   val_avg_loss_list = []
 
-  batch = next(iter(train_loader))
+  batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('index_ini')
   channel_keys.remove('label')  
   
-    model.eval
-    #   batch_iterator_train = iter(train_loader)
-    for batch_idx, (subject) in enumerate(train_loader):
-        # Load the subject and its ground truth
-        # read and concat the images
-        image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-        # read the mask
-        mask = subject['label'][torchio.DATA] # get the label image
-        mask = one_hot(mask.float().numpy(), n_classes)
-        mask = torch.from_numpy(mask)
-        # Loading images into the GPU and ignoring the affine
-        image, mask = image.float().to(device), mask.to(device)
-        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
-        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
-        # Making sure that the optimizer has been reset
-        optimizer.zero_grad()
-        # Forward Propagation to get the output from the models
-        torch.cuda.empty_cache()
-        output = model(image.float())
-        # Computing the loss
-        loss = loss_fn(output.double(), mask.double(),n_classes)
-        # Back Propagation for model to learn
-        loss.backward()
-        #Updating the weight values
-        optimizer.step()
-        #Pushing the dice to the cpu and only taking its value
-        curr_loss = dice_loss(output[:,0,:,:,:].double(), mask[:,0,:,:,:].double()).cpu().data.item()
-        #train_loss_list.append(loss.cpu().data.item())
-        total_loss+=curr_loss
-        # Computing the average loss
-        average_loss = total_loss/(batch_idx + 1)
-        #Computing the dice score 
-        curr_dice = 1 - curr_loss
-        #Computing the total dice
-        total_dice+= curr_dice
-        #Computing the average dice
-        average_dice = total_dice/(batch_idx + 1)
-        scheduler.step()
-        torch.cuda.empty_cache()
+  model.eval
+  #   batch_iterator_train = iter(train_loader)
+  for batch_idx, (subject) in enumerate(inference_loader):
+      # Load the subject and its ground truth
+      # read and concat the images
+      image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+      # read the mask
+      mask = subject['label'][torchio.DATA] # get the label image
+      mask = one_hot(mask.float().numpy(), n_classes)
+      mask = torch.from_numpy(mask)
+      # Loading images into the GPU and ignoring the affine
+      image, mask = image.float().to(device), mask.to(device)
+      #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
+      image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
+      # Making sure that the optimizer has been reset
+      # Forward Propagation to get the output from the models
+      torch.cuda.empty_cache()
+      output = model(image.float())
+      # Computing the loss
+      loss = loss_fn(output.double(), mask.double(),n_classes)
+      #Pushing the dice to the cpu and only taking its value
+      curr_loss = loss.cpu().data.item()
+      #train_loss_list.append(loss.cpu().data.item())
+      total_loss+=curr_loss
+      # Computing the average loss
+      average_loss = total_loss/(batch_idx + 1)
+      #Computing the dice score 
+      curr_dice = 1 - curr_loss
+      #Computing the total dice
+      total_dice+= curr_dice
+      #Computing the average dice
+      average_dice = total_dice/(batch_idx + 1)
+      torch.cuda.empty_cache()
 
 
 if __name__ == "__main__":
 
     # parse the cli arguments here
-    parser = argparse.ArgumentParser(description = "Training Loop of DeepSAGE")
+    parser = argparse.ArgumentParser(description = "Inference Loop of DeepSAGE")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
-    parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-num_epochs', type=int, help = 'Number of epochs', required=True)
-    parser.add_argument('-batch_size', type=int, help = 'Batch size', required=True)
-    parser.add_argument('-learning_rate', type=float, help = 'Learning rate', required=True)
     parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
-    parser.add_argument('-opt', type=str, help = 'Optimizer type', required=True)
     parser.add_argument('-save_best', type=int, help = 'Number of best models to save', required=True)
     parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
     parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
@@ -211,7 +202,7 @@ if __name__ == "__main__":
     validataionDataFromPickle = pd.read_pickle(val_loader_pickle)
 
 
-    trainingLoop(train_loader_pickle = trainingDataFromPickle, 
+    inferenceLoop(train_loader_pickle = trainingDataFromPickle, 
         val_loader_pickle = validataionDataFromPickle, 
         num_epochs = args.num_epochs, 
         batch_size = args.batch_size, 

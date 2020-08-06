@@ -25,15 +25,14 @@ import subprocess
 from DeepSAGE.inference_loop import inferenceLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def InferenceManager(dataframe, augmentations, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,batch_size, which_loss, n_classes, base_filters, n_channels, which_model, parallel_compute_command, device):
+def InferenceManager(dataframe, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,batch_size, which_loss, n_classes, base_filters, n_channels, which_model, parallel_compute_command, device):
 
     # get the indeces for kfold splitting
     inferenceData_full = dataframe
     inference_indeces_full = list(inferenceData_full.index.values)
 
-    inferenceLoop(trainingDataFromPickle = trainingData, validataionDataFromPickle = validationData, 
-            num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
-            which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
+    inferenceLoop(inferenceDataFromPickle = inferenceData_full, batch_size = batch_size,
+            which_loss = which_loss, n_classes = n_classes,
             base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-            channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device)
+            channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = currentOutputFolder, device = device)
         
