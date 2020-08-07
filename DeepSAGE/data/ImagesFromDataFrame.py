@@ -26,7 +26,7 @@ global_augs_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentations = None):
+def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = True, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -69,7 +69,12 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentat
             augmentation_list.append(global_augs_dict[str(aug)])
             
     transform = Compose(augmentation_list)
-    subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
+    # If mode is not training (i.e if mode is inference then do not perform any augmentations)
+    if train:
+        subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
+    if not train:
+        subjects_dataset = torchio.ImagesDataset(subjects_list, transform=None)
+        return subjects_dataset
 
     sampler = torchio.data.UniformSampler(psize) 
     # all of these need to be read from model.cfg

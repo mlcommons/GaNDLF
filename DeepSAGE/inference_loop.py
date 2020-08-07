@@ -24,7 +24,7 @@ from pathlib import Path
 import argparse
 import datetime
 import GPUtil
-from DeepSAGE.data.InferenceLoader import InferenceLoader
+from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
 from DeepSAGE.schd import *
 from DeepSAGE.models.fcn import fcn
 from DeepSAGE.models.unet import unet
@@ -39,11 +39,9 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   This is the main inference loop
   '''
   # Setting up the inference loader
-  inferenceDataForTorch = InferenceLoader(inferenceDataFromPickle, psize, channelHeaders, labelHeader)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
-  # aggregator for the patches
-  aggregator = torchio.inference.GridAggregator(inference_loader)
-
+  
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
     model = resunet(n_channels,n_classes,base_filters)
@@ -140,40 +138,53 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   
   model.eval
   #   batch_iterator_train = iter(train_loader)
-  for batch_idx, (subject) in enumerate(inference_loader):
-      # Load the subject and its ground truth
-      # read and concat the images
-      image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-      # read the mask
-      locations = subject[torchio.LOCATION]
-      mask = subject['label'][torchio.DATA] # get the label image
-      mask = one_hot(mask.float().numpy(), n_classes)
-      mask = torch.from_numpy(mask)
-      # Loading images into the GPU and ignoring the affine
-      image, mask = image.float().to(device), mask.to(device)
-      #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
-      image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
-      # Making sure that the optimizer has been reset
-      # Forward Propagation to get the output from the models
-      torch.cuda.empty_cache()
-      output = model(image.float())
-      # Aggregarting the patches
-      aggregator.add_batch(output, locations)
-      # Computing the loss
-      loss = loss_fn(output.double(), mask.double(),n_classes)
-      #Pushing the dice to the cpu and only taking its value
-      curr_loss = loss.cpu().data.item()
-      #train_loss_list.append(loss.cpu().data.item())
-      total_loss+=curr_loss
-      # Computing the average loss
-      average_loss = total_loss/(batch_idx + 1)
-      #Computing the dice score 
-      curr_dice = 1 - curr_loss
-      #Computing the total dice
-      total_dice+= curr_dice
-      #Computing the average dice
-      average_dice = total_dice/(batch_idx + 1)
-      torch.cuda.empty_cache()
+  with torch.no_grad():
+    for batch_idx, (subject) in enumerate(inference_loader):
+        # Load the subject and its ground truth
+        grid_sampler = torchio.inference.GridSampler(subject, psize, 4)
+        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
+        aggregator = torchio.inference.GridAggregator(grid_sampler)
+        for patches_batch in patch_loader:
+            inputs = patches_batch[MRI][DATA].to(device)
+            locations = patches_batch[torchio.LOCATION]
+            logits = model(inputs)
+            labels = logits.argmax(dim=CHANNELS_DIMENSION, keepdim=True)
+            aggregator.add_batch(labels, locations)
+
+    foreground = aggregator.get_output_tensor()
+
+        
+        image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+        # read the mask
+        locations = subject[torchio.LOCATION]
+        mask = subject['label'][torchio.DATA] # get the label image
+        mask = one_hot(mask.float().numpy(), n_classes)
+        mask = torch.from_numpy(mask)
+        # Loading images into the GPU and ignoring the affine
+        image, mask = image.float().to(device), mask.to(device)
+        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
+        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
+        # Making sure that the optimizer has been reset
+        # Forward Propagation to get the output from the models
+        torch.cuda.empty_cache()
+        output = model(image.float())
+        # Aggregarting the patches
+        aggregator.add_batch(output, locations)
+        # Computing the loss
+        loss = loss_fn(output.double(), mask.double(),n_classes)
+        #Pushing the dice to the cpu and only taking its value
+        curr_loss = loss.cpu().data.item()
+        #train_loss_list.append(loss.cpu().data.item())
+        total_loss+=curr_loss
+        # Computing the average loss
+        average_loss = total_loss/(batch_idx + 1)
+        #Computing the dice score 
+        curr_dice = 1 - curr_loss
+        #Computing the total dice
+        total_dice+= curr_dice
+        #Computing the average dice
+        average_dice = total_dice/(batch_idx + 1)
+        torch.cuda.empty_cache()
 
 
 if __name__ == "__main__":
