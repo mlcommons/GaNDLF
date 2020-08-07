@@ -53,12 +53,24 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentat
         subjects_list.append(subject)
     
     augmentation_list = []
-    # we want normalize to come first
+    
+    # first, we want to do the resampling, if it is present
+    for aug in augmentations:
+        if 'resample' in str(aug):
+            resample_split = str(aug).split(':')
+            resample_values = tuple(np.array(resample_split[1].split(',')).astype(np.float))
+            augmentation_list.append(Resample(resample_values))
+      
+    # next, we want to do the intensity normalize
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
+    if 'resample' in augmentations:
+        augmentation_list.append(global_augs_dict['normalize'])
+    
+
     for aug in augmentations:
-        if str(aug) != 'normalize':
+        if (str(aug) != 'normalize') and not('resample' in str(aug)):
             augmentation_list.append(global_augs_dict[str(aug)])
             
     transform = Compose(augmentation_list)

@@ -292,12 +292,12 @@ if __name__ == "__main__":
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
     augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
-    trainingDataFromPickle = pd.read_pickle(train_loader_pickle)
-    validataionDataFromPickle = pd.read_pickle(val_loader_pickle)
+    trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
+    validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
 
 
-    trainingLoop(train_loader_pickle = trainingDataFromPickle, 
-        val_loader_pickle = validataionDataFromPickle, 
+    trainingLoop(trainingDataFromPickle = trainingDataFromPickle, 
+        validataionDataFromPickle = validataionDataFromPickle, 
         num_epochs = args.num_epochs, 
         batch_size = args.batch_size, 
         learning_rate = args.learning_rate, 
