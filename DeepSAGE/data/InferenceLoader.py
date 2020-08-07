@@ -40,6 +40,7 @@ def InferenceLoader(dataframe, psize, channelHeaders, labelHeader):
     
     subjects_dataset = torchio.ImagesDataset(subjects_list)
     # Using the grid sampler for inference since somtetimes the entire image can't fit in the GPU
+    print(subjects_dataset)
     grid_sampler = torchio.inference.GridSampler(subjects_dataset, psize, patch_overlap = 4)
     
     return grid_sampler
