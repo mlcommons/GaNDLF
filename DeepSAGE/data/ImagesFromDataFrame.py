@@ -64,10 +64,6 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentat
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
-    if 'resample' in augmentations:
-        augmentation_list.append(global_augs_dict['normalize'])
-    
-
     for aug in augmentations:
         if (str(aug) != 'normalize') and not('resample' in str(aug)):
             augmentation_list.append(global_augs_dict[str(aug)])
