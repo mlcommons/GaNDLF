@@ -25,7 +25,6 @@ global_augs_dict = {
     'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) 
 }
 
-
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
