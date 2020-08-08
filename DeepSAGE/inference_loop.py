@@ -12,6 +12,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import random
 import torchio
+from torchio import Image, Subject
 from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
@@ -137,10 +138,9 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   model.eval
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
-    for batch_idx, (subject) in enumerate(inference_loader):
+    for batch_idx, subject in enumerate(inference_loader):
         # Load the subject and its ground truth
-        print(type(subject)
-        grid_sampler = torchio.inference.GridSampler(subject, psize, 4)
+        grid_sampler = torchio.inference.GridSampler(subject , psize, 4)
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
         for patches_batch in patch_loader:
