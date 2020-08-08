@@ -139,7 +139,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   with torch.no_grad():
     for batch_idx, (subject) in enumerate(inference_loader):
         # Load the subject and its ground truth
-        print(subject)
+        print(type(subject)
         grid_sampler = torchio.inference.GridSampler(subject, psize, 4)
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
