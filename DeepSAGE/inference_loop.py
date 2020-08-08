@@ -144,9 +144,10 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
         for patches_batch in patch_loader:
-            inputs = patches_batch['data'][torchio.DATA].to(device)
+            image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).to(device)
             locations = patches_batch[torchio.LOCATION]
-            logits = model(inputs)
+            logits = model(image)
+            print(logits.shape)
             labels = logits.argmax(dim=CHANNELS_DIMENSION, keepdim=True)
             aggregator.add_batch(labels, locations)
 
