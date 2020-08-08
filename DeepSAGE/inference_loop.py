@@ -146,11 +146,11 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         for patches_batch in patch_loader:
             image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).to(device)
             locations = patches_batch[torchio.LOCATION]
-            logits = model(image)
-            aggregator.add_batch(labels, locations)
+            pred_mask = model(image)
+            aggregator.add_batch(pred_mask, locations)
 
-        foreground = aggregator.get_output_tensor()
-        print(foreground.shape())
+        pred_mask = aggregator.get_output_tensor()
+        print(foreground.shape)
 
         # read the mask
         locations = subject[torchio.LOCATION]
