@@ -138,13 +138,13 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   model.eval
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
-    for batch_idx, subject in enumerate(inference_loader):
+    for batch_idx, subject in enumerate(inferenceDataForTorch):
         # Load the subject and its ground truth
         grid_sampler = torchio.inference.GridSampler(subject , psize, 4)
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
         for patches_batch in patch_loader:
-            inputs = patches_batch[MRI][DATA].to(device)
+            inputs = patches_batch['data'][torchio.DATA].to(device)
             locations = patches_batch[torchio.LOCATION]
             logits = model(inputs)
             labels = logits.argmax(dim=CHANNELS_DIMENSION, keepdim=True)
@@ -152,8 +152,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
 
         foreground = aggregator.get_output_tensor()
 
-        
-        image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
         # read the mask
         locations = subject[torchio.LOCATION]
         mask = subject['label'][torchio.DATA] # get the label image
@@ -161,7 +159,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         mask = torch.from_numpy(mask)
         # Loading images into the GPU and ignoring the affine
         image, mask = image.float().to(device), mask.to(device)
-        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
+        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the funct ion that created it   
         image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
         # Making sure that the optimizer has been reset
         # Forward Propagation to get the output from the models
