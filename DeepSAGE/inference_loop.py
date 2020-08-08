@@ -76,7 +76,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   # get the channel keys
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
-  channel_keys.remove('index_ini')
   channel_keys.remove('label')  
 
   print("Training Data Samples: ", len(inference_loader.dataset))
@@ -133,7 +132,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
 
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
-  channel_keys.remove('index_ini')
   channel_keys.remove('label')  
   
   model.eval
@@ -141,6 +139,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   with torch.no_grad():
     for batch_idx, (subject) in enumerate(inference_loader):
         # Load the subject and its ground truth
+        print(subject)
         grid_sampler = torchio.inference.GridSampler(subject, psize, 4)
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
@@ -151,7 +150,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
             labels = logits.argmax(dim=CHANNELS_DIMENSION, keepdim=True)
             aggregator.add_batch(labels, locations)
 
-    foreground = aggregator.get_output_tensor()
+        foreground = aggregator.get_output_tensor()
 
         
         image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 

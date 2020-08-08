@@ -54,21 +54,24 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = T
     augmentation_list = []
     
     # first, we want to do the resampling, if it is present
-    for aug in augmentations:
-        if 'resample' in str(aug):
-            resample_split = str(aug).split(':')
-            resample_values = tuple(np.array(resample_split[1].split(',')).astype(np.float))
-            augmentation_list.append(Resample(resample_values))
-      
+    if train:
+        for aug in augmentations:
+            if 'resample' in str(aug):
+                resample_split = str(aug).split(':')
+                resample_values = tuple(np.array(resample_split[1].split(',')).astype(np.float))
+                augmentation_list.append(Resample(resample_values))
+        
     # next, we want to do the intensity normalize
-    if 'normalize' in augmentations:
-        augmentation_list.append(global_augs_dict['normalize'])
+        if 'normalize' in augmentations:
+            augmentation_list.append(global_augs_dict['normalize'])
     
-    for aug in augmentations:
-        if (str(aug) != 'normalize') and not('resample' in str(aug)):
-            augmentation_list.append(global_augs_dict[str(aug)])
-            
-    transform = Compose(augmentation_list)
+        for aug in augmentations:
+            if (str(aug) != 'normalize') and not('resample' in str(aug)):
+                augmentation_list.append(global_augs_dict[str(aug)])
+        
+        transform = Compose(augmentation_list)
+
+    
     # If mode is not training (i.e if mode is inference then do not perform any augmentations)
     if train:
         subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
