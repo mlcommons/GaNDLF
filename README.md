@@ -4,6 +4,7 @@
 
 - DeepSAGE: Deep SemAntic seGmEntator
 - SEACAF: SEgmentation And ClassificAtion Framework
+- GANDLF (guess how to pronouce it): GenerAlly Nuanced Deep Learning Framework 
 
 ## Why use this?
 
