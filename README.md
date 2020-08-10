@@ -84,3 +84,4 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
 - Ability to change the number of layers in the neural network models according to the parameter given in the congiguration file
 - Change the way the training and inference is logged. More user friendly and less clutter
+- Handling class imbalanaces
