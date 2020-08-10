@@ -74,8 +74,10 @@ save_best = int(params['save_best'])
 augmentations = ast.literal_eval(str(params['data_augmentation']))
 
 # Extracting the model parameters from the dictionary
-n_classes = int(params['numberOfOutputClasses'])
-largest_label = int(params['largestLabelToPredict'])
+if 'numberOfOutputClasses' in params:
+    n_classes = int(params['numberOfOutputClasses'])
+if 'largestLabelToPredict' in params:    
+    largest_label = int(params['largestLabelToPredict'])
 
 base_filters = int(params['base_filters'])
 n_channels = int(params['numberOfInputChannels'])
