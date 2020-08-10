@@ -119,11 +119,12 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       environment_variable = environment_variable[:-1] # delete last comma
       dev = 'cuda' # remove the 'multi'
       model = nn.DataParallel(model, DEVICE_ID_LIST)
-    elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
+    elif ('CUDA_VISIBLE_DEVICES' not in os.environ) or (os.environ["CUDA_VISIBLE_DEVICES"] == ''):
       environment_variable = str(DEVICE_ID_LIST[0])
     
     # only set the environment variable if there is something to set 
     if environment_variable != '':
+      print('Setting \'CUDA_VISIBLE_DEVICES\' to: ', environment_variable)
       os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
   
   print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
