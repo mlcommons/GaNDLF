@@ -153,7 +153,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         print(pred_mask.shape)
 
         # read the mask
-        locations = subject[torchio.LOCATION]
         mask = subject['label'][torchio.DATA] # get the label image
         mask = one_hot(mask.float().numpy(), n_classes)
         mask = torch.from_numpy(mask)
