@@ -82,4 +82,4 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
   - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
 - Regression example: https://github.com/wolny/pytorch-3dunet
 - Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
-- Ability to change the number of layers in the neural network models according to the paramerter given in the configurartion file
+- Ability to change the number of layers in the neural network models according to the parameter given in the congiguration file
