@@ -41,8 +41,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   '''
   This is the main training loop
   '''
-  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, augmentations)
-  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, augmentations) # may or may not need to add augmentations here
+
+  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations)
+  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations) # may or may not need to add augmentations here
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
