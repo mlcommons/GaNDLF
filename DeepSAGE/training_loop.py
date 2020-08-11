@@ -232,7 +232,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               output = model(image.float())
               # one hot encoding the mask 
               mask = one_hot(mask.cpu().float().numpy(), n_classes)
-              curr_loss = loss_fn(output.double(), mask.double(),n_classes).cpu().data.item()
+              curr_loss = loss_fn(output.double(), mask, n_classes).cpu().data.item()
               total_loss+=curr_loss
               # Computing the average loss
               average_loss = total_loss/(batch_idx + 1)
