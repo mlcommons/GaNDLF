@@ -180,7 +180,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
           # read the mask
           mask = subject['label'][torchio.DATA] # get the label image
-          mask = one_hot(mask.float().numpy(), n_classes)
+          mask = one_hot(mask.cpu().float().numpy(), n_classes)
 
           mask = torch.from_numpy(mask)
           # Loading images into the GPU and ignoring the affine
