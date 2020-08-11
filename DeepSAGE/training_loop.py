@@ -104,29 +104,29 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   sys.stdout.flush()
   dev = device
   
-  ###
-  # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-  ###
-  # if GPU has been requested, ensure that the correct free GPU is found and used
-  if 'cuda' in dev: # this does not work correctly for windows
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    DEVICE_ID_LIST = GPUtil.getAvailable(order = 'first', limit=10)
-    print('GPU devices: ', DEVICE_ID_LIST)
-    environment_variable = ''
-    if 'cuda-multi' in dev:
-      for ids in DEVICE_ID_LIST:
-        environment_variable = environment_variable + str(ids) + ','
+  # ###
+  # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
+  # ###
+  # # if GPU has been requested, ensure that the correct free GPU is found and used
+  # if 'cuda' in dev: # this does not work correctly for windows
+  #   os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+  #   DEVICE_ID_LIST = GPUtil.getAvailable(order = 'first', limit=10)
+  #   print('GPU devices: ', DEVICE_ID_LIST)
+  #   environment_variable = ''
+  #   if 'cuda-multi' in dev:
+  #     for ids in DEVICE_ID_LIST:
+  #       environment_variable = environment_variable + str(ids) + ','
       
-      environment_variable = environment_variable[:-1] # delete last comma
-      dev = 'cuda' # remove the 'multi'
-      model = nn.DataParallel(model, DEVICE_ID_LIST)
-    elif ('CUDA_VISIBLE_DEVICES' not in os.environ) or (os.environ["CUDA_VISIBLE_DEVICES"] == ''):
-      environment_variable = str(DEVICE_ID_LIST[0])
+  #     environment_variable = environment_variable[:-1] # delete last comma
+  #     dev = 'cuda' # remove the 'multi'
+  #     model = nn.DataParallel(model, DEVICE_ID_LIST)
+  #   elif ('CUDA_VISIBLE_DEVICES' not in os.environ) or (os.environ["CUDA_VISIBLE_DEVICES"] == ''):
+  #     environment_variable = str(DEVICE_ID_LIST[0])
     
-    # only set the environment variable if there is something to set 
-    if environment_variable != '':
-      print('Setting \'CUDA_VISIBLE_DEVICES\' to: ', environment_variable)
-      os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
+  #   # only set the environment variable if there is something to set 
+  #   if environment_variable != '':
+  #     print('Setting \'CUDA_VISIBLE_DEVICES\' to: ', environment_variable)
+  #     os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
   
   print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
   device = torch.device(dev)
