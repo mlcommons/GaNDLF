@@ -13,6 +13,7 @@ from torchio import Image, Subject
 
 # Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
+## todo: ability to change the dimensionality according to the config file
 global_augs_dict = {
     'normalize':ZNormalization(),
     'affine':RandomAffine(image_interpolation = 'linear'), 
