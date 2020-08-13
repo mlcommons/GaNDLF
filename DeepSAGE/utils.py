@@ -1,5 +1,5 @@
 import numpy as np
-def one_hot(segmask_array, largest_class):
+def one_hot(segmask_array, class_list):
     '''
     Encodes the mask voxels in a stacked numpy array for segmentation
     '''

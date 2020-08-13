@@ -35,7 +35,7 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations):
   '''
   This is the main inference loop
   '''
@@ -153,11 +153,11 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         pred_mask = pred_mask.unsqueeze(0)
         # read the mask
         mask = subject['label'][torchio.DATA] # get the label image
-        #mask = one_hot(mask.float().numpy(), n_classes)
-        #mask = torch.from_numpy(mask)
+        mask = one_hot(mask.float().numpy(), class_list)
+        mask = torch.from_numpy(mask)
         torch.cuda.empty_cache()
         # Computing the loss
-        mask = torch.nn.functional.one_hot(mask, num_classes=-1)
+        #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
         print(pred_mask.shape, mask.shape)
         loss = loss_fn(pred_mask.double(), mask.double(),n_classes)
         #Pushing the dice to the cpu and only taking its value
