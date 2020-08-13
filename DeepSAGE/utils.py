@@ -18,4 +18,10 @@ def one_hot(segmask_array, class_list):
     
     bag_mask = (segmask_array == 0).astype(np.float32)
     onehot_stack = np.concatenate((tum_mask, bag_mask), axis=1)
+
+    one_hot = []
+    for class_ in class_list:
+        one_hot = one_hot.append(segmask_array == int(class_))
+
+    
     return onehot_stack
