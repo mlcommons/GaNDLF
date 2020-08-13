@@ -153,6 +153,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         pred_mask = pred_mask.unsqueeze(0)
         # read the mask
         mask = subject['label'][torchio.DATA] # get the label image
+        mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
         mask = one_hot(mask.float().numpy(), class_list)
         mask = torch.from_numpy(mask)
         torch.cuda.empty_cache()

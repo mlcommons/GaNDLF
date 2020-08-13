@@ -190,7 +190,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           torch.cuda.empty_cache()
           output = model(image.float())
           # Computing the loss
-          print(output.shape,output.shape)
+          mask = mask.unsqueeze(0)
           loss = loss_fn(output.double(), mask.double(),len(class_list))
           # Back Propagation for model to learn
           loss.backward()
@@ -210,6 +210,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           average_dice = total_dice/(batch_idx + 1)
           scheduler.step()
           torch.cuda.empty_cache()
+          print("done")
       print("Epoch Training dice:" , average_dice)      
       if average_dice > 1-best_tr_loss:
           best_tr_idx = ep
@@ -217,7 +218,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       total_dice = 0
       total_loss = 0     
       print("Best Training Dice:", 1-best_tr_loss)
-      print("Best Training Epoch:", best_tr_idx)
       print("Average Loss:", average_loss)
       # Now we enter the evaluation/validation part of the epoch    
       model.eval        
@@ -253,6 +253,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
                       os.remove(os.path.join(outputDir + which_model  + str(j) + ".pt"))
           
           print("Best ",save_best," validation epochs:", keep_list)
+
 
       total_dice = 0
       total_loss = 0
