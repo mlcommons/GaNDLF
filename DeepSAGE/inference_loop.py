@@ -151,14 +151,14 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
 
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
-        print(pred_mask.shape)
         # read the mask
         mask = subject['label'][torchio.DATA] # get the label image
         mask = one_hot(mask.float().numpy(), n_classes)
         mask = torch.from_numpy(mask)
         torch.cuda.empty_cache()
         # Computing the loss
-        loss = loss_fn(output.double(), mask.double(),n_classes)
+        print(pred_mask.shape, mask.shape)
+        loss = loss_fn(pred_mask.double(), mask.double(),n_classes)
         #Pushing the dice to the cpu and only taking its value
         curr_loss = loss.cpu().data.item()
         #train_loss_list.append(loss.cpu().data.item())
