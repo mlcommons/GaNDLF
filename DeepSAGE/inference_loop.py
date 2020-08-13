@@ -45,17 +45,17 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,len(class_list),base_filters)
   elif which_model == 'unet':
-    model = unet(n_channels,n_classes,base_filters)
+    model = unet(n_channels,len(class_list),base_filters)
   elif which_model == 'fcn':
-    model = fcn(n_channels,n_classes,base_filters)
+    model = fcn(n_channels,len(class_list),base_filters)
   elif which_model == 'uinc':
-    model = uinc(n_channels,n_classes,base_filters)
+    model = uinc(n_channels,len(class_list),base_filters)
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,len(class_list),base_filters)
 
   # setting the loss function
   if which_loss == 'dc':

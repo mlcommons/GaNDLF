@@ -1,27 +1,8 @@
 import numpy as np
 def one_hot(segmask_array, class_list):
-    '''
-    Encodes the mask voxels in a stacked numpy array for segmentation
-    '''
-    list = []
-    tum_mask = np.array(list)
-    
-    # create a range from 0 to largest class and find if it is present in current mask
-    # do not consider background
-    for idx, j in enumerate(np.arange(largest_class)):
-        if j != 0:
-            mask_to_append = (segmask_array == j).astype(np.float32)
-            if tum_mask.size == 0:
-                tum_mask = mask_to_append
-            else:
-                tum_mask = np.concatenate((tum_mask, mask_to_append), axis=1)
-    
-    bag_mask = (segmask_array == 0).astype(np.float32)
-    onehot_stack = np.concatenate((tum_mask, bag_mask), axis=1)
-
-    one_hot = []
+    one_hot_stack = []
     for class_ in class_list:
-        one_hot = one_hot.append(segmask_array == int(class_))
-
-    
-    return onehot_stack
+        bin_mask = (segmask_array == int(class_))
+        one_hot_stack = one_hot_stack.append(bin_mask)
+    one_hot_stack = np.array(one_hot)
+    return one_hot
