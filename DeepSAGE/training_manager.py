@@ -27,7 +27,7 @@ from DeepSAGE.training_loop import trainingLoop
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,
     num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-    n_classes, base_filters, n_channels, which_model, parallel_compute_command, device):
+    class_list, base_filters, n_channels, which_model, parallel_compute_command, device):
 
     # kfolds = int(parameters['kcross_validation'])
     # check for single fold training
@@ -64,7 +64,7 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
       if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
         trainingLoop(trainingDataFromPickle = trainingData, validataionDataFromPickle = validationData, 
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
-        which_loss = which_loss, opt = opt, save_best = save_best, n_classes = n_classes,
+        which_loss = which_loss, opt = opt, save_best = save_best, class_list = class_list,
         base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
         channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device)
 
