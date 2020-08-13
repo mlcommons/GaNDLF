@@ -150,7 +150,9 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
             aggregator.add_batch(pred_mask, locations)
 
         pred_mask = aggregator.get_output_tensor()
+        pred_mask = pred_mask.unsqueeze(0)
         print(pred_mask.shape)
+
 
         # read the mask
         mask = subject['label'][torchio.DATA] # get the label image
