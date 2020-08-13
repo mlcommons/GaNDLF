@@ -35,7 +35,7 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations = augmentations):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations):
   '''
   This is the main inference loop
   '''
