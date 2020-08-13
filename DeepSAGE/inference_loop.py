@@ -35,12 +35,12 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations = augmentations):
   '''
   This is the main inference loop
   '''
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False, augmentations = augmentations)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
