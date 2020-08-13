@@ -158,8 +158,8 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         torch.cuda.empty_cache()
         # Computing the loss
         #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
-        print(pred_mask.shape, mask.shape)
-        loss = loss_fn(pred_mask.double(), mask.double(),n_classes)
+        mask = mask.unsqueeze(0)
+        loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
         #Pushing the dice to the cpu and only taking its value
         curr_loss = loss.cpu().data.item()
         #train_loss_list.append(loss.cpu().data.item())
@@ -172,6 +172,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         total_dice+= curr_dice
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
+        print("done")
         torch.cuda.empty_cache()
 
 
