@@ -152,22 +152,11 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
         print(pred_mask.shape)
-
-
         # read the mask
         mask = subject['label'][torchio.DATA] # get the label image
         mask = one_hot(mask.float().numpy(), n_classes)
         mask = torch.from_numpy(mask)
-        # Loading images into the GPU and ignoring the affine
-        image, mask = image.float().to(device), mask.to(device)
-        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the funct ion that created it   
-        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
-        # Making sure that the optimizer has been reset
-        # Forward Propagation to get the output from the models
         torch.cuda.empty_cache()
-        output = model(image.float())
-        # Aggregarting the patches
-        aggregator.add_batch(output, locations)
         # Computing the loss
         loss = loss_fn(output.double(), mask.double(),n_classes)
         #Pushing the dice to the cpu and only taking its value
