@@ -59,15 +59,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
     model = resunet(n_channels,len(class_list),base_filters)
 
   # Loading the weights into the model
-  model
-
-
-
-
-
-
-
-
+  model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
   # setting the loss function
   if which_loss == 'dc':
     loss_fn  = MCD_loss
@@ -146,7 +138,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   channel_keys = list(batch.keys())
   channel_keys.remove('label')  
 
-  model.eval
+  model.eval()
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
     for batch_idx, subject in enumerate(inferenceDataForTorch):
