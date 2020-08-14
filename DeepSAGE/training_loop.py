@@ -247,7 +247,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       if average_dice > best_val_dice:
           best_val_idx = ep
           best_val_dice = average_dice
-          torch.save(model, os.path.join(outputDir, which_model  + str(ep) + "best.pt"))
+          torch.save(model, os.path.join(outputDir, which_model + "_best.pt"))
   
       print("Epoch Validation dice:" , average_dice) 
       print("Best Validation Dice:", best_val_dice)
