@@ -150,8 +150,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   print("Starting Learning rate is:",clr(2*step_size))
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
-  avg_val_loss = 0
-  total_val_loss = 0
   best_val_dice = -1
   best_val_dice = -1
   total_loss = 0
