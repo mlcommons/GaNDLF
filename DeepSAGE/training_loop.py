@@ -226,17 +226,12 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               image, mask = image.to(device), mask.to(device)
               output = model(image.float())
               # one hot encoding the mask 
-<<<<<<< HEAD
-              mask = one_hot(mask.cpu().float().numpy(), n_classes)
-              curr_loss = loss_fn(output.double(), mask, n_classes).cpu().data.item()
-=======
               mask = one_hot(mask.cpu().float().numpy(), class_list)
               mask = torch.from_numpy(mask)
               mask = mask.unsqueeze(0)
               # making sure that the output and mask are on the same device
               output, mask = output.to(device), mask.to(device)
               curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
->>>>>>> 72b5f4541df5aa79456e89d2c43ea55fc25ba322
               total_loss+=curr_loss
               # Computing the average loss
               average_loss = total_loss/(batch_idx + 1)
