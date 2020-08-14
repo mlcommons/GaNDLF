@@ -42,7 +42,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   '''
   # Setting up the inference loader
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False, augmentations = augmentations)
-  inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -143,6 +142,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   with torch.no_grad():
     for batch_idx, subject in enumerate(inferenceDataForTorch):
         # Load the subject and its ground truth
+        print(subject)
         grid_sampler = torchio.inference.GridSampler(subject , psize, 4)
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
