@@ -227,7 +227,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               image, mask = image.to(device), mask.to(device)
               output = model(image.float())
               # one hot encoding the mask 
-              mask = one_hot(mask.cpu().float().numpy(), len(class_list))
+              mask = one_hot(mask.cpu().float().numpy(), class_list)
               curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
               total_loss+=curr_loss
               # Computing the average loss
@@ -242,7 +242,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
 
       if average_dice > best_val_dice:
           best_val_idx = ep
-          best_val_dice
+          best_val_dice = average_dice
           torch.save(model, os.path.join(outputDir, which_model  + str(ep) + "best.pt"))
   
       print("Epoch Validation dice:" , average_dice) 
