@@ -25,6 +25,7 @@ from pathlib import Path
 import argparse
 import datetime
 import GPUtil
+import SimpleITK as sitk
 from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
 from DeepSAGE.schd import *
 from DeepSAGE.models.fcn import fcn
@@ -35,28 +36,30 @@ from DeepSAGE.losses import *
 from DeepSAGE.utils import *
 
 
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations):
   '''
   This is the main inference loop
   '''
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False, augmentations = augmentations)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,len(class_list),base_filters)
   elif which_model == 'unet':
-    model = unet(n_channels,n_classes,base_filters)
+    model = unet(n_channels,len(class_list),base_filters)
   elif which_model == 'fcn':
-    model = fcn(n_channels,n_classes,base_filters)
+    model = fcn(n_channels,len(class_list),base_filters)
   elif which_model == 'uinc':
-    model = uinc(n_channels,n_classes,base_filters)
+    model = uinc(n_channels,len(class_list),base_filters)
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,len(class_list),base_filters)
 
+  # Loading the weights into the model
+  model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
   # setting the loss function
   if which_loss == 'dc':
     loss_fn  = MCD_loss
@@ -134,8 +137,8 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('label')  
-  
-  model.eval
+
+  model.eval()
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
     for batch_idx, subject in enumerate(inferenceDataForTorch):
@@ -150,24 +153,17 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
             aggregator.add_batch(pred_mask, locations)
 
         pred_mask = aggregator.get_output_tensor()
-        print(pred_mask.shape)
-
+        pred_mask = pred_mask.unsqueeze(0)
         # read the mask
         mask = subject['label'][torchio.DATA] # get the label image
-        mask = one_hot(mask.float().numpy(), n_classes)
+        mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+        mask = one_hot(mask.float().numpy(), class_list)
         mask = torch.from_numpy(mask)
-        # Loading images into the GPU and ignoring the affine
-        image, mask = image.float().to(device), mask.to(device)
-        #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the funct ion that created it   
-        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
-        # Making sure that the optimizer has been reset
-        # Forward Propagation to get the output from the models
         torch.cuda.empty_cache()
-        output = model(image.float())
-        # Aggregarting the patches
-        aggregator.add_batch(output, locations)
         # Computing the loss
-        loss = loss_fn(output.double(), mask.double(),n_classes)
+        #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
+        mask = mask.unsqueeze(0)
+        loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
         #Pushing the dice to the cpu and only taking its value
         curr_loss = loss.cpu().data.item()
         #train_loss_list.append(loss.cpu().data.item())
@@ -180,6 +176,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,n_classes, base
         total_dice+= curr_dice
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
+
         torch.cuda.empty_cache()
 
 

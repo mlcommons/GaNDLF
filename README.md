@@ -85,3 +85,4 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Ability to change the number of layers in the neural network models according to the parameter given in the congiguration file
 - Change the way the training and inference is logged. More user friendly and less clutter
 - Handling class imbalanaces
+- Fix the learning rate schedule

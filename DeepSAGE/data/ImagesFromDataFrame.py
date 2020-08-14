@@ -75,6 +75,9 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = T
     
     subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
 
+    if not train:
+        return subjects_dataset
+
     sampler = torchio.data.UniformSampler(psize) 
     # all of these need to be read from model.cfg
     patches_queue = torchio.Queue(subjects_dataset,max_length = 1,samples_per_volume  = 1,sampler = sampler,num_workers=4,shuffle_subjects=False, shuffle_patches=True) 

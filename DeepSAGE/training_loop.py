@@ -36,12 +36,11 @@ from DeepSAGE.utils import *
 
 
 def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
-  num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
-  n_classes, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
+  num_epochs, batch_size, learning_rate, which_loss, opt,
+  class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
   '''
   This is the main training loop
   '''
-
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations) # may or may not need to add augmentations here
 
@@ -50,17 +49,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,len(class_list),base_filters)
   elif which_model == 'unet':
-    model = unet(n_channels,n_classes,base_filters)
+    model = unet(n_channels,len(class_list),base_filters)
   elif which_model == 'fcn':
-    model = fcn(n_channels,n_classes,base_filters)
+    model = fcn(n_channels,len(class_list),base_filters)
   elif which_model == 'uinc':
-    model = uinc(n_channels,n_classes,base_filters)
+    model = uinc(n_channels,len(class_list),base_filters)
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels,n_classes,base_filters)
+    model = resunet(n_channels,len(class_list),base_filters)
 
   # setting optimizer
   if opt == 'sgd':
@@ -150,15 +149,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   print("Starting Learning rate is:",clr(2*step_size))
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
-  avg_val_loss = 0
-  total_val_loss = 0
-  best_val_loss = 2000
-  best_tr_loss = 2000
+  best_val_dice = -1
+  best_tr_dice = -1
   total_loss = 0
   total_dice = 0
   best_idx = 0
-  best_n_val_list = []
-  val_avg_loss_list = []
 
   batch = next(iter(train_loader))
   channel_keys = list(batch.keys())
@@ -180,20 +175,18 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
           # read the mask
           mask = subject['label'][torchio.DATA] # get the label image
-          mask = one_hot(mask.cpu().float().numpy(), n_classes)
-
+          mask = one_hot(mask.cpu().float().numpy(), class_list)
           mask = torch.from_numpy(mask)
           # Loading images into the GPU and ignoring the affine
           image, mask = image.float().to(device), mask.to(device)
-          #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
-          image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
           # Making sure that the optimizer has been reset
           optimizer.zero_grad()
           # Forward Propagation to get the output from the models
           torch.cuda.empty_cache()
           output = model(image.float())
           # Computing the loss
-          loss = loss_fn(output.double(), mask.double(),n_classes)
+          mask = mask.unsqueeze(0)
+          loss = loss_fn(output.double(), mask.double(),len(class_list))
           # Back Propagation for model to learn
           loss.backward()
           #Updating the weight values
@@ -201,26 +194,28 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           #Pushing the dice to the cpu and only taking its value
           curr_loss = loss.cpu().data.item()
           #train_loss_list.append(loss.cpu().data.item())
-          total_loss+=curr_loss
-          # Computing the average loss
-          average_loss = total_loss/(batch_idx + 1)
+          total_loss+=curr_loss        
           #Computing the dice score 
           curr_dice = 1 - curr_loss
           #Computing the total dice
           total_dice+= curr_dice
-          #Computing the average dice
-          average_dice = total_dice/(batch_idx + 1)
+          # Updating the learning rate
           scheduler.step()
           torch.cuda.empty_cache()
-      print("Epoch Training dice:" , average_dice)      
-      if average_dice > 1-best_tr_loss:
+
+      average_dice = total_dice/(batch_idx + 1)
+      average_loss = total_loss/(batch_idx + 1)
+     
+      if average_dice > best_tr_dice:
           best_tr_idx = ep
-          best_tr_loss = 1 - average_dice
+          best_tr_dice = average_dice
+      
+      print("Epoch Training dice:" , average_dice) 
+      print("Best Training Dice:", best_tr_dice)
+      print("Average Training Loss:", average_loss)
+      print("Best Training Epoch: ",ep)
       total_dice = 0
-      total_loss = 0     
-      print("Best Training Dice:", 1-best_tr_loss)
-      print("Best Training Epoch:", best_tr_idx)
-      print("Average Loss:", average_loss)
+      total_loss = 0  
       # Now we enter the evaluation/validation part of the epoch    
       model.eval        
     #   batch_iterator_val = iter(val_loader)
@@ -231,8 +226,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               image, mask = image.to(device), mask.to(device)
               output = model(image.float())
               # one hot encoding the mask 
+<<<<<<< HEAD
               mask = one_hot(mask.cpu().float().numpy(), n_classes)
               curr_loss = loss_fn(output.double(), mask, n_classes).cpu().data.item()
+=======
+              mask = one_hot(mask.cpu().float().numpy(), class_list)
+              mask = torch.from_numpy(mask)
+              mask = mask.unsqueeze(0)
+              # making sure that the output and mask are on the same device
+              output, mask = output.to(device), mask.to(device)
+              curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
+>>>>>>> 72b5f4541df5aa79456e89d2c43ea55fc25ba322
               total_loss+=curr_loss
               # Computing the average loss
               average_loss = total_loss/(batch_idx + 1)
@@ -243,23 +247,19 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               #Computing the average dice
               average_dice = total_dice/(batch_idx + 1)
 
-      print("Epoch Validation Dice: ", average_dice)
-      print("Average Loss:", average_loss)
-      torch.save(model, os.path.join(outputDir, which_model  + str(ep) + ".pt"))
-      if ep > save_best:
-          keep_list = np.argsort(np.array(val_avg_loss_list))
-          keep_list = keep_list[0:save_best]
-          for j in range(ep):
-              if j not in keep_list:
-                  if os.path.isfile(os.path.join(outputDir + which_model  + str(j) + ".pt")):
-                      os.remove(os.path.join(outputDir + which_model  + str(j) + ".pt"))
-          
-          print("Best ",save_best," validation epochs:", keep_list)
+      if average_dice > best_val_dice:
+          best_val_idx = ep
+          best_val_dice = average_dice
+          torch.save(model.state_dict(), os.path.join(outputDir, which_model + "_best.pt"))
+  
+      print("Epoch Validation dice:" , average_dice) 
+      print("Best Validation Dice:", best_val_dice)
+      print("Average Validation Loss:", average_loss)
+      print("Best Validation Epoch: ",ep)
 
       total_dice = 0
       total_loss = 0
       stop = time.time()   
-      val_avg_loss_list.append(1-average_dice)  
       print("Time for epoch:",(stop - start)/60,"mins")    
       sys.stdout.flush()
 
