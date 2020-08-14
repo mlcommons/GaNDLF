@@ -157,8 +157,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   total_loss = 0
   total_dice = 0
   best_idx = 0
-  best_n_val_list = []
-  val_avg_loss_list = []
 
   batch = next(iter(train_loader))
   channel_keys = list(batch.keys())
@@ -204,10 +202,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           curr_dice = 1 - curr_loss
           #Computing the total dice
           total_dice+= curr_dice
-          # Changing the learning rate
+          # Updating the learning rate
           scheduler.step()
           torch.cuda.empty_cache()
-          print("done")
+          break
 
       average_dice = total_dice/(batch_idx + 1)
       average_loss = total_loss/(batch_idx + 1)
@@ -217,7 +215,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           best_tr_loss = 1 - average_dice
       
       print("Epoch Training dice:" , average_dice) 
-      print("Best Training Dice:", 1-best_tr_loss)
+      print("Best Training Dice:", best_tr_dice)
       print("Average Training Loss:", average_loss)
       print("Best Training Epoch: ",ep)
       total_dice = 0
@@ -249,15 +247,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           best_val_loss = 1 - average_dice
           torch.save(model, os.path.join(outputDir, which_model  + str(ep) + "best.pt"))
   
-      print("Epoch Validation Dice: ", average_dice)
+      print("Epoch Validation dice:" , average_dice) 
+      print("Best Validation Dice:", best_val_dice)
       print("Average Validation Loss:", average_loss)
-
-      torch.save(model, os.path.join(outputDir, which_model  + str(ep) + ".pt"))
+      print("Best Validation Epoch: ",ep)
 
       total_dice = 0
       total_loss = 0
       stop = time.time()   
-      val_avg_loss_list.append(1-average_dice)  
       print("Time for epoch:",(stop - start)/60,"mins")    
       sys.stdout.flush()
 
