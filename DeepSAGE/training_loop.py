@@ -228,6 +228,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               output = model(image.float())
               # one hot encoding the mask 
               mask = one_hot(mask.cpu().float().numpy(), class_list)
+              mask = torch.from_numpy(mask)
               curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
               total_loss+=curr_loss
               # Computing the average loss
