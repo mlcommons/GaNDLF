@@ -86,3 +86,4 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Change the way the training and inference is logged. More user friendly and less clutter
 - Handling class imbalanaces
 - Fix the learning rate schedule
+- Different Augmentations for training and validation?
