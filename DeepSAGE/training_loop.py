@@ -150,7 +150,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
   best_val_dice = -1
-  best_val_dice = -1
+  best_tr_dice = -1
   total_loss = 0
   total_dice = 0
   best_idx = 0
@@ -239,7 +239,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               #Computing the average dice
               average_dice = total_dice/(batch_idx + 1)
               break
-            
+
       if average_dice > best_tr_dice:
           best_val_idx = ep
           best_val_loss = 1 - average_dice
