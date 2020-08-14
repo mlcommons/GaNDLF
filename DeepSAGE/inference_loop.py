@@ -25,6 +25,7 @@ from pathlib import Path
 import argparse
 import datetime
 import GPUtil
+import SimpleITK as sitk
 from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
 from DeepSAGE.schd import *
 from DeepSAGE.models.fcn import fcn
@@ -56,6 +57,16 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
     model = resunet(n_channels,len(class_list),base_filters)
+
+  # Loading the weights into the model
+  model
+
+
+
+
+
+
+
 
   # setting the loss function
   if which_loss == 'dc':
@@ -134,7 +145,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('label')  
-  
+
   model.eval
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
@@ -173,7 +184,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         total_dice+= curr_dice
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
-        print("done")
+
         torch.cuda.empty_cache()
 
 
