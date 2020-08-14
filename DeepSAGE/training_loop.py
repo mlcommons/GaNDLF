@@ -36,12 +36,11 @@ from DeepSAGE.utils import *
 
 
 def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
-  num_epochs, batch_size, learning_rate, which_loss, opt, save_best, 
+  num_epochs, batch_size, learning_rate, which_loss, opt,
   class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
   '''
   This is the main training loop
   '''
-
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations) # may or may not need to add augmentations here
 
