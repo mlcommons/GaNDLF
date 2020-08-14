@@ -152,8 +152,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   ############## STORING THE HISTORY OF THE LOSSES #################
   avg_val_loss = 0
   total_val_loss = 0
-  best_val_loss = 2000
-  best_tr_loss = 2000
+  best_val_dice = -1
+  best_val_dice = -1
   total_loss = 0
   total_dice = 0
   best_idx = 0
@@ -199,26 +199,29 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           #Pushing the dice to the cpu and only taking its value
           curr_loss = loss.cpu().data.item()
           #train_loss_list.append(loss.cpu().data.item())
-          total_loss+=curr_loss
-          # Computing the average loss
-          average_loss = total_loss/(batch_idx + 1)
+          total_loss+=curr_loss        
           #Computing the dice score 
           curr_dice = 1 - curr_loss
           #Computing the total dice
           total_dice+= curr_dice
-          #Computing the average dice
-          average_dice = total_dice/(batch_idx + 1)
+
           scheduler.step()
           torch.cuda.empty_cache()
           print("done")
-      print("Epoch Training dice:" , average_dice)      
+
+      average_dice = total_dice/(batch_idx + 1)
+      average_loss = total_loss/(batch_idx + 1)
+     
       if average_dice > 1-best_tr_loss:
           best_tr_idx = ep
           best_tr_loss = 1 - average_dice
-      total_dice = 0
-      total_loss = 0     
+      
+      print("Epoch Training dice:" , average_dice) 
       print("Best Training Dice:", 1-best_tr_loss)
-      print("Average Loss:", average_loss)
+      print("Average Training Loss:", average_loss)
+      print("Best Training Epoch: ",ep)
+      total_dice = 0
+      total_loss = 0  
       # Now we enter the evaluation/validation part of the epoch    
       model.eval        
     #   batch_iterator_val = iter(val_loader)
@@ -229,7 +232,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               image, mask = image.to(device), mask.to(device)
               output = model(image.float())
               # one hot encoding the mask 
-              mask = one_hot(mask.float().numpy(), n_classes)
+              mask = one_hot(mask.cpu().float().numpy(), n_classes)
               curr_loss = loss_fn(output.double(), mask.double(),n_classes).cpu().data.item()
               total_loss+=curr_loss
               # Computing the average loss
@@ -241,19 +244,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               #Computing the average dice
               average_dice = total_dice/(batch_idx + 1)
 
+      if average_dice > 1-best_val_loss:
+          best_val_idx = ep
+          best_val_loss = 1 - average_dice
+          torch.save(model, os.path.join(outputDir, which_model  + str(ep) + "best.pt"))
+  
       print("Epoch Validation Dice: ", average_dice)
-      print("Average Loss:", average_loss)
-      torch.save(model, os.path.join(outputDir, which_model  + str(ep) + ".pt"))
-      if ep > save_best:
-          keep_list = np.argsort(np.array(val_avg_loss_list))
-          keep_list = keep_list[0:save_best]
-          for j in range(ep):
-              if j not in keep_list:
-                  if os.path.isfile(os.path.join(outputDir + which_model  + str(j) + ".pt")):
-                      os.remove(os.path.join(outputDir + which_model  + str(j) + ".pt"))
-          
-          print("Best ",save_best," validation epochs:", keep_list)
+      print("Average Validation Loss:", average_loss)
 
+      torch.save(model, os.path.join(outputDir, which_model  + str(ep) + ".pt"))
 
       total_dice = 0
       total_loss = 0
