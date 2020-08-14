@@ -202,7 +202,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           # Updating the learning rate
           scheduler.step()
           torch.cuda.empty_cache()
-          break
 
       average_dice = total_dice/(batch_idx + 1)
       average_loss = total_loss/(batch_idx + 1)
@@ -242,7 +241,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               total_dice+= curr_dice
               #Computing the average dice
               average_dice = total_dice/(batch_idx + 1)
-              break
 
       if average_dice > best_val_dice:
           best_val_idx = ep
