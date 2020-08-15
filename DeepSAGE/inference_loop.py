@@ -175,8 +175,11 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         average_dice = total_dice/(batch_idx + 1)
         torch.cuda.empty_cache()
 
-        # Saving the mask to disk in the output dir
-
+        # Saving the mask to disk in the output directory using the same metadata as from the 
+        inputImage = sitk.ReadImage(subject['path_to_metadata'])
+        pred_mask = pred_mask.cpu().numpy()
+        result_image = sitk.GetImageFromArray(pred_mask)
+        result_image.CopyInformation(inputImage)
 
 
 if __name__ == "__main__":
