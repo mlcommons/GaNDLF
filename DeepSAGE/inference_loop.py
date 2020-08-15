@@ -178,8 +178,15 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         # Saving the mask to disk in the output directory using the same metadata as from the 
         inputImage = sitk.ReadImage(subject['path_to_metadata'])
         pred_mask = pred_mask.cpu().numpy()
+        # works since batch size is always one in inference time
+        print(pred_mask)
+        pred_mask = reverse_one_hot(pred_mask[0],class_list)
         result_image = sitk.GetImageFromArray(pred_mask)
         result_image.CopyInformation(inputImage)
+        patient_name = os.path.basename(subject['path_to_metadata'])
+        if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
+          os.mkdir(os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+        sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
 
 
 if __name__ == "__main__":
