@@ -179,7 +179,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         inputImage = sitk.ReadImage(subject['path_to_metadata'])
         pred_mask = pred_mask.cpu().numpy()
         # works since batch size is always one in inference time
-        print(pred_mask)
+        
         pred_mask = reverse_one_hot(pred_mask[0],class_list)
         result_image = sitk.GetImageFromArray(pred_mask)
         result_image.CopyInformation(inputImage)

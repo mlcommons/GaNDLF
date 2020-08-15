@@ -9,10 +9,10 @@ def one_hot(segmask_array, class_list):
     return one_hot_stack
 
 def reverse_one_hot(predmask_array,class_list):
-    idx  = np.argmax(predmask_array,axis=1)
+    print(predmask_array.shape)
+    idx  = np.argmax(predmask_array,axis=0)
     print(idx.shape)
     final_mask = 0
-    predmask_array = (predmask_array>=thresh).astype(int)
     for idx, class_ in enumerate(class_list):
         final_mask = final_mask + predmask_array[idx]*class_
 
