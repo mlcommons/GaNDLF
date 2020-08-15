@@ -149,9 +149,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
             pred_mask = model(image)
             aggregator.add_batch(pred_mask, locations)
 
-        print(subject['label'])
-        print(subject['path_to_metadata'])
-
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
         # read the mask
@@ -177,6 +174,9 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
         torch.cuda.empty_cache()
+
+        # Saving the mask to disk in the output dir
+
 
 
 if __name__ == "__main__":
