@@ -213,7 +213,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print("Epoch Training dice:" , average_dice) 
       print("Best Training Dice:", best_tr_dice)
       print("Average Training Loss:", average_loss)
-      print("Best Training Epoch: ",ep)
+      print("Best Training Epoch: ",best_tr_idx)
       total_dice = 0
       total_loss = 0  
       # Now we enter the evaluation/validation part of the epoch    
@@ -250,7 +250,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print("Epoch Validation dice:" , average_dice) 
       print("Best Validation Dice:", best_val_dice)
       print("Average Validation Loss:", average_loss)
-      print("Best Validation Epoch: ",ep)
+      print("Best Validation Epoch: ",best_val_idx)
 
       total_dice = 0
       total_loss = 0
