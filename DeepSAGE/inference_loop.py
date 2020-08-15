@@ -42,6 +42,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   '''
   # Setting up the inference loader
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False, augmentations = augmentations)
+  inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
@@ -80,6 +81,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('label')  
+  channel_keys.remove('path_for_matadata')
 
   print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
@@ -133,10 +135,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   best_n_val_list = []
   val_avg_loss_list = []
 
-  batch = next(iter(inference_loader))
-  channel_keys = list(batch.keys())
-  channel_keys.remove('label')  
-
   model.eval()
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
@@ -176,7 +174,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         total_dice+= curr_dice
         #Computing the average dice
         average_dice = total_dice/(batch_idx + 1)
-
         torch.cuda.empty_cache()
 
 
