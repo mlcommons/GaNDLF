@@ -77,7 +77,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
-  # get the channel keys
+  # get the channel keys for concatenation later
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('label')  
@@ -150,6 +150,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
             pred_mask = model(image)
             aggregator.add_batch(pred_mask, locations)
 
+        print(subject['path_to_metadata'])
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
         # read the mask
