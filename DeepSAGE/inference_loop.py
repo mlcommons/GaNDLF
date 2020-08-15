@@ -81,7 +81,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
   channel_keys.remove('label')  
-  channel_keys.remove('path_for_matadata')
+  channel_keys.remove('path_to_metadata')
 
   print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
@@ -140,7 +140,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   with torch.no_grad():
     for batch_idx, subject in enumerate(inferenceDataForTorch):
         # Load the subject and its ground truth
-        print(subject)
         grid_sampler = torchio.inference.GridSampler(subject , psize, 4)
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
@@ -150,7 +149,9 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
             pred_mask = model(image)
             aggregator.add_batch(pred_mask, locations)
 
+        print(subject['label'])
         print(subject['path_to_metadata'])
+
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
         # read the mask
