@@ -70,6 +70,7 @@ batch_size = int(params['batch_size'])
 learning_rate = int(params['learning_rate'])
 which_loss = str(params['loss_function'])
 opt = str(params['opt'])
+lr_schedule = str(params['scheduler'])
 augmentations = ast.literal_eval(str(params['data_augmentation']))
 class_list =  ast.literal_eval(str(params['class_list']))
 # Extracting the model parameters from the dictionary
