@@ -151,28 +151,32 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
 
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
-        # read the mask
-        mask = subject['label'][torchio.DATA] # get the label image
-        mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-        mask = one_hot(mask.float().numpy(), class_list)
-        mask = torch.from_numpy(mask)
-        torch.cuda.empty_cache()
-        # Computing the loss
-        #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
-        mask = mask.unsqueeze(0)
-        loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
-        #Pushing the dice to the cpu and only taking its value
-        curr_loss = loss.cpu().data.item()
-        #train_loss_list.append(loss.cpu().data.item())
-        total_loss+=curr_loss
-        # Computing the average loss
-        average_loss = total_loss/(batch_idx + 1)
-        #Computing the dice score 
-        curr_dice = 1 - curr_loss
-        #Computing the total dice
-        total_dice+= curr_dice
-        torch.cuda.empty_cache()
-        print(curr_dice)
+        # read the ground truth mask
+        if subject['label'] is not None:
+          mask = subject['label'][torchio.DATA] # get the label image
+          mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+          mask = one_hot(mask.float().numpy(), class_list)
+          mask = torch.from_numpy(mask)
+          torch.cuda.empty_cache()
+          # Computing the loss
+          #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
+          mask = mask.unsqueeze(0)
+          loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
+          #Pushing the dice to the cpu and only taking its value
+          curr_loss = loss.cpu().data.item()
+          #train_loss_list.append(loss.cpu().data.item())
+          total_loss+=curr_loss
+          # Computing the average loss
+          average_loss = total_loss/(batch_idx + 1)
+          #Computing the dice score 
+          curr_dice = 1 - curr_loss
+          #Computing the total dice
+          total_dice+= curr_dice
+          torch.cuda.empty_cache()
+          print("Current Dice is: ", curr_dice)
+        else:
+          print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
+
         # Saving the mask to disk in the output directory using the same metadata as from the 
         inputImage = sitk.ReadImage(subject['path_to_metadata'])
         pred_mask = pred_mask.cpu().numpy()
@@ -185,8 +189,9 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
           os.mkdir(os.path.join(outputDir,"generated_masks"))
         sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
   #Computing the average dice
-  average_dice = total_dice/(batch_idx + 1)
-  print(average_dice)
+  if labelHeader is not None:
+    average_dice = total_dice/(batch_idx + 1)
+    print(average_dice)
 
 if __name__ == "__main__":
 

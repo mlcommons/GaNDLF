@@ -51,6 +51,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = T
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
             subject['label'] = None
+            subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
         # Initializing the subject object using the dict
         subject = Subject(subject_dict) 
         # Appending this subject to the list of subjects
