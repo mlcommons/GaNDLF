@@ -93,11 +93,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
-  # get the channel keys
-  batch = next(iter(train_loader))
-  channel_keys = list(batch.keys())
-  channel_keys.remove('index_ini')
-  channel_keys.remove('label')  
 
   print("Training Data Samples: ", len(train_loader.dataset))
   sys.stdout.flush()
@@ -154,12 +149,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   total_loss = 0
   total_dice = 0
   best_idx = 0
-
+  
+  # Getting the channels for training and removing all the non numeric entries from the channels
   batch = next(iter(train_loader))
   channel_keys = list(batch.keys())
-  channel_keys.remove('index_ini')
-  channel_keys.remove('label')  
-  
+  channel_keys_new = []
+  for item in channel_keys:
+    if item.isnumeric():
+      channel_keys_new.append(item)
+  channel_keys = channel_keys_new
   ################ TRAINING THE MODEL##############
   for ep in range(num_epochs):
       start = time.time()
@@ -213,7 +211,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print("Epoch Training dice:" , average_dice) 
       print("Best Training Dice:", best_tr_dice)
       print("Average Training Loss:", average_loss)
-      print("Best Training Epoch: ",ep)
+      print("Best Training Epoch: ",best_tr_idx)
       total_dice = 0
       total_loss = 0  
       # Now we enter the evaluation/validation part of the epoch    
@@ -250,7 +248,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print("Epoch Validation dice:" , average_dice) 
       print("Best Validation Dice:", best_val_dice)
       print("Average Validation Loss:", average_loss)
-      print("Best Validation Epoch: ",ep)
+      print("Best Validation Epoch: ",best_val_idx)
 
       total_dice = 0
       total_loss = 0

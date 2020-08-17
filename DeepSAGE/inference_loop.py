@@ -77,10 +77,14 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
-  # get the channel keys
+  # get the channel keys for concatenation later (exclude non numeric channel keys)
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
-  channel_keys.remove('label')  
+  channel_keys_new = []
+  for item in channel_keys:
+    if item.isnumeric():
+      channel_keys_new.append(item)
+  channel_keys = channel_keys_new
 
   print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
@@ -134,10 +138,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   best_n_val_list = []
   val_avg_loss_list = []
 
-  batch = next(iter(inference_loader))
-  channel_keys = list(batch.keys())
-  channel_keys.remove('label')  
-
   model.eval()
   #   batch_iterator_train = iter(train_loader)
   with torch.no_grad():
@@ -154,31 +154,47 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
 
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
-        # read the mask
-        mask = subject['label'][torchio.DATA] # get the label image
-        mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-        mask = one_hot(mask.float().numpy(), class_list)
-        mask = torch.from_numpy(mask)
-        torch.cuda.empty_cache()
-        # Computing the loss
-        #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
-        mask = mask.unsqueeze(0)
-        loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
-        #Pushing the dice to the cpu and only taking its value
-        curr_loss = loss.cpu().data.item()
-        #train_loss_list.append(loss.cpu().data.item())
-        total_loss+=curr_loss
-        # Computing the average loss
-        average_loss = total_loss/(batch_idx + 1)
-        #Computing the dice score 
-        curr_dice = 1 - curr_loss
-        #Computing the total dice
-        total_dice+= curr_dice
-        #Computing the average dice
-        average_dice = total_dice/(batch_idx + 1)
+        # read the ground truth mask
+        if not subject['label'] == "NA":
+          mask = subject['label'][torchio.DATA] # get the label image
+          mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+          mask = one_hot(mask.float().numpy(), class_list)
+          mask = torch.from_numpy(mask)
+          torch.cuda.empty_cache()
+          # Computing the loss
+          #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
+          mask = mask.unsqueeze(0)
+          loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
+          #Pushing the dice to the cpu and only taking its value
+          curr_loss = loss.cpu().data.item()
+          #train_loss_list.append(loss.cpu().data.item())
+          total_loss+=curr_loss
+          # Computing the average loss
+          average_loss = total_loss/(batch_idx + 1)
+          #Computing the dice score 
+          curr_dice = 1 - curr_loss
+          #Computing the total dice
+          total_dice+= curr_dice
+          torch.cuda.empty_cache()
+          print("Current Dice is: ", curr_dice)
+        else:
+          print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
 
-        torch.cuda.empty_cache()
-
+        # Saving the mask to disk in the output directory using the same metadata as from the 
+        inputImage = sitk.ReadImage(subject['path_to_metadata'])
+        pred_mask = pred_mask.cpu().numpy()
+        # works since batch size is always one in inference time  
+        pred_mask = reverse_one_hot(pred_mask[0],class_list)
+        result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
+        result_image.CopyInformation(inputImage)
+        patient_name = os.path.basename(subject['path_to_metadata'])
+        if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
+          os.mkdir(os.path.join(outputDir,"generated_masks"))
+        sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+  #Computing the average dice
+  if not subject['label'] == "NA":
+    average_dice = total_dice/(batch_idx + 1)
+    print(average_dice)
 
 if __name__ == "__main__":
 

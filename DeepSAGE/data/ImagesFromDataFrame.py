@@ -46,7 +46,14 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = T
         for channel in channelHeaders:
             # assigining the dict key to the channel
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
-        subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
+        if labelHeader is not None:
+            subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
+            if not train:
+                subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
+        else:
+            subject_dict['label'] = "NA"
+            if not train:
+                subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
         # Initializing the subject object using the dict
         subject = Subject(subject_dict) 
         # Appending this subject to the list of subjects

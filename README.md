@@ -69,9 +69,6 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Add option to normalize on a per-channel basis, if required
 - Multi-dimension architectures
-- Single entry point for user 
-  - Training: done
-  - Inference
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
@@ -83,6 +80,6 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Regression example: https://github.com/wolny/pytorch-3dunet
 - Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
 - Ability to change the number of layers in the neural network models according to the parameter given in the congiguration file
-- Change the way the training and inference is logged. More user friendly and less clutter
 - Handling class imbalanaces
 - Fix the learning rate schedule
+- Different Augmentations for training and validation?

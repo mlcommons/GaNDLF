@@ -2,7 +2,7 @@
 ######START OF EMBEDDED SGE COMMANDS ##########################
 #$ -S /bin/bash
 #$ -cwd
-#$ -N BraTS2020_Train
+#$ -N BraTS2020_Infer
 #$ -M 16ee234.megh@nitk.edu.in #### email to nofity with following options/scenarios
 #$ -m a #### send mail in case the job is aborted
 #$ -m b #### send mail when job begins
@@ -18,4 +18,4 @@ CUDA_VISIBLE_DEVICES=`get_CUDA_VISIBLE_DEVICES` || exit
 export CUDA_VISIBLE_DEVICES 
 echo "Cuda device: \$CUDA_VISIBLE_DEVICES"
 source activate dss
-python ../deep_sage -config `pwd`/sample_model.cfg -data `pwd`/train.csv -output `pwd`/output_dir/ -train 1 -device cuda
+python ../deep_sage -config `pwd`/sample_model.cfg -data `pwd`/val.csv -modelDir `pwd`/output_dir/ -output `pwd`/output_dir/ -train 0 -device cuda
