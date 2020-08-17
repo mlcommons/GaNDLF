@@ -106,7 +106,7 @@ for col in data_full.columns:
         labelHeader = data_full.columns.get_loc(col)
     elif ('SubjectID' in col) or ('PatientName' in col):
         subjectIDHeader = data_full.columns.get_loc(col)
-
+print(labelHeader)
 # sanity check
 if len(channelHeaders) != int(params['numberOfInputChannels']):
     sys.exit('The number of channels in the data csv and in the parameter \'numberOfInputChannels\' need to be the same')
