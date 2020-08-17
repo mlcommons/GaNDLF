@@ -77,13 +77,14 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
-  # get the channel keys for concatenation later
+  # get the channel keys for concatenation later (exclude non numeric channel keys)
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
+  channel_keys_new = []
   for item in channel_keys:
-    if not item.isnumeric():
-      channel_keys.remove(item)
-
+    if item.isnumeric():
+      channel_keys_new.append(item)
+  channel_keys = channel_keys_new
   print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   dev = device
