@@ -80,8 +80,10 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   # get the channel keys for concatenation later
   batch = next(iter(inference_loader))
   channel_keys = list(batch.keys())
-  channel_keys.remove('label')  
-  channel_keys.remove('path_to_metadata')
+  for item in channel_keys:
+    if not item.isnumeric():
+      channel_keys.remove(item)  
+      channel_keys.remove(item)
 
   print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
@@ -189,7 +191,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
           os.mkdir(os.path.join(outputDir,"generated_masks"))
         sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
   #Computing the average dice
-  if not labelHeader == "NA":
+  if not subject['label'] == "NA":
     average_dice = total_dice/(batch_idx + 1)
     print(average_dice)
 
