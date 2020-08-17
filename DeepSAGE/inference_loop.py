@@ -152,7 +152,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
         pred_mask = aggregator.get_output_tensor()
         pred_mask = pred_mask.unsqueeze(0)
         # read the ground truth mask
-        if subject['label'] is not None:
+        if not subject['label'] == "NA":
           mask = subject['label'][torchio.DATA] # get the label image
           mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
           mask = one_hot(mask.float().numpy(), class_list)
@@ -189,7 +189,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
           os.mkdir(os.path.join(outputDir,"generated_masks"))
         sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
   #Computing the average dice
-  if labelHeader is not None:
+  if not labelHeader == "NA":
     average_dice = total_dice/(batch_idx + 1)
     print(average_dice)
 

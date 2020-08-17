@@ -50,7 +50,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = T
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
-            subject_dict['label'] = None
+            subject_dict['label'] = "NA"
             subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
         # Initializing the subject object using the dict
         subject = Subject(subject_dict) 
