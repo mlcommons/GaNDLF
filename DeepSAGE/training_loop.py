@@ -93,11 +93,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
-  # get the channel keys
-  batch = next(iter(train_loader))
-  channel_keys = list(batch.keys())
-  channel_keys.remove('index_ini')
-  channel_keys.remove('label')  
 
   print("Training Data Samples: ", len(train_loader.dataset))
   sys.stdout.flush()
