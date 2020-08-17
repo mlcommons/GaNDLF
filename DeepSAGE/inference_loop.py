@@ -85,6 +85,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
     if item.isnumeric():
       channel_keys_new.append(item)
   channel_keys = channel_keys_new
+
   print("Training Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   dev = device

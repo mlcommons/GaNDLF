@@ -157,6 +157,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
 
   batch = next(iter(train_loader))
   channel_keys = list(batch.keys())
+  print(channel_keys)
   channel_keys.remove('index_ini')
   channel_keys.remove('label')  
   
