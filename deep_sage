@@ -102,11 +102,14 @@ for col in data_full.columns:
     # add appropriate headers to read here, as needed
     if ('Channel' in col) or ('Modality' in col) or ('Image' in col):
         channelHeaders.append(data_full.columns.get_loc(col))
-    elif ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
-        labelHeader = data_full.columns.get_loc(col)
     elif ('SubjectID' in col) or ('PatientName' in col):
         subjectIDHeader = data_full.columns.get_loc(col)
-print(labelHeader)
+    # Separate if else statement
+    if ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
+        labelHeader = data_full.columns.get_loc(col)
+    else:
+        labelHeader = None
+    
 # sanity check
 if len(channelHeaders) != int(params['numberOfInputChannels']):
     sys.exit('The number of channels in the data csv and in the parameter \'numberOfInputChannels\' need to be the same')
