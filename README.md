@@ -69,9 +69,6 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
 - Add option to normalize on a per-channel basis, if required
 - Multi-dimension architectures
-- Single entry point for user 
-  - Training: done
-  - Inference
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
