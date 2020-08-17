@@ -67,7 +67,6 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 ## To Do
 
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
-- Add option to normalize on a per-channel basis, if required
 - Multi-dimension architectures
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
