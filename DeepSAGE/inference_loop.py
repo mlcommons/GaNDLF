@@ -82,7 +82,6 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   channel_keys = list(batch.keys())
   for item in channel_keys:
     if not item.isnumeric():
-      channel_keys.remove(item)  
       channel_keys.remove(item)
 
   print("Training Data Samples: ", len(inference_loader.dataset))
