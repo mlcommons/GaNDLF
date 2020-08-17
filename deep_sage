@@ -76,7 +76,6 @@ class_list =  ast.literal_eval(str(params['class_list']))
 # Extracting the model parameters from the dictionary
 
 base_filters = int(params['base_filters'])
-n_channels = int(params['numberOfInputChannels'])
 # model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
 kfolds = int(params['kcross_validation'])
@@ -109,10 +108,8 @@ for col in data_full.columns:
         labelHeader = data_full.columns.get_loc(col)
     else:
         labelHeader = None
-    
-# sanity check
-if len(channelHeaders) != int(params['numberOfInputChannels']):
-    sys.exit('The number of channels in the data csv and in the parameter \'numberOfInputChannels\' need to be the same')
+
+n_channels = len(channelHeaders)
 
 if mode != 0: # training mode
     TrainingManager(dataframe = data_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, which_loss = which_loss, opt = opt, class_list = class_list, base_filters = base_filters, n_channels = n_channels, which_model = which_model, parallel_compute_command = parallel_compute_command, device = args.device)
