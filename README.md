@@ -1,8 +1,9 @@
-# deep-semantic-seg
+# GANDLF
 
-## Name candidates
+A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification.
 
-- GANDLF: A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification 
+## Other name candidates
+
 - DeepSAGE: Deep SemAntic seGmEntator
 - SEACAF: SEgmentation And ClassificAtion Framework
 - DeepSAC: Deep Segmentation and Classification
