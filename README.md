@@ -83,3 +83,4 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Handling class imbalanaces
 - Fix the learning rate schedule
 - Different Augmentations for training and validation?
+- Parameterize the [torchio.Queue](https://torchio.readthedocs.io/data/patch_training.html?#id1)
