@@ -78,6 +78,5 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
   - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
 - Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
 - Ability to change the number of layers in the neural network models according to the parameter given in the configuration file
-- Handling class imbalanaces
 - Fix the learning rate schedule
 - Different Augmentations for training and validation?
