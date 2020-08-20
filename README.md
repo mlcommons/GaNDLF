@@ -73,9 +73,6 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
 - Add option to train on multiple networks and then fuse results from all; basically some kind of ensemble
-- Add appropriate architectures
-  - from nnUnet
-  - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
 - Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
 - Ability to change the number of layers in the neural network models according to the parameter given in the configuration file
 - Fix the learning rate schedule
