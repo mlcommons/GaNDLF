@@ -37,12 +37,12 @@ from DeepSAGE.utils import *
 
 def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
   num_epochs, batch_size, learning_rate, which_loss, opt,
-  class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device):
+  class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
   '''
   This is the main training loop
   '''
-  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations)
-  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, train = True, augmentations = augmentations) # may or may not need to add augmentations here
+  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations)
+  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations) # may or may not need to add augmentations here
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
@@ -279,6 +279,10 @@ if __name__ == "__main__":
     parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
+    parser.add_argument('-q_max_length', type=int, help = '[Queue] Max length', required=True)
+    parser.add_argument('-q_samples_per_volume', type=int, help = '[Queue] Samples per volume', required=True)
+    parser.add_argument('-q_num_workers', type=int, help = '[Queue] Number of workers', required=True)
+    parser.add_argument('-q_verbose', type=str, help = '[Queue] Verbose debugging', required=True)
     
     args = parser.parse_args()
 
@@ -290,6 +294,9 @@ if __name__ == "__main__":
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
 
+    q_verbose = False
+    if args.q_verbose == 'True':
+        q_verbose = True
 
     trainingLoop(trainingDataFromPickle = trainingDataFromPickle, 
         validataionDataFromPickle = validataionDataFromPickle, 
@@ -308,4 +315,8 @@ if __name__ == "__main__":
         labelHeader = label_header, 
         augmentations = augmentations,
         outputDir = args.outputDir,
-        device = args.device)
+        device = args.device,
+        q_verbose = q_verbose,
+        q_max_length = args.q_max_length,
+        q_samples_per_volume = args.q_samples_per_volume,
+        q_num_workers = args.q_num_workers)
