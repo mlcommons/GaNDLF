@@ -69,19 +69,11 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](
 ## To Do
 
 - Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
-- Multi-dimension architectures
 - Add more models that could potentially handle sparse data better
 - Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
 - Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
 - Add option to train on multiple networks and then fuse results from all; basically some kind of ensemble
-- [Model pruning](https://pytorch.org/tutorials/intermediate/pruning_tutorial.html)
-- Add appropriate architectures
-  - from nnUnet
-  - https://github.com/black0017/MedicalZooPytorch#implemented-architectures
-- Regression example: https://github.com/wolny/pytorch-3dunet
 - Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
-- Ability to change the number of layers in the neural network models according to the parameter given in the congiguration file
-- Handling class imbalanaces
+- Ability to change the number of layers in the neural network models according to the parameter given in the configuration file
 - Fix the learning rate schedule
 - Different Augmentations for training and validation?
-- Parameterize the [torchio.Queue](https://torchio.readthedocs.io/data/patch_training.html?#id1)
