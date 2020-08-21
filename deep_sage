@@ -103,13 +103,6 @@ if 'q_verbose' in params:
     if params['q_verbose'] == 'True':
         q_verbose = True
 
-# this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower
-q_samples_per_volume = 10
-# this determines the number subprocesses to use for data loading; '0' means main process is used
-q_num_workers = 1
-# used for debugging
-q_verbose = False
-
 parallel_compute_command = ''
 if 'parallel_compute_command' in params:
     parallel_compute_command = params['parallel_compute_command']
