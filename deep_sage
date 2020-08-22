@@ -96,7 +96,7 @@ else:
 if 'q_num_workers' in params:
     q_num_workers = int(params['q_num_workers'])
 else:
-    q_num_workers = 0
+    q_num_workers = 4
 
 q_verbose = False
 if 'q_verbose' in params:
