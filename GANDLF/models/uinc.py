@@ -1,13 +1,13 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from DeepSAGE.models.seg_modules.ResNetModule import ResNetModule
-from DeepSAGE.models.seg_modules.InceptionModule import InceptionModule
-from DeepSAGE.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
-from DeepSAGE.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
-from DeepSAGE.models.seg_modules.IncConv import IncConv
-from DeepSAGE.models.seg_modules.ResNetModule import ResNetModule
-from DeepSAGE.models.seg_modules.IncDropout import IncDropout
+from GANDLF.models.seg_modules.ResNetModule import ResNetModule
+from GANDLF.models.seg_modules.InceptionModule import InceptionModule
+from GANDLF.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
+from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
+from GANDLF.models.seg_modules.IncConv import IncConv
+from GANDLF.models.seg_modules.ResNetModule import ResNetModule
+from GANDLF.models.seg_modules.IncDropout import IncDropout
    
 class uinc(nn.Module):
     """

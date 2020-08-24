@@ -21,8 +21,8 @@ from pathlib import Path
 import subprocess
 
 
-# from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
-from DeepSAGE.inference_loop import inferenceLoop
+# from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.inference_loop import inferenceLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def InferenceManager(dataframe, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,batch_size, which_loss, class_list, base_filters, n_channels, which_model, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, augmentations):

@@ -21,8 +21,8 @@ from pathlib import Path
 import subprocess
 
 
-# from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
-from DeepSAGE.training_loop import trainingLoop
+# from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir, num_epochs, batch_size, learning_rate, which_loss, opt, class_list, base_filters, n_channels, which_model, parallel_compute_command, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
@@ -92,14 +92,14 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
         parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentOutputFolder)
         
         if not('python' in parallel_compute_command_actual):
-          sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${DeepSAGE_dir}/venv/bin/python\'')
+          sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
 
         q_verbose_string = 'False'
         if q_verbose:
           q_verbose_string = 'True'
 
         command = parallel_compute_command_actual + \
-            ' -m DeepSAGE.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
+            ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
             ' -val_loader_pickle ' + currentValidataionDataPickle + \
             ' -num_epochs ' + str(num_epochs) + ' -batch_size ' + str(batch_size) + \
             ' -learning_rate ' + str(learning_rate) + ' -which_loss ' + which_loss + \

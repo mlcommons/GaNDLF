@@ -29,7 +29,7 @@ setup(
   author="Megh Bhalerao, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
-  scripts=['deep_sage'],
+  scripts=['gandlf_run'],
   classifiers=[
     'Development Status :: Pre-Alpha',
     'Intended Audience :: Science/Research',
@@ -50,7 +50,7 @@ setup(
   long_description_content_type='text/markdown',
   include_package_data=True,
   keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
-  name='DeepSAGE',
+  name='GANDLF',
   version='0.0.1',
   zip_safe=False,
 )
