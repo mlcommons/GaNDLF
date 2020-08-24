@@ -86,12 +86,12 @@ psize = np.array(psize)
 if 'q_max_length' in params:
     q_max_length = int(params['q_max_length'])
 else:
-    q_max_length = 10
+    q_max_length = 100
 
 if 'q_samples_per_volume' in params:
     q_samples_per_volume = int(params['q_samples_per_volume'])
 else:
-    q_samples_per_volume = q_max_length
+    q_samples_per_volume = 10
 
 if 'q_num_workers' in params:
     q_num_workers = int(params['q_num_workers'])
