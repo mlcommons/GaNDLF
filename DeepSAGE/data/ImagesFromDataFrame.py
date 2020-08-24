@@ -14,12 +14,24 @@ from torchio import Image, Subject
 # Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
+spatial_transform = OneOf({
+    RandomAffine(): 0.8,
+    RandomElasticDeformation(): 0.2,
+})
+
+mri_artifact = OneOf({
+    RandomMotion(): 0.5,
+    RandomGhosting(): 0.5,
+})
+
 global_augs_dict = {
     'normalize':ZNormalization(),
-    'affine':RandomAffine(image_interpolation = 'linear'), 
-    'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
-    'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
-    'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
+    'spatial': spatial_transform,
+    'kspace': mri_artifact,
+    # 'affine':RandomAffine(image_interpolation = 'linear'), 
+    # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
+    # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
+    # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
     'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
     'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
     'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
