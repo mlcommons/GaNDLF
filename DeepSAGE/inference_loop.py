@@ -120,7 +120,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   if device.type == 'cuda':
       print('Memory Usage:')
       print('  Allocated:', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
-      print('  Cached: ', round(torch.cuda.memory_cached(0)/1024**3, 1), 'GB')
+      print('  Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
   sys.stdout.flush()
 
