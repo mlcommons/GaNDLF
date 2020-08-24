@@ -4,7 +4,7 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 
 ## Other name candidates
 
-- DeepSAGE: Deep SemAntic seGmEntator
+- GANDLF: Deep SemAntic seGmEntator
 - SEACAF: SEgmentation And ClassificAtion Framework
 - DeepSAC: Deep Segmentation and Classification
 
@@ -53,7 +53,7 @@ pip install -e .
 
 ```powershell
 # continue from previous shell
-python deepsage.py \
+python GANDLF.py \
   -config ./experiment_0/model.cfg \ # model configuration
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory

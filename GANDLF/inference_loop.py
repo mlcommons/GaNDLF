@@ -26,14 +26,14 @@ import argparse
 import datetime
 import GPUtil
 import SimpleITK as sitk
-from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
-from DeepSAGE.schd import *
-from DeepSAGE.models.fcn import fcn
-from DeepSAGE.models.unet import unet
-from DeepSAGE.models.resunet import resunet
-from DeepSAGE.models.uinc import uinc
-from DeepSAGE.losses import *
-from DeepSAGE.utils import *
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.schd import *
+from GANDLF.models.fcn import fcn
+from GANDLF.models.unet import unet
+from GANDLF.models.resunet import resunet
+from GANDLF.models.uinc import uinc
+from GANDLF.losses import *
+from GANDLF.utils import *
 
 
 def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations):
@@ -199,7 +199,7 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
 if __name__ == "__main__":
 
     # parse the cli arguments here
-    parser = argparse.ArgumentParser(description = "Inference Loop of DeepSAGE")
+    parser = argparse.ArgumentParser(description = "Inference Loop of GANDLF")
     parser.add_argument('-inference_loader_pickle', type=str, help = 'Inference loader pickle', required=True)
     parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
     parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)

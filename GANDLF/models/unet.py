@@ -2,12 +2,12 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from DeepSAGE.models.seg_modules.DownsamplingModule import DownsamplingModule
-from DeepSAGE.models.seg_modules.EncodingModule import EncodingModule
-from DeepSAGE.models.seg_modules.DecodingModule import DecodingModule
-from DeepSAGE.models.seg_modules.UpsamplingModule import UpsamplingModule
-from DeepSAGE.models.seg_modules.in_conv import in_conv
-from DeepSAGE.models.seg_modules.out_conv import out_conv
+from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
+from GANDLF.models.seg_modules.EncodingModule import EncodingModule
+from GANDLF.models.seg_modules.DecodingModule import DecodingModule
+from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
+from GANDLF.models.seg_modules.in_conv import in_conv
+from GANDLF.models.seg_modules.out_conv import out_conv
 
 
 
