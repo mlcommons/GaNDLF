@@ -25,14 +25,14 @@ from pathlib import Path
 import argparse
 import datetime
 import GPUtil
-from DeepSAGE.data.ImagesFromDataFrame import ImagesFromDataFrame
-from DeepSAGE.schd import *
-from DeepSAGE.models.fcn import fcn
-from DeepSAGE.models.unet import unet
-from DeepSAGE.models.resunet import resunet
-from DeepSAGE.models.uinc import uinc
-from DeepSAGE.losses import *
-from DeepSAGE.utils import *
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.schd import *
+from GANDLF.models.fcn import fcn
+from GANDLF.models.unet import unet
+from GANDLF.models.resunet import resunet
+from GANDLF.models.uinc import uinc
+from GANDLF.losses import *
+from GANDLF.utils import *
 
 
 def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
@@ -260,7 +260,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
 if __name__ == "__main__":
 
     # parse the cli arguments here
-    parser = argparse.ArgumentParser(description = "Training Loop of DeepSAGE")
+    parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
     parser.add_argument('-num_epochs', type=int, help = 'Number of epochs', required=True)

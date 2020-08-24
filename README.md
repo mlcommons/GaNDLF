@@ -53,7 +53,7 @@ pip install -e .
 
 ```powershell
 # continue from previous shell
-python deepsage.py \
+python GANDLF.py \
   -config ./experiment_0/model.cfg \ # model configuration
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory

@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from DeepSAGE.models.seg_modules import *
+from GANDLF.models.seg_modules import *
 
 
 class MSDNet(nn.Module):
