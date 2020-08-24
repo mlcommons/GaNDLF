@@ -18,4 +18,4 @@ CUDA_VISIBLE_DEVICES=`get_CUDA_VISIBLE_DEVICES` || exit
 export CUDA_VISIBLE_DEVICES 
 echo "Cuda device: \$CUDA_VISIBLE_DEVICES"
 source activate dss
-python ../deep_sage -config `pwd`/sample_model.cfg -data `pwd`/train.csv -output `pwd`/output_dir/ -train 1 -device cuda
+python ../gandl_run -config `pwd`/sample_model.cfg -data `pwd`/train.csv -output `pwd`/output_dir/ -train 1 -device cuda
