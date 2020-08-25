@@ -19,6 +19,7 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 - Multi-GPU (on the same machine) training
 - Leverages robust open source software
 - No need to code to generate robust models
+- [Automatic mixed precision](https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/) support
 
 ## Constructing the Data CSV
 
