@@ -76,7 +76,7 @@ class_list =  ast.literal_eval(str(params['class_list']))
 # Extracting the model parameters from the dictionary
 
 base_filters = int(params['base_filters'])
-# model_path = str(params['folderForOutput'])
+model_path = str(params['folderForOutput'])
 which_model = str(params['modelName'])
 kfolds = int(params['kcross_validation'])
 psize = params['patch_size']
