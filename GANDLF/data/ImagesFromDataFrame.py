@@ -14,12 +14,24 @@ from torchio import Image, Subject
 # Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
+spatial_transform = OneOf({
+    RandomAffine(): 0.8,
+    RandomElasticDeformation(): 0.2,
+})
+
+mri_artifact = OneOf({
+    RandomMotion(): 0.5,
+    RandomGhosting(): 0.5,
+})
+
 global_augs_dict = {
     'normalize':ZNormalization(),
-    'affine':RandomAffine(image_interpolation = 'linear'), 
-    'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
-    'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
-    'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
+    'spatial': spatial_transform,
+    'kspace': mri_artifact,
+    # 'affine':RandomAffine(image_interpolation = 'linear'), 
+    # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
+    # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
+    # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
     'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
     'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
     'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
@@ -27,7 +39,7 @@ global_augs_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = True, augmentations = None):
+def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -87,7 +99,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, train = T
 
     sampler = torchio.data.UniformSampler(psize) 
     # all of these need to be read from model.cfg
-    patches_queue = torchio.Queue(subjects_dataset,max_length = 1,samples_per_volume  = 1,sampler = sampler,num_workers=4,shuffle_subjects=False, shuffle_patches=True) 
+    patches_queue = torchio.Queue(subjects_dataset,max_length=q_max_length, samples_per_volume=q_samples_per_volume, sampler=sampler, num_workers=q_num_workers, shuffle_subjects=False, shuffle_patches=True, verbose=q_verbose) 
     
     return patches_queue
 

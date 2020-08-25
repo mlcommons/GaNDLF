@@ -25,9 +25,7 @@ import subprocess
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir,
-    num_epochs, batch_size, learning_rate, which_loss, opt, 
-    class_list, base_filters, n_channels, which_model, parallel_compute_command, device):
+def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir, num_epochs, batch_size, learning_rate, which_loss, opt, class_list, base_filters, n_channels, which_model, parallel_compute_command, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
 
     # kfolds = int(parameters['kcross_validation'])
     # check for single fold training
@@ -66,7 +64,7 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
         num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
         which_loss = which_loss, opt = opt, class_list = class_list,
         base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device)
+        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
 
       else:
         # # write parameters to pickle - this should not change for the different folds, so keeping is independent
@@ -96,6 +94,10 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
         if not('python' in parallel_compute_command_actual):
           sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
 
+        q_verbose_string = 'False'
+        if q_verbose:
+          q_verbose_string = 'True'
+
         command = parallel_compute_command_actual + \
             ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
             ' -val_loader_pickle ' + currentValidataionDataPickle + \
@@ -104,7 +106,7 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
             ' -n_classes ' + str(n_classes) + ' -base_filters ' + str(base_filters) + \
             ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
-            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
+            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder + ' -q_verbose ' + q_verbose_string + ' -q_max_length ' + str(q_max_length) + ' -q_samples_per_volume ' + str(q_samples_per_volume) + ' -q_num_workers ' +  str(q_num_workers)
         
         subprocess.Popen(command, shell=True).wait()
 

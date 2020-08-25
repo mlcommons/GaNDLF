@@ -36,12 +36,12 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 
 
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, augmentations):
+def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, augmentations):
   '''
   This is the main inference loop
   '''
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, train = False, augmentations = augmentations)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
