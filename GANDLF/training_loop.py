@@ -148,12 +148,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   best_tr_dice = -1
   total_loss = 0
   total_dice = 0
-  best_idx = 0
-  
+  best_idx = 0  
   # Getting the channels for training and removing all the non numeric entries from the channels
   batch = next(iter(train_loader))
   channel_keys = list(batch.keys())
   channel_keys_new = []
+
+
   for item in channel_keys:
     if item.isnumeric():
       channel_keys_new.append(item)
