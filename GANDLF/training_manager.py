@@ -25,7 +25,7 @@ import subprocess
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir, num_epochs, batch_size, learning_rate, which_loss, opt, class_list, base_filters, n_channels, which_model, parallel_compute_command, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
+def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir, num_epochs, batch_size, learning_rate, scheduler, which_loss, opt, class_list, base_filters, n_channels, which_model, parallel_compute_command, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
 
     # kfolds = int(parameters['kcross_validation'])
     # check for single fold training
@@ -61,7 +61,7 @@ def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, lab
 
       if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
         trainingLoop(trainingDataFromPickle = trainingData, validataionDataFromPickle = validationData, 
-        num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, 
+        num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, scheduler = scheduler,
         which_loss = which_loss, opt = opt, class_list = class_list,
         base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
         channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
