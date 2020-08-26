@@ -51,6 +51,6 @@ setup(
   include_package_data=True,
   keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
   name='GANDLF',
-  version='0.0.1',
+  version='0.0.2.NR', # NR: non-release; this should be changed when tagging
   zip_safe=False,
 )
