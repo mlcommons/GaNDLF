@@ -138,14 +138,12 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
 
   model = model.to(dev)
   # Checking for the learning rate scheduler
-  if schduler == 'traingle':
-
-
-
-  step_size = 4*batch_size*len(train_loader.dataset)
-  clr = cyclical_lr(step_size, min_lr = 0.000001, max_lr = 0.001)
-  scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-  print("Starting Learning rate is:",clr(2*step_size))
+  if scheduler == 'triangle':
+    step_size = 4*batch_size*len(train_loader.dataset)
+    clr = cyclical_lr(step_size, min_lr = learning_rate * 10**-3, max_lr=learning_rate)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
+    print("Starting Learning rate is:",clr(2*step_size))
+  print(scheduler)
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
   best_val_dice = -1

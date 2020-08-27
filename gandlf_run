@@ -67,7 +67,7 @@ for j in range(df_model.shape[0]):
 # Extrating the training parameters from the dictionary
 num_epochs = int(params['num_epochs'])
 batch_size = int(params['batch_size'])
-learning_rate = int(params['learning_rate'])
+learning_rate = float(params['learning_rate'])
 which_loss = str(params['loss_function'])
 opt = str(params['opt'])
 #lr_schedule = str(params['scheduler'])
