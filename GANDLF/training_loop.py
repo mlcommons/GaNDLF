@@ -36,7 +36,7 @@ from GANDLF.utils import *
 
 
 def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
-  num_epochs, batch_size, learning_rate, which_loss, opt,
+  num_epochs, batch_size, learning_rate, scheduler, which_loss, opt,
   class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
   '''
   This is the main training loop
@@ -137,23 +137,26 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   sys.stdout.flush()
 
   model = model.to(dev)
-
-  step_size = 4*batch_size*len(train_loader.dataset)
-  clr = cyclical_lr(step_size, min_lr = 0.000001, max_lr = 0.001)
-  scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-  print("Starting Learning rate is:",clr(2*step_size))
+  # Checking for the learning rate scheduler
+  if scheduler == 'triangle':
+    step_size = 4*batch_size*len(train_loader.dataset)
+    clr = cyclical_lr(step_size, min_lr = learning_rate * 10**-3, max_lr=learning_rate)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
+    print("Starting Learning rate is:",clr(2*step_size))
+  print(scheduler)
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
   best_val_dice = -1
   best_tr_dice = -1
   total_loss = 0
   total_dice = 0
-  best_idx = 0
-  
+  best_idx = 0  
   # Getting the channels for training and removing all the non numeric entries from the channels
   batch = next(iter(train_loader))
   channel_keys = list(batch.keys())
   channel_keys_new = []
+
+
   for item in channel_keys:
     if item.isnumeric():
       channel_keys_new.append(item)
