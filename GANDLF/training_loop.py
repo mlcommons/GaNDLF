@@ -144,9 +144,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
     scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
     print("Starting Learning rate is:",clr(2*step_size))
   if scheduler == "exp":
-    scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1, verbose=False)
+    scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
   elif scheduler == "step":
-    scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1, verbose=False)
+    scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
   elif scheduler == "reduce-on-plateau":
     scheduler_lr = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
   elif scheduler == "triangular":
