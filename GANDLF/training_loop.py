@@ -143,7 +143,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
     clr = cyclical_lr(step_size, min_lr = learning_rate * 10**-3, max_lr=learning_rate)
     scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
     print("Starting Learning rate is:",clr(2*step_size))
-  if scheduler == "exp":
+  elif scheduler == "exp":
     scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
   elif scheduler == "step":
     scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
@@ -153,7 +153,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
     scheduler_lr = torch.optim.lr_scheduler.CyclicLR(optimizer, learning_rate * 0.001, learning_rate, step_size_up=4*batch_size*len(train_loader.dataset), step_size_down=None, mode='triangular', gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=True, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
   else:
     print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file = sys.stderr)
-    scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1, verbose=False)
+    scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
   print(scheduler_lr)
   sys.stdout.flush()
