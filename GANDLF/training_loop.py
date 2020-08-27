@@ -186,14 +186,20 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           optimizer.zero_grad()
           # Forward Propagation to get the output from the models
           torch.cuda.empty_cache()
-          output = model(image.float())
-          # Computing the loss
-          mask = mask.unsqueeze(0)
           # Casts operations to mixed precision 
           with torch.cuda.amp.autocast(): 
+              output = model(image.float())
+              # Computing the loss
+              mask = mask.unsqueeze(0)
               loss = loss_fn(output.double(), mask.double(),len(class_list))
           # Back Propagation for model to learn
           scaler.scale(loss).backward() 
+          ### gradient clipping
+          # # Unscales the gradients of optimizer's assigned params in-place
+          # scaler.unscale_(optimizer)
+          # # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
+          # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+          ### gradient clipping
           #Updating the weight values
           scaler.step(optimizer) 
           #Pushing the dice to the cpu and only taking its value
