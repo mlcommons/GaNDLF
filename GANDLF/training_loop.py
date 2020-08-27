@@ -193,9 +193,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           with torch.cuda.amp.autocast(): 
               loss = loss_fn(output.double(), mask.double(),len(class_list))
           # Back Propagation for model to learn
-          loss.backward()
+          scaler.scale(loss).backward() 
           #Updating the weight values
-          optimizer.step()
+          scaler.step(optimizer) 
           #Pushing the dice to the cpu and only taking its value
           curr_loss = loss.cpu().data.item()
           #train_loss_list.append(loss.cpu().data.item())
@@ -206,6 +206,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           total_dice+= curr_dice
           # Updating the learning rate
           scheduler.step()
+          # update scale for next iteration
+          scaler.update() 
           torch.cuda.empty_cache()
 
       average_dice = total_dice/(batch_idx + 1)
