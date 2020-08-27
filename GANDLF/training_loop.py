@@ -141,8 +141,16 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   if scheduler == 'triangle':
     step_size = 4*batch_size*len(train_loader.dataset)
     clr = cyclical_lr(step_size, min_lr = learning_rate * 10**-3, max_lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
+    scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
     print("Starting Learning rate is:",clr(2*step_size))
+  if scheduler == "exp":
+    scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1, verbose=False)
+  if scheduler == "step":
+    scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1, verbose=False)
+  if scheduler == "reduce-on-plateau":
+    scheduler_lr = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
+
+
   print(scheduler)
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
@@ -200,17 +208,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           curr_dice = 1 - curr_loss
           #Computing the total dice
           total_dice+= curr_dice
-          # Updating the learning rate
-          scheduler.step()
           torch.cuda.empty_cache()
 
       average_dice = total_dice/(batch_idx + 1)
       average_loss = total_loss/(batch_idx + 1)
-     
+    
       if average_dice > best_tr_dice:
           best_tr_idx = ep
           best_tr_dice = average_dice
-      
+
       print("Epoch Training dice:" , average_dice) 
       print("Best Training Dice:", best_tr_dice)
       print("Average Training Loss:", average_loss)
@@ -234,14 +240,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               output, mask = output.to(device), mask.to(device)
               curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
               total_loss+=curr_loss
-              # Computing the average loss
-              average_loss = total_loss/(batch_idx + 1)
               #Computing the dice score 
               curr_dice = 1 - curr_loss
               #Computing the total dice
               total_dice+= curr_dice
-              #Computing the average dice
-              average_dice = total_dice/(batch_idx + 1)
+
+      #Computing the average dice
+      average_dice = total_dice/(batch_idx + 1)
+      # Computing the average loss
+      average_loss = total_loss/(batch_idx + 1)
 
       if average_dice > best_val_dice:
           best_val_idx = ep
@@ -252,6 +259,12 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print("Best Validation Dice:", best_val_dice)
       print("Average Validation Loss:", average_loss)
       print("Best Validation Epoch: ",best_val_idx)
+
+      # Updating the learning rate accoring to some conditions
+      if scheduler == "reduce-on-plateau":
+        scheduler_lr.step(average_loss)
+      else:
+        scheduler_lr.step()
 
       total_dice = 0
       total_loss = 0
