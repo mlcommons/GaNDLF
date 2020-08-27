@@ -303,7 +303,6 @@ if __name__ == "__main__":
     parser.add_argument('-learning_rate', type=float, help = 'Learning rate', required=True)
     parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
     parser.add_argument('-opt', type=str, help = 'Optimizer type', required=True)
-    parser.add_argument('-save_best', type=int, help = 'Number of best models to save', required=True)
     parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
     parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
     parser.add_argument('-n_channels', type=int, help = 'Number of input channels', required=True)
@@ -340,7 +339,6 @@ if __name__ == "__main__":
         learning_rate = args.learning_rate, 
         which_loss = args.which_loss, 
         opt = args.opt, 
-        save_best = args.save_best, 
         n_classes = args.n_classes,
         base_filters = args.base_filters, 
         n_channels = args.n_channels, 
