@@ -168,6 +168,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   channel_keys = list(batch.keys())
   channel_keys_new = []
 
+  # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+  scaler = torch.cuda.amp.GradScaler() 
 
   for item in channel_keys:
     if item.isnumeric():
@@ -196,14 +198,22 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           optimizer.zero_grad()
           # Forward Propagation to get the output from the models
           torch.cuda.empty_cache()
-          output = model(image.float())
-          # Computing the loss
-          mask = mask.unsqueeze(0)
-          loss = loss_fn(output.double(), mask.double(),len(class_list))
+          # Casts operations to mixed precision 
+          with torch.cuda.amp.autocast(): 
+              output = model(image.float())
+              # Computing the loss
+              mask = mask.unsqueeze(0)
+              loss = loss_fn(output.double(), mask.double(),len(class_list))
           # Back Propagation for model to learn
-          loss.backward()
+          scaler.scale(loss).backward() 
+          ### gradient clipping
+          # # Unscales the gradients of optimizer's assigned params in-place
+          # scaler.unscale_(optimizer)
+          # # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
+          # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+          ### gradient clipping
           #Updating the weight values
-          optimizer.step()
+          scaler.step(optimizer) 
           #Pushing the dice to the cpu and only taking its value
           curr_loss = loss.cpu().data.item()
           #train_loss_list.append(loss.cpu().data.item())
@@ -212,6 +222,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           curr_dice = 1 - curr_loss
           #Computing the total dice
           total_dice+= curr_dice
+          # update scale for next iteration
+          scaler.update() 
           torch.cuda.empty_cache()
           if scheduler == "triangular":
             scheduler_lr.step()
