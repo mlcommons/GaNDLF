@@ -11,7 +11,7 @@ def dice_loss(inp, target):
 
 def MCD_loss(pm, gt, num_class):
     acc_dice_loss = 0
-    for i in range(0,num_class):
+    for i in range(1,num_class):
         acc_dice_loss += dice_loss(gt[:,i,:,:,:],pm[:,i,:,:,:])
     acc_dice_loss/= num_class
     return acc_dice_loss
