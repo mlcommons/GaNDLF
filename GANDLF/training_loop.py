@@ -156,6 +156,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   channel_keys = list(batch.keys())
   channel_keys_new = []
 
+  # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+  scaler = torch.cuda.amp.GradScaler() 
 
   for item in channel_keys:
     if item.isnumeric():
@@ -187,7 +189,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           output = model(image.float())
           # Computing the loss
           mask = mask.unsqueeze(0)
-          loss = loss_fn(output.double(), mask.double(),len(class_list))
+          # Casts operations to mixed precision 
+          with torch.cuda.amp.autocast(): 
+              loss = loss_fn(output.double(), mask.double(),len(class_list))
           # Back Propagation for model to learn
           loss.backward()
           #Updating the weight values
