@@ -73,7 +73,7 @@ def parseConfig(config_file_path):
   # this is NOT a required parameter - a user should be able to train with NO augmentations
   if 'data_augmentation' in params:
     augmentations = ast.literal_eval(str(params['data_augmentation']))
-    params['data_augmentation'] = augmentations
+    params['augmentations'] = augmentations
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
