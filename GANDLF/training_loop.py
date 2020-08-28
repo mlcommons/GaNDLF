@@ -38,8 +38,19 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   '''
   This is the main training loop
   '''
-  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, parameters['psize'], channelHeaders, labelHeader, parameters['q_max_length'], parameters['q_samples_per_volume'], parameters['q_num_workers'], parameters['q_verbose'], train = True, augmentations = parameters['augmentations'])
-  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, parameters['psize'], channelHeaders, labelHeader, parameters['q_max_length'], parameters['q_samples_per_volume'], parameters['q_num_workers'], parameters['q_verbose'], train = True, augmentations = parameters['augmentations']) # may or may not need to add augmentations here
+  psize = parameters['psize']
+  q_max_length = parameters['q_max_length']
+  q_samples_per_volume = parameters['q_samples_per_volume']
+  q_num_workers = parameters['q_num_workers']
+  q_verbose = parameters['q_verbose']
+  augmentations = parameters['augmentations']
+  which_model = parameters['which_model']
+  opt = parameters['opt']
+  loss_function = parameters['loss_function']
+  scheduler = parameters['scheduler']
+
+  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations)
+  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations) # may or may not need to add augmentations here
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
@@ -72,17 +83,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
                             lr= learning_rate,
                             momentum = 0.9)
   # setting the loss function
-  if which_loss == 'dc':
+  if loss_function == 'dc':
     loss_fn  = MCD_loss
-  elif which_loss == 'dcce':
+  elif loss_function == 'dcce':
     loss_fn  = DCCE
-  elif which_loss == 'ce':
+  elif loss_function == 'ce':
     loss_fn = CE
-  elif which_loss == 'mse':
+  elif loss_function == 'mse':
     loss_fn = MCD_MSE_loss
   else:
-    print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
-    which_loss = 'dc'
+    print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
+    loss_function = 'dc'
     loss_fn  = MCD_loss
 
   # training_start_time = time.asctime()
