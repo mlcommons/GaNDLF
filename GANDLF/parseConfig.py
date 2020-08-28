@@ -3,16 +3,14 @@ import os
 import ast 
 import sys
 import numpy as np
-import pandas as pd
+import yaml
 
 def parseConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
     
-  df_model = pd.read_csv(config_file_path, sep=' = ', names=['param_name', 'param_value'],
-                          comment='#', skip_blank_lines=True,
-                          engine='python').fillna(' ')
+  df_model = yaml.full_load(config_file_path)
 
   # Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
   params = {}
