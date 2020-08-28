@@ -43,11 +43,11 @@ args = parser.parse_args()
 file_data_full = args.data
 model_parameters = args.config
 parameters = parseConfig(model_parameters)
-dev = args.device
+device = args.device
 model_path = args.output
 mode = args.train
-if '-1' in dev:
-    dev = 'cpu'
+if '-1' in device:
+    device = 'cpu'
 
 if mode == 0: # inference mode
     pretrainedModelPath = args.modelDir
@@ -76,9 +76,7 @@ for col in data_full.columns:
     else:
         labelHeader = None
 
-n_channels = len(channelHeaders)
-
 if mode != 0: # training mode
-    TrainingManager(dataframe = data_full, channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = model_path, parameters = parameters)
+    TrainingManager(dataframe = data_full, channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = model_path, parameters = parameters, device = device)
 else:
     InferenceManager(dataframe = data_full, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = pretrainedModelPath, batch_size = batch_size, which_loss = which_loss, class_list = class_list, base_filters = base_filters, n_channels = n_channels, which_model = which_model, device = args.device, augmentations = augmentations, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
