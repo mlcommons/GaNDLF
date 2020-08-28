@@ -39,8 +39,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   '''
   This is the main training loop
   '''
-  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations)
-  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations) # may or may not need to add augmentations here
+  trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, parameters['psize'], channelHeaders, labelHeader, parameters['q_max_length'], parameters['q_samples_per_volume'], parameters['q_num_workers'], parameters['q_verbose'], train = True, augmentations = parameters['augmentations'])
+  validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, parameters['psize'], channelHeaders, labelHeader, parameters['q_max_length'], parameters['q_samples_per_volume'], parameters['q_num_workers'], parameters['q_verbose'], train = True, augmentations = parameters['augmentations']) # may or may not need to add augmentations here
 
   train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
   val_loader = DataLoader(validationDataForTorch, batch_size=1)
