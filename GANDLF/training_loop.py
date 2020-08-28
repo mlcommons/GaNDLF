@@ -48,6 +48,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   opt = parameters['opt']
   loss_function = parameters['loss_function']
   scheduler = parameters['scheduler']
+  class_list = parameters['class_list']
+  base_filters = parameters['base_filters']
+  base_filters = parameters['base_filters']
 
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations) # may or may not need to add augmentations here
@@ -65,7 +68,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   elif which_model == 'uinc':
     model = uinc(n_channels,len(class_list),base_filters)
   else:
-    print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
+    print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
     model = resunet(n_channels,len(class_list),base_filters)
 
