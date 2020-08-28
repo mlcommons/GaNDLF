@@ -38,6 +38,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   '''
   This is the main training loop
   '''
+  # extract variables form parameters dict
   psize = parameters['psize']
   q_max_length = parameters['q_max_length']
   q_samples_per_volume = parameters['q_samples_per_volume']
