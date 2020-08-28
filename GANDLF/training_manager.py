@@ -25,16 +25,15 @@ import subprocess
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, augmentations, kfolds, psize, channelHeaders, labelHeader, model_parameters_file, outputDir, num_epochs, batch_size, learning_rate, scheduler, which_loss, opt, class_list, base_filters, n_channels, which_model, parallel_compute_command, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
+def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameters):
 
-    # kfolds = int(parameters['kcross_validation'])
     # check for single fold training
     singleFoldTraining = False
-    if kfolds < 0: # if the user wants a single fold training
-      kfolds = abs(kfolds)
+    if parameters['kfolds'] < 0: # if the user wants a single fold training
+      parameters['kfolds'] = abs(parameters['kfolds'])
       singleFoldTraining = True
 
-    kf = KFold(n_splits=kfolds) # initialize the kfold structure
+    kf = KFold(n_splits=parameters['kfolds']) # initialize the kfold structure
 
     currentFold = 0
 
