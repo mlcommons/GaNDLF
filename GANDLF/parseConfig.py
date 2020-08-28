@@ -9,18 +9,12 @@ def parseConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
-    
-  df_model = yaml.full_load(config_file_path)
-
-  # Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
-  params = {}
-  for j in range(df_model.shape[0]):
-      params[df_model.iloc[j, 0]] = df_model.iloc[j, 1]
-
+  with open(config_file_path) as f:
+    params = yaml.load(f, Loader=yaml.FullLoader)
+  
   # require parameters - this should error out if not present
   if 'class_list' in params:
-    class_list =  ast.literal_eval(str(params['class_list']))
-    params['class_list'] = class_list
+    # nothing, we are all good to go
   else:
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
 
