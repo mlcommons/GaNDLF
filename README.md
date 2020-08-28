@@ -55,7 +55,7 @@ pip install -e .
 ```powershell
 # continue from previous shell
 python GANDLF.py \
-  -config ./experiment_0/model.cfg \ # model configuration
+  -config ./experiment_0/model.yaml \ # model configuration
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory
   -train 1 \ # 1 == train, 0 == inference
