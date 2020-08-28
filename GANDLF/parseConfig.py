@@ -95,7 +95,7 @@ def parseConfig(config_file_path):
   else:
     kfolds = -10
     print('Using default kcross_validation: ', kfolds)
-  params['kcross_validation'] = kfolds
+  params['kfolds'] = kfolds
 
   # Setting default values to the params
   if 'scheduler' in params:
