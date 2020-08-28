@@ -237,7 +237,6 @@ if __name__ == "__main__":
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     inferenceDataFromPickle = pd.read_pickle(args.inference_loader_pickle)
 
-
     inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
         channelHeaders = channel_header, 
         labelHeader = label_header, 
