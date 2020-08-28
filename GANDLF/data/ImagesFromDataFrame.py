@@ -14,17 +14,21 @@ from torchio import Image, Subject
 # Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
+
 spatial_transform = OneOf({
-    RandomAffine(): 0.8,
-    RandomElasticDeformation(): 0.2,
+    RandomAffine(): 0.2,
+    RandomElasticDeformation(): 0,
 })
 
 mri_artifact = OneOf({
-    RandomMotion(): 0.5,
-    RandomGhosting(): 0.5,
+    RandomMotion(): 0.2,
+    RandomGhosting(): 0.2,
 })
 
+
+
 global_augs_dict = {
+
     'normalize':ZNormalization(),
     'spatial': spatial_transform,
     'kspace': mri_artifact,
@@ -32,10 +36,10 @@ global_augs_dict = {
     # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
     # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
     # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
-    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
-    'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
-    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
-    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) 
+    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 0.1, seed = None), 
+    'blur': RandomBlur(std = (0., 4.), p = 0.1, seed = None), 
+    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 0.1, seed = None) , 
+    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 0.1, seed = None) 
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
@@ -78,7 +82,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
             resample_split = str(aug).split(':')
             resample_values = tuple(np.array(resample_split[1].split(',')).astype(np.float))
             augmentation_list.append(Resample(resample_values))
-    
+
     # next, we want to do the intensity normalize - required for inference as well
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
@@ -101,4 +105,4 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     patches_queue = torchio.Queue(subjects_dataset,max_length=q_max_length, samples_per_volume=q_samples_per_volume, sampler=sampler, num_workers=q_num_workers, shuffle_subjects=False, shuffle_patches=True, verbose=q_verbose) 
     
     return patches_queue
-
+    

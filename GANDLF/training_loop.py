@@ -155,7 +155,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
     print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file = sys.stderr)
     scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
-  print(scheduler_lr)
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
   best_val_dice = -1
@@ -176,6 +175,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       channel_keys_new.append(item)
   channel_keys = channel_keys_new
   ################ TRAINING THE MODEL##############
+  """
+  for idx in range(0,100):
+    t1 = time.time()
+    batch = next(iter(train_loader))
+    t2 = time.time()
+    print(t2 - t1," seconds")
+  """
+  
   for ep in range(num_epochs):
       start = time.time()
       print("\n")
@@ -199,7 +206,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           # Forward Propagation to get the output from the models
           torch.cuda.empty_cache()
           # Casts operations to mixed precision 
-          with torch.cuda.amp.autocast(): 
+          with torch.cuda.amp.autocast():
               output = model(image.float())
               # Computing the loss
               mask = mask.unsqueeze(0)
@@ -227,7 +234,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
           torch.cuda.empty_cache()
           if scheduler == "triangular":
             scheduler_lr.step()
-          print("something")
+          
 
       average_dice = total_dice/(batch_idx + 1)
       average_loss = total_loss/(batch_idx + 1)
