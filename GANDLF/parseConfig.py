@@ -88,7 +88,7 @@ def parseConfig(config_file_path):
   else:
     which_model = 'GANDLF_Session'
     print('Using default which_model: ', which_model)
-  params['modelName'] = which_model
+  params['which_model'] = which_model
 
   if 'kcross_validation' in params:
     kfolds = int(params['kcross_validation'])
