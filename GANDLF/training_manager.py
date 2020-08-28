@@ -55,8 +55,8 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
       validationData = trainingData_full.iloc[test_index]
 
       # save the current model configuration as a sanity check
-      # parametersFilePickle = os.path.join(currentOutputFolder,'model.cfg')
-      copyfile(model_parameters_file, os.path.join(currentOutputFolder,'model.cfg'))
+      currentModelConfigPickle = os.path.join(currentOutputFolder, 'parameters.pkl')
+      parameters.to_pickle(currentModelConfigPickle)
 
       if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
         trainingLoop(trainingDataFromPickle = trainingData, validataionDataFromPickle = validationData, 
