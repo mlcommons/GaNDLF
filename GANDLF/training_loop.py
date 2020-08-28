@@ -51,6 +51,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   class_list = parameters['class_list']
   base_filters = parameters['base_filters']
   base_filters = parameters['base_filters']
+  base_filters = parameters['base_filters']
+  n_channels = len(channelHeaders)
+  n_classList = len(class_list)
 
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations) # may or may not need to add augmentations here
@@ -60,17 +63,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels,len(class_list),base_filters)
+    model = resunet(n_channels,n_classList,base_filters)
   elif which_model == 'unet':
-    model = unet(n_channels,len(class_list),base_filters)
+    model = unet(n_channels,n_classList,base_filters)
   elif which_model == 'fcn':
-    model = fcn(n_channels,len(class_list),base_filters)
+    model = fcn(n_channels,n_classList,base_filters)
   elif which_model == 'uinc':
-    model = uinc(n_channels,len(class_list),base_filters)
+    model = uinc(n_channels,n_classList,base_filters)
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels,len(class_list),base_filters)
+    model = resunet(n_channels,n_classList,base_filters)
 
   # setting optimizer
   if opt == 'sgd':
@@ -214,7 +217,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
               output = model(image.float())
               # Computing the loss
               mask = mask.unsqueeze(0)
-              loss = loss_fn(output.double(), mask.double(),len(class_list))
+              loss = loss_fn(output.double(), mask.double(),n_classList)
           # Back Propagation for model to learn
           scaler.scale(loss).backward() 
           ### gradient clipping
@@ -267,7 +270,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
               mask = mask.unsqueeze(0)
               # making sure that the output and mask are on the same device
               output, mask = output.to(device), mask.to(device)
-              curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
+              curr_loss = loss_fn(output.double(), mask.double(),n_classList).cpu().data.item()
               total_loss+=curr_loss
               #Computing the dice score 
               curr_dice = 1 - curr_loss
