@@ -53,6 +53,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   base_filters = parameters['base_filters']
   base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
+  learning_rate = parameters['learning_rate']
+  num_epochs = parameters['num_epochs']
+  
   n_channels = len(channelHeaders)
   n_classList = len(class_list)
 
@@ -293,7 +296,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
       print("Average Validation Loss:", average_loss)
       print("Best Validation Epoch: ",best_val_idx)
 
-      # Updating the learning rate accoring to some conditions - reduce lr on plateau needs out loss to be monitored and scedules the LR accordingly. Others change irrespective of loss.
+      # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
       if not scheduler == "triangular":
         if scheduler == "reduce-on-plateau":
           scheduler_lr.step(average_loss)
