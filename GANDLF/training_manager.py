@@ -25,7 +25,7 @@ import subprocess
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameters):
+def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameters, device):
 
     # check for single fold training
     singleFoldTraining = False
@@ -56,14 +56,14 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
 
       # save the current model configuration as a sanity check
       currentModelConfigPickle = os.path.join(currentOutputFolder, 'parameters.pkl')
-      parameters.to_pickle(currentModelConfigPickle)
+      with open(currentModelConfigPickle, 'wb') as handle:
+        pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+      parallel_compute_command = parameters['parallel_compute_command']
 
       if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
         trainingLoop(trainingDataFromPickle = trainingData, validataionDataFromPickle = validationData, 
-        num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, scheduler = scheduler,
-        which_loss = which_loss, opt = opt, class_list = class_list,
-        base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-        channelHeaders = channelHeaders, labelHeader = labelHeader, augmentations = augmentations, outputDir = currentOutputFolder, device = device, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
+        channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = currentOutputFolder, device = device, parameters = parameters)
 
       else:
         # # write parameters to pickle - this should not change for the different folds, so keeping is independent
@@ -80,22 +80,12 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
         labelHeaderPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
         with open(labelHeaderPickle, 'wb') as handle:
             pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        augmentationsPickle = os.path.join(currentOutputFolder,'augmentations.pkl')
-        with open(augmentationsPickle, 'wb') as handle:
-            pickle.dump(augmentations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        psizePickle = os.path.join(currentOutputFolder,'psize.pkl')
-        with open(psizePickle, 'wb') as handle:
-            pickle.dump(psize, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # call qsub here
         parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentOutputFolder)
         
         if not('python' in parallel_compute_command_actual):
           sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
-
-        q_verbose_string = 'False'
-        if q_verbose:
-          q_verbose_string = 'True'
 
         command = parallel_compute_command_actual + \
             ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
