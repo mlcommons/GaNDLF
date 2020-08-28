@@ -52,6 +52,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   base_filters = parameters['base_filters']
   base_filters = parameters['base_filters']
   base_filters = parameters['base_filters']
+  batch_size = parameters['batch_size']
   n_channels = len(channelHeaders)
   n_classList = len(class_list)
 
@@ -83,7 +84,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   elif opt == 'adam':    
     optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
   else:
-    print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
+    print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the implementation, using sgd, instead', file = sys.stderr)
     opt = 'sgd'
     optimizer = optim.SGD(model.parameters(),
                             lr= learning_rate,
