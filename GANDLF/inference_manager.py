@@ -32,8 +32,6 @@ def InferenceManager(dataframe, channelHeaders, labelHeader, outputDir, paramete
     inferenceData_full = dataframe
     # inference_indeces_full = list(inferenceData_full.index.values)
 
-    inferenceLoop(inferenceDataFromPickle = inferenceData_full, batch_size = batch_size,
-            which_loss = which_loss, class_list = class_list,
-            base_filters = base_filters, n_channels = n_channels, which_model = which_model, psize = psize, 
-            channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = outputDir, device = device, augmentations = augmentations, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
+    inferenceLoop(inferenceDataFromPickle = inferenceData_full, 
+    channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = outputDir, device = device, parameters = parameters)
         
