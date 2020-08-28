@@ -90,12 +90,9 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
         command = parallel_compute_command_actual + \
             ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
             ' -val_loader_pickle ' + currentValidataionDataPickle + \
-            ' -num_epochs ' + str(num_epochs) + ' -batch_size ' + str(batch_size) + \
-            ' -learning_rate ' + str(learning_rate) + ' -which_loss ' + which_loss + \
-            ' -n_classes ' + str(n_classes) + ' -base_filters ' + str(base_filters) + \
-            ' -n_channels ' + str(n_channels) + ' -which_model ' + which_model + \
+            ' -parameter_pickle ' + currentModelConfigPickle + \
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
-            ' -augmentations_pickle ' + augmentationsPickle + ' -psize_pickle ' + psizePickle + ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder + ' -q_verbose ' + q_verbose_string + ' -q_max_length ' + str(q_max_length) + ' -q_samples_per_volume ' + str(q_samples_per_volume) + ' -q_num_workers ' +  str(q_num_workers)
+            ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
         
         subprocess.Popen(command, shell=True).wait()
 
