@@ -98,7 +98,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
 
     sampler = torchio.data.UniformSampler(psize) 
     # all of these need to be read from model.cfg
-    patches_queue = torchio.Queue(subjects_dataset,max_length=q_max_length, samples_per_volume=q_samples_per_volume, sampler=sampler, num_workers=q_num_workers, shuffle_subjects=False, shuffle_patches=True, verbose=q_verbose) 
+    patches_queue = torchio.Queue(subjects_dataset,max_length=q_max_length, samples_per_volume=q_samples_per_volume, sampler=sampler, num_workers=q_num_workers, shuffle_subjects=True, shuffle_patches=True, verbose=q_verbose) 
     
     return patches_queue
 
