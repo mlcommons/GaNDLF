@@ -61,6 +61,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
     which_model = 'resunet'
     model = resunet(n_channels,len(class_list),base_filters)
 
+
   # setting optimizer
   if opt == 'sgd':
     optimizer = optim.SGD(model.parameters(),
@@ -135,6 +136,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print('  Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
   sys.stdout.flush()
+
+  # Loading saved model weights, if they exist - right now this is specific to single fold training - can be extended further
+  if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
+    model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
+    print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
 
   model = model.to(dev)
   # Checking for the learning rate scheduler
