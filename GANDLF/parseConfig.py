@@ -3,13 +3,14 @@ import os
 import ast 
 import sys
 import numpy as np
+import pandas as pd
 
 def parserConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
     
-  df_model = pd.read_csv(model_parameters, sep=' = ', names=['param_name', 'param_value'],
+  df_model = pd.read_csv(config_file_path, sep=' = ', names=['param_name', 'param_value'],
                           comment='#', skip_blank_lines=True,
                           engine='python').fillna(' ')
 
