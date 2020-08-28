@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-def parserConfig(config_file_path):
+def parseConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
