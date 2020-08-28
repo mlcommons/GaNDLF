@@ -35,9 +35,7 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 
 
-def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
-  num_epochs, batch_size, learning_rate, scheduler, which_loss, opt,
-  class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
+def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeaders, labelHeader, device, parameters, outputDir):
   '''
   This is the main training loop
   '''
@@ -298,33 +296,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-num_epochs', type=int, help = 'Number of epochs', required=True)
-    parser.add_argument('-batch_size', type=int, help = 'Batch size', required=True)
-    parser.add_argument('-learning_rate', type=float, help = 'Learning rate', required=True)
-    parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
-    parser.add_argument('-opt', type=str, help = 'Optimizer type', required=True)
-    parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
-    parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
-    parser.add_argument('-n_channels', type=int, help = 'Number of input channels', required=True)
-    parser.add_argument('-which_model', type=str, help = 'Model type', required=True)
+    parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
     parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
-    parser.add_argument('-augmentations_pickle', type=str, help = 'Augmentations pickle', required=True)
-    parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
-    parser.add_argument('-q_max_length', type=int, help = '[Queue] Max length', required=True)
-    parser.add_argument('-q_samples_per_volume', type=int, help = '[Queue] Samples per volume', required=True)
-    parser.add_argument('-q_num_workers', type=int, help = '[Queue] Number of workers', required=True)
-    parser.add_argument('-q_verbose', type=str, help = '[Queue] Verbose debugging', required=True)
     
     args = parser.parse_args()
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-    psize = pickle.load(open(args.psize_pickle,"rb"))
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
-    augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
+    parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
 
@@ -334,22 +317,8 @@ if __name__ == "__main__":
 
     trainingLoop(trainingDataFromPickle = trainingDataFromPickle, 
         validataionDataFromPickle = validataionDataFromPickle, 
-        num_epochs = args.num_epochs, 
-        batch_size = args.batch_size, 
-        learning_rate = args.learning_rate, 
-        which_loss = args.which_loss, 
-        opt = args.opt, 
-        n_classes = args.n_classes,
-        base_filters = args.base_filters, 
-        n_channels = args.n_channels, 
-        which_model = args.which_model, 
-        psize = psize, 
         channelHeaders = channel_header, 
         labelHeader = label_header, 
-        augmentations = augmentations,
+        parameters = parameters,
         outputDir = args.outputDir,
-        device = args.device,
-        q_verbose = q_verbose,
-        q_max_length = args.q_max_length,
-        q_samples_per_volume = args.q_samples_per_volume,
-        q_num_workers = args.q_num_workers)
+        device = args.device,)
