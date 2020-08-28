@@ -19,7 +19,6 @@ from sklearn.model_selection import KFold
 from shutil import copyfile
 import time
 import sys
-import ast 
 import pickle
 from pathlib import Path
 import argparse
