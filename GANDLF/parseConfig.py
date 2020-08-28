@@ -86,7 +86,7 @@ def parseConfig(config_file_path):
   if 'which_model' in params:
     which_model = str(params['modelName'])
   else:
-    which_model = 'GANDLF_Session'
+    which_model = 'resunet'
     print('Using default which_model: ', which_model)
   params['which_model'] = which_model
 
