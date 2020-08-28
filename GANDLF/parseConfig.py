@@ -13,16 +13,11 @@ def parseConfig(config_file_path):
     params = yaml.load(f, Loader=yaml.FullLoader)
   
   # require parameters - this should error out if not present
-  if 'class_list' in params:
-    # nothing, we are all good to go
-  else:
+  if not('class_list' in params):
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
 
   if 'patch_size' in params:
-    psize = params['patch_size']    
-    psize = ast.literal_eval(psize) 
-    psize = np.array(psize)
-    params['psize'] = psize
+    params['psize'] = params['patch_size'] 
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
 
