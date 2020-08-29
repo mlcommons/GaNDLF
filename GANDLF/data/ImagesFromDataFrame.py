@@ -80,21 +80,28 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     augmentation_list = []
     
     # first, we want to do the resampling, if it is present - required for inference as well
-    for aug in augmentations:
-        if 'resample' in str(aug):
-            resample_split = str(aug).split(':')
-            resample_values = tuple(np.array(resample_split[1].split(',')).astype(np.float))
+    if 'resample' in augmentations:
+        if 'resolution' in augmentations['resample']:
+            # resample_split = str(aug).split(':')
+            resample_values = tuple(np.array(augmentations['resample']['resolution']).astype(np.float))
             augmentation_list.append(Resample(resample_values))
     
     # next, we want to do the intensity normalize - required for inference as well
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
-    # other augmentations should only happen for training
+    # other augmentations should only happen for training - and also setting the probablities for the augmentations
     if train:
         for aug in augmentations:
             if (str(aug) != 'normalize') and not('resample' in str(aug)):
                 augmentation_list.append(global_augs_dict[str(aug)])
+                aug_split = str(aug).split(':')
+                prob = float(aug_split[1])
+                aug = str(aug_split[0])
+                print(aug)
+                actual_function = global_augs_dict[str(aug)]
+                actual_function = actual_function(p=prob)
+                augmentation_list.append(actual_function)
         
     transform = Compose(augmentation_list)
     
