@@ -93,14 +93,8 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     # other augmentations should only happen for training - and also setting the probablities for the augmentations
     if train:
         for aug in augmentations:
-            if (str(aug) != 'normalize') and not('resample' in str(aug)):
-                augmentation_list.append(global_augs_dict[str(aug)])
-                aug_split = str(aug).split(':')
-                prob = float(aug_split[1])
-                aug = str(aug_split[0])
-                print(aug)
-                actual_function = global_augs_dict[str(aug)]
-                actual_function = actual_function(p=prob)
+            if (aug != 'normalize') and (aug != 'resample'): # resample and normalize should always have probability=1
+                actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
                 augmentation_list.append(actual_function)
         
     transform = Compose(augmentation_list)
