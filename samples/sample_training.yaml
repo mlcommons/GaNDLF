@@ -34,15 +34,19 @@ kcross_validation: -10
 # 'spatial': one of affine or elastic is picked (randomly) for augmentation
 # 'kspace': one of motion or ghosting is picked (randomly) for augmentation
 data_augmentation: 
-  - normalize
-  - resample: 
-    - resolution: 1,2,3
-  - spatial
-  - kspace
-  - bias
-  - blur
-  - noise
-  - swap
+  {
+  'normalize',
+  'resample':
+    { 
+    'resolution': [1,2,3]
+    },
+  'spatial',
+  'kspace',
+  'bias',
+  'blur',
+  'noise',
+  'swap'
+  }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
 # not used for single fold training
