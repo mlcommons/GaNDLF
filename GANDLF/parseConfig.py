@@ -62,7 +62,7 @@ def parseConfig(config_file_path):
     augmentations = ast.literal_eval(str(params['data_augmentation']))
     params['augmentations'] = augmentations
 
-  params['augmentations']['resample']['resolution'] = np.array(params['augmentations']['resample']['resolution'].split(','))
+  temp = params['augmentations']['resample']['resolution']
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
