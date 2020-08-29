@@ -33,7 +33,15 @@ kcross_validation: -10
 # 'resample:X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'spatial': one of affine or elastic is picked (randomly) for augmentation
 # 'kspace': one of motion or ghosting is picked (randomly) for augmentation
-data_augmentation: ['normalize', 'resample:1,2,3', 'spatial', 'kspace', 'bias', 'blur', 'noise', 'swap']
+data_augmentation: 
+  - normalize
+  - resample:1,2,3
+  - spatial
+  - kspace
+  - bias
+  - blur
+  - noise
+  - swap
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
 # not used for single fold training
