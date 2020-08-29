@@ -59,16 +59,15 @@ def parseConfig(config_file_path):
   
   # this is NOT a required parameter - a user should be able to train with NO augmentations
   if 'data_augmentation' in params:
-    augmentations = ast.literal_eval(str(params['data_augmentation']))
-    params['augmentations'] = augmentations
+    params['augmentations'] = params['data_augmentation']
 
-  for key in params['augmentations']:
-    if (key != 'normalize') and (key != 'resample'):
-      temp = params['augmentations'][key]
-      if (params['augmentations'][key] == None) or not('probability' in params['augmentations'][key]):
-          params['augmentations'][key] = {}
-          params['augmentations'][key]['probability'] = 1
-  temp = params['augmentations']['resample']['resolution']
+  if len(params['augmentations']) > 0: # only when augmentations are defined
+    for key in params['augmentations']:
+      if (key != 'normalize') and (key != 'resample'):
+        temp = params['augmentations'][key]
+        if (params['augmentations'][key] == None) or not('probability' in params['augmentations'][key]):
+            params['augmentations'][key] = {}
+            params['augmentations'][key]['probability'] = 1
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
