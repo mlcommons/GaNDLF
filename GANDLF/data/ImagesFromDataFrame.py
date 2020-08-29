@@ -54,8 +54,6 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     # This list will later contain the list of subjects 
     subjects_list = []
 
-
-
     # iterating through the dataframe
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject such as different image modalities, labels, any other data
