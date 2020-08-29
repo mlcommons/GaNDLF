@@ -15,17 +15,23 @@ from torchio import Image, Subject
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 
-spatial_transform = OneOf({
-    RandomAffine(): 0.2,
-    RandomElasticDeformation(): 0,
-})
+def mri_artifact(p = 1):
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
 
-mri_artifact = OneOf({
-    RandomMotion(): 0.2,
-    RandomGhosting(): 0.2,
-})
+def spatial_transform(p=1):
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
 
+def bias(p=1):
+    return RandomBiasField(coefficients = 0.5, order= 3, p= p, seed = None)
 
+def blur(p=1):
+    return RandomBlur(std = (0., 4.), p = p, seed = None)
+
+def noise(p=1):
+    return RandomNoise(mean = 0, std = (0, 0.25), p = p, seed = None)
+
+def swap(p=1):
+    return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
 
 global_augs_dict = {
 
@@ -36,11 +42,14 @@ global_augs_dict = {
     # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
     # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
     # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
-    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 0.1, seed = None), 
-    'blur': RandomBlur(std = (0., 4.), p = 0.1, seed = None), 
-    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 0.1, seed = None) , 
-    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 0.1, seed = None) 
+    'bias': bias, 
+    'blur': blur, 
+    'noise': noise , 
+    'swap': swap
 }
+
+
+
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = None):
@@ -87,12 +96,19 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
-    # other augmentations should only happen for training
+    # other augmentations should only happen for training - and also setting the probablities for the augmentations
     if train:
         for aug in augmentations:
             if (str(aug) != 'normalize') and not('resample' in str(aug)):
-                augmentation_list.append(global_augs_dict[str(aug)])
-        
+                aug_split = str(aug).split(':')
+                prob = float(aug_split[1])
+                aug = str(aug_split[0])
+                print(aug)
+                actual_function = global_augs_dict[str(aug)]
+                actual_function = actual_function(p=prob)
+                augmentation_list.append(actual_function)
+
+
     transform = Compose(augmentation_list)
     
     subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
@@ -105,4 +121,3 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     patches_queue = torchio.Queue(subjects_dataset,max_length=q_max_length, samples_per_volume=q_samples_per_volume, sampler=sampler, num_workers=q_num_workers, shuffle_subjects=False, shuffle_patches=True, verbose=q_verbose) 
     
     return patches_queue
-    
