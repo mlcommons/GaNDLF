@@ -62,6 +62,12 @@ def parseConfig(config_file_path):
     augmentations = ast.literal_eval(str(params['data_augmentation']))
     params['augmentations'] = augmentations
 
+  for key in params['augmentations']:
+    if (key != 'normalize') and (key != 'resample'):
+      temp = params['augmentations'][key]
+      if (params['augmentations'][key] == None) or not('probability' in params['augmentations'][key]):
+          params['augmentations'][key] = {}
+          params['augmentations'][key]['probability'] = 1
   temp = params['augmentations']['resample']['resolution']
 
   # Extracting the model parameters from the dictionary
