@@ -37,9 +37,9 @@ global_augs_dict = {
     'normalize':ZNormalization(),
     'spatial': spatial_transform,
     'kspace': mri_artifact,
-    'bias': bias, 
-    'blur': blur, 
-    'noise': noise , 
+    'bias': bias,
+    'blur': blur,
+    'noise': noise,
     'swap': swap
 }
 
