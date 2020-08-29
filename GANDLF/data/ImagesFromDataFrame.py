@@ -11,9 +11,9 @@ import torchio
 from torchio.transforms import *
 from torchio import Image, Subject
 
-# Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
+# define individual functions/lambdas for augmentations to handle properties
 def mri_artifact(p = 1):
     return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
 
@@ -32,6 +32,7 @@ def noise(p=1):
 def swap(p=1):
     return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
 
+# Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
     'normalize':ZNormalization(),
     'spatial': spatial_transform,
