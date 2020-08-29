@@ -19,7 +19,6 @@ from sklearn.model_selection import KFold
 from shutil import copyfile
 import time
 import sys
-import ast 
 import pickle
 from pathlib import Path
 import argparse
@@ -35,12 +34,32 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 
 
-def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, 
-  num_epochs, batch_size, learning_rate, scheduler, which_loss, opt,
-  class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, augmentations, outputDir, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose):
+def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeaders, labelHeader, device, parameters, outputDir):
   '''
   This is the main training loop
   '''
+  # extract variables form parameters dict
+  psize = parameters['psize']
+  q_max_length = parameters['q_max_length']
+  q_samples_per_volume = parameters['q_samples_per_volume']
+  q_num_workers = parameters['q_num_workers']
+  q_verbose = parameters['q_verbose']
+  augmentations = parameters['augmentations']
+  which_model = parameters['which_model']
+  opt = parameters['opt']
+  loss_function = parameters['loss_function']
+  scheduler = parameters['scheduler']
+  class_list = parameters['class_list']
+  base_filters = parameters['base_filters']
+  base_filters = parameters['base_filters']
+  base_filters = parameters['base_filters']
+  batch_size = parameters['batch_size']
+  learning_rate = parameters['learning_rate']
+  num_epochs = parameters['num_epochs']
+  
+  n_channels = len(channelHeaders)
+  n_classList = len(class_list)
+
   trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations)
   validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = augmentations) # may or may not need to add augmentations here
 
@@ -49,17 +68,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
 
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels,len(class_list),base_filters)
+    model = resunet(n_channels,n_classList,base_filters)
   elif which_model == 'unet':
-    model = unet(n_channels,len(class_list),base_filters)
+    model = unet(n_channels,n_classList,base_filters)
   elif which_model == 'fcn':
-    model = fcn(n_channels,len(class_list),base_filters)
+    model = fcn(n_channels,n_classList,base_filters)
   elif which_model == 'uinc':
-    model = uinc(n_channels,len(class_list),base_filters)
+    model = uinc(n_channels,n_classList,base_filters)
   else:
-    print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
+    print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels,len(class_list),base_filters)
+    model = resunet(n_channels,n_classList,base_filters)
 
   # setting optimizer
   if opt == 'sgd':
@@ -69,23 +88,23 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
   elif opt == 'adam':    
     optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
   else:
-    print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the impementation, using sgd, instead', file = sys.stderr)
+    print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the implementation, using sgd, instead', file = sys.stderr)
     opt = 'sgd'
     optimizer = optim.SGD(model.parameters(),
                             lr= learning_rate,
                             momentum = 0.9)
   # setting the loss function
-  if which_loss == 'dc':
+  if loss_function == 'dc':
     loss_fn  = MCD_loss
-  elif which_loss == 'dcce':
+  elif loss_function == 'dcce':
     loss_fn  = DCCE
-  elif which_loss == 'ce':
+  elif loss_function == 'ce':
     loss_fn = CE
-  elif which_loss == 'mse':
+  elif loss_function == 'mse':
     loss_fn = MCD_MSE_loss
   else:
-    print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
-    which_loss = 'dc'
+    print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
+    loss_function = 'dc'
     loss_fn  = MCD_loss
 
   # training_start_time = time.asctime()
@@ -203,7 +222,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               output = model(image.float())
               # Computing the loss
               mask = mask.unsqueeze(0)
-              loss = loss_fn(output.double(), mask.double(),len(class_list))
+              loss = loss_fn(output.double(), mask.double(),n_classList)
           # Back Propagation for model to learn
           scaler.scale(loss).backward() 
           ### gradient clipping
@@ -256,7 +275,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
               mask = mask.unsqueeze(0)
               # making sure that the output and mask are on the same device
               output, mask = output.to(device), mask.to(device)
-              curr_loss = loss_fn(output.double(), mask.double(),len(class_list)).cpu().data.item()
+              curr_loss = loss_fn(output.double(), mask.double(),n_classList).cpu().data.item()
               total_loss+=curr_loss
               #Computing the dice score 
               curr_dice = 1 - curr_loss
@@ -278,7 +297,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle,
       print("Average Validation Loss:", average_loss)
       print("Best Validation Epoch: ",best_val_idx)
 
-      # Updating the learning rate accoring to some conditions - reduce lr on plateau needs out loss to be monitored and scedules the LR accordingly. Others change irrespective of loss.
+      # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
       if not scheduler == "triangular":
         if scheduler == "reduce-on-plateau":
           scheduler_lr.step(average_loss)
@@ -298,33 +317,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-num_epochs', type=int, help = 'Number of epochs', required=True)
-    parser.add_argument('-batch_size', type=int, help = 'Batch size', required=True)
-    parser.add_argument('-learning_rate', type=float, help = 'Learning rate', required=True)
-    parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
-    parser.add_argument('-opt', type=str, help = 'Optimizer type', required=True)
-    parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
-    parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
-    parser.add_argument('-n_channels', type=int, help = 'Number of input channels', required=True)
-    parser.add_argument('-which_model', type=str, help = 'Model type', required=True)
+    parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
     parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
-    parser.add_argument('-augmentations_pickle', type=str, help = 'Augmentations pickle', required=True)
-    parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
-    parser.add_argument('-q_max_length', type=int, help = '[Queue] Max length', required=True)
-    parser.add_argument('-q_samples_per_volume', type=int, help = '[Queue] Samples per volume', required=True)
-    parser.add_argument('-q_num_workers', type=int, help = '[Queue] Number of workers', required=True)
-    parser.add_argument('-q_verbose', type=str, help = '[Queue] Verbose debugging', required=True)
     
     args = parser.parse_args()
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-    psize = pickle.load(open(args.psize_pickle,"rb"))
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
-    augmentations = pickle.load(open(args.augmentations_pickle,"rb"))
+    parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
 
@@ -334,22 +338,8 @@ if __name__ == "__main__":
 
     trainingLoop(trainingDataFromPickle = trainingDataFromPickle, 
         validataionDataFromPickle = validataionDataFromPickle, 
-        num_epochs = args.num_epochs, 
-        batch_size = args.batch_size, 
-        learning_rate = args.learning_rate, 
-        which_loss = args.which_loss, 
-        opt = args.opt, 
-        n_classes = args.n_classes,
-        base_filters = args.base_filters, 
-        n_channels = args.n_channels, 
-        which_model = args.which_model, 
-        psize = psize, 
         channelHeaders = channel_header, 
         labelHeader = label_header, 
-        augmentations = augmentations,
+        parameters = parameters,
         outputDir = args.outputDir,
-        device = args.device,
-        q_verbose = q_verbose,
-        q_max_length = args.q_max_length,
-        q_samples_per_volume = args.q_samples_per_volume,
-        q_num_workers = args.q_num_workers)
+        device = args.device,)

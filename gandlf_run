@@ -15,7 +15,6 @@ from torch.utils.data import Dataset, DataLoader
 from torch.autograd import Variable
 import gc
 from torchsummary import summary
-import ast 
 from pathlib import Path
 from sklearn.model_selection import KFold
 import pickle
@@ -25,6 +24,7 @@ from datetime import date
 
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager 
+from GANDLF.parseConfig import parseConfig
 
 copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
 parser = argparse.ArgumentParser(prog='GANDLF', formatter_class=argparse.RawTextHelpFormatter, description = "3D Image Semantic Segmentation using Deep Learning.\n\n" + copyrightMessage)
@@ -42,77 +42,18 @@ args = parser.parse_args()
 
 file_data_full = args.data
 model_parameters = args.config
-dev = args.device
+parameters = parseConfig(model_parameters)
+device = args.device
 model_path = args.output
 mode = args.train
-if '-1' in dev:
-    dev = 'cpu'
+if '-1' in device:
+    device = 'cpu'
 
 if mode == 0: # inference mode
     pretrainedModelPath = args.modelDir
 
 # safe directory creation
 Path(model_path).mkdir(parents=True, exist_ok=True)
-
-df_model = pd.read_csv(model_parameters, sep=' = ', names=['param_name', 'param_value'],
-                         comment='#', skip_blank_lines=True,
-                         engine='python').fillna(' ')
-
-#Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
-params = {}
-for j in range(df_model.shape[0]):
-    params[df_model.iloc[j, 0]] = df_model.iloc[j, 1]
-
-# Extrating the training parameters from the dictionary
-num_epochs = int(params['num_epochs'])
-batch_size = int(params['batch_size'])
-learning_rate = float(params['learning_rate'])
-which_loss = str(params['loss_function'])
-opt = str(params['opt'])
-#lr_schedule = str(params['scheduler'])
-augmentations = ast.literal_eval(str(params['data_augmentation']))
-class_list =  ast.literal_eval(str(params['class_list']))
-# Extracting the model parameters from the dictionary
-
-base_filters = int(params['base_filters'])
-which_model = str(params['modelName'])
-kfolds = int(params['kcross_validation'])
-psize = params['patch_size']
-psize = ast.literal_eval(psize) 
-psize = np.array(psize)
-
-# Setting default values to the params
-if 'q_max_length' in params:
-    q_max_length = int(params['q_max_length'])
-else:
-    q_max_length = 100
-
-if 'q_samples_per_volume' in params:
-    q_samples_per_volume = int(params['q_samples_per_volume'])
-else:
-    q_samples_per_volume = 10
-
-if 'q_num_workers' in params:
-    q_num_workers = int(params['q_num_workers'])
-else:
-    q_num_workers = 4
-
-if 'scheduler' in params:
-    scheduler = str(params['scheduler'])
-else:
-    scheduler = 'triangle'
-
-
-q_verbose = False
-if 'q_verbose' in params:
-    if params['q_verbose'] == 'True':
-        q_verbose = True
-
-parallel_compute_command = ''
-if 'parallel_compute_command' in params:
-    parallel_compute_command = params['parallel_compute_command']
-    parallel_compute_command = parallel_compute_command.replace('\'', '')
-    parallel_compute_command = parallel_compute_command.replace('\"', '')
 
 ## read training dataset into data frame
 data_full = pd.read_csv(file_data_full)
@@ -135,9 +76,7 @@ for col in data_full.columns:
     else:
         labelHeader = None
 
-n_channels = len(channelHeaders)
-
 if mode != 0: # training mode
-    TrainingManager(dataframe = data_full, augmentations = augmentations, kfolds = kfolds, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = model_path, num_epochs = num_epochs, batch_size = batch_size, learning_rate = learning_rate, scheduler = scheduler, which_loss = which_loss, opt = opt, class_list = class_list, base_filters = base_filters, n_channels = n_channels, which_model = which_model, parallel_compute_command = parallel_compute_command, device = args.device, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
+    TrainingManager(dataframe = data_full, channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = model_path, parameters = parameters, device = device)
 else:
-    InferenceManager(dataframe = data_full, psize = psize, channelHeaders = channelHeaders, labelHeader = labelHeader, model_parameters_file = model_parameters, outputDir = pretrainedModelPath, batch_size = batch_size, which_loss = which_loss, class_list = class_list, base_filters = base_filters, n_channels = n_channels, which_model = which_model, device = args.device, augmentations = augmentations, q_max_length = q_max_length, q_samples_per_volume = q_samples_per_volume, q_num_workers = q_num_workers, q_verbose = q_verbose)
+    InferenceManager(dataframe = data_full, channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = model_path, parameters = parameters, device = device)
