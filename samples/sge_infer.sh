@@ -18,4 +18,4 @@ CUDA_VISIBLE_DEVICES=`get_CUDA_VISIBLE_DEVICES` || exit
 export CUDA_VISIBLE_DEVICES 
 echo "Cuda device: \$CUDA_VISIBLE_DEVICES"
 source activate dss
-python ../gandl_run -config `pwd`/sample_model.cfg -data `pwd`/val.csv -modelDir `pwd`/output_dir/ -output `pwd`/output_dir/ -train 0 -device cuda
+python ../gandl_run -config `pwd`/sample_model.yaml -data `pwd`/val.csv -modelDir `pwd`/output_dir/ -output `pwd`/output_dir/ -train 0 -device cuda

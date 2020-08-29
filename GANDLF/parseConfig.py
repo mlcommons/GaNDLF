@@ -3,34 +3,21 @@ import os
 import ast 
 import sys
 import numpy as np
-import pandas as pd
+import yaml
 
 def parseConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
-    
-  df_model = pd.read_csv(config_file_path, sep=' = ', names=['param_name', 'param_value'],
-                          comment='#', skip_blank_lines=True,
-                          engine='python').fillna(' ')
-
-  # Read the parameters as a dictionary so that we can access everything by the name and so when we add some extra parameters we dont have to worry about the indexing
-  params = {}
-  for j in range(df_model.shape[0]):
-      params[df_model.iloc[j, 0]] = df_model.iloc[j, 1]
-
+  with open(config_file_path) as f:
+    params = yaml.load(f, Loader=yaml.FullLoader)
+  
   # require parameters - this should error out if not present
-  if 'class_list' in params:
-    class_list =  ast.literal_eval(str(params['class_list']))
-    params['class_list'] = class_list
-  else:
+  if not('class_list' in params):
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
 
   if 'patch_size' in params:
-    psize = params['patch_size']    
-    psize = ast.literal_eval(psize) 
-    psize = np.array(psize)
-    params['psize'] = psize
+    params['psize'] = params['patch_size'] 
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
 
