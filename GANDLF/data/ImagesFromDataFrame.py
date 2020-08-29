@@ -60,7 +60,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
         subject_dict = {}
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
-            # assigining the dict key to the channel
+            # assigning the dict key to the channel
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
@@ -88,7 +88,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
-    # other augmentations should only happen for training - and also setting the probablities for the augmentations
+    # other augmentations should only happen for training - and also setting the probabilities for the augmentations
     if train:
         for aug in augmentations:
             if (aug != 'normalize') and (aug != 'resample'): # resample and normalize should always have probability=1
