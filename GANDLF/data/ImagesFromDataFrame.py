@@ -14,15 +14,23 @@ from torchio import Image, Subject
 # Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
-spatial_transform = OneOf({
-    RandomAffine(): 0.8,
-    RandomElasticDeformation(): 0.2,
-})
+def mri_artifact(p = 1):
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
 
-mri_artifact = OneOf({
-    RandomMotion(): 0.5,
-    RandomGhosting(): 0.5,
-})
+def spatial_transform(p=1):
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
+
+def bias(p=1):
+    return RandomBiasField(coefficients = 0.5, order= 3, p= p, seed = None)
+
+def blur(p=1):
+    return RandomBlur(std = (0., 4.), p = p, seed = None)
+
+def noise(p=1):
+    return RandomNoise(mean = 0, std = (0, 0.25), p = p, seed = None)
+
+def swap(p=1):
+    return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
 
 global_augs_dict = {
     'normalize':ZNormalization(),
@@ -32,10 +40,10 @@ global_augs_dict = {
     # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
     # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
     # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
-    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
-    'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
-    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
-    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) 
+    'bias': bias, 
+    'blur': blur, 
+    'noise': noise , 
+    'swap': swap
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
@@ -48,6 +56,8 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     dataframe.index = range(0,num_row)
     # This list will later contain the list of subjects 
     subjects_list = []
+
+
 
     # iterating through the dataframe
     for patient in range(num_row):
