@@ -58,16 +58,12 @@ def parseConfig(config_file_path):
   params['opt'] = opt
   
   # this is NOT a required parameter - a user should be able to train with NO augmentations
-  if 'data_augmentation' in params:
-    params['augmentations'] = params['data_augmentation']
-
-  if len(params['augmentations']) > 0: # only when augmentations are defined
-    for key in params['augmentations']:
-      if (key != 'normalize') and (key != 'resample'):
-        temp = params['augmentations'][key]
-        if (params['augmentations'][key] == None) or not('probability' in params['augmentations'][key]):
-            params['augmentations'][key] = {}
-            params['augmentations'][key]['probability'] = 1
+  if len(params['data_augmentation']) > 0: # only when augmentations are defined
+    for key in params['data_augmentation']: # iterate through all keys
+      if (key != 'normalize') and (key != 'resample'): # no need to check probabilities for these: they should ALWAYS be added
+        if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
+            params['data_augmentation'][key] = {}
+            params['data_augmentation'][key]['probability'] = 1
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
