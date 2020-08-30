@@ -11,31 +11,36 @@ import torchio
 from torchio.transforms import *
 from torchio import Image, Subject
 
-# Defining a dictionary - key is the string and the value is the augmentation object
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
-spatial_transform = OneOf({
-    RandomAffine(): 0.8,
-    RandomElasticDeformation(): 0.2,
-})
+# define individual functions/lambdas for augmentations to handle properties
+def mri_artifact(p = 1):
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
 
-mri_artifact = OneOf({
-    RandomMotion(): 0.5,
-    RandomGhosting(): 0.5,
-})
+def spatial_transform(p=1):
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
 
+def bias(p=1):
+    return RandomBiasField(coefficients = 0.5, order= 3, p= p, seed = None)
+
+def blur(p=1):
+    return RandomBlur(std = (0., 4.), p = p, seed = None)
+
+def noise(p=1):
+    return RandomNoise(mean = 0, std = (0, 0.25), p = p, seed = None)
+
+def swap(p=1):
+    return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
+
+# Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
     'normalize':ZNormalization(),
     'spatial': spatial_transform,
     'kspace': mri_artifact,
-    # 'affine':RandomAffine(image_interpolation = 'linear'), 
-    # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
-    # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
-    # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
-    'bias': RandomBiasField(coefficients = 0.5, order= 3, p= 1., seed = None), 
-    'blur': RandomBlur(std = (0., 4.), p = 1, seed = None), 
-    'noise':RandomNoise(mean = 0, std = (0, 0.25), p = 1., seed = None) , 
-    'swap':RandomSwap(patch_size = 15, num_iterations = 100, p = 1, seed = None) 
+    'bias': bias,
+    'blur': blur,
+    'noise': noise,
+    'swap': swap
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
@@ -55,7 +60,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
         subject_dict = {}
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
-            # assigining the dict key to the channel
+            # assigning the dict key to the channel
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
@@ -73,21 +78,22 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     augmentation_list = []
     
     # first, we want to do the resampling, if it is present - required for inference as well
-    for aug in augmentations:
-        if 'resample' in str(aug):
-            resample_split = str(aug).split(':')
-            resample_values = tuple(np.array(resample_split[1].split(',')).astype(np.float))
+    if 'resample' in augmentations:
+        if 'resolution' in augmentations['resample']:
+            # resample_split = str(aug).split(':')
+            resample_values = tuple(np.array(augmentations['resample']['resolution']).astype(np.float))
             augmentation_list.append(Resample(resample_values))
     
     # next, we want to do the intensity normalize - required for inference as well
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
-    # other augmentations should only happen for training
+    # other augmentations should only happen for training - and also setting the probabilities for the augmentations
     if train:
         for aug in augmentations:
-            if (str(aug) != 'normalize') and not('resample' in str(aug)):
-                augmentation_list.append(global_augs_dict[str(aug)])
+            if (aug != 'normalize') and (aug != 'resample'): # resample and normalize should always have probability=1
+                actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
+                augmentation_list.append(actual_function)
         
     transform = Compose(augmentation_list)
     
