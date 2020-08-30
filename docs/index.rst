@@ -6,7 +6,7 @@
 Welcome to GANDLF's documentation!
 ==================================
 
-A **G**\ener-**A**\ lly **N**\uanced **D**\eep **L**\earning **F**\ramework for segmentation and classification.
+A **G**\ener-**A**\lly **N**\uanced **D**\eep **L**\earning **F**\ramework for segmentation and classification.
 
 .. toctree::
    :maxdepth: 2
