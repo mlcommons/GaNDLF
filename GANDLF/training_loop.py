@@ -44,7 +44,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   q_samples_per_volume = parameters['q_samples_per_volume']
   q_num_workers = parameters['q_num_workers']
   q_verbose = parameters['q_verbose']
-  augmentations = parameters['augmentations']
+  augmentations = parameters['data_augmentation']
   which_model = parameters['which_model']
   opt = parameters['opt']
   loss_function = parameters['loss_function']
@@ -154,6 +154,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
       print('  Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
   sys.stdout.flush()
+
+  # resume if compatible model was found
+  if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
+    model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
+    print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
 
   model = model.to(dev)
   # Checking for the learning rate scheduler

@@ -45,7 +45,7 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
   q_samples_per_volume = parameters['q_samples_per_volume']
   q_num_workers = parameters['q_num_workers']
   q_verbose = parameters['q_verbose']
-  augmentations = parameters['augmentations']
+  augmentations = parameters['data_augmentation']
   which_model = parameters['which_model']
   opt = parameters['opt']
   loss_function = parameters['loss_function']
