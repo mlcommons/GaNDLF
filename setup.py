@@ -42,7 +42,7 @@ setup(
     'Programming Language :: Python :: 3.8',
   ],
   description=(
-    "Semantic segmenation using various DL architectures"
+    "Semantic segmentation using various DL architectures"
     " on PyTorch."
   ),
   install_requires=requirements,
