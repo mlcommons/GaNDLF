@@ -66,15 +66,3 @@ python GANDLF.py \
 ### Multi-GPU systems
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/).
-
-## To Do
-
-- Ability to change [interpolation type](https://torchio.readthedocs.io/transforms/transforms.html?highlight=interpolation#interpolation) from config file
-- Add more models that could potentially handle sparse data better
-- Put as many defaults as possible for different training/testing options in case the user passes bad argument in config file
-- Put CLI parameter parsing as a separate class for modularity and readability and this can be used by both the single interface for both training and testing
-- Add option to train on multiple networks and then fuse results from all; basically some kind of ensemble
-- Ability to resume training if a compatible weight file is found in the output directory (how would this work for k-fold training)
-- Ability to change the number of layers in the neural network models according to the parameter given in the configuration file
-- Fix the learning rate schedule
-- Different Augmentations for training and validation?
