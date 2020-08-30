@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'GANDLF'
-copyright = '2020, Megh Bhalerao, Siddhesh Thakur, Sarthak Pati'
-author = 'Megh Bhalerao, Siddhesh Thakur, Sarthak Pati'
+copyright = '2020, CBICA, UPenn'
+author = 'CBICA, UPenn'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.3.NR'
