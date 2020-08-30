@@ -155,6 +155,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
   sys.stdout.flush()
 
+  # resume if compatible model was found
+  if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
+    model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
+    print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
+
   model = model.to(dev)
   # Checking for the learning rate scheduler
   if scheduler == "triangle":
