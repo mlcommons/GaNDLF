@@ -140,6 +140,12 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   #   if environment_variable != '':
   #     print('Setting \'CUDA_VISIBLE_DEVICES\' to: ', environment_variable)
   #     os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
+
+  environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
+
+  # multi-gpu support
+  if ',' in environment_cuda_visible:
+    model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
   
   print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
   device = torch.device(dev)
