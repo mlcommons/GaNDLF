@@ -9,4 +9,6 @@ For any new feature, please ensure the corresponding option in the [sample confi
 
 ## Adding Transformations
 
-Add 
+- Update [TorchIO](https://github.com/fepegar/torchio) version in [setup](../setup.py), if appropriate.
+- Add transformation in [ImagesFromDataFrame Function](../GANDLF/data/ImagesFromDataFrame.py), under `global_augs_dict`
+- Ensure probability is used as input (not used for normalize or resample)
