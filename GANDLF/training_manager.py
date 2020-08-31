@@ -94,6 +94,7 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
             ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
             ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
         
+        print('Command to run:', command)
         subprocess.Popen(command, shell=True).wait()
 
       if singleFoldTraining:
