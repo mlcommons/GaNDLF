@@ -2,6 +2,17 @@
 Installation Instructions
 =========================
 
+*************
+Prerequisites
+*************
+
+- Python3 with a preference for `conda <https://www.anaconda.com/>`_
+- `CUDA <https://developer.nvidia.com/cuda-download>`_ and a compatible `cuDNN version <https://developer.nvidia.com/cudnn>`_ installed system-wide
+
+*************
+Instructions
+*************
+
 Follow these instructions (written assuming `Anaconda <https://www.anaconda.com/>`_ distribution in mind):
 
 .. code-block:: powershell
