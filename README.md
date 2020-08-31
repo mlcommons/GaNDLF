@@ -50,6 +50,13 @@ conda install pytorch torchvision cudatoolkit=10.2 -c pytorch -y # install accor
 pip install -e .
 ```
 
+### [OPTIONAL] Build the documentation
+
+```powershell
+cd docs
+make html
+```
+
 ## Usage
 
 ```powershell
