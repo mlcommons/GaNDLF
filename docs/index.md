@@ -18,6 +18,5 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 ## Table of Contents
 
 - [Application Setup](./setup.md)
-- [Process the Data](./process_data.md)
-- [Run the Application](./runningApplication.md)
-- [Extras](./extras.md)
+- [Usage](./usage.md)
+- [Extending GANDLF](./extending.md)
