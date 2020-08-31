@@ -32,3 +32,5 @@ All details and comments are in the [samples/sample_training.yaml](../samples/sa
 ### Multi-GPU systems
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
+
+For an example how this is set, see [sge_wrapper](../samples/sge_wrapper).
