@@ -1,0 +1,13 @@
+theme: jekyll-theme-cayman
+show_downloads: True
+navigation:
+  - title: Home
+    url: /
+  - title: Application Setup
+    url: setup
+  - title: Process the Data
+    url: process_data
+  - title: Run the Application
+    url: runningApplication
+  - title: Extras
+    url: extras
