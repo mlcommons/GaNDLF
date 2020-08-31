@@ -33,3 +33,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - Update [Training Function](../GANDLF/training_loop.py)
 - Update [Training Manager](../GANDLF/training_manager.py), if any training API has changed
 
+## Add Inference Functionality
+
+- Update [Inference Function](../GANDLF/inference_loop.py)
+- Update [Inference Manager](../GANDLF/inference_manager.py), if any inference API has changed
