@@ -1,5 +1,6 @@
 ## 0.0.3 
 
+- Added detailed documentation
 - 
 
 ## 0.0.2
