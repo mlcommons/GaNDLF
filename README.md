@@ -53,7 +53,7 @@ pip install -e .
 ### [OPTIONAL] Build the documentation
 
 ```powershell
-cd docs
+cd docs/rst
 make html
 ```
 
