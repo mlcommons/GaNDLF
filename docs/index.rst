@@ -29,6 +29,8 @@ Features
    :caption: Contents:
 
    installation
+   usage
+   extending
 
 Indices and tables
 ==================
