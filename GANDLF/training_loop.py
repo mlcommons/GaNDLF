@@ -205,7 +205,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           # Making sure that the optimizer has been reset
           optimizer.zero_grad()
           # Forward Propagation to get the output from the models
-          torch.cuda.empty_cache()
+          # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
+          #torch.cuda.empty_cache()
           # Casts operations to mixed precision 
           with torch.cuda.amp.autocast(): 
               output = model(image.float())
@@ -232,7 +233,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           total_dice+= curr_dice
           # update scale for next iteration
           scaler.update() 
-          torch.cuda.empty_cache()
+          # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
+          #torch.cuda.empty_cache()
           if scheduler == "triangular":
             scheduler_lr.step()
 
