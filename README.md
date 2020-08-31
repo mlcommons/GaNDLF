@@ -21,18 +21,9 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 - No need to code to generate robust models
 - [Automatic mixed precision](https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/) support
 
-## Constructing the Data CSV
+## Documentation
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [./samples/sample_train.csv](./samples/sample_train.csv) and needs to be structured with the following header format:
-
-```csv
-Channel_0,Channel_1,...,Channel_X,Label
-/full/path/0.nii.gz,/full/path/1.nii.gz,...,/full/path/X.nii.gz,/full/path/segmentation.nii.gz
-```
-
-- `Channel` can be substituted with `Modality` or `Image`
-- `Label` can be substituted with `Mask` or `Segmentation`
-- Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
+Start at [./docs/index.md](./docs/index.md).
 
 ## Installation
 
