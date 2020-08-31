@@ -337,10 +337,6 @@ if __name__ == "__main__":
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
 
-    q_verbose = False
-    if args.q_verbose == 'True':
-        q_verbose = True
-
     trainingLoop(trainingDataFromPickle = trainingDataFromPickle, 
         validataionDataFromPickle = validataionDataFromPickle, 
         channelHeaders = channel_header, 
