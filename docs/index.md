@@ -2,12 +2,6 @@
 
 A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification.
 
-## Other name candidates
-
-- DeepSAGE: Deep SemAntic seGmEntator
-- SEACAF: SEgmentation And ClassificAtion Framework
-- DeepSAC: Deep Segmentation and Classification
-
 ## Why use this?
 
 - Supports multiple
@@ -21,11 +15,8 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 - No need to code to generate robust models
 - [Automatic mixed precision](https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/) support
 
-## Documentation
+## Table of Contents
 
-Start at [./docs/index.md](./docs/index.md).
-
-Includes:
-- Installation
-- Usage GANDLF
-- Extending GANDLF
+- [Application Setup](./setup.md)
+- [Usage](./usage.md)
+- [Extending GANDLF](./extending.md)
