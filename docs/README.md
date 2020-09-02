@@ -1,1 +1,1 @@
-The website for GANDLF
+The website for GANDLF; start with [index.md](./index.md).
