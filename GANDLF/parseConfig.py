@@ -44,7 +44,11 @@ def parseConfig(config_file_path):
   params['learning_rate'] = learning_rate
 
   if 'loss_function' in params:
-    loss_function = str(params['loss_function'])
+    if params['loss_function'] == 'mse_torch':
+      params['loss_function'] = {}
+      params['loss_function']['mse_torch'] = {}
+      params['loss_function']['mse_torch']['reduction'] = 'mean'
+    loss_function = params['loss_function']
   else:
     loss_function = 'dc'
     print('Using default loss_function: ', loss_function)
