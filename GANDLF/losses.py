@@ -79,5 +79,6 @@ def MCD_MSE_loss(inp,target,num_classes):
     l = MCD_loss(inp,target,num_classes) + 0.1*MSE_loss(inp,target,num_classes)
     return l
 
-
+def MSE_loss(inp, target, reduction = 'mean'):
+    l = MSELoss(inp, target, reduction = reduction) # for reductions options, see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 
