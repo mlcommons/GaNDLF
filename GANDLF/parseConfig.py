@@ -62,6 +62,8 @@ def parseConfig(config_file_path):
         params['loss_function'] = {}
         params['loss_function']['mse_torch'] = {}
         params['loss_function']['mse_torch']['reduction'] = 'mean'
+      else:
+        defineDefaultLoss = False
   else:
     defineDefaultLoss = True
   if defineDefaultLoss == True:
