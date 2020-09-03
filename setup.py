@@ -15,14 +15,15 @@ requirements = [
   'torch>=1.6',
   'torchvision',
   'tqdm',
-  'torchio==0.17.21',
+  'torchio==0.17.34',
   'pandas',
   'pylint',
   'torchsummary',
   'scikit-learn==0.23.1',
   'pickle5==0.0.11',
   'setuptools',
-  'GPUtil'
+  # 'GPUtil',
+  'pyyaml'
 ]
 
 setup(
@@ -41,7 +42,7 @@ setup(
     'Programming Language :: Python :: 3.8',
   ],
   description=(
-    "Semantic segmenation using various DL architectures"
+    "Semantic segmentation using various DL architectures"
     " on PyTorch."
   ),
   install_requires=requirements,
@@ -51,6 +52,6 @@ setup(
   include_package_data=True,
   keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
   name='GANDLF',
-  version='0.0.2.NR', # NR: non-release; this should be changed when tagging
+  version='0.0.3.NR', # NR: non-release; this should be changed when tagging
   zip_safe=False,
 )

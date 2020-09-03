@@ -35,11 +35,32 @@ from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-
-def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, base_filters, n_channels, which_model, psize, channelHeaders, labelHeader, outputDir, device, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, augmentations):
+def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, parameters, outputDir):
   '''
   This is the main inference loop
   '''
+  # extract variables form parameters dict
+  psize = parameters['psize']
+  q_max_length = parameters['q_max_length']
+  q_samples_per_volume = parameters['q_samples_per_volume']
+  q_num_workers = parameters['q_num_workers']
+  q_verbose = parameters['q_verbose']
+  augmentations = parameters['data_augmentation']
+  which_model = parameters['which_model']
+  opt = parameters['opt']
+  loss_function = parameters['loss_function']
+  scheduler = parameters['scheduler']
+  class_list = parameters['class_list']
+  base_filters = parameters['base_filters']
+  base_filters = parameters['base_filters']
+  base_filters = parameters['base_filters']
+  batch_size = parameters['batch_size']
+  learning_rate = parameters['learning_rate']
+  num_epochs = parameters['num_epochs']
+  
+  n_channels = len(channelHeaders)
+  n_classList = len(class_list)
+
   # Setting up the inference loader
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
@@ -54,24 +75,24 @@ def inferenceLoop(inferenceDataFromPickle,batch_size, which_loss,class_list, bas
   elif which_model == 'uinc':
     model = uinc(n_channels,len(class_list),base_filters)
   else:
-    print('WARNING: Could not find the requested model \'' + which_model + '\' in the impementation, using ResUNet, instead', file = sys.stderr)
+    print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
     model = resunet(n_channels,len(class_list),base_filters)
 
   # Loading the weights into the model
   model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
   # setting the loss function
-  if which_loss == 'dc':
+  if loss_function == 'dc':
     loss_fn  = MCD_loss
-  elif which_loss == 'dcce':
+  elif loss_function == 'dcce':
     loss_fn  = DCCE
-  elif which_loss == 'ce':
+  elif loss_function == 'ce':
     loss_fn = CE
-  elif which_loss == 'mse':
+  elif loss_function == 'mse':
     loss_fn = MCD_MSE_loss
   else:
-    print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the impementation, using dc, instead', file = sys.stderr)
-    which_loss = 'dc'
+    print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
+    loss_function = 'dc'
     loss_fn  = MCD_loss
 
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
@@ -201,14 +222,9 @@ if __name__ == "__main__":
     # parse the cli arguments here
     parser = argparse.ArgumentParser(description = "Inference Loop of GANDLF")
     parser.add_argument('-inference_loader_pickle', type=str, help = 'Inference loader pickle', required=True)
-    parser.add_argument('-which_loss', type=str, help = 'Loss type', required=True)
-    parser.add_argument('-n_classes', type=int, help = 'Number of output classes', required=True)
-    parser.add_argument('-base_filters', type=int, help = 'Number of base filters', required=True)
-    parser.add_argument('-n_channels', type=int, help = 'Number of input channels', required=True)
-    parser.add_argument('-which_model', type=str, help = 'Model type', required=True)
+    parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
     parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
-    parser.add_argument('-psize_pickle', type=str, help = 'psize pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
     
@@ -218,18 +234,12 @@ if __name__ == "__main__":
     psize = pickle.load(open(args.psize_pickle,"rb"))
     channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
-    inferenceDataFromPickle = pd.read_pickle(inference_loader_pickle)
-
+    parameters = pickle.load(open(args.parameter_pickle,"rb"))
+    inferenceDataFromPickle = pd.read_pickle(args.inference_loader_pickle)
 
     inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
-        batch_size = args.batch_size, 
-        which_loss = args.which_loss, 
-        n_classes = args.n_classes,
-        base_filters = args.base_filters, 
-        n_channels = args.n_channels, 
-        which_model = args.which_model, 
-        psize = psize, 
         channelHeaders = channel_header, 
         labelHeader = label_header, 
+        parameters = parameters,
         outputDir = args.outputDir,
-        device = args.device)
+        device = args.device,)
