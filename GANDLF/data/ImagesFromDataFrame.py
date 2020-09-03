@@ -13,26 +13,6 @@ from torchio import Image, Subject
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
-<<<<<<< HEAD
-
-def mri_artifact(p = 1):
-    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
-
-def spatial_transform(p=1):
-    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
-
-def bias(p=1):
-    return RandomBiasField(coefficients = 0.5, order= 3, p= p, seed = None)
-
-def blur(p=1):
-    return RandomBlur(std = (0., 4.), p = p, seed = None)
-
-def noise(p=1):
-    return RandomNoise(mean = 0, std = (0, 0.25), p = p, seed = None)
-
-def swap(p=1):
-    return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
-=======
 # define individual functions/lambdas for augmentations to handle properties
 def mri_artifact(p = 1):
     return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
@@ -48,7 +28,6 @@ def blur(p=1):
 
 def noise(p=1):
     return RandomNoise(mean = 0, std = (0, 0.25), p = p, seed = None)
->>>>>>> 87e997201ac69381e203e41383f90c3ee10fc0cd
 
 def swap(p=1):
     return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
@@ -59,24 +38,11 @@ global_augs_dict = {
     'normalize':ZNormalization(),
     'spatial': spatial_transform,
     'kspace': mri_artifact,
-<<<<<<< HEAD
-    # 'affine':RandomAffine(image_interpolation = 'linear'), 
-    # 'elastic': RandomElasticDeformation(num_control_points=(7, 7, 7),locked_borders=2),
-    # 'motion': RandomMotion(degrees=10, translation = 10, num_transforms= 2, image_interpolation = 'linear', p = 1., seed = None), 
-    # 'ghosting': RandomGhosting(num_ghosts = (4, 10), axes = (0, 1, 2), intensity = (0.5, 1), restore = 0.02, p = 1., seed = None),
-    'bias': bias, 
-    'blur': blur, 
-    'noise': noise , 
-=======
     'bias': bias,
     'blur': blur,
     'noise': noise,
->>>>>>> 87e997201ac69381e203e41383f90c3ee10fc0cd
     'swap': swap
 }
-
-
-
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = None):
@@ -123,21 +89,6 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
     
-<<<<<<< HEAD
-    # other augmentations should only happen for training - and also setting the probablities for the augmentations
-    if train:
-        for aug in augmentations:
-            if (str(aug) != 'normalize') and not('resample' in str(aug)):
-                aug_split = str(aug).split(':')
-                prob = float(aug_split[1])
-                aug = str(aug_split[0])
-                print(aug)
-                actual_function = global_augs_dict[str(aug)]
-                actual_function = actual_function(p=prob)
-                augmentation_list.append(actual_function)
-
-
-=======
     # other augmentations should only happen for training - and also setting the probabilities for the augmentations
     if train:
         for aug in augmentations:
@@ -145,7 +96,6 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
                 actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
                 augmentation_list.append(actual_function)
         
->>>>>>> 87e997201ac69381e203e41383f90c3ee10fc0cd
     transform = Compose(augmentation_list)
     
     subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)

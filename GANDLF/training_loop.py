@@ -140,11 +140,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
   sys.stdout.flush()
 
-<<<<<<< HEAD
-  # Loading saved model weights, if they exist - right now this is specific to single fold training - can be extended further
-=======
   # resume if compatible model was found
->>>>>>> 87e997201ac69381e203e41383f90c3ee10fc0cd
   if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
     model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
     print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
