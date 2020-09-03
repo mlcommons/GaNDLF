@@ -44,6 +44,7 @@ def parseConfig(config_file_path):
   params['learning_rate'] = learning_rate
 
   if 'loss_function' in params:
+    defineDefaultLoss = False
     # check if user has passed a dict 
     if isinstance(params['loss_function'], dict): # if this is a dict
       if len(params['loss_function']) > 0: # only proceed if something is defined
@@ -62,8 +63,6 @@ def parseConfig(config_file_path):
         params['loss_function'] = {}
         params['loss_function']['mse_torch'] = {}
         params['loss_function']['mse_torch']['reduction'] = 'mean'
-      else:
-        defineDefaultLoss = False
   else:
     defineDefaultLoss = True
   if defineDefaultLoss == True:
