@@ -1,5 +1,6 @@
 import numpy as np
 import torch 
+from torch.nn import MSELoss, SmoothL1Loss, L1Loss
 
 def dice_loss(inp, target):
     smooth = 1e-7
