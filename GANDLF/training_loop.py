@@ -94,18 +94,23 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
                             lr= learning_rate,
                             momentum = 0.9)
   # setting the loss function
-  if loss_function == 'dc':
-    loss_fn  = MCD_loss
-  elif loss_function == 'dcce':
-    loss_fn  = DCCE
-  elif loss_function == 'ce':
-    loss_fn = CE
-  elif loss_function == 'mse':
-    loss_fn = MCD_MSE_loss
-  else:
-    print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
-    loss_function = 'dc'
-    loss_fn  = MCD_loss
+  if isinstance(loss_function, dict): # this is currently only happening for mse_torch
+    # check for mse_torch
+    loss_fn = MSE_torch_loss
+    MSE_torch_requested = True
+  else: # this is a simple string, so proceed with previous workflow
+    if loss_function == 'dc':
+      loss_fn  = MCD_loss
+    elif loss_function == 'dcce':
+      loss_fn  = DCCE
+    elif loss_function == 'ce':
+      loss_fn = CE
+    elif loss_function == 'mse':
+      loss_fn = MCD_MSE_loss
+    else:
+      print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
+      loss_function = 'dc'
+      loss_fn  = MCD_loss
 
   # training_start_time = time.asctime()
   # startstamp = time.time()
@@ -213,13 +218,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           # Making sure that the optimizer has been reset
           optimizer.zero_grad()
           # Forward Propagation to get the output from the models
-          torch.cuda.empty_cache()
+          # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
+          #torch.cuda.empty_cache()
           # Casts operations to mixed precision 
           with torch.cuda.amp.autocast():
               output = model(image.float())
               # Computing the loss
               mask = mask.unsqueeze(0)
-              loss = loss_fn(output.double(), mask.double(),n_classList)
+              if MSE_torch_requested:
+                loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['reduction'])
+              else:
+                loss = loss_fn(output.double(), mask.double(), n_classList)
           # Back Propagation for model to learn
           scaler.scale(loss).backward() 
           ### gradient clipping
@@ -240,7 +249,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           total_dice+= curr_dice
           # update scale for next iteration
           scaler.update() 
-          torch.cuda.empty_cache()
+          # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
+          #torch.cuda.empty_cache()
           if scheduler == "triangular":
             scheduler_lr.step()
           
@@ -311,6 +321,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
 if __name__ == "__main__":
 
+    torch.multiprocessing.freeze_support()
     # parse the cli arguments here
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
