@@ -44,10 +44,32 @@ def parseConfig(config_file_path):
   params['learning_rate'] = learning_rate
 
   if 'loss_function' in params:
-    loss_function = str(params['loss_function'])
+    defineDefaultLoss = False
+    # check if user has passed a dict 
+    if isinstance(params['loss_function'], dict): # if this is a dict
+      if len(params['loss_function']) > 0: # only proceed if something is defined
+        for key in params['loss_function']: # iterate through all keys
+          if key == 'mse_torch':
+            if (params['loss_function'][key] == None) or not('reduction' in params['loss_function'][key]):
+              params['loss_function'][key] = {}
+              params['loss_function'][key]['reduction'] = 'mean'
+          else:
+            params['loss_function'] = key # use simple string for other functions - can be extended with parameters, if needed
+      else:
+        defineDefaultLoss = True
+    else:      
+      # check if user has passed a single string
+      if params['loss_function'] == 'mse_torch':
+        params['loss_function'] = {}
+        params['loss_function']['mse_torch'] = {}
+        params['loss_function']['mse_torch']['reduction'] = 'mean'
   else:
+    defineDefaultLoss = True
+  if defineDefaultLoss == True:
     loss_function = 'dc'
     print('Using default loss_function: ', loss_function)
+  else:
+    loss_function = params['loss_function']
   params['loss_function'] = loss_function
 
   if 'opt' in params:
