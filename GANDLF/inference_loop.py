@@ -107,7 +107,7 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
       channel_keys_new.append(item)
   channel_keys = channel_keys_new
 
-  print("Training Data Samples: ", len(inference_loader.dataset))
+  print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   dev = device
   
