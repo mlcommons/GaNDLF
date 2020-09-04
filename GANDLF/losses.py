@@ -1,6 +1,8 @@
 import numpy as np
 import torch 
 
+
+# Dice scores and dice losses   
 def dice_loss(inp, target):
     smooth = 1e-7
     iflat = inp.contiguous().view(-1)
@@ -12,7 +14,7 @@ def dice_loss(inp, target):
 def MCD_loss(pm, gt, num_class):
     acc_dice_loss = 0
     for i in range(1,num_class):
-        acc_dice_loss += dice_loss(gt[:,i,:,:,:],pm[:,i,:,:,:])
+        acc_dice_loss += dice_loss(gt[:,i,:,:,:],pm[:,i,:,:,:]) 
     acc_dice_loss = acc_dice_loss/(num_class-1)
     return acc_dice_loss
 
