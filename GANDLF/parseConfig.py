@@ -112,7 +112,7 @@ def parseConfig(config_file_path):
 
   if 'model' in params:
 
-    if isinstance(params['model'], dict):
+    if not(isinstance(params['model'], dict)):
       sys.exit('The \'model\' parameter needs to be populated as a dictionary')
     elif len(params['model']) == 0: # only proceed if something is defined
       sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
@@ -122,15 +122,8 @@ def parseConfig(config_file_path):
     if not params['model']['final_layer']:
       sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
 
-
-
-    test = params['model']['architecture']
-
-    test = 2
-
   else:
-    # define default model here
-    test = 'default'
+    sys.exit('The \'model\' parameter needs to be populated as a dictionary')
 
   if 'kcross_validation' in params:
     kfolds = int(params['kcross_validation'])
