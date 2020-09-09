@@ -117,6 +117,12 @@ def parseConfig(config_file_path):
     elif len(params['model']) == 0: # only proceed if something is defined
       sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
 
+    if not params['model']['architecture']:
+      sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
+    if not params['model']['final_layer']:
+      sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
+
+
 
     test = params['model']['architecture']
 
