@@ -1,4 +1,7 @@
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 class ModelBase:
     '''
@@ -12,3 +15,5 @@ class ModelBase:
         self.n_classes = n_classes
         self.base_filters = base_filters
         self.final_convolution_layer = final_convolution_layer
+
+        if final_convolution_layer == 'sigmoid'
