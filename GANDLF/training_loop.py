@@ -236,7 +236,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           #train_loss_list.append(loss.cpu().data.item())
           total_loss+=curr_loss        
           #Computing the dice score 
-          curr_dice = 1 - curr_loss
+          curr_dice = MCD(output.double(), mask.double(), n_classList)
           #Computing the total dice
           total_dice+= curr_dice
           # update scale for next iteration
@@ -277,7 +277,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
               curr_loss = loss_fn(output.double(), mask.double(),n_classList).cpu().data.item()
               total_loss+=curr_loss
               #Computing the dice score 
-              curr_dice = 1 - curr_loss
+              curr_dice = MCD(output.double(), mask.double(), n_classList)
               #Computing the total dice
               total_dice+= curr_dice
 
