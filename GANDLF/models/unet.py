@@ -2,6 +2,8 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
+
+from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
@@ -11,7 +13,7 @@ from GANDLF.models.seg_modules.out_conv import out_conv
 
 
 
-class unet(nn.Module):
+class unet(ModelBase):
     """
     This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf - without the residual connections. The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
