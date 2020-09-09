@@ -14,6 +14,10 @@ class ModelBase:
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.base_filters = base_filters
-        self.final_convolution_layer = final_convolution_layer
 
-        if final_convolution_layer == 'sigmoid'
+        if final_convolution_layer == 'sigmoid':
+            self.final_convolution_layer = F.sigmoid
+        elif final_convolution_layer == 'softmax':
+            self.final_convolution_layer = F.softmax
+        elif (final_convolution_layer == 'none') or (final_convolution_layer == None) or (final_convolution_layer == 'None') or (final_convolution_layer == 'regression'):
+            self.final_convolution_layer = None
