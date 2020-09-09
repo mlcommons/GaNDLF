@@ -8,6 +8,7 @@ class ModelBase(nn.Module):
     This is the base model class that all other architectures will need to derive from
     '''
     def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(ModelBase, self).__init__()
         '''
         This defines all defaults that the model base uses
         '''
