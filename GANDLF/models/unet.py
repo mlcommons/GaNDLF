@@ -21,9 +21,7 @@ class unet(ModelBase):
     """
     def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
         super(unet, self).__init__( n_channels, n_classes, base_filters, final_convolution_layer)
-        self.n_channels = n_channels
-        self.n_classes = n_classes
-        self.ins = in_conv(self.n_channels, base_filters)
+        self.ins = in_conv(n_channels, base_filters)
         self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
         self.en_1 = EncodingModule(base_filters*2, base_filters*2)
         self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4)
@@ -39,7 +37,7 @@ class unet(ModelBase):
         self.us_1 = UpsamplingModule(base_filters*4, base_filters*2)
         self.de_1 = DecodingModule(base_filters*4, base_filters*2)
         self.us_0 = UpsamplingModule(base_filters*2, base_filters)
-        self.out = out_conv(base_filters*2, self.n_classes)
+        self.out = out_conv(base_filters*2, n_classes)
 
     def forward(self, x):
         x1 = self.ins(x)
