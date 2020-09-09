@@ -68,6 +68,7 @@ class out_conv(nn.Module):
         if self.res == True:
             x = x + skip
         x = F.leaky_relu(self.in_3(x))
-        x = F.softmax(self.conv3(x),dim=1)
+        x = self.conv3(x)
+        x = F.softmax(x,dim=1)
         return x
  
