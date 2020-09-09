@@ -4,6 +4,9 @@ modelName: resunet
 # define the model, all properties are required
 model:
   {
+    # dimension = 3
+    # base_filters
+    # other model-related properties can go here
     type: resunet,
     final_layer: None # can be either sigmoid, softmax or none (none == regression)
   }
