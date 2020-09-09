@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ModelBase:
+class ModelBase(nn.Module):
     '''
     This is the base model class that all other architectures will need to derive from
     '''
