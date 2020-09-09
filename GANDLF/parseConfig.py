@@ -96,10 +96,14 @@ def parseConfig(config_file_path):
   params['base_filters'] = base_filters
 
   if 'modelName' in params:
+    defineDefaultModel = False
     which_model = str(params['modelName'])
   elif 'which_model' in params:
+    defineDefaultModel = False
     which_model = str(params['which_model'])
   else: # default case
+    defineDefaultModel = True
+  if defineDefaultModel == True:
     which_model = 'resunet'
     print('Using default model: ', which_model)
   params['which_model'] = which_model
