@@ -1,6 +1,7 @@
 # Choose the segmentation model here 
 # options: unet, resunet, fcn
 modelName: resunet
+# define the model, all properties are required
 model:
   {
     type: resunet,
