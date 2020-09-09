@@ -45,6 +45,15 @@ kcross_validation: -5
 data_augmentation: 
   {
     'normalize',
+    'resample':{
+      'resolution': [1,2,3]
+    },
+    'spatial':{
+      'probability': 0.5
+    },
+    'kspace':{
+      'probability': 1
+    },
     'bias',
     'blur',
     'noise',
