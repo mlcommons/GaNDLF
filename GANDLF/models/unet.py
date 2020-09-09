@@ -19,8 +19,8 @@ class unet(ModelBase):
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
     and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
     """
-    def __init__(self, n_channels, n_classes, base_filters):
-        super(unet, self).__init__()
+    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(unet, self).__init__( n_channels, n_classes, base_filters, final_convolution_layer)
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.ins = in_conv(self.n_channels, base_filters)
