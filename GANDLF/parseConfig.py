@@ -108,6 +108,16 @@ def parseConfig(config_file_path):
     print('Using default model: ', which_model)
   params['which_model'] = which_model
 
+  if 'model' in params:
+
+    test = params['model']['architecture']
+
+    test = 2
+
+  else:
+    # define default model here
+    test = 'default'
+
   if 'kcross_validation' in params:
     kfolds = int(params['kcross_validation'])
   else:
