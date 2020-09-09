@@ -83,7 +83,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
             # resample_split = str(aug).split(':')
             resample_values = tuple(np.array(augmentations['resample']['resolution']).astype(np.float))
             augmentation_list.append(Resample(resample_values))
-    
+
     # next, we want to do the intensity normalize - required for inference as well
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
