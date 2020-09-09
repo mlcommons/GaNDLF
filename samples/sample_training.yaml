@@ -2,13 +2,13 @@
 # options: unet, resunet, fcn
 modelName: resunet
 # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
-base_filters: 32
+base_filters: 16
 # Set the list of labels the model should train on and predict
 class_list: [0,1,2,4]
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128,128]
 # Number of epochs
-num_epochs: 5
+num_epochs: 100
 # Set the batch size
 batch_size: 1
 # Set the initial learning rate
@@ -20,6 +20,12 @@ scheduler: triangle
 # mse_torch is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 # loss_function: dc
 loss_function: dc
+#loss_function:
+#  {
+#    'mse_torch':{
+#      'reduction': 'mean' # see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss for all options
+#    }
+#  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
 # the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
@@ -39,6 +45,15 @@ kcross_validation: -5
 data_augmentation: 
   {
     'normalize',
+    'resample':{
+      'resolution': [1,2,3]
+    },
+    'spatial':{
+      'probability': 0.5
+    },
+    'kspace':{
+      'probability': 1
+    },
     'bias',
     'blur',
     'noise',
