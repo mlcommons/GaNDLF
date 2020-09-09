@@ -70,17 +70,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
-        model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = 'softmax')
+        model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     elif which_model == 'unet':
-        model = unet(n_channels, n_classList, base_filters, final_convolution_layer = 'softmax')
+        model = unet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     elif which_model == 'fcn':
-        model = fcn(n_channels, n_classList, base_filters, final_convolution_layer = 'softmax')
+        model = fcn(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     elif which_model == 'uinc':
-        model = uinc(n_channels, n_classList, base_filters, final_convolution_layer = 'softmax')
+        model = uinc(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
-        model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = 'softmax')
+        model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
     # setting optimizer
     if opt == 'sgd':
