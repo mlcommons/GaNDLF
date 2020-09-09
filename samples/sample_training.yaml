@@ -1,6 +1,11 @@
 # Choose the segmentation model here 
 # options: unet, resunet, fcn
 modelName: resunet
+model:
+  {
+    type: resunet,
+    final_layer: None # can be either sigmoid, softmax or none (none == regression)
+  }
 # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
 base_filters: 16
 # Set the list of labels the model should train on and predict
