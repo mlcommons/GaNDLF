@@ -68,6 +68,8 @@ class out_conv(nn.Module):
         if self.res == True:
             x = x + skip
         x = F.leaky_relu(self.in_3(x))
-        x = F.sigmoid(self.conv3(x)) # need to put in an option https://github.com/FETS-AI/GANDLF/issues/78
+        x = self.conv3(x)
+        #x = F.softmax(x,dim=1)
+        x = F.sigmoid((x) # need to put in an option https://github.com/FETS-AI/GANDLF/issues/78
         return x
  
