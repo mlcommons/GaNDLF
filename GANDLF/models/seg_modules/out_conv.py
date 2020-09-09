@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 class out_conv(nn.Module):
     def __init__(self, input_channels, output_channels, leakiness=1e-2, kernel_size=3,
-        conv_bias=True, inst_norm_affine=True, res=True, lrelu_inplace=True):
+        conv_bias=True, inst_norm_affine=True, res=False, lrelu_inplace=True):
         """[The Out convolution module to learn the information and use later]
         
         [This function will create the Learning convolutions]
