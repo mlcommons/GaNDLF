@@ -30,6 +30,7 @@ class out_conv(nn.Module):
         self.conv_bias = conv_bias
         self.leakiness = leakiness
         self.res = res
+        self.final_convolution_layer = final_convolution_layer
         self.in_0 = nn.InstanceNorm3d(input_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
@@ -69,7 +70,8 @@ class out_conv(nn.Module):
             x = x + skip
         x = F.leaky_relu(self.in_3(x))
         x = self.conv3(x)
-        #x = F.softmax(x,dim=1)
-        x = F.sigmoid((x) # need to put in an option https://github.com/FETS-AI/GANDLF/issues/78
+        
+        if not(self.final_convolution_layer == None):
+            x = self.final_convolution_layer(x)
         return x
  
