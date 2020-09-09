@@ -46,7 +46,7 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
   q_num_workers = parameters['q_num_workers']
   q_verbose = parameters['q_verbose']
   augmentations = parameters['data_augmentation']
-  which_model = parameters['which_model']
+  which_model = parameters['model']['architecture']
   opt = parameters['opt']
   loss_function = parameters['loss_function']
   scheduler = parameters['scheduler']
@@ -67,17 +67,17 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels,len(class_list),base_filters)
+    model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'unet':
-    model = unet(n_channels,len(class_list),base_filters)
+    model = unet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'fcn':
-    model = fcn(n_channels,len(class_list),base_filters)
+    model = fcn(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'uinc':
-    model = uinc(n_channels,len(class_list),base_filters)
+    model = uinc(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels,len(class_list),base_filters)
+    model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
   # Loading the weights into the model
   model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
