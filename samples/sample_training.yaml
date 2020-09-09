@@ -20,6 +20,12 @@ scheduler: triangle
 # mse_torch is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 # loss_function: dc
 loss_function: dc
+#loss_function:
+#  {
+#    'mse_torch':{
+#      'reduction': 'mean' # see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss for all options
+#    }
+#  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
 # the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
