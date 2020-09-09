@@ -79,6 +79,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     which_model = 'resunet'
     model = resunet(n_channels,n_classList,base_filters)
 
+
   # setting optimizer
   if opt == 'sgd':
     optimizer = optim.SGD(model.parameters(),
@@ -153,9 +154,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
   # Checking for the learning rate scheduler
   if scheduler == "triangle":
     step_size = 4*batch_size*len(train_loader.dataset)
-    clr = cyclical_lr(step_size, min_lr = learning_rate * 10**-3, max_lr=learning_rate)
+    clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
     scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-    print("Starting Learning rate is:",clr(2*step_size))
+    print("Starting Learning rate is:", learning_rate)
   elif scheduler == "exp":
     scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
   elif scheduler == "step":
@@ -168,7 +169,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file = sys.stderr)
     scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
-  print(scheduler_lr)
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
   best_val_dice = -1
@@ -189,6 +189,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
       channel_keys_new.append(item)
   channel_keys = channel_keys_new
   ################ TRAINING THE MODEL##############
+  """
+  for idx in range(0,100):
+    t1 = time.time()
+    batch = next(iter(train_loader))
+    t2 = time.time()
+    print(t2 - t1," seconds")
+  """
+  
   for ep in range(num_epochs):
       start = time.time()
       print("\n")
@@ -213,7 +221,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
           #torch.cuda.empty_cache()
           # Casts operations to mixed precision 
-          with torch.cuda.amp.autocast(): 
+          with torch.cuda.amp.autocast():
               output = model(image.float())
               # Computing the loss
               mask = mask.unsqueeze(0)
@@ -245,6 +253,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
           #torch.cuda.empty_cache()
           if scheduler == "triangular":
             scheduler_lr.step()
+          
 
       average_dice = total_dice/(batch_idx + 1)
       average_loss = total_loss/(batch_idx + 1)

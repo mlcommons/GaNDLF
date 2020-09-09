@@ -101,7 +101,7 @@ def parseConfig(config_file_path):
     which_model = str(params['which_model'])
   else: # default case
     which_model = 'resunet'
-    print('Using default which_model: ', which_model)
+    print('Using default model: ', which_model)
   params['which_model'] = which_model
 
   if 'kcross_validation' in params:
