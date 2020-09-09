@@ -2,6 +2,8 @@
 
 - Added detailed documentation
 - Added MSE from Torch 
+- Added option to parameterize model properties
+  - Final convolution layer (softmax/sigmoid/none)
 
 ## 0.0.2
 
