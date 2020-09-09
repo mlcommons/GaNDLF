@@ -37,7 +37,7 @@ def main():
     parser.add_argument('-device', default=0, type=str, help = 'Device to perform requested session on (\'-1\' == cpu and everything else denotes GPU ID)', required=True) 
 
     #parser.add_argument('-v', '--version', action='version', 
-    #      version = format(parser.prog) + ' v' + pkg_resources.require('deep_seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
+    #version = format(parser.prog) + ' v' + pkg_resources.require('deep_seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
                                 
     args = parser.parse_args()
 
@@ -49,7 +49,7 @@ def main():
     mode = args.train
     if '-1' in device:
         device = 'cpu'
-
+    print("Device being used : ", device)
     if mode == 0: # inference mode
         pretrainedModelPath = args.modelDir
 
@@ -78,9 +78,9 @@ def main():
             labelHeader = None
 
     if mode != 0: # training mode
-        TrainingManager(dataframe = data_full, channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = model_path, parameters = parameters, device = device)
+        TrainingManager(dataframe=data_full, channelHeaders=channelHeaders, labelHeader=labelHeader, outputDir=model_path, parameters=parameters, device=device)
     else:
-        InferenceManager(dataframe = data_full, channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = model_path, parameters = parameters, device = device)
+        InferenceManager(dataframe=data_full, channelHeaders=channelHeaders, labelHeader=labelHeader, outputDir=model_path, parameters=parameters, device=device)
 
 if __name__ == '__main__':
     main()
