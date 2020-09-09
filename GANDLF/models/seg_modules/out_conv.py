@@ -55,7 +55,7 @@ class out_conv(nn.Module):
         self.conv3 = nn.Conv3d(input_channels//2, output_channels, kernel_size=1,
                                stride=1, padding=0, 
                                bias=self.conv_bias)
-        
+
     def forward(self, x1, x2):
         x = torch.cat([x1, x2], dim=1)
         #print(x.shape)
@@ -72,6 +72,9 @@ class out_conv(nn.Module):
         x = self.conv3(x)
         
         if not(self.final_convolution_layer == None):
-            x = self.final_convolution_layer(x)
+            if self.final_convolution_layer == F.softmax:
+                x = self.final_convolution_layer(x, dim=1)
+            else:
+                x = self.final_convolution_layer(x)
         return x
  
