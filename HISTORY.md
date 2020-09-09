@@ -1,7 +1,7 @@
 ## 0.0.3 
 
 - Added detailed documentation
-- 
+- Added MSE from Torch 
 
 ## 0.0.2
 
