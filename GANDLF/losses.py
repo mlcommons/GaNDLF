@@ -17,7 +17,6 @@ def MCD_loss(pm, gt, num_class):
     acc_dice_loss /= (num_class-1)
     return acc_dice_loss
 
-# Setting up the Evaluation Metric
 def dice(out, target):
     smooth = 1e-7
     oflat = out.view(-1)
@@ -25,6 +24,8 @@ def dice(out, target):
     intersection = (oflat * tflat).sum()
     return (2*intersection+smooth)/(oflat.sum()+tflat.sum()+smooth)
 
+def MCD(pm, gt, num_class):
+    return  1 - MCD_loss(pm, gt, num_class)
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
