@@ -1,0 +1,29 @@
+#!usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import sys
+import argparse
+import subprocess
+from pathlib import Path
+from datetime import date
+
+def main():
+    copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+
+    parser = argparse.ArgumentParser(prog='DeformationsGenerator', formatter_class=argparse.RawTextHelpFormatter, description = "Generating deformation fields using Greedy.\n\n" + copyrightMessage)
+    parser.add_argument('-captkPreprocessingPath', type=str, help = 'The path to CaPTk\'s Preprocessing executable, which is used for registrations', required=True)
+    parser.add_argument('-dataDir', type=str, help = 'Data directory', required=True)
+    parser.add_argument('-outputDir', type=str, help = 'Output directory to save intermediate files and deformation fields', required=True)
+       
+    args = parser.parse_args()
+
+
+    inputDir = os.path.normpath(args.dataDir)
+    outputDir = os.path.normpath(args.outputDir)
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    captkPreprocessingPath = os.path.normpath(args.captkPreprocessingPath)
+
+# main function
+if __name__ == '__main__':
+    main()
