@@ -131,10 +131,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     # ###
     # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
     # ###
-    #environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
-
-    #if ',' in environment_cuda_visible:
-    #    model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
+    if os.environ.get('CUDA_VISIBLE_DEVICES') is not None:
+        if ',' in os.environ.get('CUDA_VISIBLE_DEVICES'):
+            environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
+            model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
     
     #print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
     device = torch.device(dev)
