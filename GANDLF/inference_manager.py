@@ -24,7 +24,7 @@ import subprocess
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.inference_loop import inferenceLoop
 
-def InferenceManager(dataframe, channelHeaders, labelHeader, outputDir, parameters, device):
+def InferenceManager(dataframe, headers, outputDir, parameters, device):
     '''
     This function takes in a dataframe, with some other parameters and performs the inference
     '''
@@ -33,5 +33,5 @@ def InferenceManager(dataframe, channelHeaders, labelHeader, outputDir, paramete
     # inference_indeces_full = list(inferenceData_full.index.values)
 
     inferenceLoop(inferenceDataFromPickle = inferenceData_full, 
-    channelHeaders = channelHeaders, labelHeader = labelHeader, outputDir = outputDir, device = device, parameters = parameters)
+    headers = headers, outputDir = outputDir, device = device, parameters = parameters)
         

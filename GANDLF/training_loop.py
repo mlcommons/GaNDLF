@@ -32,7 +32,7 @@ from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeaders, labelHeader, device, parameters, outputDir):
+def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, device, parameters, outputDir):
     '''
     This is the main training loop
     '''
@@ -55,14 +55,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
     
-    n_channels = len(channelHeaders)
+    n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
 
-    trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, channelHeaders,
-                                               labelHeader, q_max_length, q_samples_per_volume,
+    trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers['channelHeaders'],
+                                               headers['labelHeader'], q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations)
-    validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, channelHeaders,
-                                               labelHeader, q_max_length, q_samples_per_volume,
+    validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers['channelHeaders'],
+                                               headers['labelHeader'], q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations) # may or may not need to add augmentations here
 
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
@@ -188,7 +188,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
                                                          scale_fn=None, scale_mode='cycle', cycle_momentum=True,
                                                          base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
     else:
-        print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file=sys.stderr)
+        print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the implementation, using exp, instead', file=sys.stderr)
         scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     sys.stdout.flush()
@@ -202,6 +202,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     batch = next(iter(train_loader))
     channel_keys = list(batch.keys())
     channel_keys_new = []
+
+    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+    scaler = torch.cuda.amp.GradScaler() 
 
     for item in channel_keys:
         if item.isnumeric():
@@ -338,24 +341,21 @@ if __name__ == "__main__":
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
     parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
-    parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
-    parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
+    parser.add_argument('-headers_pickle', type=str, help = 'Header pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
     
     args = parser.parse_args()
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-    channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
-    label_header = pickle.load(open(args.label_header_pickle,"rb"))
+    headers = pickle.load(open(args.headers_pickle,"rb"))
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
                  validataionDataFromPickle=validataionDataFromPickle, 
-                 channelHeaders=channel_header, 
-                 labelHeader=label_header, 
+                 headers = headers,  
                  parameters=parameters,
                  outputDir=args.outputDir,
                  device=args.device,)

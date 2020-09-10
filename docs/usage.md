@@ -37,6 +37,8 @@ Channel_0,Channel_1,...,Channel_X,Label
 - `Label` can be substituted with `Mask` or `Segmentation`
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
+For classification/regression, add a column called `ValueToPredict`. **Note** that currently, we are supporting only a single value prediction per model.
+
 ## Customize the Training
 
 All details and comments are in the [samples/sample_training.yaml](../samples/sample_training.yaml).
