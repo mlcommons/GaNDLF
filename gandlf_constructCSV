@@ -28,7 +28,8 @@ def main():
   outputToWrite = ''
   for i in range(len(channelsID)):
     outputToWrite = outputToWrite + str(i) + ','
-  outputToWrite = outputToWrite[:-1] # remove last comma
+  outputToWrite = outputToWrite + 'Label'
+  outputToWrite = outputToWrite + '\n'
 
   # iterate over all subject directories
   for dirs in os.listdir(inputDir):
@@ -39,15 +40,26 @@ def main():
 
       filesInDir = os.listdir(currentSubjectDir) # get all files in each directory
 
-      for i in range(len(filesInDir)):
+      for channel in channelsID:
 
-        currentFile = os.path.join(currentSubjectDir, filesInDir[i])
+        for i in range(len(filesInDir)):
 
-        for channel in channelsID:
+          currentFile = os.path.join(currentSubjectDir, filesInDir[i])
 
           if channel in filesInDir[i]:
 
-            test = 1
+            outputToWrite = outputToWrite + currentFile + ','
+          
+          elif labelID in filesInDir[i]:
+            currentMaskFile = currentFile
+          
+      outputToWrite = outputToWrite + currentMaskFile  
+      outputToWrite = outputToWrite + '\n'
+
+  file = open(outputFile, 'w')
+  file.write(outputToWrite)
+  file.close()
+      
 
 
 # main function
