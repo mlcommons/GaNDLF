@@ -177,7 +177,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
                                                          scale_fn=None, scale_mode='cycle', cycle_momentum=True,
                                                          base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
     else:
-        print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file=sys.stderr)
+        print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the implementation, using exp, instead', file=sys.stderr)
         scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     model = model.to(dev)
@@ -196,7 +196,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     elif scheduler == "triangular":
       scheduler_lr = torch.optim.lr_scheduler.CyclicLR(optimizer, learning_rate * 0.001, learning_rate, step_size_up=4*batch_size*len(train_loader.dataset), step_size_down=None, mode='triangular', gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=True, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
     else:
-      print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file = sys.stderr)
+      print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the implementation, using exp, instead', file = sys.stderr)
       scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     sys.stdout.flush()
