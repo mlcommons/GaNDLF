@@ -37,7 +37,6 @@ class unet(ModelBase):
         self.us_1 = UpsamplingModule(base_filters*4, base_filters*2)
         self.de_1 = DecodingModule(base_filters*4, base_filters*2)
         self.us_0 = UpsamplingModule(base_filters*2, base_filters)
-        self.out = out_conv(base_filters*2, n_classes)
         self.out = out_conv(base_filters*2, n_classes, final_convolution_layer = self.final_convolution_layer)
 
     def forward(self, x):
