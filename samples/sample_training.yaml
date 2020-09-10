@@ -7,7 +7,7 @@ model:
     # dimension = 3
     # base_filters
     # other model-related properties can go here
-    type: resunet,
+    architecture: resunet,
     final_layer: None # can be either sigmoid, softmax or none (none == regression)
   }
 # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
