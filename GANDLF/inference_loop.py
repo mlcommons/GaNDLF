@@ -35,7 +35,7 @@ from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, parameters, outputDir):
+def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDir):
   '''
   This is the main inference loop
   '''
@@ -58,11 +58,11 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
   learning_rate = parameters['learning_rate']
   num_epochs = parameters['num_epochs']
   
-  n_channels = len(channelHeaders)
+  n_channels = len(headers['channelHeaders'])
   n_classList = len(class_list)
 
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers['channelHeaders'], headers['labelHeader'], q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
@@ -193,7 +193,7 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
           # Computing the average loss
           average_loss = total_loss/(batch_idx + 1)
           #Computing the dice score 
-          curr_dice = MCD(output.double(), mask.double(), n_classList)
+          curr_dice = MCD(pred_mask.double(), mask.double(), n_classList)
           #Computing the total dice
           total_dice+= curr_dice
           torch.cuda.empty_cache()
@@ -223,8 +223,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Inference Loop of GANDLF")
     parser.add_argument('-inference_loader_pickle', type=str, help = 'Inference loader pickle', required=True)
     parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
-    parser.add_argument('-channel_header_pickle', type=str, help = 'Channel header pickle', required=True)
-    parser.add_argument('-label_header_pickle', type=str, help = 'Label header pickle', required=True)
+    parser.add_argument('-headers_pickle', type=str, help = 'Header pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
     parser.add_argument('-device', type=str, help = 'Device to train on', required=True)
     
@@ -232,13 +231,13 @@ if __name__ == "__main__":
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
     psize = pickle.load(open(args.psize_pickle,"rb"))
-    channel_header = pickle.load(open(args.channel_header_pickle,"rb"))
+    headers = pickle.load(open(args.headers_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     inferenceDataFromPickle = pd.read_pickle(args.inference_loader_pickle)
 
     inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
-        channelHeaders = channel_header, 
+        headers = headers, 
         labelHeader = label_header, 
         parameters = parameters,
         outputDir = args.outputDir,
