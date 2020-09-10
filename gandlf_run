@@ -75,12 +75,12 @@ def main():
         col_lower = col.lower()
         currentHeaderLoc = data_full.columns.get_loc(col)
         if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
-            channelHeaders.append(currentHeaderLoc)
+            headers['channelHeaders'].append(currentHeaderLoc)
         elif ('subjectid' in col_lower) or ('patientname' in col_lower):
-            subjectIDHeader = currentHeaderLoc
+            headers['subjectIDHeader'] = currentHeaderLoc
         elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
             if (labelHeader == None):
-                labelHeader = currentHeaderLoc
+                headers['labelHeader'] = currentHeaderLoc
             else:
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
 
