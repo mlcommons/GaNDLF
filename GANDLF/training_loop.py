@@ -101,10 +101,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     # setting the loss function
     if isinstance(loss_function, dict): # this is currently only happening for mse_torch
         # check for mse_torch
-        loss_fn = MSE_torch_loss
-        MSE_torch_requested = True
+        loss_fn = MSE_loss
+        MSE_requested = True
     else: # this is a simple string, so proceed with previous workflow
-        MSE_torch_requested = False
+        MSE_requested = False
         if loss_function == 'dc':
             loss_fn = MCD_loss
         elif loss_function == 'dcce':
@@ -244,7 +244,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
                 output = model(image)
                 # Computing the loss
                 mask = mask.unsqueeze(0)
-                if MSE_torch_requested:
+                if MSE_requested:
                     loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['reduction'])
                 else:
                     loss = loss_fn(output.double(), mask.double(), n_classList)
