@@ -1,6 +1,8 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
+
+from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
@@ -14,11 +16,9 @@ class fcn(nn.Module):
 
     DOI: 10.1109/TPAMI.2016.2572683
     """
-    def __init__(self, n_channels, n_classes, base_filters):
-        super(fcn, self).__init__()
-        self.n_channels = n_channels
-        self.n_classes = n_classes
-        self.ins = in_conv(self.n_channels, base_filters)
+    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(fcn, self).__init__( n_channels, n_classes, base_filters, final_convolution_layer)
+        self.ins = in_conv(n_channels, base_filters)
         self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
         self.en_1 = EncodingModule(base_filters*2, base_filters*2)
         self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4)
@@ -53,4 +53,11 @@ class fcn(nn.Module):
         u1 = self.us_0(x1)
         x = torch.cat([u5, u4, u3, u2, u1], dim=1)
         x = self.conv_0(x)
-        return F.softmax(x,dim=1)
+
+        if not(self.final_convolution_layer == None):
+            if self.final_convolution_layer == F.softmax:
+                x = self.final_convolution_layer(x, dim=1)
+            else:
+                x = self.final_convolution_layer(x)
+                
+        return x

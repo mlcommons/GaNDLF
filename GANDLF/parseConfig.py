@@ -96,13 +96,34 @@ def parseConfig(config_file_path):
   params['base_filters'] = base_filters
 
   if 'modelName' in params:
+    defineDefaultModel = False
+    print('This option has been superceded by \'model\'', file=sys.stderr)
     which_model = str(params['modelName'])
   elif 'which_model' in params:
+    defineDefaultModel = False
+    print('This option has been superceded by \'model\'', file=sys.stderr)
     which_model = str(params['which_model'])
   else: # default case
+    defineDefaultModel = True
+  if defineDefaultModel == True:
     which_model = 'resunet'
-    print('Using default model: ', which_model)
+    # print('Using default model: ', which_model)
   params['which_model'] = which_model
+
+  if 'model' in params:
+
+    if not(isinstance(params['model'], dict)):
+      sys.exit('The \'model\' parameter needs to be populated as a dictionary')
+    elif len(params['model']) == 0: # only proceed if something is defined
+      sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
+
+    if not params['model']['architecture']:
+      sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
+    if not params['model']['final_layer']:
+      sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
+
+  else:
+    sys.exit('The \'model\' parameter needs to be populated as a dictionary')
 
   if 'kcross_validation' in params:
     kfolds = int(params['kcross_validation'])
