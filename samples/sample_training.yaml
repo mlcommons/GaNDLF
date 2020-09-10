@@ -1,14 +1,23 @@
 # Choose the segmentation model here 
 # options: unet, resunet, fcn
 modelName: resunet
+# define the model, all properties are required
+model:
+  {
+    # dimension = 3
+    # base_filters
+    # other model-related properties can go here
+    type: resunet,
+    final_layer: None # can be either sigmoid, softmax or none (none == regression)
+  }
 # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
-base_filters: 30
+base_filters: 16
 # Set the list of labels the model should train on and predict
 class_list: [0,1,2,4]
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128,128]
 # Number of epochs
-num_epochs: 500
+num_epochs: 100
 # Set the batch size
 batch_size: 1
 # Set the initial learning rate
@@ -18,19 +27,20 @@ scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), ce (), dcce (sume of dice and ce), mse (), mse_torch() ...
 # mse_torch is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
-# loss_function: dc
-loss_function:
-  {
-    'mse_torch':{
-      'reduction': 'mean' # see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss for all options
-    }
-  }
+# use mse_torch for regression/classification problems and dice for segmentation
+loss_function: dc
+#loss_function:
+#  {
+#    'mse_torch':{
+#      'reduction': 'mean' # see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss for all options
+#    }
+#  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
 # the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
 # randomized split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
-kcross_validation: -10
+kcross_validation: -5
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
 # keep/edit as needed
@@ -68,10 +78,10 @@ data_augmentation:
 parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/$JOB_ID.stdout -e ${outputDir}/$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
 ## queue configuration - https://torchio.readthedocs.io/data/patch_training.html?#queue
 # this determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches
-q_max_length: 100
+q_max_length: 40
 # this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower
-q_samples_per_volume: 10
+q_samples_per_volume: 5
 # this determines the number subprocesses to use for data loading; '0' means main process is used
-q_num_workers: 1
+q_num_workers: 2
 # used for debugging
 q_verbose: False

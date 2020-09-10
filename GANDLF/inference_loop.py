@@ -107,7 +107,7 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
       channel_keys_new.append(item)
   channel_keys = channel_keys_new
 
-  print("Training Data Samples: ", len(inference_loader.dataset))
+  print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   dev = device
   
@@ -193,7 +193,7 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
           # Computing the average loss
           average_loss = total_loss/(batch_idx + 1)
           #Computing the dice score 
-          curr_dice = 1 - curr_loss
+          curr_dice = MCD(output.double(), mask.double(), n_classList)
           #Computing the total dice
           total_dice+= curr_dice
           torch.cuda.empty_cache()

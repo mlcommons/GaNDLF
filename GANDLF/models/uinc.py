@@ -1,6 +1,8 @@
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
+
+from .modelBase import ModelBase
 from GANDLF.models.seg_modules.ResNetModule import ResNetModule
 from GANDLF.models.seg_modules.InceptionModule import InceptionModule
 from GANDLF.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
@@ -9,7 +11,7 @@ from GANDLF.models.seg_modules.IncConv import IncConv
 from GANDLF.models.seg_modules.ResNetModule import ResNetModule
 from GANDLF.models.seg_modules.IncDropout import IncDropout
    
-class uinc(nn.Module):
+class uinc(ModelBase):
     """
     This is the implementation of the following paper: https://arxiv.org/abs/1907.02110 (from CBICA). Please look at the seg_module files (towards the end), to get 
     a better sense of the Inception Module implemented
@@ -17,10 +19,8 @@ class uinc(nn.Module):
     For the decoding module, not the initial input but the input after the first convolution is addded to the final output since the initial input and 
     the final one do not have the same dimensions. 
     """  
-    def __init__(self,n_channels,n_classes,base_filters):
-        super(uinc,self).__init__()
-        self.n_channels = n_channels
-        self.n_classes = n_classes
+    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(uinc, self).__init__( n_channels, n_classes, base_filters, final_convolution_layer)
         self.conv0_1x1 = IncConv(n_channels, base_filters)
         self.rn_0 = ResNetModule(base_filters,base_filters,res=True)
         self.ri_0 = InceptionModule(base_filters,base_filters,res=True)
@@ -68,5 +68,11 @@ class uinc(nn.Module):
         x6 = self.conv9_1x1(x6)
         x6 = self.rn_10(torch.cat((x1,x6),dim=1))
         x6 = self.dropout(x6)
-        x6 = F.softmax(x6,dim=1)
+
+        if not(self.final_convolution_layer == None):
+            if self.final_convolution_layer == F.softmax:
+                x6 = self.final_convolution_layer(x6, dim=1)
+            else:
+                x6 = self.final_convolution_layer(x6)
+                
         return x6

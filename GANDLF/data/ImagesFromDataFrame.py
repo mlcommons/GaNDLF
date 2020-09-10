@@ -15,36 +15,36 @@ from torchio import Image, Subject
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
 def mri_artifact(p = 1):
-    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5,}, p=p)
+    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
 
 def spatial_transform(p=1):
     return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
 
 def bias(p=1):
-    return RandomBiasField(coefficients = 0.5, order= 3, p= p, seed = None)
+    return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
 
 def blur(p=1):
-    return RandomBlur(std = (0., 4.), p = p, seed = None)
+    return RandomBlur(std=(0., 4.), p=p, seed=None)
 
 def noise(p=1):
-    return RandomNoise(mean = 0, std = (0, 0.25), p = p, seed = None)
+    return RandomNoise(mean=0, std=(0, 0.25), p=p, seed=None)
 
 def swap(p=1):
-    return RandomSwap(patch_size = 15, num_iterations = 100, p = p, seed = None) 
+    return RandomSwap(patch_size=15, num_iterations=100, p=p, seed=None) 
 
 # Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
-    'normalize':ZNormalization(),
-    'spatial': spatial_transform,
-    'kspace': mri_artifact,
-    'bias': bias,
-    'blur': blur,
-    'noise': noise,
+    'normalize' : ZNormalization(),
+    'spatial' : spatial_transform,
+    'kspace' : mri_artifact,
+    'bias' : bias,
+    'blur' : blur,
+    'noise' : noise,
     'swap': swap
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = True, augmentations = None):
+def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=True, augmentations=None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -61,9 +61,9 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
             # assigning the dict key to the channel
-            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),type = torchio.INTENSITY)
+            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
         if labelHeader is not None:
-            subject_dict['label'] = Image(str(dataframe[labelHeader][patient]),type = torchio.LABEL)
+            subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
             if not train:
                 subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
@@ -83,7 +83,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
             # resample_split = str(aug).split(':')
             resample_values = tuple(np.array(augmentations['resample']['resolution']).astype(np.float))
             augmentation_list.append(Resample(resample_values))
-    
+
     # next, we want to do the intensity normalize - required for inference as well
     if 'normalize' in augmentations:
         augmentation_list.append(global_augs_dict['normalize'])
@@ -104,8 +104,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
 
     sampler = torchio.data.UniformSampler(psize) 
     # all of these need to be read from model.yaml
-    patches_queue = torchio.Queue(subjects_dataset,max_length=q_max_length, samples_per_volume=q_samples_per_volume, sampler=sampler, num_workers=q_num_workers, shuffle_subjects=False, shuffle_patches=True, verbose=q_verbose) 
-
-    
+    patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length, samples_per_volume=q_samples_per_volume,
+                                  sampler=sampler, num_workers=q_num_workers, shuffle_subjects=False,
+                                  shuffle_patches=True, verbose=q_verbose)    
     return patches_queue
-
