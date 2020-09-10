@@ -69,7 +69,6 @@ def main():
     headers['predictionHeaders'] = []
     headers['labelHeader'] = None
     headers['subjectIDHeader'] = None
-    labelHeader = None
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
         col_lower = col.lower()
@@ -79,7 +78,7 @@ def main():
         elif ('subjectid' in col_lower) or ('patientname' in col_lower):
             headers['subjectIDHeader'] = currentHeaderLoc
         elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
-            if (labelHeader == None):
+            if (headers['labelHeader'] == None):
                 headers['labelHeader'] = currentHeaderLoc
             else:
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
