@@ -16,10 +16,11 @@ python GANDLF.py \
 
 It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
 
-- Within-modality co-registration [[ref1](https://doi.org/10.1109/TMI.2014.2377694), [ref2](https://doi.org/10.1038/sdata.2017.117), [ref3](https://arxiv.org/abs/1811.02629)]
-- Registration of all datasets to patient atlas, if applicable [[ref1](https://doi.org/10.1109/TMI.2014.2377694), [ref2](https://doi.org/10.1038/sdata.2017.117), [ref3](https://arxiv.org/abs/1811.02629)]
+- Registration
+  - Within-modality co-registration [[ref1](https://doi.org/10.1109/TMI.2014.2377694), [ref2](https://doi.org/10.1038/sdata.2017.117), [ref3](https://arxiv.org/abs/1811.02629)]
+  - **OPTIONAL**: Registration of all datasets to patient atlas, if applicable [[ref1](https://doi.org/10.1109/TMI.2014.2377694), [ref2](https://doi.org/10.1038/sdata.2017.117), [ref3](https://arxiv.org/abs/1811.02629)]
 - Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses)
-- Same intensity profile, i.e., normalization[[ref1](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [ref2](https://developers.google.com/machine-learning/data-prep/transform/normalization), [ref3](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]
+- Same intensity profile, i.e., normalization [[ref1](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [ref2](https://developers.google.com/machine-learning/data-prep/transform/normalization), [ref3](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]
 
 ## Constructing the Data CSV
 
