@@ -12,6 +12,10 @@ python GANDLF.py \
   -modelDir /path/to/model/weights # used in inference mode
 ```
 
+## Preparing the Data
+
+It is **highly** recommended that the dataset you want to train/infer on has been harmonized.
+
 ## Constructing the Data CSV
 
 This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](../samples/sample_train.csv) and needs to be structured with the following header format:
