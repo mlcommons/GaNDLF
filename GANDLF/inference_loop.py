@@ -109,39 +109,37 @@ def inferenceLoop(inferenceDataFromPickle, channelHeaders, labelHeader, device, 
 
   print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
-  dev = device
+  if device != 'cpu':
+      dev = int(device)
+      device = torch.device(dev)
+      print("Current Device : ", torch.cuda.current_device())
+      print("Device Count on Machine : ", torch.cuda.device_count())
+      print("Device Name : ", torch.cuda.get_device_name(device))
+      print("Cuda Availability : ", torch.cuda.is_available())
+  else:
+      dev = -1
+      device = torch.device('cpu')
   
-  # if GPU has been requested, ensure that the correct free GPU is found and used
-  if 'cuda' in dev: # this does not work correctly for windows
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    DEVICE_ID_LIST = GPUtil.getAvailable(order = 'first', limit=10)
-    print('GPU devices: ', DEVICE_ID_LIST)
-    environment_variable = ''
-    if 'cuda-multi' in dev:
-      for ids in DEVICE_ID_LIST:
-        environment_variable = environment_variable + str(ids) + ','
-      
-      environment_variable = environment_variable[:-1] # delete last comma
-      dev = 'cuda' # remove the 'multi'
-      model = nn.DataParallel(model)
-    elif 'CUDA_VISIBLE_DEVICES' not in os.environ:
-      environment_variable = str(DEVICE_ID_LIST[0])
-    
-    # only set the environment variable if there is something to set 
-    if environment_variable != '':
-      os.environ["CUDA_VISIBLE_DEVICES"] = environment_variable
   
-  print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
-  device = torch.device(dev)
-  print("Current Device : ", torch.cuda.current_device())
-  print("Device Count on Machine : ", torch.cuda.device_count())
-  print("Device Name : ", torch.cuda.get_device_name(device))
-  print("Cuda Availibility : ", torch.cuda.is_available())
+  # multi-gpu support
+  # ###
+  # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
+  # ###
+  if os.environ.get('CUDA_VISIBLE_DEVICES') is not None:
+      if ',' in os.environ.get('CUDA_VISIBLE_DEVICES'):
+          environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
+          model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
+  
+  # print stats
   print('Using device:', device)
   if device.type == 'cuda':
-      print('Memory Usage:')
-      print('  Allocated:', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
-      print('  Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
+      print("Current Device : ", torch.cuda.current_device())
+      print("Device Count on Machine : ", torch.cuda.device_count())
+      print("Device Name : ", torch.cuda.get_device_name(device))
+      print("Cuda Availibility : ", torch.cuda.is_available())
+      print('Memory Usage : ')
+      print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
+      print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
   sys.stdout.flush()
 

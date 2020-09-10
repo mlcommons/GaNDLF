@@ -125,28 +125,36 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
-    dev = int(device)
+    if device != 'cpu':
+        dev = int(device)
+        device = torch.device(dev)
+        print("Current Device : ", torch.cuda.current_device())
+        print("Device Count on Machine : ", torch.cuda.device_count())
+        print("Device Name : ", torch.cuda.get_device_name(device))
+        print("Cuda Availability : ", torch.cuda.is_available())
+    else:
+        dev = -1
+        device = torch.device('cpu')
     
     # multi-gpu support
     # ###
     # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
     # ###
-    #environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
-
-    #if ',' in environment_cuda_visible:
-    #    model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
+    if os.environ.get('CUDA_VISIBLE_DEVICES') is not None:
+        if ',' in os.environ.get('CUDA_VISIBLE_DEVICES'):
+            environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
+            model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
     
-    #print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
-    device = torch.device(dev)
-    print("Current Device : ", torch.cuda.current_device())
-    print("Device Count on Machine : ", torch.cuda.device_count())
-    print("Device Name : ", torch.cuda.get_device_name(device))
-    print("Cuda Availibility : ", torch.cuda.is_available())
+    # print stats
     print('Using device:', device)
     if device.type == 'cuda':
-            print('Memory Usage : ')
-            print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
-            print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
+        print("Current Device : ", torch.cuda.current_device())
+        print("Device Count on Machine : ", torch.cuda.device_count())
+        print("Device Name : ", torch.cuda.get_device_name(device))
+        print("Cuda Availability : ", torch.cuda.is_available())
+        print('Memory Usage : ')
+        print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
+        print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
     sys.stdout.flush()
 
@@ -155,7 +163,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
         model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
         print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
 
-    model = model.to(dev)
+    if dev > -1:
+        model = model.to(dev)
+    else:
+        model.cpu()
     # Checking for the learning rate scheduler
     if scheduler == "triangle":
         step_size = 4*batch_size*len(train_loader.dataset)
@@ -179,25 +190,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
     else:
         print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file=sys.stderr)
         scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
-
-    model = model.to(dev)
-    # Checking for the learning rate scheduler
-    if scheduler == "triangle":
-      step_size = 4*batch_size*len(train_loader.dataset)
-      clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
-      scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-      print("Starting Learning rate is:", learning_rate)
-    elif scheduler == "exp":
-      scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
-    elif scheduler == "step":
-      scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
-    elif scheduler == "reduce-on-plateau":
-      scheduler_lr = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
-    elif scheduler == "triangular":
-      scheduler_lr = torch.optim.lr_scheduler.CyclicLR(optimizer, learning_rate * 0.001, learning_rate, step_size_up=4*batch_size*len(train_loader.dataset), step_size_down=None, mode='triangular', gamma=1.0, scale_fn=None, scale_mode='cycle', cycle_momentum=True, base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
-    else:
-      print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the impementation, using exp, instead', file = sys.stderr)
-      scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
