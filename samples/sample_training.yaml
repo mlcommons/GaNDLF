@@ -1,6 +1,15 @@
 # Choose the segmentation model here 
 # options: unet, resunet, fcn
 modelName: resunet
+# define the model, all properties are required
+model:
+  {
+    # dimension = 3
+    # base_filters
+    # other model-related properties can go here
+    type: resunet,
+    final_layer: None # can be either sigmoid, softmax or none (none == regression)
+  }
 # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
 base_filters: 16
 # Set the list of labels the model should train on and predict
@@ -18,7 +27,7 @@ scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), ce (), dcce (sume of dice and ce), mse (), mse_torch() ...
 # mse_torch is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
-# loss_function: dc
+# use mse_torch for regression/classification problems and dice for segmentation
 loss_function: dc
 #loss_function:
 #  {

@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class out_conv(nn.Module):
-    def __init__(self, input_channels, output_channels, leakiness=1e-2, kernel_size=3,
-        conv_bias=True, inst_norm_affine=True, res=True, lrelu_inplace=True):
+    def __init__(self, input_channels, output_channels, final_convolution_layer, leakiness=1e-2, kernel_size=3,
+        conv_bias=True, inst_norm_affine=True, res=False, lrelu_inplace=True):
         """[The Out convolution module to learn the information and use later]
         
         [This function will create the Learning convolutions]
@@ -30,6 +30,7 @@ class out_conv(nn.Module):
         self.conv_bias = conv_bias
         self.leakiness = leakiness
         self.res = res
+        self.final_convolution_layer = final_convolution_layer
         self.in_0 = nn.InstanceNorm3d(input_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
@@ -54,7 +55,7 @@ class out_conv(nn.Module):
         self.conv3 = nn.Conv3d(input_channels//2, output_channels, kernel_size=1,
                                stride=1, padding=0, 
                                bias=self.conv_bias)
-        
+
     def forward(self, x1, x2):
         x = torch.cat([x1, x2], dim=1)
         #print(x.shape)
@@ -69,7 +70,11 @@ class out_conv(nn.Module):
             x = x + skip
         x = F.leaky_relu(self.in_3(x))
         x = self.conv3(x)
-        #x = F.softmax(x,dim=1)
-        x = F.sigmoid(x) # need to put in an option https://github.com/FETS-AI/GANDLF/issues/78
+        
+        if not(self.final_convolution_layer == None):
+            if self.final_convolution_layer == F.softmax:
+                x = self.final_convolution_layer(x, dim=1)
+            else:
+                x = self.final_convolution_layer(x)
         return x
  
