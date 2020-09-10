@@ -69,25 +69,20 @@ def main():
     headers['predictionHeaders'] = []
     headers['labelHeader'] = None
     headers['subjectIDHeader'] = None
+    labelHeader = None
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
         col_lower = col.lower()
         currentHeaderLoc = data_full.columns.get_loc(col)
         if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
-            headers['channelHeaders'].append(currentHeaderLoc)
+            channelHeaders.append(currentHeaderLoc)
         elif ('subjectid' in col_lower) or ('patientname' in col_lower):
-            if (headers['subjectIDHeader'] == None):
-                headers['subjectIDHeader'] = currentHeaderLoc
-            else:
-                print('WARNING: Multiple Subject or Patient ID headers found in training CSV, only the first one will be used', file = sys.stderr)
-        elif ('valuetopredict' in col_lower):
-            headers['predictionHeaders'].append(currentHeaderLoc)
+            subjectIDHeader = currentHeaderLoc
         elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
-            if (headers['labelHeader'] == None):
-                headers['labelHeader'] = currentHeaderLoc
+            if (labelHeader == None):
+                labelHeader = currentHeaderLoc
             else:
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
-        
 
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)

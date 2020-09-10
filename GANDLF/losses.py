@@ -75,33 +75,13 @@ def MCT_loss(inp, target, num_class):
     acc_tv_loss /= (num_class-1)
     return acc_tv_loss
 
-def MSE(inp,target):
-    iflat = inp.contiguous().view(-1)
-    tflat = target.contiguous().view(-1)
-    num = len(iflat)
-    loss = (iflat - tflat)*(iflat - tflat)
-    loss = loss.sum()
-    loss = loss/num
-    return loss
-    
-def MSE_loss(inp,target,num_classes):
-    acc_mse_loss = 0
-    for i in range(0,num_classes):
-        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:])
-    acc_mse_loss /= (num_classes - 1)
-    return acc_mse_loss
-    
-def MCD_MSE_loss(inp,target,num_classes):
-    l = MCD_loss(inp,target,num_classes) + 0.1*MSE_loss(inp,target,num_classes)
-    return l
-
-def MSE_torch(inp, target, reduction = 'mean'):
+def MSE(inp, target, reduction = 'mean'):
     iflat = inp.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     l = MSELoss(inp, target, reduction = reduction) # for reductions options, see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
     return l
 
-def MSE_torch_loss(inp, target, num_classes, reduction = 'mean'):
+def MSE_loss(inp, target, num_classes, reduction = 'mean'):
     acc_mse_loss = 0
     for i in range(0, num_classes):
         acc_mse_loss += MSE_torch(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
