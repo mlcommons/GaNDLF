@@ -77,11 +77,11 @@ def main():
             subjectIDHeader = currentHeaderLoc
         elif ('valuetopredict' in col_lower):
             predictionHeaders.append(currentHeaderLoc)
-
-        # Separate if else statement for label
-        if not(labelHeader == None):
-            if ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
+        elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
+            if (labelHeader == None):
                 labelHeader = currentHeaderLoc
+            else:
+                print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
         
 
     if mode != 0: # training mode
