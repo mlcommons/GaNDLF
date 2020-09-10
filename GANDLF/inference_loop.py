@@ -238,7 +238,6 @@ if __name__ == "__main__":
 
     inferenceLoop(inference_loader_pickle = inferenceDataFromPickle, 
         headers = headers, 
-        labelHeader = label_header, 
         parameters = parameters,
         outputDir = args.outputDir,
         device = args.device,)
