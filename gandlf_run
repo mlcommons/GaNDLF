@@ -65,17 +65,20 @@ def main():
     # the user might put the label first and the channels afterwards 
     # or might do it completely randomly
     channelHeaders = []
+    labelHeader = None
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
-        if ('Channel' in col) or ('Modality' in col) or ('Image' in col):
-            channelHeaders.append(data_full.columns.get_loc(col))
-        elif ('SubjectID' in col) or ('PatientName' in col):
-            subjectIDHeader = data_full.columns.get_loc(col)
-        # Separate if else statement
-        if ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
-            labelHeader = data_full.columns.get_loc(col)
-        else:
-            labelHeader = None
+        col_lower = col.lower()
+        currentHeaderLoc = data_full.columns.get_loc(col)
+        if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
+            channelHeaders.append(currentHeaderLoc)
+        elif ('subjectid' in col_lower) or ('patientname' in col_lower):
+            subjectIDHeader = currentHeaderLoc
+        elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
+            if (labelHeader == None):
+                labelHeader = currentHeaderLoc
+            else:
+                print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
 
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, channelHeaders=channelHeaders, labelHeader=labelHeader, outputDir=model_path, parameters=parameters, device=device)
