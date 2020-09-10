@@ -125,7 +125,16 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
 
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
-    dev = int(device)
+    if device != 'cpu':
+        dev = int(device)
+        device = torch.device(dev)
+        print("Current Device : ", torch.cuda.current_device())
+        print("Device Count on Machine : ", torch.cuda.device_count())
+        print("Device Name : ", torch.cuda.get_device_name(device))
+        print("Cuda Availability : ", torch.cuda.is_available())
+    else:
+        dev = -1
+        device = torch.device('cpu')
     
     # multi-gpu support
     # ###
@@ -136,17 +145,16 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
             environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
             model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
     
-    #print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
-    device = torch.device(dev)
-    print("Current Device : ", torch.cuda.current_device())
-    print("Device Count on Machine : ", torch.cuda.device_count())
-    print("Device Name : ", torch.cuda.get_device_name(device))
-    print("Cuda Availibility : ", torch.cuda.is_available())
+    # print stats
     print('Using device:', device)
     if device.type == 'cuda':
-            print('Memory Usage : ')
-            print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
-            print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
+        print("Current Device : ", torch.cuda.current_device())
+        print("Device Count on Machine : ", torch.cuda.device_count())
+        print("Device Name : ", torch.cuda.get_device_name(device))
+        print("Cuda Availibility : ", torch.cuda.is_available())
+        print('Memory Usage : ')
+        print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
+        print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
     sys.stdout.flush()
 
@@ -155,7 +163,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, channelHeade
         model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
         print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
 
-    model = model.to(dev)
+    if dev > -1:
+        model = model.to(dev)
+    else:
+        model.cpu()
     # Checking for the learning rate scheduler
     if scheduler == "triangle":
         step_size = 4*batch_size*len(train_loader.dataset)
