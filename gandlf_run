@@ -65,18 +65,23 @@ def main():
     # the user might put the label first and the channels afterwards 
     # or might do it completely randomly
     channelHeaders = []
+    predictionHeaders = []
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
         col_lower = col.lower()
+        currentHeaderLoc = data_full.columns.get_loc(col)
         if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
-            channelHeaders.append(data_full.columns.get_loc(col))
+            channelHeaders.append(currentHeaderLoc)
         elif ('subjectid' in col_lower) or ('patientname' in col_lower):
-            subjectIDHeader = data_full.columns.get_loc(col)
+            subjectIDHeader = currentHeaderLoc
         # Separate if else statement
         if ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
-            labelHeader = data_full.columns.get_loc(col)
+            labelHeader = currentHeaderLoc
         else:
             labelHeader = None
+        
+        if ('valuetopredict' in col_lower):
+            predictionHeaders.append(currentHeaderLoc)
 
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, channelHeaders=channelHeaders, labelHeader=labelHeader, outputDir=model_path, parameters=parameters, device=device)
