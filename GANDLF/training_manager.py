@@ -24,7 +24,7 @@ import subprocess
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameters, device):
+def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
     # check for single fold training
     singleFoldTraining = False
@@ -62,7 +62,7 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
 
         if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
             trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData,
-                         channelHeaders=channelHeaders, labelHeader=labelHeader, outputDir=currentOutputFolder,
+                         headers = headers, outputDir=currentOutputFolder,
                          device=device, parameters=parameters)
 
         else:
@@ -74,12 +74,9 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
             trainingData.to_pickle(currentTrainingDataPickle)
             validationData.to_pickle(currentValidataionDataPickle)
 
-            channelHeaderPickle = os.path.join(currentOutputFolder,'channelHeader.pkl')
-            with open(channelHeaderPickle, 'wb') as handle:
-                    pickle.dump(channelHeaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            labelHeaderPickle = os.path.join(currentOutputFolder,'labelHeader.pkl')
-            with open(labelHeaderPickle, 'wb') as handle:
-                    pickle.dump(labelHeader, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            headersPickle = os.path.join(currentOutputFolder,'headers.pkl')
+            with open(headersPickle, 'wb') as handle:
+                    pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             # call qsub here
             parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentOutputFolder)
@@ -91,7 +88,7 @@ def TrainingManager(dataframe, channelHeaders, labelHeader, outputDir, parameter
                     ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
                     ' -val_loader_pickle ' + currentValidataionDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
-                    ' -channel_header_pickle ' + channelHeaderPickle + ' -label_header_pickle ' + labelHeaderPickle + \
+                    ' -headers_pickle ' + headersPickle + \
                     ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
             
             subprocess.Popen(command, shell=True).wait()
