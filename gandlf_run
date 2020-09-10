@@ -67,12 +67,12 @@ def main():
     channelHeaders = []
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
-        if ('Channel' in col) or ('Modality' in col) or ('Image' in col):
+        if ('Channel' in col) or ('channel' in col) or ('CHANNEL' in col) or ('Modality' in col) or ('modality' in col) or ('MODALITY' in col) or ('Image' in col) or ('image' in col) or ('IMAGE' in col):
             channelHeaders.append(data_full.columns.get_loc(col))
-        elif ('SubjectID' in col) or ('PatientName' in col):
+        elif ('SubjectID' in col) or ('SUBJECTID' in col) or ('subjectid' in col) or ('PatientName' in col) or ('PATIENTNAME' in col) or ('patientname' in col):
             subjectIDHeader = data_full.columns.get_loc(col)
         # Separate if else statement
-        if ('Label' in col) or ('Mask' in col) or ('Segmentation' in col):
+        if ('Label' in col) or ('label' in col) or ('LABEL' in col) or ('Mask' in col) or ('mask' in col) or ('MASK' in col) or ('Segmentation' in col) or ('segmentation' in col) or ('SEGMENTATION' in col):
             labelHeader = data_full.columns.get_loc(col)
         else:
             labelHeader = None
