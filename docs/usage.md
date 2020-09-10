@@ -14,7 +14,10 @@ python GANDLF.py \
 
 ## Preparing the Data
 
-It is **highly** recommended that the dataset you want to train/infer on has been harmonized.
+It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
+
+- Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses)
+- Same intensity profile, i.e., normalization[[ref1](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [ref2](https://developers.google.com/machine-learning/data-prep/transform/normalization), [ref3](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]
 
 ## Constructing the Data CSV
 
