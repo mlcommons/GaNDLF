@@ -66,6 +66,7 @@ def main():
     # or might do it completely randomly
     channelHeaders = []
     predictionHeaders = []
+    labelHeader = None
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
         col_lower = col.lower()
@@ -74,14 +75,14 @@ def main():
             channelHeaders.append(currentHeaderLoc)
         elif ('subjectid' in col_lower) or ('patientname' in col_lower):
             subjectIDHeader = currentHeaderLoc
-        # Separate if else statement
-        if ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
-            labelHeader = currentHeaderLoc
-        else:
-            labelHeader = None
-        
-        if ('valuetopredict' in col_lower):
+        elif ('valuetopredict' in col_lower):
             predictionHeaders.append(currentHeaderLoc)
+
+        # Separate if else statement for label
+        if not(labelHeader == None):
+            if ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower):
+                labelHeader = currentHeaderLoc
+        
 
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, channelHeaders=channelHeaders, labelHeader=labelHeader, outputDir=model_path, parameters=parameters, device=device)
