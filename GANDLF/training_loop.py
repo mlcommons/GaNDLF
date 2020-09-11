@@ -238,7 +238,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             with torch.cuda.amp.autocast(): 
                 output = model(image)
                 # Computing the loss
-                mask = mask.unsqueeze(0)
                 if MSE_requested:
                     loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['reduction'])
                 else:

@@ -182,7 +182,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
           torch.cuda.empty_cache()
           # Computing the loss
           #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
-          mask = mask.unsqueeze(0)
           loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
           #Pushing the dice to the cpu and only taking its value
           curr_loss = loss.cpu().data.item()
