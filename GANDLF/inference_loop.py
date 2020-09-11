@@ -212,7 +212,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
             originalSize = inputImage.GetSize()
             result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
         
-        result_image.CopyInformation(inputImage)
         patient_name = os.path.basename(subject['path_to_metadata'])
         if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
           os.mkdir(os.path.join(outputDir,"generated_masks"))
