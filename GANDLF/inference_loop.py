@@ -62,7 +62,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   n_classList = len(class_list)
 
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers['channelHeaders'], headers['labelHeader'], q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 

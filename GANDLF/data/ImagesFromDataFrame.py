@@ -45,7 +45,7 @@ global_augs_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=True, augmentations=None, resize=None):
+def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=True, augmentations=None, resize=None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -54,6 +54,9 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     dataframe.index = range(0,num_row)
     # This list will later contain the list of subjects 
     subjects_list = []
+
+    channelHeaders = headers['channelHeaders']
+    labelHeader = headers['labelHeader']
 
     # iterating through the dataframe
     for patient in range(num_row):
