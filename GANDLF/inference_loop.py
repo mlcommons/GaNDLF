@@ -209,7 +209,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         result_image.CopyInformation(inputImage)
         # resize
         if parameters['resize'] is not None:
-            result_image = resize_image(resize_image, parameters['resize'], sitk.sitkNearestNeighbor)
+            originalSize = inputImage.GetSize()
+            result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
         
         result_image.CopyInformation(inputImage)
         patient_name = os.path.basename(subject['path_to_metadata'])
