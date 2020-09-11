@@ -30,7 +30,7 @@ setup(
   author="Megh Bhalerao, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
-  scripts=['gandlf_run'],
+  scripts=['gandlf_run', 'gandlf_constructCSV'],
   classifiers=[
     'Development Status :: Pre-Alpha',
     'Intended Audience :: Science/Research',
