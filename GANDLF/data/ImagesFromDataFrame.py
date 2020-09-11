@@ -5,7 +5,6 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import os
 import random
-import random
 import scipy
 import torchio
 from torchio.transforms import *
@@ -18,7 +17,7 @@ def mri_artifact(p = 1):
     return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
 
 def spatial_transform(p=1):
-    return OneOf({RandomMotion(): 0.5, RandomGhosting(): 0.5}, p=p)
+    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(): 0.2}, p=p)
 
 def bias(p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
