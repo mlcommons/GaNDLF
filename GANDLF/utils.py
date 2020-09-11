@@ -1,4 +1,6 @@
 import numpy as np
+import SimpleITK as sitk
+
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
     batch_stack = []
@@ -20,3 +22,21 @@ def reverse_one_hot(predmask_array,class_list):
     for idx, class_ in enumerate(class_list):
         final_mask = final_mask +  (idx_argmax == idx)*class_
     return final_mask
+
+
+def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
+    '''
+    This function resizes the input image based on the output size and interpolator
+    '''
+    inputSize = input_image.GetSize()
+    inputSpacing = np.array(input_image.GetSpacing())
+    outputSpacing = np.array(inputSpacing)
+    for i in range(len(output_size)):
+        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+    resampler = sitk.ResampleImageFilter()
+    resampler.SetSize(output_size)
+    resampler.SetOutputSpacing(outputSpacing)
+    resampler.SetOutputOrigin(input_image.GetOrigin())
+    resampler.SetOutputDirection(input_image.GetDirection())
+    resampler.SetDefaultPixelValue(0)
+    return resampler.Execute(input_image)
