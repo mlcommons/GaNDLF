@@ -24,6 +24,8 @@ def parseConfig(config_file_path):
   if 'resize' in params:
     if not np.greater_equal(params['resize'], params['psize']).all():
       sys.exit('The \'resize\' parameter needs to be greater than or equal to \'patch_size\'')
+  else:
+    params['resize'] = None
 
   # Extrating the training parameters from the dictionary
   if 'num_epochs' in params:
