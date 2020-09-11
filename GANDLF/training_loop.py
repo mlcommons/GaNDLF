@@ -252,10 +252,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #Updating the weight values
             scaler.step(optimizer) 
             #Pushing the dice to the cpu and only taking its value
-            #curr_loss = loss.cpu().data.item()
+            curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
-            total_loss += loss
-            
+            total_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
             curr_dice = MCD(output.double(), mask.double(), n_classList)
             #Computing the total dice
