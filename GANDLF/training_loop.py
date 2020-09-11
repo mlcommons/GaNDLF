@@ -257,14 +257,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += loss
             
-            # resize
-            if parameters['resize'] is not None:
-                inputImage = sitk.ReadImage(subject['label'])
-                base_image = sitk.GetImageFromArray(output.double())
-                base_image.CopyInformation(inputImage)
-                result_image = resize_image(base_image, parameters['resize'], sitk.sitkNearestNeighbor)
-                output = torch.from_numpy(sitk.GetArrayFromImage(result_image))
-
             #Computing the dice score  # Can be changed for multi-class outputs later.
             curr_dice = MCD(output.double(), mask.double(), n_classList)
             #Computing the total dice
