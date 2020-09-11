@@ -23,6 +23,7 @@ import pickle
 from pathlib import Path
 import argparse
 import datetime
+import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
@@ -58,12 +59,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
 
-    trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers['channelHeaders'],
-                                               headers['labelHeader'], q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations)
-    validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers['channelHeaders'],
-                                               headers['labelHeader'], q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations) # may or may not need to add augmentations here
+    trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
+    validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
 
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
@@ -256,6 +255,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += loss
+            
             #Computing the dice score  # Can be changed for multi-class outputs later.
             curr_dice = MCD(output.double(), mask.double(), n_classList)
             #Computing the total dice
