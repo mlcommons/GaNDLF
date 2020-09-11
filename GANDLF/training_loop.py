@@ -60,10 +60,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers['channelHeaders'],
                                                headers['labelHeader'], q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations)
+                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers['channelHeaders'],
                                                headers['labelHeader'], q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations) # may or may not need to add augmentations here
+                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
 
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
