@@ -266,8 +266,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             if scheduler == "triangular":
                 scheduler_lr.step()
 
-        average_dice = total_dice/(batch_idx + 1)
-        average_loss = total_loss/(batch_idx + 1)
+        average_dice = total_dice/len(train_loader.dataset)
+        average_loss = total_loss/len(train_loader.dataset)
     
         if average_dice > best_tr_dice:
             best_tr_idx = ep
@@ -304,9 +304,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 total_dice+= curr_dice
 
         #Computing the average dice
-        average_dice = total_dice/(batch_idx + 1)
+        average_dice = total_dice/len(train_loader.dataset)
         # Computing the average loss
-        average_loss = total_loss/(batch_idx + 1)
+        average_loss = total_loss/len(train_loader.dataset)
 
         if average_dice > best_val_dice:
             best_val_idx = ep
