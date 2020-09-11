@@ -4,6 +4,7 @@
 - Added MSE from Torch 
 - Added option to parameterize model properties
   - Final convolution layer (softmax/sigmoid/none)
+- Added option to resize input dataset
 
 ## 0.0.2
 

@@ -62,7 +62,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   n_classList = len(class_list)
 
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers['channelHeaders'], headers['labelHeader'], q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
   
   # Defining our model here according to parameters mentioned in the configuration file : 
@@ -182,7 +182,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
           torch.cuda.empty_cache()
           # Computing the loss
           #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
-          mask = mask.unsqueeze(0)
           loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
           #Pushing the dice to the cpu and only taking its value
           curr_loss = loss.cpu().data.item()
@@ -204,8 +203,14 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         pred_mask = pred_mask.cpu().numpy()
         # works since batch size is always one in inference time  
         pred_mask = reverse_one_hot(pred_mask[0],class_list)
+        
         result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
         result_image.CopyInformation(inputImage)
+        # resize
+        if parameters['resize'] is not None:
+            originalSize = inputImage.GetSize()
+            result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
+        
         patient_name = os.path.basename(subject['path_to_metadata'])
         if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
           os.mkdir(os.path.join(outputDir,"generated_masks"))
