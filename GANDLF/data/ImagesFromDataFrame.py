@@ -70,7 +70,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             
             if resize is not None:
                 image_resized = resize_image(subject_dict[str(channel)].as_sitk(), resize)
-                image_masked_tensor = torch.from_numpy(sitk.GetArrayFromImage(image_resized))
+                image_masked_tensor = torch.from_numpy(np.swapaxes(sitk.GetArrayFromImage(image_resized),0,2))
                 subject_dict[str(channel)] = Image(tensor = image_masked_tensor, type=torchio.INTENSITY) # overwrite previous image data with new masked data
 
         if labelHeader is not None:
@@ -78,7 +78,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             
             if resize is not None:
                 image_resized = resize_image(subject_dict['label'].as_sitk(), resize, sitk.sitkNearestNeighbor)
-                image_masked_tensor = torch.from_numpy(sitk.GetArrayFromImage(image_resized))
+                image_masked_tensor = torch.from_numpy(np.swapaxes(sitk.GetArrayFromImage(image_resized),0,2))
                 subject_dict['label'] = Image(tensor = image_masked_tensor, type=torchio.INTENSITY) # overwrite previous image data with new masked data
                 
             if not train:
