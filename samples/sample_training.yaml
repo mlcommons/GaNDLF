@@ -1,13 +1,10 @@
-# Choose the segmentation model here 
-# options: unet, resunet, fcn
-modelName: resunet
-# define the model, all properties are required
+# Choose the model parameters here
 model:
   {
     # dimension = 3
     # base_filters
     # other model-related properties can go here
-    architecture: resunet,
+    architecture: resunet, # options: unet, resunet, fcn
     final_layer: None # can be either sigmoid, softmax or none (none == regression)
   }
 # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
