@@ -23,6 +23,7 @@ import pickle
 from pathlib import Path
 import argparse
 import datetime
+import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
@@ -257,6 +258,28 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += loss
+            
+            # resize
+            if parameters['resize'] is not None:
+                # setup the resampler
+                inputImage = sitk.ReadImage(subject['label'])
+                base_image = sitk.GetArrayFromImage(output.double())
+                inputSize = base_image.GetSize()
+                outputSize = inputImage.GetSize()
+                inputSpacing = np.array(base_image.GetSpacing())
+                outputSpacing = np.array(inputSpacing)
+                for i in range(len(outputSize)):
+                    outputSpacing[i] = inputSpacing[i] * (inputSize[i] / outputSize[i])
+                resampler = sitk.ResampleImageFilter()
+                resampler.SetSize(outputSize)
+                resampler.SetOutputSpacing(outputSpacing)
+                resampler.SetOutputOrigin(base_image.GetOrigin())
+                resampler.SetOutputDirection(base_image.GetDirection())
+                resampler.SetInterpolator(sitk.sitkNearestNeighbor)
+                resampler.SetDefaultPixelValue(0)
+                result_image = resampler.Execute(base_image)
+                output = torch.from_numpy(sitk.GetArrayFromImage(result_image))
+
             #Computing the dice score  # Can be changed for multi-class outputs later.
             curr_dice = MCD(output.double(), mask.double(), n_classList)
             #Computing the total dice
