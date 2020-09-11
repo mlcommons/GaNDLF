@@ -261,23 +261,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             
             # resize
             if parameters['resize'] is not None:
-                # setup the resampler
                 inputImage = sitk.ReadImage(subject['label'])
-                base_image = sitk.GetArrayFromImage(output.double())
-                inputSize = base_image.GetSize()
-                outputSize = inputImage.GetSize()
-                inputSpacing = np.array(base_image.GetSpacing())
-                outputSpacing = np.array(inputSpacing)
-                for i in range(len(outputSize)):
-                    outputSpacing[i] = inputSpacing[i] * (inputSize[i] / outputSize[i])
-                resampler = sitk.ResampleImageFilter()
-                resampler.SetSize(outputSize)
-                resampler.SetOutputSpacing(outputSpacing)
-                resampler.SetOutputOrigin(base_image.GetOrigin())
-                resampler.SetOutputDirection(base_image.GetDirection())
-                resampler.SetInterpolator(sitk.sitkNearestNeighbor)
-                resampler.SetDefaultPixelValue(0)
-                result_image = resampler.Execute(base_image)
+                base_image = sitk.GetImageFromArray(output.double())
+                base_image.CopyInformation(inputImage)
+                result_image = resize_image(base_image, parameters['resize'], sitk.sitkNearestNeighbor)
                 output = torch.from_numpy(sitk.GetArrayFromImage(result_image))
 
             #Computing the dice score  # Can be changed for multi-class outputs later.

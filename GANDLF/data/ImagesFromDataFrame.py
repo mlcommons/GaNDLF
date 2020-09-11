@@ -10,6 +10,7 @@ import torchio
 from torchio.transforms import *
 from torchio import Image, Subject
 import SimpleITK as sitk
+from GANDLF.utils import resize_image
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
@@ -54,21 +55,6 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
     # This list will later contain the list of subjects 
     subjects_list = []
 
-    if resize is not None:
-        # setup the resampler
-        first_image = sitk.ReadImage(str(dataframe[0][0]))
-        inputSize = first_image.GetSize()
-        inputSpacing = np.array(first_image.GetSpacing())
-        outputSpacing = np.array(inputSpacing)
-        for i in range(len(resize)):
-            outputSpacing[i] = inputSpacing[i] * (inputSize[i] / resize[i])
-        resampler = sitk.ResampleImageFilter()
-        resampler.SetSize(resize)
-        resampler.SetOutputSpacing(outputSpacing)
-        resampler.SetOutputOrigin(first_image.GetOrigin())
-        resampler.SetOutputDirection(first_image.GetDirection())
-        resampler.SetDefaultPixelValue(0)
-
     # iterating through the dataframe
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject such as different image modalities, labels, any other data
@@ -80,8 +66,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
             
             if resize is not None:
-                resampler.SetInterpolator(sitk.sitkLinear)
-                image_resized = resampler.Execute(subject_dict[str(channel)].as_sitk())
+                image_resized = resize_image(subject_dict[str(channel)].as_sitk(), resize)
                 image_masked_tensor = torch.from_numpy(sitk.GetArrayFromImage(image_resized))
                 subject_dict[str(channel)] = Image(tensor = image_masked_tensor, type=torchio.INTENSITY) # overwrite previous image data with new masked data
 
@@ -89,8 +74,7 @@ def ImagesFromDataFrame(dataframe, psize, channelHeaders, labelHeader, q_max_len
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
             
             if resize is not None:
-                resampler.SetInterpolator(sitk.sitkNearestNeighbor)
-                image_resized = resampler.Execute(subject_dict['label'].as_sitk())
+                image_resized = resize_image(subject_dict['label'].as_sitk(), resize, sitk.sitkNearestNeighbor)
                 image_masked_tensor = torch.from_numpy(sitk.GetArrayFromImage(image_resized))
                 subject_dict['label'] = Image(tensor = image_masked_tensor, type=torchio.INTENSITY) # overwrite previous image data with new masked data
                 

@@ -206,23 +206,10 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         pred_mask = reverse_one_hot(pred_mask[0],class_list)
         
         result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
+        result_image.CopyInformation(inputImage)
         # resize
         if parameters['resize'] is not None:
-            # setup the resampler
-            inputSize = result_image.GetSize()
-            outputSize = inputImage.GetSize()
-            inputSpacing = np.array(result_image.GetSpacing())
-            outputSpacing = np.array(inputSpacing)
-            for i in range(len(outputSize)):
-                outputSpacing[i] = inputSpacing[i] * (inputSize[i] / outputSize[i])
-            resampler = sitk.ResampleImageFilter()
-            resampler.SetSize(outputSize)
-            resampler.SetOutputSpacing(outputSpacing)
-            resampler.SetOutputOrigin(inputImage.GetOrigin())
-            resampler.SetOutputDirection(inputImage.GetDirection())
-            resampler.SetInterpolator(sitk.sitkNearestNeighbor)
-            resampler.SetDefaultPixelValue(0)
-            result_image = resampler.Execute(result_image)
+            result_image = resize_image(resize_image, parameters['resize'], sitk.sitkNearestNeighbor)
         
         result_image.CopyInformation(inputImage)
         patient_name = os.path.basename(subject['path_to_metadata'])
