@@ -50,8 +50,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     scheduler = parameters['scheduler']
     class_list = parameters['class_list']
     base_filters = parameters['base_filters']
-    base_filters = parameters['base_filters']
-    base_filters = parameters['base_filters']
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
