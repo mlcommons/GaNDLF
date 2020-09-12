@@ -238,7 +238,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 output = model(image)
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['reduction'])
+                    loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
                     loss = loss_fn(output.double(), mask.double(), n_classList)
             # Back Propagation for model to learn
