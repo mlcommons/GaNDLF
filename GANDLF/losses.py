@@ -84,6 +84,6 @@ def MSE(inp, target, reduction = 'mean'):
 def MSE_loss(inp, target, num_classes, reduction = 'mean'):
     acc_mse_loss = 0
     for i in range(0, num_classes):
-        acc_mse_loss += MSE_torch(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
+        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
     acc_mse_loss/=num_classes
     return acc_mse_loss
