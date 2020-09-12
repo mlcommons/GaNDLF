@@ -304,9 +304,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 total_dice+= curr_dice
 
         #Computing the average dice
-        average_dice = total_dice/len(train_loader.dataset)
+        average_dice = total_dice/len(val_loader.dataset)
         # Computing the average loss
-        average_loss = total_loss/len(train_loader.dataset)
+        average_loss = total_loss/len(val_loader.dataset)
 
         if average_dice > best_val_dice:
             best_val_idx = ep
