@@ -124,18 +124,25 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     print("\nHostname     :" + str(os.getenv("HOSTNAME")))
     sys.stdout.flush()
 
+    # resume if compatible model was found
+    if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
+        model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
+        print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
+
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
     if device != 'cpu':
-        dev = device
-        device = torch.device(dev)
+        dev = os.environ.get('CUDA_VISIBLE_DEVICES')
+        device = torch.device('cuda')
         print("Current Device : ", torch.cuda.current_device())
         print("Device Count on Machine : ", torch.cuda.device_count())
         print("Device Name : ", torch.cuda.get_device_name(device))
         print("Cuda Availability : ", torch.cuda.is_available())
+        model = model.to(dev)
     else:
         dev = -1
         device = torch.device('cpu')
+        model.cpu()
     
     # multi-gpu support
     # ###
@@ -146,7 +153,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
             model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
     
-    # print stats
     print('Using device:', device)
     if device.type == 'cuda':
         print("Current Device : ", torch.cuda.current_device())
@@ -158,11 +164,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
 
     sys.stdout.flush()
-
-    # resume if compatible model was found
-    if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
-        model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
-        print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
 
     if dev > -1:
         model = model.to(dev)
