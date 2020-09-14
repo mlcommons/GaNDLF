@@ -149,7 +149,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         if ',' in dev:
             model = nn.DataParallel(model, '[' + dev + ']')
         else:
-            model = model.to(dev)
+            model = model.to(int(dev))
     else:
         dev = -1
         device = torch.device('cpu')
