@@ -127,7 +127,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
     if device != 'cpu':
-        dev = int(device)
+        dev = device
         device = torch.device(dev)
         print("Current Device : ", torch.cuda.current_device())
         print("Device Count on Machine : ", torch.cuda.device_count())
