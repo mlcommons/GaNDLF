@@ -64,6 +64,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
+    
+    # sanity check
+    if n_channels == 0:
+        sys.exit('The number of input channels cannot be zero, please check training CSV')
 
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
