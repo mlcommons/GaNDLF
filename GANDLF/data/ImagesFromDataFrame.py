@@ -114,7 +114,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         
     transform = Compose(augmentation_list)
     
-    subjects_dataset = torchio.ImagesDataset(subjects_list, transform=transform)
+    subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
 
     if not train:
         return subjects_dataset
