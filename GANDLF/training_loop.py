@@ -167,10 +167,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
     sys.stdout.flush()
 
-    if dev > -1:
-        model = model.to(dev)
-    else:
-        model.cpu()
     # Checking for the learning rate scheduler
     if scheduler == "triangle":
         step_size = 4*batch_size*len(train_loader.dataset)
