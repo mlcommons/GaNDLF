@@ -5,6 +5,7 @@
 - Added option to parameterize model properties
   - Final convolution layer (softmax/sigmoid/none)
 - Added option to resize input dataset
+- Added new regression architecture (VGG)
 
 ## 0.0.2
 
