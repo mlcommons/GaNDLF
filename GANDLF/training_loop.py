@@ -193,7 +193,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                                                          base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
     else:
         print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the implementation, using exp, instead', file=sys.stderr)
-        scheduler_lr = scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
+        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
