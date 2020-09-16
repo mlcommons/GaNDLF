@@ -338,7 +338,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         torch.save({"epoch": ep
                     "model_state_dict": model.state_dict()
                     "optimizer_state_dict": optimizer.state_dict()
-                    "val_dice": average_dice }, os.path.join(outputDir, which_model + "_current.pth.tar"))
+                    "val_dice": average_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         # Checking if patience is crossed
         if patience_count > patience:
