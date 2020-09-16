@@ -205,7 +205,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     total_dice = 0
     best_idx = 0
     patience_count = 0
-    
+    # Creating a CSV to log training loop and writing the initial columns
+    log_train = open(os.path.join(outputDir,"train_logs.csv"),"w")
+    log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
+                                
+                                
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
     channel_keys = list(batch.keys())
@@ -289,7 +293,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
         average_dice = total_dice/len(train_loader.dataset)
         average_loss = total_loss/len(train_loader.dataset)
-    
+        log_train.write(str(ep) + "," + str(average_loss) + "," + str(average_dice) + ",")
+                               
         if average_dice > best_tr_dice:
             best_tr_idx = ep
             best_tr_dice = average_dice
@@ -327,7 +332,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         average_dice = total_dice/len(val_loader.dataset)
         # Computing the average loss
         average_loss = total_loss/len(val_loader.dataset)
-
+        log_train.write(str(average_loss) + "," + str(average_dice) + "\n")
         if average_dice > best_val_dice:
             best_val_idx = ep
             best_val_dice = average_dice
@@ -371,6 +376,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         stop = time.time()     
         print("Time for epoch:",(stop - start)/60,"mins")        
         sys.stdout.flush()
+    # Closing the log file
+    log_train.close()
 
 if __name__ == "__main__":
 
