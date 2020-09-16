@@ -54,8 +54,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
     
+    
+    amp = paramters['amp']
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
+  
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
@@ -204,7 +207,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     channel_keys_new = []
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    scaler = torch.cuda.amp.GradScaler() 
+    if amp:
+        scaler = torch.cuda.amp.GradScaler() 
 
     for item in channel_keys:
         if item.isnumeric():
@@ -234,7 +238,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # Forward Propagation to get the output from the models
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             #torch.cuda.empty_cache()
-            # Casts operations to mixed precision 
+            # Casts operations to mixed precision
+            if amp:
             with torch.cuda.amp.autocast(): 
                 output = model(image)
                 # Computing the loss
