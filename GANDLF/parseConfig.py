@@ -34,6 +34,13 @@ def parseConfig(config_file_path):
     num_epochs = 100
     print('Using default num_epochs: ', num_epochs)
   params['num_epochs'] = num_epochs
+  
+  if 'patience' in params:
+    patience = int(params['patience'])
+  else:
+    print("Patience not given, train for full number of epochs")
+    patience = num_epochs
+  params['patience'] = patience
 
   if 'batch_size' in params:
     batch_size = int(params['batch_size'])
