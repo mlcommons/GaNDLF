@@ -19,8 +19,10 @@ resize: [128,128,128]
 num_epochs: 100
 # Set the batch size
 batch_size: 1
+# Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
+amp: False
 # Set the initial learning rate
-learning_rate: 0.001
+learning_rate: 0.01
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
 scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
