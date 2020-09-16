@@ -355,11 +355,19 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
         total_dice = 0
         total_loss = 0
+         # Saving the current model
+        torch.save({"epoch": ep
+                    "model_state_dict": model.state_dict()
+                    "optimizer_state_dict": optimizer.state_dict()
+                    "val_dice": average_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
+
         # Checking if patience is crossed
         if patience_count > patience:
             print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
             break
-            
+        
+
+
         stop = time.time()     
         print("Time for epoch:",(stop - start)/60,"mins")        
         sys.stdout.flush()
