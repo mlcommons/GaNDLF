@@ -53,7 +53,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
-    
+    patience = parameters['patience']
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
 
@@ -197,7 +197,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     best_tr_dice = -1
     total_loss = 0
     total_dice = 0
-    best_idx = 0  
+    best_idx = 0
+    patience_count = 0
+    
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
     channel_keys = list(batch.keys())
@@ -313,7 +315,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             best_val_idx = ep
             best_val_dice = average_dice
             torch.save(model.state_dict(), os.path.join(outputDir, which_model + "_best.pt"))
-
+        else:
+            patience_count = patience_count + 1 
+        
+        
+        
         print("Epoch Validation dice:" , average_dice) 
         print("Best Validation Dice:", best_val_dice)
         print("Average Validation Loss:", average_loss)
@@ -328,6 +334,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
         total_dice = 0
         total_loss = 0
+        # Checking if patience is crossed
+        if patience_count > patience:
+            print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
+            break
+            
         stop = time.time()     
         print("Time for epoch:",(stop - start)/60,"mins")        
         sys.stdout.flush()

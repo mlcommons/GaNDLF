@@ -17,6 +17,8 @@ patch_size: [128,128,128]
 resize: [128,128,128]
 # Number of epochs
 num_epochs: 100
+# Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
+patience: 50
 # Set the batch size
 batch_size: 1
 # Set the initial learning rate
