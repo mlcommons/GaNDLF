@@ -53,9 +53,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
+    amp = paramters['amp']
     patience = parameters['patience']
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
+  
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
@@ -156,6 +158,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         dev = -1
         device = torch.device('cpu')
         model.cpu()
+        amp = False
+        print("Since Device is CPU, Mixed Precision Training is set to False")
         
     print('Using device:', device)
     if device.type == 'cuda':
@@ -208,7 +212,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     channel_keys_new = []
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    scaler = torch.cuda.amp.GradScaler() 
+    if amp:
+        scaler = torch.cuda.amp.GradScaler() 
 
     for item in channel_keys:
         if item.isnumeric():
@@ -238,24 +243,34 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # Forward Propagation to get the output from the models
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             #torch.cuda.empty_cache()
-            # Casts operations to mixed precision 
-            with torch.cuda.amp.autocast(): 
+            # Casts operations to mixed precision
+            if amp:
+                with torch.cuda.amp.autocast(): 
+                    output = model(image)
+                # Computing the loss
+                    if MSE_requested:
+                        loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    else:
+                        loss = loss_fn(output.double(), mask.double(), n_classList)
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+            else:
                 output = model(image)
                 # Computing the loss
                 if MSE_requested:
                     loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
                     loss = loss_fn(output.double(), mask.double(), n_classList)
-            # Back Propagation for model to learn
-            scaler.scale(loss).backward() 
+                loss.backward()
+                optimizer.step()
+                           
             ### gradient clipping
             # # Unscales the gradients of optimizer's assigned params in-place
-            # scaler.unscale_(optimizer)
+            # scaler.unscale_(optimizer) - do we need this??
             # # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm) - do we need this??
             ### gradient clipping
             #Updating the weight values
-            scaler.step(optimizer) 
             #Pushing the dice to the cpu and only taking its value
             curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
@@ -265,7 +280,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #Computing the total dice
             total_dice += curr_dice
             # update scale for next iteration
-            scaler.update() 
+            if amp:
+                scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             #torch.cuda.empty_cache()
             if scheduler == "triangular":
@@ -301,7 +317,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 # making sure that the output and mask are on the same device
                 output, mask = output.to(device), mask.to(device)
                 loss = loss_fn(output.double(), mask.double(),n_classList).cpu().data.item()
-
                 total_loss += loss
                 #Computing the dice score 
                 curr_dice = MCD(output.double(), mask.double(), n_classList)
