@@ -41,6 +41,13 @@ def parseConfig(config_file_path):
     batch_size = 1
     print('Using default batch_size: ', batch_size)
   params['batch_size'] = batch_size
+  
+  if 'amp' in params:
+    amp = bool(params['amp'])
+  else:
+    amp = False
+    print("NOT using Mixed Precision Training")
+  params['amp'] = amp
 
   if 'learning_rate' in params:
     learning_rate = float(params['learning_rate'])
