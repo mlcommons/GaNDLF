@@ -8,7 +8,6 @@ with open('README.md') as readme_file:
   readme = readme_file.read()
 
 requirements = [
-  'nibabel',
   'numpy',
   'scipy',
   'SimpleITK==1.2.4',
@@ -22,7 +21,6 @@ requirements = [
   'scikit-learn==0.23.1',
   'pickle5==0.0.11',
   'setuptools',
-  # 'GPUtil',
   'pyyaml'
 ]
 
