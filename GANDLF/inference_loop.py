@@ -80,7 +80,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
   # Loading the weights into the model
-  model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
+  main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
+  model.load_state_dict(main_dict['model_state_dict'])
   # setting the loss function
   if loss_function == 'dc':
     loss_fn  = MCD_loss
