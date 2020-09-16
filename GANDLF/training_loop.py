@@ -156,11 +156,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         dev = -1
         device = torch.device('cpu')
         model.cpu()
-        
-    # If device is CPU, then do not use AMP
-    if device == 'cpu':
-      amp = False
-      print("Since Device is CPU, Mixed Precision Training is set to False")
+        amp = False
+        print("Since Device is CPU, Mixed Precision Training is set to False")
         
     print('Using device:', device)
     if device.type == 'cuda':
