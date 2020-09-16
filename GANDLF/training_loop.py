@@ -125,9 +125,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     sys.stdout.flush()
 
     # resume if compatible model was found
-    if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pt")):
-        model.load_state_dict(torch.load(os.path.join(outputDir,str(which_model) + "_best.pt")))
-        print("Model weights found. Loading weights from: ",os.path.join(outputDir,str(which_model) + "_best.pt"))
+    if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pth.tar")):
+        checkpoint = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar")
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print("Model checkpoint found. Loading checkpoint from: ",os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
 
     print("Training Data Samples: ", len(train_loader.dataset))
     sys.stdout.flush()
@@ -314,7 +316,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         if average_dice > best_val_dice:
             best_val_idx = ep
             best_val_dice = average_dice
-            torch.save(model.state_dict(), os.path.join(outputDir, which_model + "_best.pt"))
+            # We can add more stuff to be saved if we need anything more
+            torch.save({"epoch": best_val_idx
+                        "model_state_dict": model.state_dict()
+                        "optimizer_state_dict": optimizer.state_dict()
+                        "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best.pth.tar"))
         else:
             patience_count = patience_count + 1 
         
