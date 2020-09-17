@@ -206,7 +206,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     best_idx = 0
     patience_count = 0
     # Creating a CSV to log training loop and writing the initial columns
-    log_train = open(os.path.join(outputDir,"train_logs.csv"),"w")
+    log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"w")
     log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
                                 
                                 
