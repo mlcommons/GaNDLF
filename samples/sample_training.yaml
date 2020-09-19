@@ -52,7 +52,7 @@ kcross_validation: -5
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'spatial': one of affine or elastic is picked (randomly) for augmentation
-# 'kspace': one of motion or ghosting is picked (randomly) for augmentation
+# 'kspace': one of motion, ghosting or spiking is picked (randomly) for augmentation
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
