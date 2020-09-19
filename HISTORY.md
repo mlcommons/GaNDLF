@@ -6,6 +6,7 @@
   - Final convolution layer (softmax/sigmoid/none)
 - Added option to resize input dataset
 - Added new regression architecture (VGG)
+- Version checking in config file
 
 ## 0.0.2
 
