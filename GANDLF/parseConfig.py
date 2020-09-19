@@ -25,10 +25,10 @@ def parseConfig(config_file_path):
     sys.exit('The \'version\' key needs to be defined in config with \'minimum\' and \'maximum\' fields to determine the compatibility of configuration with code base')
   else:
     gandlf_version = pkg_resources.require('GANDLF')[0].version
-    gandlf_version_float = parse_version(gandlf_version)
+    gandlf_version_int = parse_version(gandlf_version)
     min = parse_version(params['version']['minimum'])
     max = parse_version(params['version']['maximum'])
-    if (min < gandlf_version_float) or (max > gandlf_version_float):
+    if (min < gandlf_version_int) or (max > gandlf_version_int):
       sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
       
   # require parameters - this should error out if not present
