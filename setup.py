@@ -25,6 +25,8 @@ requirements = [
 ]
 
 setup(
+  name='GANDLF',
+  version='0.0.3.NR', # NR: non-release; this should be changed when tagging
   author="Megh Bhalerao, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
@@ -49,7 +51,5 @@ setup(
   long_description_content_type='text/markdown',
   include_package_data=True,
   keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
-  name='GANDLF',
-  version='0.0.3.NR', # NR: non-release; this should be changed when tagging
   zip_safe=False,
 )
