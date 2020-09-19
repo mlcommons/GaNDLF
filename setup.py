@@ -21,7 +21,8 @@ requirements = [
   'scikit-learn==0.23.1',
   'pickle5==0.0.11',
   'setuptools',
-  'pyyaml'
+  'pyyaml',
+  'packaging'
 ]
 
 setup(
