@@ -5,6 +5,15 @@ import sys
 import numpy as np
 import yaml
 
+def parse_version(version_string):
+  '''
+  Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison
+  '''
+  version_string_split = version_string.split('.')
+  if len(version_string_split) > 3:
+    del version_string_split[-1]
+  return int(''.join(version_string_split))
+
 def parseConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
@@ -12,6 +21,16 @@ def parseConfig(config_file_path):
   with open(config_file_path) as f:
     params = yaml.load(f, Loader=yaml.FullLoader)
   
+  if not('version' in params):
+    sys.exit('The \'version\' key needs to be defined in config with \'minimum\' and \'maximum\' fields to determine the compatibility of configuration with code base')
+  else:
+    gandlf_version = pkg_resources.require('GANDLF')[0].version
+    gandlf_version_int = parse_version(gandlf_version)
+    min = parse_version(params['version']['minimum'])
+    max = parse_version(params['version']['maximum'])
+    if (min < gandlf_version_int) or (max > gandlf_version_int):
+      sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
+      
   # require parameters - this should error out if not present
   if not('class_list' in params):
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
