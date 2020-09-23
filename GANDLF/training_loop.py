@@ -337,9 +337,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             best_val_idx = ep
             best_val_dice = average_dice
             # We can add more stuff to be saved if we need anything more
-            torch.save({"epoch": best_val_idx
-                        "model_state_dict": model.state_dict()
-                        "optimizer_state_dict": optimizer.state_dict()
+            torch.save({"epoch": best_val_idx,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best.pth.tar"))
         else:
             patience_count = patience_count + 1 
@@ -361,9 +361,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         total_dice = 0
         total_loss = 0
          # Saving the current model
-        torch.save({"epoch": ep
-                    "model_state_dict": model.state_dict()
-                    "optimizer_state_dict": optimizer.state_dict()
+        torch.save({"epoch": ep,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
                     "val_dice": average_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         # Checking if patience is crossed
