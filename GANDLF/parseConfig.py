@@ -29,7 +29,7 @@ def parseConfig(config_file_path):
     gandlf_version_int = parse_version(gandlf_version)
     min = parse_version(params['version']['minimum'])
     max = parse_version(params['version']['maximum'])
-    if (min < gandlf_version_int) or (max > gandlf_version_int):
+    if (min > gandlf_version_int) or (max < gandlf_version_int):
       sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
       
   # require parameters - this should error out if not present
