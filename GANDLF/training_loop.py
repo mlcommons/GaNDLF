@@ -128,7 +128,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
     # resume if compatible model was found
     if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pth.tar")):
-        checkpoint = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar")
+        checkpoint = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         print("Model checkpoint found. Loading checkpoint from: ",os.path.join(outputDir,str(which_model) + "_best.pth.tar"))

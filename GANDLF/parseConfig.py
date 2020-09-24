@@ -4,6 +4,7 @@ import ast
 import sys
 import numpy as np
 import yaml
+import pkg_resources
 
 def parse_version(version_string):
   '''
