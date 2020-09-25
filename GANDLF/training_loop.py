@@ -53,7 +53,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
-    amp = paramters['amp']
+    amp = parameters['amp']
     patience = parameters['patience']
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
