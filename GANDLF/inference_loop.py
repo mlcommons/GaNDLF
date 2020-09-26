@@ -148,15 +148,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
 
   sys.stdout.flush()
   ############## STORING THE HISTORY OF THE LOSSES #################
-  avg_val_loss = 0
-  total_val_loss = 0
-  best_val_loss = 2000
-  best_tr_loss = 2000
   total_loss = 0
   total_dice = 0
-  best_idx = 0
-  best_n_val_list = []
-  val_avg_loss_list = []
 
   model.eval()
   #   batch_iterator_train = iter(train_loader)
