@@ -140,20 +140,22 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
         
         dev = os.environ.get('CUDA_VISIBLE_DEVICES')
-        device = torch.device('cuda')
-        print("Current Device : ", torch.cuda.current_device())
-        print("Device Count on Machine : ", torch.cuda.device_count())
-        print("Device Name : ", torch.cuda.get_device_name(device))
-        print("Cuda Availability : ", torch.cuda.is_available())
-
         # multi-gpu support
         # ###
         # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
         # ###
         if ',' in dev:
+            device = torch.device('cuda')
             model = nn.DataParallel(model, '[' + dev + ']')
         else:
+            device = torch.device('cuda:' + dev)
             model = model.to(int(dev))
+        
+        print("Current Device : ", torch.cuda.current_device())
+        print("Device Count on Machine : ", torch.cuda.device_count())
+        print("Device Name : ", torch.cuda.get_device_name(device))
+        print("Cuda Availability : ", torch.cuda.is_available())
+
     else:
         dev = -1
         device = torch.device('cpu')
