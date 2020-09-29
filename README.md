@@ -27,5 +27,5 @@ Start at [./docs/index.md](./docs/index.md).
 
 Includes:
 - [Installation and setup](./docs/setup.md)
-- [Using GANDLF]](./docs/usage.md)
-- [Extending GANDLF]](./docs/extending.md)
+- [Using GANDLF](./docs/usage.md)
+- [Extending GANDLF](./docs/extending.md)
