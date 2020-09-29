@@ -238,7 +238,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # read the mask
             mask = subject['label'][torchio.DATA] # get the label image
             # Why are we doing this? Please check again
-            mask = one_hot(mask.cpu().float().numpy(), class_list)
+            #mask = one_hot(mask.cpu().float().numpy(), class_list)
+            mask = one_hot(mask, class_list)
             mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
             image, mask = image.float().to(device), mask.to(device)
@@ -316,7 +317,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 image, mask = image.to(device), mask.to(device)
                 output = model(image.float())
                 # one hot encoding the mask 
-                mask = one_hot(mask.cpu().float().numpy(), class_list)
+                #mask = one_hot(mask.cpu().float().numpy(), class_list)
+                mask = one_hot(mask, class_list)
                 mask = torch.from_numpy(mask)
                 mask = mask.unsqueeze(0)
                 # making sure that the output and mask are on the same device

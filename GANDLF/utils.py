@@ -10,9 +10,9 @@ def one_hot(segmask_array, class_list):
         for class_ in class_list:
             bin_mask = (segmask_array_iter == int(class_))
             one_hot_stack.append(bin_mask)
-        one_hot_stack = np.array(one_hot_stack)
+        one_hot_stack = torch.stack(one_hot_stack)
         batch_stack.append(one_hot_stack)
-    batch_stack = np.array(batch_stack)    
+    batch_stack = torch.stack(batch_stack)    
     return batch_stack
 
 
