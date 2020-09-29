@@ -26,6 +26,6 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 Start at [./docs/index.md](./docs/index.md).
 
 Includes:
-- Installation
-- Usage GANDLF
-- Extending GANDLF
+- [Installation and setup](./docs/setup.md)
+- [Using GANDLF]](./docs/usage.md)
+- [Extending GANDLF]](./docs/extending.md)
