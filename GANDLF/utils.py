@@ -1,5 +1,6 @@
 import numpy as np
 import SimpleITK as sitk
+import torch
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
