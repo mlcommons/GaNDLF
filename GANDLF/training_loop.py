@@ -250,42 +250,42 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             torch.cuda.empty_cache()
             # Casts operations to mixed precision
             output = model(image_gpu)
-            # if amp:
-            #     with torch.cuda.amp.autocast(): 
-            #     # Computing the loss
-            #         if MSE_requested:
-            #             loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
-            #         else:
-            #             loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
-            #     scaler.scale(loss).backward()
-            #     scaler.step(optimizer)
-            # else:
-            #     # Computing the loss
-            #     if MSE_requested:
-            #         loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
-            #     else:
-            #         loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
-            #     loss.backward()
-            #     optimizer.step()
+            if amp:
+                with torch.cuda.amp.autocast(): 
+                # Computing the loss
+                    if MSE_requested:
+                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    else:
+                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+            else:
+                # Computing the loss
+                if MSE_requested:
+                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                else:
+                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                loss.backward()
+                optimizer.step()
                            
-            # ### gradient clipping
-            # # # Unscales the gradients of optimizer's assigned params in-place
-            # # scaler.unscale_(optimizer) - do we need this??
-            # # # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
-            # # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm) - do we need this??
-            # ### gradient clipping
-            # #Updating the weight values
-            # #Pushing the dice to the cpu and only taking its value
-            # curr_loss = loss.cpu().data.item()
-            # #train_loss_list.append(loss.cpu().data.item())
-            # total_loss += curr_loss
-            # #Computing the dice score  # Can be changed for multi-class outputs later.
-            # curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList)
-            # #Computing the total dice
-            # total_dice += curr_dice
-            # # update scale for next iteration
-            # if amp:
-            #     scaler.update() 
+            ### gradient clipping
+            # # Unscales the gradients of optimizer's assigned params in-place
+            # scaler.unscale_(optimizer) - do we need this??
+            # # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
+            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm) - do we need this??
+            ### gradient clipping
+            #Updating the weight values
+            #Pushing the dice to the cpu and only taking its value
+            curr_loss = loss.cpu().data.item()
+            #train_loss_list.append(loss.cpu().data.item())
+            total_loss += curr_loss
+            #Computing the dice score  # Can be changed for multi-class outputs later.
+            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList)
+            #Computing the total dice
+            total_dice += curr_dice
+            # update scale for next iteration
+            if amp:
+                scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             torch.cuda.empty_cache()
             if scheduler == "triangular":
