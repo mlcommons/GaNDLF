@@ -237,11 +237,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             mask = subject['label'][torchio.DATA] # get the label image
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
-            one_hot = one_hot(mask, class_list)
-            one_hot = one_hot.unsqueeze(0)
+            one_hot_mask = one_hot(mask, class_list)
+            one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image, one_hot = image.float().to(device), one_hot.to(device)
+            image, one_hot_mask = image.float().to(device), one_hot_mask.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -254,18 +254,18 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                     output = model(image)
                 # Computing the loss
                     if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot.double(), n_classList)
+                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
                 output = model(image)
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), one_hot.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -281,7 +281,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot.double(), n_classList)
+            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList)
             #Computing the total dice
             total_dice += curr_dice
             # update scale for next iteration
@@ -318,15 +318,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 output = model(image.float())
                 # one hot encoding the mask 
                 #mask = one_hot(mask.cpu().float().numpy(), class_list)
-                one_hot = one_hot(mask, class_list)
+                one_hot_mask = one_hot(mask, class_list)
                 #mask = torch.from_numpy(mask)
-                one_hot = one_hot.unsqueeze(0)
+                one_hot_mask = one_hot_mask.unsqueeze(0)
                 # making sure that the output and mask are on the same device
-                output, one_hot = output.to(device), one_hot.to(device)
-                loss = loss_fn(output.double(), one_hot.double(),n_classList).cpu().data.item()
+                output, one_hot_mask = output.to(device), one_hot_mask.to(device)
+                loss = loss_fn(output.double(), one_hot_mask.double(),n_classList).cpu().data.item()
                 total_loss += loss
                 #Computing the dice score 
-                curr_dice = MCD(output.double(), one_hot.double(), n_classList)
+                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList)
                 #Computing the total dice
                 total_dice+= curr_dice
 
