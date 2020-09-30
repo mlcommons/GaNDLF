@@ -114,8 +114,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             loss_fn = DCCE
         elif loss_function == 'ce':
             loss_fn = CE
-        elif loss_function == 'mse':
-            loss_fn = MCD_MSE_loss
+        # elif loss_function == 'mse':
+        #     loss_fn = MCD_MSE_loss
         else:
             print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
             loss_function = 'dc'
