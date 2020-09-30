@@ -288,7 +288,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             if amp:
                 scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            # torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()
 
