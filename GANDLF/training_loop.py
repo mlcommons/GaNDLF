@@ -150,10 +150,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         else:
             device = torch.device('cuda:' + dev)
             model = model.to(int(dev))
-            print('Memory Total : ', round(torch.cuda.get_device_properties(dev).total_memory/1024**3, 1), 'GB')
+            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
             print('Memory Usage : ')
-            print('Allocated : ', round(torch.cuda.memory_allocated(dev)/1024**3, 1),'GB')
-            print('Cached: ', round(torch.cuda.memory_reserved(dev)/1024**3, 1), 'GB')
+            print('Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
+            print('Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
         
         print("Current Device : ", torch.cuda.current_device())
         print("Device Count on Machine : ", torch.cuda.device_count())
