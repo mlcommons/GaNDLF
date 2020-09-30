@@ -227,7 +227,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Epoch Started at:", datetime.datetime.now())
         print("Epoch # : ",ep)
         print("Learning rate:", optimizer.param_groups[0]['lr'])
-        model.train
+        model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
             # Load the subject and its ground truth
@@ -308,7 +308,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         total_loss = 0
 
         # Now we enter the evaluation/validation part of the epoch        
-        model.eval                
+        model.eval()                
         # batch_iterator_val = iter(val_loader)
         for batch_idx, (subject) in enumerate(val_loader):
             with torch.no_grad():                
