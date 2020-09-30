@@ -150,6 +150,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         else:
             device = torch.device('cuda:' + dev)
             model = model.to(int(dev))
+            print('Memory Total : ', round(torch.cuda.get_device_properties(0).total_memory/1024**3, 1), 'GB')
             print('Memory Usage : ')
             print('Allocated : ', round(torch.cuda.memory_allocated(dev)/1024**3, 1),'GB')
             print('Cached: ', round(torch.cuda.memory_reserved(dev)/1024**3, 1), 'GB')
@@ -228,6 +229,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
         for batch_idx, (subject) in enumerate(train_loader):
+            print('=== Memory Usage : ')
+            print('=== Allocated : ', round(torch.cuda.memory_allocated(dev)/1024**3, 1),'GB')
+            print('=== Cached: ', round(torch.cuda.memory_reserved(dev)/1024**3, 1), 'GB')
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
@@ -243,7 +247,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            #torch.cuda.empty_cache()
+            # might help solve OOM
+            torch.cuda.empty_cache()
             # Casts operations to mixed precision
             if amp:
                 with torch.cuda.amp.autocast(): 
@@ -284,7 +289,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             if amp:
                 scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            #torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()
 
@@ -326,6 +331,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 #Computing the total dice
                 total_dice+= curr_dice
 
+        torch.cuda.empty_cache()
         #Computing the average dice
         average_dice = total_dice/len(val_loader.dataset)
         # Computing the average loss
