@@ -241,31 +241,30 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image, one_hot_mask = image.float().to(device), one_hot_mask.to(device)
+            image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             # might help solve OOM
-            # torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
             # Casts operations to mixed precision
+            output = model(image_gpu)
             if amp:
                 with torch.cuda.amp.autocast(): 
-                    output = model(image)
                 # Computing the loss
                     if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
+                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
-                output = model(image)
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -281,7 +280,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList)
+            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList)
             #Computing the total dice
             total_dice += curr_dice
             # update scale for next iteration
