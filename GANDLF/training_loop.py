@@ -229,9 +229,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train
         for batch_idx, (subject) in enumerate(train_loader):
-            print('=== Memory Usage : ')
-            print('=== Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
-            print('=== Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
+            print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
@@ -239,34 +237,35 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             mask = subject['label'][torchio.DATA] # get the label image
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
-            mask = one_hot(mask, class_list)
+            one_hot = one_hot(mask, class_list)
+            one_hot = one_hot.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image, mask = image.float().to(device), mask.to(device)
+            image, one_hot = image.float().to(device), one_hot.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             # might help solve OOM
-            torch.cuda.empty_cache()
+            # torch.cuda.empty_cache()
             # Casts operations to mixed precision
             if amp:
                 with torch.cuda.amp.autocast(): 
                     output = model(image)
                 # Computing the loss
                     if MSE_requested:
-                        loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        loss = loss_fn(output.double(), one_hot.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), mask.double(), n_classList)
+                        loss = loss_fn(output.double(), one_hot.double(), n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
                 output = model(image)
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    loss = loss_fn(output.double(), one_hot.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), mask.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot.double(), n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -282,14 +281,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), mask.double(), n_classList)
+            curr_dice = MCD(output.double(), one_hot.double(), n_classList)
             #Computing the total dice
             total_dice += curr_dice
             # update scale for next iteration
             if amp:
                 scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            torch.cuda.empty_cache()
+            # torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()
 
@@ -319,19 +318,19 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 output = model(image.float())
                 # one hot encoding the mask 
                 #mask = one_hot(mask.cpu().float().numpy(), class_list)
-                mask = one_hot(mask, class_list)
+                one_hot = one_hot(mask, class_list)
                 #mask = torch.from_numpy(mask)
-                mask = mask.unsqueeze(0)
+                one_hot = one_hot.unsqueeze(0)
                 # making sure that the output and mask are on the same device
-                output, mask = output.to(device), mask.to(device)
-                loss = loss_fn(output.double(), mask.double(),n_classList).cpu().data.item()
+                output, one_hot = output.to(device), one_hot.to(device)
+                loss = loss_fn(output.double(), one_hot.double(),n_classList).cpu().data.item()
                 total_loss += loss
                 #Computing the dice score 
-                curr_dice = MCD(output.double(), mask.double(), n_classList)
+                curr_dice = MCD(output.double(), one_hot.double(), n_classList)
                 #Computing the total dice
                 total_dice+= curr_dice
 
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
         #Computing the average dice
         average_dice = total_dice/len(val_loader.dataset)
         # Computing the average loss
