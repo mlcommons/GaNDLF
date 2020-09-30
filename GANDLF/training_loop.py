@@ -238,7 +238,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             one_hot_mask = one_hot(mask, class_list)
-            one_hot_mask = one_hot_mask.unsqueeze(0)
+            # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
             image, one_hot_mask = image.float().to(device), one_hot_mask.to(device)
