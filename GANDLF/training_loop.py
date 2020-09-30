@@ -230,8 +230,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         model.train
         for batch_idx, (subject) in enumerate(train_loader):
             print('=== Memory Usage : ')
-            print('=== Allocated : ', round(torch.cuda.memory_allocated(dev)/1024**3, 1),'GB')
-            print('=== Cached: ', round(torch.cuda.memory_reserved(dev)/1024**3, 1), 'GB')
+            print('=== Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
+            print('=== Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
