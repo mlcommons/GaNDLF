@@ -150,6 +150,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         else:
             device = torch.device('cuda:' + dev)
             model = model.to(int(dev))
+            print('Memory Usage : ')
+            print('Allocated : ', round(torch.cuda.memory_allocated(dev)/1024**3, 1),'GB')
+            print('Cached: ', round(torch.cuda.memory_reserved(dev)/1024**3, 1), 'GB')
         
         print("Current Device : ", torch.cuda.current_device())
         print("Device Count on Machine : ", torch.cuda.device_count())
@@ -164,15 +167,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Since Device is CPU, Mixed Precision Training is set to False")
         
     print('Using device:', device)
-    if device.type == 'cuda':
-        print("Current Device : ", torch.cuda.current_device())
-        print("Device Count on Machine : ", torch.cuda.device_count())
-        print("Device Name : ", torch.cuda.get_device_name(device))
-        print("Cuda Availability : ", torch.cuda.is_available())
-        print('Memory Usage : ')
-        print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
-        print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
-
     sys.stdout.flush()
 
     # Checking for the learning rate scheduler
