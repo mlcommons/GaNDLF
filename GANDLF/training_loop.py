@@ -149,6 +149,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             model = nn.DataParallel(model, '[' + dev + ']')
         else:
             device = torch.device('cuda:' + dev)
+            print('Device used: ', dev)
             model = model.to(int(dev))
             print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
             print('Memory Usage : ')
