@@ -150,6 +150,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         else:
             device = torch.device('cuda:' + dev)
             print('Device used: ', dev)
+            if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
+                dev = '0'
             model = model.to(int(dev))
             print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
             print('Memory Usage : ')
