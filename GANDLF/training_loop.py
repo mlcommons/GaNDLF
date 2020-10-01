@@ -229,7 +229,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Learning rate:", optimizer.param_groups[0]['lr'])
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
-            print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
+            # uncomment line to debug memory issues
+            # # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
