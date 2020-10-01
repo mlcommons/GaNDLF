@@ -320,7 +320,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 #mask = one_hot(mask.cpu().float().numpy(), class_list)
                 one_hot_mask = one_hot(mask, class_list)
                 #mask = torch.from_numpy(mask)
-                one_hot_mask = one_hot_mask.unsqueeze(0)
+                # one_hot_mask = one_hot_mask.unsqueeze(0)
                 # making sure that the output and mask are on the same device
                 output, one_hot_mask = output.to(device), one_hot_mask.to(device)
                 loss = loss_fn(output.double(), one_hot_mask.double(),n_classList).cpu().data.item()
