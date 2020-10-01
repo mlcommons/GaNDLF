@@ -238,10 +238,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             one_hot_mask = one_hot(mask, class_list)
+            del mask
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
             image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
+            del one_hot_mask
+            del image
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
