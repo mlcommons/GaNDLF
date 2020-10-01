@@ -247,7 +247,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # Forward Propagation to get the output from the models
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             # might help solve OOM
-            torch.cuda.empty_cache()
+            # torch.cuda.empty_cache()
             # Casts operations to mixed precision
             output = model(image_gpu)
             if amp:
@@ -287,7 +287,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             if amp:
                 scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            torch.cuda.empty_cache()
+            # torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()
 
