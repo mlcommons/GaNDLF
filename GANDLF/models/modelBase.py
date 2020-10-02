@@ -22,3 +22,4 @@ class ModelBase(nn.Module):
             self.final_convolution_layer = F.softmax
         elif (final_convolution_layer == 'none') or (final_convolution_layer == None) or (final_convolution_layer == 'None') or (final_convolution_layer == 'regression'):
             self.final_convolution_layer = None
+        

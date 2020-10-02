@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+Implementation of Residual-U-Net - ResUNet
+"""
+
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule

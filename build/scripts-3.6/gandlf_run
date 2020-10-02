@@ -1,0 +1,92 @@
+#!/home/siddhesh/anaconda3/envs/gandlf/bin/python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function, division
+import os
+os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+
+import argparse
+import sys
+import time
+import numpy as np
+import pandas as pd
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torch.autograd import Variable
+import gc
+from torchsummary import summary
+from pathlib import Path
+from sklearn.model_selection import KFold
+import pickle
+import pkg_resources
+import torchio
+from datetime import date
+
+from GANDLF.training_manager import TrainingManager
+from GANDLF.inference_manager import InferenceManager 
+from GANDLF.parseConfig import parseConfig
+
+def main():
+    copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+    parser = argparse.ArgumentParser(prog='GANDLF', formatter_class=argparse.RawTextHelpFormatter, description = "3D Image Semantic Segmentation using Deep Learning.\n\n" + copyrightMessage)
+    parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'modelDir\' during inference', required=False)
+    parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference', required=True)
+    parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
+    parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=False)
+    parser.add_argument('-modelDir', type=str, help = 'The pre-trained model directory that is used for inference, needs to contain the configuration', required=False)
+    parser.add_argument('-device', default=0, type=str, help = 'Device to perform requested session on (\'-1\' == cpu and everything else denotes GPU ID)', required=True) 
+
+    #parser.add_argument('-v', '--version', action='version', 
+    #version = format(parser.prog) + ' v' + pkg_resources.require('deep_seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
+                                
+    args = parser.parse_args()
+
+    file_data_full = args.data
+    model_parameters = args.config
+    parameters = parseConfig(model_parameters)
+    device = args.device
+    model_path = args.output
+    mode = args.train
+    if '-1' in device:
+        device = 'cpu'
+    print("Device being used : ", device)
+    if mode == 0: # inference mode
+        pretrainedModelPath = args.modelDir
+
+    # safe directory creation
+    Path(model_path).mkdir(parents=True, exist_ok=True)
+
+    ## read training dataset into data frame
+    data_full = pd.read_csv(file_data_full)
+    # shuffle the data - this is a useful level of randomization for the training process
+    data_full=data_full.sample(frac=1).reset_index(drop=True)
+
+    # find actual header locations for input channel and label
+    # the user might put the label first and the channels afterwards 
+    # or might do it completely randomly
+    headers = {}
+    headers['channelHeaders'] = []
+    headers['predictionHeaders'] = []
+    headers['labelHeader'] = None
+    headers['subjectIDHeader'] = None
+    for col in data_full.columns: 
+        # add appropriate headers to read here, as needed
+        col_lower = col.lower()
+        currentHeaderLoc = data_full.columns.get_loc(col)
+        if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
+            headers['channelHeaders'].append(currentHeaderLoc)
+        elif ('subjectid' in col_lower) or ('patientname' in col_lower):
+            headers['subjectIDHeader'] = currentHeaderLoc
+        elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower) or ('ground_truth' in col_lower) or ('groundtruth' in col_lower):
+            if (headers['labelHeader'] == None):
+                headers['labelHeader'] = currentHeaderLoc
+            else:
+                print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
+
+    if mode != 0: # training mode
+        TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)
+    else:
+        InferenceManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)
+
+if __name__ == '__main__':
+    main()
