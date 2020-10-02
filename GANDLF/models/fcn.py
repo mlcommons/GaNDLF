@@ -73,7 +73,7 @@ class fcn(ModelBase):
         x = self.conv_0(x)
 
         if not self.final_convolution_layer is None:
-            if self.final_convolution_layer == F.softmax:
+            if self.final_convolution_layer == F.softmax():
                 x = self.final_convolution_layer(x, dim=1)
             else:
                 x = self.final_convolution_layer(x)
