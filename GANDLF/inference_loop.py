@@ -24,7 +24,6 @@ import pickle
 from pathlib import Path
 import argparse
 import datetime
-import GPUtil
 import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
