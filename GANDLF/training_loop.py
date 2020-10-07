@@ -163,6 +163,9 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Device Count on Machine : ", torch.cuda.device_count())
         print("Device Name : ", torch.cuda.get_device_name(device))
         print("Cuda Availability : ", torch.cuda.is_available())
+        
+        # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
+        optimizer.load_state_dict(optimizer.state_dict())
 
     else:
         dev = -1
