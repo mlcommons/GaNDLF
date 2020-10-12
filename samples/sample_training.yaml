@@ -46,16 +46,15 @@ loss_function: dc
 #  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
-# this parameter controls the holdout data for final model evaluation
-# currently, the final model evaluation needs to happen after the training finishes, as that takes a long time
-# randomized split is performed using sklearn's KFold method
+# this parameter controls the nested training process
+# performs randomized k-fold cross-validation
+# split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
-nested_validation: 5
-# this parameter controls the validation data splits for model training
-# the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
-# randomized split is performed using sklearn's KFold method
-# for single fold run, use '-' before the fold number
-kcross_validation: -5
+nested_training:
+  {
+    holdout: 5, # this controls the holdout data splits for final model evaluation
+    validation: 5 # this controls the validation data splits for model training
+  }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
 # keep/edit as needed
