@@ -127,3 +127,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             if singleFoldValidation:
                 break
             currentValidationFold = currentValidationFold + 1 # increment the fold
+
+        if singleFoldHoldout:
+            break
+        currentHoldoutFold = currentHoldoutFold + 1 # increment the fold
