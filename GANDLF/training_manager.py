@@ -49,9 +49,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
     trainingData_full = dataframe
     training_indeces_full = list(trainingData_full.index.values)
 
-    # start the kFold train
+    # start the kFold train for holdout
     for trainAndVal_index, holdout_index in kf_holdout.split(training_indeces_full): # perform holdout split
 
+        # get the current training and holdout data
         trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
         holdoutData = trainingData_full.iloc[holdout_index]
 
@@ -73,9 +74,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
         holdoutData.to_pickle(currentHoldoutDataPickle)
 
-        current_training_indeces_full = list(trainingAndValidationData.index.values)
+        current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
-        for train_index, test_index in kf_validation.split(training_indeces_full):
+        # start the kFold train for validation
+        for train_index, test_index in kf_validation.split(current_training_indeces_full):
 
             # the output of the current fold is only needed if multi-fold training is happening
             if singleFoldValidation:
@@ -86,11 +88,6 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
             trainingData = trainingAndValidationData.iloc[train_index]
             validationData = trainingAndValidationData.iloc[test_index]
-
-            # save the current model configuration as a sanity check
-            currentModelConfigPickle = os.path.join(currentValOutputFolder, 'parameters.pkl')
-            with open(currentModelConfigPickle, 'wb') as handle:
-                pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             parallel_compute_command = parameters['parallel_compute_command']
 
