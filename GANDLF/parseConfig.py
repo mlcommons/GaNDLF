@@ -166,11 +166,18 @@ def parseConfig(config_file_path):
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
 
   if 'kcross_validation' in params:
-    kfolds = int(params['kcross_validation'])
-  else:
+    sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
+
+  if not params['nested_training']:
+    sys.exit('The parameter \'nested_training\' needs to be defined')
+  if not params['nested_training']['holdout']:
     kfolds = -10
-    print('Using default kcross_validation: ', kfolds)
-  params['kfolds'] = kfolds
+    print('Using default folds for holdout split: ', kfolds)
+    params['nested_training']['holdout']
+  if not params['nested_training']['validation']:
+    kfolds = -10
+    print('Using default folds for validation split: ', kfolds)
+    params['nested_training']['validation']
 
   # Setting default values to the params
   if 'scheduler' in params:
