@@ -27,72 +27,106 @@ from GANDLF.training_loop import trainingLoop
 def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
     # check for single fold training
-    singleFoldTraining = False
-    if parameters['kfolds'] < 0: # if the user wants a single fold training
-        parameters['kfolds'] = abs(parameters['kfolds'])
-        singleFoldTraining = True
+    singleFoldValidation = False
+    singleFoldHoldout = False    
 
-    kf = KFold(n_splits=parameters['kfolds']) # initialize the kfold structure
+    if parameters['nested_training']['holdout'] < 0: # if the user wants a single fold training
+        parameters['nested_training']['holdout'] = abs(parameters['nested_training']['holdout'])
+        singleFoldHoldout = True
 
-    currentFold = 0
+    if parameters['nested_training']['validation'] < 0: # if the user wants a single fold training
+        parameters['nested_training']['validation'] = abs(parameters['nested_training']['validation'])
+        singleFoldValidation = True
+
+    # initialize the kfold structures
+    kf_holdout = KFold(n_splits=parameters['nested_training']['holdout']) 
+    kf_validation = KFold(n_splits=parameters['nested_training']['validation'])
+
+    currentHoldoutFold = 0
+    currentValidationFold = 0
 
     # get the indeces for kfold splitting
     trainingData_full = dataframe
     training_indeces_full = list(trainingData_full.index.values)
 
     # start the kFold train
-    for train_index, test_index in kf.split(training_indeces_full):
+    for trainAndVal_index, holdout_index in kf_holdout.split(training_indeces_full): # perform holdout split
+
+        trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
+        holdoutData = trainingData_full.iloc[holdout_index]
 
         # the output of the current fold is only needed if multi-fold training is happening
-        if singleFoldTraining:
+        if singleFoldHoldout:
             currentOutputFolder = outputDir
         else:
-            currentOutputFolder = os.path.join(outputDir, str(currentFold))
+            currentOutputFolder = os.path.join(outputDir, 'holdout_' + str(currentHoldoutFold))
             Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
-
-        trainingData = trainingData_full.iloc[train_index]
-        validationData = trainingData_full.iloc[test_index]
 
         # save the current model configuration as a sanity check
         currentModelConfigPickle = os.path.join(currentOutputFolder, 'parameters.pkl')
         with open(currentModelConfigPickle, 'wb') as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        parallel_compute_command = parameters['parallel_compute_command']
+        # save the current training+validation and holdout datasets 
+        currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
+        currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
+        trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
+        holdoutData.to_pickle(currentHoldoutDataPickle)
 
-        if (not parallel_compute_command) or (singleFoldTraining): # parallel_compute_command is an empty string, thus no parallel computing requested
-            trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData,
-                         headers = headers, outputDir=currentOutputFolder,
-                         device=device, parameters=parameters)
+        current_training_indeces_full = list(trainingAndValidationData.index.values)
 
-        else:
-            # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-            ## pickle/unpickle data
-            # pickle the data
-            currentTrainingDataPickle = os.path.join(currentOutputFolder, 'train.pkl')
-            currentValidataionDataPickle = os.path.join(currentOutputFolder, 'validation.pkl')
-            trainingData.to_pickle(currentTrainingDataPickle)
-            validationData.to_pickle(currentValidataionDataPickle)
+        for train_index, test_index in kf_validation.split(training_indeces_full):
 
-            headersPickle = os.path.join(currentOutputFolder,'headers.pkl')
-            with open(headersPickle, 'wb') as handle:
-                    pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # the output of the current fold is only needed if multi-fold training is happening
+            if singleFoldValidation:
+                currentValOutputFolder = currentOutputFolder
+            else:
+                currentValOutputFolder = os.path.join(outputDir, str(currentValidationFold))
+                Path(currentValOutputFolder).mkdir(parents=True, exist_ok=True)
 
-            # call qsub here
-            parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentOutputFolder)
-            
-            if not('python' in parallel_compute_command_actual):
-                sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
+            trainingData = trainingAndValidationData.iloc[train_index]
+            validationData = trainingAndValidationData.iloc[test_index]
 
-            command = parallel_compute_command_actual + \
-                    ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
-                    ' -val_loader_pickle ' + currentValidataionDataPickle + \
-                    ' -parameter_pickle ' + currentModelConfigPickle + \
-                    ' -headers_pickle ' + headersPickle + \
-                    ' -device ' + str(device) + ' -outputDir ' + currentOutputFolder
-            
-            subprocess.Popen(command, shell=True).wait()
+            # save the current model configuration as a sanity check
+            currentModelConfigPickle = os.path.join(currentValOutputFolder, 'parameters.pkl')
+            with open(currentModelConfigPickle, 'wb') as handle:
+                pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        if singleFoldTraining:
-            break
-        currentFold = currentFold + 1 # increment the fold
+            parallel_compute_command = parameters['parallel_compute_command']
+
+            if (not parallel_compute_command) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
+                trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData,
+                            headers = headers, outputDir=currentValOutputFolder,
+                            device=device, parameters=parameters)
+
+            else:
+                # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+                ## pickle/unpickle data
+                # pickle the data
+                currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
+                currentValidataionDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
+                trainingData.to_pickle(currentTrainingDataPickle)
+                validationData.to_pickle(currentValidataionDataPickle)
+
+                headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
+                with open(headersPickle, 'wb') as handle:
+                        pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+                # call qsub here
+                parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentValOutputFolder)
+                
+                if not('python' in parallel_compute_command_actual):
+                    sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
+
+                command = parallel_compute_command_actual + \
+                        ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
+                        ' -val_loader_pickle ' + currentValidataionDataPickle + \
+                        ' -parameter_pickle ' + currentModelConfigPickle + \
+                        ' -headers_pickle ' + headersPickle + \
+                        ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder
+                
+                subprocess.Popen(command, shell=True).wait()
+
+            if singleFoldValidation:
+                break
+            currentValidationFold = currentValidationFold + 1 # increment the fold
