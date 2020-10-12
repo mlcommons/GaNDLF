@@ -1,6 +1,6 @@
 ## 0.0.4
 
-- 
+- Nested cross-validation added
 
 ## 0.0.3 
 
