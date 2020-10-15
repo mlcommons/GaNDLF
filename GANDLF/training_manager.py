@@ -82,8 +82,9 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
         with open(currentTrainingAndValidataionDataPickle, 'wb') as handle:
             pickle.dump(trainingAndValidationData, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        with open(currentHoldoutDataPickle, 'wb') as handle:
-            pickle.dump(holdoutData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        if holdoutData is not None:
+            with open(currentHoldoutDataPickle, 'wb') as handle:
+                pickle.dump(holdoutData, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
