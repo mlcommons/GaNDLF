@@ -85,6 +85,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         if holdoutData is not None:
             with open(currentHoldoutDataPickle, 'wb') as handle:
                 pickle.dump(holdoutData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            print('!!! WARNING !!!')
+            print('!!! Holdout data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
+            print('!!! WARNING !!!')
 
         current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
