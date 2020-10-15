@@ -213,11 +213,20 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"w")
     log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
 
-    dice_weights = torch.zeros(len(class_list))
+    # initialize without considering background
+    dice_weights = torch.zeros(n_classList - 1) # average for "weighted averaging"
+    dice_penalty = torch.zeros(n_classList - 1) # penalty for misclassification
     # get the weights for use for dice loss
     for batch_idx, (subject) in enumerate(train_loader): # iterate through full training data
         # accumulate dice weights for each label
-        test =1
+        mask = subject['label'][torchio.DATA]
+        one_hot_mask = one_hot(mask, class_list)
+        for i in range(1, n_classList):
+            currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:])
+            dice_weights[i] = dice_weights[i] + currentNumber
+    
+    total_nonZeroVoxels = torch.sum(dice_penalty)
+    dice_weights = torch.div(dice_weights, total_nonZeroVoxels) # this can be used for weighted averaging
 
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
