@@ -80,8 +80,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         # save the current training+validation and holdout datasets 
         currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
         currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
-        trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
-        holdoutData.to_pickle(currentHoldoutDataPickle)
+        with open(currentTrainingAndValidataionDataPickle, 'wb') as handle:
+            pickle.dump(trainingAndValidationData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(currentHoldoutDataPickle, 'wb') as handle:
+            pickle.dump(holdoutData, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
@@ -111,12 +113,14 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 # pickle the data
                 currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
                 currentValidataionDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
-                trainingData.to_pickle(currentTrainingDataPickle)
-                validationData.to_pickle(currentValidataionDataPickle)
+                with open(currentTrainingDataPickle, 'wb') as handle:
+                    pickle.dump(trainingData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                with open(currentValidataionDataPickle, 'wb') as handle:
+                    pickle.dump(validationData, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
                 with open(headersPickle, 'wb') as handle:
-                        pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 # call qsub here
                 parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentValOutputFolder)
@@ -125,11 +129,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                     sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
 
                 command = parallel_compute_command_actual + \
-                        ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
-                        ' -val_loader_pickle ' + currentValidataionDataPickle + \
-                        ' -parameter_pickle ' + currentModelConfigPickle + \
-                        ' -headers_pickle ' + headersPickle + \
-                        ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder
+                    ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
+                    ' -val_loader_pickle ' + currentValidataionDataPickle + \
+                    ' -parameter_pickle ' + currentModelConfigPickle + \
+                    ' -headers_pickle ' + headersPickle + \
+                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder
                 
                 subprocess.Popen(command, shell=True).wait()
 
