@@ -223,7 +223,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         one_hot_mask = one_hot(mask, class_list)
         for i in range(1, n_classList):
             currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:])
-            dice_weights[i] = dice_weights[i] + currentNumber
+            dice_weights[i-1] = dice_weights[i-1] + currentNumber
     
     total_nonZeroVoxels = torch.sum(dice_penalty)
     dice_weights = torch.div(dice_weights, total_nonZeroVoxels) # this can be used for weighted averaging
