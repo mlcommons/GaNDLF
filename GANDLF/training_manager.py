@@ -83,13 +83,13 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             print('!!! WARNING !!!')
             print('!!! Holdout data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
             print('!!! WARNING !!!')
+            current_training_indeces_full = trainingAndValidationData # using the new indeces for validation training
         else:
             currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
             currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
             trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
             holdoutData.to_pickle(currentHoldoutDataPickle)
-
-        current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
+            current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
         # start the kFold train for validation
         for train_index, test_index in kf_validation.split(current_training_indeces_full):
