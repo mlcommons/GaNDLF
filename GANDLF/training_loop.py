@@ -212,8 +212,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     # Creating a CSV to log training loop and writing the initial columns
     log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"w")
     log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
-                                
-                                
+
+    dice_weights = torch.zeros(len(class_list))
+    # get the weights for use for dice loss
+    for batch_idx, (subject) in enumerate(train_loader): # iterate through full training data
+        # accumulate dice weights for each label
+        test =1
+
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
     channel_keys = list(batch.keys())
