@@ -225,8 +225,19 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:])
             dice_weights[i-1] = dice_weights[i-1] + currentNumber
     
-    total_nonZeroVoxels = torch.sum(dice_penalty)
+    total_nonZeroVoxels = torch.sum(dice_weights) # total number of non-zero voxels to be considered
+
+    # get the penalty values - dice_weights contains the overall number for each class in the training data
+    for i in range(len(dice_weights)):
+        penalty = 0
+        for j in range(len(dice_weights)):
+            if i != j:
+                penalty = penalty + dice_weights[j]
+        
+        dice_penalty[i] = penalty / total_nonZeroVoxels # this can be reversed, per interpretation
+    
     dice_weights = torch.div(dice_weights, total_nonZeroVoxels) # this can be used for weighted averaging
+
 
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
