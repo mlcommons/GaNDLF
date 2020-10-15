@@ -28,7 +28,8 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
     # check for single fold training
     singleFoldValidation = False
-    singleFoldHoldout = False    
+    singleFoldHoldout = False
+    noHoldoutData = False
 
     if parameters['nested_training']['holdout'] < 0: # if the user wants a single fold training
         parameters['nested_training']['holdout'] = abs(parameters['nested_training']['holdout'])
@@ -37,6 +38,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
     if parameters['nested_training']['validation'] < 0: # if the user wants a single fold training
         parameters['nested_training']['validation'] = abs(parameters['nested_training']['validation'])
         singleFoldValidation = True
+
+    # this is the condition where holdout data is not to be kept
+    if parameters['nested_training']['holdout'] == 1:
+        noHoldoutData = True
+        parameters['nested_training']['holdout'] = 2 # put 2 just so that the first for-loop does not fail
 
     # initialize the kfold structures
     kf_holdout = KFold(n_splits=parameters['nested_training']['holdout']) 
@@ -53,8 +59,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
     for trainAndVal_index, holdout_index in kf_holdout.split(training_indeces_full): # perform holdout split
 
         # get the current training and holdout data
-        trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
-        holdoutData = trainingData_full.iloc[holdout_index]
+        if noHoldoutData:
+            trainingAndValidationData = training_indeces_full # don't consider the split indeces for this case
+        else:
+            trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
+            holdoutData = trainingData_full.iloc[holdout_index]
 
         # the output of the current fold is only needed if multi-fold training is happening
         if singleFoldHoldout:
