@@ -42,6 +42,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
     # this is the condition where holdout data is not to be kept
     if parameters['nested_training']['holdout'] == 1:
         noHoldoutData = True
+        singleFoldHoldout = True
         parameters['nested_training']['holdout'] = 2 # put 2 just so that the first for-loop does not fail
 
     # initialize the kfold structures
