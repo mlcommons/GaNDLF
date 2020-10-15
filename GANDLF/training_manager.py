@@ -79,17 +79,15 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # save the current training+validation and holdout datasets 
-        currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
-        currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
-        with open(currentTrainingAndValidataionDataPickle, 'wb') as handle:
-            pickle.dump(trainingAndValidationData, handle, protocol=pickle.HIGHEST_PROTOCOL)
         if noHoldoutData:
             print('!!! WARNING !!!')
             print('!!! Holdout data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
             print('!!! WARNING !!!')
         else:
-            with open(currentHoldoutDataPickle, 'wb') as handle:
-                pickle.dump(holdoutData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
+            currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
+            trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
+            holdoutData.to_pickle(currentHoldoutDataPickle)
 
         current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
@@ -119,10 +117,8 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 # pickle the data
                 currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
                 currentValidataionDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
-                with open(currentTrainingDataPickle, 'wb') as handle:
-                    pickle.dump(trainingData, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                with open(currentValidataionDataPickle, 'wb') as handle:
-                    pickle.dump(validationData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                trainingData.to_pickle(currentTrainingDataPickle)
+                validationData.to_pickle(currentValidataionDataPickle)
 
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
                 with open(headersPickle, 'wb') as handle:
