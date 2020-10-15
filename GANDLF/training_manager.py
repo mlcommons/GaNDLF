@@ -61,7 +61,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
         # get the current training and holdout data
         if noHoldoutData:
-            trainingAndValidationData = training_indeces_full # don't consider the split indeces for this case
+            trainingAndValidationData = trainingData_full # don't consider the split indeces for this case
         else:
             trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
             holdoutData = trainingData_full.iloc[holdout_index]
