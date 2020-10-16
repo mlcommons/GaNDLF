@@ -296,7 +296,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                     if MSE_requested:
                         loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), dice_penalty_dict, n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
@@ -304,7 +304,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 if MSE_requested:
                     loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), dice_penalty_dict, n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -320,7 +320,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
+            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList, dice_penalty_dict).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
             #Computing the total dice
             total_dice += curr_dice
             # update scale for next iteration
@@ -362,10 +362,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 # one_hot_mask = one_hot_mask.unsqueeze(0)
                 # making sure that the output and mask are on the same device
                 output, one_hot_mask = output.to(device), one_hot_mask.to(device)
-                loss = loss_fn(output.double(), one_hot_mask.double(),n_classList).cpu().data.item()
+                loss = loss_fn(output.double(), one_hot_mask.double(),n_classList, dice_penalty_dict).cpu().data.item()
                 total_loss += loss
                 #Computing the dice score 
-                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
+                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
                 #Computing the total dice
                 total_dice+= curr_dice
 
