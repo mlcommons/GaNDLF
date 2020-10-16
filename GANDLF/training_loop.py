@@ -306,10 +306,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             best_tr_idx = ep
             best_tr_dice = average_dice
 
-        print("Epoch Training dice:" , average_dice) 
-        print("Best Training Dice:", best_tr_dice)
-        print("Average Training Loss:", average_loss)
-        print("Best Training Epoch: ",best_tr_idx)
+        print("Ep Train DCE: %s Best Train DCE: %s Avg Train Loss: %s Best Train Ep"%(average_train_dice, best_train_dice, average_train_loss, best_train_idx)) 
         total_dice = 0
         total_loss = 0
 
@@ -354,11 +351,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             patience_count = patience_count + 1 
         
         
-        
-        print("Epoch Validation dice:" , average_dice) 
-        print("Best Validation Dice:", best_val_dice)
-        print("Average Validation Loss:", average_loss)
-        print("Best Validation Epoch: ",best_val_idx)
+        print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
