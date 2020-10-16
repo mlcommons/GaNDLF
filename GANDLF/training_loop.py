@@ -215,7 +215,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     total_train_dice = 0
     patience_count = 0
     # Creating a CSV to log training loop and writing the initial columns
-    log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"w")
+    log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
+    log_train = open(log_train_file,"w")
     log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
     log_train.close()
                                 
@@ -374,7 +375,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Time for epoch:",(stop - start)/60,"mins")        
 
         sys.stdout.flush()
-        log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"a")
+        log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
         log_train.close()
         total_test_dice = 0
