@@ -33,7 +33,7 @@ from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, device, parameters, outputDir):
+def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
     '''
     This is the main training loop
     '''
@@ -396,6 +396,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
+    parser.add_argument('-holdout_loader_pickle', type=str, help = 'Holdout loader pickle', required=True)
     parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-headers_pickle', type=str, help = 'Header pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
@@ -408,10 +409,14 @@ if __name__ == "__main__":
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
+    holdoutDataFromPickle = pd.read_pickle(args.holdout_loader_pickle)
+    if holdout_loader_pickle == 'None':
+        holdout_loader_pickle = None
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
                  validataionDataFromPickle=validataionDataFromPickle, 
                  headers = headers,  
                  parameters=parameters,
                  outputDir=args.outputDir,
-                 device=args.device,)
+                 device=args.device,
+                 holdoutDataFromPickle=holdoutDataFromPickle,)
