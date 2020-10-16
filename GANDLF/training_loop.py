@@ -356,7 +356,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             else:
                 scheduler_lr.step()
 
-
         # Saving the current model
         torch.save({"epoch": ep,
                     "model_state_dict": model.state_dict(),
@@ -368,8 +367,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
             break
         
-
-
         stop = time.time()     
         print("Time for epoch:",(stop - start)/60,"mins")        
 
