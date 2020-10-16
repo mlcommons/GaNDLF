@@ -12,20 +12,12 @@ def dice_loss(inp, target):
     return 1 - ((2. * intersection + smooth) /
                 (iflat.sum() + tflat.sum() + smooth))
 
-def MCD_loss(pm, gt, num_class):
+def MCD_loss(pm, gt, num_class, weights): 
     acc_dice_loss = 0
     for i in range(1, num_class):
-        acc_dice_loss += dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        acc_dice_loss += dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:]) * weights[i]
     acc_dice_loss /= (num_class-1)
     return acc_dice_loss
-
-## weighted multi-class dice - needs to be replicated for all multi-class losses
-# def MCD_loss(pm, gt, num_class, weights): 
-#     acc_dice_loss = 0
-#     for i in range(1, num_class):
-#         acc_dice_loss += dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:]) * weights[i]
-#     acc_dice_loss /= (num_class-1)
-#     return acc_dice_loss
 
 def dice(out, target):
     smooth = 1e-7
@@ -34,8 +26,8 @@ def dice(out, target):
     intersection = (oflat * tflat).sum()
     return (2*intersection+smooth)/(oflat.sum()+tflat.sum()+smooth)
 
-def MCD(pm, gt, num_class):
-    return  1 - MCD_loss(pm, gt, num_class)
+def MCD(pm, gt, num_class, weights):
+    return  1 - MCD_loss(pm, gt, num_class, weights)
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
@@ -43,15 +35,15 @@ def CE(out,target):
     loss = torch.dot(-torch.log(oflat), tflat)/tflat.sum()
     return loss
 
-def CCE(out, target, num_class):
+def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
     for i in range(1, num_class):
-        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:])
+        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
     acc_ce_loss /= (num_class-1)
     return acc_ce_loss
         
-def DCCE(out,target, n_classes):
-    l = MCD_loss(out,target, n_classes) + CCE(out, target,n_classes)
+def DCCE(out,target, n_classes, weights):
+    l = MCD_loss(out,target, n_classes, weights) + CCE(out, target,n_classes, weights)
     return l
 
 
@@ -76,10 +68,10 @@ def tversky_loss(inp, target, alpha):
     return 1 - ((intersection+smooth)/denominator)
 
 
-def MCT_loss(inp, target, num_class):
+def MCT_loss(inp, target, num_class, weights):
     acc_tv_loss = 0
     for i in range(1, num_class):
-        acc_tv_loss += TV_loss(inp[:,i,:,:,:], target[:,i,:,:,:])
+        acc_tv_loss += TV_loss(inp[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
     acc_tv_loss /= (num_class-1)
     return acc_tv_loss
 
@@ -89,9 +81,9 @@ def MSE(inp, target, reduction = 'mean'):
     l = MSELoss(inp, target, reduction = reduction) # for reductions options, see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
     return l
 
-def MSE_loss(inp, target, num_classes, reduction = 'mean'):
+def MSE_loss(inp, target, num_classes, weights,  reduction = 'mean'):
     acc_mse_loss = 0
-    for i in range(0, num_classes):
-        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
+    for i in range(1, num_classes):
+        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction) * weights[i]
     acc_mse_loss/=num_classes
     return acc_mse_loss
