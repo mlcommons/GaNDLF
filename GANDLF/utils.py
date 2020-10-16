@@ -1,6 +1,8 @@
 import numpy as np
 import SimpleITK as sitk
 import torch
+from losses import *
+import torchio
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
@@ -73,6 +75,6 @@ def test(model,loader,psize,channel_keys,class_list,loss_fn):
             curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
             #Computing the total dice
             total_dice+= curr_dice
-            print("Current Dice is: ", curr_dice)
+            #print("Current Dice is: ", curr_dice)
         return total_dice, total_loss
 
