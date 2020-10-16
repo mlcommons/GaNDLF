@@ -1,6 +1,5 @@
 import os
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
-
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
