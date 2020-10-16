@@ -81,9 +81,9 @@ def MSE(inp, target, reduction = 'mean'):
     l = MSELoss(inp, target, reduction = reduction) # for reductions options, see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
     return l
 
-def MSE_loss(inp, target, num_classes, weights,  reduction = 'mean'):
+def MSE_loss(inp, target, num_classes, reduction = 'mean'):
     acc_mse_loss = 0
     for i in range(1, num_classes):
-        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction) * weights[i]
+        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
     acc_mse_loss/=num_classes
     return acc_mse_loss
