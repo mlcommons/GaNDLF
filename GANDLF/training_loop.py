@@ -24,6 +24,7 @@ from pathlib import Path
 import argparse
 import datetime
 import SimpleITK as sitk
+from utils import test
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
