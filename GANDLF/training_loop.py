@@ -64,9 +64,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
-
+    inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
+    
+    
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
+    inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # sanity check
     if n_channels == 0:
@@ -298,11 +302,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             if scheduler == "triangular":
                 scheduler_lr.step()
 
-        average_dice = total_dice/len(train_loader.dataset)
-        average_loss = total_loss/len(train_loader.dataset)
-        log_train.write(str(ep) + "," + str(average_loss) + "," + str(average_dice) + ",")
+        average_train_dice = total_dice/len(train_loader.dataset)
+        average_train_loss = total_loss/len(train_loader.dataset)
                                
-        if average_dice > best_tr_dice:
+        if average_train_dice > best_tr_dice:
             best_tr_idx = ep
             best_tr_dice = average_dice
 
@@ -311,34 +314,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         total_loss = 0
 
         # Now we enter the evaluation/validation part of the epoch        
-        model.eval()                
-        # batch_iterator_val = iter(val_loader)
-        for batch_idx, (subject) in enumerate(val_loader):
-            with torch.no_grad():                
-                image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-                mask = subject['label'][torchio.DATA] # get the label image
-                image, mask = image.to(device), mask.to(device)
-                output = model(image.float())
-                # one hot encoding the mask 
-                #mask = one_hot(mask.cpu().float().numpy(), class_list)
-                one_hot_mask = one_hot(mask, class_list)
-                #mask = torch.from_numpy(mask)
-                # one_hot_mask = one_hot_mask.unsqueeze(0)
-                # making sure that the output and mask are on the same device
-                output, one_hot_mask = output.to(device), one_hot_mask.to(device)
-                loss = loss_fn(output.double(), one_hot_mask.double(),n_classList).cpu().data.item()
-                total_loss += loss
-                #Computing the dice score 
-                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
-                #Computing the total dice
-                total_dice+= curr_dice
-
+        total_val_dice, total_val_loss = test(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
         # torch.cuda.empty_cache()
         #Computing the average dice
-        average_dice = total_dice/len(val_loader.dataset)
+        average_val_dice = total_val_dice/len(val_loader.dataset)
         # Computing the average loss
-        average_loss = total_loss/len(val_loader.dataset)
-        log_train.write(str(average_loss) + "," + str(average_dice) + "\n")
+        average_val_loss = total_val_loss/len(val_loader.dataset)
+
         if average_dice > best_val_dice:
             best_val_idx = ep
             best_val_dice = average_dice
@@ -352,6 +334,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         
         
         print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
+        
+        total_test_dice, total_test_loss = test(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        average_test_dice = total_test_dice/len(inference_loader.dataset)
+        average_test_loss = total_test_loss/len(inference_loader.dataset)
+
+        
+        
+        
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
