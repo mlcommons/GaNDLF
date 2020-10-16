@@ -62,6 +62,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         # get the current training and holdout data
         if noHoldoutData:
             trainingAndValidationData = trainingData_full # don't consider the split indeces for this case
+            holdoutData = None
         else:
             trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
             holdoutData = trainingData_full.iloc[holdout_index]
@@ -109,7 +110,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             if (not parallel_compute_command) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData,
                             headers = headers, outputDir=currentValOutputFolder,
-                            device=device, parameters=parameters)
+                            device=device, parameters=parameters, holdoutDataFromPickle=holdoutData)
 
             else:
                 # # write parameters to pickle - this should not change for the different folds, so keeping is independent
@@ -135,7 +136,12 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                     ' -val_loader_pickle ' + currentValidataionDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
                     ' -headers_pickle ' + headersPickle + \
-                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder
+                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -holdout_loader_pickle '
+                
+                if noHoldoutData:
+                    command = command + 'None'
+                else:
+                    command = command + currentHoldoutDataPickle
                 
                 subprocess.Popen(command, shell=True).wait()
 
