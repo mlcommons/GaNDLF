@@ -19,6 +19,14 @@ def MCD_loss(pm, gt, num_class):
     acc_dice_loss /= (num_class-1)
     return acc_dice_loss
 
+## weighted multi-class dice - needs to be replicated for all multi-class losses
+# def MCD_loss(pm, gt, num_class, weights): 
+#     acc_dice_loss = 0
+#     for i in range(1, num_class):
+#         acc_dice_loss += dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:]) * weights[i]
+#     acc_dice_loss /= (num_class-1)
+#     return acc_dice_loss
+
 def dice(out, target):
     smooth = 1e-7
     oflat = out.view(-1)
