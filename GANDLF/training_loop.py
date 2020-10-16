@@ -216,8 +216,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     # initialize without considering background
     dice_weights = torch.zeros(n_classList - 1) # average for "weighted averaging"
     dice_penalty = torch.zeros(n_classList - 1) # penalty for misclassification
+
+    # define a seaparate data loader for penalty calculations
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                               q_num_workers, q_verbose, train=False, augmentations=None, resize = parameters['resize']) 
+    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
+    
     # get the weights for use for dice loss
-    for batch_idx, (subject) in enumerate(train_loader): # iterate through full training data
+    for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
         # accumulate dice weights for each label
         mask = subject['label'][torchio.DATA]
         one_hot_mask = one_hot(mask, class_list)
