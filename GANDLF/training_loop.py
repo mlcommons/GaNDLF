@@ -217,6 +217,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     # Creating a CSV to log training loop and writing the initial columns
     log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"w")
     log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
+    log_train.close()
                                 
                                 
     # Getting the channels for training and removing all the non numeric entries from the channels
@@ -312,17 +313,16 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
         # Now we enter the evaluation/validation part of the epoch        
         model.eval()
+
+        # validation data scores
         total_val_dice, total_val_loss = test(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
         average_val_dice = total_val_dice/len(val_loader.dataset)
         average_val_loss = total_val_loss/len(val_loader.dataset)
 
-
+        # testing data scores
         total_test_dice, total_test_loss = test(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
         average_test_dice = total_test_dice/len(inference_loader.dataset)
         average_test_loss = total_test_loss/len(inference_loader.dataset)
-
-
-
 
         if average_val_dice > best_val_dice:
             best_val_idx = ep
@@ -374,15 +374,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Time for epoch:",(stop - start)/60,"mins")        
 
         sys.stdout.flush()
+        log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
+        log_train.close()
         total_test_dice = 0
         total_test_loss = 0
         total_train_dice = 0
         total_train_loss = 0
         total_val_dice = 0
         total_val_loss = 0
-    # Closing the log file
-    log_train.close()
 
 if __name__ == "__main__":
 
