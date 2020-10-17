@@ -236,7 +236,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     for ep in range(num_epochs):
         start = time.time()
         print("\n")
-        print("Ep# %s | LR: %s | Start: %s "%(str(ep), str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
+        print("Ep# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             # uncomment line to debug memory issues
