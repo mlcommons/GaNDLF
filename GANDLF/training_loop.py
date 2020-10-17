@@ -63,13 +63,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
-    # inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-    #                                         q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
+    inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
     
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
-    # inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
+    inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # sanity check
     if n_channels == 0:
@@ -319,10 +319,20 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         average_val_dice = total_val_dice/len(val_loader.dataset)
         average_val_loss = total_val_loss/len(val_loader.dataset)
 
-        # # testing data scores
-        # total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
-        # average_test_dice = total_test_dice/len(inference_loader.dataset)
-        # average_test_loss = total_test_loss/len(inference_loader.dataset)
+        # testing data scores
+        total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        average_test_dice = total_test_dice/len(inference_loader.dataset)
+        average_test_loss = total_test_loss/len(inference_loader.dataset)
+        
+        if average_test_dice > best_test_dice:
+            best_test_idx = ep
+            best_test_dice = average_test_dice
+            best_test_val_dice = average_test_dice
+            # We can add more stuff to be saved if we need anything more
+            torch.save({"epoch": best_test_idx,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
         if average_val_dice > best_val_dice:
             best_val_idx = ep
