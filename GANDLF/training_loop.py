@@ -248,11 +248,11 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             mask = subject['label'][torchio.DATA] # get the label image
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
-            mask = one_hot(mask, class_list)
+            one_hot_mask = one_hot(mask, class_list)
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
+            image, one_hot_mask = image.float().to(device), one_hot_mask.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -260,7 +260,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # might help solve OOM
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
-            output = model(image_gpu)
+            output = model(image)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
@@ -275,7 +275,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 if MSE_requested:
                     loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), mask.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -284,7 +284,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList).cpu().data.item()
+            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item()
             #print(curr_dice)
             #Computng the total dice
             total_train_dice += curr_dice
@@ -295,8 +295,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()            
-            print(curr_dice)
-            break
+            #print(curr_dice)
 
         average_train_dice = total_train_dice/len(train_loader.dataset)
         average_train_loss = total_train_loss/len(train_loader.dataset)
@@ -335,7 +334,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
+        print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep: %s"%(str(average_val_dice), str(best_val_dice), str(average_val_loss), str(best_val_idx))) 
         print("Best Test Dice w.r.t val model: ", best_test_val_dice )
 
         # if average_test_dice > best_test_dice:
@@ -372,7 +371,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
-        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
+        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "\n")
         log_train.close()
         total_test_dice = 0
         total_test_loss = 0
