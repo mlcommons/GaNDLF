@@ -1,6 +1,5 @@
 import os
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
-
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
@@ -24,6 +23,7 @@ from pathlib import Path
 import argparse
 import datetime
 import SimpleITK as sitk
+from utils import test
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
@@ -63,9 +63,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
-
+    # inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+    #                                         q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
+    
+    
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
+    # inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # sanity check
     if n_channels == 0:
@@ -204,14 +208,16 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
     best_val_dice = -1
-    best_tr_dice = -1
-    total_loss = 0
-    total_dice = 0
-    best_idx = 0
+    best_train_dice = -1
+    best_test_dice = -1
+    total_train_loss = 0
+    total_train_dice = 0
     patience_count = 0
     # Creating a CSV to log training loop and writing the initial columns
-    log_train = open(os.path.join(outputDir,"trainingScores_log.csv"),"w")
-    log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
+    log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
+    log_train = open(log_train_file,"w")
+    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice\n")
+    log_train.close()
                                 
                                 
     # Getting the channels for training and removing all the non numeric entries from the channels
@@ -231,9 +237,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     for ep in range(num_epochs):
         start = time.time()
         print("\n")
-        print("Epoch Started at:", datetime.datetime.now())
-        print("Epoch # : ",ep)
-        print("Learning rate:", optimizer.param_groups[0]['lr'])
+        print("Ep # %s LR: %s Start: %s "%(str(ep), str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             # uncomment line to debug memory issues
@@ -249,7 +253,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
+            image, mask = image.float().cuda(), mask.cuda()
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -257,7 +261,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # might help solve OOM
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
-            output = model(image_gpu)
+            output = model(image)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
@@ -276,118 +280,106 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 loss.backward()
                 optimizer.step()
                            
-            ### gradient clipping
-            # # Unscales the gradients of optimizer's assigned params in-place
-            # scaler.unscale_(optimizer) - do we need this??
-            # # Since the gradients of optimizer's assigned params are unscaled, clips as usual:
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm) - do we need this??
-            ### gradient clipping
-            #Updating the weight values
             #Pushing the dice to the cpu and only taking its value
             curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
-            total_loss += curr_loss
+            total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
-            #Computing the total dice
-            total_dice += curr_dice
+            curr_dice = MCD(output.double(), mask.double(), n_classList).cpu().data.item()
+            #print(curr_dice)
+            #Computng the total dice
+            total_train_dice += curr_dice
             # update scale for next iteration
             if amp:
                 scaler.update() 
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             # torch.cuda.empty_cache()
             if scheduler == "triangular":
-                scheduler_lr.step()
+                scheduler_lr.step()            
 
-        average_dice = total_dice/len(train_loader.dataset)
-        average_loss = total_loss/len(train_loader.dataset)
-        log_train.write(str(ep) + "," + str(average_loss) + "," + str(average_dice) + ",")
+
+        average_train_dice = total_train_dice/len(train_loader.dataset)
+        average_train_loss = total_train_loss/len(train_loader.dataset)
                                
-        if average_dice > best_tr_dice:
-            best_tr_idx = ep
-            best_tr_dice = average_dice
+        if average_train_dice > best_train_dice:
+            best_train_idx = ep
+            best_train_dice = average_train_dice
+            torch.save({"epoch": best_train_idx,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
 
-        print("Epoch Training dice:" , average_dice) 
-        print("Best Training Dice:", best_tr_dice)
-        print("Average Training Loss:", average_loss)
-        print("Best Training Epoch: ",best_tr_idx)
-        total_dice = 0
-        total_loss = 0
+        print("Ep Train DCE: %s Best Train DCE: %s Avg Train Loss: %s Best Train Ep"%(average_train_dice, best_train_dice, average_train_loss, best_train_idx)) 
 
         # Now we enter the evaluation/validation part of the epoch        
-        model.eval()                
-        # batch_iterator_val = iter(val_loader)
-        for batch_idx, (subject) in enumerate(val_loader):
-            with torch.no_grad():                
-                image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-                mask = subject['label'][torchio.DATA] # get the label image
-                image, mask = image.to(device), mask.to(device)
-                output = model(image.float())
-                # one hot encoding the mask 
-                #mask = one_hot(mask.cpu().float().numpy(), class_list)
-                one_hot_mask = one_hot(mask, class_list)
-                #mask = torch.from_numpy(mask)
-                # one_hot_mask = one_hot_mask.unsqueeze(0)
-                # making sure that the output and mask are on the same device
-                output, one_hot_mask = output.to(device), one_hot_mask.to(device)
-                loss = loss_fn(output.double(), one_hot_mask.double(),n_classList).cpu().data.item()
-                total_loss += loss
-                #Computing the dice score 
-                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
-                #Computing the total dice
-                total_dice+= curr_dice
+        model.eval()
 
-        # torch.cuda.empty_cache()
-        #Computing the average dice
-        average_dice = total_dice/len(val_loader.dataset)
-        # Computing the average loss
-        average_loss = total_loss/len(val_loader.dataset)
-        log_train.write(str(average_loss) + "," + str(average_dice) + "\n")
-        if average_dice > best_val_dice:
+        # validation data scores
+        total_val_dice, total_val_loss = get_stats(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
+        average_val_dice = total_val_dice/len(val_loader.dataset)
+        average_val_loss = total_val_loss/len(val_loader.dataset)
+
+        # # testing data scores
+        # total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        # average_test_dice = total_test_dice/len(inference_loader.dataset)
+        # average_test_loss = total_test_loss/len(inference_loader.dataset)
+
+        if average_val_dice > best_val_dice:
             best_val_idx = ep
-            best_val_dice = average_dice
+            best_val_dice = average_val_dice
+            best_test_val_dice = average_val_dice
             # We can add more stuff to be saved if we need anything more
             torch.save({"epoch": best_val_idx,
                         "model_state_dict": model.state_dict(),
                         "optimizer_state_dict": optimizer.state_dict(),
-                        "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best.pth.tar"))
+                        "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        
-        
-        
-        print("Epoch Validation dice:" , average_dice) 
-        print("Best Validation Dice:", best_val_dice)
-        print("Average Validation Loss:", average_loss)
-        print("Best Validation Epoch: ",best_val_idx)
+        print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
+        print("Best Test Dice w.r.t val model: ", best_test_val_dice )
+
+        if average_test_dice > best_test_dice:
+            best_test_dice = average_test_dice
+            best_test_idx = ep 
+            torch.save({"epoch": best_test_idx,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        print("Epoch Test dice:" , average_test_dice)
+        print("Best Test Dice:", best_test_dice)
+
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
             if scheduler == "reduce-on-plateau":
-                scheduler_lr.step(average_loss)
+                scheduler_lr.step(average_val_loss)
             else:
                 scheduler_lr.step()
 
-        total_dice = 0
-        total_loss = 0
-         # Saving the current model
+        # Saving the current model
         torch.save({"epoch": ep,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict(),
-                    "val_dice": average_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
+                    "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         # Checking if patience is crossed
         if patience_count > patience:
             print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
             break
         
-
-
         stop = time.time()     
         print("Time for epoch:",(stop - start)/60,"mins")        
+
         sys.stdout.flush()
-    # Closing the log file
-    log_train.close()
+        log_train = open(log_train_file, "a")
+        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
+        log_train.close()
+        total_test_dice = 0
+        total_test_loss = 0
+        total_train_dice = 0
+        total_train_loss = 0
+        total_val_dice = 0
+        total_val_loss = 0
 
 if __name__ == "__main__":
 
