@@ -315,12 +315,12 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         model.eval()
 
         # validation data scores
-        total_val_dice, total_val_loss = test(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
+        total_val_dice, total_val_loss = get_stats(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
         average_val_dice = total_val_dice/len(val_loader.dataset)
         average_val_loss = total_val_loss/len(val_loader.dataset)
 
         # # testing data scores
-        # total_test_dice, total_test_loss = test(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        # total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
         # average_test_dice = total_test_dice/len(inference_loader.dataset)
         # average_test_loss = total_test_loss/len(inference_loader.dataset)
 
