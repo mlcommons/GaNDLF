@@ -1,7 +1,7 @@
 import numpy as np
 import SimpleITK as sitk
 import torch
-from losses import *
+from GANDLF.losses import *
 import torchio
 
 def one_hot(segmask_array, class_list):

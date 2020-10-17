@@ -23,7 +23,6 @@ from pathlib import Path
 import argparse
 import datetime
 import SimpleITK as sitk
-from utils import test
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
@@ -58,7 +57,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
-
+    holdoutDataFromPickle = pd.read_csv("./csvs/test_e1.csv")
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
@@ -249,7 +248,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             mask = subject['label'][torchio.DATA] # get the label image
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
-            one_hot_mask = one_hot(mask, class_list)
+            mask = one_hot(mask, class_list)
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
@@ -266,17 +265,17 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
                     if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                        loss = loss_fn(output.double(), mask.double(), n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                    loss = loss_fn(output.double(), mask.double(), n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -296,7 +295,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()            
-
+            print(curr_dice)
+            break
 
         average_train_dice = total_train_dice/len(train_loader.dataset)
         average_train_loss = total_train_loss/len(train_loader.dataset)
@@ -309,7 +309,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             "optimizer_state_dict": optimizer.state_dict(),
             "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
 
-        print("Ep Train DCE: %s Best Train DCE: %s Avg Train Loss: %s Best Train Ep"%(average_train_dice, best_train_dice, average_train_loss, best_train_idx)) 
+        print("Ep Train DCE: %s Best Train DCE: %s Avg Train Loss: %s Best Train Ep %s"%(str(average_train_dice), str(best_train_dice), str(average_train_loss), str(best_train_idx)))
 
         # Now we enter the evaluation/validation part of the epoch        
         model.eval()
