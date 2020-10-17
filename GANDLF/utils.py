@@ -1,8 +1,8 @@
 import numpy as np
 import SimpleITK as sitk
 import torch
-from losses import *
 import torchio
+from GANDLF.losses import *
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
