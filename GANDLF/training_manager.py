@@ -99,7 +99,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             if singleFoldValidation:
                 currentValOutputFolder = currentOutputFolder
             else:
-                currentValOutputFolder = os.path.join(outputDir, str(currentValidationFold))
+                currentValOutputFolder = os.path.join(currentOutputFolder, str(currentValidationFold))
                 Path(currentValOutputFolder).mkdir(parents=True, exist_ok=True)
 
             trainingData = trainingAndValidationData.iloc[train_index]
