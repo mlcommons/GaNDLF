@@ -44,7 +44,10 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def test(model,loader,psize,channel_keys,class_list,loss_fn):
+def get_stats(model, loader, psize, channel_keys, class_list, loss_fn):
+    '''
+    This function gets various statistics from the specified model and data loader
+    '''
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0

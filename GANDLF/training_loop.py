@@ -62,13 +62,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
-    inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
+    # inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+    #                                         q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
     
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
-    inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
+    # inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # sanity check
     if n_channels == 0:
@@ -215,7 +215,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
-    log_train.write("Epoch,Train_Loss,Train_Dice, Val_Loss, Val_Dice\n")
+    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice\n")
     log_train.close()
                                 
                                 
@@ -252,7 +252,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image, mask = image.float().cuda(), mask.cuda()
+            image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -260,7 +260,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # might help solve OOM
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
-            output = model(image)
+            output = model(image_gpu)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
@@ -284,7 +284,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), mask.double(), n_classList).cpu().data.item()
+            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList).cpu().data.item()
             #print(curr_dice)
             #Computng the total dice
             total_train_dice += curr_dice
@@ -315,19 +315,19 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         model.eval()
 
         # validation data scores
-        total_val_dice, total_val_loss = test(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
+        total_val_dice, total_val_loss = get_stats(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
         average_val_dice = total_val_dice/len(val_loader.dataset)
         average_val_loss = total_val_loss/len(val_loader.dataset)
 
-        # testing data scores
-        total_test_dice, total_test_loss = test(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
-        average_test_dice = total_test_dice/len(inference_loader.dataset)
-        average_test_loss = total_test_loss/len(inference_loader.dataset)
+        # # testing data scores
+        # total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        # average_test_dice = total_test_dice/len(inference_loader.dataset)
+        # average_test_loss = total_test_loss/len(inference_loader.dataset)
 
         if average_val_dice > best_val_dice:
             best_val_idx = ep
             best_val_dice = average_val_dice
-            best_test_val_dice = average_test_dice
+            best_test_val_dice = average_val_dice
             # We can add more stuff to be saved if we need anything more
             torch.save({"epoch": best_val_idx,
                         "model_state_dict": model.state_dict(),
@@ -338,15 +338,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
         print("Best Test Dice w.r.t val model: ", best_test_val_dice )
 
-        if average_test_dice > best_test_dice:
-            best_test_dice = average_test_dice
-            best_test_idx = ep 
-            torch.save({"epoch": best_test_idx,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("Epoch Test dice:" , average_test_dice)
-        print("Best Test Dice:", best_test_dice)
+        # if average_test_dice > best_test_dice:
+        #     best_test_dice = average_test_dice
+        #     best_test_idx = ep 
+        #     torch.save({"epoch": best_test_idx,
+        #     "model_state_dict": model.state_dict(),
+        #     "optimizer_state_dict": optimizer.state_dict(),
+        #     "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        # print("Epoch Test dice:" , average_test_dice)
+        # print("Best Test Dice:", best_test_dice)
 
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
@@ -362,14 +362,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                     "optimizer_state_dict": optimizer.state_dict(),
                     "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
+        stop = time.time()     
+        print("Time for epoch: ",(stop - start)/60," mins")        
+
         # Checking if patience is crossed
         if patience_count > patience:
             print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
             break
         
-        stop = time.time()     
-        print("Time for epoch:",(stop - start)/60,"mins")        
-
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
