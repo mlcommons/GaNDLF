@@ -324,6 +324,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         average_test_dice = total_test_dice/len(inference_loader.dataset)
         average_test_loss = total_test_loss/len(inference_loader.dataset)
         
+        # stats for current holdout data
         if average_test_dice > best_test_dice:
             best_test_idx = ep
             best_test_dice = average_test_dice
@@ -333,7 +334,10 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                         "model_state_dict": model.state_dict(),
                         "optimizer_state_dict": optimizer.state_dict(),
                         "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        print("Epoch Test dice:" , average_test_dice)
+        print("Best Test Dice:", best_test_dice)
 
+        # stats for current validation data
         if average_val_dice > best_val_dice:
             best_val_idx = ep
             best_val_dice = average_val_dice
@@ -347,17 +351,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             patience_count = patience_count + 1 
         print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
         print("Best Test Dice w.r.t val model: ", best_test_val_dice )
-
-        if average_test_dice > best_test_dice:
-            best_test_dice = average_test_dice
-            best_test_idx = ep 
-            torch.save({"epoch": best_test_idx,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("Epoch Test dice:" , average_test_dice)
-        print("Best Test Dice:", best_test_dice)
-
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
