@@ -350,7 +350,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         else:
             patience_count = patience_count + 1 
         print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
-        print("Best Val Dice w.r.t val model: ", best_test_val_dice )
+        print("Best Test Dice w.r.t val model: ", best_test_val_dice )
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
@@ -365,14 +365,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                     "optimizer_state_dict": optimizer.state_dict(),
                     "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
+        stop = time.time()     
+        print("Time for epoch: ",(stop - start)/60," mins")        
+
         # Checking if patience is crossed
         if patience_count > patience:
             print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
             break
         
-        stop = time.time()     
-        print("Time for epoch:",(stop - start)/60,"mins")        
-
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
