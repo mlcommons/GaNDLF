@@ -105,9 +105,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             trainingData = trainingAndValidationData.iloc[train_index]
             validationData = trainingAndValidationData.iloc[test_index]
 
-            parallel_compute_command = parameters['parallel_compute_command']
-
-            if (not parallel_compute_command) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
+            if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData,
                             headers = headers, outputDir=currentValOutputFolder,
                             device=device, parameters=parameters, holdoutDataFromPickle=holdoutData)
@@ -126,7 +124,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                     pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 # call qsub here
-                parallel_compute_command_actual = parallel_compute_command.replace('${outputDir}', currentValOutputFolder)
+                parallel_compute_command_actual = parameters['parallel_compute_command'].replace('${outputDir}', currentValOutputFolder)
                 
                 if not('python' in parallel_compute_command_actual):
                     sys.exit('The \'parallel_compute_command_actual\' needs to have the python from the virtual environment, which is usually \'${GANDLF_dir}/venv/bin/python\'')
