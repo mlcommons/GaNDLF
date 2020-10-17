@@ -215,6 +215,6 @@ def parseConfig(config_file_path):
       parallel_compute_command = params['parallel_compute_command']
       parallel_compute_command = parallel_compute_command.replace('\'', '')
       parallel_compute_command = parallel_compute_command.replace('\"', '')
-      params['parallel_compute_command'] = parallel_compute_command
+  params['parallel_compute_command'] = parallel_compute_command
 
   return params
