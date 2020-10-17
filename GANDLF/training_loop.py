@@ -265,15 +265,15 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
                     if MSE_requested:
-                        loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), mask.double(), n_classList)
+                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
                     loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
                 loss.backward()
