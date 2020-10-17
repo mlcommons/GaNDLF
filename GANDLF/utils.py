@@ -1,7 +1,6 @@
 import numpy as np
 import SimpleITK as sitk
 import torch
-from GANDLF.losses import *
 import torchio
 from GANDLF.losses import *
 
