@@ -216,7 +216,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
-    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice\n")
+    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n")
     log_train.close()
                                 
                                 
@@ -375,7 +375,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
 
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
-        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
+        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
         total_test_dice = 0
         total_test_loss = 0
