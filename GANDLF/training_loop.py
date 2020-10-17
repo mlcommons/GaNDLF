@@ -362,14 +362,14 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                     "optimizer_state_dict": optimizer.state_dict(),
                     "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
+        stop = time.time()     
+        print("Time for epoch: ",(stop - start)/60," mins")        
+
         # Checking if patience is crossed
         if patience_count > patience:
             print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
             break
         
-        stop = time.time()     
-        print("Time for epoch:",(stop - start)/60,"mins")        
-
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_dice) + "\n")
