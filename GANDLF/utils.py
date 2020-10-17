@@ -1,6 +1,7 @@
 import numpy as np
 import SimpleITK as sitk
 import torch
+from GANDLF.losses import *
 import torchio
 from GANDLF.losses import *
 
@@ -66,10 +67,7 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn):
             pred_mask = pred_mask.unsqueeze(0)
             mask = subject['label'][torchio.DATA] # get the label image
             mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-            mask = one_hot(mask.float().numpy(), class_list)
-            #print(sum(sum(sum(sum(sum(mask[0,1]))))))
-            #print(sum(sum(sum(sum(sum(pred_mask[0,1]))))))
-            mask = torch.from_numpy(mask)
+            mask = one_hot(mask, class_list)
             # making sure that the output and mask are on the same device
             pred_mask, mask = pred_mask.cuda(), mask.cuda()
             loss = loss_fn(pred_mask.double(), mask.double(),len(class_list)).cpu().data.item()

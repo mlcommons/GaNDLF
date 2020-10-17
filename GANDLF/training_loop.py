@@ -57,7 +57,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
-
+    holdoutDataFromPickle = pd.read_csv("./csvs/test_e1.csv")
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
@@ -252,7 +252,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
+            image, one_hot_mask = image.float().to(device), one_hot_mask.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -260,22 +260,22 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # might help solve OOM
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
-            output = model(image_gpu)
+            output = model(image)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
                     if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                        loss = loss_fn(output.double(), mask.double(), n_classList)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
                 # Computing the loss
                 if MSE_requested:
-                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                    loss = loss_fn(output.double(), mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot_mask_gpu.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
                 loss.backward()
                 optimizer.step()
                            
@@ -284,7 +284,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList).cpu().data.item()
+            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item()
             #print(curr_dice)
             #Computng the total dice
             total_train_dice += curr_dice
@@ -295,7 +295,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # torch.cuda.empty_cache()
             if scheduler == "triangular":
                 scheduler_lr.step()            
-
+            #print(curr_dice)
 
         average_train_dice = total_train_dice/len(train_loader.dataset)
         average_train_loss = total_train_loss/len(train_loader.dataset)
@@ -308,7 +308,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             "optimizer_state_dict": optimizer.state_dict(),
             "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
 
-        print("Ep Train DCE: %s Best Train DCE: %s Avg Train Loss: %s Best Train Ep"%(average_train_dice, best_train_dice, average_train_loss, best_train_idx)) 
+        print("Ep Train DCE: %s Best Train DCE: %s Avg Train Loss: %s Best Train Ep %s"%(str(average_train_dice), str(best_train_dice), str(average_train_loss), str(best_train_idx)))
 
         # Now we enter the evaluation/validation part of the epoch        
         model.eval()
@@ -348,7 +348,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep"%(average_val_dice, best_val_dice, average_val_loss, best_val_idx)) 
+        print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep: %s"%(str(average_val_dice), str(best_val_dice), str(average_val_loss), str(best_val_idx))) 
         print("Best Test Dice w.r.t val model: ", best_test_val_dice )
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
