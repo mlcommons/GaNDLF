@@ -253,7 +253,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image, mask = image.float().cuda(), mask.cuda()
+            image_gpu, one_hot_mask_gpu = image.float().to(device), one_hot_mask.to(device)
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -261,7 +261,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             # might help solve OOM
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
-            output = model(image)
+            output = model(image_gpu)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
@@ -285,7 +285,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), mask.double(), n_classList).cpu().data.item()
+            curr_dice = MCD(output.double(), one_hot_mask_gpu.double(), n_classList).cpu().data.item()
             #print(curr_dice)
             #Computng the total dice
             total_train_dice += curr_dice
