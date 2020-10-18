@@ -32,7 +32,7 @@ from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, device, parameters, outputDir):
+def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
     '''
     This is the main training loop
     '''
@@ -62,13 +62,13 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
-    # inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-    #                                         q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
+    inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
     
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
-    # inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
+    inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # sanity check
     if n_channels == 0:
@@ -215,7 +215,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
-    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice\n")
+    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n")
     log_train.close()
                                 
                                 
@@ -236,7 +236,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     for ep in range(num_epochs):
         start = time.time()
         print("\n")
-        print("Ep # %s LR: %s Start: %s "%(str(ep), str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
+        print("Ep# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             # uncomment line to debug memory issues
@@ -318,11 +318,25 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         average_val_dice = total_val_dice/len(val_loader.dataset)
         average_val_loss = total_val_loss/len(val_loader.dataset)
 
-        # # testing data scores
-        # total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
-        # average_test_dice = total_test_dice/len(inference_loader.dataset)
-        # average_test_loss = total_test_loss/len(inference_loader.dataset)
+        # testing data scores
+        total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        average_test_dice = total_test_dice/len(inference_loader.dataset)
+        average_test_loss = total_test_loss/len(inference_loader.dataset)
+        
+        # stats for current holdout data
+        if average_test_dice > best_test_dice:
+            best_test_idx = ep
+            best_test_dice = average_test_dice
+            best_test_val_dice = average_test_dice
+            # We can add more stuff to be saved if we need anything more
+            torch.save({"epoch": best_test_idx,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        print("Ep Test DCE: %s Best Test DCE: %s Avg Test Loss: %s Best Test Ep"%(average_test_dice, best_test_dice, average_test_loss, best_test_idx)) 
+        print("Best Test Dice w.r.t val model: ", best_test_val_dice )
 
+        # stats for current validation data
         if average_val_dice > best_val_dice:
             best_val_idx = ep
             best_val_dice = average_val_dice
@@ -336,17 +350,6 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             patience_count = patience_count + 1 
         print("Ep Val DCE: %s Best Val DCE: %s Avg Val Loss: %s Best Val Ep: %s"%(str(average_val_dice), str(best_val_dice), str(average_val_loss), str(best_val_idx))) 
         print("Best Test Dice w.r.t val model: ", best_test_val_dice )
-
-        # if average_test_dice > best_test_dice:
-        #     best_test_dice = average_test_dice
-        #     best_test_idx = ep 
-        #     torch.save({"epoch": best_test_idx,
-        #     "model_state_dict": model.state_dict(),
-        #     "optimizer_state_dict": optimizer.state_dict(),
-        #     "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        # print("Epoch Test dice:" , average_test_dice)
-        # print("Best Test Dice:", best_test_dice)
-
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
@@ -371,7 +374,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
-        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "\n")
+        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
         total_test_dice = 0
         total_test_loss = 0
@@ -387,6 +390,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
+    parser.add_argument('-holdout_loader_pickle', type=str, help = 'Holdout loader pickle', required=True)
     parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-headers_pickle', type=str, help = 'Header pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
@@ -399,10 +403,14 @@ if __name__ == "__main__":
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
+    holdoutDataFromPickle = pd.read_pickle(args.holdout_loader_pickle)
+    if holdout_loader_pickle == 'None':
+        holdout_loader_pickle = None
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
                  validataionDataFromPickle=validataionDataFromPickle, 
                  headers = headers,  
                  parameters=parameters,
                  outputDir=args.outputDir,
-                 device=args.device,)
+                 device=args.device,
+                 holdoutDataFromPickle=holdoutDataFromPickle,)
