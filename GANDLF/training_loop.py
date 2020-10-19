@@ -400,9 +400,11 @@ if __name__ == "__main__":
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
-    holdoutDataFromPickle = pd.read_pickle(args.holdout_loader_pickle)
-    if holdoutDataFromPickle == 'None':
+    holdoutData_str = args.holdout_loader_pickle
+    if holdoutData_str == 'None'
         holdoutDataFromPickle = None
+    else:
+        holdoutDataFromPickle = pd.read_pickle(holdoutData_str)
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
                  validationDataFromPickle=validationDataFromPickle, 
