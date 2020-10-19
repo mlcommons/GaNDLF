@@ -32,7 +32,7 @@ from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
+def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
     '''
     This is the main training loop
     '''
@@ -60,7 +60,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
     holdoutDataFromPickle = pd.read_csv("./csvs/test_e1.csv")
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
-    validationDataForTorch = ImagesFromDataFrame(validataionDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+    validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
     inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
@@ -399,13 +399,13 @@ if __name__ == "__main__":
     headers = pickle.load(open(args.headers_pickle,"rb"))
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
-    validataionDataFromPickle = pd.read_pickle(args.val_loader_pickle)
+    validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
     holdoutDataFromPickle = pd.read_pickle(args.holdout_loader_pickle)
     if holdoutDataFromPickle == 'None':
         holdoutDataFromPickle = None
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
-                 validataionDataFromPickle=validataionDataFromPickle, 
+                 validationDataFromPickle=validationDataFromPickle, 
                  headers = headers,  
                  parameters=parameters,
                  outputDir=args.outputDir,
