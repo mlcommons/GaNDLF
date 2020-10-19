@@ -182,7 +182,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         step_size = 4*batch_size*len(train_loader.dataset)
         clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
         scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-        print("LR initial: ",learning_rate)
+        print("Initial Learning Rate: ",learning_rate)
     elif scheduler == "exp":
         scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
     elif scheduler == "step":
