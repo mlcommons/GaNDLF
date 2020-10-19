@@ -401,7 +401,7 @@ if __name__ == "__main__":
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
     holdoutData_str = args.holdout_loader_pickle
-    if holdoutData_str == 'None'
+    if holdoutData_str == 'None':
         holdoutDataFromPickle = None
     else:
         holdoutDataFromPickle = pd.read_pickle(holdoutData_str)
