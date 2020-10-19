@@ -222,8 +222,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         dice_penalty_dict[i] = 0
 
     # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=False, augmentations=None, resize = parameters['resize']) 
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize']) 
     penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
     
     # get the weights for use for dice loss
