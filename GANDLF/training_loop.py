@@ -61,7 +61,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
+                                               q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
     inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
     
