@@ -330,7 +330,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "model_state_dict": model.state_dict(),
                         "optimizer_state_dict": optimizer.state_dict(),
                         "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("Ep Test DCE: %s Best Test DCE: %s Avg Test Loss: %s Best Test Ep"%(average_test_dice, best_test_dice, average_test_loss, best_test_idx)) 
+        print("Ep Test DCE: %s Best Test DCE: %s Avg Test Loss: %s Best Test Ep %s"%(average_test_dice, best_test_dice, average_test_loss, best_test_idx)) 
         print("Best Test Dice w.r.t val model: ", best_test_val_dice )
 
         # stats for current validation data
