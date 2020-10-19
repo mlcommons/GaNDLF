@@ -232,7 +232,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         mask = subject['label'][torchio.DATA]
         one_hot_mask = one_hot(mask, class_list)
         for i in range(1, n_classList):
-            currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:])
+            currentNumber = one_hot_mask[:,i,:,:,:].nonzero().size(0)
             dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
             total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
     
