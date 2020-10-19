@@ -2,6 +2,7 @@
 
 - Added full image validation for generating loss and dice scores
 - Nested cross-validation added
+- Weighted DICE computation for handling class imbalances for segmentation
 
 ## 0.0.3 
 
