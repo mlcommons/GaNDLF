@@ -106,8 +106,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             validationData = trainingAndValidationData.iloc[test_index]
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
-                trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData,
-                            headers = headers, outputDir=currentValOutputFolder,
+                trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
                             device=device, parameters=parameters, holdoutDataFromPickle=holdoutData)
 
             else:

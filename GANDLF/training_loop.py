@@ -136,7 +136,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         print("Model checkpoint found. Loading checkpoint from: ",os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
 
-    print("Training Data Samples: ", len(train_loader.dataset))
+    print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)))
     sys.stdout.flush()
     if device != 'cpu':
         if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
@@ -162,11 +162,8 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
             print('Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
             print('Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
         
-        print("Current Device : ", torch.cuda.current_device())
-        print("Device Count on Machine : ", torch.cuda.device_count())
-        print("Device Name : ", torch.cuda.get_device_name(device))
-        print("Cuda Availability : ", torch.cuda.is_available())
-        
+        print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
+     
         # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
         optimizer.load_state_dict(optimizer.state_dict())
 
@@ -185,7 +182,7 @@ def trainingLoop(trainingDataFromPickle, validataionDataFromPickle, headers, dev
         step_size = 4*batch_size*len(train_loader.dataset)
         clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
         scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-        print("Starting Learning rate is:",learning_rate)
+        print("LR initial: ",learning_rate)
     elif scheduler == "exp":
         scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
     elif scheduler == "step":
