@@ -57,7 +57,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
-    holdoutDataFromPickle = pd.read_csv("./csvs/test_e1.csv")
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
