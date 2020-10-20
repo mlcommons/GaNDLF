@@ -44,7 +44,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_stats(model, loader, psize, channel_keys, class_list, loss_fn):
+def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -72,7 +72,7 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn):
             loss = loss_fn(pred_mask.double(), mask.double(),len(class_list)).cpu().data.item()
             total_loss += loss
             #Computing the dice score 
-            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
+            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item()
             #Computing the total dice
             total_dice+= curr_dice
             #print("Current Dice is: ", curr_dice)
