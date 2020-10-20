@@ -69,7 +69,7 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights):
             mask = one_hot(mask, class_list)
             # making sure that the output and mask are on the same device
             pred_mask, mask = pred_mask.cuda(), mask.cuda()
-            loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item()
+            loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
             total_loss += loss
             #Computing the dice score 
             curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item()
