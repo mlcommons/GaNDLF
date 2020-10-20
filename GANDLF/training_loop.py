@@ -294,7 +294,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     if MSE_requested:
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), dice_penalty_dict, n_classList)
+                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
@@ -302,7 +302,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 if MSE_requested:
                     loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot_mask.double(), dice_penalty_dict, n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                 loss.backward()
                 optimizer.step()
                            
@@ -311,7 +311,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask.double(), dice_penalty_dict, n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
+            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
             #print(curr_dice)
             #Computng the total dice
             total_train_dice += curr_dice
