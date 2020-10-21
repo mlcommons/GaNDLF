@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 from datetime import date
 import numpy as np
+import pandas as pd
 
 def main():
   copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
@@ -22,14 +23,38 @@ def main():
   outputFile = os.path.normpath(args.outputFile)
   
   avg_dice = []
+
+  final_stats = 'Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n'
   
   for dirs in os.listdir(inputDir):
 
     currentHoldoutDir = os.path.join(inputDir, dirs)
     if os.path.isdir(currentHoldoutDir): # go in only if it is a directory
       if 'holdout_' in dirs: # ensure it is part of the holdout structure
-        test = 1
 
+        for val in os.listdir(currentHoldoutDir):
+
+          currentValidationDir = os.path.join(currentHoldoutDir, val)
+          if os.path.isdir(currentValidationDir):
+
+            filesInDir = os.listdir(currentValidationDir) # get all files in each directory
+
+            for i in range(len(filesInDir)):
+
+              if 'trainingScores_log' in filesInDir[i]:
+
+                log_file = os.path.join(currentValidationDir, filesInDir[i])
+                with open(log_file) as f:
+                  for line in f:
+                      pass
+                  final_stats = final_stats + line
+  
+  file = open(outputFile, 'w')
+  file.write(final_stats)
+  file.close()
+
+  data_full = pd.read_csv(outputFile)
+      
 
 # main function
 if __name__ == '__main__':
