@@ -12,10 +12,14 @@ def dice_loss(inp, target):
     return 1 - ((2. * intersection + smooth) /
                 (iflat.sum() + tflat.sum() + smooth))
 
-def MCD_loss(pm, gt, num_class, weights): 
+def MCD_loss(pm, gt, num_class, weights = None): 
     acc_dice_loss = 0
     for i in range(1, num_class):
-        acc_dice_loss += dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:]) * weights[i]
+        currentDice = dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        if weights is not None:
+            currentDice = currentDice * weights[i]
+        
+        acc_dice_loss += currentDice
     acc_dice_loss /= (num_class-1)
     return acc_dice_loss
 
@@ -26,8 +30,8 @@ def dice(out, target):
     intersection = (oflat * tflat).sum()
     return (2*intersection+smooth)/(oflat.sum()+tflat.sum()+smooth)
 
-def MCD(pm, gt, num_class, weights):
-    return  1 - MCD_loss(pm, gt, num_class, weights)
+def MCD(pm, gt, num_class):
+    return  1 - MCD_loss(pm, gt, num_class)
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
