@@ -10,6 +10,8 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
+import seaborn as sns
+
 def main():
   copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
 
@@ -55,12 +57,12 @@ def main():
 
   data_full = pd.read_csv(outputFile)
 
-  train_loss = data_full['Train_Loss'].tolist()
-  train_dice = data_full['Train_Dice'].tolist()
-  val_loss = data_full['Val_Loss'].tolist()
-  val_dice = data_full['Val_Dice'].tolist()
-  holdout_loss = data_full['Holdout_Loss'].tolist()
-  holdout_dice = data_full['Holdout_Dice'].tolist()
+  del data_full['Epoch']
+  data_full.to_csv(outputFile)
+
+  bplot = sns.boxplot(data=data_full, 
+                 width=0.5,
+                 palette="colorblind")
       
 
 # main function
