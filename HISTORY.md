@@ -2,6 +2,7 @@
 
 - Added full image validation for generating loss and dice scores
 - Nested cross-validation added
+  - Collect statistics and plot them
 
 ## 0.0.3 
 
