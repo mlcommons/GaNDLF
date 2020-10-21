@@ -7,6 +7,7 @@ import argparse
 import subprocess
 from pathlib import Path
 from datetime import date
+import numpy as np
 
 def main():
   copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
@@ -17,6 +18,17 @@ def main():
       
   args = parser.parse_args()
 
+  inputDir = os.path.normpath(args.inputDir)
+  outputFile = os.path.normpath(args.outputFile)
+  
+  avg_dice = []
+  
+  for dirs in os.listdir(inputDir):
+
+    currentHoldoutDir = os.path.join(inputDir, dirs)
+    if os.path.isdir(currentHoldoutDir): # go in only if it is a directory
+      if 'holdout_' in dirs: # ensure it is part of the holdout structure
+        test = 1
 
 
 # main function
