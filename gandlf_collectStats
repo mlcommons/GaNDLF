@@ -54,6 +54,13 @@ def main():
   file.close()
 
   data_full = pd.read_csv(outputFile)
+
+  train_loss = data_full['Train_Loss'].tolist()
+  train_dice = data_full['Train_Dice'].tolist()
+  val_loss = data_full['Val_Loss'].tolist()
+  val_dice = data_full['Val_Dice'].tolist()
+  holdout_loss = data_full['Holdout_Loss'].tolist()
+  holdout_dice = data_full['Holdout_Dice'].tolist()
       
 
 # main function
