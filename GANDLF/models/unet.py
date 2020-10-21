@@ -1,17 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Implementation of UNet with Inception Convolutions - UInc
+"""
 
-import torch.nn.functional as F
-import torch.nn as nn
-import torch
-
-from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
-
-
+from .modelBase import ModelBase
 
 class unet(ModelBase):
     """
@@ -40,6 +38,18 @@ class unet(ModelBase):
         self.out = out_conv(base_filters*2, n_classes, final_convolution_layer = self.final_convolution_layer)
 
     def forward(self, x):
+        """
+        Parameters
+        ----------
+        x : Tensor
+            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, zdims].
+
+        Returns
+        -------
+        x : Tensor
+            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, zdims].
+
+        """
         x1 = self.ins(x)
         x2 = self.ds_0(x1)
         x2 = self.en_1(x2)
@@ -59,9 +69,3 @@ class unet(ModelBase):
         x = self.us_0(x)
         x = self.out(x, x1)
         return x
-
-"""
-This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The Downsampling, Encoding, Decoding modules
-are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
-and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
-"""

@@ -1,23 +1,27 @@
-import torch.nn.functional as F
-import torch.nn as nn
-import torch
+# -*- coding: utf-8 -*-
+"""
+Implementation of Residual-U-Net - ResUNet
+"""
 
-from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
+from .modelBase import ModelBase
 
 class resunet(ModelBase):
     """
-    This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf - with the residual connections. The Downsampling, Encoding, Decoding modules
-    are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
-    and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+    This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf - with the
+    residual connections. The Downsampling, Encoding, Decoding modules are defined in the
+    seg_modules file. These smaller modules are basically defined by 2 parameters, the input
+    channels (filters) and the output channels (filters), and some other hyperparameters,
+    which remain constant all the modules. For more details on the smaller modules please have a
+    look at the seg_modules file.
     """
     def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(resunet, self).__init__( n_channels, n_classes, base_filters, final_convolution_layer)
+        super(resunet, self).__init__(n_channels, n_classes, base_filters, final_convolution_layer)
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.ins = in_conv(self.n_channels, base_filters, res=True)
@@ -36,9 +40,22 @@ class resunet(ModelBase):
         self.us_1 = UpsamplingModule(base_filters*4, base_filters*2)
         self.de_1 = DecodingModule(base_filters*4, base_filters*2, res=True)
         self.us_0 = UpsamplingModule(base_filters*2, base_filters)
-        self.out = out_conv(base_filters*2, n_classes, final_convolution_layer = self.final_convolution_layer, res=True)
+        self.out = out_conv(base_filters*2, n_classes,
+                            final_convolution_layer=self.final_convolution_layer, res=True)
 
     def forward(self, x):
+        """
+        Parameters
+        ----------
+        x : Tensor
+            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, zdims].
+
+        Returns
+        -------
+        x : Tensor
+            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, zdims].
+
+        """
         x1 = self.ins(x)
         x2 = self.ds_0(x1)
         x2 = self.en_1(x2)
