@@ -7,3 +7,18 @@ import argparse
 import subprocess
 from pathlib import Path
 from datetime import date
+
+def main():
+  copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+
+  parser = argparse.ArgumentParser(prog='GANDLF_CollectCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Collect statistics from different holdout/validation combinations from output directory.\n\n" + copyrightMessage)
+  parser.add_argument('-inputDir', type=str, help = 'Input directory which contains holdout and validation models', required=True)
+  parser.add_argument('-outputFile', type=str, help = 'Output CSV file', required=True)
+      
+  args = parser.parse_args()
+
+
+
+# main function
+if __name__ == '__main__':
+  main()
