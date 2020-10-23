@@ -7,19 +7,10 @@ os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation reques
 
 import argparse
 import sys
-import time
-import numpy as np
 import pandas as pd
-import torch
-from torch.utils.data import Dataset, DataLoader
-from torch.autograd import Variable
 import gc
-from torchsummary import summary
 from pathlib import Path
-from sklearn.model_selection import KFold
-import pickle
 import pkg_resources
-import torchio
 from datetime import date
 
 from GANDLF.training_manager import TrainingManager
