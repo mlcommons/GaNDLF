@@ -1,13 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Implementation of MSDNet
+"""
+
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-from GANDLF.models.seg_modules import *
-
+from GANDLF.models.seg_modules.add_conv_block import add_conv_block
 
 class MSDNet(nn.Module):
     """
     Paper: A mixed-scale dense convolutional neural network for image analysis
-    Published: PNAS, Jan. 2018 
+    Published: PNAS, Jan. 2018
     Paper: http://www.pnas.org/content/early/2017/12/21/1715832114
     DOI: 10.1073/pnas.1715832114
     Derived from Shubham Dokania's https://github.com/shubham1810/MS-D_Net_PyTorch
@@ -22,7 +26,7 @@ class MSDNet(nn.Module):
         super().__init__()
 
         self.layer_list = add_conv_block(in_ch=in_channels, volumetric=volumetric)
-        
+
         current_in_channels = 1
         # Add N layers
         for i in range(num_layers):
@@ -51,12 +55,12 @@ class MSDNet(nn.Module):
     def forward(self, x):
         prev_features = []
         inp = x
-        
+
         for i, f in enumerate(self.layers):
             # Check if last conv block
             if i == len(self.layers) - 2:
                 x = torch.cat(prev_features + [inp], 1)
-            
+
             x = f(x)
 
             if (i + 1) % 2 == 0 and not i == (len(self.layers) - 1):

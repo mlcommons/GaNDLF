@@ -1,23 +1,29 @@
+# -*- coding: utf-8 -*-
+"""
+Implementation of Fully Convolutional Network - FCN 
+"""
+
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-
-from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
+from .modelBase import ModelBase
 
-class fcn(nn.Module):
+class fcn(ModelBase):
     """
-    This is the standard FCN (Fully Convolutional Network) architecture : https://arxiv.org/abs/1411.4038 . The Downsampling, Encoding, Decoding modules
-    are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
-    and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
-
+    This is the standard FCN (Fully Convolutional Network) architecture :
+    https://arxiv.org/abs/1411.4038 . The Downsampling, Encoding, Decoding modules are defined in
+    the seg_modules file. These smaller modules are basically defined by 2 parameters, the input
+    channels (filters) and the output channels (filters), and some other hyperparameters, which
+    remain constant all the modules. For more details on the smaller modules please have a look at
+    the seg_modules file.
     DOI: 10.1109/TPAMI.2016.2572683
     """
     def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(fcn, self).__init__( n_channels, n_classes, base_filters, final_convolution_layer)
+        super(fcn, self).__init__(n_channels, n_classes, base_filters, final_convolution_layer)
         self.ins = in_conv(n_channels, base_filters)
         self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
         self.en_1 = EncodingModule(base_filters*2, base_filters*2)
@@ -36,6 +42,18 @@ class fcn(nn.Module):
                                 kernel_size=1, stride=1, padding=0, bias=True)
 
     def forward(self, x):
+        """
+        Parameters
+        ----------
+        x : Tensor
+            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, zdims].
+
+        Returns
+        -------
+        x : Tensor
+            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, zdims].
+
+        """
         x1 = self.ins(x)
         x2 = self.ds_0(x1)
         x2 = self.en_1(x2)
@@ -54,10 +72,10 @@ class fcn(nn.Module):
         x = torch.cat([u5, u4, u3, u2, u1], dim=1)
         x = self.conv_0(x)
 
-        if not(self.final_convolution_layer == None):
-            if self.final_convolution_layer == F.softmax:
+        if not self.final_convolution_layer is None:
+            if self.final_convolution_layer == F.softmax():
                 x = self.final_convolution_layer(x, dim=1)
             else:
                 x = self.final_convolution_layer(x)
-                
+
         return x
