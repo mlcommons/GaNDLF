@@ -213,8 +213,39 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     log_train = open(log_train_file,"w")
     log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n")
     log_train.close()
-                                
-                                
+
+    # initialize without considering background
+    dice_weights_dict = {} # average for "weighted averaging"
+    dice_penalty_dict = {} # penalty for misclassification
+    for i in range(1, n_classList):
+        dice_weights_dict[i] = 0
+        dice_penalty_dict[i] = 0
+
+    # define a seaparate data loader for penalty calculations
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize']) 
+    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
+    
+    # get the weights for use for dice loss
+    total_nonZeroVoxels = 0
+    for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
+        # accumulate dice weights for each label
+        mask = subject['label'][torchio.DATA]
+        one_hot_mask = one_hot(mask, class_list)
+        for i in range(1, n_classList):
+            currentNumber = one_hot_mask[:,i,:,:,:].nonzero().size(0)
+            dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
+            total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
+    
+    # get the penalty values - dice_weights contains the overall number for each class in the training data
+    for i in range(1, n_classList):
+        penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
+        for j in range(1, n_classList):
+            if i != j: # for differing classes, subtract the number
+                penalty = penalty - dice_penalty_dict[j]
+        
+        dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+        dice_weights_dict[i] = dice_weights_dict[i] / total_nonZeroVoxels # this can be used for weighted averaging
+              
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
     channel_keys = list(batch.keys())
@@ -263,7 +294,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     if MSE_requested:
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
+                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
             else:
@@ -271,7 +302,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 if MSE_requested:
                     loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                 else:
-                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList)
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                 loss.backward()
                 optimizer.step()
                            
@@ -280,7 +311,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
             #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item()
+            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
             #print(curr_dice)
             #Computng the total dice
             total_train_dice += curr_dice
@@ -310,12 +341,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         model.eval()
 
         # validation data scores
-        total_val_dice, total_val_loss = get_stats(model,validationDataForTorch,psize,channel_keys,class_list,loss_fn)
+        total_val_dice, total_val_loss = get_stats(model, validationDataForTorch, psize, channel_keys, class_list, loss_fn)
         average_val_dice = total_val_dice/len(val_loader.dataset)
         average_val_loss = total_val_loss/len(val_loader.dataset)
 
         # testing data scores
-        total_test_dice, total_test_loss = get_stats(model,inferenceDataForTorch,psize,channel_keys,class_list,loss_fn) 
+        total_test_dice, total_test_loss = get_stats(model, inferenceDataForTorch, psize, channel_keys, class_list, loss_fn) 
         average_test_dice = total_test_dice/len(inference_loader.dataset)
         average_test_loss = total_test_loss/len(inference_loader.dataset)
         
@@ -330,7 +361,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "optimizer_state_dict": optimizer.state_dict(),
                         "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
         print("   Test DCE: %s | Best Test DCE: %s | Avg Test Loss: %s | Best Test Ep %s"%(average_test_dice, best_test_dice, average_test_loss, best_test_idx)) 
-        print("   Best Test Dice w.r.t val model: ", best_test_val_dice )
 
         # stats for current validation data
         if average_val_dice > best_val_dice:
@@ -345,7 +375,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         else:
             patience_count = patience_count + 1 
         print("   Val DCE: %s | Best Val DCE: %s | Avg Val Loss: %s | Best Val Ep: %s"%(str(average_val_dice), str(best_val_dice), str(average_val_loss), str(best_val_idx))) 
-        print("   Best Test Dice w.r.t val model: ", best_test_val_dice )
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
