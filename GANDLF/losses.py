@@ -12,10 +12,14 @@ def dice_loss(inp, target):
     return 1 - ((2. * intersection + smooth) /
                 (iflat.sum() + tflat.sum() + smooth))
 
-def MCD_loss(pm, gt, num_class):
+def MCD_loss(pm, gt, num_class, weights = None): 
     acc_dice_loss = 0
     for i in range(1, num_class):
-        acc_dice_loss += dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDice = dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        if weights is not None:
+            currentDice = currentDice * weights[i]
+        
+        acc_dice_loss += currentDice
     acc_dice_loss /= (num_class-1)
     return acc_dice_loss
 
@@ -35,15 +39,15 @@ def CE(out,target):
     loss = torch.dot(-torch.log(oflat), tflat)/tflat.sum()
     return loss
 
-def CCE(out, target, num_class):
+def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
     for i in range(1, num_class):
-        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:])
+        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
     acc_ce_loss /= (num_class-1)
     return acc_ce_loss
         
-def DCCE(out,target, n_classes):
-    l = MCD_loss(out,target, n_classes) + CCE(out, target,n_classes)
+def DCCE(out,target, n_classes, weights):
+    l = MCD_loss(out,target, n_classes, weights) + CCE(out, target,n_classes, weights)
     return l
 
 
@@ -68,10 +72,10 @@ def tversky_loss(inp, target, alpha):
     return 1 - ((intersection+smooth)/denominator)
 
 
-def MCT_loss(inp, target, num_class):
+def MCT_loss(inp, target, num_class, weights):
     acc_tv_loss = 0
     for i in range(1, num_class):
-        acc_tv_loss += TV_loss(inp[:,i,:,:,:], target[:,i,:,:,:])
+        acc_tv_loss += TV_loss(inp[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
     acc_tv_loss /= (num_class-1)
     return acc_tv_loss
 
@@ -83,7 +87,7 @@ def MSE(inp, target, reduction = 'mean'):
 
 def MSE_loss(inp, target, num_classes, reduction = 'mean'):
     acc_mse_loss = 0
-    for i in range(0, num_classes):
+    for i in range(1, num_classes):
         acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
     acc_mse_loss/=num_classes
     return acc_mse_loss

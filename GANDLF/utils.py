@@ -44,10 +44,16 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_stats(model, loader, psize, channel_keys, class_list, loss_fn):
+def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
+    # if no weights are specified, use 1
+    if weights is None:
+        weights = [1]
+        for i in range(class_list - 1):
+            weights.append(1)
+
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0
@@ -69,10 +75,10 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn):
             mask = one_hot(mask, class_list)
             # making sure that the output and mask are on the same device
             pred_mask, mask = pred_mask.cuda(), mask.cuda()
-            loss = loss_fn(pred_mask.double(), mask.double(),len(class_list)).cpu().data.item()
+            loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
             total_loss += loss
             #Computing the dice score 
-            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
+            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item()
             #Computing the total dice
             total_dice+= curr_dice
             #print("Current Dice is: ", curr_dice)
