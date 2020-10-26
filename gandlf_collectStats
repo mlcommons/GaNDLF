@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 def main():
   copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
@@ -59,23 +60,32 @@ def main():
   data_full = pd.read_csv(outputFile)
   del data_full['Epoch'] # no need for epoch
 
-  data_loss = data_full
-  data_dice = data_full
+  data_loss = data_full.copy()
+  data_dice = data_full.copy()
 
-  del data_loss['Train_Loss'] # keep only dice
-  del data_loss['Val_Loss'] # keep only dice
-  del data_loss['Holdout_Loss'] # keep only dice
-  
-  del data_loss['Train_Dice'] # keep only loss
-  del data_loss['Val_Dice'] # keep only loss
-  del data_loss['Holdout_Dice'] # keep only loss
+  cols = ['Train', 'Val', 'Holdout']
+  for i in cols:
+    
+    del data_dice[i + '_Loss'] # keep only dice    
+    del data_loss[i + '_Dice'] # keep only loss
+
+    data_loss.rename(columns = {i + '_Loss':i}, inplace = True) 
+    data_dice.rename(columns = {i + '_Dice':i}, inplace = True) 
+
+  fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True)
 
   data_full.to_csv(outputFile, index=False)
 
-  bplot = sns.boxplot(data=data_full, width=0.5, palette="colorblind")
-  bplot.set(xlabel='P', ylabel='common ylabel', title='some title')
+  bplot = sns.boxplot(data=data_dice, width=0.5, palette="colorblind", ax=axes[0])
+  bplot.set(xlabel='Dataset', ylabel='Dice', title='Dice plot')
   bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
-  bplot.figure.savefig(os.path.join(pathlib.Path(outputFile).parent.absolute(), 'plot.png'), dpi=600)
+
+  bplot = sns.boxplot(data=data_loss, width=0.5, palette="colorblind", ax=axes[1])
+  bplot.set(xlabel='Dataset', ylabel='Loss', title='Loss plot')
+  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
+
+
+  plt.savefig(os.path.join(pathlib.Path(outputFile).parent.absolute(), 'plot.png'), dpi=600)
       
 
 # main function
