@@ -5,6 +5,7 @@ import os
 import sys
 import argparse
 import subprocess
+import pathlib
 from pathlib import Path
 from datetime import date
 import numpy as np
@@ -49,20 +50,32 @@ def main():
                 with open(log_file) as f:
                   for line in f:
                       pass
-                  final_stats = final_stats + line + '\n'
+                  final_stats = final_stats + line
   
   file = open(outputFile, 'w')
   file.write(final_stats)
   file.close()
 
   data_full = pd.read_csv(outputFile)
+  del data_full['Epoch'] # no need for epoch
 
-  del data_full['Epoch']
-  data_full.to_csv(outputFile)
+  data_loss = data_full
+  data_dice = data_full
 
-  bplot = sns.boxplot(data=data_full, 
-                 width=0.5,
-                 palette="colorblind")
+  del data_loss['Train_Loss'] # keep only dice
+  del data_loss['Val_Loss'] # keep only dice
+  del data_loss['Holdout_Loss'] # keep only dice
+  
+  del data_loss['Train_Dice'] # keep only loss
+  del data_loss['Val_Dice'] # keep only loss
+  del data_loss['Holdout_Dice'] # keep only loss
+
+  data_full.to_csv(outputFile, index=False)
+
+  bplot = sns.boxplot(data=data_full, width=0.5, palette="colorblind")
+  bplot.set(xlabel='P', ylabel='common ylabel', title='some title')
+  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
+  bplot.figure.savefig(os.path.join(pathlib.Path(outputFile).parent.absolute(), 'plot.png'), dpi=600)
       
 
 # main function
