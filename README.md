@@ -1,12 +1,6 @@
 # GANDLF
 
-A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification.
-
-## Other name candidates
-
-- DeepSAGE: Deep SemAntic seGmEntator
-- SEACAF: SEgmentation And ClassificAtion Framework
-- DeepSAC: Deep Segmentation and Classification
+A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
 ## Why use this?
 
@@ -15,7 +9,8 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
   - Channels/modalities 
   - Prediction classes
 - Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)
-- Built-in cross validation, with support for parallel HPC-based computing
+- Built-in nested cross validation (and related combined statistics), with support for parallel HPC-based computing
+- Handles imbalanced classes (very small tumor in large organ)
 - Multi-GPU (on the same machine) training
 - Leverages robust open source software
 - No need to code to generate robust models
