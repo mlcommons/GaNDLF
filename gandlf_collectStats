@@ -73,15 +73,16 @@ def main():
     data_dice.rename(columns = {i + '_Dice':i}, inplace = True) 
 
   fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True)
-  plt.ylim(0, 1)
 
   data_full.to_csv(outputFile, index=False)
 
   bplot = sns.boxplot(data=data_dice, width=0.5, palette="colorblind", ax=axes[0])
+  bplot.set(ylim=(0, 1))
   bplot.set(xlabel='Dataset', ylabel='Dice', title='Dice plot')
   bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
 
   bplot = sns.boxplot(data=data_loss, width=0.5, palette="colorblind", ax=axes[1])
+  bplot.set(ylim=(0, 1))
   bplot.set(xlabel='Dataset', ylabel='Loss', title='Loss plot')
   bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
 
