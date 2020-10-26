@@ -19,12 +19,12 @@ def main():
 
   parser = argparse.ArgumentParser(prog='GANDLF_CollectCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Collect statistics from different holdout/validation combinations from output directory.\n\n" + copyrightMessage)
   parser.add_argument('-inputDir', type=str, help = 'Input directory which contains holdout and validation models', required=True)
-  parser.add_argument('-outputFile', type=str, help = 'Output CSV file', required=True)
+  parser.add_argument('-outputDir', type=str, help = 'Output directory to save stats and plot', required=True)
       
   args = parser.parse_args()
 
   inputDir = os.path.normpath(args.inputDir)
-  outputFile = os.path.normpath(args.outputFile)
+  outputDir = os.path.normpath(args.outputDir)
   
   avg_dice = []
 
@@ -53,6 +53,8 @@ def main():
                       pass
                   final_stats = final_stats + line
   
+  outputFile = os.path.join(outputDir, 'data.csv')
+  outputPlot = os.path.join(outputDir, 'plot.png')
   file = open(outputFile, 'w')
   file.write(final_stats)
   file.close()
@@ -76,18 +78,17 @@ def main():
 
   data_full.to_csv(outputFile, index=False)
 
-  bplot = sns.boxplot(data=data_dice, width=0.5, palette="colorblind", ax=axes[0])
-  bplot.set(ylim=(0, 1))
-  bplot.set(xlabel='Dataset', ylabel='Dice', title='Dice plot')
-  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
+  bplot = sns.boxplot(data=data_dice, width=0.5, palette="colorblind", ax=axes[0]) # plot the data
+  bplot.set(ylim=(0, 1)) # set limits for y-axis for proper visualization
+  bplot.set(xlabel='Dataset', ylabel='Dice', title='Dice plot') # set labels
+  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right") # rotate so that everything is visible
 
-  bplot = sns.boxplot(data=data_loss, width=0.5, palette="colorblind", ax=axes[1])
-  bplot.set(ylim=(0, 1))
-  bplot.set(xlabel='Dataset', ylabel='Loss', title='Loss plot')
-  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
+  bplot = sns.boxplot(data=data_loss, width=0.5, palette="colorblind", ax=axes[1]) # plot the data
+  bplot.set(ylim=(0, 1)) # set limits for y-axis for proper visualization
+  bplot.set(xlabel='Dataset', ylabel='Loss', title='Loss plot') # set labels
+  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right") # rotate so that everything is visible
 
-
-  plt.savefig(os.path.join(pathlib.Path(outputFile).parent.absolute(), 'plot.png'), dpi=600)
+  plt.savefig(outputPlot, dpi=600)
       
 
 # main function
