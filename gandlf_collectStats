@@ -73,6 +73,7 @@ def main():
     data_dice.rename(columns = {i + '_Dice':i}, inplace = True) 
 
   fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True)
+  plt.ylim(0, 1)
 
   data_full.to_csv(outputFile, index=False)
 
