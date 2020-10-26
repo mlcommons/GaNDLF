@@ -25,18 +25,19 @@ def main():
 
   inputDir = os.path.normpath(args.inputDir)
   outputDir = os.path.normpath(args.outputDir)
+  outputFile = os.path.join(outputDir, 'data.csv') # data file name
+  outputPlot = os.path.join(outputDir, 'plot.png') # plot file
   
-  avg_dice = []
-
-  final_stats = 'Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n'
+  final_stats = 'Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n' # the columns that need to be present in final output; epoch is always removed
   
+  # loop through output directory
   for dirs in os.listdir(inputDir):
 
     currentHoldoutDir = os.path.join(inputDir, dirs)
     if os.path.isdir(currentHoldoutDir): # go in only if it is a directory
       if 'holdout_' in dirs: # ensure it is part of the holdout structure
 
-        for val in os.listdir(currentHoldoutDir):
+        for val in os.listdir(currentHoldoutDir): # loop through all validation directories
 
           currentValidationDir = os.path.join(currentHoldoutDir, val)
           if os.path.isdir(currentValidationDir):
@@ -45,7 +46,7 @@ def main():
 
             for i in range(len(filesInDir)):
 
-              if 'trainingScores_log' in filesInDir[i]:
+              if 'trainingScores_log' in filesInDir[i]: # when the log has been found, collect the final numbers
 
                 log_file = os.path.join(currentValidationDir, filesInDir[i])
                 with open(log_file) as f:
@@ -53,8 +54,6 @@ def main():
                       pass
                   final_stats = final_stats + line
   
-  outputFile = os.path.join(outputDir, 'data.csv')
-  outputPlot = os.path.join(outputDir, 'plot.png')
   file = open(outputFile, 'w')
   file.write(final_stats)
   file.close()
@@ -62,21 +61,22 @@ def main():
   data_full = pd.read_csv(outputFile)
   del data_full['Epoch'] # no need for epoch
 
+  data_full.to_csv(outputFile, index=False) # save updated data
+
+  # perform deep copy
   data_loss = data_full.copy()
   data_dice = data_full.copy()
 
-  cols = ['Train', 'Val', 'Holdout']
+  cols = ['Train', 'Val', 'Holdout'] # set the datasets that need to be plotted
   for i in cols:
     
     del data_dice[i + '_Loss'] # keep only dice    
     del data_loss[i + '_Dice'] # keep only loss
 
-    data_loss.rename(columns = {i + '_Loss':i}, inplace = True) 
-    data_dice.rename(columns = {i + '_Dice':i}, inplace = True) 
+    data_loss.rename(columns = {i + '_Loss':i}, inplace = True) # rename the columns
+    data_dice.rename(columns = {i + '_Dice':i}, inplace = True) # rename the columns
 
-  fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True)
-
-  data_full.to_csv(outputFile, index=False)
+  fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True) # set plot properties
 
   bplot = sns.boxplot(data=data_dice, width=0.5, palette="colorblind", ax=axes[0]) # plot the data
   bplot.set(ylim=(0, 1)) # set limits for y-axis for proper visualization
