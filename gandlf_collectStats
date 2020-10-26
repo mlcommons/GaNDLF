@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import date
 import numpy as np
 import pandas as pd
+from io import StringIO
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -54,13 +55,9 @@ def main():
                       pass
                   final_stats = final_stats + line
   
-  file = open(outputFile, 'w')
-  file.write(final_stats)
-  file.close()
-
-  data_full = pd.read_csv(outputFile)
+  data_string = StringIO(final_stats)
+  data_full = pd.read_csv(data_string, sep=",")
   del data_full['Epoch'] # no need for epoch
-
   data_full.to_csv(outputFile, index=False) # save updated data
 
   # perform deep copy
