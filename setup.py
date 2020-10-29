@@ -27,7 +27,7 @@ requirements = [
 
 setup(
   name='GANDLF',
-  version='0.0.4', # NR: non-release; this should be changed when tagging\
+  version='0.0.5.NR', # NR: non-release; this should be changed when tagging\
   author="Megh Bhalerao, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
