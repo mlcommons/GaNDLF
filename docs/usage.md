@@ -41,6 +41,10 @@ The [gandlf_constructCSV](../gandlf_constructCSV) can be used to make this easie
 
 For classification/regression, add a column called `ValueToPredict`. **Note** that currently, we are supporting only a single value prediction per model.
 
+## Plot the final results
+
+After the holdout/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for holdout and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this.
+
 ## Customize the Training
 
 All details and comments are in the [samples/sample_training.yaml](../samples/sample_training.yaml).
