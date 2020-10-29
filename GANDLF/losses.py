@@ -1,6 +1,5 @@
-import numpy as np
 import torch 
-from torch.nn import MSELoss, SmoothL1Loss, L1Loss
+from torch.nn import MSELoss
 
 
 # Dice scores and dice losses   
@@ -75,13 +74,11 @@ def tversky_loss(inp, target, alpha):
 def MCT_loss(inp, target, num_class, weights):
     acc_tv_loss = 0
     for i in range(1, num_class):
-        acc_tv_loss += TV_loss(inp[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
+        acc_tv_loss += tversky_loss(inp[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
     acc_tv_loss /= (num_class-1)
     return acc_tv_loss
 
 def MSE(inp, target, reduction = 'mean'):
-    iflat = inp.contiguous().view(-1)
-    tflat = target.contiguous().view(-1)
     l = MSELoss(inp, target, reduction = reduction) # for reductions options, see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
     return l
 
