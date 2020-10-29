@@ -1,6 +1,5 @@
-import numpy as np
 import torch 
-from torch.nn import MSELoss, SmoothL1Loss, L1Loss
+from torch.nn import MSELoss
 
 
 # Dice scores and dice losses   
