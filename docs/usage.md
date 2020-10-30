@@ -3,13 +3,13 @@
 ## Example of CLI
 ```powershell
 # continue from previous shell
-python GANDLF.py \
+python gandlf_run \
   -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory
   -train 1 \ # 1 == train, 0 == inference
   -device 0 # postive integer for GPU device, -1 for CPU
-  -modelDir /path/to/model/weights # used in inference mode
+  # -modelDir /path/to/model/weights # used in inference mode
 ```
 
 ## Preparing the Data
@@ -37,13 +37,29 @@ Channel_0,Channel_1,...,Channel_X,Label
 - `Label` can be substituted with `Mask` or `Segmentation`
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
-The [gandlf_constructCSV](../gandlf_constructCSV) can be used to make this easier.
+The [gandlf_constructCSV](../gandlf_constructCSV) can be used to make this easier:
+
+```powershell
+# continue from previous shell
+python gandlf_constructCSV \
+  -inputDir ./experiment_0/output_dir/ # this is the main output directory of training step
+  -output ./experiment_0/output_dir_stats/ \ # output directory
+```
 
 For classification/regression, add a column called `ValueToPredict`. **Note** that currently, we are supporting only a single value prediction per model.
 
 ## Plot the final results
 
-After the holdout/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for holdout and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this.
+After the holdout/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for holdout and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this:
+
+```powershell
+# continue from previous shell
+python gandlf_collectStats \
+  -inputDir /path/to/input/data 
+  -channeslID _t1.nii.gz,_t2.nii.gz,_t1ce.nii.gz,_flair.nii.gz # comma-separated strings to compare the filenames from inputDir
+  -labelID _seg.nii.gz # Label/mask identifier string to compare the filenames from inputDir
+  -output ./experiment_0/output_dir_stats/ \ # output directory
+```
 
 ## Customize the Training
 
