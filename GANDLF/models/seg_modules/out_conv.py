@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class out_conv(nn.Module):
-    def __init__(self, input_channels, output_channels, final_convolution_layer, leakiness=1e-2, kernel_size=3,
-        conv_bias=True, inst_norm_affine=True, res=False, lrelu_inplace=True):
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, final_convolution_layer,
+        leakiness=1e-2, kernel_size=3, conv_bias=True, inst_norm_affine=True, res=False, lrelu_inplace=True):
         """[The Out convolution module to learn the information and use later]
         
         [This function will create the Learning convolutions]
@@ -31,28 +31,28 @@ class out_conv(nn.Module):
         self.leakiness = leakiness
         self.res = res
         self.final_convolution_layer = final_convolution_layer
-        self.in_0 = nn.InstanceNorm3d(input_channels, 
+        self.in_0 = InstanceNorm(input_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.in_1 = nn.InstanceNorm3d(input_channels//2, 
+        self.in_1 = InstanceNorm(input_channels//2, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.in_2 = nn.InstanceNorm3d(input_channels//2, 
+        self.in_2 = InstanceNorm(input_channels//2, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.in_3 = nn.InstanceNorm3d(input_channels//2, 
+        self.in_3 = InstanceNorm(input_channels//2, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.conv0 = nn.Conv3d(input_channels, input_channels//2, kernel_size=3,
+        self.conv0 = Conv(input_channels, input_channels//2, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
-        self.conv1 = nn.Conv3d(input_channels//2, input_channels//2, kernel_size=3,
+        self.conv1 = Conv(input_channels//2, input_channels//2, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
-        self.conv2 = nn.Conv3d(input_channels//2, input_channels//2, kernel_size=3,
+        self.conv2 = Conv(input_channels//2, input_channels//2, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
-        self.conv3 = nn.Conv3d(input_channels//2, output_channels, kernel_size=1,
+        self.conv3 = Conv(input_channels//2, output_channels, kernel_size=1,
                                stride=1, padding=0, 
                                bias=self.conv_bias)
 
