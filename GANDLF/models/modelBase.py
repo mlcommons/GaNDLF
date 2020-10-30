@@ -30,12 +30,14 @@ class ModelBase(nn.Module):
             self.InstanceNorm = nn.InstanceNorm2d
             self.Dropout = nn.Dropout2d
             self.BatchNorm = nn.BatchNorm2d
+            self.MaxPool = nn.MaxPool2d
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
             self.ConvTranspose = nn.ConvTranspose3d
             self.InstanceNorm = nn.InstanceNorm3d
             self.Dropout = nn.Dropout3d
             self.BatchNorm = nn.BatchNorm3d
+            self.MaxPool = nn.MaxPool3d
         else:
             sys.exit('Currently, only 2D or 3D datasets are supported.')
 
