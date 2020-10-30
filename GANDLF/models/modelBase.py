@@ -31,6 +31,9 @@ class ModelBase(nn.Module):
             self.Dropout = nn.Dropout2d
             self.BatchNorm = nn.BatchNorm2d
             self.MaxPool = nn.MaxPool2d
+            self.AvgPool = nn.AvgPool2d
+            self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d
+            self.AdaptiveMaxPool = nn.AdaptiveMaxPool2d
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
             self.ConvTranspose = nn.ConvTranspose3d
@@ -38,6 +41,9 @@ class ModelBase(nn.Module):
             self.Dropout = nn.Dropout3d
             self.BatchNorm = nn.BatchNorm3d
             self.MaxPool = nn.MaxPool3d
+            self.AvgPool = nn.AvgPool3d
+            self.AdaptiveAvgPool = nn.AdaptiveAvgPool3d
+            self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
         else:
             sys.exit('Currently, only 2D or 3D datasets are supported.')
 
