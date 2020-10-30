@@ -21,10 +21,13 @@ class ModelBase(nn.Module):
         self.base_filters = base_filters
         self.n_dimensions = n_dimensions
 
+        # based on dimensionality, the following need to defined:
+        # convolution, batch_norm, instancenorm, dropout
+
         if self.n_dimensions == 2:
-            test = 2
+            self.Convolution = nn.Conv2d
         elif self.n_dimensions == 3:
-            test = 3
+            self.Convolution = nn.Conv3d
         else:
             sys.exit('Currently, only 2D or 3D datasets are supported.')
 
