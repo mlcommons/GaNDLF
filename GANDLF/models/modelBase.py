@@ -26,8 +26,12 @@ class ModelBase(nn.Module):
 
         if self.n_dimensions == 2:
             self.Convolution = nn.Conv2d
+            self.InstanceNorm = nn.InstanceNorm2d
+            self.Dropout = nn.Dropout2d
         elif self.n_dimensions == 3:
             self.Convolution = nn.Conv3d
+            self.InstanceNorm = nn.InstanceNorm3d
+            self.Dropout = nn.Dropout3d
         else:
             sys.exit('Currently, only 2D or 3D datasets are supported.')
 
