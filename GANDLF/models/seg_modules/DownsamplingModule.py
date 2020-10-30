@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class DownsamplingModule(nn.Module):
-    def __init__(self, input_channels, output_channels, leakiness=1e-2, 
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, leakiness=1e-2, 
                  dropout_p=0.3, kernel_size=3, conv_bias=True, 
                  inst_norm_affine=True, lrelu_inplace=True):
         """[To Downsample a given input with convolution operation]
@@ -31,10 +31,10 @@ class DownsamplingModule(nn.Module):
         self.leakiness = leakiness
         self.inst_norm_affine = inst_norm_affine
         self.lrelu_inplace = True
-        self.in_0 = nn.InstanceNorm3d(output_channels, 
+        self.in_0 = InstanceNorm(output_channels, 
                                     affine=self.inst_norm_affine,
                                     track_running_stats=True)
-        self.conv0 = nn.Conv3d(input_channels, output_channels, kernel_size = 3,
+        self.conv0 = Conv(input_channels, output_channels, kernel_size = 3,
                                stride=2, padding=(kernel_size - 1) // 2, 
                                bias = self.conv_bias)
 
