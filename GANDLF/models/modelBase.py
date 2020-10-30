@@ -26,11 +26,13 @@ class ModelBase(nn.Module):
 
         if self.n_dimensions == 2:
             self.Convolution = nn.Conv2d
+            self.ConvolutionTranspose = nn.ConvTranspose2d
             self.InstanceNorm = nn.InstanceNorm2d
             self.Dropout = nn.Dropout2d
             self.BatchNorm = nn.BatchNorm2d
         elif self.n_dimensions == 3:
             self.Convolution = nn.Conv3d
+            self.ConvolutionTranspose = nn.ConvTranspose3d
             self.InstanceNorm = nn.InstanceNorm3d
             self.Dropout = nn.Dropout3d
             self.BatchNorm = nn.BatchNorm3d
