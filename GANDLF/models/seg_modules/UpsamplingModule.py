@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from GANDLF.models.seg_modules.Interpolate import Interpolate 
 
 class UpsamplingModule(nn.Module): 
-    def __init__(self, input_channels, output_channels, leakiness=1e-2, 
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, leakiness=1e-2, 
         lrelu_inplace=True, kernel_size=3, scale_factor=2,
         conv_bias=True, inst_norm_affine=True):
         """[summary]

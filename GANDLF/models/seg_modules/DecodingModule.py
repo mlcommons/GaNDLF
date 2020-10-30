@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class DecodingModule(nn.Module):
-    def __init__(self, input_channels, output_channels, leakiness=1e-2, conv_bias=True, kernel_size=3,
-        inst_norm_affine=True, res=True, lrelu_inplace=True):
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, leakiness=1e-2, conv_bias=True,    
+        kernel_size=3, inst_norm_affine=True, res=True, lrelu_inplace=True):
         """[The Decoding convolution module to learn the information and use later]
         
         [This function will create the Learning convolutions]
