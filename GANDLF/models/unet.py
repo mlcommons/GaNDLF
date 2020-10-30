@@ -20,7 +20,7 @@ class unet(ModelBase):
     def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
         super(unet, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
         self.ins = in_conv(n_channels, base_filters, self.Convolution, self.Dropout, self.InstanceNorm)
-        self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
+        self.ds_0 = DownsamplingModule(base_filters, base_filters*2, self.Convolution, self.Dropout, self.InstanceNorm)
         self.en_1 = EncodingModule(base_filters*2, base_filters*2)
         self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4)
         self.en_2 = EncodingModule(base_filters*4, base_filters*4)
