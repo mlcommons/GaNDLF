@@ -26,14 +26,14 @@ class MSDNet(modelBase):
 
         super(MSDNet, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
 
-        self.layer_list = add_conv_block(self.Convolution, self.BatchNorm, in_ch=n_channels)
+        self.layer_list = add_conv_block(self.Conv, self.BatchNorm, in_ch=n_channels)
 
         current_in_channels = 1
         # Add N layers
         for i in range(num_layers):
             s = i % 10 + 1
             self.layer_list += add_conv_block(
-                self.Convolution,
+                self.Conv,
                 self.BatchNorm,
                 in_ch=current_in_channels,
                 dilate=s
@@ -42,7 +42,7 @@ class MSDNet(modelBase):
 
         # Add final output block
         self.layer_list += add_conv_block(
-            self.Convolution,
+            self.Conv,
             self.BatchNorm,
             in_ch=current_in_channels + n_channels,
             out_ch=n_classes,
