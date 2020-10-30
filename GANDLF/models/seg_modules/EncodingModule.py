@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class EncodingModule(nn.Module):
-    def __init__(self, input_channels, output_channels, kernel_size = 3, 
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, kernel_size = 3, 
                  dropout_p=0.3, leakiness=1e-2, conv_bias=True, 
                  inst_norm_affine=True, res = False, lrelu_inplace=True):
         """[The Encoding convolution module to learn the information and use later]
