@@ -22,17 +22,17 @@ class fcn(ModelBase):
     the seg_modules file.
     DOI: 10.1109/TPAMI.2016.2572683
     """
-    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(fcn, self).__init__(n_channels, n_classes, base_filters, final_convolution_layer)
-        self.ins = in_conv(n_channels, base_filters)
-        self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
-        self.en_1 = EncodingModule(base_filters*2, base_filters*2)
-        self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4)
-        self.en_2 = EncodingModule(base_filters*4, base_filters*4)
-        self.ds_2 = DownsamplingModule(base_filters*4, base_filters*8)
-        self.en_3 = EncodingModule(base_filters*8, base_filters*8)
-        self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16)
-        self.en_4 = EncodingModule(base_filters*16, base_filters*16)
+    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(fcn, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
+        self.ins = in_conv(n_channels, base_filters, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.ds_0 = DownsamplingModule(base_filters, base_filters*2, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.en_1 = EncodingModule(base_filters*2, base_filters*2, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.en_2 = EncodingModule(base_filters*4, base_filters*4, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.ds_2 = DownsamplingModule(base_filters*4, base_filters*8, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.en_3 = EncodingModule(base_filters*8, base_filters*8, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16, self.Convolution, self.Dropout, self.InstanceNorm)
+        self.en_4 = EncodingModule(base_filters*16, base_filters*16, self.Convolution, self.Dropout, self.InstanceNorm)
         self.us_4 = FCNUpsamplingModule(base_filters*16, 1, scale_factor=5)
         self.us_3 = FCNUpsamplingModule(base_filters*8, 1, scale_factor=4)
         self.us_2 = FCNUpsamplingModule(base_filters*4, 1, scale_factor=3)
