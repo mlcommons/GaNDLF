@@ -10,7 +10,7 @@ class ModelBase(nn.Module):
     '''
     This is the base model class that all other architectures will need to derive from
     '''
-    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
+    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
         """
         This defines all defaults that the model base uses
         """
@@ -18,6 +18,15 @@ class ModelBase(nn.Module):
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.base_filters = base_filters
+        self.n_dimensions = n_dimensions
+
+        if self.n_dimensions == 2:
+            test = 2
+        elif self.n_dimensions == 3:
+            test = 3
+        else:
+            sys.exit('Currently, only 2D or 3D datasets are supported.')
+
         none_list = ['none', None, 'None', 'regression']
 
         if final_convolution_layer == 'sigmoid':
