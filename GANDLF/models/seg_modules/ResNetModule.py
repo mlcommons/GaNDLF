@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ResNetModule(nn.Module):
-    def __init__(self,input_channels,output_channels,dropout_p=0.3,leakiness=1e-2,conv_bias=True,inst_norm_affine=True,res=False,lrelu_inplace=True):
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, 
+    dropout_p=0.3, leakiness=1e-2,conv_bias=True, inst_norm_affine=True, res=False, lrelu_inplace=True):
         nn.Module.__init__(self)
         self.output_channels = output_channels
         self.dropout_p = dropout_p
@@ -12,13 +13,13 @@ class ResNetModule(nn.Module):
         self.inst_norm_affine = inst_norm_affine
         self.res = res
         self.lrelu_inplace = lrelu_inplace 
-        self.dropout = nn.Dropout3d(dropout_p)
-        self.inst_norm = nn.InstanceNorm3d(output_channels,affine = self.inst_norm_affine, track_running_stats = True)
-        self.conv = nn.Conv3d(output_channels,output_channels,kernel_size=3,stride=1,padding=1,bias = self.conv_bias)
+        self.dropout = Dropout(dropout_p)
+        self.inst_norm = InstanceNorm(output_channels, affine = self.inst_norm_affine, track_running_stats = True)
+        self.conv = Conv(output_channels, output_channels, kernel_size=3, stride=1, padding=1, bias = self.conv_bias)
     def forward(self,x):
         if self.res == True:
             skip = x          
-        x = F.leaky_relu(self.inst_norm(self.conv(x)),negative_slope = self.leakiness,inplace = self.lrelu_inplace)
+        x = F.leaky_relu(self.inst_norm(self.conv(x)),negative_slope = self.leakiness, inplace = self.lrelu_inplace)
         x = self.inst_norm(self.conv(x))
         x = x + skip
         x = F.leaky_relu(x,negative_slope = self.leakiness, inplace = self.lrelu_inplace)
