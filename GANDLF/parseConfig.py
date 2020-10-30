@@ -36,6 +36,9 @@ def parseConfig(config_file_path):
   if not('class_list' in params):
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
 
+  if not params['dimension']:
+    sys.exit('The \'dimension\' parameter to be defined, which should be 2 or 3')
+
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
   else:
