@@ -33,11 +33,11 @@ class fcn(ModelBase):
         self.en_3 = EncodingModule(base_filters*8, base_filters*8, self.Convolution, self.Dropout, self.InstanceNorm)
         self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16, self.Convolution, self.Dropout, self.InstanceNorm)
         self.en_4 = EncodingModule(base_filters*16, base_filters*16, self.Convolution, self.Dropout, self.InstanceNorm)
-        self.us_4 = FCNUpsamplingModule(base_filters*16, 1, scale_factor=5)
-        self.us_3 = FCNUpsamplingModule(base_filters*8, 1, scale_factor=4)
-        self.us_2 = FCNUpsamplingModule(base_filters*4, 1, scale_factor=3)
-        self.us_1 = FCNUpsamplingModule(base_filters*2, 1, scale_factor=2)
-        self.us_0 = FCNUpsamplingModule(base_filters, 1, scale_factor=1)
+        self.us_4 = FCNUpsamplingModule(base_filters*16, 1, scale_factor=5, Conv = self.Convolution)
+        self.us_3 = FCNUpsamplingModule(base_filters*8, 1, scale_factor=4, Conv = self.Convolution)
+        self.us_2 = FCNUpsamplingModule(base_filters*4, 1, scale_factor=3, Conv = self.Convolution)
+        self.us_1 = FCNUpsamplingModule(base_filters*2, 1, scale_factor=2, Conv = self.Convolution)
+        self.us_0 = FCNUpsamplingModule(base_filters, 1, scale_factor=1, Conv = self.Convolution)
         self.conv_0 = nn.Conv3d(in_channels=5, out_channels=self.n_classes,
                                 kernel_size=1, stride=1, padding=0, bias=True)
 
