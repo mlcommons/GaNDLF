@@ -38,7 +38,7 @@ class fcn(ModelBase):
         self.us_2 = FCNUpsamplingModule(base_filters*4, 1, scale_factor=3, Conv = self.Conv)
         self.us_1 = FCNUpsamplingModule(base_filters*2, 1, scale_factor=2, Conv = self.Conv)
         self.us_0 = FCNUpsamplingModule(base_filters, 1, scale_factor=1, Conv = self.Conv)
-        self.conv_0 = nn.Conv3d(in_channels=5, out_channels=self.n_classes,
+        self.conv_0 = self.Conv(in_channels=5, out_channels=self.n_classes,
                                 kernel_size=1, stride=1, padding=0, bias=True)
 
     def forward(self, x):
