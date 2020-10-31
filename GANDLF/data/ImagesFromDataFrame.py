@@ -127,6 +127,9 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     if not train:
         return subjects_dataset
 
+    if psize.shape[0] == 2:
+        psize = np.append(psize, 1) # ensuring same size during torchio processing
+
     sampler = torchio.data.UniformSampler(psize)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
