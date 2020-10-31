@@ -73,6 +73,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
 
+    if len(psize) == 2:
+        psize.append(1) # ensuring same size during torchio processing
+
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
         model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
