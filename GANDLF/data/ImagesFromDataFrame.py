@@ -28,8 +28,8 @@ def blur(p=1):
 def noise(p=1):
     return RandomNoise(mean=0, std=(0, 0.25), p=p, seed=None)
 
-def swap(p=1):
-    return RandomSwap(patch_size=15, num_iterations=100, p=p, seed=None)
+def swap(patch_size = 15, p=1):
+    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p, seed=None)
 
 # Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
@@ -117,7 +117,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         for aug in augmentations:
             # resample and normalize should always have probability=1
             if (aug != 'normalize') and (aug != 'resample'):
-                actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
+                actual_function = global_augs_dict[aug](patch_size=psize, p=augmentations[aug]['probability'])
                 augmentation_list.append(actual_function)
 
     transform = Compose(augmentation_list)
@@ -126,9 +126,6 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     if not train:
         return subjects_dataset
-
-    if len(psize) == 2:
-        psize.append(1) # ensuring same size during torchio processing
 
     sampler = torchio.data.UniformSampler(psize)
     # all of these need to be read from model.yaml
