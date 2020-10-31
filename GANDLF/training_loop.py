@@ -57,8 +57,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
-    if len(psize) == 2:
-        psize.append(1) # ensuring same size during torchio processing
+    # if len(psize) == 2:
+    #     psize.append(1) # ensuring same size during torchio processing
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
