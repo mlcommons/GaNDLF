@@ -25,7 +25,7 @@ class ModelBase(nn.Module):
         # convolution, batch_norm, instancenorm, dropout
 
         if self.n_dimensions == 2:
-            self.Conv = nn.Conv2d
+            self.Conv = nn.Conv3d
             self.ConvTranspose = nn.ConvTranspose2d
             self.InstanceNorm = nn.InstanceNorm2d
             self.Dropout = nn.Dropout2d
