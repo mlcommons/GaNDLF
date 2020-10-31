@@ -130,7 +130,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
                 command = parallel_compute_command_actual + \
                     ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
-                    ' -val_loader_pickle ' + currentValidataionDataPickle + \
+                    ' -val_loader_pickle ' + currentValidationDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
                     ' -headers_pickle ' + headersPickle + \
                     ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -holdout_loader_pickle '
