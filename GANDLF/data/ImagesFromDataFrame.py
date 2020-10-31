@@ -128,7 +128,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         return subjects_dataset
 
     if len(psize) == 2:
-        psize = psize.append(1) # ensuring same size during torchio processing
+        psize.append(1) # ensuring same size during torchio processing
 
     sampler = torchio.data.UniformSampler(psize)
     # all of these need to be read from model.yaml
