@@ -50,10 +50,10 @@ class ModelBase(nn.Module):
         none_list = ['none', None, 'None', 'regression']
 
         if final_convolution_layer == 'sigmoid':
-            self.final_convolution_layer = F.sigmoid()
+            self.final_convolution_layer = F.sigmoid
 
         elif final_convolution_layer == 'softmax':
-            self.final_convolution_layer = F.softmax()
+            self.final_convolution_layer = F.softmax
 
         elif final_convolution_layer in none_list:
             self.final_convolution_layer = None
