@@ -57,6 +57,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
+    if len(psize) == 2:
+        psize.append(1) # ensuring same size during torchio processing
+
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
@@ -72,9 +75,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # sanity check
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
-
-    if len(psize) == 2:
-        psize.append(1) # ensuring same size during torchio processing
 
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
