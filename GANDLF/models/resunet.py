@@ -25,7 +25,7 @@ class resunet(ModelBase):
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.ins = in_conv(self.n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
+        self.ds_0 = DownsamplingModule(base_filters, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm)
         self.en_1 = EncodingModule(base_filters*2, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm, res=True)
         self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm)
         self.en_2 = EncodingModule(base_filters*4, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm, res=True)
