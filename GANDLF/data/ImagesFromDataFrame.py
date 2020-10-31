@@ -13,19 +13,19 @@ from GANDLF.utils import resize_image
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
-def mri_artifact(p = 1):
+def mri_artifact(patch_size = None, p = 1):
     return OneOf({RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=p)
 
-def spatial_transform(p=1):
+def spatial_transform(patch_size = None, p=1):
     return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(): 0.2}, p=p)
 
-def bias(p=1):
+def bias(patch_size = None, p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
 
-def blur(p=1):
+def blur(patch_size = None, p=1):
     return RandomBlur(std=(0., 4.), p=p, seed=None)
 
-def noise(p=1):
+def noise(patch_size = None, p=1):
     return RandomNoise(mean=0, std=(0, 0.25), p=p, seed=None)
 
 def swap(patch_size = 15, p=1):
