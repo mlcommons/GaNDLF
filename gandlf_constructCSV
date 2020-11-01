@@ -27,7 +27,7 @@ def main():
   
   outputToWrite = ''
   for i in range(len(channelsID)):
-    outputToWrite = outputToWrite + str(i) + ','
+    outputToWrite = outputToWrite + 'Channel_' + str(i) + ','
   outputToWrite = outputToWrite + 'Label'
   outputToWrite = outputToWrite + '\n'
 
