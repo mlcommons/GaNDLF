@@ -10,6 +10,8 @@ from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
 
+import copy
+
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
@@ -17,7 +19,17 @@ def mri_artifact(patch_size = None, p = 1):
     return OneOf({RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=p)
 
 def spatial_transform(patch_size = None, p=1):
-    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(): 0.2}, p=p)
+    if patch_size is not None:
+        num_controls = patch_size
+        max_displacement = np.divide(patch_size, 10)
+        if patch_size[-1] == 1:
+            patch_size[-1] = 5 # torchio error The number of control points for axis 2 should be greater than 4 with locked border
+            max_displacement[-1] = 1 # ensure maximum displacement is never grater than patch size
+    else:
+        # use defaults defined in torchio
+        num_controls = 7 
+        max_displacement = 7.5
+    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(num_control_points = num_controls, max_displacement = max_displacement): 0.2}, p=p)
 
 def bias(patch_size = None, p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
@@ -56,6 +68,11 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
+
+    # define the control points and swap axes for augmentation
+    augmentation_patchAxesPoints = copy.deepcopy(psize)
+    for i in range(len(augmentation_patchAxesPoints)):
+        augmentation_patchAxesPoints[i] = max(round(augmentation_patchAxesPoints[i] / 10), 1) # always at least have 1
 
     # iterating through the dataframe
     for patient in range(num_row):
@@ -117,7 +134,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         for aug in augmentations:
             # resample and normalize should always have probability=1
             if (aug != 'normalize') and (aug != 'resample'):
-                actual_function = global_augs_dict[aug](patch_size=psize, p=augmentations[aug]['probability'])
+                actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
                 augmentation_list.append(actual_function)
 
     transform = Compose(augmentation_list)
