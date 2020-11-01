@@ -1,21 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-class Interpolate(nn.Module):
-    def __init__(self, size=None, scale_factor=None, mode='nearest',
-                 align_corners=True):
-        super(Interpolate, self).__init__()
-        self.align_corners = align_corners
-        self.mode = mode
-        self.scale_factor = scale_factor
-        self.size = size
-
-    def forward(self, x):
-        return nn.functional.interpolate(x, size=self.size,
-                                         scale_factor=self.scale_factor,
-                                         mode=self.mode,
-                                         align_corners=self.align_corners)
+from .Interpolate import Interpolate
 
 class FCNUpsamplingModule(nn.Module):
     def __init__(self, input_channels, output_channels, Conv, leakiness=1e-2, 
@@ -43,7 +29,11 @@ class FCNUpsamplingModule(nn.Module):
         self.conv_bias = conv_bias
         self.leakiness = leakiness
         self.scale_factor = scale_factor
-        self.interpolate = Interpolate(scale_factor=2**(self.scale_factor-1), mode='trilinear', 
+        if Conv == nn.Conv3d:
+            mode = 'trilinear'
+        else:
+            mode = 'bilinear'
+        self.interpolate = Interpolate(scale_factor=2**(self.scale_factor-1), mode=mode, 
                                        align_corners=True)
         self.conv0 = Conv(input_channels, output_channels, kernel_size=1,
                                 stride=1, padding=0, 
