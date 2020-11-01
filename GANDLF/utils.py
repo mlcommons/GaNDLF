@@ -68,6 +68,10 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
             for patches_batch in patch_loader:
                 image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).cuda()
                 locations = patches_batch[torchio.LOCATION]
+                ## special case for 2D            
+                if image.shape[-1] == 1:
+                    model_2d = True
+                    image = torch.squeeze(image, -1)
                 pred_mask = model(image)
                 #print(image.shape)
                 #print(pred_mask.shape)
@@ -76,6 +80,8 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
             pred_mask = pred_mask.unsqueeze(0)
             mask = subject['label'][torchio.DATA] # get the label image
             mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+            if model_2d:
+                mask = torch.squeeze(mask, -1)
             mask = one_hot(mask, class_list)
             # making sure that the output and mask are on the same device
             pred_mask, mask = pred_mask.cuda(), mask.cuda()
