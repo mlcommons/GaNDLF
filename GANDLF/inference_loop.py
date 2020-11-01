@@ -46,16 +46,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   q_verbose = parameters['q_verbose']
   augmentations = parameters['data_augmentation']
   which_model = parameters['model']['architecture']
-  opt = parameters['opt']
-  loss_function = parameters['loss_function']
-  scheduler = parameters['scheduler']
   class_list = parameters['class_list']
   base_filters = parameters['base_filters']
-  base_filters = parameters['base_filters']
-  base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
-  learning_rate = parameters['learning_rate']
-  num_epochs = parameters['num_epochs']
   
   n_channels = len(headers['channelHeaders'])
   n_classList = len(class_list)
@@ -69,43 +62,30 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     if psize[-1] == 1:
         checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
     else:
         checkPatchDivisibility(psize)
   elif which_model == 'unet':
-    model = unet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     if psize[-1] == 1:
         checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
     else:
         checkPatchDivisibility(psize)
   elif which_model == 'fcn':
-    model = fcn(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'uinc':
-    model = uinc(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
   model.load_state_dict(main_dict['model_state_dict'])
-  # setting the loss function
-  if loss_function == 'dc':
-    loss_fn  = MCD_loss
-  elif loss_function == 'dcce':
-    loss_fn  = DCCE
-  elif loss_function == 'ce':
-    loss_fn = CE
-  elif loss_function == 'mse':
-    loss_fn = MCD_MSE_loss
-  else:
-    print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
-    loss_function = 'dc'
-    loss_fn  = MCD_loss
-
+  
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
