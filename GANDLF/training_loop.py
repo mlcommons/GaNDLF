@@ -79,8 +79,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
         model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        checkPatchDivisibility(psize)
     elif which_model == 'unet':
         model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        checkPatchDivisibility(psize)
     elif which_model == 'fcn':
         model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     elif which_model == 'uinc':
