@@ -13,7 +13,7 @@ class IncDownsamplingModule(nn.Module):
         self.lrelu_inplace = lrelu_inplace
         self.inst_norm_affine = inst_norm_affine
         self.inst_norm = nn.InstanceNorm3d(output_channels,affine = self.inst_norm_affine, track_running_stats = True)
-        self.down = nn.Conv3d(input_channels,output_channels,kernel_size = 1, stride = 2, padding = 0, bias = self.conv_bias)
+        self.down = Conv(input_channels,output_channels,kernel_size = 1, stride = 2, padding = 0, bias = self.conv_bias)
     
     def forward(self,x):
         x = F.leaky_relu(self.inst_norm(self.down(x)),negative_slope = self.leakiness, inplace = self.lrelu_inplace)

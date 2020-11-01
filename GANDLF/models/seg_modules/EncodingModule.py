@@ -34,16 +34,16 @@ class EncodingModule(nn.Module):
         self.inst_norm_affine = inst_norm_affine
         self.lrelu_inplace = lrelu_inplace
         self.dropout = nn.Dropout3d(dropout_p)
-        self.in_0 = nn.InstanceNorm3d(output_channels, 
+        self.in_0 = InstanceNorm(output_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.in_1 = nn.InstanceNorm3d(output_channels, 
+        self.in_1 = InstanceNorm(output_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.conv0 = nn.Conv3d(output_channels, output_channels, kernel_size=3,
+        self.conv0 = Conv(output_channels, output_channels, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
-        self.conv1 = nn.Conv3d(output_channels, output_channels, kernel_size=3,
+        self.conv1 = Conv(output_channels, output_channels, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
 

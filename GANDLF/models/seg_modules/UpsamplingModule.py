@@ -31,7 +31,7 @@ class UpsamplingModule(nn.Module):
         self.scale_factor = scale_factor
         self.interpolate = Interpolate(scale_factor=self.scale_factor, mode='trilinear', 
                                        align_corners=True)
-        self.conv0 = nn.Conv3d(input_channels, output_channels, kernel_size=1,
+        self.conv0 = Conv(input_channels, output_channels, kernel_size=1,
                                 stride=1, padding=0, 
                                 bias = self.conv_bias)
         
