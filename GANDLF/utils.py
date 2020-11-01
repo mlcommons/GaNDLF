@@ -51,9 +51,9 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
     # if no weights are specified, use 1
     if weights is None:
         weights = [1]
-    else:
-        for i in range(class_list - 1):
-            weights.append(1)
+        if class_list > 1:
+            for i in range(class_list - 1):
+                weights.append(1)
 
     model.eval()
     with torch.no_grad():
