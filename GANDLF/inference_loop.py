@@ -160,6 +160,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         aggregator = torchio.inference.GridAggregator(grid_sampler)
         for patches_batch in patch_loader:
             image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).to(device)
+            if image.shape[-1] == 1:
+                model_2d = True
+                image = torch.squeeze(image, -1)
             locations = patches_batch[torchio.LOCATION]
             pred_mask = model(image)
             aggregator.add_batch(pred_mask, locations)
@@ -170,6 +173,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         if not subject['label'] == "NA":
           mask = subject['label'][torchio.DATA] # get the label image
           mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+          if model_2d:
+              mask = torch.squeeze(mask, -1)
           mask = one_hot(mask.float().numpy(), class_list)
           mask = torch.from_numpy(mask)
           torch.cuda.empty_cache()
