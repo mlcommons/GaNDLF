@@ -3,6 +3,7 @@ import SimpleITK as sitk
 import torch
 import torchio
 from GANDLF.losses import *
+import sys
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
@@ -18,6 +19,9 @@ def one_hot(segmask_array, class_list):
     batch_stack = torch.stack(batch_stack)    
     return batch_stack
 
+def checkPatchDivisibility(patch_size, number = 16):
+    if np.count_nonzero(np.remainder(patch_size, number)) > 0:
+        sys.exit('The \'patch_size\' should be divisible by ' + str(number) + ' for unet-like models')
 
 def reverse_one_hot(predmask_array,class_list):
     idx_argmax  = np.argmax(predmask_array,axis=0)
