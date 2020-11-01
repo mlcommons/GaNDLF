@@ -165,7 +165,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   
   # print stats
   print('Using device:', device)
-
   sys.stdout.flush()
 
   model = model.to(dev)
