@@ -57,8 +57,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
-    # if len(psize) == 2:
-    #     psize.append(1) # ensuring same size during torchio processing
+    if len(psize) == 2:
+        psize.append(1) # ensuring same size during torchio processing
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
@@ -276,6 +276,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
             # read the mask
             mask = subject['label'][torchio.DATA] # get the label image
+
+            ## special case for 2D            
+            if image.shape[-1] == 1:
+                model_2d = True
+                image = torch.squeeze(image, -1)
+                mask = torch.squeeze(mask, -1)
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             one_hot_mask = one_hot(mask, class_list)
@@ -291,6 +297,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
             output = model(image)
+            if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
+                one_hot_mask = one_hot_mask.unsqueeze(-1)
+                output = output.unsqueeze(-1)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
