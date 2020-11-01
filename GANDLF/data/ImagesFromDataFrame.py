@@ -23,7 +23,7 @@ def spatial_transform(patch_size = None, p=1):
         num_controls = patch_size
         max_displacement = np.divide(patch_size, 10)
         if patch_size[-1] == 1:
-            max_displacement[-1] = 1 # ensure maximum displacement is never grater than patch size
+            max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
     else:
         # use defaults defined in torchio
         num_controls = 7 
