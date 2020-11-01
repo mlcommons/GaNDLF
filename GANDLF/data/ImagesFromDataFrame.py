@@ -23,13 +23,12 @@ def spatial_transform(patch_size = None, p=1):
         num_controls = patch_size
         max_displacement = np.divide(patch_size, 10)
         if patch_size[-1] == 1:
-            patch_size[-1] = 5 # torchio error The number of control points for axis 2 should be greater than 4 with locked border
             max_displacement[-1] = 1 # ensure maximum displacement is never grater than patch size
     else:
         # use defaults defined in torchio
         num_controls = 7 
         max_displacement = 7.5
-    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(num_control_points = num_controls, max_displacement = max_displacement): 0.2}, p=p)
+    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
 
 def bias(patch_size = None, p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
