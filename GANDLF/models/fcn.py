@@ -22,23 +22,23 @@ class fcn(ModelBase):
     the seg_modules file.
     DOI: 10.1109/TPAMI.2016.2572683
     """
-    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(fcn, self).__init__(n_channels, n_classes, base_filters, final_convolution_layer)
-        self.ins = in_conv(n_channels, base_filters)
-        self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
-        self.en_1 = EncodingModule(base_filters*2, base_filters*2)
-        self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4)
-        self.en_2 = EncodingModule(base_filters*4, base_filters*4)
-        self.ds_2 = DownsamplingModule(base_filters*4, base_filters*8)
-        self.en_3 = EncodingModule(base_filters*8, base_filters*8)
-        self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16)
-        self.en_4 = EncodingModule(base_filters*16, base_filters*16)
-        self.us_4 = FCNUpsamplingModule(base_filters*16, 1, scale_factor=5)
-        self.us_3 = FCNUpsamplingModule(base_filters*8, 1, scale_factor=4)
-        self.us_2 = FCNUpsamplingModule(base_filters*4, 1, scale_factor=3)
-        self.us_1 = FCNUpsamplingModule(base_filters*2, 1, scale_factor=2)
-        self.us_0 = FCNUpsamplingModule(base_filters, 1, scale_factor=1)
-        self.conv_0 = nn.Conv3d(in_channels=5, out_channels=self.n_classes,
+    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(fcn, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
+        self.ins = in_conv(n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm)
+        self.ds_0 = DownsamplingModule(base_filters, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_1 = EncodingModule(base_filters*2, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm)
+        self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_2 = EncodingModule(base_filters*4, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm)
+        self.ds_2 = DownsamplingModule(base_filters*4, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_3 = EncodingModule(base_filters*8, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm)
+        self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_4 = EncodingModule(base_filters*16, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm)
+        self.us_4 = FCNUpsamplingModule(base_filters*16, 1, scale_factor=5, Conv = self.Conv)
+        self.us_3 = FCNUpsamplingModule(base_filters*8, 1, scale_factor=4, Conv = self.Conv)
+        self.us_2 = FCNUpsamplingModule(base_filters*4, 1, scale_factor=3, Conv = self.Conv)
+        self.us_1 = FCNUpsamplingModule(base_filters*2, 1, scale_factor=2, Conv = self.Conv)
+        self.us_0 = FCNUpsamplingModule(base_filters, 1, scale_factor=1, Conv = self.Conv)
+        self.conv_0 = self.Conv(in_channels=5, out_channels=self.n_classes,
                                 kernel_size=1, stride=1, padding=0, bias=True)
 
     def forward(self, x):

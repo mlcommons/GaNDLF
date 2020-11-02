@@ -20,27 +20,27 @@ class resunet(ModelBase):
     which remain constant all the modules. For more details on the smaller modules please have a
     look at the seg_modules file.
     """
-    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(resunet, self).__init__(n_channels, n_classes, base_filters, final_convolution_layer)
+    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(resunet, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
         self.n_channels = n_channels
         self.n_classes = n_classes
-        self.ins = in_conv(self.n_channels, base_filters, res=True)
-        self.ds_0 = DownsamplingModule(base_filters, base_filters*2)
-        self.en_1 = EncodingModule(base_filters*2, base_filters*2, res=True)
-        self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4)
-        self.en_2 = EncodingModule(base_filters*4, base_filters*4, res=True)
-        self.ds_2 = DownsamplingModule(base_filters*4, base_filters*8)
-        self.en_3 = EncodingModule(base_filters*8, base_filters*8, res=True)
-        self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16)
-        self.en_4 = EncodingModule(base_filters*16, base_filters*16, res=True)
-        self.us_3 = UpsamplingModule(base_filters*16, base_filters*8)
-        self.de_3 = DecodingModule(base_filters*16, base_filters*8, res=True)
-        self.us_2 = UpsamplingModule(base_filters*8, base_filters*4)
-        self.de_2 = DecodingModule(base_filters*8, base_filters*4, res=True)
-        self.us_1 = UpsamplingModule(base_filters*4, base_filters*2)
-        self.de_1 = DecodingModule(base_filters*4, base_filters*2, res=True)
-        self.us_0 = UpsamplingModule(base_filters*2, base_filters)
-        self.out = out_conv(base_filters*2, n_classes,
+        self.ins = in_conv(self.n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.ds_0 = DownsamplingModule(base_filters, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_1 = EncodingModule(base_filters*2, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.ds_1 = DownsamplingModule(base_filters*2, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_2 = EncodingModule(base_filters*4, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.ds_2 = DownsamplingModule(base_filters*4, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_3 = EncodingModule(base_filters*8, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.ds_3 = DownsamplingModule(base_filters*8, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm)
+        self.en_4 = EncodingModule(base_filters*16, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.us_3 = UpsamplingModule(base_filters*16, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm)
+        self.de_3 = DecodingModule(base_filters*16, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.us_2 = UpsamplingModule(base_filters*8, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm)
+        self.de_2 = DecodingModule(base_filters*8, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.us_1 = UpsamplingModule(base_filters*4, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm)
+        self.de_1 = DecodingModule(base_filters*4, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm, res=True)
+        self.us_0 = UpsamplingModule(base_filters*2, base_filters, self.Conv, self.Dropout, self.InstanceNorm)
+        self.out = out_conv(base_filters*2, n_classes, self.Conv, self.Dropout, self.InstanceNorm,
                             final_convolution_layer=self.final_convolution_layer, res=True)
 
     def forward(self, x):

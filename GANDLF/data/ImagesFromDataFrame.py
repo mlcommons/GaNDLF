@@ -10,26 +10,37 @@ from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
 
+import copy
+
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
-def mri_artifact(p = 1):
+def mri_artifact(patch_size = None, p = 1):
     return OneOf({RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=p)
 
-def spatial_transform(p=1):
-    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(): 0.2}, p=p)
+def spatial_transform(patch_size = None, p=1):
+    if patch_size is not None:
+        num_controls = patch_size
+        max_displacement = np.divide(patch_size, 10)
+        if patch_size[-1] == 1:
+            max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
+    else:
+        # use defaults defined in torchio
+        num_controls = 7 
+        max_displacement = 7.5
+    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
 
-def bias(p=1):
+def bias(patch_size = None, p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
 
-def blur(p=1):
+def blur(patch_size = None, p=1):
     return RandomBlur(std=(0., 4.), p=p, seed=None)
 
-def noise(p=1):
+def noise(patch_size = None, p=1):
     return RandomNoise(mean=0, std=(0, 0.25), p=p, seed=None)
 
-def swap(p=1):
-    return RandomSwap(patch_size=15, num_iterations=100, p=p, seed=None)
+def swap(patch_size = 15, p=1):
+    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p, seed=None)
 
 # Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
@@ -56,6 +67,11 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
+
+    # define the control points and swap axes for augmentation
+    augmentation_patchAxesPoints = copy.deepcopy(psize)
+    for i in range(len(augmentation_patchAxesPoints)):
+        augmentation_patchAxesPoints[i] = max(round(augmentation_patchAxesPoints[i] / 10), 1) # always at least have 1
 
     # iterating through the dataframe
     for patient in range(num_row):
@@ -117,7 +133,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         for aug in augmentations:
             # resample and normalize should always have probability=1
             if (aug != 'normalize') and (aug != 'resample'):
-                actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
+                actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
                 augmentation_list.append(actual_function)
 
     transform = Compose(augmentation_list)

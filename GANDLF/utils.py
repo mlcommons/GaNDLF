@@ -3,6 +3,7 @@ import SimpleITK as sitk
 import torch
 import torchio
 from GANDLF.losses import *
+import sys
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
@@ -18,6 +19,9 @@ def one_hot(segmask_array, class_list):
     batch_stack = torch.stack(batch_stack)    
     return batch_stack
 
+def checkPatchDivisibility(patch_size, number = 16):
+    if np.count_nonzero(np.remainder(patch_size, number)) > 0:
+        sys.exit('The \'patch_size\' should be divisible by ' + str(number) + ' for unet-like models')
 
 def reverse_one_hot(predmask_array,class_list):
     idx_argmax  = np.argmax(predmask_array,axis=0)
@@ -51,7 +55,7 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
     # if no weights are specified, use 1
     if weights is None:
         weights = [1]
-        for i in range(class_list - 1):
+        for i in range(len(class_list) - 1):
             weights.append(1)
 
     model.eval()
@@ -64,12 +68,19 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
             for patches_batch in patch_loader:
                 image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).cuda()
                 locations = patches_batch[torchio.LOCATION]
+                ## special case for 2D            
+                if image.shape[-1] == 1:
+                    model_2d = True
+                    image = torch.squeeze(image, -1)
+                    locations = torch.squeeze(locations, -1)
                 pred_mask = model(image)
+                if model_2d:
+                    pred_mask = pred_mask.unsqueeze(-1)
                 #print(image.shape)
                 #print(pred_mask.shape)
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
-            pred_mask = pred_mask.unsqueeze(0)
+            pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             mask = subject['label'][torchio.DATA] # get the label image
             mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
             mask = one_hot(mask, class_list)
@@ -78,7 +89,7 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
             loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
             total_loss += loss
             #Computing the dice score 
-            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item()
+            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
             #Computing the total dice
             total_dice+= curr_dice
             #print("Current Dice is: ", curr_dice)

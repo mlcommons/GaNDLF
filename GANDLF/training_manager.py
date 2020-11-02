@@ -106,7 +106,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             validationData = trainingAndValidationData.iloc[test_index]
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
-                trainingLoop(trainingDataFromPickle=trainingData, validataionDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
+                trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
                             device=device, parameters=parameters, holdoutDataFromPickle=holdoutData)
 
             else:
@@ -114,9 +114,9 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 ## pickle/unpickle data
                 # pickle the data
                 currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
-                currentValidataionDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
+                currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
                 trainingData.to_pickle(currentTrainingDataPickle)
-                validationData.to_pickle(currentValidataionDataPickle)
+                validationData.to_pickle(currentValidationDataPickle)
 
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
                 with open(headersPickle, 'wb') as handle:
@@ -130,7 +130,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
                 command = parallel_compute_command_actual + \
                     ' -m GANDLF.training_loop -train_loader_pickle ' + currentTrainingDataPickle + \
-                    ' -val_loader_pickle ' + currentValidataionDataPickle + \
+                    ' -val_loader_pickle ' + currentValidationDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
                     ' -headers_pickle ' + headersPickle + \
                     ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -holdout_loader_pickle '

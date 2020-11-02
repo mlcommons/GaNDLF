@@ -46,19 +46,15 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   q_verbose = parameters['q_verbose']
   augmentations = parameters['data_augmentation']
   which_model = parameters['model']['architecture']
-  opt = parameters['opt']
-  loss_function = parameters['loss_function']
-  scheduler = parameters['scheduler']
   class_list = parameters['class_list']
   base_filters = parameters['base_filters']
-  base_filters = parameters['base_filters']
-  base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
-  learning_rate = parameters['learning_rate']
-  num_epochs = parameters['num_epochs']
   
   n_channels = len(headers['channelHeaders'])
   n_classList = len(class_list)
+
+  if len(psize) == 2:
+      psize.append(1) # ensuring same size during torchio processing
 
   # Setting up the inference loader
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
@@ -66,35 +62,30 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
-    model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    if psize[-1] == 1:
+        checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
+    else:
+        checkPatchDivisibility(psize)
   elif which_model == 'unet':
-    model = unet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    if psize[-1] == 1:
+        checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
+    else:
+        checkPatchDivisibility(psize)
   elif which_model == 'fcn':
-    model = fcn(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'uinc':
-    model = uinc(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
-    model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
   model.load_state_dict(main_dict['model_state_dict'])
-  # setting the loss function
-  if loss_function == 'dc':
-    loss_fn  = MCD_loss
-  elif loss_function == 'dcce':
-    loss_fn  = DCCE
-  elif loss_function == 'ce':
-    loss_fn = CE
-  elif loss_function == 'mse':
-    loss_fn = MCD_MSE_loss
-  else:
-    print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
-    loss_function = 'dc'
-    loss_fn  = MCD_loss
-
+  
   print("\nHostname   :" + str(os.getenv("HOSTNAME")))
   sys.stdout.flush()
 
@@ -110,15 +101,37 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
   if device != 'cpu':
-      dev = int(device)
-      device = torch.device(dev)
-      print("Current Device : ", torch.cuda.current_device())
-      print("Device Count on Machine : ", torch.cuda.device_count())
-      print("Device Name : ", torch.cuda.get_device_name(device))
-      print("Cuda Availability : ", torch.cuda.is_available())
+      if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
+          sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
+      
+      dev = os.environ.get('CUDA_VISIBLE_DEVICES')
+      # multi-gpu support
+      # ###
+      # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
+      # ###
+      if ',' in dev:
+          device = torch.device('cuda')
+          model = nn.DataParallel(model, '[' + dev + ']')
+      else:
+          print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
+          if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
+              dev = '0'
+          print('Device finally used: ', dev)
+          device = torch.device('cuda:' + dev)
+          model = model.to(int(dev))
+          print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
+          print('Memory Usage : ')
+          print('Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
+          print('Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
+      
+      print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
+    
   else:
       dev = -1
       device = torch.device('cpu')
+      model.cpu()
+      amp = False
+      print("Since Device is CPU, Mixed Precision Training is set to False")
   
   
   # multi-gpu support
@@ -132,15 +145,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   
   # print stats
   print('Using device:', device)
-  if device.type == 'cuda':
-      print("Current Device : ", torch.cuda.current_device())
-      print("Device Count on Machine : ", torch.cuda.device_count())
-      print("Device Name : ", torch.cuda.get_device_name(device))
-      print("Cuda Availibility : ", torch.cuda.is_available())
-      print('Memory Usage : ')
-      print('Allocated : ', round(torch.cuda.memory_allocated(0)/1024**3, 1),'GB')
-      print('Cached: ', round(torch.cuda.memory_reserved(0)/1024**3, 1), 'GB')
-
   sys.stdout.flush()
 
   model = model.to(dev)
@@ -160,6 +164,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         aggregator = torchio.inference.GridAggregator(grid_sampler)
         for patches_batch in patch_loader:
             image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).to(device)
+            if image.shape[-1] == 1:
+                model_2d = True
+                image = torch.squeeze(image, -1)
             locations = patches_batch[torchio.LOCATION]
             pred_mask = model(image)
             aggregator.add_batch(pred_mask, locations)
@@ -170,6 +177,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         if not subject['label'] == "NA":
           mask = subject['label'][torchio.DATA] # get the label image
           mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+          if model_2d:
+              mask = torch.squeeze(mask, -1)
           mask = one_hot(mask.float().numpy(), class_list)
           mask = torch.from_numpy(mask)
           torch.cuda.empty_cache()

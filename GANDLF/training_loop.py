@@ -57,6 +57,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
   
+    if len(psize) == 2:
+        psize.append(1) # ensuring same size during torchio processing
+
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
@@ -75,17 +78,25 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
-        model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        if psize[-1] == 1:
+            checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
+        else:
+            checkPatchDivisibility(psize)
     elif which_model == 'unet':
-        model = unet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        if psize[-1] == 1:
+            checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
+        else:
+            checkPatchDivisibility(psize)
     elif which_model == 'fcn':
-        model = fcn(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     elif which_model == 'uinc':
-        model = uinc(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
-        model = resunet(n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
     # setting optimizer
     if opt == 'sgd':
@@ -232,7 +243,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         mask = subject['label'][torchio.DATA]
         one_hot_mask = one_hot(mask, class_list)
         for i in range(1, n_classList):
-            currentNumber = one_hot_mask[:,i,:,:,:].nonzero().size(0)
+            currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
             dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
             total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
     
@@ -273,6 +284,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
             # read the mask
             mask = subject['label'][torchio.DATA] # get the label image
+
+            ## special case for 2D            
+            if image.shape[-1] == 1:
+                model_2d = True
+                image = torch.squeeze(image, -1)
+                mask = torch.squeeze(mask, -1)
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             one_hot_mask = one_hot(mask, class_list)
@@ -288,6 +305,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
             output = model(image)
+            if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
+                one_hot_mask = one_hot_mask.unsqueeze(-1)
+                output = output.unsqueeze(-1)
             if amp:
                 with torch.cuda.amp.autocast(): 
                 # Computing the loss
@@ -335,7 +355,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "optimizer_state_dict": optimizer.state_dict(),
             "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
 
-        print("   Train DCE: %s | Best Train DCE: %s | Avg Train Loss: %s | Best Train Ep %s"%(str(average_train_dice), str(best_train_dice), str(average_train_loss), str(best_train_idx)))
+        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
 
         # Now we enter the evaluation/validation part of the epoch        
         model.eval()
@@ -350,18 +370,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         average_test_dice = total_test_dice/len(inference_loader.dataset)
         average_test_loss = total_test_loss/len(inference_loader.dataset)
         
-        # stats for current holdout data
-        if average_test_dice > best_test_dice:
-            best_test_idx = ep
-            best_test_dice = average_test_dice
-            best_test_val_dice = average_test_dice
-            # We can add more stuff to be saved if we need anything more
-            torch.save({"epoch": best_test_idx,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("   Test DCE: %s | Best Test DCE: %s | Avg Test Loss: %s | Best Test Ep %s"%(average_test_dice, best_test_dice, average_test_loss, best_test_idx)) 
-
         # stats for current validation data
         if average_val_dice > best_val_dice:
             best_val_idx = ep
@@ -374,7 +382,19 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        print("   Val DCE: %s | Best Val DCE: %s | Avg Val Loss: %s | Best Val Ep: %s"%(str(average_val_dice), str(best_val_dice), str(average_val_loss), str(best_val_idx))) 
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Train DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Train Ep ", format(best_val_idx,'.1f'))
+
+        # stats for current holdout data
+        if average_test_dice > best_test_dice:
+            best_test_idx = ep
+            best_test_dice = average_test_dice
+            best_test_val_dice = average_test_dice
+            # We can add more stuff to be saved if we need anything more
+            torch.save({"epoch": best_test_idx,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Train DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Train Ep ", format(best_test_idx,'.1f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
