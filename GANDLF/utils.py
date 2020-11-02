@@ -72,23 +72,24 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
                 if image.shape[-1] == 1:
                     model_2d = True
                     image = torch.squeeze(image, -1)
+                    locations = torch.squeeze(locations, -1)
                 pred_mask = model(image)
+                if model_2d:
+                    pred_mask = pred_mask.unsqueeze(-1)
                 #print(image.shape)
                 #print(pred_mask.shape)
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
-            pred_mask = pred_mask.unsqueeze(0)
+            pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             mask = subject['label'][torchio.DATA] # get the label image
             mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-            if model_2d:
-                mask = torch.squeeze(mask, -1)
             mask = one_hot(mask, class_list)
             # making sure that the output and mask are on the same device
             pred_mask, mask = pred_mask.cuda(), mask.cuda()
             loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
             total_loss += loss
             #Computing the dice score 
-            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item()
+            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
             #Computing the total dice
             total_dice+= curr_dice
             #print("Current Dice is: ", curr_dice)
