@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class DecodingModule(nn.Module):
-    def __init__(self, input_channels, output_channels, leakiness=1e-2, conv_bias=True, kernel_size=3,
-        inst_norm_affine=True, res=True, lrelu_inplace=True):
+    def __init__(self, input_channels, output_channels, Conv, Dropout, InstanceNorm, leakiness=1e-2, conv_bias=True,    
+        kernel_size=3, inst_norm_affine=True, res=True, lrelu_inplace=True):
         """[The Decoding convolution module to learn the information and use later]
         
         [This function will create the Learning convolutions]
@@ -30,22 +30,22 @@ class DecodingModule(nn.Module):
         self.conv_bias = conv_bias
         self.leakiness = leakiness
         self.res = res
-        self.in_0 = nn.InstanceNorm3d(input_channels, 
+        self.in_0 = InstanceNorm(input_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.in_1 = nn.InstanceNorm3d(output_channels, 
+        self.in_1 = InstanceNorm(output_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.in_2 = nn.InstanceNorm3d(output_channels, 
+        self.in_2 = InstanceNorm(output_channels, 
                                       affine=self.inst_norm_affine,
                                       track_running_stats=True)
-        self.conv0 = nn.Conv3d(input_channels, output_channels, kernel_size=3,
+        self.conv0 = Conv(input_channels, output_channels, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
-        self.conv1 = nn.Conv3d(output_channels, output_channels, kernel_size=3,
+        self.conv1 = Conv(output_channels, output_channels, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
-        self.conv2 = nn.Conv3d(output_channels, output_channels, kernel_size=3,
+        self.conv2 = Conv(output_channels, output_channels, kernel_size=3,
                                stride=1, padding=(kernel_size - 1) // 2, 
                                bias=self.conv_bias)
         

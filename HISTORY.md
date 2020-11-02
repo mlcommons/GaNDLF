@@ -1,3 +1,7 @@
+## 0.0.5
+
+- 2D support added
+
 ## 0.0.4
 
 - Added full image validation for generating loss and dice scores

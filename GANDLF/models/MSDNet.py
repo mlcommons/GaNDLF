@@ -7,8 +7,9 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 from GANDLF.models.seg_modules.add_conv_block import add_conv_block
+from GANDLF.models import modelBase
 
-class MSDNet(nn.Module):
+class MSDNet(modelBase):
     """
     Paper: A mixed-scale dense convolutional neural network for image analysis
     Published: PNAS, Jan. 2018
@@ -21,30 +22,32 @@ class MSDNet(nn.Module):
         if isinstance(m, nn.Linear):
             nn.init.kaiming_normal(m, m.weight.data)
 
-    def __init__(self, in_channels=1, out_channels=2, num_layers=40, volumetric=True):
+    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, num_layers = 4):
 
-        super().__init__()
+        super(MSDNet, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
 
-        self.layer_list = add_conv_block(in_ch=in_channels, volumetric=volumetric)
+        self.layer_list = add_conv_block(self.Conv, self.BatchNorm, in_ch=n_channels)
 
         current_in_channels = 1
         # Add N layers
         for i in range(num_layers):
             s = i % 10 + 1
             self.layer_list += add_conv_block(
+                self.Conv,
+                self.BatchNorm,
                 in_ch=current_in_channels,
-                dilate=s,
-                volumetric=volumetric
+                dilate=s
             )
             current_in_channels += 1
 
         # Add final output block
         self.layer_list += add_conv_block(
-            in_ch=current_in_channels + in_channels,
-            out_ch=out_channels,
+            self.Conv,
+            self.BatchNorm,
+            in_ch=current_in_channels + n_channels,
+            out_ch=n_classes,
             kernel_size=1,
-            last=True,
-            volumetric=volumetric
+            last=True
         )
 
         # Add to Module List
@@ -64,7 +67,7 @@ class MSDNet(nn.Module):
             x = f(x)
 
             if (i + 1) % 2 == 0 and not i == (len(self.layers) - 1):
-                x = F.relu(x)
+                x = nn.ReLU(x) #F.relu(x)
                 # Append output into previous features
                 prev_features.append(x)
                 x = torch.cat(prev_features, 1)

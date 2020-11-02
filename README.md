@@ -6,9 +6,10 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 
 - Supports multiple
   - Deep Learning model architectures
+  - Data dimensions (2D/3D)
   - Channels/modalities 
   - Prediction classes
-- Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)
+- Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)  
 - Built-in nested cross validation (and related combined statistics), with support for parallel HPC-based computing
 - Handles imbalanced classes (very small tumor in large organ)
 - Multi-GPU (on the same machine) training
