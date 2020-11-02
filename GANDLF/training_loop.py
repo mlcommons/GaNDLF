@@ -355,7 +355,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "optimizer_state_dict": optimizer.state_dict(),
             "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
 
-        print("   Train DCE: %s | Best Train DCE: %s | Avg Train Loss: %s | Best Train Ep %s"%(str(average_train_dice), str(best_train_dice), str(average_train_loss), str(best_train_idx)))
+        print("   Train DCE: {0:.10f} | Best Train DCE: {0:.10f} | Avg Train Loss: {0:.10f} | Best Train Ep {0:.1f}".format(average_train_dice. best_train_dice, average_train_loss, best_train_idx))
 
         # Now we enter the evaluation/validation part of the epoch        
         model.eval()
@@ -370,18 +370,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         average_test_dice = total_test_dice/len(inference_loader.dataset)
         average_test_loss = total_test_loss/len(inference_loader.dataset)
         
-        # stats for current holdout data
-        if average_test_dice > best_test_dice:
-            best_test_idx = ep
-            best_test_dice = average_test_dice
-            best_test_val_dice = average_test_dice
-            # We can add more stuff to be saved if we need anything more
-            torch.save({"epoch": best_test_idx,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("   Test DCE: %s | Best Test DCE: %s | Avg Test Loss: %s | Best Test Ep %s"%(average_test_dice, best_test_dice, average_test_loss, best_test_idx)) 
-
         # stats for current validation data
         if average_val_dice > best_val_dice:
             best_val_idx = ep
@@ -394,7 +382,19 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        print("   Val DCE: %s | Best Val DCE: %s | Avg Val Loss: %s | Best Val Ep: %s"%(str(average_val_dice), str(best_val_dice), str(average_val_loss), str(best_val_idx))) 
+        print("     Val DCE: {0:.10f} | Best Train DCE: {0:.10f} | Avg Train Loss: {0:.10f} | Best Train Ep {0:.1f}".format(average_val_dice. best_val_dice, average_val_loss, best_val_idx))
+
+        # stats for current holdout data
+        if average_test_dice > best_test_dice:
+            best_test_idx = ep
+            best_test_dice = average_test_dice
+            best_test_val_dice = average_test_dice
+            # We can add more stuff to be saved if we need anything more
+            torch.save({"epoch": best_test_idx,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        print("    Test DCE: {0:.10f} | Best Train DCE: {0:.10f} | Avg Train Loss: {0:.10f} | Best Train Ep {0:.1f}".format(average_test_dice. best_test_dice, average_test_loss, best_test_idx))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
