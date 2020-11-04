@@ -12,6 +12,22 @@ from GANDLF.utils import resize_image
 
 import copy
 
+def threshold_intensities(input_tensor, min_val, max_val):
+    '''
+    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
+    '''
+    l1_tensor = torch.where(input_tensor < min_val, input_tensor, 0)
+    l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, 0)
+    return l2_tensor
+
+def clip_intensities(input_tensor, min_val, max_val):
+    '''
+    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
+    '''
+    l1_tensor = torch.where(input_tensor < min_val, input_tensor, min_val)
+    l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, max_val)
+    return l2_tensor
+
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
