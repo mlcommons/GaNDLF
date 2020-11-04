@@ -3,31 +3,24 @@ from torch.nn import MSELoss
 
 
 # Dice scores and dice losses   
-def dice_loss(inp, target):
+def dice(inp, target):
     smooth = 1e-7
     iflat = inp.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     intersection = (iflat * tflat).sum()
-    return 1 - ((2. * intersection + smooth) /
-                (iflat.sum() + tflat.sum() + smooth))
+    return ((2. * intersection + smooth) /
+                (iflat.sum() + tflat.sum() + smooth)) # 2 * intersection / union
 
 def MCD_loss(pm, gt, num_class, weights = None): 
     acc_dice_loss = 0
-    for i in range(1, num_class):
-        currentDice = dice_loss(gt[:,i,:,:,:], pm[:,i,:,:,:])
+    for i in range(1, num_class): # 0 is background
+        currentDiceLoss = 1 - dice(gt[:,i,:,:,:], pm[:,i,:,:,:]) # subtract from 1 because this is a loss
         if weights is not None:
-            currentDice = currentDice * weights[i]
+            currentDiceLoss = currentDiceLoss * weights[i]
         
-        acc_dice_loss += currentDice
-    acc_dice_loss /= (num_class-1)
+        acc_dice_loss += currentDiceLoss
+    acc_dice_loss /= (num_class-1) # we should not be considering 0
     return acc_dice_loss
-
-def dice(out, target):
-    smooth = 1e-7
-    oflat = out.view(-1)
-    tflat = target.view(-1)
-    intersection = (oflat * tflat).sum()
-    return (2*intersection+smooth)/(oflat.sum()+tflat.sum()+smooth)
 
 def MCD(pm, gt, num_class):
     return  1 - MCD_loss(pm, gt, num_class)
