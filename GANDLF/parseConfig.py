@@ -124,17 +124,24 @@ def parseConfig(config_file_path):
   
   # this is NOT a required parameter - a user should be able to train with NO augmentations
   if len(params['data_augmentation']) > 0: # only when augmentations are defined
+    thresholdOrClip = False
     for key in params['data_augmentation']: # iterate through all keys
       # for threshold or clip, ensure min and max are defined
-      if (key == 'threshold') or (key == 'clip'):
-        if not(isinstance(params['data_augmentation'][key], dict)):
-          params['data_augmentation'][key] = {}
-        if not 'min' in params['data_augmentation'][key]: 
-          params['data_augmentation'][key]['min'] = sys.float_info.min
-        if not 'max' in params['data_augmentation'][key]:
-          params['data_augmentation'][key]['max'] = sys.float_info.max
+      if not thresholdOrClip:
+        if (key == 'threshold') or (key == 'clip'):
+          thresholdOrClip = True
+          if not(isinstance(params['data_augmentation'][key], dict)):
+            params['data_augmentation'][key] = {}
+          
+          if not 'min' in params['data_augmentation'][key]: 
+            params['data_augmentation'][key]['min'] = sys.float_info.min
+          if not 'max' in params['data_augmentation'][key]:
+            params['data_augmentation'][key]['max'] = sys.float_info.max
+      else:
+        sys.exit('Use only \'threshold\' or \'clip\', not both')
 
-      if (key != 'normalize') and (key != 'resample'): # no need to check probabilities for these: they should ALWAYS be added
+      keysToSkip = ['normalize', 'resample', 'threshold', 'clip']
+      if not(key in keysToSkip): # no need to check probabilities for these: they should ALWAYS be added
         if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
             params['data_augmentation'][key] = {}
             params['data_augmentation'][key]['probability'] = 1
