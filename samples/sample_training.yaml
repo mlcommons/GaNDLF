@@ -62,6 +62,7 @@ nested_training:
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
+# 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
@@ -74,6 +75,10 @@ data_augmentation:
       'min': 10, 
       'max': 75, 
     },
+    'clip':{
+      'min': 10, 
+      'max': 75, 
+    }, 
     'normalize',
     'resample':{
       'resolution': [1,2,3]
