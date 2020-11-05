@@ -5,12 +5,28 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
                                 RandomNoise, RandomSwap, ZNormalization,
-                                Resample, Compose)
+                                Resample, Compose, Lambda)
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
 
 import copy
+
+def threshold_intensities(input_tensor, min_val, max_val):
+    '''
+    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
+    '''
+    l1_tensor = torch.where(input_tensor < min_val, input_tensor, 0)
+    l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, 0)
+    return l2_tensor
+
+def clip_intensities(input_tensor, min_val, max_val):
+    '''
+    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
+    '''
+    l1_tensor = torch.where(input_tensor < min_val, input_tensor, min_val)
+    l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, max_val)
+    return l2_tensor
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
@@ -30,6 +46,12 @@ def spatial_transform(patch_size = None, p=1):
         max_displacement = 7.5
     return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
 
+def threshold_transform(min, max, p=1):
+    return Lambda(lambda x: threshold_intensities(x, min, max))
+
+def clip_transform(min, max, p=1):
+    return Lambda(lambda x: clip_intensities(x, min, max))
+
 def bias(patch_size = None, p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
 
@@ -44,6 +66,8 @@ def swap(patch_size = 15, p=1):
 
 # Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
+    'threshold' : threshold_transform,
+    'clip' : clip_transform,
     'normalize' : ZNormalization(),
     'spatial' : spatial_transform,
     'kspace' : mri_artifact,
@@ -116,6 +140,10 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     augmentation_list = []
 
+    # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
+    for key in ['threshold','clip']:
+        augmentation_list.append(global_augs_dict[key](min=augmentations[key]['min'], max=augmentations[key]['max']))
+        
     # first, we want to do the resampling, if it is present - required for inference as well
     if 'resample' in augmentations:
         if 'resolution' in augmentations['resample']:

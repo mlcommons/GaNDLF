@@ -1,11 +1,11 @@
 # affix version
 version:
   {
-    minimum: 0.0.3,
-    maximum: 0.0.3 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.5,
+    maximum: 0.0.5 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # the dimension of the model and dataset: defines dimensionality of computations
-dimension: 2
+dimension: 3
 # Choose the model parameters here
 model:
   {
@@ -61,6 +61,9 @@ nested_training:
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
+# 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
+# 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
+# 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
@@ -69,6 +72,14 @@ nested_training:
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
+    'threshold':{
+      'min': 10, 
+      'max': 75
+    },
+    'clip':{
+      'min': 10, 
+      'max': 75
+    }, 
     'normalize',
     'resample':{
       'resolution': [1,2,3]
