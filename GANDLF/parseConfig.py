@@ -130,9 +130,9 @@ def parseConfig(config_file_path):
         if not(isinstance(params['data_augmentation'][key], dict)):
           params['data_augmentation'][key] = {}
         if not 'min' in params['data_augmentation'][key]: 
-          params['data_augmentation'][key]['min'] = None
+          params['data_augmentation'][key]['min'] = sys.float_info.min
         if not 'max' in params['data_augmentation'][key]:
-          params['data_augmentation'][key]['max'] = None
+          params['data_augmentation'][key]['max'] = sys.float_info.max
 
       if (key != 'normalize') and (key != 'resample'): # no need to check probabilities for these: they should ALWAYS be added
         if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
