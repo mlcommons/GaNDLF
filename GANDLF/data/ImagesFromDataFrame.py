@@ -5,7 +5,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
                                 RandomNoise, RandomSwap, ZNormalization,
-                                Resample, Compose)
+                                Resample, Compose, Lambda)
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
@@ -46,6 +46,12 @@ def spatial_transform(patch_size = None, p=1):
         max_displacement = 7.5
     return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
 
+def threshold_transform(min, max, p=1):
+    return Lambda(lambda x: threshold_intensities(x, min, max))
+
+def clip_transform(min, max, p=1):
+    return Lambda(lambda x: clip_intensities(x, min, max))
+
 def bias(patch_size = None, p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
 
@@ -60,6 +66,8 @@ def swap(patch_size = 15, p=1):
 
 # Defining a dictionary - key is the string and the value is the augmentation object
 global_augs_dict = {
+    'threshold' : threshold_transform,
+    'clip' : clip_transform,
     'normalize' : ZNormalization(),
     'spatial' : spatial_transform,
     'kspace' : mri_artifact,
@@ -132,6 +140,10 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     augmentation_list = []
 
+    # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
+    for key in ['threshold','clip']:
+        augmentation_list.append(global_augs_dict[key](min=augmentations[key]['min'], max=augmentations[key]['max']))
+        
     # first, we want to do the resampling, if it is present - required for inference as well
     if 'resample' in augmentations:
         if 'resolution' in augmentations['resample']:
