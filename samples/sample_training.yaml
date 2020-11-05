@@ -61,6 +61,7 @@ nested_training:
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
+# 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
@@ -69,6 +70,10 @@ nested_training:
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
+    'threshold':{
+      'min': 10, 
+      'max': 75, 
+    },
     'normalize',
     'resample':{
       'resolution': [1,2,3]
