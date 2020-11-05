@@ -1,6 +1,7 @@
 ## 0.0.5
 
 - 2D support added
+- Added option to threshold or clip the input image
 
 ## 0.0.4
 
