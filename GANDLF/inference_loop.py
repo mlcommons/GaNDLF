@@ -105,10 +105,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
           sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
       
       dev = os.environ.get('CUDA_VISIBLE_DEVICES')
-      # multi-gpu support
-      # ###
-      # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-      # ###
+      # multi-gpu support:  https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
       if ',' in dev:
           device = torch.device('cuda')
           model = nn.DataParallel(model, '[' + dev + ']')
@@ -134,10 +131,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
       print("Since Device is CPU, Mixed Precision Training is set to False")
   
   
-  # multi-gpu support
-  # ###
-  # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-  # ###
+  # multi-gpu support: https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
   if os.environ.get('CUDA_VISIBLE_DEVICES') is not None:
       if ',' in os.environ.get('CUDA_VISIBLE_DEVICES'):
           environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
@@ -150,77 +144,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   model = model.to(dev)
 
   sys.stdout.flush()
-  ############## STORING THE HISTORY OF THE LOSSES #################
-  total_loss = 0
-  total_dice = 0
-
   model.eval()
-  #   batch_iterator_train = iter(train_loader)
-  with torch.no_grad():
-    for batch_idx, subject in enumerate(inferenceDataForTorch):
-        # Load the subject and its ground truth
-        grid_sampler = torchio.inference.GridSampler(subject , psize, 4)
-        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
-        aggregator = torchio.inference.GridAggregator(grid_sampler)
-        for patches_batch in patch_loader:
-            image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).to(device)
-            if image.shape[-1] == 1:
-                model_2d = True
-                image = torch.squeeze(image, -1)
-            locations = patches_batch[torchio.LOCATION]
-            pred_mask = model(image)
-            aggregator.add_batch(pred_mask, locations)
-
-        pred_mask = aggregator.get_output_tensor()
-        pred_mask = pred_mask.unsqueeze(0)
-        # read the ground truth mask
-        if not subject['label'] == "NA":
-          mask = subject['label'][torchio.DATA] # get the label image
-          mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-          if model_2d:
-              mask = torch.squeeze(mask, -1)
-          mask = one_hot(mask.float().numpy(), class_list)
-          mask = torch.from_numpy(mask)
-          torch.cuda.empty_cache()
-          # Computing the loss
-          #mask = torch.nn.functional.one_hot(mask, num_classes=-1)
-          loss = loss_fn(pred_mask.double(), mask.double(),len(class_list))
-          #Pushing the dice to the cpu and only taking its value
-          curr_loss = loss.cpu().data.item()
-          #train_loss_list.append(loss.cpu().data.item())
-          total_loss+=curr_loss
-          # Computing the average loss
-          average_loss = total_loss/(batch_idx + 1)
-          #Computing the dice score 
-          curr_dice = MCD(pred_mask.double(), mask.double(), n_classList)
-          #Computing the total dice
-          total_dice+= curr_dice
-          torch.cuda.empty_cache()
-          print("Current Dice is: ", curr_dice)
-        else:
-          print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
-
-        # Saving the mask to disk in the output directory using the same metadata as from the 
-        inputImage = sitk.ReadImage(subject['path_to_metadata'])
-        pred_mask = pred_mask.cpu().numpy()
-        # works since batch size is always one in inference time  
-        pred_mask = reverse_one_hot(pred_mask[0],class_list)
-        
-        result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
-        result_image.CopyInformation(inputImage)
-        # resize
-        if parameters['resize'] is not None:
-            originalSize = inputImage.GetSize()
-            result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
-        
-        patient_name = os.path.basename(subject['path_to_metadata'])
-        if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
-          os.mkdir(os.path.join(outputDir,"generated_masks"))
-        sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
-  #Computing the average dice
-  if not subject['label'] == "NA":
-    average_dice = total_dice/(batch_idx + 1)
-    print(average_dice)
+  average_dice, average_loss = get_stats(model, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True)
+  print(average_dice, average_loss)
 
 if __name__ == "__main__":
 
