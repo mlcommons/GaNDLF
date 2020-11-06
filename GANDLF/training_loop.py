@@ -361,14 +361,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         model.eval()
 
         # validation data scores
-        total_val_dice, total_val_loss = get_stats(model, validationDataForTorch, psize, channel_keys, class_list, loss_fn)
-        average_val_dice = total_val_dice/len(val_loader.dataset)
-        average_val_loss = total_val_loss/len(val_loader.dataset)
+        average_val_dice, average_val_loss = get_stats(model, val_loader, psize, channel_keys, class_list, loss_fn)
 
         # testing data scores
-        total_test_dice, total_test_loss = get_stats(model, inferenceDataForTorch, psize, channel_keys, class_list, loss_fn) 
-        average_test_dice = total_test_dice/len(inference_loader.dataset)
-        average_test_loss = total_test_loss/len(inference_loader.dataset)
+        average_test_dice, average_test_loss = get_stats(model, inference_loader, psize, channel_keys, class_list, loss_fn) 
         
         # stats for current validation data
         if average_val_dice > best_val_dice:
@@ -421,12 +417,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
-        total_test_dice = 0
-        total_test_loss = 0
         total_train_dice = 0
         total_train_loss = 0
-        total_val_dice = 0
-        total_val_loss = 0
 
 if __name__ == "__main__":
 
