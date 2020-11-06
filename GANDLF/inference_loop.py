@@ -63,16 +63,10 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
     model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    if psize[-1] == 1:
-        checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
-    else:
-        checkPatchDivisibility(psize)
+    checkPatchDivisibility(psize)
   elif which_model == 'unet':
     model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    if psize[-1] == 1:
-        checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
-    else:
-        checkPatchDivisibility(psize)
+    checkPatchDivisibility(psize)
   elif which_model == 'fcn':
     model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'uinc':
