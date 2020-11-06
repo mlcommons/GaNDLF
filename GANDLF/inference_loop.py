@@ -63,14 +63,22 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
     model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    checkPatchDivisibility(psize)
+    if not checkPatchDivisibility(psize):
+        sys.exit('The \'patch_size\' should be divisible by 16 for the \'' + which_model + '\' architecture')
+    if not checkPatchDivisibility(base_filters):
+        sys.exit('The \'base_filters\' should be divisible by 16 for the \'' + which_model + '\' architecture')
   elif which_model == 'unet':
     model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    checkPatchDivisibility(psize)
+    if not checkPatchDivisibility(psize):
+        sys.exit('The \'patch_size\' should be divisible by 16 for the \'' + which_model + '\' architecture')
+    if not checkPatchDivisibility(base_filters):
+        sys.exit('The \'base_filters\' should be divisible by 16 for the \'' + which_model + '\' architecture')
   elif which_model == 'fcn':
     model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   elif which_model == 'uinc':
     model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    if not checkPatchDivisibility(base_filters, 4):
+        sys.exit('The \'base_filters\' should be divisible by 4 for the \'' + which_model + '\' architecture')
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
