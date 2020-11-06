@@ -392,7 +392,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         if average_test_dice > best_test_dice:
             best_test_idx = ep
             best_test_dice = average_test_dice
-            best_test_val_dice = average_test_dice
             # We can add more stuff to be saved if we need anything more
             torch.save({"epoch": best_test_idx,
                         "model_state_dict": model.state_dict(),
