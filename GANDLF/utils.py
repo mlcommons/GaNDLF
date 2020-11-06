@@ -48,7 +48,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights = None):
+def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -79,18 +79,38 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
             pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
-            mask = subject['label'][torchio.DATA] # get the label image
-            mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-            mask = one_hot(mask, class_list)
-            # making sure that the output and mask are on the same device
-            pred_mask, mask = pred_mask.cuda(), mask.cuda()
-            loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
-            total_loss += loss
-            #Computing the dice score 
-            curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
-            #Computing the total dice
-            total_dice+= curr_dice
-            #print("Current Dice is: ", curr_dice)
-        avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
-        return avg_dice, avg_loss
+            if not subject['label'] == "NA":
+                mask = subject['label'][torchio.DATA] # get the label image
+                mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+                mask = one_hot(mask, class_list)
+                # making sure that the output and mask are on the same device
+                pred_mask, mask = pred_mask.cuda(), mask.cuda()
+                loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
+                total_loss += loss
+                #Computing the dice score 
+                curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
+                #Computing the total dice
+                total_dice+= curr_dice
+            else:
+                print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
+            if save_mask:
+                inputImage = sitk.ReadImage(subject['path_to_metadata'])
+                pred_mask = pred_mask.cpu().numpy()
+                pred_mask = reverse_one_hot(pred_mask[0],class_list)
+                result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
+                result_image.CopyInformation(inputImage)
+                if parameters['resize'] is not None:
+                    originalSize = inputImage.GetSize()
+                    result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
+        
+                patient_name = os.path.basename(subject['path_to_metadata'])
+                if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
+                    os.mkdir(os.path.join(outputDir,"generated_masks"))
+                sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+        if not subject['label'] == "NA"
+            avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
+            return avg_dice, avg_loss
+        else:
+            print("WARNING: No Ground Truth Label provided, returning metris as NONE")
+            return None, None
 
