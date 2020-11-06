@@ -64,13 +64,15 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   divisibilityCheck_baseFilter = True
 
   divisibilityCheck_denom_patch = 16 # for unet/resunet/uinc
-  divisibilityCheck_denom_baseFilter = 16 # for unet/resunet
+  divisibilityCheck_denom_baseFilter = 4 # for uinc
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
     model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    divisibilityCheck_baseFilter = False
   elif which_model == 'unet':
     model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    divisibilityCheck_baseFilter = False
   elif which_model == 'fcn':
     model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     # not enough information to perform checking for this, yet
@@ -78,7 +80,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     divisibilityCheck_baseFilter = False
   elif which_model == 'uinc':
     model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    divisibilityCheck_denom_baseFilter = 4 # change the denom for base filter check
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
