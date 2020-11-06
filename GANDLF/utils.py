@@ -76,8 +76,6 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
                 pred_mask = model(image)
                 if model_2d:
                     pred_mask = pred_mask.unsqueeze(-1)
-                #print(image.shape)
-                #print(pred_mask.shape)
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
             pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
@@ -93,5 +91,6 @@ def get_stats(model, loader, psize, channel_keys, class_list, loss_fn, weights =
             #Computing the total dice
             total_dice+= curr_dice
             #print("Current Dice is: ", curr_dice)
-        return total_dice, total_loss
+        avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
+        return avg_dice, avg_loss
 
