@@ -59,31 +59,39 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # Setting up the inference loader
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
+
+  divisibilityCheck_patch = True
+  divisibilityCheck_baseFilter = True
+
+  divisibilityCheck_denom_patch = 16 # for unet/resunet/uinc
+  divisibilityCheck_denom_baseFilter = 16 # for unet/resunet
   
   # Defining our model here according to parameters mentioned in the configuration file : 
   if which_model == 'resunet':
     model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    if not checkPatchDivisibility(psize):
-        sys.exit('The \'patch_size\' should be divisible by 16 for the \'' + which_model + '\' architecture')
-    if not checkPatchDivisibility(base_filters):
-        sys.exit('The \'base_filters\' should be divisible by 16 for the \'' + which_model + '\' architecture')
   elif which_model == 'unet':
     model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    if not checkPatchDivisibility(psize):
-        sys.exit('The \'patch_size\' should be divisible by 16 for the \'' + which_model + '\' architecture')
-    if not checkPatchDivisibility(base_filters):
-        sys.exit('The \'base_filters\' should be divisible by 16 for the \'' + which_model + '\' architecture')
   elif which_model == 'fcn':
     model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    # not enough information to perform checking for this, yet
+    divisibilityCheck_patch = False 
+    divisibilityCheck_baseFilter = False
   elif which_model == 'uinc':
     model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    if not checkPatchDivisibility(base_filters, 4):
-        sys.exit('The \'base_filters\' should be divisible by 4 for the \'' + which_model + '\' architecture')
+    divisibilityCheck_denom_baseFilter = 4 # change the denom for base filter check
   else:
     print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
     which_model = 'resunet'
     model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
+  # check divisibility
+  if divisibilityCheck_patch:
+    if not checkPatchDivisibility(psize, divisibilityCheck_denom_patch):
+      sys.exit('The \'patch_size\' should be divisible by \'' + str(divisibilityCheck_denom_patch) + '\' for the \'' + which_model + '\' architecture')
+  if divisibilityCheck_baseFilter:
+    if not checkPatchDivisibility(base_filters, divisibilityCheck_denom_baseFilter):
+      sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
+  
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
   model.load_state_dict(main_dict['model_state_dict'])
