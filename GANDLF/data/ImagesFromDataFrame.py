@@ -142,7 +142,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     for key in ['threshold','clip']:
-        augmentation_list.append(global_augs_dict[key](min=augmentations[key]['min'], max=augmentations[key]['max']))
+        if key in augmentations:
+            augmentation_list.append(global_augs_dict[key](min=augmentations[key]['min'], max=augmentations[key]['max']))
         
     # first, we want to do the resampling, if it is present - required for inference as well
     if 'resample' in augmentations:
