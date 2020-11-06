@@ -38,6 +38,10 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     inputSize = input_image.GetSize()
     inputSpacing = np.array(input_image.GetSpacing())
     outputSpacing = np.array(inputSpacing)
+
+    if (len(output_size) != len(inputSpacing)):
+        sys.exit('The output size dimension is inconsistent with the input dataset, please check parameters.')
+
     for i in range(len(output_size)):
         outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
     resampler = sitk.ResampleImageFilter()
@@ -90,7 +94,7 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                 #Computing the dice score 
                 curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
                 #Computing the total dice
-                total_dice+= curr_dice
+                total_dice += curr_dice
             else:
                 print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
@@ -107,7 +111,7 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                 if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
                     os.mkdir(os.path.join(outputDir,"generated_masks"))
                 sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
-        if not subject['label'] == "NA"
+        if (subject['label'] != "NA"):
             avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
             return avg_dice, avg_loss
         else:
