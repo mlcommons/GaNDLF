@@ -361,10 +361,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         model.eval()
 
         # validation data scores
-        average_val_dice, average_val_loss = get_stats(model, val_loader, psize, channel_keys, class_list, loss_fn)
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, val_loader, psize, channel_keys, class_list, loss_fn)
 
         # testing data scores
-        average_test_dice, average_test_loss = get_stats(model, inference_loader, psize, channel_keys, class_list, loss_fn) 
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn) 
         
         # stats for current validation data
         if average_val_dice > best_val_dice:
