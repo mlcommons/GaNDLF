@@ -20,11 +20,18 @@ def one_hot(segmask_array, class_list):
     return batch_stack
 
 def checkPatchDivisibility(patch_size, number = 16):
-    patch_size_to_check = patch_size
+    '''
+    This function checks the divisibility of a numpy array or integer for architectural integrity
+    '''
+    if isinstance(patch_size, int):
+        patch_size_to_check = np.array(patch_size)
+    else:
+        patch_size_to_check = patch_size
     if patch_size_to_check[-1] == 1: # for 2D, don't check divisibility of last dimension
         patch_size_to_check = patch_size_to_check[:-1]
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
-        sys.exit('The \'patch_size\' should be divisible by ' + str(number) + ' for the selected architecture')
+        return False
+    return True
 
 def reverse_one_hot(predmask_array,class_list):
     idx_argmax  = np.argmax(predmask_array,axis=0)
