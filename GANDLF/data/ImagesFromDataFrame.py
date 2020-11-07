@@ -28,6 +28,17 @@ def clip_intensities(input_tensor, min_val, max_val):
     l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, max_val)
     return l2_tensor
 
+def resize_image_resolution(input_image, output_size, interpolator = sitk.sitkLinear):
+    '''
+    This function resizes the input image based on the output size and interpolator
+    '''
+    inputSize = input_image.GetSize()
+    inputSpacing = np.array(input_image.GetSpacing())
+    outputSpacing = np.array(inputSpacing)
+    for i in range(len(output_size)):
+        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+    return outputSpacing
+
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
@@ -114,23 +125,12 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),
                                                type=torchio.INTENSITY)
 
-            if resize is not None:
-                image_resized = resize_image(subject_dict[str(channel)].as_sitk(), resize)
-                image_masked_tensor = torch.from_numpy(np.swapaxes(sitk.GetArrayFromImage(image_resized), 0, 2))
-                # overwrite previous image data with new masked data
-                subject_dict[str(channel)] = Image(tensor=image_masked_tensor,
-                                                   type=torchio.INTENSITY)
+            if (resize is not None) and (not('resample' in preprocessing) or (preprocessing['resample'] is None)):
+                resize = resize_image_resolution(subject_dict[str(channel)].as_sitk(), resize)
+                preprocessing['resample']['resolution'] = resize
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
-
-            if resize is not None:
-                image_resized = resize_image(subject_dict['label'].as_sitk(),
-                                             resize,
-                                             sitk.sitkNearestNeighbor)
-                image_masked_tensor = torch.from_numpy(np.swapaxes(sitk.GetArrayFromImage(image_resized), 0, 2))
-                # overwrite previous image data with new masked data
-                subject_dict['label'] = Image(tensor = image_masked_tensor, type=torchio.INTENSITY)
 
             if not train:
                 subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
