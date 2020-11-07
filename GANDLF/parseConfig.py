@@ -141,9 +141,11 @@ def parseConfig(config_file_path):
       if not thresholdOrClip:
         if (key in thresholdOrClipDict):
           thresholdOrClip = True # we only allow one of threshold or clip to occur and not both
-          if not(isinstance(params['data_preprocessing'][key], dict)):
+          if not(isinstance(params['data_preprocessing'][key], dict)): # initialize if nothing is present
             params['data_preprocessing'][key] = {}
           
+          # if one of the required parameters is not present, initialize with lowest/highest possible values
+          # this ensures the absence of a field doesn't affect processing
           if not 'min' in params['data_preprocessing'][key]: 
             params['data_preprocessing'][key]['min'] = sys.float_info.min
           if not 'max' in params['data_preprocessing'][key]:
