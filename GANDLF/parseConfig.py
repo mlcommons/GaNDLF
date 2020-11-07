@@ -135,18 +135,19 @@ def parseConfig(config_file_path):
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
   if len(params['data_preprocessing']) < 0: # perform this only when pre-processing is defined
     thresholdOrClip = False
-    for key in params['data_augmentation']: # iterate through all keys
+    thresholdOrClipDict = ['threshold', 'clip'] # this can be extended, as required
+    for key in params['data_preprocessing']: # iterate through all keys
       # for threshold or clip, ensure min and max are defined
       if not thresholdOrClip:
-        if (key == 'threshold') or (key == 'clip'):
-          thresholdOrClip = True
-          if not(isinstance(params['data_augmentation'][key], dict)):
-            params['data_augmentation'][key] = {}
+        if (key in thresholdOrClipDict):
+          thresholdOrClip = True # we only allow one of threshold or clip to occur and not both
+          if not(isinstance(params['data_preprocessing'][key], dict)):
+            params['data_preprocessing'][key] = {}
           
-          if not 'min' in params['data_augmentation'][key]: 
-            params['data_augmentation'][key]['min'] = sys.float_info.min
-          if not 'max' in params['data_augmentation'][key]:
-            params['data_augmentation'][key]['max'] = sys.float_info.max
+          if not 'min' in params['data_preprocessing'][key]: 
+            params['data_preprocessing'][key]['min'] = sys.float_info.min
+          if not 'max' in params['data_preprocessing'][key]:
+            params['data_preprocessing'][key]['max'] = sys.float_info.max
       else:
         sys.exit('Use only \'threshold\' or \'clip\', not both')
 
