@@ -137,6 +137,8 @@ def parseConfig(config_file_path):
     thresholdOrClip = False
     thresholdOrClipDict = ['threshold', 'clip'] # this can be extended, as required
     keysForWarning = ['resize'] # properties for which the user will see a warning
+
+    # iterate through all keys
     for key in params['data_preprocessing']: # iterate through all keys
       # for threshold or clip, ensure min and max are defined
       if not thresholdOrClip:
