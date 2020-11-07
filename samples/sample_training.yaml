@@ -64,7 +64,7 @@ nested_training:
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
-# resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116
+# resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
 data_preprocessing:
   {
     'threshold':{
@@ -79,7 +79,7 @@ data_preprocessing:
     'resample':{
       'resolution': [1,2,3]
     },
-    'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
+    #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
