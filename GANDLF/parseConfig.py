@@ -124,6 +124,16 @@ def parseConfig(config_file_path):
   
   # this is NOT a required parameter - a user should be able to train with NO augmentations
   if len(params['data_augmentation']) > 0: # only when augmentations are defined
+      keysToSkip = ['normalize', 'resample', 'threshold', 'clip']
+      if not(key in keysToSkip): # no need to check probabilities for these: they should ALWAYS be added
+        if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
+            params['data_augmentation'][key] = {}
+            params['data_augmentation'][key]['probability'] = 1
+      else:
+        print('WARNING: \'' + key + '\' should be defined under \'data_processing\' and not under \'data_augmentation\', this will be skipped', file = sys.stderr)
+
+  # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
+  if len(params['data_preprocessing']) < 0: # perform this only when pre-processing is defined
     thresholdOrClip = False
     for key in params['data_augmentation']: # iterate through all keys
       # for threshold or clip, ensure min and max are defined
@@ -139,12 +149,6 @@ def parseConfig(config_file_path):
             params['data_augmentation'][key]['max'] = sys.float_info.max
       else:
         sys.exit('Use only \'threshold\' or \'clip\', not both')
-
-      keysToSkip = ['normalize', 'resample', 'threshold', 'clip']
-      if not(key in keysToSkip): # no need to check probabilities for these: they should ALWAYS be added
-        if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
-            params['data_augmentation'][key] = {}
-            params['data_augmentation'][key]['probability'] = 1
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
