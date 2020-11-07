@@ -15,6 +15,18 @@ def parse_version(version_string):
     del version_string_split[-1]
   return int(''.join(version_string_split))
 
+def initialize_key(parameters, key):
+  '''
+  This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero
+  '''
+  if key in parameters: 
+    if len(parameters[key]) == 0: # if key is present but not defined
+      parameters[key] = None
+  else:
+    parameters[key] = None # if key is absent
+
+  return parameters
+
 def parseConfig(config_file_path):
   '''
   This function parses the configuration file and returns a dictionary of parameters
