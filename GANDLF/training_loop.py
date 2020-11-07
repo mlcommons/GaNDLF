@@ -43,6 +43,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     q_num_workers = parameters['q_num_workers']
     q_verbose = parameters['q_verbose']
     augmentations = parameters['data_augmentation']
+    preprocessing = parameters['data_preprocessing']
     which_model = parameters['model']['architecture']
     opt = parameters['opt']
     loss_function = parameters['loss_function']
@@ -61,11 +62,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         psize.append(1) # ensuring same size during torchio processing
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, resize = parameters['resize'])
+                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, preprocessing = preprocessing, resize = parameters['data_preprocessing']['resize'])
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize']) # may or may not need to add augmentations here
+                                               q_num_workers, q_verbose, train=False, augmentations=augmentations, preprocessing = preprocessing, resize = parameters['data_preprocessing']['resize']) # may or may not need to add augmentations here
     inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize'])
+                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, preprocessing = preprocessing, resize = parameters['data_preprocessing']['resize'])
     
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
