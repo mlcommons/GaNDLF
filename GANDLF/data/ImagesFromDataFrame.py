@@ -33,10 +33,9 @@ def resize_image_resolution(input_image, output_size, interpolator = sitk.sitkLi
     This function resizes the input image based on the output size and interpolator
     '''
     inputSize = input_image.GetSize()
-    inputSpacing = np.array(input_image.GetSpacing())
-    outputSpacing = np.array(inputSpacing)
+    outputSpacing = np.array(input_image.GetSpacing())
     for i in range(len(output_size)):
-        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
     return outputSpacing
 
 ## todo: ability to change interpolation type from config file
@@ -114,6 +113,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         augmentation_patchAxesPoints[i] = max(round(augmentation_patchAxesPoints[i] / 10), 1) # always at least have 1
 
     # iterating through the dataframe
+    resizeCheck = False
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
@@ -125,9 +125,17 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),
                                                type=torchio.INTENSITY)
 
-            if (resize is not None) and (not('resample' in preprocessing) or (preprocessing['resample'] is None)):
-                resize = resize_image_resolution(subject_dict[str(channel)].as_sitk(), resize)
-                preprocessing['resample']['resolution'] = resize
+            # if resize has been defined but resample is not (or is none)
+            if not resizeCheck:
+                if (preprocessing['resize'] is not None):
+                    resizeCheck = True
+                    if not('resample' in preprocessing) or (preprocessing['resample'] is None):
+                        preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), resize)
+                    else:
+                        print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
+                else:
+                    resizeCheck = True
+
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
