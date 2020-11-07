@@ -135,52 +135,44 @@ def parseConfig(config_file_path):
   params['opt'] = opt
   
   # this is NOT a required parameter - a user should be able to train with NO augmentations
-  if 'data_augmentation' in params:
-    if len(params['data_augmentation']) > 0: # only when augmentations are defined
-        keysToSkip = ['normalize', 'resample', 'threshold', 'clip']
-        if not(key in keysToSkip): # no need to check probabilities for these: they should ALWAYS be added
-          if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
-              params['data_augmentation'][key] = {}
-              params['data_augmentation'][key]['probability'] = 1
-        else:
-          print('WARNING: \'' + key + '\' should be defined under \'data_processing\' and not under \'data_augmentation\', this will be skipped', file = sys.stderr)
-    else:
-      params['data_augmentation'] = None
-  else:
-    params['data_augmentation'] = None
+  params = initialize_key(params, 'data_augmentation')
+  if len(params['data_augmentation']) > 0: # only when augmentations are defined
+      keysToSkip = ['normalize', 'resample', 'threshold', 'clip']
+      if not(key in keysToSkip): # no need to check probabilities for these: they should ALWAYS be added
+        if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
+            params['data_augmentation'][key] = {}
+            params['data_augmentation'][key]['probability'] = 1
+      else:
+        print('WARNING: \'' + key + '\' should be defined under \'data_processing\' and not under \'data_augmentation\', this will be skipped', file = sys.stderr)
 
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
-  if 'data_preprocessing' in params:
-    if len(params['data_preprocessing']) < 0: # perform this only when pre-processing is defined
-      thresholdOrClip = False
-      thresholdOrClipDict = ['threshold', 'clip'] # this can be extended, as required
-      keysForWarning = ['resize'] # properties for which the user will see a warning
+  params = initialize_key(params, 'data_preprocessing')
+  if len(params['data_preprocessing']) < 0: # perform this only when pre-processing is defined
+    thresholdOrClip = False
+    thresholdOrClipDict = ['threshold', 'clip'] # this can be extended, as required
+    keysForWarning = ['resize'] # properties for which the user will see a warning
 
-      # iterate through all keys
-      for key in params['data_preprocessing']: # iterate through all keys
-        # for threshold or clip, ensure min and max are defined
-        if not thresholdOrClip:
-          if (key in thresholdOrClipDict):
-            thresholdOrClip = True # we only allow one of threshold or clip to occur and not both
-            if not(isinstance(params['data_preprocessing'][key], dict)): # initialize if nothing is present
-              params['data_preprocessing'][key] = {}
-            
-            # if one of the required parameters is not present, initialize with lowest/highest possible values
-            # this ensures the absence of a field doesn't affect processing
-            if not 'min' in params['data_preprocessing'][key]: 
-              params['data_preprocessing'][key]['min'] = sys.float_info.min
-            if not 'max' in params['data_preprocessing'][key]:
-              params['data_preprocessing'][key]['max'] = sys.float_info.max
-        else:
-          sys.exit('Use only \'threshold\' or \'clip\', not both')
+    # iterate through all keys
+    for key in params['data_preprocessing']: # iterate through all keys
+      # for threshold or clip, ensure min and max are defined
+      if not thresholdOrClip:
+        if (key in thresholdOrClipDict):
+          thresholdOrClip = True # we only allow one of threshold or clip to occur and not both
+          if not(isinstance(params['data_preprocessing'][key], dict)): # initialize if nothing is present
+            params['data_preprocessing'][key] = {}
+          
+          # if one of the required parameters is not present, initialize with lowest/highest possible values
+          # this ensures the absence of a field doesn't affect processing
+          if not 'min' in params['data_preprocessing'][key]: 
+            params['data_preprocessing'][key]['min'] = sys.float_info.min
+          if not 'max' in params['data_preprocessing'][key]:
+            params['data_preprocessing'][key]['max'] = sys.float_info.max
+      else:
+        sys.exit('Use only \'threshold\' or \'clip\', not both')
 
-        # give a warning for resize
-        if key in keysForWarning:
-          print('WARNING: \'' + key + '\' is generally not recommended, as it changes image properties in unexpected ways.', file = sys.stderr)
-    else:
-      params['data_preprocessing'] = None
-  else:
-    params['data_preprocessing'] = None
+      # give a warning for resize
+      if key in keysForWarning:
+        print('WARNING: \'' + key + '\' is generally not recommended, as it changes image properties in unexpected ways.', file = sys.stderr)
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
