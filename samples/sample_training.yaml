@@ -21,8 +21,6 @@ base_filters: 16
 class_list: [0,1,2,4]
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128,128]
-# resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116
-resize: [128,128,128]
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
@@ -57,20 +55,17 @@ nested_training:
     holdout: 5, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
     validation: 5 # this controls the validation data splits for model training
   }
-# various data augmentation techniques
-# options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
-# keep/edit as needed
-# all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
+## pre-processing
+# this constructs an order of transformations, which is applied to all images in the data loader
+# order present here is the order in which the transformations are applied
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
-# 'spatial': one of affine or elastic is picked (randomly) for augmentation
-# 'kspace': one of motion, ghosting or spiking is picked (randomly) for augmentation
-# 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
-data_augmentation: 
+# resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116
+data_preprocessing:
   {
     'threshold':{
       'min': 10, 
@@ -84,6 +79,17 @@ data_augmentation:
     'resample':{
       'resolution': [1,2,3]
     },
+    'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
+  }
+# various data augmentation techniques
+# options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
+# keep/edit as needed
+# all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
+# 'spatial': one of affine or elastic is picked (randomly) for augmentation
+# 'kspace': one of motion, ghosting or spiking is picked (randomly) for augmentation
+# 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
+data_augmentation: 
+  {
     'spatial':{
       'probability': 0.5
     },
