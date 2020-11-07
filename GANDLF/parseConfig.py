@@ -136,6 +136,7 @@ def parseConfig(config_file_path):
   if len(params['data_preprocessing']) < 0: # perform this only when pre-processing is defined
     thresholdOrClip = False
     thresholdOrClipDict = ['threshold', 'clip'] # this can be extended, as required
+    keysForWarning = ['resize'] # properties for which the user will see a warning
     for key in params['data_preprocessing']: # iterate through all keys
       # for threshold or clip, ensure min and max are defined
       if not thresholdOrClip:
@@ -152,6 +153,10 @@ def parseConfig(config_file_path):
             params['data_preprocessing'][key]['max'] = sys.float_info.max
       else:
         sys.exit('Use only \'threshold\' or \'clip\', not both')
+
+      # give a warning for resize
+      if key in keysForWarning:
+        print('WARNING: \'' + key + '\' is generally not recommended, as it changes image properties in unexpected ways.', file = sys.stderr)
 
   # Extracting the model parameters from the dictionary
   if 'base_filters' in params:
