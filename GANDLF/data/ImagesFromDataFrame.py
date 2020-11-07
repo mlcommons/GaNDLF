@@ -9,34 +9,9 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
+from GANDLF.preprocessing import *
 
 import copy
-
-def threshold_intensities(input_tensor, min_val, max_val):
-    '''
-    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
-    '''
-    l1_tensor = torch.where(input_tensor < min_val, input_tensor, 0)
-    l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, 0)
-    return l2_tensor
-
-def clip_intensities(input_tensor, min_val, max_val):
-    '''
-    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
-    '''
-    l1_tensor = torch.where(input_tensor < min_val, input_tensor, min_val)
-    l2_tensor = torch.where(l1_tensor > max_val, l1_tensor, max_val)
-    return l2_tensor
-
-def resize_image_resolution(input_image, output_size, interpolator = sitk.sitkLinear):
-    '''
-    This function resizes the input image based on the output size and interpolator
-    '''
-    inputSize = input_image.GetSize()
-    outputSpacing = np.array(input_image.GetSpacing())
-    for i in range(len(output_size)):
-        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
-    return outputSpacing
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
@@ -129,8 +104,11 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             if not resizeCheck:
                 if (preprocessing['resize'] is not None):
                     resizeCheck = True
-                    if not('resample' in preprocessing) or (preprocessing['resample'] is None):
-                        preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), resize)
+                    if not('resample' in preprocessing):
+                        preprocessing['resample'] = {}
+
+                        if not('resolution' in preprocessing['resample']):
+                            preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), resize)
                     else:
                         print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
                 else:
@@ -162,6 +140,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         if 'resolution' in preprocessing['resample']:
             # resample_split = str(aug).split(':')
             resample_values = tuple(np.array(preprocessing['resample']['resolution']).astype(np.float))
+            if len(resample_values) == 2:
+                resample_values = np.append(resample_values,1)
             augmentation_list.append(Resample(resample_values))
 
     # next, we want to do the intensity normalize - required for inference as well
