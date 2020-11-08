@@ -28,6 +28,11 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - Add transformation in [ImagesFromDataFrame Function](../GANDLF/data/ImagesFromDataFrame.py), under `global_augs_dict`
 - Ensure probability is used as input (not used for normalize or resample)
 
+### Adding Pre-processing functionality
+
+- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [../GANDLF/preprocessing.py](../GANDLF/preprocessing.py) file.
+- Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
+
 ## Add Training Functionality
 
 - Update [Training Function](../GANDLF/training_loop.py)
