@@ -77,21 +77,24 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
 
+    divisibilityCheck_patch = True
+    divisibilityCheck_baseFilter = True
+
+    divisibilityCheck_denom_patch = 16 # for unet/resunet/uinc
+    divisibilityCheck_denom_baseFilter = 4 # for uinc
+    
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
         model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-        if psize[-1] == 1:
-            checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
-        else:
-            checkPatchDivisibility(psize)
+        divisibilityCheck_baseFilter = False
     elif which_model == 'unet':
         model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-        if psize[-1] == 1:
-            checkPatchDivisibility(psize[:-1]) # for 2D, don't check divisibility of last dimension
-        else:
-            checkPatchDivisibility(psize)
+        divisibilityCheck_baseFilter = False
     elif which_model == 'fcn':
         model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        # not enough information to perform checking for this, yet
+        divisibilityCheck_patch = False 
+        divisibilityCheck_baseFilter = False
     elif which_model == 'uinc':
         model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
     else:
@@ -99,6 +102,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         which_model = 'resunet'
         model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
+    # check divisibility
+    if divisibilityCheck_patch:
+        if not checkPatchDivisibility(psize, divisibilityCheck_denom_patch):
+        sys.exit('The \'patch_size\' should be divisible by \'' + str(divisibilityCheck_denom_patch) + '\' for the \'' + which_model + '\' architecture')
+    if divisibilityCheck_baseFilter:
+        if not checkPatchDivisibility(base_filters, divisibilityCheck_denom_baseFilter):
+        sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
+    
     # setting optimizer
     if opt == 'sgd':
         optimizer = optim.SGD(model.parameters(),
@@ -168,10 +179,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             print('Device finally used: ', dev)
             device = torch.device('cuda:' + dev)
             model = model.to(int(dev))
-            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
-            print('Memory Usage : ')
-            print('Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
-            print('Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
+            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB' )
         
         print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
      
@@ -362,14 +370,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         model.eval()
 
         # validation data scores
-        total_val_dice, total_val_loss = get_stats(model, validationDataForTorch, psize, channel_keys, class_list, loss_fn)
-        average_val_dice = total_val_dice/len(val_loader.dataset)
-        average_val_loss = total_val_loss/len(val_loader.dataset)
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, val_loader, psize, channel_keys, class_list, loss_fn)
 
         # testing data scores
-        total_test_dice, total_test_loss = get_stats(model, inferenceDataForTorch, psize, channel_keys, class_list, loss_fn) 
-        average_test_dice = total_test_dice/len(inference_loader.dataset)
-        average_test_loss = total_test_loss/len(inference_loader.dataset)
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn) 
         
         # stats for current validation data
         if average_val_dice > best_val_dice:
@@ -389,7 +393,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         if average_test_dice > best_test_dice:
             best_test_idx = ep
             best_test_dice = average_test_dice
-            best_test_val_dice = average_test_dice
             # We can add more stuff to be saved if we need anything more
             torch.save({"epoch": best_test_idx,
                         "model_state_dict": model.state_dict(),
@@ -422,12 +425,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
-        total_test_dice = 0
-        total_test_loss = 0
         total_train_dice = 0
         total_train_loss = 0
-        total_val_dice = 0
-        total_val_loss = 0
 
 if __name__ == "__main__":
 
