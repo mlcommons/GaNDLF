@@ -179,10 +179,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             print('Device finally used: ', dev)
             device = torch.device('cuda:' + dev)
             model = model.to(int(dev))
-            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
-            print('Memory Usage : ')
-            print('Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
-            print('Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
+            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB' )
         
         print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
      
@@ -396,7 +393,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         if average_test_dice > best_test_dice:
             best_test_idx = ep
             best_test_dice = average_test_dice
-            best_test_val_dice = average_test_dice
             # We can add more stuff to be saved if we need anything more
             torch.save({"epoch": best_test_idx,
                         "model_state_dict": model.state_dict(),
