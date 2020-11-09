@@ -93,6 +93,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         optimizer = optim.SGD(model.parameters(),
                               lr= learning_rate,
                               momentum = 0.9)
+    
     # setting the loss function
     if isinstance(loss_function, dict): # this is currently only happening for mse_torch
         # check for mse_torch
@@ -127,40 +128,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)))
     sys.stdout.flush()
-    if device != 'cpu':
-        if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
-            sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
-        
-        dev = os.environ.get('CUDA_VISIBLE_DEVICES')
-        # multi-gpu support
-        # ###
-        # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-        # ###
-        if ',' in dev:
-            device = torch.device('cuda')
-            model = nn.DataParallel(model, '[' + dev + ']')
-        else:
-            print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
-            if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
-                dev = '0'
-            print('Device finally used: ', dev)
-            device = torch.device('cuda:' + dev)
-            model = model.to(int(dev))
-            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB' )
-        
-        print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
-     
-        # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
-        optimizer.load_state_dict(optimizer.state_dict())
 
-    else:
-        dev = -1
-        device = torch.device('cpu')
-        model.cpu()
-        amp = False
-        print("Since Device is CPU, Mixed Precision Training is set to False")
-        
-    print('Using device:', device)
+    amp, device = send_model_to_device(model, amp, device, optimizer=optimizer)
+    print('Using device:', device)        
     sys.stdout.flush()
 
     # Checking for the learning rate scheduler

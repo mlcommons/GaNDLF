@@ -78,48 +78,12 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
 
   print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
-  if device != 'cpu':
-      if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
-          sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
-      
-      dev = os.environ.get('CUDA_VISIBLE_DEVICES')
-      # multi-gpu support:  https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-      if ',' in dev:
-          device = torch.device('cuda')
-          model = nn.DataParallel(model, '[' + dev + ']')
-      else:
-          print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
-          if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
-              dev = '0'
-          print('Device finally used: ', dev)
-          device = torch.device('cuda:' + dev)
-          model = model.to(int(dev))
-          print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB')
-          print('Memory Usage : ')
-          print('Allocated : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB')
-          print('Cached: ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB')
-      
-      print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
-    
-  else:
-      dev = -1
-      device = torch.device('cpu')
-      model.cpu()
-      amp = False
-      print("Since Device is CPU, Mixed Precision Training is set to False")
-  
-  
-  # multi-gpu support: https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-  if os.environ.get('CUDA_VISIBLE_DEVICES') is not None:
-      if ',' in os.environ.get('CUDA_VISIBLE_DEVICES'):
-          environment_cuda_visible = os.environ["CUDA_VISIBLE_DEVICES"]
-          model = nn.DataParallel(model, '[' + environment_cuda_visible + ']')
+  amp, device = send_model_to_device(model, amp, device, optimizer=None)
   
   # print stats
   print('Using device:', device)
   sys.stdout.flush()
 
-  sys.stdout.flush()
   model.eval()
   average_dice, average_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True)
   print(average_dice, average_loss)
