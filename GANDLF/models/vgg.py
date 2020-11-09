@@ -5,6 +5,8 @@ Modified from https://github.com/pytorch/vision.git
 import math
 import torch.nn as nn
 
+from .modelBase import get_final_layer
+
 __all__ = [
     'VGG', 'vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn',
     'vgg19_bn', 'vgg19',
@@ -15,7 +17,7 @@ class VGG(nn.Module):
     '''
     VGG model 
     '''
-    def __init__(self, n_dimensions, features):
+    def __init__(self, n_dimensions, n_outputClasses, features, final_convolution_layer: str = 'softmax',):
         super(VGG, self).__init__()
         self.features = features
         if n_dimensions == 2:
@@ -32,7 +34,8 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(512, 10),
             nn.ReLU(True),
-            nn.Linear(10, 1)
+            nn.Linear(10, n_outputClasses),
+            get_final_layer(final_convolution_layer)
         )
          # Initialize weights
         for m in self.modules():
