@@ -27,11 +27,9 @@ import datetime
 import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
-from GANDLF.models.fcn import fcn
-from GANDLF.models.unet import unet
-from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
+from .parameterParsing import *
 
 def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDir):
   '''
@@ -59,38 +57,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
-  divisibilityCheck_patch = True
-  divisibilityCheck_baseFilter = True
-
-  divisibilityCheck_denom_patch = 16 # for unet/resunet/uinc
-  divisibilityCheck_denom_baseFilter = 4 # for uinc
-  
-  # Defining our model here according to parameters mentioned in the configuration file : 
-  if which_model == 'resunet':
-    model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], residualConnections=True)
-    divisibilityCheck_baseFilter = False
-  elif which_model == 'unet':
-    model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    divisibilityCheck_baseFilter = False
-  elif which_model == 'fcn':
-    model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    # not enough information to perform checking for this, yet
-    divisibilityCheck_patch = False 
-    divisibilityCheck_baseFilter = False
-  elif which_model == 'uinc':
-    model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-  else:
-    print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
-    which_model = 'resunet'
-    model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], residualConnections=True)
-
-  # check divisibility
-  if divisibilityCheck_patch:
-    if not checkPatchDivisibility(psize, divisibilityCheck_denom_patch):
-      sys.exit('The \'patch_size\' should be divisible by \'' + str(divisibilityCheck_denom_patch) + '\' for the \'' + which_model + '\' architecture')
-  if divisibilityCheck_baseFilter:
-    if not checkPatchDivisibility(base_filters, divisibilityCheck_denom_baseFilter):
-      sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
+  # Defining our model here according to parameters mentioned in the configuration file
+  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
   
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
