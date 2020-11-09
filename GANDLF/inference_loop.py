@@ -46,6 +46,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   class_list = parameters['class_list']
   base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
+  loss_function = parameters['loss_function']
   
   n_channels = len(headers['channelHeaders'])
   n_classList = len(class_list)
@@ -83,6 +84,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # print stats
   print('Using device:', device)
   sys.stdout.flush()
+
+  # get loss function
+  loss_fn, MSE_requested = get_loss(loss_function)
 
   model.eval()
   average_dice, average_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True)
