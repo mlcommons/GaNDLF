@@ -119,8 +119,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   print('Using device:', device)
   sys.stdout.flush()
 
-  model = model.to(dev)
-
   sys.stdout.flush()
   model.eval()
   average_dice, average_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True)
