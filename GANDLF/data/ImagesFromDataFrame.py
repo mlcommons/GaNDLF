@@ -141,7 +141,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             # resample_split = str(aug).split(':')
             resample_values = tuple(np.array(preprocessing['resample']['resolution']).astype(np.float))
             if len(resample_values) == 2:
-                resample_values = np.append(resample_values,1)
+                resample_values = tuple(np.append(resample_values,1))
             augmentation_list.append(Resample(resample_values))
 
     # next, we want to do the intensity normalize - required for inference as well
