@@ -24,6 +24,7 @@ model_urls = {
 class _DenseLayer(nn.Module):
     def __init__(
         self,
+        n_dimensions,
         num_input_features: int,
         growth_rate: int,
         bn_size: int,
@@ -31,28 +32,35 @@ class _DenseLayer(nn.Module):
         memory_efficient: bool = False
     ) -> None:
         super(_DenseLayer, self).__init__()
-        self.norm1: nn.BatchNorm2d
-        self.add_module('norm1', nn.BatchNorm2d(num_input_features))
+        if n_dimensions == 2:
+            self.Conv = nn.Conv2d
+            self.BatchNorm = nn.BatchNorm2d
+        elif n_dimensions == 3:
+            self.Conv = nn.Conv3d
+            self.BatchNorm = nn.BatchNorm3d
+
+        self.norm1: self.BatchNorm
+        self.add_module('norm1', self.BatchNorm(num_input_features))
         self.relu1: nn.ReLU
         self.add_module('relu1', nn.ReLU(inplace=True))
-        self.conv1: nn.Conv2d
-        self.add_module('conv1', nn.Conv2d(num_input_features, bn_size *
+        self.conv1: self.Conv
+        self.add_module('conv1', self.Conv(num_input_features, bn_size *
                                            growth_rate, kernel_size=1, stride=1,
                                            bias=False))
-        self.norm2: nn.BatchNorm2d
-        self.add_module('norm2', nn.BatchNorm2d(bn_size * growth_rate))
+        self.norm2: self.BatchNorm
+        self.add_module('norm2', self.BatchNorm(bn_size * growth_rate))
         self.relu2: nn.ReLU
         self.add_module('relu2', nn.ReLU(inplace=True))
-        self.conv2: nn.Conv2d
-        self.add_module('conv2', nn.Conv2d(bn_size * growth_rate, growth_rate,
+        self.conv2: self.Conv
+        self.add_module('conv2', self.Conv(bn_size * growth_rate, growth_rate,
                                            kernel_size=3, stride=1, padding=1,
                                            bias=False))
         self.drop_rate = float(drop_rate)
         self.memory_efficient = memory_efficient
 
     def bn_function(self, inputs: List[Tensor]) -> Tensor:
-        concated_features = torch.cat(inputs, 1)
-        bottleneck_output = self.conv1(self.relu1(self.norm1(concated_features)))  # noqa: T484
+        concatenated_features = torch.cat(inputs, 1)
+        bottleneck_output = self.conv1(self.relu1(self.norm1(concatenated_features)))  # noqa: T484
         return bottleneck_output
 
     # todo: rewrite when torchscript supports any
@@ -159,6 +167,7 @@ class DenseNet(nn.Module):
 
     def __init__(
         self,
+        n_dimensions,
         growth_rate: int = 32,
         block_config: Tuple[int, int, int, int] = (6, 12, 24, 16),
         num_init_features: int = 64,
@@ -170,13 +179,24 @@ class DenseNet(nn.Module):
 
         super(DenseNet, self).__init__()
 
+        if n_dimensions == 2:
+            self.Conv = nn.Conv2d
+            self.BatchNorm = nn.BatchNorm2d
+            self.MaxPool = nn.MaxPool2d
+            self.adaptive_avg_pool = F.adaptive_avg_pool2d
+        elif n_dimensions == 3:
+            self.Conv = nn.Conv3d
+            self.BatchNorm = nn.BatchNorm3d
+            self.MaxPool = nn.MaxPool3d
+            self.adaptive_avg_pool = F.adaptive_avg_pool3d
+
         # First convolution
         self.features = nn.Sequential(OrderedDict([
-            ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2,
+            ('conv0', self.Conv(3, num_init_features, kernel_size=7, stride=2,
                                 padding=3, bias=False)),
-            ('norm0', nn.BatchNorm2d(num_init_features)),
+            ('norm0', self.BatchNorm(num_init_features)),
             ('relu0', nn.ReLU(inplace=True)),
-            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+            ('pool0', self.MaxPool(kernel_size=3, stride=2, padding=1)),
         ]))
 
         # Each denseblock
@@ -199,16 +219,16 @@ class DenseNet(nn.Module):
                 num_features = num_features // 2
 
         # Final batch norm
-        self.features.add_module('norm5', nn.BatchNorm2d(num_features))
+        self.features.add_module('norm5', self.BatchNorm(num_features))
 
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
 
         # Official init from torch repo.
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, self.Conv):
                 nn.init.kaiming_normal_(m.weight)
-            elif isinstance(m, nn.BatchNorm2d):
+            elif isinstance(m, self.BatchNorm):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
@@ -217,7 +237,7 @@ class DenseNet(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
+        out = self.adaptive_avg_pool(out, (1, 1))
         out = torch.flatten(out, 1)
         out = self.classifier(out)
         return out
