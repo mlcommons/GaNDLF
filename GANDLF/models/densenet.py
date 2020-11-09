@@ -10,6 +10,7 @@ from torch.utils import load_state_dict_from_url
 from torch import Tensor
 from typing import Any, List, Tuple
 
+from .modelBase import get_final_layer
 
 __all__ = ['DenseNet', 'densenet121', 'densenet169', 'densenet201', 'densenet161']
 
@@ -273,9 +274,16 @@ def _densenet(
     num_init_features: int,
     pretrained: bool = False,
     progress: bool = False,
+    final_convolution_layer: str = 'softmax',
     **kwargs: Any
 ) -> DenseNet:
-    model = DenseNet(n_dimensions, growth_rate, block_config, num_init_features, **kwargs)
+    model_dense = DenseNet(n_dimensions, growth_rate, block_config, num_init_features, **kwargs)
+
+    model = nn.Sequential(
+        model_dense,
+        get_final_layer(final_convolution_layer)
+    )
+
     if pretrained:
         _load_state_dict(model, model_urls[arch], progress)
     return model
