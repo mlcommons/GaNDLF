@@ -78,7 +78,6 @@ def get_optimizer(which_optimizer, model_parameters, learning_rate):
     '''
     This function parses the optimizer from the config file and returns the appropriate object
     '''
-    # setting optimizer
     if which_optimizer == 'sgd':
         optimizer = optim.SGD(model_parameters,
                               lr=learning_rate,
@@ -96,3 +95,32 @@ def get_optimizer(which_optimizer, model_parameters, learning_rate):
                               momentum = 0.9)
 
     return optimizer
+
+def get_scheduler(which_scheduler, optimizer, batch_size, training_samples_size, learning_rate):
+    '''
+    This function parses the optimizer from the config file and returns the appropriate object
+    '''
+    step_size = 4*batch_size*training_samples_size
+    if which_scheduler == "triangle":
+        clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
+        scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
+        print("Initial Learning Rate: ",learning_rate)
+    elif which_scheduler == "exp":
+        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
+    elif which_scheduler == "step":
+        scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
+    elif which_scheduler == "reduce-on-plateau":
+        scheduler_lr = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1,
+                                                                  patience=10, threshold=0.0001, threshold_mode='rel',
+                                                                  cooldown=0, min_lr=0, eps=1e-08, verbose=False)
+    elif which_scheduler == "triangular":
+        scheduler_lr = torch.optim.lr_scheduler.CyclicLR(optimizer, learning_rate * 0.001, learning_rate,
+                                                         step_size_up=step_size,
+                                                         step_size_down=None, mode='triangular', gamma=1.0,
+                                                         scale_fn=None, scale_mode='cycle', cycle_momentum=True,
+                                                         base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+    else:
+        print('WARNING: Could not find the requested Learning Rate scheduler \'' + which_scheduler + '\' in the implementation, using exp, instead', file=sys.stderr)
+        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
+
+    return scheduler_lr
