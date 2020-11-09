@@ -65,8 +65,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
   model.load_state_dict(main_dict['model_state_dict'])
   
-  print("\nHostname   :" + str(os.getenv("HOSTNAME")))
-  sys.stdout.flush()
+  if not(os.environ.get('HOSTNAME') is None):
+      print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
+      sys.stdout.flush()
 
   # get the channel keys for concatenation later (exclude non numeric channel keys)
   batch = next(iter(inference_loader))
