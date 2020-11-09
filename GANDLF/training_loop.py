@@ -95,24 +95,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                               momentum = 0.9)
     
     # setting the loss function
-    if isinstance(loss_function, dict): # this is currently only happening for mse_torch
-        # check for mse_torch
-        loss_fn = MSE_loss
-        MSE_requested = True
-    else: # this is a simple string, so proceed with previous workflow
-        MSE_requested = False
-        if loss_function == 'dc':
-            loss_fn = MCD_loss
-        elif loss_function == 'dcce':
-            loss_fn = DCCE
-        elif loss_function == 'ce':
-            loss_fn = CE
-        # elif loss_function == 'mse':
-        #     loss_fn = MCD_MSE_loss
-        else:
-            print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
-            loss_function = 'dc'
-            loss_fn = MCD_loss
+    loss_fn, MSE_requested = get_loss(loss_function)
 
     # training_start_time = time.asctime()
     # startstamp = time.time()
