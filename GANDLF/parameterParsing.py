@@ -45,3 +45,29 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
             sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
     
     return model
+
+def get_loss(which_loss):
+    '''
+    This function parses the loss coming from the config file and returns the appropriate object
+    '''
+    MSE_requested = False
+    if isinstance(which_loss, dict): # this is currently only happening for mse_torch
+        # check for mse_torch
+        loss_fn = MSE_loss
+        MSE_requested = True
+    else: # this is a simple string, so proceed with previous workflow
+        MSE_requested = False
+        if which_loss == 'dc':
+            loss_fn = MCD_loss
+        elif which_loss == 'dcce':
+            loss_fn = DCCE
+        elif which_loss == 'ce':
+            loss_fn = CE
+        # elif loss_function == 'mse':
+        #     loss_fn = MCD_MSE_loss
+        else:
+            print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
+            which_loss = 'dc'
+            loss_fn = MCD_loss
+
+    return loss_fn, MSE_requested
