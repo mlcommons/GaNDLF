@@ -25,11 +25,9 @@ import datetime
 import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
-from GANDLF.models.fcn import fcn
-from GANDLF.models.unet import unet
-from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
+from .parameterParsing import *
 
 def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
     '''
@@ -76,39 +74,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
 
-    divisibilityCheck_patch = True
-    divisibilityCheck_baseFilter = True
+    # Defining our model here according to parameters mentioned in the configuration file
+    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
-    divisibilityCheck_denom_patch = 16 # for unet/resunet/uinc
-    divisibilityCheck_denom_baseFilter = 4 # for uinc
-    
-    # Defining our model here according to parameters mentioned in the configuration file : 
-    if which_model == 'resunet':
-        model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], residualConnections=True)
-        divisibilityCheck_baseFilter = False
-    elif which_model == 'unet':
-        model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-        divisibilityCheck_baseFilter = False
-    elif which_model == 'fcn':
-        model = fcn(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-        # not enough information to perform checking for this, yet
-        divisibilityCheck_patch = False 
-        divisibilityCheck_baseFilter = False
-    elif which_model == 'uinc':
-        model = uinc(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
-    else:
-        print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
-        which_model = 'resunet'
-        model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], residualConnections=True)
-
-    # check divisibility
-    if divisibilityCheck_patch:
-        if not checkPatchDivisibility(psize, divisibilityCheck_denom_patch):
-        sys.exit('The \'patch_size\' should be divisible by \'' + str(divisibilityCheck_denom_patch) + '\' for the \'' + which_model + '\' architecture')
-    if divisibilityCheck_baseFilter:
-        if not checkPatchDivisibility(base_filters, divisibilityCheck_denom_baseFilter):
-        sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
-    
     # setting optimizer
     if opt == 'sgd':
         optimizer = optim.SGD(model.parameters(),
@@ -125,6 +93,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         optimizer = optim.SGD(model.parameters(),
                               lr= learning_rate,
                               momentum = 0.9)
+    
     # setting the loss function
     if isinstance(loss_function, dict): # this is currently only happening for mse_torch
         # check for mse_torch
@@ -159,40 +128,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)))
     sys.stdout.flush()
-    if device != 'cpu':
-        if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
-            sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
-        
-        dev = os.environ.get('CUDA_VISIBLE_DEVICES')
-        # multi-gpu support
-        # ###
-        # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
-        # ###
-        if ',' in dev:
-            device = torch.device('cuda')
-            model = nn.DataParallel(model, '[' + dev + ']')
-        else:
-            print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
-            if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
-                dev = '0'
-            print('Device finally used: ', dev)
-            device = torch.device('cuda:' + dev)
-            model = model.to(int(dev))
-            print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB' )
-        
-        print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
-     
-        # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
-        optimizer.load_state_dict(optimizer.state_dict())
 
-    else:
-        dev = -1
-        device = torch.device('cpu')
-        model.cpu()
-        amp = False
-        print("Since Device is CPU, Mixed Precision Training is set to False")
-        
-    print('Using device:', device)
+    amp, device = send_model_to_device(model, amp, device, optimizer=optimizer)
+    print('Using device:', device)        
     sys.stdout.flush()
 
     # Checking for the learning rate scheduler
