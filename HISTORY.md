@@ -3,6 +3,7 @@
 - 2D support added
 - Pre-processing module added
   - Added option to threshold or clip the input image
+- Code consolidation
 
 ## 0.0.4
 
