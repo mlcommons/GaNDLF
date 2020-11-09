@@ -24,35 +24,29 @@ model_urls = {
 class _DenseLayer(nn.Module):
     def __init__(
         self,
-        n_dimensions,
         num_input_features: int,
         growth_rate: int,
         bn_size: int,
         drop_rate: float,
-        memory_efficient: bool = False
+        memory_efficient: bool = False,
+        Conv = nn.Conv2d, BatchNorm = nn.BatchNorm2d
     ) -> None:
         super(_DenseLayer, self).__init__()
-        if n_dimensions == 2:
-            self.Conv = nn.Conv2d
-            self.BatchNorm = nn.BatchNorm2d
-        elif n_dimensions == 3:
-            self.Conv = nn.Conv3d
-            self.BatchNorm = nn.BatchNorm3d
 
-        self.norm1: self.BatchNorm
-        self.add_module('norm1', self.BatchNorm(num_input_features))
+        self.norm1: BatchNorm
+        self.add_module('norm1', BatchNorm(num_input_features))
         self.relu1: nn.ReLU
         self.add_module('relu1', nn.ReLU(inplace=True))
-        self.conv1: self.Conv
-        self.add_module('conv1', self.Conv(num_input_features, bn_size *
+        self.conv1: Conv
+        self.add_module('conv1', Conv(num_input_features, bn_size *
                                            growth_rate, kernel_size=1, stride=1,
                                            bias=False))
-        self.norm2: self.BatchNorm
-        self.add_module('norm2', self.BatchNorm(bn_size * growth_rate))
+        self.norm2: BatchNorm
+        self.add_module('norm2', BatchNorm(bn_size * growth_rate))
         self.relu2: nn.ReLU
         self.add_module('relu2', nn.ReLU(inplace=True))
-        self.conv2: self.Conv
-        self.add_module('conv2', self.Conv(bn_size * growth_rate, growth_rate,
+        self.conv2: Conv
+        self.add_module('conv2', Conv(bn_size * growth_rate, growth_rate,
                                            kernel_size=3, stride=1, padding=1,
                                            bias=False))
         self.drop_rate = float(drop_rate)
@@ -118,7 +112,8 @@ class _DenseBlock(nn.ModuleDict):
         bn_size: int,
         growth_rate: int,
         drop_rate: float,
-        memory_efficient: bool = False
+        memory_efficient: bool = False,
+        Conv = nn.Conv2d, BatchNorm = nn.BatchNorm2d
     ) -> None:
         super(_DenseBlock, self).__init__()
         for i in range(num_layers):
@@ -128,6 +123,7 @@ class _DenseBlock(nn.ModuleDict):
                 bn_size=bn_size,
                 drop_rate=drop_rate,
                 memory_efficient=memory_efficient,
+                Conv = Conv, BatchNorm = BatchNorm
             )
             self.add_module('denselayer%d' % (i + 1), layer)
 
@@ -140,13 +136,13 @@ class _DenseBlock(nn.ModuleDict):
 
 
 class _Transition(nn.Sequential):
-    def __init__(self, num_input_features: int, num_output_features: int) -> None:
+    def __init__(self, num_input_features: int, num_output_features: int, Conv: nn.Conv2d, BatchNorm: nn.BatchNorm2d, AvgPool: nn.AvgPool2d) -> None:
         super(_Transition, self).__init__()
-        self.add_module('norm', nn.BatchNorm2d(num_input_features))
+        self.add_module('norm', BatchNorm(num_input_features))
         self.add_module('relu', nn.ReLU(inplace=True))
-        self.add_module('conv', nn.Conv2d(num_input_features, num_output_features,
+        self.add_module('conv', Conv(num_input_features, num_output_features,
                                           kernel_size=1, stride=1, bias=False))
-        self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
+        self.add_module('pool', AvgPool(kernel_size=2, stride=2))
 
 
 class DenseNet(nn.Module):
@@ -184,11 +180,13 @@ class DenseNet(nn.Module):
             self.BatchNorm = nn.BatchNorm2d
             self.MaxPool = nn.MaxPool2d
             self.adaptive_avg_pool = F.adaptive_avg_pool2d
+            self.AvgPool = nn.AvgPool2d
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
             self.BatchNorm = nn.BatchNorm3d
             self.MaxPool = nn.MaxPool3d
             self.adaptive_avg_pool = F.adaptive_avg_pool3d
+            self.AvgPool = nn.AvgPool3d
 
         # First convolution
         self.features = nn.Sequential(OrderedDict([
@@ -208,13 +206,15 @@ class DenseNet(nn.Module):
                 bn_size=bn_size,
                 growth_rate=growth_rate,
                 drop_rate=drop_rate,
-                memory_efficient=memory_efficient
+                memory_efficient=memory_efficient,
+                Conv = self.Conv,
+                BatchNorm = self.BatchNorm
             )
             self.features.add_module('denseblock%d' % (i + 1), block)
             num_features = num_features + num_layers * growth_rate
             if i != len(block_config) - 1:
                 trans = _Transition(num_input_features=num_features,
-                                    num_output_features=num_features // 2)
+                                    num_output_features=num_features // 2, Conv = self.Conv, BatchNorm = self.BatchNorm, AvgPool = self.AvgPool)
                 self.features.add_module('transition%d' % (i + 1), trans)
                 num_features = num_features // 2
 
