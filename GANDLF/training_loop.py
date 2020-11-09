@@ -3,6 +3,7 @@ os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation reques
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 from torch.utils.data.dataset import Dataset
+import torch.optim as optim
 from torch.autograd import Variable
 import torch.nn as nn
 import numpy as np
@@ -77,7 +78,21 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
     # setting optimizer
-    optimizer = get_optimizer(opt, model.parameters(), learning_rate) 
+    if opt == 'sgd':
+        optimizer = optim.SGD(model.parameters(),
+                              lr=learning_rate,
+                              momentum = 0.9)
+    elif opt == 'adam':        
+        optimizer = optim.Adam(model.parameters(),
+                               lr=learning_rate,
+                               betas = (0.9,0.999),
+                               weight_decay = 0.00005)
+    else:
+        print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the implementation, using sgd, instead', file = sys.stderr)
+        opt = 'sgd'
+        optimizer = optim.SGD(model.parameters(),
+                              lr= learning_rate,
+                              momentum = 0.9)
     
     # setting the loss function
     loss_fn, MSE_requested = get_loss(loss_function)
