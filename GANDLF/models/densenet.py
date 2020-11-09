@@ -262,15 +262,16 @@ def _load_state_dict(model: nn.Module, model_url: str, progress: bool) -> None:
 
 
 def _densenet(
+    n_dimensions,
     arch: str,
     growth_rate: int,
     block_config: Tuple[int, int, int, int],
     num_init_features: int,
-    pretrained: bool,
-    progress: bool,
+    pretrained: bool = False,
+    progress: bool = False,
     **kwargs: Any
 ) -> DenseNet:
-    model = DenseNet(growth_rate, block_config, num_init_features, **kwargs)
+    model = DenseNet(n_dimensions, growth_rate, block_config, num_init_features, **kwargs)
     if pretrained:
         _load_state_dict(model, model_urls[arch], progress)
     return model
