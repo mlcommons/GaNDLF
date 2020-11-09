@@ -27,7 +27,6 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
-from GANDLF.models.resunet import resunet
 from GANDLF.models.uinc import uinc
 from GANDLF.losses import *
 from GANDLF.utils import *
@@ -85,7 +84,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     
     # Defining our model here according to parameters mentioned in the configuration file : 
     if which_model == 'resunet':
-        model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], residualConnections=True)
         divisibilityCheck_baseFilter = False
     elif which_model == 'unet':
         model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
@@ -100,7 +99,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
-        model = resunet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+        model = unet(parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], residualConnections=True)
 
     # check divisibility
     if divisibilityCheck_patch:
