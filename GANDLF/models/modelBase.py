@@ -7,6 +7,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 import sys
 
+def get_final_layer(final_convolution_layer):
+    none_list = ['none', None, 'None', 'regression']
+
+    if final_convolution_layer == 'sigmoid':
+        final_convolution_layer = F.sigmoid
+
+    elif final_convolution_layer == 'softmax':
+        final_convolution_layer = F.softmax
+
+    elif final_convolution_layer in none_list:
+        final_convolution_layer = None
+
+    return final_convolution_layer
+
+
 class ModelBase(nn.Module):
     '''
     This is the base model class that all other architectures will need to derive from
@@ -46,15 +61,5 @@ class ModelBase(nn.Module):
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
         else:
             sys.exit('Currently, only 2D or 3D datasets are supported.')
-
-        none_list = ['none', None, 'None', 'regression']
-
-        if final_convolution_layer == 'sigmoid':
-            self.final_convolution_layer = F.sigmoid
-
-        elif final_convolution_layer == 'softmax':
-            self.final_convolution_layer = F.softmax
-
-        elif final_convolution_layer in none_list:
-            self.final_convolution_layer = None
         
+        self.final_convolution_layer = get_final_layer(final_convolution_layer)
