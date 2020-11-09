@@ -4,6 +4,7 @@
 - Pre-processing module added
   - Added option to threshold or clip the input image
 - Code consolidation
+- Added generic DenseNet
 
 ## 0.0.4
 
