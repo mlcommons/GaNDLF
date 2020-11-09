@@ -1,3 +1,5 @@
+import torch.optim as optim
+
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
@@ -71,3 +73,26 @@ def get_loss(which_loss):
             loss_fn = MCD_loss
 
     return loss_fn, MSE_requested
+
+def get_optimizer(which_optimizer, model_parameters, learning_rate):
+    '''
+    This function parses the optimizer from the config file and returns the appropriate object
+    '''
+    # setting optimizer
+    if which_optimizer == 'sgd':
+        optimizer = optim.SGD(model_parameters,
+                              lr=learning_rate,
+                              momentum = 0.9)
+    elif which_optimizer == 'adam':        
+        optimizer = optim.Adam(model_parameters,
+                               lr=learning_rate,
+                               betas = (0.9,0.999),
+                               weight_decay = 0.00005)
+    else:
+        print('WARNING: Could not find the requested optimizer \'' + which_optimizer + '\' in the implementation, using sgd, instead', file = sys.stderr)
+        opt = 'sgd'
+        optimizer = optim.SGD(model_parameters,
+                              lr= learning_rate,
+                              momentum = 0.9)
+
+    return optimizer
