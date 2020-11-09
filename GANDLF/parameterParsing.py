@@ -2,6 +2,7 @@ from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
+from GANDLF.models.densenet import _densenet
 from GANDLF.losses import *
 from GANDLF.utils import *
 
@@ -31,6 +32,18 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         divisibilityCheck_baseFilter = False
     elif which_model == 'uinc':
         model = uinc(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet121': # regressor network
+        # ref: https://arxiv.org/pdf/1608.06993.pdf
+        model = _densenet(n_dimensions, 'densenet121', 32, (6, 12, 24, 16), 64) # are these configurations fine? - taken from torch
+    elif which_model == 'densenet161': # regressor network 
+        # ref: https://arxiv.org/pdf/1608.06993.pdf
+        model = _densenet(n_dimensions, 'densenet161', 48, (6, 12, 36, 24), 96) # are these configurations fine? - taken from torch
+    elif which_model == 'densenet169': # regressor network
+        # ref: https://arxiv.org/pdf/1608.06993.pdf
+        model = _densenet(n_dimensions, 'densenet169', 32, (6, 12, 32, 32), 64) # are these configurations fine? - taken from torch
+    elif which_model == 'densenet201': # regressor network
+        # ref: https://arxiv.org/pdf/1608.06993.pdf
+        model = _densenet(n_dimensions, 'densenet201', 32, (6, 12, 48, 32), 64) # are these configurations fine? - taken from torch
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
