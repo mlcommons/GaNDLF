@@ -78,29 +78,16 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
 
     # setting optimizer
-    if opt == 'sgd':
-        optimizer = optim.SGD(model.parameters(),
-                              lr=learning_rate,
-                              momentum = 0.9)
-    elif opt == 'adam':        
-        optimizer = optim.Adam(model.parameters(),
-                               lr=learning_rate,
-                               betas = (0.9,0.999),
-                               weight_decay = 0.00005)
-    else:
-        print('WARNING: Could not find the requested optimizer \'' + opt + '\' in the implementation, using sgd, instead', file = sys.stderr)
-        opt = 'sgd'
-        optimizer = optim.SGD(model.parameters(),
-                              lr= learning_rate,
-                              momentum = 0.9)
-    
+    optimizer = get_optimizer(opt, model.parameters(), learning_rate) 
+        
     # setting the loss function
     loss_fn, MSE_requested = get_loss(loss_function)
 
     # training_start_time = time.asctime()
     # startstamp = time.time()
-    print("\nHostname     :" + str(os.getenv("HOSTNAME")))
-    sys.stdout.flush()
+    if not(os.environ.get('HOSTNAME') is None):
+        print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
+        sys.stdout.flush()
 
     # resume if compatible model was found
     if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pth.tar")):
@@ -117,28 +104,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     sys.stdout.flush()
 
     # Checking for the learning rate scheduler
-    if scheduler == "triangle":
-        step_size = 4*batch_size*len(train_loader.dataset)
-        clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
-        scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
-        print("Initial Learning Rate: ",learning_rate)
-    elif scheduler == "exp":
-        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
-    elif scheduler == "step":
-        scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
-    elif scheduler == "reduce-on-plateau":
-        scheduler_lr = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1,
-                                                                  patience=10, threshold=0.0001, threshold_mode='rel',
-                                                                  cooldown=0, min_lr=0, eps=1e-08, verbose=False)
-    elif scheduler == "triangular":
-        scheduler_lr = torch.optim.lr_scheduler.CyclicLR(optimizer, learning_rate * 0.001, learning_rate,
-                                                         step_size_up=4*batch_size*len(train_loader.dataset),
-                                                         step_size_down=None, mode='triangular', gamma=1.0,
-                                                         scale_fn=None, scale_mode='cycle', cycle_momentum=True,
-                                                         base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
-    else:
-        print('WARNING: Could not find the requested Learning Rate scheduler \'' + scheduler + '\' in the implementation, using exp, instead', file=sys.stderr)
-        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
+    scheduler_lr = get_scheduler(scheduler, optimizer, batch_size, len(train_loader.dataset), learning_rate)
 
     sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
