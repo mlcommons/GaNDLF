@@ -71,9 +71,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     is_regression = False
-    # check if regression has been requested
-    if (model.final_convolution_layer == None) and (len(headers['predictionHeaders']) > 0):
-        is_regression = True
+    is_classification = False
+    # check if regression/classification has been requested
+    if len(headers['predictionHeaders']) > 0:
+        if model.final_convolution_layer is None:
+            is_regression = True
+        else:
+            is_classification = True
 
     # sanity check
     if n_channels == 0:
