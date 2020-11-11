@@ -115,11 +115,11 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                 else:
                     resizeCheck = True
         
-        # for regression
-        if predictionHeaders:
-            # get the mask
-            if (subject_dict['label'] is None) and (class_list is not None):
-                sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
+        # # for regression
+        # if predictionHeaders:
+        #     # get the mask
+        #     if (subject_dict['label'] is None) and (class_list is not None):
+        #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
