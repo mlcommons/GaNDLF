@@ -166,10 +166,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if amp:
         scaler = torch.cuda.amp.GradScaler() 
 
-    for item in channel_keys:
+    for item in all_keys:
         if item.isnumeric():
             channel_keys_new.append(item)
+        elif 'value' in item:
+            value_keys_new.append(item)
     channel_keys = channel_keys_new
+    value_keys = value_keys_new
     ################ TRAINING THE MODEL##############
     for ep in range(num_epochs):
         start = time.time()
