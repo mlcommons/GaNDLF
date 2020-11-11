@@ -135,7 +135,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         valueCounter = 0
         for values in predictionHeaders:
             # assigning the dict key to the channel
-            subject_dict['value_' + str(valueCounter)] = np.array(dataframe[values][patient] / 100) # put scaling as an option
+            subject_dict['value_' + str(valueCounter)] = np.array(dataframe[values][patient])
             valueCounter = valueCounter + 1
         
         # Initializing the subject object using the dict
