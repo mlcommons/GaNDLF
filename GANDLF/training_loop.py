@@ -70,6 +70,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
+    is_regression = False
+    # check if regression has been requested
+    if (model.final_convolution_layer == None) and (len(headers['predictionHeaders']) > 0):
+        is_regression = True
+
     # sanity check
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
