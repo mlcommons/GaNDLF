@@ -159,20 +159,20 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
               
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
-    channel_keys = list(batch.keys())
-    channel_keys_new = []
+    all_keys = list(batch.keys())
+    channel_keys = []
+    value_keys = []
+
+    for item in all_keys:
+        if item.isnumeric():
+            channel_keys.append(item)
+        elif 'value' in item:
+            value_keys.append(item)
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if amp:
         scaler = torch.cuda.amp.GradScaler() 
 
-    for item in all_keys:
-        if item.isnumeric():
-            channel_keys_new.append(item)
-        elif 'value' in item:
-            value_keys_new.append(item)
-    channel_keys = channel_keys_new
-    value_keys = value_keys_new
     ################ TRAINING THE MODEL##############
     for ep in range(num_epochs):
         start = time.time()
