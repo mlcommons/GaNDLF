@@ -76,8 +76,9 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
         # save the current model configuration as a sanity check
         currentModelConfigPickle = os.path.join(currentOutputFolder, 'parameters.pkl')
-        with open(currentModelConfigPickle, 'wb') as handle:
-            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        if not os.path.exists(currentModelConfigPickle):
+            with open(currentModelConfigPickle, 'wb') as handle:
+                pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # save the current training+validation and holdout datasets 
         if noHoldoutData:
@@ -88,8 +89,12 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         else:
             currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
             currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
-            trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
-            holdoutData.to_pickle(currentHoldoutDataPickle)
+            
+            if not os.path.exists(currentHoldoutDataPickle):
+                holdoutData.to_pickle(currentHoldoutDataPickle)
+            if not os.path.exists(currentTrainingAndValidataionDataPickle):
+                trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
+            
             current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
         # start the kFold train for validation
@@ -115,12 +120,15 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 # pickle the data
                 currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
                 currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
-                trainingData.to_pickle(currentTrainingDataPickle)
-                validationData.to_pickle(currentValidationDataPickle)
+                if not os.path.exists(currentTrainingDataPickle):
+                    trainingData.to_pickle(currentTrainingDataPickle)
+                if not os.path.exists(currentValidationDataPickle):
+                    validationData.to_pickle(currentValidationDataPickle)
 
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
-                with open(headersPickle, 'wb') as handle:
-                    pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                if not os.path.exists(headersPickle):
+                    with open(headersPickle, 'wb') as handle:
+                        pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 # call qsub here
                 parallel_compute_command_actual = parameters['parallel_compute_command'].replace('${outputDir}', currentValOutputFolder)
