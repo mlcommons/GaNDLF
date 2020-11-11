@@ -81,6 +81,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
+    predictionHeaders = headers['predictionHeaders']
 
     # define the control points and swap axes for augmentation
     augmentation_patchAxesPoints = copy.deepcopy(psize)
