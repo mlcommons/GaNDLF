@@ -130,6 +130,14 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             subject_dict['label'] = "NA"
             if not train:
                 subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
+        
+        # iterating through the values to predict of the subject
+        valueCounter = 0
+        for values in predictionHeaders:
+            # assigning the dict key to the channel
+            subject_dict['value_' + str(valueCounter)] = np.array(dataframe[values][patient] / 100) # put scaling as an option
+            valueCounter = valueCounter + 1
+        
         # Initializing the subject object using the dict
         subject = Subject(subject_dict)
         # Appending this subject to the list of subjects
