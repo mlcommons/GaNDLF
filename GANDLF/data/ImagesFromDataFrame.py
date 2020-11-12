@@ -102,15 +102,16 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
-                if (preprocessing['resize'] is not None):
-                    resizeCheck = True
-                    if not('resample' in preprocessing):
-                        preprocessing['resample'] = {}
+                if not(preprocessing is None) and ('resize' in preprocessing):
+                    if (preprocessing['resize'] is not None):
+                        resizeCheck = True
+                        if not('resample' in preprocessing):
+                            preprocessing['resample'] = {}
 
-                        if not('resolution' in preprocessing['resample']):
-                            preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), preprocessing['resize'])
-                    else:
-                        print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
+                            if not('resolution' in preprocessing['resample']):
+                                preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), preprocessing['resize'])
+                        else:
+                            print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
                 else:
                     resizeCheck = True
 
@@ -132,21 +133,23 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     augmentation_list = []
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
-    for key in ['threshold','clip']:
-        augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
+    if not(preprocessing is None):
+        for key in ['threshold','clip']:
+            if key in preprocessing:
+                augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
         
-    # first, we want to do the resampling, if it is present - required for inference as well
-    if 'resample' in preprocessing:
-        if 'resolution' in preprocessing['resample']:
-            # resample_split = str(aug).split(':')
-            resample_values = tuple(np.array(preprocessing['resample']['resolution']).astype(np.float))
-            if len(resample_values) == 2:
-                resample_values = tuple(np.append(resample_values,1))
-            augmentation_list.append(Resample(resample_values))
+        # first, we want to do the resampling, if it is present - required for inference as well
+        if 'resample' in preprocessing:
+            if 'resolution' in preprocessing['resample']:
+                # resample_split = str(aug).split(':')
+                resample_values = tuple(np.array(preprocessing['resample']['resolution']).astype(np.float))
+                if len(resample_values) == 2:
+                    resample_values = tuple(np.append(resample_values,1))
+                augmentation_list.append(Resample(resample_values))
 
-    # next, we want to do the intensity normalize - required for inference as well
-    if 'normalize' in preprocessing:
-        augmentation_list.append(global_preprocessing_dict['normalize'])
+        # next, we want to do the intensity normalize - required for inference as well
+        if 'normalize' in preprocessing:
+            augmentation_list.append(global_preprocessing_dict['normalize'])
 
     # other augmentations should only happen for training - and also setting the probabilities
     # for the augmentations
