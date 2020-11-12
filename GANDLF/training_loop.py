@@ -78,7 +78,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         sys.exit('The number of input channels cannot be zero, please check training CSV')
 
     # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
 
     # setting optimizer
     optimizer = get_optimizer(opt, model.parameters(), learning_rate) 
@@ -131,7 +131,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         dice_penalty_dict[i] = 0
 
     # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=False, augmentations=augmentations, resize = parameters['resize']) 
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=False, augmentations=None,preprocessing=preprocessing) 
     penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
     
     # get the weights for use for dice loss
