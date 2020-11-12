@@ -34,7 +34,7 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
     elif which_model == 'uinc':
         model = uinc(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'msdnet':
-        model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
+        #model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet121': # regressor network
         # ref: https://arxiv.org/pdf/1608.06993.pdf
         model = _densenet(n_dimensions, 'densenet121', 32, (6, 12, 24, 16), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
