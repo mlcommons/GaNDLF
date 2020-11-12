@@ -6,22 +6,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as cp
 from collections import OrderedDict
-from torch.utils import load_state_dict_from_url
 from torch import Tensor
 from typing import Any, List, Tuple
 
 from .modelBase import get_final_layer
 
 __all__ = ['DenseNet', 'densenet121', 'densenet169', 'densenet201', 'densenet161']
-
-model_urls = {
-    'densenet121': 'https://download.pytorch.org/models/densenet121-a639ec97.pth',
-    'densenet169': 'https://download.pytorch.org/models/densenet169-b2777c0a.pth',
-    'densenet201': 'https://download.pytorch.org/models/densenet201-c1103571.pth',
-    'densenet161': 'https://download.pytorch.org/models/densenet161-8d451a50.pth',
-}
-
-
 class _DenseLayer(nn.Module):
     '''
     memory_efficient (bool) - If True, uses checkpointing. Much more memory efficient,
