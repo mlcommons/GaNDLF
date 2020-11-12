@@ -69,7 +69,7 @@ global_augs_dict = {
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_volume,
-                        q_num_workers, q_verbose, train=True, augmentations=None, preprocessing=None, resize=None):
+                        q_num_workers, q_verbose, train=True, augmentations=None, preprocessing=None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -108,7 +108,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                         preprocessing['resample'] = {}
 
                         if not('resolution' in preprocessing['resample']):
-                            preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), resize)
+                            preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), preprocessing['resize'])
                     else:
                         print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
                 else:
