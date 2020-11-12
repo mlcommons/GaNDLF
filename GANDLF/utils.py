@@ -5,6 +5,7 @@ import torch.nn as nn
 import torchio
 from GANDLF.losses import *
 import sys
+import os
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
