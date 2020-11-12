@@ -7,9 +7,9 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 from GANDLF.models.seg_modules.add_conv_block import add_conv_block
-from GANDLF.models import modelBase
+from .modelBase import ModelBase
 
-class MSDNet(modelBase):
+class MSDNet(ModelBase):
     """
     Paper: A mixed-scale dense convolutional neural network for image analysis
     Published: PNAS, Jan. 2018
