@@ -60,7 +60,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
   # Defining our model here according to parameters mentioned in the configuration file
-  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
   
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))

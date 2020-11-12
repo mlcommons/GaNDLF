@@ -7,7 +7,7 @@ from GANDLF.models.densenet import _densenet
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, **kwargs):
+def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, psize, **kwargs):
     '''
     This function takes the default constructor and returns the model
 
