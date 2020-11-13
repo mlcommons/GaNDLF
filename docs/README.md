@@ -13,6 +13,9 @@ Visualize using https://mermaid-js.github.io/mermaid-live-editor/
 graph TD;
     Training_Data-->CSV_List;
     CSV_List-->Command_Line_API;
+    Config_YAML-->Model_Configuration
+    Config_YAML-->Training_Configuration
+    Config_YAML-->Data_Configuration
     Model_Configuration-- Architecture, Loss, Optimizer, Learning Rate -->Command_Line_API;
     Training_Configuration-- Output classes, Cross-validation -->Command_Line_API;
     Data_Configuration-- Preprocessing, Augmentation -->Command_Line_API;
