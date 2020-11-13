@@ -20,7 +20,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 ## Adding Models
 
 - Add model code in [./GANDLF/models/](../GANDLF/models/)
-- Update initialization in [./GANDLF/parameterParsing](../GANDLF/models/parameterParsing.py)
+- Update initialization in [./GANDLF/parameterParsing](../GANDLF/parameterParsing.py)
 - Ensure both 2D and 3D datasets are supported (an easy way to do this is to inherit from [./GANDLF/models/modelBase](../GANDLF/models/modelBase.py))
 
 ## Adding Transformations

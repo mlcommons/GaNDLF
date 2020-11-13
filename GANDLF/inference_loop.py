@@ -42,6 +42,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   q_num_workers = parameters['q_num_workers']
   q_verbose = parameters['q_verbose']
   augmentations = parameters['data_augmentation']
+  preprocessing = parameters['data_preprocessing']
   which_model = parameters['model']['architecture']
   class_list = parameters['class_list']
   base_filters = parameters['base_filters']
@@ -55,11 +56,11 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
       psize.append(1) # ensuring same size during torchio processing
 
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, resize = parameters['resize'])
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, preprocessing = preprocessing)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
   # Defining our model here according to parameters mentioned in the configuration file
-  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'])
+  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
   
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
