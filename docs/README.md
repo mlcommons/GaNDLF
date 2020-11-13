@@ -2,7 +2,7 @@ The website for GANDLF; start with [index.md](./index.md).
 
 ## Flowchart
 
-![alt text](./images/flowchart)
+![Flowchart](https://raw.githubusercontent.com/sarthakpati/GANDLF/master/docs/images/flowchart.png?token=ACZNH6PO73ZNGZTBQDEGONS7XBIAU)
 
 
 ### Code 
