@@ -2,6 +2,11 @@ The website for GANDLF; start with [index.md](./index.md).
 
 ## Flowchart
 
+![alt text](./images/flowchart)
+
+
+### Code 
+
 Visualize using https://mermaid-js.github.io/mermaid-live-editor/
 
 ```mermaid
