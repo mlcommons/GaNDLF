@@ -73,6 +73,15 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
+    is_regression = False
+    is_classification = False
+    # check if regression/classification has been requested
+    if len(headers['predictionHeaders']) > 0:
+        if model.final_convolution_layer is None:
+            is_regression = True
+        else:
+            is_classification = True
+
     # sanity check
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
@@ -157,17 +166,20 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
               
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
-    channel_keys = list(batch.keys())
-    channel_keys_new = []
+    all_keys = list(batch.keys())
+    channel_keys = []
+    value_keys = []
+
+    for item in all_keys:
+        if item.isnumeric():
+            channel_keys.append(item)
+        elif 'value' in item:
+            value_keys.append(item)
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if amp:
         scaler = torch.cuda.amp.GradScaler() 
 
-    for item in channel_keys:
-        if item.isnumeric():
-            channel_keys_new.append(item)
-    channel_keys = channel_keys_new
     ################ TRAINING THE MODEL##############
     for ep in range(num_epochs):
         start = time.time()
@@ -180,6 +192,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+            
+            # if regression, concatenate values to predict
+            if is_regression:
+                valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
+                valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
+                if dev != 'cpu':
+                    valuesToPredict = valuesToPredict.to(device)
+
             # read the mask
             mask = subject['label'][torchio.DATA] # get the label image
 

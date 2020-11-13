@@ -81,6 +81,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
+    predictionHeaders = headers['predictionHeaders']
 
     # define the control points and swap axes for augmentation
     augmentation_patchAxesPoints = copy.deepcopy(psize)
@@ -114,7 +115,12 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                             print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
                 else:
                     resizeCheck = True
-
+        
+        # # for regression
+        # if predictionHeaders:
+        #     # get the mask
+        #     if (subject_dict['label'] is None) and (class_list is not None):
+        #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
@@ -125,6 +131,14 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
             subject_dict['label'] = "NA"
             if not train:
                 subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
+        
+        # iterating through the values to predict of the subject
+        valueCounter = 0
+        for values in predictionHeaders:
+            # assigning the dict key to the channel
+            subject_dict['value_' + str(valueCounter)] = np.array(dataframe[values][patient])
+            valueCounter = valueCounter + 1
+        
         # Initializing the subject object using the dict
         subject = Subject(subject_dict)
         # Appending this subject to the list of subjects
