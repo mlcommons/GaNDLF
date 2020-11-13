@@ -168,6 +168,6 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
             avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
             return avg_dice, avg_loss
         else:
-            print("WARNING: No Ground Truth Label provided, returning metris as NONE")
+            print("WARNING: No Ground Truth Label provided, returning metrics as NONE")
             return None, None
 
