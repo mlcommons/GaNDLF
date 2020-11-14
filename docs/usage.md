@@ -8,7 +8,7 @@ python gandlf_run \
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory
   -train 1 \ # 1 == train, 0 == inference
-  -device 0 # postive integer for GPU device, -1 for CPU
+  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, -1 for CPU
   # -modelDir /path/to/model/weights # used in inference mode
 ```
 
