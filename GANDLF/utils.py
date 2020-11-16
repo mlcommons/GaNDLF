@@ -60,11 +60,11 @@ def send_model_to_device(model, ampInput, device, optimizer):
             device = torch.device('cuda')
             model = nn.DataParallel(model, '[' + dev + ']')
         else:
-            dev_int = int(dev)
             print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
             print('Total number of CUDA devices: ', torch.cuda.device_count())
-            # if (torch.cuda.device_count() == 1) and (dev_int == 1): # this should be properly fixed
-            #     dev = '0'
+            if (torch.cuda.device_count() == 1) and (dev_int == 1): # this should be properly fixed
+                dev = '0'
+            dev_int = int(dev)
             print('Device finally used: ', dev)
             # device = torch.device('cuda:' + dev)
             device = torch.device('cuda')
