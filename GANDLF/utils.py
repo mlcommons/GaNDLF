@@ -62,14 +62,14 @@ def send_model_to_device(model, ampInput, device, optimizer):
         else:
             print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
             print('Total number of CUDA devices: ', torch.cuda.device_count())
-            if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
-                dev = '0'
+            # if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
+            #     dev = '0'
             dev_int = int(dev)
             print('Device finally used: ', dev)
             # device = torch.device('cuda:' + dev)
             device = torch.device('cuda')
             print('Sending model to aforementioned device')
-            model = model.to(dev_int)
+            model = model.to(device)
             print('Memory Total : ', round(torch.cuda.get_device_properties(dev_int).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(dev_int)/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(dev_int)/1024**3, 1), 'GB' )
         
         print("Device - Current: %s Count: %d Name: %s Availability: %s"%(torch.cuda.current_device(), torch.cuda.device_count(), torch.cuda.get_device_name(device), torch.cuda.is_available()))
