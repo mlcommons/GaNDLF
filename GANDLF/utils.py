@@ -66,6 +66,7 @@ def send_model_to_device(model, ampInput, device, optimizer):
             #     dev = '0'
             print('Device finally used: ', dev)
             device = torch.device('cuda:' + dev)
+            print('Sending model to aforementioned device')
             model = model.to(int(dev))
             print('Memory Total : ', round(torch.cuda.get_device_properties(int(dev)).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(int(dev))/1024**3, 1), 'GB' )
         
@@ -82,7 +83,7 @@ def send_model_to_device(model, ampInput, device, optimizer):
         amp = False
         print("Since Device is CPU, Mixed Precision Training is set to False")
 
-    return amp, device
+    return model, amp, device
 
 
 def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):

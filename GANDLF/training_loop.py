@@ -111,7 +111,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)))
     sys.stdout.flush()
 
-    amp, device = send_model_to_device(model, amp, device, optimizer=optimizer)
+    model, amp, device = send_model_to_device(model, amp, device, optimizer=optimizer)
     print('Using device:', device)        
     sys.stdout.flush()
 
