@@ -22,16 +22,20 @@ requirements = [
   'pickle5==0.0.11',
   'setuptools',
   'seaborn',
-  'pyyaml'
+  'pyyaml',
+  'openslide-python',
+  'scikit-image',
+  'matplotlib',
+  'tqdm',
 ]
 
 setup(
   name='GANDLF',
   version='0.0.5.NR', # NR: non-release; this should be changed when tagging\
-  author="Megh Bhalerao, Siddhesh Thakur, Sarthak Pati",
+  author="Megh Bhalerao, Caleb Grenko, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
-  scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats'],
+  scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
     'Development Status :: Pre-Alpha',
     'Intended Audience :: Science/Research',
