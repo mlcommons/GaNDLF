@@ -2,15 +2,6 @@ from pathlib import Path
 from .utils import pass_method, map_values
 import numpy as np
 from skimage.io import imsave
-##
-# 1) GANDLF/GANDLF/opm for source files
-# 2) gandlf_minePatches to top level
-# 2.5) update setup.py
-# 3) add gandlf_minePatches to scripts in setup.py
-# ====
-# 4) port changes back to opm original
-# 5) opm has single entry point, gandlf_minePatches will be in GANDLF
-# 6) Give sarthak OPM repo and version, he'll hash and add as submodule
 
 
 class Patch:
