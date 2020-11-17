@@ -38,6 +38,7 @@ def generate_initial_mask(slide_path):
 
 def parse_gandlf_csv(fpath):
     df = pd.read_csv(fpath)
+    df = df.drop_duplicates()
     for index, row in df.iterrows():
         yield row['Channel_0'], row['Label']
 
