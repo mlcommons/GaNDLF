@@ -81,7 +81,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
 
   print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
-  amp, device = send_model_to_device(model, amp, device, optimizer=None)
+  model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
   
   # print stats
   print('Using device:', device)
