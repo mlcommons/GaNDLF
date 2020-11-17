@@ -197,7 +197,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             if is_regression:
                 valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
                 valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
-                if dev != 'cpu':
+                if device.type != 'cpu':
                     valuesToPredict = valuesToPredict.to(device)
 
             # read the mask
@@ -208,6 +208,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 model_2d = True
                 image = torch.squeeze(image, -1)
                 mask = torch.squeeze(mask, -1)
+            else:
+                model_2d = False
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             one_hot_mask = one_hot(mask, class_list)
