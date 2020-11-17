@@ -1,3 +1,6 @@
+#!usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import time
 import warnings
 import argparse
@@ -41,7 +44,7 @@ def parse_gandlf_csv(fpath):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-i', '--input_path',
+    parser.add_argument('-i', '--input_CSV',
                         dest='input_path',
                         help="input path for the tissue",
                         required=True)
@@ -61,7 +64,7 @@ if __name__ == '__main__':
     if not out_dir.endswith("/"):
         out_dir += "/"
 
-    out_csv_path = out_dir + out_dir.split("/")[-2] + ".csv"
+    out_csv_path = os.path.join(out_dir, 'opm_train.csv')
 
     for slide, label in parse_gandlf_csv(args.input_path):
         start = time.time()
