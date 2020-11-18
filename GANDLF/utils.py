@@ -124,11 +124,10 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
         total_loss = total_dice = 0
         for batch_idx, (subject) in enumerate(loader):
             subject_dict = {}
-            subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LabelMap)
+            if 'label' in subject:
+                subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
             for key in channel_keys:
                 subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
-                test = 1
-            temp = torchio.Subject(subject_dict)
             grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(grid_sampler)
