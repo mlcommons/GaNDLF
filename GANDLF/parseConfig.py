@@ -56,6 +56,9 @@ def parseConfig(config_file_path):
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
   
+  if not('patch_sampler' in params):
+    params['patch_sampler'] = 'label'
+
   if 'resize' in params:
     print('WARNING: \'resize\' should be defined under \'data_processing\', this will be skipped', file = sys.stderr)
 

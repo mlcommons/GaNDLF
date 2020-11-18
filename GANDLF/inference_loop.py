@@ -56,7 +56,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
       psize.append(1) # ensuring same size during torchio processing
 
   # Setting up the inference loader
-  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train = False, augmentations = augmentations, preprocessing = preprocessing)
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
   # Defining our model here according to parameters mentioned in the configuration file

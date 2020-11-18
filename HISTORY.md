@@ -5,6 +5,7 @@
   - Added option to threshold or clip the input image
 - Code consolidation
 - Added generic DenseNet
+- Added option to switch between Uniform and Label samplers
 
 ## 0.0.4
 

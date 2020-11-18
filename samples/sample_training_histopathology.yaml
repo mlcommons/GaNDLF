@@ -23,6 +23,8 @@ modality: path
 class_list: [0,1]
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [512, 512]
+# uniform: UniformSampler or label: LabelSampler
+patch_sampler: label
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
