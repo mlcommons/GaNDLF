@@ -73,6 +73,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
+    # Defining our model here according to parameters mentioned in the configuration file
+    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+
     is_regression = False
     is_classification = False
     # check if regression/classification has been requested
@@ -85,9 +88,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # sanity check
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
-
-    # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
 
     # setting optimizer
     optimizer = get_optimizer(opt, model.parameters(), learning_rate) 

@@ -109,7 +109,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False):
+def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False, outputDir = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -123,7 +123,12 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
     with torch.no_grad():
         total_loss = total_dice = 0
         for batch_idx, (subject) in enumerate(loader):
-            grid_sampler = torchio.inference.GridSampler(subject , psize)
+            subject_dict = {}
+            if 'label' in subject:
+                subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+            for key in channel_keys:
+                subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
+            grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(grid_sampler)
             for patches_batch in patch_loader:
@@ -141,8 +146,9 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
             pred_mask = aggregator.get_output_tensor()
             pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             if not subject['label'] == "NA":
-                mask = subject['label'][torchio.DATA] # get the label image
-                mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
+                mask = subject_dict['label'][torchio.DATA] # get the label image
+                if mask.dim() == 4:
+                    mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
                 mask = one_hot(mask, class_list)
                 # making sure that the output and mask are on the same device
                 pred_mask, mask = pred_mask.cuda(), mask.cuda()
@@ -160,9 +166,9 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                 pred_mask = reverse_one_hot(pred_mask[0],class_list)
                 result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
                 result_image.CopyInformation(inputImage)
-                if parameters['resize'] is not None:
-                    originalSize = inputImage.GetSize()
-                    result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
+                # if parameters['resize'] is not None:
+                #     originalSize = inputImage.GetSize()
+                #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
         
                 patient_name = os.path.basename(subject['path_to_metadata'])
                 if not os.path.isdir(os.path.join(outputDir,"generated_masks")):

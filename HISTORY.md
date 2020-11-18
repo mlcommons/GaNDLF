@@ -6,6 +6,7 @@
 - Code consolidation
 - Added generic DenseNet
 - Added option to switch between Uniform and Label samplers
+- Added histopathology input (patch-based extraction)
 
 ## 0.0.4
 
