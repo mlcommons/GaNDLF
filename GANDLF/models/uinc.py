@@ -85,7 +85,7 @@ class uinc(ModelBase):
         x6 = self.dropout(x6)
 
         if not self.final_convolution_layer is None:
-            if self.final_convolution_layer == F.softmax():
+            if self.final_convolution_layer == F.softmax:
                 x6 = self.final_convolution_layer(x6, dim=1)
             else:
                 x6 = self.final_convolution_layer(x6)
