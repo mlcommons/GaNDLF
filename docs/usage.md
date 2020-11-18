@@ -24,6 +24,9 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 
 Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
 
+**For Histopathology Only:**
+- Convert WSI/label map to patches with OPM: [See using OPM](./GANDLF/OPM/README.md)
+
 ## Constructing the Data CSV
 
 This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](../samples/sample_train.csv) and needs to be structured with the following header format:
