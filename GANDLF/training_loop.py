@@ -162,7 +162,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 penalty = penalty - dice_penalty_dict[j]
         
         dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-        dice_weights_dict[i] = dice_weights_dict[i] / total_nonZeroVoxels # this can be used for weighted averaging
+    dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
               
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
