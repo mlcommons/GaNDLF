@@ -59,14 +59,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         psize.append(1) # ensuring same size during torchio processing
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, preprocessing = preprocessing)
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
     if holdoutDataFromPickle is None:
         print('No holdout data is defined, using validation data for those metrics')
         holdoutDataFromPickle = validationDataFromPickle
     inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, preprocessing = preprocessing)
+                                            q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
@@ -140,7 +140,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         dice_penalty_dict[i] = 0
 
     # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=False, augmentations=None,preprocessing=preprocessing) 
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
     penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
     
     # get the weights for use for dice loss
