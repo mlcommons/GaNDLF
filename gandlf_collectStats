@@ -26,6 +26,7 @@ def main():
 
   inputDir = os.path.normpath(args.inputDir)
   outputDir = os.path.normpath(args.outputDir)
+  Path(outputDir).mkdir(parents=True, exist_ok=True)
   outputFile = os.path.join(outputDir, 'data.csv') # data file name
   outputPlot = os.path.join(outputDir, 'plot.png') # plot file
   
