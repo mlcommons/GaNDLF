@@ -9,6 +9,7 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
   - Data dimensions (2D/3D)
   - Channels/modalities 
   - Prediction classes
+  - Modalities (MRI/CT/PET/Histopathology)
 - Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)  
 - Built-in nested cross validation (and related combined statistics), with support for parallel HPC-based computing
 - Handles imbalanced classes (very small tumor in large organ)
