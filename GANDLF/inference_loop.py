@@ -90,8 +90,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # get loss function
   loss_fn, MSE_requested = get_loss(loss_function)
 
-  model.eval()
-  average_dice, average_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True, outputDir = outputDir)
+  average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True, outputDir = outputDir)
   print(average_dice, average_loss)
 
 if __name__ == "__main__":
