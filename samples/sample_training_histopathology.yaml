@@ -56,7 +56,7 @@ opt: adam
 # for single fold run, use '-' before the fold number
 nested_training:
   {
-    holdout: 1, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
+    testing: 1, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
     validation: 1 # this controls the validation data splits for model training
   }
 ## pre-processing

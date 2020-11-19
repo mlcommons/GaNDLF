@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 def main():
   copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
 
-  parser = argparse.ArgumentParser(prog='GANDLF_CollectCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Collect statistics from different holdout/validation combinations from output directory.\n\n" + copyrightMessage)
-  parser.add_argument('-inputDir', type=str, help = 'Input directory which contains holdout and validation models', required=True)
+  parser = argparse.ArgumentParser(prog='GANDLF_CollectCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Collect statistics from different testing/validation combinations from output directory.\n\n" + copyrightMessage)
+  parser.add_argument('-inputDir', type=str, help = 'Input directory which contains testing and validation models', required=True)
   parser.add_argument('-outputDir', type=str, help = 'Output directory to save stats and plot', required=True)
       
   args = parser.parse_args()
@@ -30,18 +30,18 @@ def main():
   outputFile = os.path.join(outputDir, 'data.csv') # data file name
   outputPlot = os.path.join(outputDir, 'plot.png') # plot file
   
-  final_stats = 'Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n' # the columns that need to be present in final output; epoch is always removed
+  final_stats = 'Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n' # the columns that need to be present in final output; epoch is always removed
   
   # loop through output directory
   for dirs in os.listdir(inputDir):
 
-    currentHoldoutDir = os.path.join(inputDir, dirs)
-    if os.path.isdir(currentHoldoutDir): # go in only if it is a directory
-      if 'holdout_' in dirs: # ensure it is part of the holdout structure
+    currentTestingDir = os.path.join(inputDir, dirs)
+    if os.path.isdir(currentTestingDir): # go in only if it is a directory
+      if 'testing_' in dirs: # ensure it is part of the testing structure
 
-        for val in os.listdir(currentHoldoutDir): # loop through all validation directories
+        for val in os.listdir(currentTestingDir): # loop through all validation directories
 
-          currentValidationDir = os.path.join(currentHoldoutDir, val)
+          currentValidationDir = os.path.join(currentTestingDir, val)
           if os.path.isdir(currentValidationDir):
 
             filesInDir = os.listdir(currentValidationDir) # get all files in each directory
@@ -65,7 +65,7 @@ def main():
   data_loss = data_full.copy()
   data_dice = data_full.copy()
 
-  cols = ['Train', 'Val', 'Holdout'] # set the datasets that need to be plotted
+  cols = ['Train', 'Val', 'Testing'] # set the datasets that need to be plotted
   for i in cols:
     
     del data_dice[i + '_Loss'] # keep only dice    

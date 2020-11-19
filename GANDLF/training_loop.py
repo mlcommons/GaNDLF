@@ -29,7 +29,7 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 from .parameterParsing import *
 
-def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
+def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, testingDataFromPickle = None):
     '''
     This is the main training loop
     '''
@@ -62,10 +62,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
-    if holdoutDataFromPickle is None:
-        print('No holdout data is defined, using validation data for those metrics')
-        holdoutDataFromPickle = validationDataFromPickle
-    inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+    if testingDataFromPickle is None:
+        print('No testing data is defined, using validation data for those metrics')
+        testingDataFromPickle = validationDataFromPickle
+    inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
     
@@ -129,7 +129,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
-    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n")
+    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n")
     log_train.close()
 
     # initialize without considering background
@@ -300,7 +300,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             patience_count = patience_count + 1 
         print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Train DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Train Ep ", format(best_val_idx,'.1f'))
 
-        # stats for current holdout data
+        # stats for current testing data
         if average_test_dice > best_test_dice:
             best_test_idx = ep
             best_test_dice = average_test_dice
@@ -346,7 +346,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-holdout_loader_pickle', type=str, help = 'Holdout loader pickle', required=True)
+    parser.add_argument('-testing_loader_pickle', type=str, help = 'Testing loader pickle', required=True)
     parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-headers_pickle', type=str, help = 'Header pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
@@ -359,11 +359,11 @@ if __name__ == "__main__":
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
-    holdoutData_str = args.holdout_loader_pickle
-    if holdoutData_str == 'None':
-        holdoutDataFromPickle = None
+    testingData_str = args.testing_loader_pickle
+    if testingData_str == 'None':
+        testingDataFromPickle = None
     else:
-        holdoutDataFromPickle = pd.read_pickle(holdoutData_str)
+        testingDataFromPickle = pd.read_pickle(testingData_str)
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
                  validationDataFromPickle=validationDataFromPickle, 
@@ -371,4 +371,4 @@ if __name__ == "__main__":
                  parameters=parameters,
                  outputDir=args.outputDir,
                  device=args.device,
-                 holdoutDataFromPickle=holdoutDataFromPickle,)
+                 testingDataFromPickle=testingDataFromPickle,)
