@@ -6,6 +6,7 @@ import torchio
 from GANDLF.losses import *
 import sys
 import os
+import subprocess
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
@@ -109,7 +110,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False, outputDir = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False, outputDir = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -134,6 +135,7 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
             for patches_batch in patch_loader:
                 image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).cuda()
                 locations = patches_batch[torchio.LOCATION]
+                image = image.float().to(device)
                 ## special case for 2D            
                 if image.shape[-1] == 1:
                     model_2d = True
@@ -153,7 +155,13 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
                 mask = one_hot(mask, class_list)
                 # making sure that the output and mask are on the same device
-                pred_mask, mask = pred_mask.cuda(), mask.cuda()
+                # pred_mask, mask = pred_mask.cuda(), mask.cuda()
+                pred_mask, mask = pred_mask.to(device), mask.to(device)
+                print('batch_idx: ', batch_idx)
+                print('pred_mask.shape: ', pred_mask.shape)
+                # print('Memory Total : ', round(torch.cuda.get_device_properties(device).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(device)/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(device)/1024**3, 1), 'GB' )
+                subprocess.run("nvidia-smi", shell=True)
+        
                 loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 total_loss += loss
                 #Computing the dice score 
