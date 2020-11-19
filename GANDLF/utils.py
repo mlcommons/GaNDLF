@@ -148,6 +148,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                     pred_mask = pred_mask.unsqueeze(-1)
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
+            pred_mask.cpu()
             pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             if not subject['label'] == "NA":
                 mask = subject_dict['label'][torchio.DATA] # get the label image
@@ -156,11 +157,11 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                 mask = one_hot(mask, class_list)
                 # making sure that the output and mask are on the same device
                 # pred_mask, mask = pred_mask.cuda(), mask.cuda()
-                pred_mask, mask = pred_mask.to(device), mask.to(device)
-                print('batch_idx: ', batch_idx)
-                print('pred_mask.shape: ', pred_mask.shape)
+                # # pred_mask, mask = pred_mask.to(device), mask.to(device)
+                # print('batch_idx: ', batch_idx)
+                # print('pred_mask.shape: ', pred_mask.shape)
                 # print('Memory Total : ', round(torch.cuda.get_device_properties(device).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(device)/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(device)/1024**3, 1), 'GB' )
-                subprocess.run("nvidia-smi", shell=True)
+                # subprocess.run("nvidia-smi", shell=True)
         
                 loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 total_loss += loss
@@ -172,7 +173,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                 print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
                 inputImage = sitk.ReadImage(subject['path_to_metadata'])
-                pred_mask = pred_mask.cpu().numpy()
+                pred_mask = pred_mask.numpy()
                 pred_mask = reverse_one_hot(pred_mask[0],class_list)
                 result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
                 result_image.CopyInformation(inputImage)
