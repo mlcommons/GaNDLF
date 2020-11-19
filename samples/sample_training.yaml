@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.5,
-    maximum: 0.0.5 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.6,
+    maximum: 0.0.6 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # the dimension of the model and dataset: defines dimensionality of computations
 dimension: 3
