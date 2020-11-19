@@ -139,6 +139,8 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                     model_2d = True
                     image = torch.squeeze(image, -1)
                     locations = torch.squeeze(locations, -1)
+                else:
+                    model_2d = False
                 pred_mask = model(image)
                 if model_2d:
                     pred_mask = pred_mask.unsqueeze(-1)
