@@ -216,14 +216,18 @@ def parseConfig(config_file_path):
 
   if not params['nested_training']:
     sys.exit('The parameter \'nested_training\' needs to be defined')
-  if not params['nested_training']['holdout']:
-    kfolds = -10
-    print('Using default folds for holdout split: ', kfolds)
-    params['nested_training']['holdout']
+  if not params['nested_training']['testing']:
+    if not params['nested_training']['holdout']:
+      kfolds = -5
+      print('Using default folds for testing split: ', kfolds)
+    else:
+      print('WARNING: \'holdout\' should not be defined under \'nested_training\', please use \'testing\' instead;', file = sys.stderr)
+      kfolds = params['nested_training']['holdout']
+    params['nested_training']['testing'] = kfolds
   if not params['nested_training']['validation']:
-    kfolds = -10
+    kfolds = -5
     print('Using default folds for validation split: ', kfolds)
-    params['nested_training']['validation']
+    params['nested_training']['validation'] = kfolds
 
   # Setting default values to the params
   if 'scheduler' in params:

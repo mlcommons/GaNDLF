@@ -53,7 +53,7 @@ For classification/regression, add a column called `ValueToPredict`. **Note** th
 
 ## Plot the final results
 
-After the holdout/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for holdout and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this:
+After the testing/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this:
 
 ```powershell
 # continue from previous shell
