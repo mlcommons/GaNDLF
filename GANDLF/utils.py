@@ -6,7 +6,6 @@ import torchio
 from GANDLF.losses import *
 import sys
 import os
-import subprocess
 
 def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
@@ -148,7 +147,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                     pred_mask = pred_mask.unsqueeze(-1)
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
-            pred_mask.cpu()
+            pred_mask.cpu() # the validation is done on CPU, see https://github.com/FETS-AI/GANDLF/issues/270
             pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             if not subject['label'] == "NA":
                 mask = subject_dict['label'][torchio.DATA] # get the label image
