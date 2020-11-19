@@ -109,7 +109,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False, outputDir = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False, outputDir = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -134,6 +134,7 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
             for patches_batch in patch_loader:
                 image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).cuda()
                 locations = patches_batch[torchio.LOCATION]
+                image = image.float().to(device)
                 ## special case for 2D            
                 if image.shape[-1] == 1:
                     model_2d = True
@@ -146,14 +147,13 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                     pred_mask = pred_mask.unsqueeze(-1)
                 aggregator.add_batch(pred_mask, locations)
             pred_mask = aggregator.get_output_tensor()
+            pred_mask.cpu() # the validation is done on CPU, see https://github.com/FETS-AI/GANDLF/issues/270
             pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             if not subject['label'] == "NA":
                 mask = subject_dict['label'][torchio.DATA] # get the label image
                 if mask.dim() == 4:
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-                mask = one_hot(mask, class_list)
-                # making sure that the output and mask are on the same device
-                pred_mask, mask = pred_mask.cuda(), mask.cuda()
+                mask = one_hot(mask, class_list)        
                 loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 total_loss += loss
                 #Computing the dice score 
@@ -164,7 +164,7 @@ def get_metrics_save_mask(model, loader, psize, channel_keys, class_list, loss_f
                 print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
                 inputImage = sitk.ReadImage(subject['path_to_metadata'])
-                pred_mask = pred_mask.cpu().numpy()
+                pred_mask = pred_mask.numpy()
                 pred_mask = reverse_one_hot(pred_mask[0],class_list)
                 result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
                 result_image.CopyInformation(inputImage)

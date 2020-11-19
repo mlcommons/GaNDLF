@@ -277,14 +277,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
 
-        # Now we enter the evaluation/validation part of the epoch        
-        model.eval()
-
+        # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, val_loader, psize, channel_keys, class_list, loss_fn)
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, class_list, loss_fn)
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn) 
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn) 
         
         # stats for current validation data
         if average_val_dice > best_val_dice:
@@ -298,7 +296,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Train DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Train Ep ", format(best_val_idx,'.1f'))
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
 
         # stats for current testing data
         if average_test_dice > best_test_dice:
@@ -309,7 +307,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "model_state_dict": model.state_dict(),
                         "optimizer_state_dict": optimizer.state_dict(),
                         "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Train DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Train Ep ", format(best_test_idx,'.1f'))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":

@@ -48,7 +48,7 @@ def parseConfig(config_file_path):
   if not('class_list' in params):
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
 
-  if not params['dimension']:
+  if not('dimension' in params):
     sys.exit('The \'dimension\' parameter to be defined, which should be 2 or 3')
 
   if 'patch_size' in params:
@@ -203,9 +203,9 @@ def parseConfig(config_file_path):
     elif len(params['model']) == 0: # only proceed if something is defined
       sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
 
-    if not params['model']['architecture']:
+    if not('architecture' in params['model']):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
-    if not params['model']['final_layer']:
+    if not('final_layer' in params['model']):
       sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
 
   else:
@@ -214,17 +214,17 @@ def parseConfig(config_file_path):
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
 
-  if not params['nested_training']:
+  if not('nested_training' in params):
     sys.exit('The parameter \'nested_training\' needs to be defined')
-  if not params['nested_training']['testing']:
-    if not params['nested_training']['holdout']:
+  if not('testing' in params['nested_training']):
+    if not('holdout' in params['nested_training']):
       kfolds = -5
       print('Using default folds for testing split: ', kfolds)
     else:
       print('WARNING: \'holdout\' should not be defined under \'nested_training\', please use \'testing\' instead;', file = sys.stderr)
       kfolds = params['nested_training']['holdout']
     params['nested_training']['testing'] = kfolds
-  if not params['nested_training']['validation']:
+  if not('validation' in params['nested_training']):
     kfolds = -5
     print('Using default folds for validation split: ', kfolds)
     params['nested_training']['validation'] = kfolds
