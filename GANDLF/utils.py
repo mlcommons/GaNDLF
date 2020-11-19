@@ -154,15 +154,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                 mask = subject_dict['label'][torchio.DATA] # get the label image
                 if mask.dim() == 4:
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
-                mask = one_hot(mask, class_list)
-                # making sure that the output and mask are on the same device
-                # pred_mask, mask = pred_mask.cuda(), mask.cuda()
-                # # pred_mask, mask = pred_mask.to(device), mask.to(device)
-                # print('batch_idx: ', batch_idx)
-                # print('pred_mask.shape: ', pred_mask.shape)
-                # print('Memory Total : ', round(torch.cuda.get_device_properties(device).total_memory/1024**3, 1), 'GB, Allocated: ', round(torch.cuda.memory_allocated(device)/1024**3, 1),'GB, Cached: ',round(torch.cuda.memory_reserved(device)/1024**3, 1), 'GB' )
-                # subprocess.run("nvidia-smi", shell=True)
-        
+                mask = one_hot(mask, class_list)        
                 loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 total_loss += loss
                 #Computing the dice score 
