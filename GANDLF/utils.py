@@ -1,3 +1,5 @@
+import os
+os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
 import SimpleITK as sitk
 import torch
@@ -183,3 +185,10 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
             print("WARNING: No Ground Truth Label provided, returning metrics as NONE")
             return None, None
 
+def fix_paths(cwd):
+    '''
+    This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+    '''
+    if os.name == 'nt': # proceed for windows
+        vipshome = os.path.join(cwd, 'vips/vips-dev-8.10/bin')
+        os.environ['PATH'] = vipshome + ';' + os.environ['PATH']

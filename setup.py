@@ -25,7 +25,8 @@ requirements = [
   'pyyaml',
   'openslide-python',
   'scikit-image',
-  'matplotlib'
+  'matplotlib',
+  'pyvips'
 ]
 
 setup(
@@ -57,3 +58,15 @@ setup(
   keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
   zip_safe=False,
 )
+
+## windows vips installation
+import os
+
+if os.name == 'nt': # proceed for windows
+  from pathlib import Path
+  if not Path('./vips/vips-dev-8.10/bin/libvips-42.dll').exists(): # download and extract if main dll is absent
+    print('Downloading and extracting VIPS for Windows')
+    import requests, zipfile, io
+    r = requests.get('https://github.com/libvips/libvips/releases/download/v8.10.2/vips-dev-w64-all-8.10.2.zip')
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall('./vips')
