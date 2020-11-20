@@ -1,6 +1,6 @@
 ## 0.0.6
 
-- 
+- Added PyVIPS support
 
 ## 0.0.5
 
