@@ -25,7 +25,8 @@ requirements = [
   'pyyaml',
   'openslide-python',
   'scikit-image',
-  'matplotlib'
+  'matplotlib',
+  'pyvips'
 ]
 
 setup(
