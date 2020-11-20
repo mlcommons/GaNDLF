@@ -28,50 +28,50 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
     # check for single fold training
     singleFoldValidation = False
-    singleFoldHoldout = False
-    noHoldoutData = False
+    singleFoldTesting = False
+    noTestingData = False
 
-    if parameters['nested_training']['holdout'] < 0: # if the user wants a single fold training
-        parameters['nested_training']['holdout'] = abs(parameters['nested_training']['holdout'])
-        singleFoldHoldout = True
+    if parameters['nested_training']['testing'] < 0: # if the user wants a single fold training
+        parameters['nested_training']['testing'] = abs(parameters['nested_training']['testing'])
+        singleFoldTesting = True
 
     if parameters['nested_training']['validation'] < 0: # if the user wants a single fold training
         parameters['nested_training']['validation'] = abs(parameters['nested_training']['validation'])
         singleFoldValidation = True
 
-    # this is the condition where holdout data is not to be kept
-    if parameters['nested_training']['holdout'] == 1:
-        noHoldoutData = True
-        singleFoldHoldout = True
-        parameters['nested_training']['holdout'] = 2 # put 2 just so that the first for-loop does not fail
+    # this is the condition where testing data is not to be kept
+    if parameters['nested_training']['testing'] == 1:
+        noTestingData = True
+        singleFoldTesting = True
+        parameters['nested_training']['testing'] = 2 # put 2 just so that the first for-loop does not fail
 
     # initialize the kfold structures
-    kf_holdout = KFold(n_splits=parameters['nested_training']['holdout']) 
+    kf_testing = KFold(n_splits=parameters['nested_training']['testing']) 
     kf_validation = KFold(n_splits=parameters['nested_training']['validation'])
 
-    currentHoldoutFold = 0
+    currentTestingFold = 0
     currentValidationFold = 0
 
     # get the indeces for kfold splitting
     trainingData_full = dataframe
     training_indeces_full = list(trainingData_full.index.values)
 
-    # start the kFold train for holdout
-    for trainAndVal_index, holdout_index in kf_holdout.split(training_indeces_full): # perform holdout split
+    # start the kFold train for testing
+    for trainAndVal_index, testing_index in kf_testing.split(training_indeces_full): # perform testing split
 
-        # get the current training and holdout data
-        if noHoldoutData:
+        # get the current training and testing data
+        if noTestingData:
             trainingAndValidationData = trainingData_full # don't consider the split indeces for this case
-            holdoutData = None
+            testingData = None
         else:
             trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
-            holdoutData = trainingData_full.iloc[holdout_index]
+            testingData = trainingData_full.iloc[testing_index]
 
         # the output of the current fold is only needed if multi-fold training is happening
-        if singleFoldHoldout:
+        if singleFoldTesting:
             currentOutputFolder = outputDir
         else:
-            currentOutputFolder = os.path.join(outputDir, 'holdout_' + str(currentHoldoutFold))
+            currentOutputFolder = os.path.join(outputDir, 'testing_' + str(currentTestingFold))
             Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
 
         # save the current model configuration as a sanity check
@@ -80,20 +80,20 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             with open(currentModelConfigPickle, 'wb') as handle:
                 pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        # save the current training+validation and holdout datasets 
-        if noHoldoutData:
+        # save the current training+validation and testing datasets 
+        if noTestingData:
             print('!!! WARNING !!!')
-            print('!!! Holdout data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
+            print('!!! Testing data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
             print('!!! WARNING !!!')
             current_training_indeces_full = trainingAndValidationData # using the new indeces for validation training
         else:
-            currentTrainingAndValidataionDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
-            currentHoldoutDataPickle = os.path.join(currentOutputFolder, 'holdout.pkl')
+            currentTrainingAndValidationDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
+            currentTestingDataPickle = os.path.join(currentOutputFolder, 'testing.pkl')
             
-            if not os.path.exists(currentHoldoutDataPickle):
-                holdoutData.to_pickle(currentHoldoutDataPickle)
-            if not os.path.exists(currentTrainingAndValidataionDataPickle):
-                trainingAndValidationData.to_pickle(currentTrainingAndValidataionDataPickle)
+            if not os.path.exists(currentTestingDataPickle):
+                testingData.to_pickle(currentTestingDataPickle)
+            if not os.path.exists(currentTrainingAndValidationDataPickle):
+                trainingAndValidationData.to_pickle(currentTrainingAndValidationDataPickle)
             
             current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
 
@@ -112,7 +112,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
-                            device=device, parameters=parameters, holdoutDataFromPickle=holdoutData)
+                            device=device, parameters=parameters, testingDataFromPickle=testingData)
 
             else:
                 # # write parameters to pickle - this should not change for the different folds, so keeping is independent
@@ -141,12 +141,12 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                     ' -val_loader_pickle ' + currentValidationDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
                     ' -headers_pickle ' + headersPickle + \
-                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -holdout_loader_pickle '
+                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -testing_loader_pickle '
                 
-                if noHoldoutData:
+                if noTestingData:
                     command = command + 'None'
                 else:
-                    command = command + currentHoldoutDataPickle
+                    command = command + currentTestingDataPickle
                 
                 subprocess.Popen(command, shell=True).wait()
 
@@ -154,6 +154,6 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 break
             currentValidationFold = currentValidationFold + 1 # increment the fold
 
-        if singleFoldHoldout:
+        if singleFoldTesting:
             break
-        currentHoldoutFold = currentHoldoutFold + 1 # increment the fold
+        currentTestingFold = currentTestingFold + 1 # increment the fold

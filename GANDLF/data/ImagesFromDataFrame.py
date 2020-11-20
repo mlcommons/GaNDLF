@@ -67,9 +67,14 @@ global_augs_dict = {
     'swap': swap
 }
 
+global_sampler_dict = {
+    'uniform': torchio.data.UniformSampler,
+    'label': torchio.data.LabelSampler,
+}
+
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_volume,
-                        q_num_workers, q_verbose, train=True, augmentations=None, preprocessing=None):
+                        q_num_workers, q_verbose, sampler = 'label', train=True, augmentations=None, preprocessing=None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -179,7 +184,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     if not train:
         return subjects_dataset
 
-    sampler = torchio.data.UniformSampler(psize)
+    sampler = global_sampler_dict[sampler](psize)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
                                   samples_per_volume=q_samples_per_volume,

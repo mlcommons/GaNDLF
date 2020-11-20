@@ -195,7 +195,68 @@ def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outp
         out_thresh = np.array((out > 0.5)*255, dtype=np.uint16)
         imsave(os.path.join(subject_dest_dir, row['PID']+'_prob.png'), out)
         imsave(os.path.join(subject_dest_dir, row['PID']+'_seg.png'), out_thresh)
-        imsave(os.path.join(subject_dest_dir, row['PID']+'_count.png'), count_map)
+        imsave(os.path.join(subject_dest_dir, row['PID']+'_count.png'), count_ma
+def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDir):
+  '''
+  This is the main inference loop
+  '''
+  # extract variables form parameters dict
+  psize = parameters['psize']
+  q_max_length = parameters['q_max_length']
+  q_samples_per_volume = parameters['q_samples_per_volume']
+  q_num_workers = parameters['q_num_workers']
+  q_verbose = parameters['q_verbose']
+  augmentations = parameters['data_augmentation']
+  preprocessing = parameters['data_preprocessing']
+  which_model = parameters['model']['architecture']
+  class_list = parameters['class_list']
+  base_filters = parameters['base_filters']
+  batch_size = parameters['batch_size']
+  loss_function = parameters['loss_function']
+  
+  n_channels = len(headers['channelHeaders'])
+  n_classList = len(class_list)
+
+  if len(psize) == 2:
+      psize.append(1) # ensuring same size during torchio processing
+
+  # Setting up the inference loader
+  inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
+  inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
+
+  # Defining our model here according to parameters mentioned in the configuration file
+  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+  
+  # Loading the weights into the model
+  main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
+  model.load_state_dict(main_dict['model_state_dict'])
+  
+  if not(os.environ.get('HOSTNAME') is None):
+      print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
+      sys.stdout.flush()
+
+  # get the channel keys for concatenation later (exclude non numeric channel keys)
+  batch = next(iter(inference_loader))
+  channel_keys = list(batch.keys())
+  channel_keys_new = []
+  for item in channel_keys:
+    if item.isnumeric():
+      channel_keys_new.append(item)
+  channel_keys = channel_keys_new
+
+  print("Data Samples: ", len(inference_loader.dataset))
+  sys.stdout.flush()
+  model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
+  
+  # print stats
+  print('Using device:', device)
+  sys.stdout.flush()
+
+  # get loss function
+  loss_fn, MSE_requested = get_loss(loss_function)
+
+  average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True, outputDir = outputDir)
+  print(average_dice, average_loss)
 
 if __name__ == "__main__":
 

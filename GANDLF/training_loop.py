@@ -29,7 +29,7 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 from .parameterParsing import *
 
-def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, holdoutDataFromPickle = None):
+def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, testingDataFromPickle = None):
     '''
     This is the main training loop
     '''
@@ -59,20 +59,23 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         psize.append(1) # ensuring same size during torchio processing
 
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=True, augmentations=augmentations, preprocessing = preprocessing)
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
-    if holdoutDataFromPickle is None:
-        print('No holdout data is defined, using validation data for those metrics')
-        holdoutDataFromPickle = validationDataFromPickle
-    inferenceDataForTorch = ImagesFromDataFrame(holdoutDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                            q_num_workers, q_verbose, train=False, augmentations=augmentations, preprocessing = preprocessing)
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
+    if testingDataFromPickle is None:
+        print('No testing data is defined, using validation data for those metrics')
+        testingDataFromPickle = validationDataFromPickle
+    inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+                                            q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
+    # Defining our model here according to parameters mentioned in the configuration file
+    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+
     is_regression = False
     is_classification = False
     # check if regression/classification has been requested
@@ -85,9 +88,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # sanity check
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
-
-    # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
 
     # setting optimizer
     optimizer = get_optimizer(opt, model.parameters(), learning_rate) 
@@ -129,7 +129,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
-    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Holdout_Loss,Holdout_Dice\n")
+    log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n")
     log_train.close()
 
     # initialize without considering background
@@ -140,7 +140,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         dice_penalty_dict[i] = 0
 
     # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, train=False, augmentations=None,preprocessing=preprocessing) 
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
     penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
     
     # get the weights for use for dice loss
@@ -162,7 +162,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 penalty = penalty - dice_penalty_dict[j]
         
         dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-        dice_weights_dict[i] = dice_weights_dict[i] / total_nonZeroVoxels # this can be used for weighted averaging
+    dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
               
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
@@ -277,14 +277,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
 
-        # Now we enter the evaluation/validation part of the epoch        
-        model.eval()
-
+        # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, val_loader, psize, channel_keys, class_list, loss_fn)
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, class_list, loss_fn)
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, inference_loader, psize, channel_keys, class_list, loss_fn) 
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn) 
         
         # stats for current validation data
         if average_val_dice > best_val_dice:
@@ -298,9 +296,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         else:
             patience_count = patience_count + 1 
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Train DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Train Ep ", format(best_val_idx,'.1f'))
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
 
-        # stats for current holdout data
+        # stats for current testing data
         if average_test_dice > best_test_dice:
             best_test_idx = ep
             best_test_dice = average_test_dice
@@ -309,7 +307,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         "model_state_dict": model.state_dict(),
                         "optimizer_state_dict": optimizer.state_dict(),
                         "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Train DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Train Ep ", format(best_test_idx,'.1f'))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
@@ -346,7 +344,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Training Loop of GANDLF")
     parser.add_argument('-train_loader_pickle', type=str, help = 'Train loader pickle', required=True)
     parser.add_argument('-val_loader_pickle', type=str, help = 'Validation loader pickle', required=True)
-    parser.add_argument('-holdout_loader_pickle', type=str, help = 'Holdout loader pickle', required=True)
+    parser.add_argument('-testing_loader_pickle', type=str, help = 'Testing loader pickle', required=True)
     parser.add_argument('-parameter_pickle', type=str, help = 'Parameters pickle', required=True)
     parser.add_argument('-headers_pickle', type=str, help = 'Header pickle', required=True)
     parser.add_argument('-outputDir', type=str, help = 'Output directory', required=True)
@@ -359,11 +357,11 @@ if __name__ == "__main__":
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
-    holdoutData_str = args.holdout_loader_pickle
-    if holdoutData_str == 'None':
-        holdoutDataFromPickle = None
+    testingData_str = args.testing_loader_pickle
+    if testingData_str == 'None':
+        testingDataFromPickle = None
     else:
-        holdoutDataFromPickle = pd.read_pickle(holdoutData_str)
+        testingDataFromPickle = pd.read_pickle(testingData_str)
 
     trainingLoop(trainingDataFromPickle=trainingDataFromPickle, 
                  validationDataFromPickle=validationDataFromPickle, 
@@ -371,4 +369,4 @@ if __name__ == "__main__":
                  parameters=parameters,
                  outputDir=args.outputDir,
                  device=args.device,
-                 holdoutDataFromPickle=holdoutDataFromPickle,)
+                 testingDataFromPickle=testingDataFromPickle,)

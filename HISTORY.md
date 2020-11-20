@@ -1,3 +1,7 @@
+## 0.0.6
+
+- 
+
 ## 0.0.5
 
 - 2D support added
@@ -5,6 +9,8 @@
   - Added option to threshold or clip the input image
 - Code consolidation
 - Added generic DenseNet
+- Added option to switch between Uniform and Label samplers
+- Added histopathology input (patch-based extraction)
 
 ## 0.0.4
 

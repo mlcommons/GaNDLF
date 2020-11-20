@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.5,
-    maximum: 0.0.5 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.6,
+    maximum: 0.0.6 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # the dimension of the model and dataset: defines dimensionality of computations
 dimension: 3
@@ -23,6 +23,8 @@ modality: rad
 class_list: [0,1,2,4]
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128,128]
+# uniform: UniformSampler or label: LabelSampler
+patch_sampler: label
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
@@ -54,7 +56,7 @@ opt: adam
 # for single fold run, use '-' before the fold number
 nested_training:
   {
-    holdout: 5, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
+    testing: 5, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
     validation: 5 # this controls the validation data splits for model training
   }
 ## pre-processing
