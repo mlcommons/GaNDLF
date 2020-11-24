@@ -59,9 +59,11 @@ setup(
   zip_safe=False,
 )
 
-## windows vips installation
 import os
+## submodule update
+os.system('git submodule update --init --recursive')
 
+## windows vips installation
 if os.name == 'nt': # proceed for windows
   from pathlib import Path
   if not Path('./vips/vips-dev-8.10/bin/libvips-42.dll').exists(): # download and extract if main dll is absent
