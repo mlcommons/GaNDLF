@@ -17,9 +17,10 @@ class VGG(nn.Module):
     '''
     VGG model 
     '''
-    def __init__(self, n_dimensions, features, n_outputClasses, final_convolution_layer: str = 'softmax',):
+    def __init__(self, n_dimensions, features, n_outputClasses, final_convolution_layer: str = 'softmax'):
         super(VGG, self).__init__()
         self.features = features
+        self.final_convolution_layer = final_convolution_layer
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
