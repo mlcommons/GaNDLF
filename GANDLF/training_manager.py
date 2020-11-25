@@ -50,7 +50,6 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
     kf_validation = KFold(n_splits=parameters['nested_training']['validation'])
 
     currentTestingFold = 0
-    currentValidationFold = 0
 
     # get the indeces for kfold splitting
     trainingData_full = dataframe
@@ -59,6 +58,8 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
     # start the kFold train for testing
     for trainAndVal_index, testing_index in kf_testing.split(training_indeces_full): # perform testing split
 
+        currentValidationFold = 0 # ensure the validation fold is initialized per-testing split
+        
         # get the current training and testing data
         if noTestingData:
             trainingAndValidationData = trainingData_full # don't consider the split indeces for this case
