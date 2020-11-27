@@ -14,3 +14,4 @@ __pycache__
 *_build*
 *build*
 debug.log
+vips/*

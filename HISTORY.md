@@ -1,6 +1,7 @@
 ## 0.0.6
 
 - New modality switch added for rad/path
+- Added PyVIPS support
 
 ## 0.0.5
 
