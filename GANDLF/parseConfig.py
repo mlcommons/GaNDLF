@@ -170,14 +170,6 @@ def parseConfig(config_file_path):
         if key in keysForWarning:
           print('WARNING: \'' + key + '\' is generally not recommended, as it changes image properties in unexpected ways.', file = sys.stderr)
 
-  # Extracting the model parameters from the dictionary
-  if 'base_filters' in params:
-    base_filters = int(params['base_filters'])
-  else:
-    base_filters = 30
-    print('Using default base_filters: ', base_filters)
-  params['base_filters'] = base_filters
-
   if 'modelName' in params:
     defineDefaultModel = False
     print('This option has been superceded by \'model\'', file=sys.stderr)
@@ -206,6 +198,11 @@ def parseConfig(config_file_path):
       sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
     if not('dimension' in params['model']):
       sys.exit('The \'model\' parameter needs \'dimension\' key to be defined, which should either 2 or 3')
+    if not('base_filters' in params['model']):
+      base_filters = 32
+      params['model']['base_filters'] = base_filters
+      print('Using default base_filters: ', base_filters)
+      # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
