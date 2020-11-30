@@ -48,9 +48,6 @@ def parseConfig(config_file_path):
   if not('class_list' in params):
     sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
 
-  if not('dimension' in params):
-    sys.exit('The \'dimension\' parameter to be defined, which should be 2 or 3')
-
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
   else:
@@ -207,6 +204,8 @@ def parseConfig(config_file_path):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
     if not('final_layer' in params['model']):
       sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
+    if not('dimension' in params['model']):
+      sys.exit('The \'model\' parameter needs \'dimension\' key to be defined, which should either 2 or 3')
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
