@@ -44,10 +44,6 @@ def parseConfig(config_file_path):
     if (min > gandlf_version_int) or (max < gandlf_version_int):
       sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
       
-  # require parameters - this should error out if not present
-  if not('class_list' in params):
-    sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
-
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
   else:
