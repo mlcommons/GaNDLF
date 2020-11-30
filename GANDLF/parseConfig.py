@@ -44,13 +44,6 @@ def parseConfig(config_file_path):
     if (min > gandlf_version_int) or (max < gandlf_version_int):
       sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
       
-  # require parameters - this should error out if not present
-  if not('class_list' in params):
-    sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
-
-  if not('dimension' in params):
-    sys.exit('The \'dimension\' parameter to be defined, which should be 2 or 3')
-
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
   else:
@@ -173,14 +166,6 @@ def parseConfig(config_file_path):
         if key in keysForWarning:
           print('WARNING: \'' + key + '\' is generally not recommended, as it changes image properties in unexpected ways.', file = sys.stderr)
 
-  # Extracting the model parameters from the dictionary
-  if 'base_filters' in params:
-    base_filters = int(params['base_filters'])
-  else:
-    base_filters = 30
-    print('Using default base_filters: ', base_filters)
-  params['base_filters'] = base_filters
-
   if 'modelName' in params:
     defineDefaultModel = False
     print('This option has been superceded by \'model\'', file=sys.stderr)
@@ -207,6 +192,18 @@ def parseConfig(config_file_path):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
     if not('final_layer' in params['model']):
       sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
+    if not('dimension' in params['model']):
+      sys.exit('The \'model\' parameter needs \'dimension\' key to be defined, which should either 2 or 3')
+    if not('base_filters' in params['model']):
+      base_filters = 32
+      params['model']['base_filters'] = base_filters
+      print('Using default \'base_filters\' in \'model\': ', base_filters)
+      # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
+    # if not('n_channels' in params['model']):
+    #   n_channels = 32
+    #   params['model']['n_channels'] = n_channels
+    #   print('Using default \'n_channels\' in \'model\': ', n_channels)
+    #   # sys.exit('The \'model\' parameter needs \'n_channels\' key to be defined') # uncomment if we need this to be passed by user
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')

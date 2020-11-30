@@ -41,18 +41,24 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     q_verbose = parameters['q_verbose']
     augmentations = parameters['data_augmentation']
     preprocessing = parameters['data_preprocessing']
-    which_model = parameters['model']['architecture']
     opt = parameters['opt']
     loss_function = parameters['loss_function']
     scheduler = parameters['scheduler']
-    class_list = parameters['class_list']
-    base_filters = parameters['base_filters']
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
     amp = parameters['amp']
     patience = parameters['patience']
-    n_channels = len(headers['channelHeaders'])
+
+    ## model configuration
+    which_model = parameters['model']['architecture']
+    dimension = parameters['model']['dimension']
+    base_filters = parameters['model']['base_filters']
+    class_list = parameters['model']['class_list']
+    if not('n_channels' in parameters['model']):
+        n_channels = len(headers['channelHeaders'])
+    else:
+        n_channels = parameters['model']['n_channels']
     n_classList = len(class_list)
   
     if len(psize) == 2:
@@ -74,7 +80,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
 
     is_regression = False
     is_classification = False
