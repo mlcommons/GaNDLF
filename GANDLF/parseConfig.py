@@ -201,8 +201,13 @@ def parseConfig(config_file_path):
     if not('base_filters' in params['model']):
       base_filters = 32
       params['model']['base_filters'] = base_filters
-      print('Using default base_filters: ', base_filters)
+      print('Using default \'base_filters\' in \'model\': ', base_filters)
       # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
+    # if not('n_channels' in params['model']):
+    #   n_channels = 32
+    #   params['model']['n_channels'] = n_channels
+    #   print('Using default \'n_channels\' in \'model\': ', n_channels)
+    #   # sys.exit('The \'model\' parameter needs \'n_channels\' key to be defined') # uncomment if we need this to be passed by user
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
