@@ -12,6 +12,7 @@ model:
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
+    amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
 # Set the Modality : rad for radiology, path for histopathology
@@ -26,8 +27,7 @@ num_epochs: 100
 patience: 50
 # Set the batch size
 batch_size: 1
-# Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
-amp: False
+
 # Set the initial learning rate
 learning_rate: 0.01
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
