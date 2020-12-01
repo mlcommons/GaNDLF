@@ -51,7 +51,8 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         # ref: https://arxiv.org/pdf/1608.06993.pdf
         model = _densenet(n_dimensions, 'densenet201', 32, (6, 12, 48, 32), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
     elif which_model == 'vgg16':
-        test = make_layers(cfg['D'], n_dimensions, n_channels)
+        #test = make_layers(cfg['D'], n_dimensions, n_channels) # URB to be fixed
+        test = make_layers(cfg['D'], n_dimensions, 3)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(n_dimensions, test, n_classes, final_convolution_layer = final_convolution_layer)
         divisibilityCheck_patch = False 
