@@ -69,7 +69,11 @@ global_augs_dict = {
 
 global_sampler_dict = {
     'uniform': torchio.data.UniformSampler,
+    'uniformsampler': torchio.data.UniformSampler,
+    'uniformsample': torchio.data.UniformSampler,
     'label': torchio.data.LabelSampler,
+    'labelsampler': torchio.data.LabelSampler,
+    'labelsample': torchio.data.LabelSampler,
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
@@ -184,6 +188,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     if not train:
         return subjects_dataset
 
+    sampler = sampler.lower() # for easier parsing
     sampler = global_sampler_dict[sampler](psize)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
