@@ -29,7 +29,6 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 from .parameterParsing import *
 
-
 def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, testingDataFromPickle = None):
     '''
     This is the main training loop
