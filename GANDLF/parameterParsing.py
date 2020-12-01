@@ -1,4 +1,7 @@
 import os
+from collections import Counter
+import numpy as np
+
 import torch.optim as optim
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
@@ -50,10 +53,19 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
     elif which_model == 'densenet201': # regressor network
         # ref: https://arxiv.org/pdf/1608.06993.pdf
         model = _densenet(n_dimensions, 'densenet201', 32, (6, 12, 48, 32), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
-    # elif which_model == 'vgg16':
-    #     test = make_layers(cfg['D'], n_dimensions, n_channels)
-    #     # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
-    #     model = VGG(n_dimensions, test, n_classes, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'vgg16':
+        vgg_config = cfg['D']
+        num_final_features = vgg_config[-2]
+        divisibility_factor = Counter(vgg_config)['M']
+        if psize[-1] == 1:
+            psize_altered = np.array(psize[:-1])
+        else:
+            psize_altered = np.array(psize)
+
+        featuresForClassifier = num_final_features * np.prod(psize_altered // 2**divisibility_factor)
+        layers = make_layers(cfg['D'], n_dimensions, n_channels)
+        # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
+        model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
