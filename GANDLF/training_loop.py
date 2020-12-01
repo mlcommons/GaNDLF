@@ -29,6 +29,7 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 from .parameterParsing import *
 
+
 def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, testingDataFromPickle = None):
     '''
     This is the main training loop
@@ -54,6 +55,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     patience = parameters['patience']
     n_channels = len(headers['channelHeaders'])
     n_classList = len(class_list)
+    scaling_factor = parameters['scaling_factor']
   
     if len(psize) == 2:
         psize.append(1) # ensuring same size during torchio processing
@@ -76,8 +78,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
 
+    
     is_regression = False
     is_classification = False
+
     # check if regression/classification has been requested
     if len(headers['predictionHeaders']) > 0:
         if model.final_convolution_layer is None:
@@ -145,25 +149,29 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     
     # get the weights for use for dice loss
     total_nonZeroVoxels = 0
-    for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-        # accumulate dice weights for each label
-        mask = subject['label'][torchio.DATA]
-        one_hot_mask = one_hot(mask, class_list)
-        for i in range(1, n_classList):
-            currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-            dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-            total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
     
-    # get the penalty values - dice_weights contains the overall number for each class in the training data
-    for i in range(1, n_classList):
-        penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-        for j in range(1, n_classList):
-            if i != j: # for differing classes, subtract the number
-                penalty = penalty - dice_penalty_dict[j]
-        
-        dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-    dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-              
+    # For regression dice penalty need not be taken account
+    # For classification this should be calculated on the basis of predicted labels and mask
+    if not is_regression:
+        for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
+            # accumulate dice weights for each label
+            mask = subject['label'][torchio.DATA]
+            one_hot_mask = one_hot(mask, class_list)
+            for i in range(1, n_classList):
+                currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
+                dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
+                total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
+            
+            # get the penalty values - dice_weights contains the overall number for each class in the training data
+        for i in range(1, n_classList):
+            penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
+            for j in range(1, n_classList):
+                if i != j: # for differing classes, subtract the number
+                    penalty = penalty - dice_penalty_dict[j]
+            
+            dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+        dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
+     
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
     all_keys = list(batch.keys())
@@ -197,26 +205,36 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             if is_regression:
                 valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
                 valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
+                valuesToPredict = valuesToPredict*scaling_factor
                 if device.type != 'cpu':
                     valuesToPredict = valuesToPredict.to(device)
-
+            
             # read the mask
-            mask = subject['label'][torchio.DATA] # get the label image
+            if subject['label'] == ['NA']:
+                mask_present = False
+            else:
+                mask_present = True
+                mask = subject['label'][torchio.DATA] # get the label image
 
             ## special case for 2D            
             if image.shape[-1] == 1:
                 model_2d = True
                 image = torch.squeeze(image, -1)
-                mask = torch.squeeze(mask, -1)
+                if mask_present:
+                    mask = torch.squeeze(mask, -1)
             else:
                 model_2d = False
             # Why are we doing this? Please check again
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
-            one_hot_mask = one_hot(mask, class_list)
+            if mask_present:
+                one_hot_mask = one_hot(mask, class_list)
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image, one_hot_mask = image.float().to(device), one_hot_mask.to(device)
+            image = image.float().to(device)
+            if mask_present:
+                one_hot_mask = one_hot_mask.to(device)
+
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
             # Forward Propagation to get the output from the models
@@ -225,36 +243,55 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
             output = model(image)
-            if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
-                one_hot_mask = one_hot_mask.unsqueeze(-1)
-                output = output.unsqueeze(-1)
-            if amp:
-                with torch.cuda.amp.autocast(): 
-                # Computing the loss
+            if is_regression:
+                #print("Output:", output) #U
+                #print("Values to predict:", valuesToPredict)  #U
+                output = output.clone().type(dtype=torch.float) #U
+                valuesToPredict = valuesToPredict.clone().type(dtype=torch.float) #U
+
+                #loss = MSE(output, valuesToPredict) 
+                loss = torch.nn.MSELoss()(output, valuesToPredict)
+                print("loss:", loss)
+                loss.backward()
+                optimizer.step()
+            else:
+                if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
+                    one_hot_mask = one_hot_mask.unsqueeze(-1)
+                    output = output.unsqueeze(-1)
+            
+            if not is_regression:
+                if amp:
+                    with torch.cuda.amp.autocast(): 
+                    # Computing the loss
+                        if MSE_requested:
+                            loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                        else:
+                            loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                else:
+                    # Computing the loss
                     if MSE_requested:
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                scaler.scale(loss).backward()
-                scaler.step(optimizer)
-            else:
-                # Computing the loss
-                if MSE_requested:
-                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
-                else:
-                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                loss.backward()
-                optimizer.step()
+                    loss.backward()
+                    optimizer.step()
+
+            
+            
                            
             #Pushing the dice to the cpu and only taking its value
             curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
-            #Computing the dice score  # Can be changed for multi-class outputs later.
-            curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
-            #print(curr_dice)
-            #Computng the total dice
-            total_train_dice += curr_dice
+
+            if not is_regression:
+                #Computing the dice score  # Can be changed for multi-class outputs later.
+                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
+                #print(curr_dice)
+                #Computng the total dice
+                total_train_dice += curr_dice
             # update scale for next iteration
             if amp:
                 scaler.update() 
@@ -264,50 +301,50 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 scheduler_lr.step()            
             #print(curr_dice)
 
-        average_train_dice = total_train_dice/len(train_loader.dataset)
+        #average_train_dice = total_train_dice/len(train_loader.dataset) #U
         average_train_loss = total_train_loss/len(train_loader.dataset)
                                
-        if average_train_dice > best_train_dice:
-            best_train_idx = ep
-            best_train_dice = average_train_dice
-            torch.save({"epoch": best_train_idx,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
+        # if average_train_dice > best_train_dice:
+        #     best_train_idx = ep
+        #     best_train_dice = average_train_dice
+        #     torch.save({"epoch": best_train_idx,
+        #     "model_state_dict": model.state_dict(),
+        #     "optimizer_state_dict": optimizer.state_dict(),
+        #     "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
 
-        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
+        # print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
 
-        # Now we enter the evaluation/validation part of the epoch      
-        # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, class_list, loss_fn)
+        # # Now we enter the evaluation/validation part of the epoch      
+        # # validation data scores
+        # average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, class_list, loss_fn)
 
-        # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn) 
+        # # testing data scores
+        # average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn) 
         
-        # stats for current validation data
-        if average_val_dice > best_val_dice:
-            best_val_idx = ep
-            best_val_dice = average_val_dice
-            best_test_val_dice = average_val_dice
-            # We can add more stuff to be saved if we need anything more
-            torch.save({"epoch": best_val_idx,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
-        else:
-            patience_count = patience_count + 1 
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+        # # stats for current validation data
+        # if average_val_dice > best_val_dice:
+        #     best_val_idx = ep
+        #     best_val_dice = average_val_dice
+        #     best_test_val_dice = average_val_dice
+        #     # We can add more stuff to be saved if we need anything more
+        #     torch.save({"epoch": best_val_idx,
+        #                 "model_state_dict": model.state_dict(),
+        #                 "optimizer_state_dict": optimizer.state_dict(),
+        #                 "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
+        # else:
+        #     patience_count = patience_count + 1 
+        # print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
 
-        # stats for current testing data
-        if average_test_dice > best_test_dice:
-            best_test_idx = ep
-            best_test_dice = average_test_dice
-            # We can add more stuff to be saved if we need anything more
-            torch.save({"epoch": best_test_idx,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
+        # # stats for current testing data
+        # if average_test_dice > best_test_dice:
+        #     best_test_idx = ep
+        #     best_test_dice = average_test_dice
+        #     # We can add more stuff to be saved if we need anything more
+        #     torch.save({"epoch": best_test_idx,
+        #                 "model_state_dict": model.state_dict(),
+        #                 "optimizer_state_dict": optimizer.state_dict(),
+        #                 "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+        # print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         if not scheduler == "triangular":
@@ -317,10 +354,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 scheduler_lr.step()
 
         # Saving the current model
-        torch.save({"epoch": ep,
-                    "model_state_dict": model.state_dict(),
-                    "optimizer_state_dict": optimizer.state_dict(),
-                    "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
+        # torch.save({"epoch": ep,
+        #             "model_state_dict": model.state_dict(),
+        #             "optimizer_state_dict": optimizer.state_dict(),
+        #             "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         stop = time.time()     
         print("Time for epoch: ",(stop - start)/60," mins")        
@@ -332,7 +369,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
-        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
+        #log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
         total_train_dice = 0
         total_train_loss = 0
