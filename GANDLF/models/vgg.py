@@ -4,7 +4,6 @@ Modified from https://github.com/pytorch/vision.git
 '''
 import math
 import torch.nn as nn
-
 from .modelBase import get_final_layer
 
 __all__ = [
@@ -20,23 +19,35 @@ class VGG(nn.Module):
     def __init__(self, n_dimensions, features, n_outputClasses, final_convolution_layer: str = 'softmax'):
         super(VGG, self).__init__()
         self.features = features
-        self.final_convolution_layer = final_convolution_layer
+        self.final_convolution_layer = get_final_layer(final_convolution_layer)
+        #self.n_outputClasses = n_outputClasses
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
 
+
+        # row = 218
+        # col = 182
+        # div_factor = 5
+        # for x in range(div_factor):
+        #     row = math.floor(row/2)
+        #     col = math.floor(col/2)
+
+
+
+        print("final_convolution_layer:", final_convolution_layer)
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(512, 512),
+            nn.Linear(15360, 512), ## Adaptive shapes can not be given to VGG
             nn.ReLU(True),
             nn.Dropout(),
             nn.Linear(512, 512),
             nn.ReLU(True),
             nn.Linear(512, 10),
             nn.ReLU(True),
-            nn.Linear(10, n_outputClasses),
-            get_final_layer(final_convolution_layer)
+            nn.Linear(10, n_outputClasses) 
+            #self.final_convolution_layer #get_final_layer(final_convolution_layer)
         )
          # Initialize weights
         for m in self.modules():
@@ -47,9 +58,13 @@ class VGG(nn.Module):
 
 
     def forward(self, x):
+        print("X1:", x.shape)
         x = self.features(x)
+        print("X2:", x.shape)
         x = x.view(x.size(0), -1)
+        print("X3:", x.shape)
         x = self.classifier(x)
+        print("X4:", x.shape)
         return x
 
 
