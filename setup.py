@@ -26,7 +26,8 @@ requirements = [
   'openslide-python',
   'scikit-image',
   'matplotlib',
-  'pyvips'
+  'pyvips',
+  'torchviz'
 ]
 
 setup(
