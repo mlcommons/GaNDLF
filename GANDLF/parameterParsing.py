@@ -13,7 +13,7 @@ from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, psize, **kwargs):
+def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, psize, batch_size, **kwargs):
     '''
     This function takes the default constructor and returns the model
 
@@ -62,7 +62,7 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         else:
             psize_altered = np.array(psize)
 
-        featuresForClassifier = num_final_features * np.prod(psize_altered // 2**divisibility_factor)
+        featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**divisibility_factor)
         layers = make_layers(cfg['D'], n_dimensions, n_channels)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)

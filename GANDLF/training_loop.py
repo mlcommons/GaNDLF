@@ -80,7 +80,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
 
     is_regression = False
     is_classification = False
