@@ -56,7 +56,6 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
     # get the indeces for kfold splitting
     trainingData_full = dataframe
-    training_indeces_full = list(trainingData_full.index.values)
 
     # start the kFold train for testing
     for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full): # perform testing split
@@ -97,7 +96,6 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             print('!!! WARNING !!!')
             print('!!! Testing data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
             print('!!! WARNING !!!')
-            current_training_indeces_full = list(trainingData_full.index.values) # using the new indeces for validation training
             current_training_subject_indeces_full = subjectIDs_full
         else:
             currentTrainingAndValidationDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
@@ -108,11 +106,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             if not os.path.exists(currentTrainingAndValidationDataPickle):
                 trainingAndValidationData.to_pickle(currentTrainingAndValidationDataPickle)
             
-            current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
             current_training_subject_indeces_full = trainingAndValidationData[trainingAndValidationData.columns[headers['subjectIDHeader']]].unique().tolist()
 
         # start the kFold train for validation
-        for train_index, val_index in kf_validation.split(current_training_indeces_full):
+        for train_index, val_index in kf_validation.split(current_training_subject_indeces_full):
 
             # the output of the current fold is only needed if multi-fold training is happening
             if singleFoldValidation:
