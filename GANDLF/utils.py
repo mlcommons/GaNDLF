@@ -121,6 +121,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
         for i in range(len(class_list) - 1):
             weights.append(1)
 
+    outputToWrite = 'SubjectID,PredictedValue\n'
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0
@@ -192,20 +193,28 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     return avg_dice, avg_loss
                 else:
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
-            if save_mask and is_segmentation:
-                inputImage = sitk.ReadImage(subject['path_to_metadata'])
-                pred_mask = pred_mask.numpy()
-                pred_mask = reverse_one_hot(pred_mask[0],class_list)
-                result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
-                result_image.CopyInformation(inputImage)
-                # if parameters['resize'] is not None:
-                #     originalSize = inputImage.GetSize()
-                #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
-        
+            if save_mask:
                 patient_name = os.path.basename(subject['path_to_metadata'])
-                if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
-                    os.mkdir(os.path.join(outputDir,"generated_masks"))
-                sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+
+                if is_segmentation:
+                    inputImage = sitk.ReadImage(subject['path_to_metadata'])
+                    pred_mask = pred_mask.numpy()
+                    pred_mask = reverse_one_hot(pred_mask[0],class_list)
+                    result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
+                    result_image.CopyInformation(inputImage)
+                    # if parameters['resize'] is not None:
+                    #     originalSize = inputImage.GetSize()
+                    #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)            
+                    if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
+                        os.mkdir(os.path.join(outputDir,"generated_masks"))
+                    sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+                else:
+                    outputToWrite += patient_name + ',' + pred_output + '\n'
+        
+        file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
+        file.write(outputToWrite)
+        file.close()
+
         if (subject['label'] != "NA"):
             avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
             return avg_dice, avg_loss
