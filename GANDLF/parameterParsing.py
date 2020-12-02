@@ -1,4 +1,7 @@
 import os
+from collections import Counter
+import numpy as np
+
 import torch.optim as optim
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
@@ -10,7 +13,7 @@ from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
 
-def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, psize, **kwargs):
+def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, psize, batch_size, **kwargs):
     '''
     This function takes the default constructor and returns the model
 
@@ -51,12 +54,18 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         # ref: https://arxiv.org/pdf/1608.06993.pdf
         model = _densenet(n_dimensions, 'densenet201', 32, (6, 12, 48, 32), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
     elif which_model == 'vgg16':
-        #test = make_layers(cfg['D'], n_dimensions, n_channels) # URB to be fixed
-        test = make_layers(cfg['D'], n_dimensions, 3)
+        vgg_config = cfg['D']
+        num_final_features = vgg_config[-2]
+        divisibility_factor = Counter(vgg_config)['M']
+        if psize[-1] == 1:
+            psize_altered = np.array(psize[:-1])
+        else:
+            psize_altered = np.array(psize)
+
+        featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**divisibility_factor)
+        layers = make_layers(cfg['D'], n_dimensions, n_channels)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
-        model = VGG(n_dimensions, test, n_classes, final_convolution_layer = final_convolution_layer)
-        divisibilityCheck_patch = False 
-        divisibilityCheck_baseFilter = False
+        model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
