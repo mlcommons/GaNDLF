@@ -364,7 +364,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "model_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "best_train_dice": best_train_dice,
-            "best_train_loss", best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
+            "best_train_loss": best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
             
         print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
 
@@ -374,7 +374,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "model_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "best_val_dice": best_val_dice,
-            "best_val_loss", best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
+            "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
         print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
 
@@ -384,7 +384,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "model_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "best_test_dice": best_test_dice,
-            "best_test_loss", best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+            "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
         print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
 
