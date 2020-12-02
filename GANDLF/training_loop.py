@@ -132,6 +132,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     best_val_dice = -1
     best_train_dice = -1
     best_test_dice = -1
+    
+    best_val_loss = 1000000
+    best_train_loss = 1000000
+    best_test_loss = 1000000
+    
     total_train_loss = 0
     total_train_dice = 0
     patience_count = 0
@@ -247,7 +252,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # torch.cuda.empty_cache()
             # Casts operations to mixed precision
             output = model(image)
-            if is_regression:
+            if is_regression or is_classification:
                 #print("Output:", output) #U
                 #print("Values to predict:", valuesToPredict)  #U
                 output = output.clone().type(dtype=torch.float) #U
@@ -256,8 +261,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 #loss = MSE(output, valuesToPredict) 
                 loss = torch.nn.MSELoss()(output, valuesToPredict)
                 print("loss:", loss)
-                loss.backward()
-                optimizer.step()
+                if amp:
+                    with torch.cuda.amp.autocast(): 
+                        scaler.scale(loss).backward()
+                        scaler.step(optimizer)
+                else:
+                    loss.backward()
+                    optimizer.step()
             else:
                 if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
                     one_hot_mask = one_hot_mask.unsqueeze(-1)
@@ -282,9 +292,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     loss.backward()
                     optimizer.step()
 
-            
-            
-                           
             #Pushing the dice to the cpu and only taking its value
             curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
@@ -308,48 +315,78 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         #average_train_dice = total_train_dice/len(train_loader.dataset) #U
         average_train_loss = total_train_loss/len(train_loader.dataset)
 
-        if not is_regression:
-            if average_train_dice > best_train_dice:
-                best_train_idx = ep
-                best_train_dice = average_train_dice
-                torch.save({"epoch": best_train_idx,
-                "model_state_dict": model.state_dict(),
-                "optimizer_state_dict": optimizer.state_dict(),
-                "best_train_dice": best_train_dice }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
+        # initialize some bool variables to control model saving
+        save_condition_train = False
+        save_condition_val = False
+        save_condition_test = False
 
-            print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
-
-            # Now we enter the evaluation/validation part of the epoch      
-            # validation data scores
-            average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, class_list, loss_fn)
-
-            # testing data scores
-            average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn) 
+        if is_regression or is_classification: 
+            is_segmentation = False
+        else:
+            is_segmentation = True
         
-            # stats for current validation data
-            if average_val_dice > best_val_dice:
-                best_val_idx = ep
-                best_val_dice = average_val_dice
-                best_test_val_dice = average_val_dice
-                # We can add more stuff to be saved if we need anything more
-                torch.save({"epoch": best_val_idx,
-                            "model_state_dict": model.state_dict(),
-                            "optimizer_state_dict": optimizer.state_dict(),
-                            "best_val_dice": best_val_dice }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
-            else:
-                patience_count = patience_count + 1 
-            print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+        # Now we enter the evaluation/validation part of the epoch      
+        # validation data scores
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation)
 
-            # stats for current testing data
-            if average_test_dice > best_test_dice:
-                best_test_idx = ep
+        # testing data scores
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation) 
+    
+        # regression or classification, use the loss to drive the model saving
+        if is_segmentation:
+            save_condition_train = average_train_dice > best_train_dice
+            if save_condition_train:
+                best_train_dice = average_train_dice
+            save_condition_val = average_val_dice > best_val_dice
+            if save_condition_val:
+                best_val_dice = average_val_dice
+            else: # patience is calculated on validation
+                patience_count = patience_count + 1 
+            save_condition_test = average_test_dice > best_test_dice
+            if save_condition_test:
                 best_test_dice = average_test_dice
-                # We can add more stuff to be saved if we need anything more
-                torch.save({"epoch": best_test_idx,
-                            "model_state_dict": model.state_dict(),
-                            "optimizer_state_dict": optimizer.state_dict(),
-                            "best_test_dice": best_test_dice }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
-            print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
+        else: 
+            save_condition_train = average_train_loss < best_train_loss
+            if save_condition_train:
+                best_train_loss = average_train_loss
+            save_condition_val = average_val_loss < best_val_loss
+            if save_condition_val:
+                best_val_loss = average_val_loss
+            else: # patience is calculated on validation
+                patience_count = patience_count + 1 
+            save_condition_test = average_test_loss < best_test_loss
+            if save_condition_test:
+                best_test_loss = average_test_loss
+
+        if save_condition_train:
+            best_train_idx = ep
+            torch.save({"epoch": best_train_idx,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "best_train_dice": best_train_dice,
+            "best_train_loss", best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
+            
+        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
+
+        if save_condition_val:
+            best_val_idx = ep
+            torch.save({"epoch": best_val_idx,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "best_val_dice": best_val_dice,
+            "best_val_loss", best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
+        
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+
+        if save_condition_test:
+            best_test_idx = ep
+            torch.save({"epoch": best_test_idx,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "best_test_dice": best_test_dice,
+            "best_test_loss", best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
+
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         
@@ -359,12 +396,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             else:
                 scheduler_lr.step()
 
-        if not is_regression:
-            #Saving the current model
-            torch.save({"epoch": ep,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "val_dice": average_val_dice }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
+        #Saving the current model
+        torch.save({"epoch": ep,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "val_dice": average_val_dice, "val_loss": average_val_loss }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         stop = time.time()     
         print("Time for epoch: ",(stop - start)/60," mins")        

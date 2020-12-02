@@ -42,10 +42,10 @@ def generate_initial_mask(slide_path, scale):
     return tissue_mask(slide_thumbnail), real_scale
 
 def parse_gandlf_csv(fpath):
-    df = pd.read_csv(fpath)
+    df = pd.read_csv(fpath, dtype=str)
     df = df.drop_duplicates()
     for index, row in df.iterrows():
-        yield row['Channel_0'], row['Label']
+        yield row['SubjectID'], row['Channel_0'], row['Label']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -79,12 +79,13 @@ if __name__ == '__main__':
 
     out_csv_path = os.path.join(out_dir, 'opm_train.csv')
 
-    for slide, label in parse_gandlf_csv(args.input_path):
+    for sid, slide, label in parse_gandlf_csv(args.input_path):
         start = time.time()
 
         # Create new instance of slide manager
         manager = PatchManager(slide)
         manager.set_label_map(label)
+        manager.set_subjectID(sid)
 
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(slide, cfg['scale'])
