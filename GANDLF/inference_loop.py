@@ -51,6 +51,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   
   n_channels = len(headers['channelHeaders'])
   n_classList = len(class_list)
+  
+  # initialize problem type    
+  is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
   if len(psize) == 2:
       psize.append(1) # ensuring same size during torchio processing
@@ -93,7 +96,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # get loss function
   loss_fn, MSE_requested = get_loss(loss_function)
 
-  average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True, outputDir = outputDir)
+  average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, is_segmentation, weights = None, save_mask = True, outputDir = outputDir)
   print(average_dice, average_loss)
 
 if __name__ == "__main__":
