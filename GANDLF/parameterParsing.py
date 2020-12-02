@@ -81,7 +81,8 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         # Newly created modules have require_grad=True by default
         num_features = model.classifier[6].in_features
         features = list(model.classifier.children())[:-1] # Remove last layer
-        features.extend([nn.AvgPool2d(1024), nn.Linear(num_features,1024),nn.ReLU(True), nn.Dropout2d(0.8), nn.Linear(1024,1)])
+        #features.extend([nn.AvgPool2d(1024), nn.Linear(num_features,1024),nn.ReLU(True), nn.Dropout2d(0.8), nn.Linear(1024,1)]) # RuntimeError: non-empty 2D or 3D (batch mode) tensor expected for input
+        features.extend([nn.Linear(num_features,1024),nn.ReLU(True), nn.Dropout2d(0.8), nn.Linear(1024,1)])
         model.classifier = nn.Sequential(*features) # Replace the model classifier
         divisibilityCheck_patch = False 
         divisibilityCheck_baseFilter = False
