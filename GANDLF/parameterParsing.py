@@ -12,6 +12,9 @@ from GANDLF.models.densenet import _densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
+import torch
+import torchvision
+import torch.nn as nn
 
 def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, psize, batch_size, **kwargs):
     '''
@@ -61,11 +64,27 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
             psize_altered = np.array(psize[:-1])
         else:
             psize_altered = np.array(psize)
-
+        divisibilityCheck_patch = False 
+        divisibilityCheck_baseFilter = False
         featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**divisibility_factor)
         layers = make_layers(cfg['D'], n_dimensions, n_channels)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'brain_age':
+        if n_dimensions != 2:
+            sys.exit("Brain Age predictions only works on 2D data")
+        model = torchvision.model.vgg16(pretrained = True)
+        # Freeze training for all layers
+        for param in model.features.parameters():
+            param.require_grad = False
+        # Newly created modules have require_grad=True by default
+        num_features = model.classifier[6].in_features
+        features = list(model.classifier.children())[:-1] # Remove last layer
+        features.extend([nn.AvgPool2d(1024), nn.Linear(num_features,1024),nn.ReLU(True), nn.Dropout2d(0.8), nn.Linear(1024,1)])
+        model.classifier = nn.Sequential(*features) # Replace the model classifier
+        divisibilityCheck_patch = False 
+        divisibilityCheck_baseFilter = False
+        
     else:
         print('WARNING: Could not find the requested model \'' + which_model + '\' in the implementation, using ResUNet, instead', file = sys.stderr)
         which_model = 'resunet'
