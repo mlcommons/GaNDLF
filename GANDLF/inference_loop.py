@@ -72,12 +72,15 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
 
   # get the channel keys for concatenation later (exclude non numeric channel keys)
   batch = next(iter(inference_loader))
-  channel_keys = list(batch.keys())
-  channel_keys_new = []
-  for item in channel_keys:
-    if item.isnumeric():
-      channel_keys_new.append(item)
-  channel_keys = channel_keys_new
+  all_keys = list(batch.keys())
+  channel_keys = []
+  value_keys = []
+
+  for item in all_keys:
+      if item.isnumeric():
+          channel_keys.append(item)
+      elif 'value' in item:
+          value_keys.append(item)
 
   print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
