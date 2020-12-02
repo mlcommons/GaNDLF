@@ -86,6 +86,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     
     is_regression = False
     is_classification = False
+    is_segmentation = False
 
     # check if regression/classification has been requested
     if len(headers['predictionHeaders']) > 0:
@@ -93,6 +94,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             is_regression = True
         else:
             is_classification = True
+    else:
+        is_segmentation = True
 
     # sanity check
     if n_channels == 0:
@@ -140,6 +143,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     total_train_loss = 0
     total_train_dice = 0
     patience_count = 0
+    
+    best_train_idx = 0
+    best_val_idx = 0
+    best_test_idx = 0
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
@@ -260,7 +267,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
                 #loss = MSE(output, valuesToPredict) 
                 loss = torch.nn.MSELoss()(output, valuesToPredict)
-                print("loss:", loss)
                 if amp:
                     with torch.cuda.amp.autocast(): 
                         scaler.scale(loss).backward()
@@ -312,7 +318,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 scheduler_lr.step()            
             #print(curr_dice)
 
-        #average_train_dice = total_train_dice/len(train_loader.dataset) #U
+        if is_segmentation:
+            average_train_dice = total_train_dice/len(train_loader.dataset) 
+        else:
+            average_train_dice = 1
+
         average_train_loss = total_train_loss/len(train_loader.dataset)
 
         # initialize some bool variables to control model saving
@@ -320,11 +330,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         save_condition_val = False
         save_condition_test = False
 
-        if is_regression or is_classification: 
-            is_segmentation = False
-        else:
-            is_segmentation = True
-        
         # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
         average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation)
