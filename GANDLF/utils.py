@@ -192,7 +192,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     return avg_dice, avg_loss
                 else:
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
-            if save_mask:
+            if save_mask and is_segmentation:
                 inputImage = sitk.ReadImage(subject['path_to_metadata'])
                 pred_mask = pred_mask.numpy()
                 pred_mask = reverse_one_hot(pred_mask[0],class_list)
