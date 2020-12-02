@@ -4,7 +4,6 @@ Modified from https://github.com/pytorch/vision.git
 '''
 import math
 import torch.nn as nn
-
 from .modelBase import get_final_layer
 
 __all__ = [
@@ -20,6 +19,7 @@ class VGG(nn.Module):
     def __init__(self, n_dimensions, features, inputFeaturesForClassifier, n_outputClasses, final_convolution_layer: str = 'softmax',):
         super(VGG, self).__init__()
         self.features = features
+        self.final_convolution_layer = get_final_layer(final_convolution_layer)
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
@@ -34,8 +34,7 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(512, 10),
             nn.ReLU(True),
-            nn.Linear(10, n_outputClasses),
-            get_final_layer(final_convolution_layer)
+            nn.Linear(10, n_outputClasses) 
         )
          # Initialize weights
         for m in self.modules():
