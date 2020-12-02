@@ -49,7 +49,9 @@ python gandlf_constructCSV \
   -output ./experiment_0/output_dir_stats/ \ # output directory
 ```
 
-For classification/regression, add a column called `ValueToPredict`. **Note** that currently, we are supporting only a single value prediction per model.
+Notes:
+- For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
+- If `SubjectID` or `PatientName` is present, the randomized split is done according to that instead of per-row. See https://github.com/FETS-AI/GANDLF/issues/285 for details.
 
 ## Plot the final results
 

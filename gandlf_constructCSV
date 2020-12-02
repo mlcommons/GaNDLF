@@ -25,7 +25,7 @@ def main():
   channelsID = channelsID.split(',')
   labelID = args.labelID
   
-  outputToWrite = ''
+  outputToWrite = 'SubjectID,'
   for i in range(len(channelsID)):
     outputToWrite = outputToWrite + 'Channel_' + str(i) + ','
   outputToWrite = outputToWrite + 'Label'
@@ -35,6 +35,8 @@ def main():
   for dirs in os.listdir(inputDir):
     
     currentSubjectDir = os.path.join(inputDir, dirs)
+
+    outputToWrite = outputToWrite + dirs + ','
 
     if os.path.isdir(currentSubjectDir): # only consider folders
 
