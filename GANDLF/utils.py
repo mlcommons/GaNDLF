@@ -183,7 +183,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 #Computing the total dice
                 total_dice += curr_dice
             else:
-                if !(is_segmentation):
+                if not (is_segmentation):
                     avg_dice = 1 # we don't care about this for regression/classification
                     avg_loss = total_loss/len(loader.dataset)
                     return avg_dice, avg_loss
