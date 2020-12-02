@@ -16,11 +16,7 @@ class VGG(nn.Module):
     '''
     VGG model 
     '''
-<<<<<<< HEAD
-    def __init__(self, n_dimensions, features, n_outputClasses, final_convolution_layer: str = 'softmax'):
-=======
     def __init__(self, n_dimensions, features, inputFeaturesForClassifier, n_outputClasses, final_convolution_layer: str = 'softmax',):
->>>>>>> c51dbd6319efb6d9234f3f471c98ad4a19cf282c
         super(VGG, self).__init__()
         self.features = features
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
@@ -29,16 +25,6 @@ class VGG(nn.Module):
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
-
-
-        # row = 218
-        # col = 182
-        # div_factor = 5
-        # for x in range(div_factor):
-        #     row = math.floor(row/2)
-        #     col = math.floor(col/2)
-
-
 
         print("final_convolution_layer:", final_convolution_layer)
         self.classifier = nn.Sequential(
