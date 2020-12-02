@@ -20,13 +20,11 @@ class VGG(nn.Module):
         super(VGG, self).__init__()
         self.features = features
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
-        #self.n_outputClasses = n_outputClasses
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
 
-        print("final_convolution_layer:", final_convolution_layer)
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(inputFeaturesForClassifier, 512),
@@ -37,7 +35,6 @@ class VGG(nn.Module):
             nn.Linear(512, 10),
             nn.ReLU(True),
             nn.Linear(10, n_outputClasses) 
-            #self.final_convolution_layer #get_final_layer(final_convolution_layer)
         )
          # Initialize weights
         for m in self.modules():
@@ -48,13 +45,9 @@ class VGG(nn.Module):
 
 
     def forward(self, x):
-        print("X1:", x.shape)
         x = self.features(x)
-        print("X2:", x.shape)
         x = x.view(x.size(0), -1)
-        print("X3:", x.shape)
         x = self.classifier(x)
-        print("X4:", x.shape)
         return x
 
 
