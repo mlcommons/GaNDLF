@@ -51,22 +51,32 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
     currentTestingFold = 0
 
+    # split across subjects
+    subjectIDs_full = dataframe[dataframe.columns[headers['subjectIDHeader']]].unique().tolist()
+
     # get the indeces for kfold splitting
     trainingData_full = dataframe
-    training_indeces_full = list(trainingData_full.index.values)
 
     # start the kFold train for testing
-    for trainAndVal_index, testing_index in kf_testing.split(training_indeces_full): # perform testing split
+    for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full): # perform testing split
 
         currentValidationFold = 0 # ensure the validation fold is initialized per-testing split
         
+        trainingAndValidationData = pd.DataFrame() # initialize the variable
+        testingData = pd.DataFrame() # initialize the variable
         # get the current training and testing data
         if noTestingData:
             trainingAndValidationData = trainingData_full # don't consider the split indeces for this case
             testingData = None
         else:
-            trainingAndValidationData = trainingData_full.iloc[trainAndVal_index]
-            testingData = trainingData_full.iloc[testing_index]
+            # loop over all trainAndVal_index and construct new dataframe
+            for subject_idx in trainAndVal_index:                 
+                trainingAndValidationData = trainingAndValidationData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+
+            # loop over all testing_index and construct new dataframe
+            for subject_idx in testing_index:                 
+                testingData = testingData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+
 
         # the output of the current fold is only needed if multi-fold training is happening
         if singleFoldTesting:
@@ -86,7 +96,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             print('!!! WARNING !!!')
             print('!!! Testing data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
             print('!!! WARNING !!!')
-            current_training_indeces_full = trainingAndValidationData # using the new indeces for validation training
+            current_training_subject_indeces_full = subjectIDs_full
         else:
             currentTrainingAndValidationDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
             currentTestingDataPickle = os.path.join(currentOutputFolder, 'testing.pkl')
@@ -96,10 +106,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             if not os.path.exists(currentTrainingAndValidationDataPickle):
                 trainingAndValidationData.to_pickle(currentTrainingAndValidationDataPickle)
             
-            current_training_indeces_full = list(trainingAndValidationData.index.values) # using the new indeces for validation training
+            current_training_subject_indeces_full = trainingAndValidationData[trainingAndValidationData.columns[headers['subjectIDHeader']]].unique().tolist()
 
         # start the kFold train for validation
-        for train_index, test_index in kf_validation.split(current_training_indeces_full):
+        for train_index, val_index in kf_validation.split(current_training_subject_indeces_full):
 
             # the output of the current fold is only needed if multi-fold training is happening
             if singleFoldValidation:
@@ -108,8 +118,17 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 currentValOutputFolder = os.path.join(currentOutputFolder, str(currentValidationFold))
                 Path(currentValOutputFolder).mkdir(parents=True, exist_ok=True)
 
-            trainingData = trainingAndValidationData.iloc[train_index]
-            validationData = trainingAndValidationData.iloc[test_index]
+            trainingData = pd.DataFrame() # initialize the variable
+            validationData = pd.DataFrame() # initialize the variable
+
+            # loop over all train_index and construct new dataframe
+            for subject_idx in train_index:                 
+                trainingData = trainingData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+
+            # loop over all val_index and construct new dataframe
+            for subject_idx in val_index:                 
+                validationData = validationData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
