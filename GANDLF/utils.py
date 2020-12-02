@@ -111,7 +111,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = False, outputDir = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, weights = None, save_mask = False, outputDir = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -126,15 +126,23 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
         total_loss = total_dice = 0
         for batch_idx, (subject) in enumerate(loader):
             subject_dict = {}
-            if 'label' in subject:
-                subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+            if ('label' in subject):
+                if (subject['label'] != ['NA']):
+                    subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+            
+            for key in value_keys: # for regression/classification
+                subject_dict['value_' + key] = subject[key]
+
             for key in channel_keys:
                 subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
             grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(grid_sampler)
+
+            pred_output = 0 # this is used for regression
             for patches_batch in patch_loader:
-                image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1).cuda()
+                image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
+                valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
                 locations = patches_batch[torchio.LOCATION]
                 image = image.float().to(device)
                 ## special case for 2D            
@@ -144,14 +152,29 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                     locations = torch.squeeze(locations, -1)
                 else:
                     model_2d = False
-                pred_mask = model(image)
-                if model_2d:
-                    pred_mask = pred_mask.unsqueeze(-1)
-                aggregator.add_batch(pred_mask, locations)
-            pred_mask = aggregator.get_output_tensor()
-            pred_mask.cpu() # the validation is done on CPU, see https://github.com/FETS-AI/GANDLF/issues/270
-            pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
-            if not subject['label'] == "NA":
+                
+                if is_segmentation: # for segmentation, get the predicted mask
+                    pred_mask = model(image)
+                    if model_2d:
+                        pred_mask = pred_mask.unsqueeze(-1)
+                else: # for regression/classification, get the predicted output and add it together to average later on
+                    pred_output += model(image)
+                
+                print ('Segmentation status utils:', is_segmentation)
+                if is_segmentation: # aggregate the predicted mask
+                    aggregator.add_batch(pred_mask, locations)
+            
+            if is_segmentation:
+                pred_mask = aggregator.get_output_tensor()
+                pred_mask.cpu() # the validation is done on CPU, see https://github.com/FETS-AI/GANDLF/issues/270
+                pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
+            else:
+                pred_output = pred_output / len(locations) # average the predicted output across patches
+                #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
+                loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double())
+                total_loss += loss
+
+            if not subject['label'] == ["NA"]:
                 mask = subject_dict['label'][torchio.DATA] # get the label image
                 if mask.dim() == 4:
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
@@ -163,7 +186,12 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, class_list
                 #Computing the total dice
                 total_dice += curr_dice
             else:
-                print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
+                if not (is_segmentation):
+                    avg_dice = 1 # we don't care about this for regression/classification
+                    avg_loss = total_loss/len(loader.dataset)
+                    return avg_dice, avg_loss
+                else:
+                    print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
                 inputImage = sitk.ReadImage(subject['path_to_metadata'])
                 pred_mask = pred_mask.numpy()

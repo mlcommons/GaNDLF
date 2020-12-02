@@ -27,7 +27,8 @@ requirements = [
   'scikit-image',
   'matplotlib',
   'requests==2.25.0',
-  'pyvips'
+  'pyvips',
+  'torchviz'
 ]
 
 setup(
