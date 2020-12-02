@@ -220,3 +220,23 @@ def fix_paths(cwd):
     if os.name == 'nt': # proceed for windows
         vipshome = os.path.join(cwd, 'vips/vips-dev-8.10/bin')
         os.environ['PATH'] = vipshome + ';' + os.environ['PATH']
+
+def find_problem_type(headersFromCSV, model_final_layer):
+    '''
+    This function determines the type of problem at hand - regression, classification or segmentation
+    '''    
+    # initialize problem type    
+    is_regression = False
+    is_classification = False
+    is_segmentation = False
+
+    # check if regression/classification has been requested
+    if len(headersFromCSV['predictionHeaders']) > 0:
+        if model_final_layer is None:
+            is_regression = True
+        else:
+            is_classification = True
+    else:
+        is_segmentation = True
+    
+    return is_regression, is_classification, is_segmentation
