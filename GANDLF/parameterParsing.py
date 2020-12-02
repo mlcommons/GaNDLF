@@ -73,7 +73,8 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
     elif which_model == 'brain_age':
         if n_dimensions != 2:
             sys.exit("Brain Age predictions only works on 2D data")
-        model = torchvision.model.vgg16(pretrained = True)
+        model = torchvision.models.vgg16(pretrained = True)
+        model.final_convolution_layer = None
         # Freeze training for all layers
         for param in model.features.parameters():
             param.require_grad = False
