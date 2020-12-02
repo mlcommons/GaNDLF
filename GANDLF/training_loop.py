@@ -83,7 +83,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
 
-    
+    # initialize problem type    
     is_regression = False
     is_classification = False
     is_segmentation = False
