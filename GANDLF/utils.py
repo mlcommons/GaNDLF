@@ -269,7 +269,7 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     outputToWrite = outputToWrite + '\n'
     
     # iterate over all subject directories
-    for dirs in os.listdir(inputDir):        
+    for dirs in os.listdir(inputDir):
         currentSubjectDir = os.path.join(inputDir, dirs)
         outputToWrite = outputToWrite + dirs + ','
         if os.path.isdir(currentSubjectDir): # only consider folders
