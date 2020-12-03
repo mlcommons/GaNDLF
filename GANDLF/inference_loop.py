@@ -44,7 +44,12 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   augmentations = parameters['data_augmentation']
   preprocessing = parameters['data_preprocessing']
   which_model = parameters['model']['architecture']
-  class_list = parameters['class_list']
+  class_list = parameters['model']['class_list']
+  n_classList = len(class_list)
+  if not('n_channels' in parameters['model']):
+      n_channels = len(headers['channelHeaders'])
+  else:
+      n_channels = parameters['model']['n_channels']
   base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
   loss_function = parameters['loss_function']
