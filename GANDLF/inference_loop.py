@@ -51,11 +51,18 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
   loss_function = parameters['loss_function']
-  scaling_factor = parameters['scaling_factor']
+  if 'scaling_factor' in parameters:
+      scaling_factor = parameters['scaling_factor']
+  else:
+      scaling_factor = 1
   
   n_channels = len(headers['channelHeaders'])
   if 'class_list' in parameters['model']:
+      class_list = parameters['model']['class_list']
       n_classList = len(class_list)
+  
+  # Defining our model here according to parameters mentioned in the configuration file
+  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
   
   # initialize problem type    
   is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
@@ -70,9 +77,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
   inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
-  # Defining our model here according to parameters mentioned in the configuration file
-  model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
-  
   # Loading the weights into the model
   main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
   model.load_state_dict(main_dict['model_state_dict'])
