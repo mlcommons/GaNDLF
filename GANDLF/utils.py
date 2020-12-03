@@ -121,6 +121,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
         for i in range(len(class_list) - 1):
             weights.append(1)
 
+    outputToWrite = 'SubjectID,PredictedValue\n'
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0
@@ -193,19 +194,27 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 else:
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
-                inputImage = sitk.ReadImage(subject['path_to_metadata'])
-                pred_mask = pred_mask.numpy()
-                pred_mask = reverse_one_hot(pred_mask[0],class_list)
-                result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
-                result_image.CopyInformation(inputImage)
-                # if parameters['resize'] is not None:
-                #     originalSize = inputImage.GetSize()
-                #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)
-        
                 patient_name = os.path.basename(subject['path_to_metadata'])
-                if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
-                    os.mkdir(os.path.join(outputDir,"generated_masks"))
-                sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+
+                if is_segmentation:
+                    inputImage = sitk.ReadImage(subject['path_to_metadata'])
+                    pred_mask = pred_mask.numpy()
+                    pred_mask = reverse_one_hot(pred_mask[0],class_list)
+                    result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
+                    result_image.CopyInformation(inputImage)
+                    # if parameters['resize'] is not None:
+                    #     originalSize = inputImage.GetSize()
+                    #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)            
+                    if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
+                        os.mkdir(os.path.join(outputDir,"generated_masks"))
+                    sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+                else:
+                    outputToWrite += patient_name + ',' + pred_output + '\n'
+        
+        file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
+        file.write(outputToWrite)
+        file.close()
+
         if (subject['label'] != "NA"):
             avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
             return avg_dice, avg_loss
@@ -220,3 +229,23 @@ def fix_paths(cwd):
     if os.name == 'nt': # proceed for windows
         vipshome = os.path.join(cwd, 'vips/vips-dev-8.10/bin')
         os.environ['PATH'] = vipshome + ';' + os.environ['PATH']
+
+def find_problem_type(headersFromCSV, model_final_layer):
+    '''
+    This function determines the type of problem at hand - regression, classification or segmentation
+    '''    
+    # initialize problem type    
+    is_regression = False
+    is_classification = False
+    is_segmentation = False
+
+    # check if regression/classification has been requested
+    if len(headersFromCSV['predictionHeaders']) > 0:
+        if model_final_layer is None:
+            is_regression = True
+        else:
+            is_classification = True
+    else:
+        is_segmentation = True
+    
+    return is_regression, is_classification, is_segmentation

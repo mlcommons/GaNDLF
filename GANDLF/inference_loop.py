@@ -51,6 +51,9 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   
   n_channels = len(headers['channelHeaders'])
   n_classList = len(class_list)
+  
+  # initialize problem type    
+  is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
   if len(psize) == 2:
       psize.append(1) # ensuring same size during torchio processing
@@ -72,12 +75,15 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
 
   # get the channel keys for concatenation later (exclude non numeric channel keys)
   batch = next(iter(inference_loader))
-  channel_keys = list(batch.keys())
-  channel_keys_new = []
-  for item in channel_keys:
-    if item.isnumeric():
-      channel_keys_new.append(item)
-  channel_keys = channel_keys_new
+  all_keys = list(batch.keys())
+  channel_keys = []
+  value_keys = []
+
+  for item in all_keys:
+      if item.isnumeric():
+          channel_keys.append(item)
+      elif 'value' in item:
+          value_keys.append(item)
 
   print("Data Samples: ", len(inference_loader.dataset))
   sys.stdout.flush()
@@ -90,7 +96,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   # get loss function
   loss_fn, MSE_requested = get_loss(loss_function)
 
-  average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, weights = None, save_mask = True, outputDir = outputDir)
+  average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, is_segmentation, weights = None, save_mask = True, outputDir = outputDir)
   print(average_dice, average_loss)
 
 if __name__ == "__main__":
