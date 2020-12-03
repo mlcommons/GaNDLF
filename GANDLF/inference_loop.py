@@ -51,6 +51,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   base_filters = parameters['base_filters']
   batch_size = parameters['batch_size']
   loss_function = parameters['loss_function']
+  scaling_factor = parameters['scaling_factor']
   
   n_channels = len(headers['channelHeaders'])
   if 'class_list' in parameters['model']:
