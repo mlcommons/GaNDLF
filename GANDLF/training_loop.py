@@ -370,7 +370,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_val_dice": best_val_dice,
             "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Train Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
 
         if save_condition_test:
             best_test_idx = ep
@@ -380,7 +380,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_test_dice": best_test_dice,
             "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Train Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         
