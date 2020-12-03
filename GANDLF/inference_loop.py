@@ -44,8 +44,6 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   augmentations = parameters['data_augmentation']
   preprocessing = parameters['data_preprocessing']
   which_model = parameters['model']['architecture']
-  class_list = parameters['model']['class_list']
-  n_classList = len(class_list)
   if not('n_channels' in parameters['model']):
       n_channels = len(headers['channelHeaders'])
   else:
@@ -55,11 +53,15 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
   loss_function = parameters['loss_function']
   
   n_channels = len(headers['channelHeaders'])
-  n_classList = len(class_list)
+  if 'class_list' in parameters['model']:
+      n_classList = len(class_list)
   
   # initialize problem type    
   is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
+  if is_regression or is_classification:
+      n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
+  
   if len(psize) == 2:
       psize.append(1) # ensuring same size during torchio processing
 
