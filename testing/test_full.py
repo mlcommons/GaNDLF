@@ -33,8 +33,8 @@ def test_constructTrainingCSV():
   # delete previous csv files
   files = os.listdir(inputDir)
   for item in files:
-      if item.endswith(".csv"):
-          os.remove(os.path.join(inputDir, item))
+    if item.endswith(".csv"):
+      os.remove(os.path.join(inputDir, item))
 
   for application_data in os.listdir(inputDir):
     currentApplicationDir = os.path.join(inputDir, application_data)
