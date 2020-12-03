@@ -95,7 +95,6 @@ def send_model_to_device(model, ampInput, device, optimizer):
 
     return model, amp, device
 
-
 def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     '''
     This function resizes the input image based on the output size and interpolator
@@ -256,3 +255,35 @@ def find_problem_type(headersFromCSV, model_final_layer):
         is_segmentation = True
     
     return is_regression, is_classification, is_segmentation
+
+def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
+    '''
+    This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    '''
+    channelsID_list = channelsID.split(',') # split into list
+    
+    outputToWrite = 'SubjectID,'
+    for i in range(len(channelsID_list)):
+        outputToWrite = outputToWrite + 'Channel_' + str(i) + ','
+    outputToWrite = outputToWrite + 'Label'
+    outputToWrite = outputToWrite + '\n'
+    
+    # iterate over all subject directories
+    for dirs in os.listdir(inputDir):        
+        currentSubjectDir = os.path.join(inputDir, dirs)
+        outputToWrite = outputToWrite + dirs + ','
+        if os.path.isdir(currentSubjectDir): # only consider folders
+            filesInDir = os.listdir(currentSubjectDir) # get all files in each directory
+            for channel in channelsID_list:
+                for i in range(len(filesInDir)):
+                    currentFile = os.path.join(currentSubjectDir, filesInDir[i])
+                    if channel in filesInDir[i]:
+                        outputToWrite = outputToWrite + currentFile + ','            
+                    elif labelID in filesInDir[i]:
+                        currentMaskFile = currentFile
+            outputToWrite = outputToWrite + currentMaskFile  
+            outputToWrite = outputToWrite + '\n'
+
+    file = open(outputFile, 'w')
+    file.write(outputToWrite)
+    file.close()
