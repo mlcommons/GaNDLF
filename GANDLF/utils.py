@@ -41,6 +41,9 @@ def checkPatchDivisibility(patch_size, number = 16):
     return True
 
 def reverse_one_hot(predmask_array,class_list):
+    '''
+    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
+    '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
     for idx, class_ in enumerate(class_list):
