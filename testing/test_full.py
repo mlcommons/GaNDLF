@@ -3,10 +3,12 @@ import sys
 from pathlib import Path
 import requests, zipfile, io, os
 
+from GANDLF.utils import writeTrainingCSV
+
 '''
 steps to follow to write tests:
 [x] download sample data
-[ ] construct the training csv
+[x] construct the training csv
 [ ] for each dir (application type) and sub-dir (image dimension), run training for a single epoch on cpu
 [ ] for each dir (application type) and sub-dir (image dimension), run inference for a single trained model per testing/validation split for a single subject on cpu
 4. hopefully the various sys.exit messages throughout the code will catch issues
@@ -18,10 +20,33 @@ def test_download_data():
   '''
   urlToDownload = 'https://github.com/sarthakpati/tempDownloads/raw/main/data.zip'
   if not Path(os.getcwd() + '/testing/data/test/3d_rad_segmentation/001/image.nii.gz').exists():
-      print('Downloading and extracting sample data')
-      r = requests.get(urlToDownload)
-      z = zipfile.ZipFile(io.BytesIO(r.content))
-      z.extractall('./testing')
+    print('Downloading and extracting sample data')
+    r = requests.get(urlToDownload)
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall('./testing')
+
+def test_constructTrainingCSV():
+  '''
+  This function constructs training csv
+  '''
+  inputDir = os.path.normpath('./testing/data')
+  # delete previous csv files
+  files = os.listdir(inputDir)
+  for item in files:
+      if item.endswith(".csv"):
+          os.remove(os.path.join(inputDir, item))
+
+  for application_data in os.listdir(inputDir):
+    currentApplicationDir = os.path.join(inputDir, application_data)
+
+    if '2d_rad_segmentation' in application_data:
+      channelsID = '_blue.png,_red.png,_green.png'
+      labelID = 'mask.png'
+    elif '3d_rad_segmentation' in application_data:
+      channelsID = 'image'
+      labelID = 'mask'
+    writeTrainingCSV(currentApplicationDir, channelsID, labelID, inputDir + '/train_' + application_data + '.csv')
+
 
 def test_full():
   test = 1
