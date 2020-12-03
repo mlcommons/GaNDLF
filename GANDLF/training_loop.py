@@ -54,8 +54,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     which_model = parameters['model']['architecture']
     dimension = parameters['model']['dimension']
     base_filters = parameters['model']['base_filters']
-    class_list = parameters['model']['class_list']
-    n_classList = len(class_list)
+    if 'class_list' in parameters['model']:
+        n_classList = len(class_list)
     if not('n_channels' in parameters['model']):
         n_channels = len(headers['channelHeaders'])
     else:
