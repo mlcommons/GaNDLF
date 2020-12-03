@@ -111,7 +111,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, weights = None, save_mask = False, outputDir = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -210,7 +210,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                         os.mkdir(os.path.join(outputDir,"generated_masks"))
                     sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
                 else:
-                    outputToWrite += patient_name + ',' + pred_output + '\n'
+                    outputToWrite += patient_name + ',' + str(pred_output * scaling_factor) + '\n'
         
         file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
         file.write(outputToWrite)

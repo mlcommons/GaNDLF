@@ -55,12 +55,20 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     dimension = parameters['model']['dimension']
     base_filters = parameters['model']['base_filters']
     if 'class_list' in parameters['model']:
+        class_list = parameters['model']['class_list']
         n_classList = len(class_list)
     if not('n_channels' in parameters['model']):
         n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
-    scaling_factor = parameters['scaling_factor']
+
+    if 'scaling_factor' in parameters:
+        scaling_factor = parameters['scaling_factor']
+    else:
+        scaling_factor = 1
+
+    # Defining our model here according to parameters mentioned in the configuration file
+    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
 
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
@@ -85,9 +93,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
-    # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
-
     # sanity check
     if n_channels == 0:
         sys.exit('The number of input channels cannot be zero, please check training CSV')
@@ -323,10 +328,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation)
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor)
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation) 
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor)
     
         # regression or classification, use the loss to drive the model saving
         if is_segmentation:
