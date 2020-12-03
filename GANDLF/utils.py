@@ -167,10 +167,11 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             
             if is_segmentation:
                 pred_mask = aggregator.get_output_tensor()
-                pred_mask.cpu() # the validation is done on CPU, see https://github.com/FETS-AI/GANDLF/issues/270
+                pred_mask = pred_mask.cpu() # the validation is done on CPU, see https://github.com/FETS-AI/GANDLF/issues/270
                 pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
             else:
                 pred_output = pred_output / len(locations) # average the predicted output across patches
+                pred_output = pred_output.cpu()
                 #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double())
                 total_loss += loss
