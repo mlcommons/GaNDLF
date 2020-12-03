@@ -61,6 +61,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     else:
         n_channels = parameters['model']['n_channels']
     scaling_factor = parameters['scaling_factor']
+
+    # initialize problem type    
+    is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
+
+    if is_regression or is_classification:
+        n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
   
     if len(psize) == 2:
         psize.append(1) # ensuring same size during torchio processing
@@ -75,16 +81,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
-    
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
-
-    # initialize problem type    
-    is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
     # sanity check
     if n_channels == 0:
