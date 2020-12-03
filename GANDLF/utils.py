@@ -10,6 +10,9 @@ import sys
 import os
 
 def one_hot(segmask_array, class_list):
+    '''
+    This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
+    '''
     batch_size = segmask_array.shape[0]
     batch_stack = []
     for b in range(batch_size):
