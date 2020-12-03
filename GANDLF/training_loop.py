@@ -55,11 +55,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     dimension = parameters['model']['dimension']
     base_filters = parameters['model']['base_filters']
     class_list = parameters['model']['class_list']
+    n_classList = len(class_list)
     if not('n_channels' in parameters['model']):
         n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
-    n_classList = len(class_list)
     scaling_factor = parameters['scaling_factor']
   
     if len(psize) == 2:
