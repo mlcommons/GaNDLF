@@ -41,7 +41,7 @@ Notes:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - If `SubjectID` or `PatientName` is present, the randomized split is done according to that instead of per-row. See https://github.com/FETS-AI/GANDLF/issues/285 for details.
 
-## Construct the Configuration
+## Customize the Training
 
 GANDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
 
@@ -90,10 +90,6 @@ python gandlf_collectStats \
   -labelID _seg.nii.gz # Label/mask identifier string to compare the filenames from inputDir
   -output ./experiment_0/output_dir_stats/ \ # output directory
 ```
-
-## Customize the Training
-
-All details and comments are in the [samples/sample_training.yaml](../samples/sample_training.yaml).
 
 ### Multi-GPU systems
 
