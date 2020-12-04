@@ -1,13 +1,12 @@
-import os
+import os, sys
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
+import pandas as pd
 import SimpleITK as sitk
 import torch
 import torch.nn as nn
 import torchio
 from GANDLF.losses import *
-import sys
-import os
 
 def one_hot(segmask_array, class_list):
     '''
@@ -288,3 +287,39 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     file = open(outputFile, 'w')
     file.write(outputToWrite)
     file.close()
+
+def parseTrainingCSV(inputTrainingCSVFile):
+    '''
+    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    '''
+    ## read training dataset into data frame
+    data_full = pd.read_csv(inputTrainingCSVFile)
+    # shuffle the data - this is a useful level of randomization for the training process
+    data_full=data_full.sample(frac=1).reset_index(drop=True)
+
+    # find actual header locations for input channel and label
+    # the user might put the label first and the channels afterwards 
+    # or might do it completely randomly
+    headers = {}
+    headers['channelHeaders'] = []
+    headers['predictionHeaders'] = []
+    headers['labelHeader'] = None
+    headers['subjectIDHeader'] = None
+
+    for col in data_full.columns: 
+        # add appropriate headers to read here, as needed
+        col_lower = col.lower()
+        currentHeaderLoc = data_full.columns.get_loc(col)
+        if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
+            headers['channelHeaders'].append(currentHeaderLoc)
+        elif ('valuetopredict' in col_lower):
+            headers['predictionHeaders'].append(currentHeaderLoc)
+        elif ('subject' in col_lower) or ('patient' in col_lower):
+            headers['subjectIDHeader'] = currentHeaderLoc
+        elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower) or ('ground_truth' in col_lower) or ('groundtruth' in col_lower):
+            if (headers['labelHeader'] == None):
+                headers['labelHeader'] = currentHeaderLoc
+            else:
+                print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
+    
+    return data_full, headers
