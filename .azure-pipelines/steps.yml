@@ -2,6 +2,8 @@ steps:
 - script: |
     conda create -p ./venv python=3.6.5 -y
     conda activate ./venv
+    pip install --upgrade pip
+    conda update conda
     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
     conda install -c sdvillal openslide -y 
     conda install -c sdvillal openslide 
