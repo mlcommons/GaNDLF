@@ -5,29 +5,30 @@ trigger:
 - main
 
 jobs:
-  - job: windows
+  # - job: windows
+  ## this is weird "Failed to build pickle5" coming up during dependency installation
+  #   pool:
+  #     vmImage: windows-latest
+  #   steps:
+  #     - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+  #       displayName: Add conda to PATH
+    
+  #     - template: .azure-pipelines/steps.yml
+  
+  - job: linux
     pool:
-      vmImage: windows-latest
+      vmImage: ubuntu-latest
     steps:
-      - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
         displayName: Add conda to PATH
     
       - template: .azure-pipelines/steps.yml
-  
-  # - job: linux
-  #   pool:
-  #     vmImage: ubuntu-latest
-  #   steps:
-  #     - bash: echo "##vso[task.prependpath]$CONDA/bin"
-  #       displayName: Add conda to PATH
-    
-  #     - template: .azure-pipelines/steps.yml
 
-  # - job: macOS
-  #   pool:
-  #     vmImage: macOS-latest
-  #   steps:
-  #     - bash: echo "##vso[task.prependpath]$CONDA/bin"
-  #       displayName: Add conda to PATH
+  - job: macOS
+    pool:
+      vmImage: macOS-latest
+    steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
     
-  #     - template: .azure-pipelines/steps.yml
+      - template: .azure-pipelines/steps.yml
