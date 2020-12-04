@@ -283,7 +283,7 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
                             allImageFiles += currentFile + ','            
                         elif labelID in filesInDir[i]:
                             maskFile = currentFile 
-                outputToWrite = allImageFiles + maskFile + '\n'
+                outputToWrite += allImageFiles + maskFile + '\n'
 
     file = open(outputFile, 'w')
     file.write(outputToWrite)
