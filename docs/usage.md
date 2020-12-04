@@ -41,6 +41,30 @@ Notes:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - If `SubjectID` or `PatientName` is present, the randomized split is done according to that instead of per-row. See https://github.com/FETS-AI/GANDLF/issues/285 for details.
 
+## Construct the Configuration
+
+GANDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
+
+- Model
+  - Architecture
+  - Dimensionality of computations 
+  - Final layer of model
+  - Mixed precision
+  - Class list
+- Various training parameters:
+  - Patch size
+  - Number of epochs and patience parameter
+  - Learning rate
+  - Scheduler 
+  - Loss function
+  - Optimizer
+- Data Augmentation
+- Data preprocessing
+- Nested data splits
+  - Testing 
+  - Validation 
+
+Please see a [sample](../samples/sample_training.yaml) for detailed guide and comments.
 ## Running GANDLF (Training/Inference)
 
 ```bash
