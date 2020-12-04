@@ -8,18 +8,18 @@ trigger:
 
 strategy:
   matrix:
-    linux_3.6:
-      imageName: 'ubuntu-latest'
-      python.version: '3.6'
-    linux_3.7:
-      imageName: 'ubuntu-latest'
-      python.version: '3.7'
-    mac_3.6:
-      imageName: 'macos-latest'
-      python.version: '3.6'
-    mac_3.7:
-      imageName: 'macos-latest'
-      python.version: '3.7'
+    # linux_3.6:
+    #   imageName: 'ubuntu-latest'
+    #   python.version: '3.6'
+    # linux_3.7:
+    #   imageName: 'ubuntu-latest'
+    #   python.version: '3.7'
+    # mac_3.6:
+    #   imageName: 'macos-latest'
+    #   python.version: '3.6'
+    # mac_3.7:
+    #   imageName: 'macos-latest'
+    #   python.version: '3.7'
     windows_3.6:
       imageName: 'windows-latest'
       python.version: '3.6'
