@@ -53,12 +53,21 @@ def test_constructTrainingCSV():
 
 
 def test_segmentation_rad_2d():
+  print('Starting 2D Rad segmentation tests')
+
   inputDir = os.path.normpath('./testing/data')
   parameters = parseConfig(inputDir + '/2d_rad_segmentation/sample_training.yaml')
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
-  test = 1
-  # print('started 2d segmentation')
-  # print('passed')
-  # print('started 3d segmentation')
-  # sys.exit('boo!')
+
+  print('passed')
+
+def test_segmentation_rad_3d():
+  print('Starting 3D Rad segmentation tests')
+  
+  inputDir = os.path.normpath('./testing/data')
+  parameters = parseConfig(inputDir + '/3d_rad_segmentation/sample_training.yaml')
+  for model in all_models_segmentation:
+    parameters['model']['architecture'] = model 
+
+  print('passed')
