@@ -2,7 +2,7 @@ The website for GANDLF; start with [index.md](./index.md).
 
 ## Flowchart
 
-![Flowchart](https://raw.githubusercontent.com/FETS-AI/GANDLF/master/docs/images/flowchart.png?token=ACZNH6JZ5MFQE5M4R24NZ5C7YZXXI)
+![Flowchart](./images/flowchart.png)
 
 
 ### Code 
