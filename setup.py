@@ -29,7 +29,8 @@ requirements = [
   'requests==2.25.0',
   'pyvips',
   'torchviz',
-  'pytest'
+  'pytest',
+  'pytest-azurepipelines'
 ]
 
 setup(
