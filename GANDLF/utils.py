@@ -274,15 +274,16 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
             outputToWrite = outputToWrite + dirs + ','
             if os.path.isdir(currentSubjectDir): # only consider folders
                 filesInDir = os.listdir(currentSubjectDir) # get all files in each directory
+                maskFile = ''
+                allImageFiles = ''
                 for channel in channelsID_list:
                     for i in range(len(filesInDir)):
                         currentFile = os.path.join(currentSubjectDir, filesInDir[i])
                         if channel in filesInDir[i]:
-                            outputToWrite += currentFile + ','            
+                            allImageFiles += currentFile + ','            
                         elif labelID in filesInDir[i]:
-                            outputToWrite += currentFile + ','
-                        outputToWrite = outputToWrite[:-1]
-                outputToWrite = outputToWrite + '\n'
+                            maskFile = currentFile 
+                outputToWrite = allImageFiles + maskFile + '\n'
 
     file = open(outputFile, 'w')
     file.write(outputToWrite)
