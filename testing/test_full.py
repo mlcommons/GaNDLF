@@ -67,8 +67,6 @@ def test_constructTrainingCSV():
 
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
-
-  # inputDir = os.path.normpath('./testing/data')
   application_data = '2d_rad_segmentation'
   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml')
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
@@ -81,8 +79,6 @@ def test_train_segmentation_rad_2d():
 
 def test_train_segmentation_rad_3d():
   print('Starting 3D Rad segmentation tests')
-  
-  # inputDir = os.path.normpath('./testing/data')
   application_data = '3d_rad_segmentation'
   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml')
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
