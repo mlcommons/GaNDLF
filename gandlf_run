@@ -27,9 +27,9 @@ def main():
     parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=True)
     parser.add_argument('-modelDir', type=str, help = 'The pre-trained model directory that is used for inference, needs to contain the configuration', required=False)
     parser.add_argument('-device', default='cuda', type=str, help = 'Device to perform requested session on \'cpu\' or \'cuda\'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set', required=True) 
-
-    #parser.add_argument('-v', '--version', action='version', 
-    #version = format(parser.prog) + ' v' + pkg_resources.require('deep_seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
+    
+    parser.add_argument('-v', '--version', action='version', 
+    version = format(parser.prog) + ' v' + pkg_resources.require(parser.prog)[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
                                 
     args = parser.parse_args()
 
