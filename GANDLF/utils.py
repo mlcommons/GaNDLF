@@ -278,7 +278,8 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
                 allImageFiles = ''
                 for channel in channelsID_list:
                     for i in range(len(filesInDir)):
-                        currentFile = os.path.join(currentSubjectDir, filesInDir[i])
+                        currentFile = os.path.abspath(os.path.join(currentSubjectDir, filesInDir[i]))
+                        currentFile = currentFile.replace('\\', '/')
                         if channel in filesInDir[i]:
                             allImageFiles += currentFile + ','            
                         elif labelID in filesInDir[i]:
