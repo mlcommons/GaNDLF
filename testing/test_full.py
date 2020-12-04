@@ -4,6 +4,7 @@ from pathlib import Path
 import requests, zipfile, io, os
 
 from GANDLF.utils import writeTrainingCSV
+from GANDLF.parseConfig import parseConfig
 
 '''
 steps to follow to write tests:
@@ -48,7 +49,9 @@ def test_constructTrainingCSV():
     writeTrainingCSV(currentApplicationDir, channelsID, labelID, inputDir + '/train_' + application_data + '.csv')
 
 
-def test_full():
+def test_segmentation_rad_2d():
+  inputDir = os.path.normpath('./testing/data')
+  parameters = parseConfig(inputDir + '/2d_rad_segmentation/sample_training.yaml')
   test = 1
   # print('started 2d segmentation')
   # print('passed')
