@@ -1,4 +1,5 @@
 # using conda with Azure DevOps: https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/anaconda?view=azure-devops&tabs=ubuntu-16-04
+# not using strategy matrix because conda needs to be initialized differently for all operating systems
 
 trigger:
 - main
@@ -12,29 +13,21 @@ jobs:
         displayName: Add conda to PATH
     
       - template: .azure-pipelines/steps.yml
-      # - script: |
-      #     conda create -p ./venv python=3.6.5 -y
-      #     source activate ./venv
-      #     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
-      #     conda install -c sdvillal openslide -y 
-      #     pip install -e .
-      #   displayName: 'Install dependencies'
   
-  # - job: macOS
-  #   pool:
-  #     vmImage: macOS-latest
-  #   steps:
-  #     - bash: echo "##vso[task.prependpath]$CONDA/bin"
-  #       displayName: Add conda to PATH
+  - job: linux
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+    
+      - template: .azure-pipelines/steps.yml
 
-  # - job: linux
-  #   pool:
-  #     vmImage: ubuntu-latest
-  #   steps:
-  #     - bash: echo "##vso[task.prependpath]$CONDA/bin"
-  #       displayName: Add conda to PATH
-
-
-# - script: |
-#     pytest
-#   displayName: 'Run tests'
+  - job: macOS
+    pool:
+      vmImage: macOS-latest
+    steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+    
+      - template: .azure-pipelines/steps.yml
