@@ -10,14 +10,15 @@ jobs:
     steps:
       - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
         displayName: Add conda to PATH
-
-      - script: |
-          conda create -p ./venv python=3.6.5 -y
-          source activate ./venv
-          conda install requests pytorch torchvision cudatoolkit=10.2 -c pytorch -y
-          conda install -c sdvillal openslide 
-          pip install -e .
-        displayName: 'Install dependencies'
+    
+      - template: .azure-pipelines/steps.yml
+      # - script: |
+      #     conda create -p ./venv python=3.6.5 -y
+      #     source activate ./venv
+      #     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
+      #     conda install -c sdvillal openslide -y 
+      #     pip install -e .
+      #   displayName: 'Install dependencies'
   
   # - job: macOS
   #   pool:
