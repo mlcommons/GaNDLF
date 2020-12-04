@@ -147,7 +147,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             pred_output = 0 # this is used for regression
             for patches_batch in patch_loader:
                 image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
-                valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
+                if len(value_keys) > 0:
+                    valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
                 locations = patches_batch[torchio.LOCATION]
                 image = image.float().to(device)
                 ## special case for 2D            
@@ -165,7 +166,6 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 else: # for regression/classification, get the predicted output and add it together to average later on
                     pred_output += model(image)
                 
-                print ('Segmentation status utils:', is_segmentation)
                 if is_segmentation: # aggregate the predicted mask
                     aggregator.add_batch(pred_mask, locations)
             
@@ -213,12 +213,13 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
                         os.mkdir(os.path.join(outputDir,"generated_masks"))
                     sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
-                else:
+                elif len(value_keys) > 0:
                     outputToWrite += patient_name + ',' + str(pred_output * scaling_factor) + '\n'
         
-        file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
-        file.write(outputToWrite)
-        file.close()
+        if len(value_keys) > 0:
+            file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
+            file.write(outputToWrite)
+            file.close()
 
         if (subject['label'] != "NA"):
             avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
