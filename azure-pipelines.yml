@@ -37,9 +37,11 @@ steps:
   displayName: 'Use Python $(python.version)'
 
 - script: |
-    python -m pip install --upgrade pip
-    pip install torch torchvision requests # we don't care about gpu installation as all tests are going to happen on cpu
-    pip install .
+    conda create -p ./venv python=3.6.5 -y
+    conda activate ./venv
+    conda install requests pytorch torchvision cudatoolkit=10.2 -c pytorch -y
+    conda install -c sdvillal openslide 
+    pip install -e .
   displayName: 'Install dependencies'
 
 # - script: |
