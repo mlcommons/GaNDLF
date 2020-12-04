@@ -6,6 +6,9 @@ import requests, zipfile, io, os
 from GANDLF.utils import writeTrainingCSV
 from GANDLF.parseConfig import parseConfig
 
+all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
+all_models_regression = [] # populate once it becomes available
+
 '''
 steps to follow to write tests:
 [x] download sample data
