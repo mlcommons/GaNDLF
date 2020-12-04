@@ -38,7 +38,7 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install torch torchvision # we don't care about gpu installation as all tests are going to happen on cpu
+    pip install torch torchvision requests # we don't care about gpu installation as all tests are going to happen on cpu
     pip install .
   displayName: 'Install dependencies'
 
