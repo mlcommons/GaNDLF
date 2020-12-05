@@ -97,7 +97,7 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         if not checkPatchDivisibility(psize, divisibilityCheck_denom_patch):
             sys.exit('The \'patch_size\' should be divisible by \'' + str(divisibilityCheck_denom_patch) + '\' for the \'' + which_model + '\' architecture')
     if divisibilityCheck_baseFilter:
-        if not checkPatchDivisibility(base_filters, divisibilityCheck_denom_baseFilter):
+        if base_filters % divisibilityCheck_denom_baseFilter != 0:
             sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
     
     return model
