@@ -9,7 +9,8 @@ from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager 
 
 ## global defines
-all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
+# all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
+all_models_segmentation = ['unet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 all_models_regression = [] # populate once it becomes available
 
 inputDir = os.path.abspath(os.path.normpath('./testing/data'))
