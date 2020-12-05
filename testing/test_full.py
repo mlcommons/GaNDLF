@@ -21,7 +21,7 @@ Path(outputDir).mkdir(parents=True, exist_ok=True)
 steps to follow to write tests:
 [x] download sample data
 [x] construct the training csv
-[ ] for each dir (application type) and sub-dir (image dimension), run training for a single epoch on cpu
+[x] for each dir (application type) and sub-dir (image dimension), run training for a single epoch on cpu
   [x] separate tests for 2D and 3D segmentation
   [x] read default parameters from yaml config
   [x] for each type, iterate through all available segmentation model archs
