@@ -16,3 +16,4 @@ __pycache__
 debug.log
 vips/*
 testing/data/*
+testing/data_output/*
