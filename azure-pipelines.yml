@@ -1,47 +1,34 @@
-# Python package
-# Create and test a Python package on multiple Python versions.
-# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+# using conda with Azure DevOps: https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/anaconda?view=azure-devops&tabs=ubuntu-16-04
+# not using strategy matrix because conda needs to be initialized differently for all operating systems
 
 trigger:
 - main
 
-strategy:
-  matrix:
-    linux_3.6:
-      imageName: 'ubuntu-latest'
-      python.version: '3.6'
-    linux_3.7:
-      imageName: 'ubuntu-latest'
-      python.version: '3.7'
-    mac_3.6:
-      imageName: 'macos-latest'
-      python.version: '3.6'
-    mac_3.7:
-      imageName: 'macos-latest'
-      python.version: '3.7'
-    windows_3.6:
-      imageName: 'windows-latest'
-      python.version: '3.6'
-    windows_3.7:
-      imageName: 'windows-latest'
-      python.version: '3.7'
+jobs:
+  # - job: windows
+  ## this is weird "Failed to build pickle5" coming up during dependency installation
+  #   pool:
+  #     vmImage: windows-latest
+  #   steps:
+  #     - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+  #       displayName: Add conda to PATH
+    
+  #     - template: .azure-pipelines/steps.yml
+  
+  - job: linux
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+    
+      - template: .azure-pipelines/steps.yml
 
-pool:
-  vmImage: $(imageName)
-
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
-
-- script: |
-    python -m pip install --upgrade pip
-    pip install torch torchvision # we don't care about gpu installation as all tests are going to happen on cpu
-    pip install .
-  displayName: 'Install dependencies'
-
-# - script: |
-#     pytest
-#   displayName: 'Run tests'
+  - job: macOS
+    pool:
+      vmImage: macOS-latest
+    steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+    
+      - template: .azure-pipelines/steps.yml
