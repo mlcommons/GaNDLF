@@ -168,6 +168,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 else:
                     command = command + currentTestingDataPickle
                 
+                print('Submitting job for testing split ' + str(currentTestingFold) + ' and validation split ' + str(currentValidationFold))
                 subprocess.Popen(command, shell=True).wait()
 
             if singleFoldValidation:
