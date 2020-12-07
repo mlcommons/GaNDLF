@@ -11,7 +11,7 @@ from GANDLF.inference_manager import InferenceManager
 ## global defines
 # all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 all_models_segmentation = ['unet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
-all_models_regression = [] # populate once it becomes available
+# all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
 
 inputDir = os.path.abspath(os.path.normpath('./testing/data'))
 outputDir = os.path.abspath(os.path.normpath('./testing/data_output'))
@@ -88,3 +88,12 @@ def test_train_segmentation_rad_3d():
     TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu')
 
   print('passed')
+
+# def test_regression_rad_2d():
+#   application_data = '2d_rad_segmentation'
+#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml')
+#   # training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
+#   for model in all_models_regression:
+#     parameters['model']['architecture'] = model 
+#     # currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
+#     # TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu')
