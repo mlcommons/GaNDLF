@@ -97,6 +97,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             print('!!! Testing data is empty, which will result in scientifically incorrect results; use at your own risk !!!')
             print('!!! WARNING !!!')
             current_training_subject_indeces_full = subjectIDs_full
+            currentTestingDataPickle = 'None'
         else:
             currentTrainingAndValidationDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
             currentTestingDataPickle = os.path.join(currentOutputFolder, 'testing.pkl')
@@ -161,12 +162,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                     ' -val_loader_pickle ' + currentValidationDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
                     ' -headers_pickle ' + headersPickle + \
-                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -testing_loader_pickle '
-                
-                if noTestingData:
-                    command = command + 'None'
-                else:
-                    command = command + currentTestingDataPickle
+                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -testing_loader_pickle ' + currentTestingDataPickle
                 
                 print('Submitting job for testing split ' + str(currentTestingFold) + ' and validation split ' + str(currentValidationFold))
                 subprocess.Popen(command, shell=True).wait()
