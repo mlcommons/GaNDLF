@@ -161,7 +161,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                     ' -val_loader_pickle ' + currentValidationDataPickle + \
                     ' -parameter_pickle ' + currentModelConfigPickle + \
                     ' -headers_pickle ' + headersPickle + \
-                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -testing_loader_pickle ' + currentTestingDataPickle
+                    ' -device ' + str(device) + ' -outputDir ' + currentValOutputFolder + ' -testing_loader_pickle '
                 
                 if noTestingData:
                     command = command + 'None'
