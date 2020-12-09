@@ -413,7 +413,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         
         sys.stdout.flush()
         log_train = open(log_train_file, "a")
-        #log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
+        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
         total_train_dice = 0
         total_train_loss = 0
