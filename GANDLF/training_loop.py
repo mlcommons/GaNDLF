@@ -223,7 +223,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     valuesToPredict = valuesToPredict.to(device)
             
             # read the mask
-            if subject['label'] == ['NA']:
+            first = next(iter(subject['label']))
+            if first == 'NA':
                 mask_present = False
             else:
                 mask_present = True
