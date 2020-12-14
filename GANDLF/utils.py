@@ -177,7 +177,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 pred_output = pred_output / len(locations) # average the predicted output across patches
                 pred_output = pred_output.cpu()
                 #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
-                loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double())
+                loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
 
             if not subject['label'] == ["NA"]:
