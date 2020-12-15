@@ -22,8 +22,8 @@ class uinc(ModelBase):
     not the initial input but the input after the first convolution is addded to the final output
     since the initial input and the final one do not have the same dimensions.
     """
-    def __init__(self, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(uinc, self).__init__(n_channels, n_classes, base_filters, final_convolution_layer)
+    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
+        super(uinc, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
         self.conv0_1x1 = IncConv(n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm)
         self.rn_0 = ResNetModule(base_filters, base_filters, self.Conv, self.Dropout, self.InstanceNorm, res=True)
         self.ri_0 = InceptionModule(base_filters, base_filters, self.Conv, self.Dropout, self.InstanceNorm, res=True)

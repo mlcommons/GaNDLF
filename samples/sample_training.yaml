@@ -10,7 +10,7 @@ model:
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 64, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
     architecture: resunet, # options: unet, resunet, fcn, uinc
-    final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
+    final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
@@ -29,7 +29,7 @@ patience: 50
 batch_size: 1
 
 # Set the initial learning rate
-learning_rate: 0.01
+learning_rate: 0.001
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
 scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
@@ -107,7 +107,7 @@ data_augmentation:
 # that your HPC would expect
 # ${outputDir} will be changed to the outputDir you pass in CLI + '/${fold_number}'
 # ensure that the correct location of the virtual environment is getting invoked, otherwise it would pick up the system python, which might not have all dependencies
-parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/$JOB_ID.stdout -e ${outputDir}/$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
+parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/\$JOB_ID.stdout -e ${outputDir}/\$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
 ## queue configuration - https://torchio.readthedocs.io/data/patch_training.html?#queue
 # this determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches
 q_max_length: 40
