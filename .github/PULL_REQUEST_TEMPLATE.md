@@ -16,7 +16,5 @@ but PRs are more likely to be merged quickly if all the tasks are done. -->
 - [ ] Function/class source code documentation added/updated
 - [ ] [Usage documentation](https://github.com/FETS-AI/GANDLF/blob/master/docs) has been updated, if appropriate
 - [ ] [History](https://github.com/FETS-AI/GANDLF/blob/master/HISTORY.md) has been updated, if appropriate
-<!-- hopefully these will get enabled soon once we add unit testing
 - [ ] Tests added or modified to cover the changes
 - [ ] Integration tests passed locally by running `pytest`
--->

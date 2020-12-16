@@ -11,7 +11,7 @@ import SimpleITK as sitk
 from GANDLF.utils import resize_image
 from GANDLF.preprocessing import *
 
-import copy
+import copy, sys
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
