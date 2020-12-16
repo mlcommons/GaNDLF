@@ -28,7 +28,9 @@ requirements = [
   'matplotlib',
   'requests==2.25.0',
   'pyvips',
-  'torchviz'
+  'torchviz',
+  'pytest',
+  'pytest-azurepipelines'
 ]
 
 setup(

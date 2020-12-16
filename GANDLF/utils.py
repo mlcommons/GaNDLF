@@ -1,15 +1,17 @@
-import os
+import os, sys
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
+import pandas as pd
 import SimpleITK as sitk
 import torch
 import torch.nn as nn
 import torchio
 from GANDLF.losses import *
-import sys
-import os
 
 def one_hot(segmask_array, class_list):
+    '''
+    This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
+    '''
     batch_size = segmask_array.shape[0]
     batch_stack = []
     for b in range(batch_size):
@@ -38,6 +40,9 @@ def checkPatchDivisibility(patch_size, number = 16):
     return True
 
 def reverse_one_hot(predmask_array,class_list):
+    '''
+    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
+    '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
     for idx, class_ in enumerate(class_list):
@@ -88,7 +93,6 @@ def send_model_to_device(model, ampInput, device, optimizer):
         print("Since Device is CPU, Mixed Precision Training is set to False")
 
     return model, amp, device
-
 
 def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     '''
@@ -143,7 +147,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             pred_output = 0 # this is used for regression
             for patches_batch in patch_loader:
                 image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
-                valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
+                if len(value_keys) > 0:
+                    valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
                 locations = patches_batch[torchio.LOCATION]
                 image = image.float().to(device)
                 ## special case for 2D            
@@ -161,7 +166,6 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 else: # for regression/classification, get the predicted output and add it together to average later on
                     pred_output += model(image)
                 
-                print ('Segmentation status utils:', is_segmentation)
                 if is_segmentation: # aggregate the predicted mask
                     aggregator.add_batch(pred_mask, locations)
             
@@ -173,7 +177,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 pred_output = pred_output / len(locations) # average the predicted output across patches
                 pred_output = pred_output.cpu()
                 #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
-                loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double())
+                loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
 
             if not subject['label'] == ["NA"]:
@@ -209,12 +213,13 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
                         os.mkdir(os.path.join(outputDir,"generated_masks"))
                     sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
-                else:
+                elif len(value_keys) > 0:
                     outputToWrite += patient_name + ',' + str(pred_output * scaling_factor) + '\n'
         
-        file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
-        file.write(outputToWrite)
-        file.close()
+        if len(value_keys) > 0:
+            file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
+            file.write(outputToWrite)
+            file.close()
 
         if (subject['label'] != "NA"):
             avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
@@ -250,3 +255,74 @@ def find_problem_type(headersFromCSV, model_final_layer):
         is_segmentation = True
     
     return is_regression, is_classification, is_segmentation
+
+def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
+    '''
+    This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    '''
+    channelsID_list = channelsID.split(',') # split into list
+    
+    outputToWrite = 'SubjectID,'
+    for i in range(len(channelsID_list)):
+        outputToWrite = outputToWrite + 'Channel_' + str(i) + ','
+    outputToWrite = outputToWrite + 'Label'
+    outputToWrite = outputToWrite + '\n'
+    
+    # iterate over all subject directories
+    for dirs in os.listdir(inputDir):
+        currentSubjectDir = os.path.join(inputDir, dirs)
+        if os.path.isdir(currentSubjectDir):
+            outputToWrite = outputToWrite + dirs + ','
+            if os.path.isdir(currentSubjectDir): # only consider folders
+                filesInDir = os.listdir(currentSubjectDir) # get all files in each directory
+                maskFile = ''
+                allImageFiles = ''
+                for channel in channelsID_list:
+                    for i in range(len(filesInDir)):
+                        currentFile = os.path.abspath(os.path.join(currentSubjectDir, filesInDir[i]))
+                        currentFile = currentFile.replace('\\', '/')
+                        if channel in filesInDir[i]:
+                            allImageFiles += currentFile + ','            
+                        elif labelID in filesInDir[i]:
+                            maskFile = currentFile 
+                outputToWrite += allImageFiles + maskFile + '\n'
+
+    file = open(outputFile, 'w')
+    file.write(outputToWrite)
+    file.close()
+
+def parseTrainingCSV(inputTrainingCSVFile):
+    '''
+    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    '''
+    ## read training dataset into data frame
+    data_full = pd.read_csv(inputTrainingCSVFile)
+    # shuffle the data - this is a useful level of randomization for the training process
+    data_full=data_full.sample(frac=1).reset_index(drop=True)
+
+    # find actual header locations for input channel and label
+    # the user might put the label first and the channels afterwards 
+    # or might do it completely randomly
+    headers = {}
+    headers['channelHeaders'] = []
+    headers['predictionHeaders'] = []
+    headers['labelHeader'] = None
+    headers['subjectIDHeader'] = None
+
+    for col in data_full.columns: 
+        # add appropriate headers to read here, as needed
+        col_lower = col.lower()
+        currentHeaderLoc = data_full.columns.get_loc(col)
+        if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
+            headers['channelHeaders'].append(currentHeaderLoc)
+        elif ('valuetopredict' in col_lower):
+            headers['predictionHeaders'].append(currentHeaderLoc)
+        elif ('subject' in col_lower) or ('patient' in col_lower):
+            headers['subjectIDHeader'] = currentHeaderLoc
+        elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower) or ('ground_truth' in col_lower) or ('groundtruth' in col_lower):
+            if (headers['labelHeader'] == None):
+                headers['labelHeader'] = currentHeaderLoc
+            else:
+                print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
+    
+    return data_full, headers
