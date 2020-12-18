@@ -14,7 +14,7 @@ requirements = [
   'torch>=1.6',
   'torchvision',
   'tqdm',
-  'torchio==0.17.53',
+  'torchio==0.18.10',
   'pandas',
   'pylint',
   'torchsummary',
