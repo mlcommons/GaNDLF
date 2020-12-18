@@ -1,5 +1,6 @@
 import torch 
 from torch.nn import MSELoss
+import math
 
 
 # Dice scores and dice losses   
@@ -23,7 +24,10 @@ def MCD(pm, gt, num_class, weights = None):
     return acc_dice
 
 def MCD_loss(pm, gt, num_class, weights = None): 
-    return 1 - MCD(pm, gt, num_class, weights) # should this be "-log" for better visualization?
+    return 1 - MCD(pm, gt, num_class, weights) 
+
+def MCD_log_loss(pm, gt, num_class, weights = None): 
+    return -math.log(MCD(pm, gt, num_class, weights))
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
