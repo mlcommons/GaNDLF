@@ -32,16 +32,16 @@ def spatial_transform(patch_size = None, p=1):
     return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
 
 def bias(patch_size = None, p=1):
-    return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
+    return RandomBiasField(coefficients=0.5, order=3, p=p)
 
 def blur(patch_size = None, p=1):
-    return RandomBlur(std=(0., 4.), p=p, seed=None)
+    return RandomBlur(std=(0., 4.), p=p)
 
 def noise(patch_size = None, p=1):
-    return RandomNoise(mean=0, std=(0, 0.25), p=p, seed=None)
+    return RandomNoise(mean=0, std=(0, 0.25), p=p)
 
 def swap(patch_size = 15, p=1):
-    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p, seed=None)
+    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p)
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
