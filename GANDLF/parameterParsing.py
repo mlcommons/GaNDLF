@@ -115,6 +115,8 @@ def get_loss(which_loss):
         MSE_requested = False
         if which_loss == 'dc':
             loss_fn = MCD_loss
+        elif which_loss == 'dc_log':
+            loss_fn = MCD_log_loss
         elif which_loss == 'dcce':
             loss_fn = DCCE
         elif which_loss == 'ce':
