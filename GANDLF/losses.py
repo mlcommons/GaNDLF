@@ -1,5 +1,6 @@
 import torch 
 from torch.nn import MSELoss
+import math
 
 
 # Dice scores and dice losses   
@@ -11,19 +12,22 @@ def dice(inp, target):
     return ((2. * intersection + smooth) /
                 (iflat.sum() + tflat.sum() + smooth)) # 2 * intersection / union
 
-def MCD_loss(pm, gt, num_class, weights = None): 
-    acc_dice_loss = 0
+def MCD(pm, gt, num_class, weights = None): 
+    acc_dice = 0
     for i in range(1, num_class): # 0 is background
-        currentDiceLoss = 1 - dice(gt[:,i,:,:,:], pm[:,i,:,:,:]) # subtract from 1 because this is a loss
+        currentDiceLoss = dice(gt[:,i,:,:,:], pm[:,i,:,:,:]) # subtract from 1 because this is a loss
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         
-        acc_dice_loss += currentDiceLoss
-    acc_dice_loss /= (num_class-1) # we should not be considering 0
-    return acc_dice_loss
+        acc_dice += currentDiceLoss
+    acc_dice /= (num_class-1) # we should not be considering 0
+    return acc_dice
 
-def MCD(pm, gt, num_class):
-    return  1 - MCD_loss(pm, gt, num_class)
+def MCD_loss(pm, gt, num_class, weights = None): 
+    return 1 - MCD(pm, gt, num_class, weights) 
+
+def MCD_log_loss(pm, gt, num_class, weights = None): 
+    return -math.log(MCD(pm, gt, num_class, weights))
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
