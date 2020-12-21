@@ -23,7 +23,7 @@ def MCD_loss(pm, gt, num_class, weights = None):
     return acc_dice_loss
 
 def MCD(pm, gt, num_class):
-    return  1 - MCD_loss(pm, gt, num_class)
+    return  1 - MCD_loss(pm, gt, num_class, weights = None)
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
