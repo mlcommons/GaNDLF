@@ -27,7 +27,7 @@ def MCD_loss(pm, gt, num_class, weights = None):
     return 1 - MCD(pm, gt, num_class, weights) 
 
 def MCD_log_loss(pm, gt, num_class, weights = None): 
-    return -math.log(MCD(pm, gt, num_class, weights))
+    return -torch.log(MCD(pm, gt, num_class, weights))
 
 def CE(out,target):
     oflat = out.contiguous().view(-1)
