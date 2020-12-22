@@ -155,7 +155,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
         # padding image, but only for label sampler, because we don't want to pad for uniform
         if 'label' in sampler:
-            padder = Pad(psize, padding_mode = 'symmetric')
+            psize_pad = list(np.round(np.divide(psize,2)))
+            padder = Pad(psize_pad, padding_mode = 'symmetric')
             subject = padder(subject)
 
         # Appending this subject to the list of subjects
