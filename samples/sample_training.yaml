@@ -100,7 +100,7 @@ data_augmentation:
     'noise',
     'swap',
     'flip':{
-      'axes_to_flip': [0,1,2]
+      'axes_to_flip': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
     }
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
