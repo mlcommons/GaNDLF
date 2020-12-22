@@ -192,7 +192,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     if augmentation_list:
       transform = Compose(augmentation_list)
     else:
-      transoform = None
+      transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
 
     if not train:
