@@ -143,13 +143,10 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
-
-            if not train:
-                subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
+            subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
             subject_dict['label'] = "NA"
-            if not train:
-                subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
+            subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
         
         # iterating through the values to predict of the subject
         valueCounter = 0
