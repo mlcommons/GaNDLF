@@ -5,7 +5,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
                                 RandomNoise, RandomSwap, ZNormalization,
-                                Resample, Compose, Lambda)
+                                Resample, Compose, Lambda, Pad)
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
@@ -91,6 +91,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
     predictionHeaders = headers['predictionHeaders']
+    
+    sampler = sampler.lower() # for easier parsing
 
     # define the control points and swap axes for augmentation
     augmentation_patchAxesPoints = copy.deepcopy(psize)
@@ -150,6 +152,12 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         
         # Initializing the subject object using the dict
         subject = Subject(subject_dict)
+
+        # padding image, but only for label sampler, because we don't want to pad for uniform
+        if 'label' in sampler:
+            padder = Pad(psize, padding_mode = 'symmetric')
+            subject = padder(subject)
+
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
 
@@ -189,7 +197,6 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     if not train:
         return subjects_dataset
 
-    sampler = sampler.lower() # for easier parsing
     sampler = global_sampler_dict[sampler](psize)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
