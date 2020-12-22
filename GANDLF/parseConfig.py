@@ -139,6 +139,12 @@ def parseConfig(config_file_path, version_check = True):
               params['data_augmentation']['affine'] = {}
               params['data_augmentation']['elastic'] = {}
               del params['data_augmentation']['spatial']
+
+      if 'swap' in params['data_augmentation']:
+          if not(isinstance(params['data_augmentation']['swap'], dict)):
+              params['data_augmentation']['swap'] = {}
+          if not('patch_size' in params['data_augmentation']['swap']):
+              params['data_augmentation']['swap']['patch_size'] = 15 # default
       
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
