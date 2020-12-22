@@ -80,7 +80,7 @@ def test_train_segmentation_rad_2d():
 def test_train_segmentation_rad_3d():
   print('Starting 3D Rad segmentation tests')
   application_data = '3d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml')
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml', version_check = False)
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
