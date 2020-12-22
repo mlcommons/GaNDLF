@@ -138,6 +138,7 @@ def parseConfig(config_file_path, version_check = True):
               print('WARNING: \'spatial\' is now deprecated in favor of split \'affine\' and/or \'elastic\'', file = sys.stderr)
               params['data_augmentation']['affine'] = {}
               params['data_augmentation']['elastic'] = {}
+              del params['data_augmentation']['spatial']
       
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
