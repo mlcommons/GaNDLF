@@ -132,6 +132,13 @@ def parseConfig(config_file_path, version_check = True):
   params = initialize_key(params, 'data_augmentation')
   if not(params['data_augmentation'] == None):
     if len(params['data_augmentation']) > 0: # only when augmentations are defined
+      
+      if 'spatial' in params['data_augmentation']:
+          if not('affine' in params['data_augmentation']) or not('elastic' in params['data_augmentation']):
+              print('WARNING: \'spatial\' is now deprecated in favor of split \'affine\' and/or \'elastic\'', file = sys.stderr)
+              params['data_augmentation']['affine'] = {}
+              params['data_augmentation']['elastic'] = {}
+      
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
               if not isinstance(params['data_augmentation'][key], dict):
