@@ -98,7 +98,10 @@ data_augmentation:
     'bias',
     'blur',
     'noise',
-    'swap'
+    'swap',
+    'flip':{
+      'axes_to_flip': [0,1,2]
+    }
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
