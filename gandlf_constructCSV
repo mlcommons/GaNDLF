@@ -7,6 +7,7 @@ import argparse
 import subprocess
 from pathlib import Path
 from datetime import date
+from GANDLF.utils import writeTrainingCSV
 
 def main():
   copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
@@ -21,46 +22,8 @@ def main():
 
   inputDir = os.path.normpath(args.inputDir)
   outputFile = os.path.normpath(args.outputFile)
-  channelsID = args.channelsID
-  channelsID = channelsID.split(',')
-  labelID = args.labelID
-  
-  outputToWrite = ''
-  for i in range(len(channelsID)):
-    outputToWrite = outputToWrite + 'Channel_' + str(i) + ','
-  outputToWrite = outputToWrite + 'Label'
-  outputToWrite = outputToWrite + '\n'
 
-  # iterate over all subject directories
-  for dirs in os.listdir(inputDir):
-    
-    currentSubjectDir = os.path.join(inputDir, dirs)
-
-    if os.path.isdir(currentSubjectDir): # only consider folders
-
-      filesInDir = os.listdir(currentSubjectDir) # get all files in each directory
-
-      for channel in channelsID:
-
-        for i in range(len(filesInDir)):
-
-          currentFile = os.path.join(currentSubjectDir, filesInDir[i])
-
-          if channel in filesInDir[i]:
-
-            outputToWrite = outputToWrite + currentFile + ','
-          
-          elif labelID in filesInDir[i]:
-            currentMaskFile = currentFile
-          
-      outputToWrite = outputToWrite + currentMaskFile  
-      outputToWrite = outputToWrite + '\n'
-
-  file = open(outputFile, 'w')
-  file.write(outputToWrite)
-  file.close()
-      
-
+  writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
 
 # main function
 if __name__ == '__main__':

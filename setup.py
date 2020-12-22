@@ -14,7 +14,7 @@ requirements = [
   'torch>=1.6',
   'torchvision',
   'tqdm',
-  'torchio==0.17.53',
+  'torchio==0.18.10',
   'pandas',
   'pylint',
   'torchsummary',
@@ -26,12 +26,16 @@ requirements = [
   'openslide-python',
   'scikit-image',
   'matplotlib',
-  'pyvips'
+  'requests==2.25.0',
+  'pyvips',
+  'torchviz',
+  'pytest',
+  'pytest-azurepipelines'
 ]
 
 setup(
   name='GANDLF',
-  version='0.0.6.NR', # NR: non-release; this should be changed when tagging\
+  version='0.0.6', # NR: non-release; this should be changed when tagging\
   author="Megh Bhalerao, Caleb Grenko, Siddhesh Thakur, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',

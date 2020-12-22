@@ -11,7 +11,7 @@ import SimpleITK as sitk
 from GANDLF.utils import resize_image
 from GANDLF.preprocessing import *
 
-import copy
+import copy, sys
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
@@ -32,16 +32,16 @@ def spatial_transform(patch_size = None, p=1):
     return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
 
 def bias(patch_size = None, p=1):
-    return RandomBiasField(coefficients=0.5, order=3, p=p, seed=None)
+    return RandomBiasField(coefficients=0.5, order=3, p=p)
 
 def blur(patch_size = None, p=1):
-    return RandomBlur(std=(0., 4.), p=p, seed=None)
+    return RandomBlur(std=(0., 4.), p=p)
 
 def noise(patch_size = None, p=1):
-    return RandomNoise(mean=0, std=(0, 0.25), p=p, seed=None)
+    return RandomNoise(mean=0, std=(0, 0.25), p=p)
 
 def swap(patch_size = 15, p=1):
-    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p, seed=None)
+    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p)
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
@@ -180,9 +180,11 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         for aug in augmentations:
             actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             augmentation_list.append(actual_function)
-
-    transform = Compose(augmentation_list)
-
+    print(augmentation_list)
+    if augmentation_list:
+        transform = Compose(augmentation_list)
+    else:
+        transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
 
     if not train:
