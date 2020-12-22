@@ -134,7 +134,8 @@ def parseConfig(config_file_path, version_check = True):
     if len(params['data_augmentation']) > 0: # only when augmentations are defined
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
-              params['data_augmentation'][key] = {}
+              if not isinstance(params['data_augmentation'][key], dict):
+                params['data_augmentation'][key] = {}
               params['data_augmentation'][key]['probability'] = 1
 
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
