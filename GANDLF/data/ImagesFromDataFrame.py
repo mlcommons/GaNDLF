@@ -16,10 +16,10 @@ import copy, sys
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
 # define individual functions/lambdas for augmentations to handle properties
-def mri_artifact(patch_size = None, p = 1):
+def mri_artifact(p = 1):
     return OneOf({RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=p)
 
-def affine(patch_size = None, p = 1):
+def affine(p = 1):
     return RandomAffine(p=p)
 
 def elastic(patch_size = None, p = 1):
@@ -34,31 +34,19 @@ def elastic(patch_size = None, p = 1):
         max_displacement = 7.5
     return RandomElasticDeformation(max_displacement = max_displacement, p = p)
 
-def spatial_transform(patch_size = None, p=1):
-    if patch_size is not None:
-        num_controls = patch_size
-        max_displacement = np.divide(patch_size, 10)
-        if patch_size[-1] == 1:
-            max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
-    else:
-        # use defaults defined in torchio
-        num_controls = 7 
-        max_displacement = 7.5
-    return OneOf({RandomAffine(): 0.8, RandomElasticDeformation(max_displacement = max_displacement): 0.2}, p=p)
-
-def bias(patch_size = None, p=1):
-    return RandomBiasField(coefficients=0.5, order=3, p=p)
-
-def blur(patch_size = None, p=1):
-    return RandomBlur(std=(0., 4.), p=p)
-
-def noise(patch_size = None, p=1):
-    return RandomNoise(mean=0, std=(0, 0.25), p=p)
-
 def swap(patch_size = 15, p=1):
     return RandomSwap(patch_size=patch_size, num_iterations=100, p=p)
 
-def flip(patch_size = None, axes = 0, p=1):
+def bias(p=1):
+    return RandomBiasField(coefficients=0.5, order=3, p=p)
+
+def blur(p=1):
+    return RandomBlur(std=(0., 4.), p=p)
+
+def noise(p=1):
+    return RandomNoise(mean=0, std=(0, 0.25), p=p)
+
+def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
 
 ## lambdas for pre-processing
@@ -79,7 +67,6 @@ global_preprocessing_dict = {
 global_augs_dict = {
     'affine' : affine,
     'elastic' : elastic,
-    'spatial' : spatial_transform,
     'kspace' : mri_artifact,
     'bias' : bias,
     'blur' : blur,
@@ -214,10 +201,13 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                     axes_to_flip = [0,1,2]
                 else:
                     axes_to_flip = augmentations[aug]['axes_to_flip']
-                actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, axes = axes_to_flip, p=augmentations[aug]['probability'])
-            else:
+                actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
+            elif ('elastic' in aug) or ('swap' in aug):
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
+            else:
+                actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
             augmentation_list.append(actual_function)
+    
     if augmentation_list:
         transform = Compose(augmentation_list)
     else:
