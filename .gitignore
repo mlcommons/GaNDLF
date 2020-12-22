@@ -15,3 +15,6 @@ __pycache__
 *build*
 debug.log
 vips/*
+testing/data/*
+testing/data_output/*
+.coverage

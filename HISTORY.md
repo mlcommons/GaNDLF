@@ -1,6 +1,7 @@
 ## 0.0.6
 
 - Added PyVIPS support
+- SubjectID-based split added
 
 ## 0.0.5
 
