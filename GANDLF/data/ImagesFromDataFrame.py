@@ -219,9 +219,9 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             augmentation_list.append(actual_function)
     if augmentation_list:
-      transform = Compose(augmentation_list)
+        transform = Compose(augmentation_list)
     else:
-      transform = None
+        transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
 
     if not train:
