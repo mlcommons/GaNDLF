@@ -5,7 +5,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
                                 RandomNoise, RandomSwap, ZNormalization,
-                                Resample, Compose, Lambda, Pad)
+                                Resample, Compose, Lambda, RandomFlip, Pad)
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
@@ -43,6 +43,9 @@ def noise(patch_size = None, p=1):
 def swap(patch_size = 15, p=1):
     return RandomSwap(patch_size=patch_size, num_iterations=100, p=p)
 
+def flip(patch_size = None, axes = 0, p=1):
+    return RandomFlip(axes = axes, p = p)
+
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
     return Lambda(lambda x: threshold_intensities(x, min, max))
@@ -64,7 +67,8 @@ global_augs_dict = {
     'bias' : bias,
     'blur' : blur,
     'noise' : noise,
-    'swap': swap
+    'swap': swap,
+    'flip': flip
 }
 
 global_sampler_dict = {
@@ -187,7 +191,15 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     # for the augmentations
     if train and not(augmentations == None):
         for aug in augmentations:
-            actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
+
+            if 'flip' in aug:
+                if not('axes_to_flip' in augmentations[aug]):
+                    axes_to_flip = [0,1,2]
+                else:
+                    axes_to_flip = augmentations[aug]['axes_to_flip']
+                actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, axes = axes_to_flip, p=augmentations[aug]['probability'])
+            else:
+                actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             augmentation_list.append(actual_function)
     if augmentation_list:
       transform = Compose(augmentation_list)
