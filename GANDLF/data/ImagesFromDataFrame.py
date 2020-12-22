@@ -19,6 +19,21 @@ import copy, sys
 def mri_artifact(patch_size = None, p = 1):
     return OneOf({RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=p)
 
+def affine(patch_size = None, p = 1):
+    return RandomAffine(p=p)
+
+def elastic(patch_size = None, p = 1):
+    if patch_size is not None:
+        num_controls = patch_size
+        max_displacement = np.divide(patch_size, 10)
+        if patch_size[-1] == 1:
+            max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
+    else:
+        # use defaults defined in torchio
+        num_controls = 7 
+        max_displacement = 7.5
+    return RandomElasticDeformation(max_displacement = max_displacement, p = p)
+
 def spatial_transform(patch_size = None, p=1):
     if patch_size is not None:
         num_controls = patch_size
@@ -62,6 +77,8 @@ global_preprocessing_dict = {
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object
 global_augs_dict = {
+    'affine' : affine,
+    'elastic' : elastic,
     'spatial' : spatial_transform,
     'kspace' : mri_artifact,
     'bias' : bias,
