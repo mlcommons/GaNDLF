@@ -317,7 +317,7 @@ def parseTrainingCSV(inputTrainingCSVFile):
             headers['channelHeaders'].append(currentHeaderLoc)
         elif ('valuetopredict' in col_lower):
             headers['predictionHeaders'].append(currentHeaderLoc)
-        elif ('subject' in col_lower) or ('patient' in col_lower):
+        elif ('subject' in col_lower) or ('patient' in col_lower) or ('pid' in col_lower):
             headers['subjectIDHeader'] = currentHeaderLoc
         elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower) or ('ground_truth' in col_lower) or ('groundtruth' in col_lower):
             if (headers['labelHeader'] == None):
