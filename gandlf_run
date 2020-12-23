@@ -27,9 +27,9 @@ def main():
     parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=True)
     parser.add_argument('-modelDir', type=str, help = 'The pre-trained model directory that is used for inference, needs to contain the configuration', required=False)
     parser.add_argument('-device', default='cuda', type=str, help = 'Device to perform requested session on \'cpu\' or \'cuda\'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set', required=True) 
-
-    #parser.add_argument('-v', '--version', action='version', 
-    #version = format(parser.prog) + ' v' + pkg_resources.require('deep_seg')[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
+    
+    parser.add_argument('-v', '--version', action='version', 
+    version = format(parser.prog) + ' v' + pkg_resources.require(parser.prog)[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
                                 
     args = parser.parse_args()
 
@@ -39,43 +39,18 @@ def main():
     device = args.device
     model_path = args.output
     mode = args.train
+
     if '-1' in device:
         device = 'cpu'
-        
+  
     if mode == 0: # inference mode
         pretrainedModelPath = args.modelDir
 
     # safe directory creation
     Path(model_path).mkdir(parents=True, exist_ok=True)
 
-    ## read training dataset into data frame
-    data_full = pd.read_csv(file_data_full)
-    # shuffle the data - this is a useful level of randomization for the training process
-    data_full=data_full.sample(frac=1).reset_index(drop=True)
-
-    # find actual header locations for input channel and label
-    # the user might put the label first and the channels afterwards 
-    # or might do it completely randomly
-    headers = {}
-    headers['channelHeaders'] = []
-    headers['predictionHeaders'] = []
-    headers['labelHeader'] = None
-    headers['subjectIDHeader'] = None
-    for col in data_full.columns: 
-        # add appropriate headers to read here, as needed
-        col_lower = col.lower()
-        currentHeaderLoc = data_full.columns.get_loc(col)
-        if ('channel' in col_lower) or ('modality' in col_lower) or ('image' in col_lower):
-            headers['channelHeaders'].append(currentHeaderLoc)
-        elif ('valuetopredict' in col_lower):
-            headers['predictionHeaders'].append(currentHeaderLoc)
-        elif ('subjectid' in col_lower) or ('patientname' in col_lower):
-            headers['subjectIDHeader'] = currentHeaderLoc
-        elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower) or ('ground_truth' in col_lower) or ('groundtruth' in col_lower):
-            if (headers['labelHeader'] == None):
-                headers['labelHeader'] = currentHeaderLoc
-            else:
-                print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
+    # parse training CSV
+    data_full, headers = parseTrainingCSV(file_data_full)
         
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)

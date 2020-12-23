@@ -1,0 +1,12 @@
+steps:
+- script: |
+    conda create -p ./venv python=3.6.5 -y
+    source activate ./venv
+    conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
+    conda install -c sdvillal openslide -y 
+    pip install -e .
+  displayName: 'Install dependencies'
+
+# - script: |
+#     pytest
+#   displayName: 'Run Tests'

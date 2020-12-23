@@ -1,17 +1,5 @@
 # Usage
 
-## Example of CLI
-```powershell
-# continue from previous shell
-python gandlf_run \
-  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
-  -data ./experiment_0/train.csv \ # data in CSV format 
-  -output ./experiment_0/output_dir/ \ # output directory
-  -train 1 \ # 1 == train, 0 == inference
-  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, -1 for CPU
-  # -modelDir /path/to/model/weights # used in inference mode
-```
-
 ## Preparing the Data
 
 It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
@@ -32,8 +20,8 @@ Recommended tool for tackling all aforementioned preprocessing tasks: https://gi
 This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](../samples/sample_train.csv) and needs to be structured with the following header format:
 
 ```csv
-Channel_0,Channel_1,...,Channel_X,Label
-/full/path/0.nii.gz,/full/path/1.nii.gz,...,/full/path/X.nii.gz,/full/path/segmentation.nii.gz
+SubjectID,Channel_0,Channel_1,...,Channel_X,Label
+001,/full/path/0.nii.gz,/full/path/1.nii.gz,...,/full/path/X.nii.gz,/full/path/segmentation.nii.gz
 ```
 
 - `Channel` can be substituted with `Modality` or `Image`
@@ -42,20 +30,59 @@ Channel_0,Channel_1,...,Channel_X,Label
 
 The [gandlf_constructCSV](../gandlf_constructCSV) can be used to make this easier:
 
-```powershell
+```bash
 # continue from previous shell
 python gandlf_constructCSV \
   -inputDir ./experiment_0/output_dir/ # this is the main output directory of training step
   -output ./experiment_0/output_dir_stats/ \ # output directory
 ```
 
-For classification/regression, add a column called `ValueToPredict`. **Note** that currently, we are supporting only a single value prediction per model.
+Notes:
+- For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
+- If `SubjectID` or `PatientName` is present, the randomized split is done according to that instead of per-row. See https://github.com/FETS-AI/GANDLF/issues/285 for details.
+
+## Customize the Training
+
+GANDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
+
+- Model
+  - Architecture
+  - Dimensionality of computations 
+  - Final layer of model
+  - Mixed precision
+  - Class list
+- Various training parameters:
+  - Patch size
+  - Number of epochs and patience parameter
+  - Learning rate
+  - Scheduler 
+  - Loss function
+  - Optimizer
+- Data Augmentation
+- Data preprocessing
+- Nested data splits
+  - Testing 
+  - Validation 
+
+Please see a [sample](../samples/sample_training.yaml) for detailed guide and comments.
+## Running GANDLF (Training/Inference)
+
+```bash
+# continue from previous shell
+python gandlf_run \
+  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -data ./experiment_0/train.csv \ # data in CSV format 
+  -output ./experiment_0/output_dir/ \ # output directory
+  -train 1 \ # 1 == train, 0 == inference
+  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, -1 for CPU
+  # -modelDir /path/to/model/weights # used in inference mode
+```
 
 ## Plot the final results
 
 After the testing/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this:
 
-```powershell
+```bash
 # continue from previous shell
 python gandlf_collectStats \
   -inputDir /path/to/input/data 
@@ -63,10 +90,6 @@ python gandlf_collectStats \
   -labelID _seg.nii.gz # Label/mask identifier string to compare the filenames from inputDir
   -output ./experiment_0/output_dir_stats/ \ # output directory
 ```
-
-## Customize the Training
-
-All details and comments are in the [samples/sample_training.yaml](../samples/sample_training.yaml).
 
 ### Multi-GPU systems
 

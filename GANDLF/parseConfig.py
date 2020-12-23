@@ -27,30 +27,24 @@ def initialize_key(parameters, key):
 
   return parameters
 
-def parseConfig(config_file_path):
+def parseConfig(config_file_path, version_check = True):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
   with open(config_file_path) as f:
     params = yaml.load(f, Loader=yaml.FullLoader)
   
-  if not('version' in params):
-    sys.exit('The \'version\' key needs to be defined in config with \'minimum\' and \'maximum\' fields to determine the compatibility of configuration with code base')
-  else:
-    gandlf_version = pkg_resources.require('GANDLF')[0].version
-    gandlf_version_int = parse_version(gandlf_version)
-    min = parse_version(params['version']['minimum'])
-    max = parse_version(params['version']['maximum'])
-    if (min > gandlf_version_int) or (max < gandlf_version_int):
-      sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
+  if version_check: # this is only to be used for testing
+    if not('version' in params):
+      sys.exit('The \'version\' key needs to be defined in config with \'minimum\' and \'maximum\' fields to determine the compatibility of configuration with code base')
+    else:
+      gandlf_version = pkg_resources.require('GANDLF')[0].version
+      gandlf_version_int = parse_version(gandlf_version)
+      min = parse_version(params['version']['minimum'])
+      max = parse_version(params['version']['maximum'])
+      if (min > gandlf_version_int) or (max < gandlf_version_int):
+        sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
       
-  # require parameters - this should error out if not present
-  if not('class_list' in params):
-    sys.exit('The \'class_list\' parameter needs to be present in the configuration file')
-
-  if not('dimension' in params):
-    sys.exit('The \'dimension\' parameter to be defined, which should be 2 or 3')
-
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
   else:
@@ -147,9 +141,27 @@ def parseConfig(config_file_path):
   params = initialize_key(params, 'data_augmentation')
   if not(params['data_augmentation'] == None):
     if len(params['data_augmentation']) > 0: # only when augmentations are defined
+      
+      # special case for spatial augmentation, which is now deprecated 
+      if 'spatial' in params['data_augmentation']:
+          if not('affine' in params['data_augmentation']) or not('elastic' in params['data_augmentation']):
+              print('WARNING: \'spatial\' is now deprecated in favor of split \'affine\' and/or \'elastic\'', file = sys.stderr)
+              params['data_augmentation']['affine'] = {}
+              params['data_augmentation']['elastic'] = {}
+              del params['data_augmentation']['spatial']
+      
+      # special case for random swapping - which takes a patch size to swap pixels around
+      if 'swap' in params['data_augmentation']:
+          if not(isinstance(params['data_augmentation']['swap'], dict)):
+              params['data_augmentation']['swap'] = {}
+          if not('patch_size' in params['data_augmentation']['swap']):
+              params['data_augmentation']['swap']['patch_size'] = 15 # default
+      
+      # for all others, ensure probability is present
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
-              params['data_augmentation'][key] = {}
+              if not isinstance(params['data_augmentation'][key], dict):
+                params['data_augmentation'][key] = {}
               params['data_augmentation'][key]['probability'] = 1
 
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
@@ -182,14 +194,6 @@ def parseConfig(config_file_path):
         if key in keysForWarning:
           print('WARNING: \'' + key + '\' is generally not recommended, as it changes image properties in unexpected ways.', file = sys.stderr)
 
-  # Extracting the model parameters from the dictionary
-  if 'base_filters' in params:
-    base_filters = int(params['base_filters'])
-  else:
-    base_filters = 30
-    print('Using default base_filters: ', base_filters)
-  params['base_filters'] = base_filters
-
   if 'modelName' in params:
     defineDefaultModel = False
     print('This option has been superceded by \'model\'', file=sys.stderr)
@@ -216,6 +220,18 @@ def parseConfig(config_file_path):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
     if not('final_layer' in params['model']):
       sys.exit('The \'model\' parameter needs \'final_layer\' key to be defined')
+    if not('dimension' in params['model']):
+      sys.exit('The \'model\' parameter needs \'dimension\' key to be defined, which should either 2 or 3')
+    if not('base_filters' in params['model']):
+      base_filters = 32
+      params['model']['base_filters'] = base_filters
+      print('Using default \'base_filters\' in \'model\': ', base_filters)
+      # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
+    # if not('n_channels' in params['model']):
+    #   n_channels = 32
+    #   params['model']['n_channels'] = n_channels
+    #   print('Using default \'n_channels\' in \'model\': ', n_channels)
+    #   # sys.exit('The \'model\' parameter needs \'n_channels\' key to be defined') # uncomment if we need this to be passed by user
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
