@@ -158,18 +158,18 @@ def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outp
     # Patch blocks
 
     for index, row in test_df.iterrows():
-        subject_name = row['PID']
-        print("Patient Slide       : ", row['PID'])
-        print("Patient Location    : ", row['channel_0'])
-        os_image = OpenSlide(row['channel_0'])
+        subject_name = row[headers['subjectIDHeader']]
+        print("Patient Slide       : ", row[headers['subjectIDHeader']])
+        print("Patient Location    : ", row[headers['channelHeaders']])
+        os_image = OpenSlide(row[headers['channelHeaders']])
         level_width, level_height = os_image.level_dimensions[int(parameters['slide_level'])]
-        subject_dest_dir = os.path.join(outputDir subject_name)
+        subject_dest_dir = os.path.join(outputDir, subject_name)
         os.makedirs(subject_dest_dir, exist_ok=True)
 
         probs_map = np.zeros((level_height, level_width), dtype=np.float16)
         count_map = np.zeros((level_height, level_width), dtype=np.uint8)
 
-        patient_dataset_obj = InferTumorSegDataset(row['channel_0'],
+        patient_dataset_obj = InferTumorSegDataset(row[headers['channelHeaders']],
                                                    patch_size=psize,
                                                    stride_size=stride,
                                                    selected_level=parameters['slide_level'],
@@ -193,9 +193,10 @@ def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outp
         out = count_map*probs_map
         count_map = np.array(count_map*255, dtype=np.uint16)
         out_thresh = np.array((out > 0.5)*255, dtype=np.uint16)
-        imsave(os.path.join(subject_dest_dir, row['PID']+'_prob.png'), out)
-        imsave(os.path.join(subject_dest_dir, row['PID']+'_seg.png'), out_thresh)
-        imsave(os.path.join(subject_dest_dir, row['PID']+'_count.png'), count_ma
+        imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
+        imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
+        imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_ma
+
 def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDir):
   '''
   This is the main inference loop
