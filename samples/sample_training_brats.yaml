@@ -8,11 +8,11 @@ version:
 model:
   {
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
-    base_filters: 64, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
+    base_filters: 30, # 30 is for a GPU with 11GB VRAM - can be decreased/increased appropriately
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
-    amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
+    amp: True, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
 # Set the Modality : rad for radiology, path for histopathology
@@ -22,14 +22,13 @@ patch_size: [128,128,128]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: label
 # Number of epochs
-num_epochs: 100
+num_epochs: 500
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
 patience: 50
 # Set the batch size
-batch_size: 1
-
+batch_size: 1 # change according to available GPU memory - this is for 11GB
 # Set the initial learning rate
-learning_rate: 0.001
+learning_rate: 0.00001
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
 scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
@@ -66,19 +65,7 @@ nested_training:
 # resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
 data_preprocessing:
   {
-    'threshold':{
-      'min': 10, 
-      'max': 75
-    },
-    'clip':{
-      'min': 10, 
-      'max': 75
-    }, 
     'normalize',
-    'resample':{
-      'resolution': [1,2,3]
-    },
-    #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
@@ -91,18 +78,12 @@ data_augmentation:
     'affine',
     'elastic',
     'kspace':{
-      'probability': 1
+      'probability': 0.5
     },
     'bias',
     'blur',
     'noise',
-    'gamma',
-    'swap':{
-      'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
-    }
-    'flip':{
-      'axes_to_flip': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
-    }
+    'swap'
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
