@@ -3,6 +3,7 @@
 All Models in GANDLF are to be derived from this base class code
 """
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import sys
@@ -11,7 +12,7 @@ def get_final_layer(final_convolution_layer):
     none_list = ['none', None, 'None', 'regression']
 
     if final_convolution_layer == 'sigmoid':
-        final_convolution_layer = F.sigmoid
+        final_convolution_layer = torch.sigmoid
 
     elif final_convolution_layer == 'softmax':
         final_convolution_layer = F.softmax
