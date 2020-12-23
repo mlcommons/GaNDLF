@@ -5,7 +5,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
                                 RandomNoise, RandomSwap, ZNormalization,
-                                Resample, Compose, Lambda)
+                                Resample, Compose, Lambda, Pad)
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
@@ -91,6 +91,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
     predictionHeaders = headers['predictionHeaders']
+    
+    sampler = sampler.lower() # for easier parsing
 
     # define the control points and swap axes for augmentation
     augmentation_patchAxesPoints = copy.deepcopy(psize)
@@ -133,13 +135,10 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
-
-            if not train:
-                subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
+            subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
             subject_dict['label'] = "NA"
-            if not train:
-                subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
+            subject_dict['path_to_metadata'] = str(dataframe[channel][patient])
         
         # iterating through the values to predict of the subject
         valueCounter = 0
@@ -150,6 +149,13 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         
         # Initializing the subject object using the dict
         subject = Subject(subject_dict)
+
+        # padding image, but only for label sampler, because we don't want to pad for uniform
+        if 'label' in sampler:
+            psize_pad = list(np.asarray(np.round(np.divide(psize,2)), dtype=int))
+            padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+            subject = padder(subject)
+
         # Appending this subject to the list of subjects
         subjects_list.append(subject)
 
@@ -180,17 +186,16 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         for aug in augmentations:
             actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             augmentation_list.append(actual_function)
-    print(augmentation_list)
+    
     if augmentation_list:
-        transform = Compose(augmentation_list)
+      transform = Compose(augmentation_list)
     else:
-        transform = None
+      transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
 
     if not train:
         return subjects_dataset
 
-    sampler = sampler.lower() # for easier parsing
     sampler = global_sampler_dict[sampler](psize)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,

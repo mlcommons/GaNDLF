@@ -208,7 +208,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         print("Ep# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
-            print(batch_idx)
             # uncomment line to debug memory issues
             # # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
             # Load the subject and its ground truth
