@@ -84,7 +84,6 @@ data_preprocessing:
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
-# 'spatial': one of affine or elastic is picked (randomly) for augmentation
 # 'kspace': one of motion, ghosting or spiking is picked (randomly) for augmentation
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
@@ -97,6 +96,7 @@ data_augmentation:
     'bias',
     'blur',
     'noise',
+    'gamma',
     'swap':{
       'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
     }
