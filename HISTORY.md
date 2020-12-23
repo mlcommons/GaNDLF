@@ -1,6 +1,6 @@
 ## 0.0.7
 
-- 
+- New modality switch added for rad/path
 
 ## 0.0.6
 
