@@ -30,7 +30,7 @@ def normalize_div_by_255(input_tensor):
     This function divides all values of the input tensor by 255 on all channels
     """
     return normalize_by_val(input_tensor,
-                            mean=[0., 0.,, 0.],
+                            mean=[0., 0., 0.],
                             std=[1., 1., 1.])
 
 def normalize_standardize(input_tensor):
