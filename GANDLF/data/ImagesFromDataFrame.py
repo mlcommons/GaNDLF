@@ -5,7 +5,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
                                 RandomNoise, RandomSwap, ZNormalization,
-                                Resample, Compose, Lambda, RandomFlip, Pad)
+                                Resample, Compose, Lambda, RandomFlip, RandomGamma, Pad)
 from torchio import Image, Subject
 import SimpleITK as sitk
 from GANDLF.utils import resize_image
@@ -46,8 +46,14 @@ def blur(p=1):
 def noise(p=1):
     return RandomNoise(mean=0, std=(0, 0.25), p=p)
 
+def gamma(p=1):
+    return RandomGamma(p=p)
+
 def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
+
+# def anisotropy(axes = 0, p=1):
+#     return RandomFlip(axes = axes, p = p)
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
@@ -71,8 +77,9 @@ global_augs_dict = {
     'bias' : bias,
     'blur' : blur,
     'noise' : noise,
-    'swap': swap,
-    'flip': flip
+    'gamma' : gamma,
+    'swap' : swap,
+    'flip' : flip
 }
 
 global_sampler_dict = {
