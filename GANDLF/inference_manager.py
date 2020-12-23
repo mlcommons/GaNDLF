@@ -33,11 +33,11 @@ def InferenceManager(dataframe, headers, outputDir, parameters, device):
     # inference_indeces_full = list(inferenceData_full.index.values)
 
     if parameters['modality'] == 'rad':
-	    inferenceLoopRad(inferenceDataFromPickle=inferenceData_full, headers=headers, outputDir=outputDir,
-	                     device=device, parameters=parameters)
+        inferenceLoopRad(inferenceDataFromPickle=inferenceData_full, headers=headers, outputDir=outputDir,
+                         device=device, parameters=parameters)
     elif parameters['modality'] == 'path':
-	    inferenceLoopPath(inferenceDataFromPickle=inferenceData_full, headers=headers, outputDir=outputDir,
-	                      device=device, parameters=parameters)
+        inferenceLoopPath(inferenceDataFromPickle=inferenceData_full, headers=headers, outputDir=outputDir,
+                          device=device, parameters=parameters)
     else:
-    	print('Modality should be on of rad or path. Please set the correct on in the config file.')
+        print('Modality should be on of rad or path. Please set the correct on in the config file.')
         sys.exit(0)
