@@ -22,7 +22,7 @@ import subprocess
 
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.inference_loop import inferenceLoop
+from GANDLF.inference_loop import *
 
 def InferenceManager(dataframe, headers, outputDir, parameters, device):
     '''
