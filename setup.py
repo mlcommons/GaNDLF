@@ -36,7 +36,7 @@ requirements = [
 setup(
   name='GANDLF',
   version='0.0.7.NR', # NR: non-release; this should be changed when tagging\
-  author="Megh Bhalerao, Caleb Grenko, Siddhesh Thakur, Sarthak Pati",
+  author="Megh Bhalerao, Caleb Grenko, Siddhesh Thakur, Ujjwal Baid, Sarthak Pati",
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
