@@ -26,7 +26,7 @@ import argparse
 import datetime
 import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.test_dataloader_histopath import InferTumorSegDataset
+from GANDLF.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.schd import *
 from GANDLF.losses import *
 from GANDLF.utils import *
