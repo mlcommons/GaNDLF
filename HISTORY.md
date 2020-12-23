@@ -4,7 +4,6 @@
 
 ## 0.0.6
 
-- New modality switch added for rad/path
 - Added PyVIPS support
 - SubjectID-based split added
 
