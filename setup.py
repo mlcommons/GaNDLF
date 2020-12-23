@@ -11,7 +11,7 @@ requirements = [
   'numpy',
   'scipy',
   'SimpleITK==1.2.4',
-  'torch>=1.6',
+  'torch>=1.7',
   'torchvision',
   'tqdm',
   'torchio==0.18.10',
