@@ -41,7 +41,7 @@ setup(
   python_requires='>=3.6',
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
-    'Development Status :: Pre-Alpha',
+    'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: BSD-3-Clause License',
     'Natural Language :: English',
