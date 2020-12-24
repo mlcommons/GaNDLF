@@ -92,8 +92,7 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_volume,
-                        q_num_workers, q_verbose, sampler = 'label', train=True, augmentations=None, preprocessing=None):
+def ImagesFromDataFrame(dataframe, psize, headers, q_max_length=10, q_samples_per_volume=1, q_num_workers=2, q_verbose=False, sampler = 'label', train=True, augmentations=None, preprocessing=None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
