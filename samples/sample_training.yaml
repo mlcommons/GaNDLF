@@ -10,13 +10,8 @@ model:
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 30, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
     architecture: resunet, # options: unet, resunet, fcn, uinc
-<<<<<<< HEAD
-    final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
-    class_list: [0,1], # Set the list of labels the model should train on and predict
-=======
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
->>>>>>> e3c12f9821d99c239d91e7d7748c271f68feb7ea
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
@@ -78,21 +73,20 @@ nested_training:
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
-  'spatial':{
-    'probability': 0.1
-  },
-  'kspace':{
-    'probability': 0.1
-  },
-  'bias':{'probability': 0.1},
-  'blur':{'probability': 0.1},
-  'noise':{'probability': 0.1},
-  'swap':{'probability': 0.1}
+    'spatial':{
+      'probability': 0.5
+    },
+    'kspace':{
+      'probability': 1
+    },
+    'bias',
+    'blur',
+    'noise',
+    'swap',
+    'flip':{
+      'axes_to_flip': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
+    }
   }
-<<<<<<< HEAD
-
-#parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=40G -cwd -o ${outputDir}/\$JOB_ID.stdout -e ${outputDir}/\$JOB_ID.stderr /cbica/home/bhaleram/comp_space/ispy-seg/GANDLF/expts_iso/sge_wrapper /gpfs/fs001/cbica/comp_space/bhaleram/ispy-seg/GANDLF/venv/bin/python '
-=======
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
 # not used for single fold training
@@ -101,7 +95,6 @@ data_augmentation:
 # ${outputDir} will be changed to the outputDir you pass in CLI + '/${fold_number}'
 # ensure that the correct location of the virtual environment is getting invoked, otherwise it would pick up the system python, which might not have all dependencies
 parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/\$JOB_ID.stdout -e ${outputDir}/\$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
->>>>>>> e3c12f9821d99c239d91e7d7748c271f68feb7ea
 ## queue configuration - https://torchio.readthedocs.io/data/patch_training.html?#queue
 # this determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches
 q_max_length: 40
