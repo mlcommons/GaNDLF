@@ -49,6 +49,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     num_epochs = parameters['num_epochs']
     amp = parameters['amp']
     patience = parameters['patience']
+    use_weights = parameters['weighted_loss']
 
     ## model configuration
     which_model = parameters['model']['architecture']
@@ -149,42 +150,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n")
     log_train.close()
 
-    # initialize without considering background
-    dice_weights_dict = {} # average for "weighted averaging"
-    dice_penalty_dict = {} # penalty for misclassification
-    for i in range(1, n_classList):
-        dice_weights_dict[i] = 0
-        dice_penalty_dict[i] = 0
-
-    # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
-    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
-    
-    # get the weights for use for dice loss
-    total_nonZeroVoxels = 0
-    
-    # For regression dice penalty need not be taken account
-    # For classification this should be calculated on the basis of predicted labels and mask
-    if not is_regression:
-        for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-            # accumulate dice weights for each label
-            mask = subject['label'][torchio.DATA]
-            one_hot_mask = one_hot(mask, class_list)
-            for i in range(1, n_classList):
-                currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-                dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-                total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
-            
-            # get the penalty values - dice_weights contains the overall number for each class in the training data
-        for i in range(1, n_classList):
-            penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-            for j in range(1, n_classList):
-                if i != j: # for differing classes, subtract the number
-                    penalty = penalty - dice_penalty_dict[j]
-            
-            dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-        dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-     
+    if use_weights:
+        dice_weights_dict = get_class_imbalance_weights(trainingDataFromPickle,parameters,headers,is_regression)
+    else:
+        dice_weights_dict = None
+        # initialize without considering background
+        
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(iter(train_loader))
     all_keys = list(batch.keys())
