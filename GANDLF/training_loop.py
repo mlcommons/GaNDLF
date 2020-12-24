@@ -244,9 +244,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image = image.float().to(device)
-            if mask_present:
-                one_hot_mask = one_hot_mask.to(device)
+            if device.type != 'cpu':
+                image = image.float().to(device)
+                if mask_present:
+                    one_hot_mask = one_hot_mask.to(device)
 
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
