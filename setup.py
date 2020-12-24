@@ -11,7 +11,7 @@ requirements = [
   'numpy',
   'scipy',
   'SimpleITK==1.2.4',
-  'torch>=1.6',
+  'torch>=1.7',
   'torchvision',
   'tqdm',
   'torchio==0.18.10',
@@ -36,12 +36,12 @@ requirements = [
 setup(
   name='GANDLF',
   version='0.0.7.NR', # NR: non-release; this should be changed when tagging\
-  author="Megh Bhalerao, Caleb Grenko, Siddhesh Thakur, Sarthak Pati",
+  author="Ujjwal Baid, Megh Bhalerao, Caleb Grenko, Sarthak Pati, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
-    'Development Status :: Pre-Alpha',
+    'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: BSD-3-Clause License',
     'Natural Language :: English',
