@@ -40,11 +40,11 @@ def swap(patch_size = 15, p=1):
 def bias(p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p)
 
-def blur(p=1):
-    return RandomBlur(std=(0., 4.), p=p)
+def blur(std, p=1):
+    return RandomBlur(std=std, p=p)
 
-def noise(p=1):
-    return RandomNoise(mean=0, std=(0, 0.25), p=p)
+def noise(mean, std, p=1):
+    return RandomNoise(mean=mean, std=std, p=p)
 
 def gamma(p=1):
     return RandomGamma(p=p)
@@ -208,8 +208,10 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
             elif ('elastic' in aug) or ('swap' in aug):
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
-            elif ('bias' in aug) or ('noise' in aug):
+            elif ('blur' in aug):
                 actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
+            elif ('noise' in aug):
+                actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
             else:
                 actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
             augmentation_list.append(actual_function)
