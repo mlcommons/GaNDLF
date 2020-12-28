@@ -148,6 +148,21 @@ def parseConfig(config_file_path, version_check = True):
           if not('patch_size' in params['data_augmentation']['swap']):
               params['data_augmentation']['swap']['patch_size'] = 15 # default
       
+      # special case for random blur/noise - which takes a std-dev range
+      for std_aug in ['blur', 'noise']:
+        if std_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][std_aug], dict)):
+                params['data_augmentation'][std_aug] = {}
+            if not('std' in params['data_augmentation'][std_aug]):
+                params['data_augmentation'][std_aug]['std'] = [0, 1] # default
+
+      # special case for random noise - which takes a mean range
+      if 'noise' in params['data_augmentation']:
+          if not(isinstance(params['data_augmentation']['noise'], dict)):
+              params['data_augmentation']['noise'] = {}
+          if not('mean' in params['data_augmentation']['noise']):
+              params['data_augmentation']['noise']['mean'] = 0 # default
+      
       # for all others, ensure probability is present
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'

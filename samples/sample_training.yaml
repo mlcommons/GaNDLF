@@ -94,8 +94,13 @@ data_augmentation:
       'probability': 1
     },
     'bias',
-    'blur',
-    'noise',
+    'blur': {
+      'std': [0, 1] # default std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomBlur
+    },
+    'noise': { # for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomNoise
+      'mean': 0 # default mean
+      'std': [0, 1] # default std-dev range
+    },
     'gamma',
     'swap':{
       'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
