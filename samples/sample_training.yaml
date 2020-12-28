@@ -96,6 +96,7 @@ data_augmentation:
     'bias',
     'blur',
     'noise',
+    'gamma',
     'swap':{
       'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
     }
