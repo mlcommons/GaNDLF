@@ -92,28 +92,28 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
         sys.stdout.flush()
 
-        # get the channel keys for concatenation later (exclude non numeric channel keys)
-        batch = next(iter(inference_loader))
-        all_keys = list(batch.keys())
-        channel_keys = []
-        value_keys = []
+    # get the channel keys for concatenation later (exclude non numeric channel keys)
+    batch = next(iter(inference_loader))
+    all_keys = list(batch.keys())
+    channel_keys = []
+    value_keys = []
 
-        for item in all_keys:
-            if item.isnumeric():
-                channel_keys.append(item)
-            elif 'value' in item:
-                value_keys.append(item)
+    for item in all_keys:
+        if item.isnumeric():
+            channel_keys.append(item)
+        elif 'value' in item:
+            value_keys.append(item)
 
-        print("Data Samples: ", len(inference_loader.dataset))
-        sys.stdout.flush()
-        model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
-        
-        # print stats
-        print('Using device:', device)
-        sys.stdout.flush()
+    print("Data Samples: ", len(inference_loader.dataset))
+    sys.stdout.flush()
+    model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
+    
+    # print stats
+    print('Using device:', device)
+    sys.stdout.flush()
 
-        # get loss function
-        loss_fn, MSE_requested = get_loss(loss_function)
+    # get loss function
+    loss_fn, MSE_requested = get_loss(loss_function)
 
     get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
     print(average_dice, average_loss)
