@@ -41,25 +41,23 @@ setup(
   python_requires='>=3.6',
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
-    'Development Status :: 2 - Pre-Alpha',
+    'Development Status :: 1 - Planning',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: BSD-3-Clause License',
+    'License :: OSI Approved :: BSD License',
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
   ],
   description=(
-    "Semantic segmentation using various DL architectures"
-    " on PyTorch."
+    "Segmentation/regression/classification using various DL architectures using PyTorch."
   ),
   install_requires=requirements,
   license="BSD-3-Clause License",
   long_description=readme,
   long_description_content_type='text/markdown',
   include_package_data=True,
-  keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
+  keywords='semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation',
   zip_safe=False,
 )
 
