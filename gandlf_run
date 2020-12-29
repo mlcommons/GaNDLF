@@ -30,7 +30,7 @@ def main():
     
     parser.add_argument('-v', '--version', action='version', 
     version = format(parser.prog) + ' v' + pkg_resources.require(parser.prog)[0].version + '\n\n' + copyrightMessage, help="Show program's version number and exit.")
-                                
+
     args = parser.parse_args()
 
     file_data_full = args.data
@@ -42,7 +42,7 @@ def main():
 
     if '-1' in device:
         device = 'cpu'
-  
+
     if mode == 0: # inference mode
         pretrainedModelPath = args.modelDir
 
