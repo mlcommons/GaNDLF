@@ -115,7 +115,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -324,9 +324,8 @@ def parseTrainingCSV(inputTrainingCSVFile):
                 headers['labelHeader'] = currentHeaderLoc
             else:
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
-    
     return data_full, headers
-
+    
 def get_class_imbalance_weights(trainingDataFromPickle,parameters,headers,is_regression):
     dice_weights_dict = {} # average for "weighted averaging"
     dice_penalty_dict = {} # penalty for misclassification
@@ -361,5 +360,5 @@ def get_class_imbalance_weights(trainingDataFromPickle,parameters,headers,is_reg
             
             dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
         dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-    return dice_weights_dict
+    return dice_penalty_dict
         
