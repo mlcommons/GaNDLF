@@ -43,3 +43,14 @@ For any new feature, please ensure the corresponding option in the [sample confi
 
 - Update [Inference Function](../GANDLF/inference_loop.py)
 - Update [Inference Manager](../GANDLF/inference_manager.py), if any inference API has changed
+
+## Update Tests
+
+Once you have made changes to functionality, it is imperative that the unit tests be updated to cover the new code. Please see the [full testing suite](../testing/test_full.py) for details.
+
+## Run Tests
+
+Once you have the virtual environment set up, tests can be run using the following command:
+```powershell
+pytest
+```
