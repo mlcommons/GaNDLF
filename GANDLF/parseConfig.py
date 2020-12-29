@@ -47,6 +47,8 @@ def parseConfig(config_file_path, version_check = True):
       
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
+    if len(params['psize']) == 2: # 2d check
+        params['psize'].append(1) # ensuring same size during torchio processing
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
   
@@ -232,6 +234,8 @@ def parseConfig(config_file_path, version_check = True):
       base_filters = 32
       params['model']['base_filters'] = base_filters
       print('Using default \'base_filters\' in \'model\': ', base_filters)
+    if not('class_list' in params['model']): 
+      params['model']['class_list'] = [] # ensure that this is initialized
       # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
     # if not('n_channels' in params['model']):
     #   n_channels = 32
@@ -266,6 +270,12 @@ def parseConfig(config_file_path, version_check = True):
   else:
       scheduler = 'triangle'
   params['scheduler'] = scheduler
+
+  if 'scaling_factor' in params:
+      scaling_factor = params['scaling_factor']
+  else:
+      scaling_factor = 1
+  params['scaling_factor'] = scaling_factor
 
   if 'q_max_length' in params:
       q_max_length = int(params['q_max_length'])
