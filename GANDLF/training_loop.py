@@ -151,17 +151,18 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     log_train.close()
 
     if use_weights:
-        dice_weights_dict = get_class_imbalance_weights(trainingDataFromPickle,parameters,headers,is_regression)
+        dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle,parameters,headers,is_regression)
     else:
-        dice_weights_dict = None
+        dice_penalty_dict = None
         # initialize without considering background
         
     # Getting the channels for training and removing all the non numeric entries from the channels
+
     batch = next(iter(train_loader))
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
-
+    
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)
@@ -340,7 +341,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_train_dice": best_train_dice,
             "best_train_loss": best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
             
-        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
+        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'))
 
         if save_condition_val:
             best_val_idx = ep
@@ -350,7 +351,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_val_dice": best_val_dice,
             "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'))
 
         if save_condition_test:
             best_test_idx = ep
@@ -360,7 +361,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_test_dice": best_test_dice,
             "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         
