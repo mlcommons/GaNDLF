@@ -54,18 +54,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     which_model = parameters['model']['architecture']
     dimension = parameters['model']['dimension']
     base_filters = parameters['model']['base_filters']
-    if 'class_list' in parameters['model']:
-        class_list = parameters['model']['class_list']
-        n_classList = len(class_list)
+    class_list = parameters['model']['class_list']
+    n_classList = len(class_list)
+
     if not('n_channels' in parameters['model']):
         n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
-
-    if 'scaling_factor' in parameters:
-        scaling_factor = parameters['scaling_factor']
-    else:
-        scaling_factor = 1
 
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
@@ -76,9 +71,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if is_regression or is_classification:
         n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
   
-    if len(psize) == 2:
-        psize.append(1) # ensuring same size during torchio processing
-
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
