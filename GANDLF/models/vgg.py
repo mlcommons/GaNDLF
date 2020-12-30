@@ -56,16 +56,18 @@ def make_layers(cfg, n_dimensions, in_channels, batch_norm=False):
     if n_dimensions == 2:
         Conv = nn.Conv2d
         MaxPool = nn.MaxPool2d
+        BatchNorm = nn.BatchNorm2d
     elif n_dimensions == 3:
         Conv = nn.Conv3d
         MaxPool = nn.MaxPool3d
+        BatchNorm = nn.BatchNorm3d
     for v in cfg:
         if v == 'M':
             layers += [MaxPool(kernel_size=2, stride=2)]
         else:
             conv = Conv(in_channels, v, kernel_size=3, padding=1)
             if batch_norm:
-                layers += [conv, nn.BatchNorm3d(v), nn.ReLU(inplace=True)]
+                layers += [conv, BatchNorm(v), nn.ReLU(inplace=True)]
             else:
                 layers += [conv, nn.ReLU(inplace=True)]
             in_channels = v
