@@ -122,21 +122,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
-    best_val_dice = -1
-    best_train_dice = -1
-    best_test_dice = -1
-    
-    best_val_loss = 1000000
-    best_train_loss = 1000000
-    best_test_loss = 1000000
-    
-    total_train_loss = 0
-    total_train_dice = 0
-    patience_count = 0
-    
-    best_train_idx = 0
-    best_val_idx = 0
-    best_test_idx = 0
+    best_val_dice = best_train_dice = best_test_dice -1
+    best_val_loss = best_train_loss = best_test_loss =  1000000
+    total_train_loss = total_train_dice = 0
+    patience_count = 0    
+    best_train_idx = best_val_idx = best_test_idx = 0
+
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
