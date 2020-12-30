@@ -225,7 +225,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length=10, q_samples_pe
     if not train:
         return subjects_dataset
     if sampler in ('weighted', 'weightedsampler', 'weightedsample'):
-        sampler = global_sampler_dict[sampler](psize,probability_map='label')
+        sampler = global_sampler_dict[sampler](psize, probability_map = 'label')
     else:
         sampler = global_sampler_dict[sampler](psize)
     # all of these need to be read from model.yaml
