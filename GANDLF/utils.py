@@ -326,7 +326,10 @@ def parseTrainingCSV(inputTrainingCSVFile):
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
     return data_full, headers
     
-def get_class_imbalance_weights(trainingDataFromPickle,parameters,headers,is_regression):
+def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression):
+    '''
+    This function calculates the penalty that is used for validation loss in multi-class problems
+    '''
     dice_weights_dict = {} # average for "weighted averaging"
     dice_penalty_dict = {} # penalty for misclassification
     for i in range(1, n_classList):
