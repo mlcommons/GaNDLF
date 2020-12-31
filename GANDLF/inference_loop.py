@@ -55,7 +55,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     if 'scaling_factor' in parameters:
         scaling_factor = parameters['scaling_factor']
     else:
-        scaling_factor = 1
+        n_channels = parameters['model']['n_channels']
     
     n_classList = len(class_list)
     
