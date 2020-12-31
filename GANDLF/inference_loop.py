@@ -52,8 +52,8 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     base_filters = parameters['model']['base_filters']
     batch_size = parameters['batch_size']
     loss_function = parameters['loss_function']
-    if 'scaling_factor' in parameters:
-        scaling_factor = parameters['scaling_factor']
+    if not('n_channels' in parameters['model']):	
+        n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
     
