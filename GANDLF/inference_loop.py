@@ -57,10 +57,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     else:
         scaling_factor = 1
     
-    n_channels = len(headers['channelHeaders'])
-    if 'class_list' in parameters['model']:
-        class_list = parameters['model']['class_list']
-        n_classList = len(class_list)
+    n_classList = len(class_list)
     
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
