@@ -115,7 +115,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     # get loss function
     loss_fn, MSE_requested = get_loss(loss_function)
 
-    get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
+    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
     print(average_dice, average_loss)
 
 if __name__ == "__main__":
