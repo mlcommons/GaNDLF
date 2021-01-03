@@ -89,11 +89,13 @@ global_sampler_dict = {
     'label': torchio.data.LabelSampler,
     'labelsampler': torchio.data.LabelSampler,
     'labelsample': torchio.data.LabelSampler,
+    'weighted': torchio.data.WeightedSampler,
+    'weightedsampler': torchio.data.WeightedSampler,
+    'weightedsample': torchio.data.WeightedSampler
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_volume,
-                        q_num_workers, q_verbose, sampler = 'label', train=True, augmentations=None, preprocessing=None):
+def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_per_volume = 1, q_num_workers = 2, q_verbose = False, sampler = 'label', train = True, augmentations = None, preprocessing = None):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -134,7 +136,6 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
                         resizeCheck = True
                         if not('resample' in preprocessing):
                             preprocessing['resample'] = {}
-
                             if not('resolution' in preprocessing['resample']):
                                 preprocessing['resample']['resolution'] = resize_image_resolution(subject_dict[str(channel)].as_sitk(), preprocessing['resize'])
                         else:
@@ -166,7 +167,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
         subject = Subject(subject_dict)
 
         # padding image, but only for label sampler, because we don't want to pad for uniform
-        if 'label' in sampler:
+        if 'label' in sampler or 'weight' in sampler:
             psize_pad = list(np.asarray(np.round(np.divide(psize,2)), dtype=int))
             padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
             subject = padder(subject)
@@ -221,11 +222,12 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length, q_samples_per_v
     else:
         transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
-
     if not train:
         return subjects_dataset
-
-    sampler = global_sampler_dict[sampler](psize)
+    if sampler in ('weighted', 'weightedsampler', 'weightedsample'):
+        sampler = global_sampler_dict[sampler](psize, probability_map = 'label')
+    else:
+        sampler = global_sampler_dict[sampler](psize)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
                                   samples_per_volume=q_samples_per_volume,
