@@ -1,4 +1,3 @@
-
 import os
 import ast 
 import sys
@@ -307,5 +306,11 @@ def parseConfig(config_file_path, version_check = True):
       parallel_compute_command = parallel_compute_command.replace('\'', '')
       parallel_compute_command = parallel_compute_command.replace('\"', '')
   params['parallel_compute_command'] = parallel_compute_command
+
+  if 'weighted_loss' in params:
+    pass
+  else:
+    print("WARNING: NOT using weighted loss")
+    params['weighted_loss'] = False 
 
   return params

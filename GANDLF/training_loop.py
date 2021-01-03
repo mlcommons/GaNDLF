@@ -49,6 +49,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     num_epochs = parameters['num_epochs']
     amp = parameters['amp']
     patience = parameters['patience']
+    use_weights = parameters['weighted_loss']
 
     ## model configuration
     which_model = parameters['model']['architecture']
@@ -121,69 +122,31 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
-    best_val_dice = -1
-    best_train_dice = -1
-    best_test_dice = -1
-    
-    best_val_loss = 1000000
-    best_train_loss = 1000000
-    best_test_loss = 1000000
-    
-    total_train_loss = 0
-    total_train_dice = 0
-    patience_count = 0
-    
-    best_train_idx = 0
-    best_val_idx = 0
-    best_test_idx = 0
+    best_val_dice = best_train_dice = best_test_dice = -1
+    best_val_loss = best_train_loss = best_test_loss =  1000000
+    total_train_loss = total_train_dice = 0
+    patience_count = 0    
+    best_train_idx = best_val_idx = best_test_idx = 0
+
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
     log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n")
     log_train.close()
 
-    # initialize without considering background
-    dice_weights_dict = {} # average for "weighted averaging"
-    dice_penalty_dict = {} # penalty for misclassification
-    for i in range(1, n_classList):
-        dice_weights_dict[i] = 0
-        dice_penalty_dict[i] = 0
-
-    # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
-    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
-    
-    # get the weights for use for dice loss
-    total_nonZeroVoxels = 0
-    
-    # For regression dice penalty need not be taken account
-    # For classification this should be calculated on the basis of predicted labels and mask
-    if not is_regression:
-        for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-            # accumulate dice weights for each label
-            mask = subject['label'][torchio.DATA]
-            one_hot_mask = one_hot(mask, class_list)
-            for i in range(1, n_classList):
-                currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-                dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-                total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
-            
-            # get the penalty values - dice_weights contains the overall number for each class in the training data
-        for i in range(1, n_classList):
-            penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-            for j in range(1, n_classList):
-                if i != j: # for differing classes, subtract the number
-                    penalty = penalty - dice_penalty_dict[j]
-            
-            dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-        dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-     
+    if use_weights:
+        dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression)
+    else:
+        dice_penalty_dict = None
+        # initialize without considering background
+        
     # Getting the channels for training and removing all the non numeric entries from the channels
+
     batch = next(iter(train_loader))
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
-
+    
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)
@@ -362,7 +325,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_train_dice": best_train_dice,
             "best_train_loss": best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
             
-        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
+        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'))
 
         if save_condition_val:
             best_val_idx = ep
@@ -372,7 +335,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_val_dice": best_val_dice,
             "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'))
 
         if save_condition_test:
             best_test_idx = ep
@@ -382,7 +345,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_test_dice": best_test_dice,
             "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'))
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         

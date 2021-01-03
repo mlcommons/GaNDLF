@@ -18,7 +18,6 @@ def MCD(pm, gt, num_class, weights = None):
         currentDiceLoss = dice(gt[:,i,:,:,:], pm[:,i,:,:,:]) # subtract from 1 because this is a loss
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
-        
         acc_dice += currentDiceLoss
     acc_dice /= (num_class-1) # we should not be considering 0
     return acc_dice

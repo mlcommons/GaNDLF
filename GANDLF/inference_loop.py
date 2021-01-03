@@ -48,34 +48,41 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
-    base_filters = parameters['base_filters']
+
+    base_filters = parameters['model']['base_filters']
     batch_size = parameters['batch_size']
     loss_function = parameters['loss_function']
-    scaling_factor = parameters['scaling_factor']
-    
-    if not('n_channels' in parameters['model']):
+    if not('n_channels' in parameters['model']):	
         n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
-
-    class_list = parameters['model']['class_list']
+    
     n_classList = len(class_list)
     
     # Defining our model here according to parameters mentioned in the configuration file
+    model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
+    amp = parameters['amp']
+    # initialize problem type    
+    is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
+
+    class_list = parameters['model']['class_list']
+    n_classList = len(class_list)
+
+    # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
-    
+
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
     if is_regression or is_classification:
         n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
-    
+
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
     # Loading the weights into the model
-    main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
+    main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best_val.pth.tar"))
     model.load_state_dict(main_dict['model_state_dict'])
     
     if not(os.environ.get('HOSTNAME') is None):
@@ -105,7 +112,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     # get loss function
     loss_fn, MSE_requested = get_loss(loss_function)
 
-    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, class_list, loss_fn, is_segmentation, weights = None, save_mask = True, outputDir = outputDir)
+    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
     print(average_dice, average_loss)
 
 if __name__ == "__main__":
