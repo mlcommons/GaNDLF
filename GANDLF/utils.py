@@ -130,6 +130,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     with torch.no_grad():
         total_loss = total_dice = 0
         for batch_idx, (subject) in enumerate(loader):
+            # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
             subject_dict = {}
             if ('label' in subject):
                 if (subject['label'] != ['NA']):
