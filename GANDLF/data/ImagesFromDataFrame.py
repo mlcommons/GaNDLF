@@ -126,8 +126,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
             # assigning the dict key to the channel
-            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]),
-                                               type=torchio.INTENSITY)
+            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
