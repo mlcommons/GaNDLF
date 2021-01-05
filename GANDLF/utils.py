@@ -195,8 +195,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             else:
                 if not (is_segmentation):
                     avg_dice = 1 # we don't care about this for regression/classification
-                    avg_loss = total_loss/len(loader.dataset)
-                    return avg_dice, avg_loss
+                    # avg_loss = total_loss/len(loader.dataset)
+                    # return avg_dice, avg_loss
                 else:
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
@@ -222,12 +222,13 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             file.write(outputToWrite)
             file.close()
 
-        if (subject['label'] != "NA"):
-            avg_dice, avg_loss = total_dice/len(loader.dataset), total_loss/len(loader.dataset)
-            return avg_dice, avg_loss
+        # calculate average loss and dice
+        avg_loss = total_loss/len(loader.dataset)
+        if is_segmentation:
+            avg_dice = total_dice/len(loader.dataset)
         else:
-            print("WARNING: No Ground Truth Label provided, returning metrics as NONE")
-            return None, None
+            avg_dice = 1
+        return avg_dice, avg_loss
 
 def fix_paths(cwd):
     '''
