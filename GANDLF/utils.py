@@ -200,22 +200,22 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 else:
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
-                patient_name = subject['subject_id'] # write output according to subject id
+                patient_name = subject['subject_id']
 
                 if is_segmentation:
                     inputImage = sitk.ReadImage(subject['path_to_metadata'])
+                    _, ext = os.path.splitext(subject['path_to_metadata'])
                     pred_mask = pred_mask.numpy()
                     pred_mask = reverse_one_hot(pred_mask[0],class_list)
-                    result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
+                    if not(model_2d):
+                        result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2))
                     result_image.CopyInformation(inputImage)
                     # if parameters['resize'] is not None:
                     #     originalSize = inputImage.GetSize()
-                    #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor)            
-                    if not os.path.isdir(os.path.join(outputDir,"generated_masks")):
-                        os.mkdir(os.path.join(outputDir,"generated_masks"))
-                    sitk.WriteImage(result_image, os.path.join(outputDir,"generated_masks","pred_mask_" + patient_name))
+                    #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor) # change this for resample
+                    sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + ext))
                 elif len(value_keys) > 0:
-                    outputToWrite += patient_name + ',' + str(pred_output * scaling_factor) + '\n'
+                    outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
         
         if len(value_keys) > 0:
             file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
