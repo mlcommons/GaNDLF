@@ -200,7 +200,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 else:
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
-                patient_name = os.path.basename(subject['path_to_metadata'])
+                patient_name = subject['subject_id'] # write output according to subject id
 
                 if is_segmentation:
                     inputImage = sitk.ReadImage(subject['path_to_metadata'])
