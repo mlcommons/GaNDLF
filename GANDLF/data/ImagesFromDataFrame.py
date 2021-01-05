@@ -108,6 +108,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
     channelHeaders = headers['channelHeaders']
     labelHeader = headers['labelHeader']
     predictionHeaders = headers['predictionHeaders']
+    subjectIDHeader = headers['subjectIDHeader']
     
     sampler = sampler.lower() # for easier parsing
 
@@ -122,6 +123,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
         subject_dict = {}
+        subject_dict['subject_id'] = dataframe[subjectIDHeader][patient]
 
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
