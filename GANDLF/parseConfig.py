@@ -244,6 +244,9 @@ def parseConfig(config_file_path, version_check = True):
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
+  
+  if isinstance(params['model']['class_list'], str):
+    params['model']['class_list'] = eval(params['model']['class_list'])
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
