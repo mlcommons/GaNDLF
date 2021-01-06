@@ -288,6 +288,9 @@ def parseConfig(config_file_path, version_check = True):
       q_samples_per_volume = 10
   params['q_samples_per_volume'] = q_samples_per_volume
 
+  if int(params['q_max_length']) % int(params['q_samples_per_volume']) !=0:
+      sys.exit('\'q_max_length\' needs to be divisible by \'q_samples_per_volume\'')
+
   if 'q_num_workers' in params:
       q_num_workers = int(params['q_num_workers'])
   else:
