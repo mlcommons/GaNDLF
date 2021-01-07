@@ -233,5 +233,5 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
                                   samples_per_volume=q_samples_per_volume,
                                   sampler=sampler, num_workers=q_num_workers,
-                                  shuffle_subjects=False, shuffle_patches=True, verbose=q_verbose)
+                                  shuffle_subjects=True, shuffle_patches=True, verbose=q_verbose)
     return patches_queue
