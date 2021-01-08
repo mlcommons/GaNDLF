@@ -53,17 +53,13 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     batch_size = parameters['batch_size']
     loss_function = parameters['loss_function']
     scaling_factor = parameters['scaling_factor']
-    if not('n_channels' in parameters['model']):	
-        n_channels = len(headers['channelHeaders'])
-    else:
-        n_channels = parameters['model']['n_channels']
+    amp = parameters['amp']
     
     class_list = parameters['model']['class_list']
     n_classList = len(class_list)
 
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
-    amp = parameters['amp']
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
