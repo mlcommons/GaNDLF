@@ -11,7 +11,7 @@ requirements = [
   'numpy',
   'scipy',
   'SimpleITK==1.2.4',
-  'torch>=1.6',
+  'torch>=1.7',
   'torchvision',
   'tqdm',
   'torchio==0.18.10',
@@ -36,30 +36,28 @@ requirements = [
 setup(
   name='GANDLF',
   version='0.0.7.NR', # NR: non-release; this should be changed when tagging\
-  author="Megh Bhalerao, Caleb Grenko, Siddhesh Thakur, Sarthak Pati",
+  author="Ujjwal Baid, Megh Bhalerao, Caleb Grenko, Sarthak Pati, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
-    'Development Status :: Pre-Alpha',
+    'Development Status :: 1 - Planning',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: BSD-3-Clause License',
+    'License :: OSI Approved :: BSD License',
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
   ],
   description=(
-    "Semantic segmentation using various DL architectures"
-    " on PyTorch."
+    "Segmentation/regression/classification using various DL architectures using PyTorch."
   ),
   install_requires=requirements,
   license="BSD-3-Clause License",
   long_description=readme,
   long_description_content_type='text/markdown',
   include_package_data=True,
-  keywords='semantic, segmentation, brain, breast, liver, lung, augmentation',
+  keywords='semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation',
   zip_safe=False,
 )
 
