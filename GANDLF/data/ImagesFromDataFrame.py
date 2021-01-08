@@ -66,7 +66,8 @@ def clip_transform(min, max, p=1):
 global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
-    'normalize' : ZNormalization()
+    'normalize' : ZNormalization(),
+    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0)
 }
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object
