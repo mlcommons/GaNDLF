@@ -27,6 +27,9 @@ import datetime
 import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 if os.name != 'nt':
+    '''
+    path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
+    '''
     from GANDLF.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.schd import *
 from GANDLF.losses import *
@@ -114,6 +117,9 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
 
 
 if os.name != 'nt':
+    '''
+    path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
+    '''
     def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outputDir):
         '''
         This is the main inference loop for histopathology
