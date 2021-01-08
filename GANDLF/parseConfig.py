@@ -1,4 +1,3 @@
-
 import os
 import ast 
 import sys
@@ -47,6 +46,8 @@ def parseConfig(config_file_path, version_check = True):
       
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
+    if len(params['psize']) == 2: # 2d check
+        params['psize'].append(1) # ensuring same size during torchio processing
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
   
@@ -157,6 +158,21 @@ def parseConfig(config_file_path, version_check = True):
           if not('patch_size' in params['data_augmentation']['swap']):
               params['data_augmentation']['swap']['patch_size'] = 15 # default
       
+      # special case for random blur/noise - which takes a std-dev range
+      for std_aug in ['blur', 'noise']:
+        if std_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][std_aug], dict)):
+                params['data_augmentation'][std_aug] = {}
+            if not('std' in params['data_augmentation'][std_aug]):
+                params['data_augmentation'][std_aug]['std'] = [0, 1] # default
+
+      # special case for random noise - which takes a mean range
+      if 'noise' in params['data_augmentation']:
+          if not(isinstance(params['data_augmentation']['noise'], dict)):
+              params['data_augmentation']['noise'] = {}
+          if not('mean' in params['data_augmentation']['noise']):
+              params['data_augmentation']['noise']['mean'] = 0 # default
+      
       # for all others, ensure probability is present
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
@@ -226,6 +242,8 @@ def parseConfig(config_file_path, version_check = True):
       base_filters = 32
       params['model']['base_filters'] = base_filters
       print('Using default \'base_filters\' in \'model\': ', base_filters)
+    if not('class_list' in params['model']): 
+      params['model']['class_list'] = [] # ensure that this is initialized
       # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
     # if not('n_channels' in params['model']):
     #   n_channels = 32
@@ -235,6 +253,9 @@ def parseConfig(config_file_path, version_check = True):
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
+  
+  if isinstance(params['model']['class_list'], str):
+    params['model']['class_list'] = eval(params['model']['class_list'])
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
@@ -261,6 +282,12 @@ def parseConfig(config_file_path, version_check = True):
       scheduler = 'triangle'
   params['scheduler'] = scheduler
 
+  if 'scaling_factor' in params:
+      scaling_factor = params['scaling_factor']
+  else:
+      scaling_factor = 1
+  params['scaling_factor'] = scaling_factor
+
   if 'q_max_length' in params:
       q_max_length = int(params['q_max_length'])
   else:
@@ -272,6 +299,9 @@ def parseConfig(config_file_path, version_check = True):
   else:
       q_samples_per_volume = 10
   params['q_samples_per_volume'] = q_samples_per_volume
+
+  if int(params['q_max_length']) % int(params['q_samples_per_volume']) !=0:
+      sys.exit('\'q_max_length\' needs to be divisible by \'q_samples_per_volume\'')
 
   if 'q_num_workers' in params:
       q_num_workers = int(params['q_num_workers'])
@@ -291,5 +321,11 @@ def parseConfig(config_file_path, version_check = True):
       parallel_compute_command = parallel_compute_command.replace('\'', '')
       parallel_compute_command = parallel_compute_command.replace('\"', '')
   params['parallel_compute_command'] = parallel_compute_command
+
+  if 'weighted_loss' in params:
+    pass
+  else:
+    print("WARNING: NOT using weighted loss")
+    params['weighted_loss'] = False 
 
   return params
