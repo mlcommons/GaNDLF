@@ -1,6 +1,7 @@
 ## 0.0.7
 
 - New modality switch added for rad/path
+- Class list can now be defined as a range
 
 ## 0.0.6
 

@@ -8,17 +8,18 @@ version:
 model:
   {
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
-    base_filters: 64, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
+    base_filters: 30, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
+    # class_list: '[*range(0,100,1)]' # a range of values from 0 to 99 with a step of 1 will be created; customize as needed, but ensure this is defined as a string as it will be passed through 'eval' function
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
-patch_size: [128,128,128]
+patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: label
 # Number of epochs
@@ -63,6 +64,7 @@ nested_training:
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
+# resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is 
 # resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
 data_preprocessing:
   {
@@ -94,8 +96,13 @@ data_augmentation:
       'probability': 1
     },
     'bias',
-    'blur',
-    'noise',
+    'blur': {
+      'std': [0, 1] # default std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomBlur
+    },
+    'noise': { # for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomNoise
+      'mean': 0 # default mean
+      'std': [0, 1] # default std-dev range
+    },
     'gamma',
     'swap':{
       'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
