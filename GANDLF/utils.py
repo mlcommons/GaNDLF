@@ -330,13 +330,13 @@ def parseTrainingCSV(inputTrainingCSVFile):
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
     return data_full, headers
     
-# def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, n_classList):
+# def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, classList):
 #     '''
 #     This function calculates the penalty that is used for validation loss in multi-class problems
 #     '''
 #     dice_weights_dict = {} # average for "weighted averaging"
 #     dice_penalty_dict = {} # penalty for misclassification
-#     for i in range(1, n_classList):
+#     for i in range(1, classList):
 #         dice_weights_dict[i] = 0
 #         dice_penalty_dict[i] = 0
 #     # define a seaparate data loader for penalty calculations
@@ -352,16 +352,16 @@ def parseTrainingCSV(inputTrainingCSVFile):
 #         for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
 #             # accumulate dice weights for each label
 #             mask = subject['label'][torchio.DATA]
-#             one_hot_mask = one_hot(mask, n_classList)
-#             for i in range(1, n_classList):
+#             one_hot_mask = one_hot(mask, classList)
+#             for i in range(1, len(classList)):
 #                 currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
 #                 dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
 #                 total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
             
 #             # get the penalty values - dice_weights contains the overall number for each class in the training data
-#         for i in range(1, n_classList):
+#         for i in range(1, len(classList)):
 #             penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-#             for j in range(1, n_classList):
+#             for j in range(1, len(classList)):
 #                 if i != j: # for differing classes, subtract the number
 #                     penalty = penalty - dice_penalty_dict[j]
             
