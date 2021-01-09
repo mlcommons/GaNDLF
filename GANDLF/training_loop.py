@@ -135,7 +135,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     log_train.close()
 
     if use_weights:
-        dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression)
+        dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, class_list)
     else:
         dice_penalty_dict = None
         # initialize without considering background
