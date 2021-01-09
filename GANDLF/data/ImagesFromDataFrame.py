@@ -196,7 +196,10 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
 
         # next, we want to do the intensity normalize - required for inference as well
         if 'normalize' in preprocessing:
-            augmentation_list.append(global_preprocessing_dict['normalize'])
+            if 'normalize_nonZero' in preprocessing:
+                augmentation_list.append(global_preprocessing_dict['normalize_nonZero'])
+            else:
+                augmentation_list.append(global_preprocessing_dict['normalize'])
 
     # other augmentations should only happen for training - and also setting the probabilities
     # for the augmentations
