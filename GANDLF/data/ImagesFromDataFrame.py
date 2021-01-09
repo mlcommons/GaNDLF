@@ -8,7 +8,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
                                 Resample, Compose, Lambda, RandomFlip, RandomGamma, Pad)
 from torchio import Image, Subject
 import SimpleITK as sitk
-from GANDLF.utils import resize_image
+# from GANDLF.utils import resize_image
 from GANDLF.preprocessing import *
 
 import copy, sys
