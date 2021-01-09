@@ -153,7 +153,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
                 # accumulate dice weights for each label
                 mask = subject['label'][torchio.DATA]
-                one_hot_mask = one_hot(mask, n_classList)
+                one_hot_mask = one_hot(mask, class_list)
                 for i in range(1, n_classList):
                     currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
                     dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
