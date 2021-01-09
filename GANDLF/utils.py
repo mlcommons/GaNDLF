@@ -7,6 +7,8 @@ import torch
 import torch.nn as nn
 import torchio
 from GANDLF.losses import *
+from GANDLF.data import ImagesFromDataFrame
+from torch.utils.data import DataLoader
 
 def one_hot(segmask_array, class_list):
     '''
@@ -328,7 +330,7 @@ def parseTrainingCSV(inputTrainingCSVFile):
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
     return data_full, headers
     
-def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression):
+def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, n_classList):
     '''
     This function calculates the penalty that is used for validation loss in multi-class problems
     '''
@@ -350,7 +352,7 @@ def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_
         for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
             # accumulate dice weights for each label
             mask = subject['label'][torchio.DATA]
-            one_hot_mask = one_hot(mask, class_list)
+            one_hot_mask = one_hot(mask, n_classList)
             for i in range(1, n_classList):
                 currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
                 dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
