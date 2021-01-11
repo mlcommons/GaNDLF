@@ -246,7 +246,12 @@ def parseConfig(config_file_path, version_check = True):
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
   
   if isinstance(params['model']['class_list'], str):
-    params['model']['class_list'] = eval(params['model']['class_list'])
+    try:
+      params['model']['class_list'] = eval(params['model']['class_list'])
+    except:
+      if '||' in params['model']['class_list']:
+        # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
+        print('This is a special case for multi-class computation, where different labels are processed together')
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
