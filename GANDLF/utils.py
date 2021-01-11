@@ -19,8 +19,14 @@ def one_hot(segmask_array, class_list):
     for b in range(batch_size):
         one_hot_stack = []
         segmask_array_iter = segmask_array[b,0]
-        for class_ in class_list:
-            bin_mask = (segmask_array_iter == int(class_))
+        for _class in class_list:
+            if '||' in _class: # special case
+                class_split = _class.split('||')
+                bin_mask = (segmask_array_iter == int(class_split[0]))
+                for i in range(1,len(class_split)):
+                    bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+            else:
+                bin_mask = (segmask_array_iter == int(_class))
             one_hot_stack.append(bin_mask)
         one_hot_stack = torch.stack(one_hot_stack)
         batch_stack.append(one_hot_stack)
