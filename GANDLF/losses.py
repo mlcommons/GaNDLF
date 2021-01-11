@@ -39,7 +39,9 @@ def CE(out,target):
 def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
     for i in range(1, num_class):
-        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
+        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:])
+        if weights is not None:
+            acc_ce_loss *= weights[i]
     acc_ce_loss /= (num_class-1)
     return acc_ce_loss
         
