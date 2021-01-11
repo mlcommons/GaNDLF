@@ -19,7 +19,7 @@ def one_hot(segmask_array, class_list):
     for b in range(batch_size):
         one_hot_stack = []
         segmask_array_iter = segmask_array[b,0]
-        for _class in class_list:
+        for _class in class_list: # this implementation allows users to combine logical operands 
             if '||' in _class: # special case
                 class_split = _class.split('||')
                 bin_mask = (segmask_array_iter == int(class_split[0]))
@@ -68,8 +68,8 @@ def reverse_one_hot(predmask_array,class_list):
     '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
-    for idx, class_ in enumerate(class_list):
-        final_mask = final_mask +  (idx_argmax == idx)*class_
+    for idx, _class in enumerate(class_list):
+        final_mask = final_mask +  (idx_argmax == idx)*_class
     return final_mask
 
 def send_model_to_device(model, ampInput, device, optimizer):
