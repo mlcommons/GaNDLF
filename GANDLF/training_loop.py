@@ -166,7 +166,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     if i != j: # for differing classes, subtract the number
                         penalty = penalty - dice_penalty_dict[j]
                 
-                dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+                if total_nonZeroVoxels != 0:
+                    dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+                else:
+                    dice_penalty_dict[i] = 0
             # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
             # dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, class_list) # this doesn't work because ImagesFromDataFrame gets import twice, causing a "'module' object is not callable" error
     else:

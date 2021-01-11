@@ -32,12 +32,16 @@ def CE(out,target):
     oflat = out.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     loss = torch.dot(-torch.log(oflat), tflat)/tflat.sum()
+    if torch.isnan(loss): # contingency for empty mask
+        return 0
     return loss
 
 def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
     for i in range(1, num_class):
-        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
+        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:])
+        if weights is not None:
+            acc_ce_loss *= weights[i]
     acc_ce_loss /= (num_class-1)
     return acc_ce_loss
         
