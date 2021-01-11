@@ -54,8 +54,30 @@ def reverse_one_hot(predmask_array,class_list):
     '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
-    for idx, _class in enumerate(class_list):
-        final_mask = final_mask +  (idx_argmax == idx)*_class
+    special_cases_to_check = ['|', '&'] 
+    special_case_detected = False
+    max = 0
+    
+    for _class in class_list:
+        for case in special_cases_to_check:
+            if case in _class: # check if any of the specical cases are present
+                special_case_detected = True
+                class_split = _class.split(case) # if present, then split the sub-class
+                for i in class_split: # find the max for computation later on
+                    if int(i) > max:
+                        max = i
+    
+    if special_case_detected:
+        # do something
+        test = 1
+        '''
+        for i in len(class_list):
+            output = predmask_array[:,:,:,i]
+            (max – sum(output)) mod max 
+        '''
+    else:        
+        for idx, _class in enumerate(class_list):
+            final_mask = final_mask +  (idx_argmax == idx)*_class
     return final_mask
 
 def checkPatchDivisibility(patch_size, number = 16):
