@@ -48,6 +48,16 @@ def one_hot(segmask_array, class_list):
     batch_stack = torch.stack(batch_stack)    
     return batch_stack
 
+def reverse_one_hot(predmask_array,class_list):
+    '''
+    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
+    '''
+    idx_argmax  = np.argmax(predmask_array,axis=0)
+    final_mask = 0
+    for idx, _class in enumerate(class_list):
+        final_mask = final_mask +  (idx_argmax == idx)*_class
+    return final_mask
+
 def checkPatchDivisibility(patch_size, number = 16):
     '''
     This function checks the divisibility of a numpy array or integer for architectural integrity
@@ -61,16 +71,6 @@ def checkPatchDivisibility(patch_size, number = 16):
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
         return False
     return True
-
-def reverse_one_hot(predmask_array,class_list):
-    '''
-    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
-    '''
-    idx_argmax  = np.argmax(predmask_array,axis=0)
-    final_mask = 0
-    for idx, _class in enumerate(class_list):
-        final_mask = final_mask +  (idx_argmax == idx)*_class
-    return final_mask
 
 def send_model_to_device(model, ampInput, device, optimizer):
     '''
