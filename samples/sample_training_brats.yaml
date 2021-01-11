@@ -22,20 +22,20 @@ patch_size: [128,128,128]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: label
 # Number of epochs
-num_epochs: 500
+num_epochs: 200
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
-patience: 50
+patience: 20
 # Set the batch size
 batch_size: 1 # change according to available GPU memory - this is for 11GB
 # Set the initial learning rate
-learning_rate: 0.00001
+learning_rate: 0.0001
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
 scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), dc_log (-log of dice), ce (), dcce (sum of dice and ce), mse () ...
 # mse is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 # use mse_torch for regression/classification problems and dice for segmentation
-loss_function: dc
+loss_function: dcce
 #loss_function:
 #  {
 #    'mse':{
@@ -65,7 +65,7 @@ nested_training:
 # resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
 data_preprocessing:
   {
-    'normalize',
+    'normalize_nonZero',
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
@@ -83,7 +83,6 @@ data_augmentation:
     'bias',
     'blur',
     'noise',
-    'swap'
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
