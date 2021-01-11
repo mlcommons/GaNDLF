@@ -60,10 +60,13 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     base_filters = parameters['model']['base_filters']
     batch_size = parameters['batch_size']
     loss_function = parameters['loss_function']
+
+    scaling_factor = parameters['scaling_factor']
     amp = parameters['amp']
     
+    class_list = parameters['model']['class_list']
     n_classList = len(class_list)
-    
+
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
     # initialize problem type    
