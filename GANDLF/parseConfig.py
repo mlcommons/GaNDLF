@@ -252,6 +252,10 @@ def parseConfig(config_file_path, version_check = True):
       if '||' in params['model']['class_list']:
         # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
         print('This is a special case for multi-class computation, where different labels are processed together')
+        temp_classList = params['model']['class_list']
+        temp_classList= temp_classList.replace('[', '') # we don't need the brackets
+        temp_classList= temp_classList.replace(']', '') # we don't need the brackets
+        params['model']['class_list'] = temp_classList.split(',')
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
