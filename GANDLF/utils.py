@@ -54,7 +54,7 @@ def reverse_one_hot(predmask_array,class_list):
     '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
-    special_cases_to_check = ['|', '||', '&', '&&'] 
+    special_cases_to_check = [ '||', '&&'] 
     special_case_detected = False
     max = 0
     
@@ -68,8 +68,9 @@ def reverse_one_hot(predmask_array,class_list):
                         max = i
     
     if special_case_detected:
-        # do something
-        test = 1
+        for i in len(class_list):
+            output = predmask_array[:,i,:,:,:]
+            test = (max - sum(output)) % max 
         '''
         for i in len(class_list):
             output = predmask_array[:,:,:,i]
