@@ -65,7 +65,7 @@ def reverse_one_hot(predmask_array,class_list):
                 class_split = _class.split(case) # if present, then split the sub-class
                 for i in class_split: # find the max for computation later on
                     if int(i) > max:
-                        max = i
+                        max = int(i)
     
     if special_case_detected:
         for i in len(class_list):
