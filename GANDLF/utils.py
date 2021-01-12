@@ -68,7 +68,7 @@ def reverse_one_hot(predmask_array,class_list):
                         max = int(i)
     
     if special_case_detected:
-        for i in len(class_list):
+        for i in range(0,len(class_list)):
             output = predmask_array[:,i,:,:,:]
             test = (max - sum(output)) % max 
         '''
