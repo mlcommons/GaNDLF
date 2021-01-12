@@ -249,7 +249,7 @@ def parseConfig(config_file_path, version_check = True):
     try:
       params['model']['class_list'] = eval(params['model']['class_list'])
     except:
-      if '||' in params['model']['class_list']:
+      if ('||' in params['model']['class_list']) or ('&&' in params['model']['class_list']):
         # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
         print('This is a special case for multi-class computation, where different labels are processed together')
         temp_classList = params['model']['class_list']
