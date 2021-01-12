@@ -68,9 +68,12 @@ def reverse_one_hot(predmask_array,class_list):
                         max = int(i)
     
     if special_case_detected:
-        for i in range(0,len(class_list)):
-            output = predmask_array[:,i,:,:,:]
-            test = (max - sum(output)) % max 
+        output = predmask_array[:,0,:,:,:].long()
+        for i in range(1,len(class_list)):
+            output += predmask_array[:,i,:,:,:].long()
+            # temp_sum = torch.sum(output)
+        # output_2 = (max - torch.sum(output)) % max 
+        # test_2 = 1
         '''
         for i in len(class_list):
             output = predmask_array[:,:,:,i]
