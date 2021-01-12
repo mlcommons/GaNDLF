@@ -154,7 +154,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 # accumulate dice weights for each label
                 mask = subject['label'][torchio.DATA]
                 one_hot_mask = one_hot(mask, class_list)
-                temp = reverse_one_hot(one_hot_mask, class_list)
                 for i in range(1, n_classList):
                     currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
                     dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
@@ -234,6 +233,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             if mask_present:
                 one_hot_mask = one_hot(mask, class_list)
+                #temp = reverse_one_hot(one_hot_mask, class_list)
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
