@@ -20,26 +20,27 @@ def one_hot(segmask_array, class_list):
         one_hot_stack = []
         segmask_array_iter = segmask_array[b,0]
         for _class in class_list: # this implementation allows users to combine logical operands 
-            if '||' in _class: # special case
-                class_split = _class.split('||')
-                bin_mask = (segmask_array_iter == int(class_split[0]))
-                for i in range(1,len(class_split)):
-                    bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
-            elif '|' in _class: # special case
-                class_split = _class.split('|')
-                bin_mask = (segmask_array_iter == int(class_split[0]))
-                for i in range(1,len(class_split)):
-                    bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
-            elif '&&' in _class: # special case
-                class_split = _class.split('&&')
-                bin_mask = (segmask_array_iter == int(class_split[0]))
-                for i in range(1,len(class_split)):
-                    bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
-            elif '&' in _class: # special case
-                class_split = _class.split('&')
-                bin_mask = (segmask_array_iter == int(class_split[0]))
-                for i in range(1,len(class_split)):
-                    bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
+            if isinstance(_class, str):
+                if '||' in _class: # special case
+                    class_split = _class.split('||')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                elif '|' in _class: # special case
+                    class_split = _class.split('|')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                elif '&&' in _class: # special case
+                    class_split = _class.split('&&')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
+                elif '&' in _class: # special case
+                    class_split = _class.split('&')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
             else:
                 bin_mask = (segmask_array_iter == int(_class))
             one_hot_stack.append(bin_mask)
