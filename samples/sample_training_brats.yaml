@@ -11,16 +11,17 @@ model:
     base_filters: 30, # 30 is for a GPU with 11GB VRAM - can be decreased/increased appropriately
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
-    class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
+    class_list: '[0,1||2||4,1||4,4]', # Set the list of labels the model should train on and predict
     amp: True, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
+weighted_loss: True
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128,128]
 # uniform: UniformSampler or label: LabelSampler
-patch_sampler: label
+patch_sampler: uniform
 # Number of epochs
 num_epochs: 200
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
@@ -94,10 +95,10 @@ data_augmentation:
 parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/\$JOB_ID.stdout -e ${outputDir}/\$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
 ## queue configuration - https://torchio.readthedocs.io/data/patch_training.html?#queue
 # this determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches
-q_max_length: 40
+q_max_length: 100
 # this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower
-q_samples_per_volume: 5
+q_samples_per_volume: 10
 # this determines the number subprocesses to use for data loading; '0' means main process is used
-q_num_workers: 2
+q_num_workers: 16 # scale based on available cpu resources
 # used for debugging
 q_verbose: False
