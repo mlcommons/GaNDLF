@@ -20,7 +20,7 @@ modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128,128]
 # uniform: UniformSampler or label: LabelSampler
-patch_sampler: label
+patch_sampler: uniform
 # Number of epochs
 num_epochs: 200
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
@@ -98,6 +98,6 @@ q_max_length: 40
 # this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower
 q_samples_per_volume: 5
 # this determines the number subprocesses to use for data loading; '0' means main process is used
-q_num_workers: 2
+q_num_workers: 16 # change according to available cpu threads
 # used for debugging
 q_verbose: False
