@@ -41,6 +41,9 @@ def one_hot(segmask_array, class_list):
                     bin_mask = (segmask_array_iter == int(class_split[0]))
                     for i in range(1,len(class_split)):
                         bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
+                else:
+                    # assume that it is a simple int
+                    bin_mask = (segmask_array_iter == int(_class)) 
             else:
                 bin_mask = (segmask_array_iter == int(_class))
             one_hot_stack.append(bin_mask)
