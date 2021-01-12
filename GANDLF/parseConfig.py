@@ -256,6 +256,38 @@ def parseConfig(config_file_path, version_check = True):
         temp_classList= temp_classList.replace('[', '') # we don't need the brackets
         temp_classList= temp_classList.replace(']', '') # we don't need the brackets
         params['model']['class_list'] = temp_classList.split(',')
+        # # sanity check
+        # class_list_check = params['model']['class_list']
+        # base_label = None
+        # special_cases_to_check = [ '||', '&&'] 
+        # prevLabelCombo_split = []
+        # for i in range(len(class_list_check),0,-1):
+        #   currentLabelCombo = class_list_check[i] 
+        #   if base_label is None:
+        #     for case in special_cases_to_check:
+        #       if case in currentLabelCombo:
+        #         sys.exit('Combinatorial label training needs a single label in the final layer for consistency')
+        #       else:         
+        #         base_label = int(currentLabelCombo)
+        #   else:
+        #     currentLabelCombo_split = currentLabelCombo.split('||')
+        #     if len(currentLabelCombo) == 1:
+        #       currentLabelCombo_split = currentLabelCombo.split('&&')
+        #       if len(currentLabelCombo) == 1:
+        #         sys.exit('Combinatorial label training currently only works with \'||\' and \'&&\'')
+        #     if len(prevLabelCombo_split) == 0: # first combinatorial label - no need for comparison
+        #       prevLabelCombo_split = currentLabelCombo_split
+        #     else:
+        #       if not(set(prevLabelCombo_split).issubset(currentLabelCombo_split)):
+        #         sys.exit('Combinatorial label training needs each combined label to be a subset of the previous, for example: \'[0,1||2||4,1||4,4]')
+
+        #       test = 1
+        #     prevLabelCombo = class_list_check[i-1]
+        #     prevLabelCombo_split = prevLabelCombo.split('||')
+        #     if len(prevLabelCombo) == 1:
+        #       prevLabelCombo_split = prevLabelCombo.split('&&')
+        #       if len(prevLabelCombo) == 1:
+        #         sys.exit('Combinatorial label training currently only works with \'||\' and \'&&\'')
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
