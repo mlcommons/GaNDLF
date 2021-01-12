@@ -29,11 +29,11 @@ def MCD_log_loss(pm, gt, num_class, weights = None):
     return -torch.log(MCD(pm, gt, num_class, weights))
 
 def CE(out,target):
+    if bool(torch.sum(target) == torch.tensor([0])): # contingency for empty mask
+        return 0
     oflat = out.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     loss = torch.dot(-torch.log(oflat), tflat)/tflat.sum()
-    if torch.isnan(loss): # contingency for empty mask
-        return 0
     return loss
 
 def CCE(out, target, num_class, weights):
