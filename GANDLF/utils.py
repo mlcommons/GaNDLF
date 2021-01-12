@@ -114,8 +114,11 @@ def send_model_to_device(model, ampInput, device, optimizer):
         else:
             print('Device requested via CUDA_VISIBLE_DEVICES: ', dev)
             print('Total number of CUDA devices: ', torch.cuda.device_count())
-            if (torch.cuda.device_count() == 1) and (int(dev) == 1): # this should be properly fixed
+
+            # if only a single visible device, it will be indexed as '0'
+            if torch.cuda.device_count() == 1:
                 dev = '0'
+
             dev_int = int(dev)
             print('Device finally used: ', dev)
             # device = torch.device('cuda:' + dev)
