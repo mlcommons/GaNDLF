@@ -19,6 +19,7 @@ def one_hot(segmask_array, class_list):
     for b in range(batch_size):
         one_hot_stack = []
         segmask_array_iter = segmask_array[b,0]
+        bin_mask = (segmask_array_iter == 0) # initialize bin_mask
         for _class in class_list: # this implementation allows users to combine logical operands 
             if isinstance(_class, str):
                 if '||' in _class: # special case
