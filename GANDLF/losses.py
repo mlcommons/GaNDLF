@@ -14,7 +14,7 @@ def dice(inp, target):
 
 def MCD(pm, gt, num_class, weights = None): 
     acc_dice = 0
-    for i in range(1, num_class): # 0 is background
+    for i in range(0, num_class): # 0 is background
         currentDiceLoss = dice(gt[:,i,:,:,:], pm[:,i,:,:,:]) # subtract from 1 because this is a loss
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
@@ -38,7 +38,7 @@ def CE(out,target):
 
 def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
-    for i in range(1, num_class):
+    for i in range(0, num_class):
         acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:])
         if weights is not None:
             acc_ce_loss *= weights[i]
@@ -73,7 +73,7 @@ def tversky_loss(inp, target, alpha):
 
 def MCT_loss(inp, target, num_class, weights):
     acc_tv_loss = 0
-    for i in range(1, num_class):
+    for i in range(0, num_class):
         acc_tv_loss += tversky_loss(inp[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
     acc_tv_loss /= (num_class-1)
     return acc_tv_loss
