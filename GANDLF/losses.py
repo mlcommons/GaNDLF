@@ -19,7 +19,9 @@ def MCD(pm, gt, num_class, weights = None):
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice += currentDiceLoss
+        print('==== currentDiceLoss_', i, ': ', currentDiceLoss)
     acc_dice /= (num_class-1) # we should not be considering 0
+    print('=== acc_dice: ', acc_dice)
     return acc_dice
 
 def MCD_loss(pm, gt, num_class, weights = None): 
