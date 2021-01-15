@@ -38,6 +38,8 @@ scheduler: triangle
 # mse is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
 # use mse_torch for regression/classification problems and dice for segmentation
 loss_function: dc
+# this parameter weights the loss to handle imbalanced losses better
+weighted_loss: True 
 #loss_function:
 #  {
 #    'mse':{
