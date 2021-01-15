@@ -1,24 +1,8 @@
 
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-import torch
-from torch.utils.data.dataset import Dataset
-import torch.optim as optim
-import numpy as np
 import pandas as pd
-from torch.utils.data import DataLoader
-import os
-import random
-import torchio
-from torchio.transforms import *
-from torchio import Image, Subject
+import os, sys, pickle, subprocess
 from sklearn.model_selection import KFold
-from shutil import copyfile
-import time
-import sys
-import ast 
-import pickle
 from pathlib import Path
-import subprocess
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.training_loop import trainingLoop
