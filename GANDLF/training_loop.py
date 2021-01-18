@@ -160,7 +160,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
                 
                 # get the penalty values - dice_weights contains the overall number for each class in the training data
-            for i in range(1, n_classList):
+            for i in range(0, n_classList):
                 penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
                 for j in range(1, n_classList):
                     if i != j: # for differing classes, subtract the number
