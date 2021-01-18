@@ -137,7 +137,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if use_weights:
         dice_weights_dict = {} # average for "weighted averaging"
         dice_penalty_dict = {} # penalty for misclassification
-        for i in range(1, n_classList):
+        for i in range(0, n_classList):
             dice_weights_dict[i] = 0
             dice_penalty_dict[i] = 0
         # define a seaparate data loader for penalty calculations
@@ -154,7 +154,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 # accumulate dice weights for each label
                 mask = subject['label'][torchio.DATA]
                 one_hot_mask = one_hot(mask, class_list)
-                for i in range(1, n_classList):
+                for i in range(0, n_classList):
                     currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
                     dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
                     total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
@@ -162,7 +162,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 # get the penalty values - dice_weights contains the overall number for each class in the training data
             for i in range(0, n_classList):
                 penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-                for j in range(1, n_classList):
+                for j in range(0, n_classList):
                     if i != j: # for differing classes, subtract the number
                         penalty = penalty - dice_weights_dict[j]
                 
