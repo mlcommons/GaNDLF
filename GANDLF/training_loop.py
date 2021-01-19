@@ -135,13 +135,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     log_train.close()
 
     if use_weights:
+        print('Calculating penalty weights')
         dice_weights_dict = {} # average for "weighted averaging"
         dice_penalty_dict = {} # penalty for misclassification
         for i in range(0, n_classList):
             dice_weights_dict[i] = 0
             dice_penalty_dict[i] = 0
         # define a seaparate data loader for penalty calculations
-        penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) 
+        penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None, preprocessing=None) 
         penalty_loader = DataLoader(penaltyData, batch_size=1)
         
         # get the weights for use for dice loss
