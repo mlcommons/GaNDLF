@@ -16,6 +16,7 @@ from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
 from shutil import copyfile
+from copy import deepcopy
 import time
 import sys
 import pickle
@@ -160,18 +161,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
                     total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
                 
-                # get the penalty values - dice_weights contains the overall number for each class in the training data
-            for i in range(0, n_classList):
-                penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-                for j in range(0, n_classList):
-                    if i != j: # for differing classes, subtract the number
-                        penalty = penalty - dice_weights_dict[j]
-                
-                if total_nonZeroVoxels != 0:
-                    dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-                else:
-                    dice_penalty_dict[i] = 0
-            # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
+            
+            # dice_weights_dict_temp = deepcopy(dice_weights_dict)
+            dice_weights_dict = {k: (v / total_nonZeroVoxels) for k, v in dice_weights_dict.items()} # divide each dice value by total nonzero
+            dice_penalty_dict = deepcopy(dice_weights_dict) # deep copy so that both values are preserved
+            dice_penalty_dict = {k: 1 - v for k, v in dice_weights_dict.items()} # subtract from 1 for penalty
+            total = sum(dice_penalty_dict.values())
+            dice_penalty_dict = {k: v / total for k, v in dice_penalty_dict.items()} # normalize penalty to ensure sum of 1
             # dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, class_list) # this doesn't work because ImagesFromDataFrame gets import twice, causing a "'module' object is not callable" error
     else:
         dice_penalty_dict = None
