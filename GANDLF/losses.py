@@ -15,7 +15,8 @@ def dice(inp, target):
 def MCD(pm, gt, num_class, weights = None): 
     acc_dice = 0
     for i in range(0, num_class): # 0 is background
-        currentDiceLoss = dice(gt[:,i,:,:,:], pm[:,i,:,:,:]) # subtract from 1 because this is a loss
+        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice += currentDiceLoss
@@ -25,10 +26,20 @@ def MCD(pm, gt, num_class, weights = None):
     return acc_dice
 
 def MCD_loss(pm, gt, num_class, weights = None): 
-    return 1 - MCD(pm, gt, num_class, weights) 
+    return MCD(pm, gt, num_class, weights) 
 
 def MCD_log_loss(pm, gt, num_class, weights = None): 
-    return -torch.log(MCD(pm, gt, num_class, weights))
+    acc_dice = 0
+    for i in range(0, num_class): # 0 is background
+        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDiceLoss = -torch.log(currentDice) # subtract from 1 because this is a loss
+        if weights is not None:
+            currentDiceLoss = currentDiceLoss * weights[i]
+        acc_dice += currentDiceLoss
+        print('==== currentDiceLoss_', i, ': ', currentDiceLoss)
+    acc_dice /= num_class # we should not be considering 0
+    print('=== acc_dice: ', acc_dice)
+    return acc_dice
 
 def CE(out,target):
     if bool(torch.sum(target) == 0): # contingency for empty mask
