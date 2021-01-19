@@ -25,7 +25,7 @@ def MCD(pm, gt, num_class, weights = None):
         acc_dice += currentDice
         print('==== currentDice_', i, ': ', currentDice)
     acc_dice /= num_class # we should not be considering 0
-    print('=== acc_dice: ', acc_dice)
+    print('=== accDice: ', acc_dice)
     return acc_dice
 
 def MCD_loss(pm, gt, num_class, weights = None): 
