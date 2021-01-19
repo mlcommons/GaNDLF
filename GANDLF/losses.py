@@ -46,7 +46,20 @@ def MCD_loss(pm, gt, num_class, weights = None):
     # return 1 - MCD(pm, gt, num_class, weights) 
 
 def MCD_log_loss(pm, gt, num_class, weights = None): 
-    return -torch.log(MCD(pm, gt, num_class, weights))
+    '''
+    These weights should be the penalty weights, not penalty weights
+    '''
+    acc_dice_loss = 0
+    for i in range(0, num_class): # 0 is background
+        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDiceLoss = -torch.log(currentDice) # subtract from 1 because this is a loss
+        if weights is not None:
+            currentDiceLoss = currentDiceLoss * weights[i]
+        acc_dice_loss += currentDiceLoss
+        print('==== currentDiceLoss_', i, ': ', currentDiceLoss)
+    acc_dice_loss /= num_class # we should not be considering 0
+    print('=== accDiceLoss_: ', acc_dice_loss)
+    return acc_dice_loss
 
 def CE(out,target):
     if bool(torch.sum(target) == 0): # contingency for empty mask
