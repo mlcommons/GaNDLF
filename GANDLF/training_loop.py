@@ -175,7 +175,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         
     # Getting the channels for training and removing all the non numeric entries from the channels
 
-    batch = next(iter(train_loader))
+    batch = next(iter(val_loader)) # using train_loader makes this slower as train loader contains full augmentations
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
