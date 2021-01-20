@@ -40,15 +40,17 @@ class NonZeroNormalize(NormalizationTransform):
     """
     def __init__(
             self,
+            masking_method: TypeMaskingMethod = None,
             **kwargs
             ):
-        super().__init__(**kwargs)
-        # self.args_names = ('masking_method',)
+        super().__init__(masking_method=masking_method, **kwargs)
+        self.args_names = ('masking_method',)
 
     def apply_normalization(
             self,
             subject: Subject,
             image_name: str,
+            mask: torch.Tensor,
             ) -> None:
         image = subject[image_name]
         mask = image > 0
