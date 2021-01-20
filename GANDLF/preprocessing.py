@@ -53,7 +53,7 @@ class NonZeroNormalize(NormalizationTransform):
             mask: torch.Tensor,
             ) -> None:
         image = subject[image_name]
-        mask = image > 0
+        mask = image.data > 0
         standardized = self.znorm(
             image.data,
             mask,
