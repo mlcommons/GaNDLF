@@ -81,8 +81,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     model.load_state_dict(main_dict['model_state_dict'])
     
     if not(os.environ.get('HOSTNAME') is None):
-        print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
-        sys.stdout.flush()
+        print("\nHostname     :" + str(os.environ.get('HOSTNAME')), flush=True)
 
     # get the channel keys for concatenation later (exclude non numeric channel keys)
     batch = next(iter(inference_loader))
@@ -96,19 +95,17 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         elif 'value' in item:
             value_keys.append(item)
 
-    print("Data Samples: ", len(inference_loader.dataset))
-    sys.stdout.flush()
+    print("Data Samples: ", len(inference_loader.dataset), flush=True)
     model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
     
     # print stats
-    print('Using device:', device)
-    sys.stdout.flush()
+    print('Using device:', device, flush=True)
 
     # get loss function
     loss_fn, MSE_requested = get_loss(loss_function)
 
     average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
-    print(average_dice, average_loss)
+    print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
 if __name__ == "__main__":
 
