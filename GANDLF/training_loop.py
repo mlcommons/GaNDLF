@@ -79,7 +79,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
     if testingDataFromPickle is None:
-        print('No testing data is defined, using validation data for those metrics')
+        print('No testing data is defined, using validation data for those metrics', flush=True)
         testingDataFromPickle = validationDataFromPickle
     inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
@@ -101,8 +101,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # training_start_time = time.asctime()
     # startstamp = time.time()
     if not(os.environ.get('HOSTNAME') is None):
-        print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
-        sys.stdout.flush()
+        print("\nHostname     :" + str(os.environ.get('HOSTNAME')), flush=True)
 
     # resume if compatible model was found
     if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pth.tar")):
@@ -111,17 +110,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         print("Model checkpoint found. Loading checkpoint from: ",os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
 
-    print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)))
-    sys.stdout.flush()
+    print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)), flush=True)
 
     model, amp, device = send_model_to_device(model, amp, device, optimizer=optimizer)
-    print('Using device:', device)        
-    sys.stdout.flush()
+    print('Using device:', device, flush=True)
 
     # Checking for the learning rate scheduler
     scheduler_lr = get_scheduler(scheduler, optimizer, batch_size, len(train_loader.dataset), learning_rate)
 
-    sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
     best_val_dice = best_train_dice = best_test_dice = -1
     best_val_loss = best_train_loss = best_test_loss =  1000000
@@ -136,7 +132,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     log_train.close()
 
     if use_weights:
-        print('Calculating penalty weights')
+        print('Calculating penalty weights', flush=True)
         dice_weights_dict = {} # average for "weighted averaging"
         dice_penalty_dict = {} # penalty for misclassification
         for i in range(0, n_classList):
@@ -193,8 +189,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     ################ TRAINING THE MODEL##############
     for ep in range(num_epochs):
         start = time.time()
-        print("\n")
-        print("Ep# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
+        print("\nEp# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())), flush=True)
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             # uncomment line to debug memory issues
@@ -359,7 +354,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_train_dice": best_train_dice,
             "best_train_loss": best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
             
-        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'))
+        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'), flush=True)
 
         if save_condition_val:
             best_val_idx = ep
@@ -369,7 +364,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_val_dice": best_val_dice,
             "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'))
+        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'), flush=True)
 
         if save_condition_test:
             best_test_idx = ep
@@ -379,7 +374,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_test_dice": best_test_dice,
             "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'))
+        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'), flush=True)
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         
@@ -396,14 +391,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     "val_dice": average_val_dice, "val_loss": average_val_loss }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         stop = time.time()     
-        print("Time for epoch: ",(stop - start)/60," mins")        
+        print("Time for epoch: ",(stop - start)/60," mins", flush=True)        
 
         # Checking if patience is crossed
         if patience_count > patience:
-            print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
+            print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience), flush=True)
             break
         
-        sys.stdout.flush()
         log_train = open(log_train_file, "a")
         log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
