@@ -26,3 +26,15 @@ def resize_image_resolution(input_image, output_size):
     for i in range(len(output_size)):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
     return outputSpacing
+
+class NonZeroNormalize:
+    def __call__(self, x):
+        tensor = x.clone().float()
+        mask = tensor > 0
+        values = x > tensor.masked_select(mask)
+        mean, std = values.mean(), values.std()
+        if std == 0:
+            return None
+        tensor -= mean
+        tensor /= std
+        return tensor
