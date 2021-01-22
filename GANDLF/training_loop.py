@@ -328,6 +328,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             save_condition_val = average_val_dice > best_val_dice
             if save_condition_val:
                 best_val_dice = average_val_dice
+                patience_count = 0
             else: # patience is calculated on validation
                 patience_count = patience_count + 1 
             save_condition_test = average_test_dice > best_test_dice
