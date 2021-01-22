@@ -164,7 +164,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
                 for j in range(1, n_classList):
                     if i != j: # for differing classes, subtract the number
-                        penalty = penalty - dice_penalty_dict[j]
+                        penalty = penalty - dice_weights_dict[j]
                 
                 if total_nonZeroVoxels != 0:
                     dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
@@ -335,6 +335,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             save_condition_val = average_val_dice > best_val_dice
             if save_condition_val:
                 best_val_dice = average_val_dice
+                patience_count = 0
             else: # patience is calculated on validation
                 patience_count = patience_count + 1 
             save_condition_test = average_test_dice > best_test_dice
