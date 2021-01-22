@@ -80,11 +80,7 @@ def parseConfig(config_file_path, version_check = True):
   params['batch_size'] = batch_size
   
   if 'amp' in params:
-    amp = bool(params['amp'])
-  else:
-    amp = False
-    print("NOT using Mixed Precision Training")
-  params['amp'] = amp
+    print("Please define \'amp\' under \'model\'")
 
   if 'learning_rate' in params:
     learning_rate = float(params['learning_rate'])
@@ -222,6 +218,13 @@ def parseConfig(config_file_path, version_check = True):
       sys.exit('The \'model\' parameter needs to be populated as a dictionary')
     elif len(params['model']) == 0: # only proceed if something is defined
       sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
+
+    if 'amp' in params['model']:
+      amp = params['model']['amp']
+    else:
+      amp = False
+      print("NOT using Mixed Precision Training")
+    params['model']['amp'] = amp
 
     if not('architecture' in params['model']):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
