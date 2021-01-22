@@ -65,8 +65,8 @@ def clip_transform(min, max, p=1):
 def crop_external_zero_planes(psize, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
-        raise ValueError("crop_external_zero_planes cannot be performed with non 1 probability.")
-    return CropExternalZeroplanes(patch_size=patch_size, p=p)
+        raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
+    return CropExternalZeroplanes(psize=psize, p=p)
 
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
