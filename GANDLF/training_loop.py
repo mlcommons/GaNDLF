@@ -48,7 +48,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
-    amp = parameters['amp']
+    amp = parameters['model']['amp']
     patience = parameters['patience']
     use_weights = parameters['weighted_loss']
 
