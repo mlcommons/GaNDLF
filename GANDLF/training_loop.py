@@ -184,6 +184,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if amp:
+        print('Using automatic mixed precision', flush=True)
         scaler = torch.cuda.amp.GradScaler() 
 
     ################ TRAINING THE MODEL##############
