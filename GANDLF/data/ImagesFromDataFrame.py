@@ -66,9 +66,6 @@ def crop_external_zero_planes(psize, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
         raise ValueError("crop_external_zero_planes cannot be performed with non 1 probability.")
-    if len(psize) != 3:
-        raise ValueError("Here we rely on a length 3 psize in order to get a length four (first dim equal to 1).")
-    patch_size = [1]+[dim for dim in psize]
     return CropExternalZeroplanes(patch_size=patch_size, p=p)
 
 # defining dict for pre-processing - key is the string and the value is the transform object
