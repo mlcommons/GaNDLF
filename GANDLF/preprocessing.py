@@ -93,13 +93,15 @@ class  CropExternalZeroplanes(SpatialTransform):
         self.psize = psize
     
     def apply_transform(self, subject):
+
+        # get dictionary of images
+        images_dict = subject.get_images_dict(intensity_only=False)
         
         # make sure shapes are consistent across images, and get this shape
         subject.check_consistent_spatial_shape()
         example_image_affine = list(images_dict.values())[0].affine
         
         # create stack of all images (including segmentation)
-        images_dict = subject.get_images_dict(intensity_only=False)
         numpy_stack_list = []
         names_list = []
         for name, image in images_dict.items():
