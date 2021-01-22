@@ -3,10 +3,10 @@ import sys
 
 import torch
 import torchio
+from torchio.transforms.spatial_transform import SpatialTransform
 import SimpleITK as sitk
 import nibabel as nib
 
-from torchio.transforms.spatial_transform import SpatialTransform
 
 def threshold_intensities(input_tensor, min_val, max_val):
     '''
@@ -17,11 +17,13 @@ def threshold_intensities(input_tensor, min_val, max_val):
     l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
     return l2_tensor
 
+
 def clip_intensities(input_tensor, min_val, max_val):
     '''
     This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
     '''
     return torch.clamp(input_tensor, min_val, max_val)
+
 
 def resize_image_resolution(input_image, output_size):
     '''
@@ -75,6 +77,7 @@ def crop_image_outside_zeros(array, psize):
                       small[2]:large[2]]
     
     return new_corner_idxs, new_array
+
 
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/spatial/crop.py
 class  CropExternalZeroplanes(SpatialTransform):
