@@ -86,7 +86,7 @@ class  CropExternalZeroplanes(SpatialTransform):
     (starting from edges) physical-coordinate planes with all zero voxels until you reach a non-zero voxel.
 
     Args:
-        psize: patch size (has a channel axis dimension which should be made 1) used to ensure we do not crop to smaller size than this)
+        psize: patch size (used to ensure we do not crop to smaller size than this)
         **kwargs: See :class:`~torchio.transforms.Transform` for additional
             keyword arguments.
     """
