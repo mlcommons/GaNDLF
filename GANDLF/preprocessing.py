@@ -36,6 +36,25 @@ def resize_image_resolution(input_image, output_size):
     return outputSpacing
 
 
+def tensor_rotate_90(input_image, axis):
+    # with 'axis' axis of rotation, rotate 90 degrees
+    # tensor image is expected to be of shape (1, a, b, c)
+    if axis not in [1, 2, 3]:
+        raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
+    relevant_axes = set([1, 2, 3])
+    affected_axes = list(relevant_axes - set([axis]) )
+    return torch.transpose(input_image, affected_axes[0], affected_axes[1]).flip(affected_axes[1])
+
+
+def tensor_rotate_180(input_image, axis):
+    # with 'axis' axis of rotation, rotate 180 degrees
+    # tensor image is expected to be of shape (1, a, b, c)
+    if axis not in [1, 2, 3]:
+        raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
+    relevant_axes = set([1, 2, 3])
+    affected_axes = list(relevant_axes - set([axis]) )
+    return input_image.flip(affected_axes[0]).flip(affected_axes[1]) 
+
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
 def crop_image_outside_zeros(array, psize):
     dimensions = len(array.shape)

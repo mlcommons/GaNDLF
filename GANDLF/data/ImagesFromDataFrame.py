@@ -55,18 +55,26 @@ def flip(axes = 0, p=1):
 # def anisotropy(axes = 0, p=1):
 #     return RandomFlip(axes = axes, p = p)
 
-## lambdas for pre-processing
-def threshold_transform(min, max, p=1):
-    return Lambda(lambda x: threshold_intensities(x, min, max))
-
-def clip_transform(min, max, p=1):
-    return Lambda(lambda x: clip_intensities(x, min, max))
-
 def crop_external_zero_planes(psize, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
         raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
     return CropExternalZeroplanes(psize=psize, p=p)
+
+## lambdas for pre-processing
+def threshold_transform(min, max, p=1):
+    return Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
+
+def clip_transform(min, max, p=1):
+    return Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
+
+def rotate_90(axis, p=1):
+    return Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
+
+def rotate_180(axis, p=1):
+    return Lambda(function=(lambda x: tensor_rotate_180(x, axis=axis)), p=p)
+
+
 
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
@@ -87,7 +95,9 @@ global_augs_dict = {
     'noise' : noise,
     'gamma' : gamma,
     'swap' : swap,
-    'flip' : flip
+    'flip' : flip, 
+    'rotate_90': rotate_90, 
+    'rotate_180': rotate_180
 }
 
 global_sampler_dict = {
@@ -220,6 +230,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
                 else:
                     axes_to_flip = augmentations[aug]['axes_to_flip']
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
+            elif aug in ['rotate_90', 'rotate_180']:
+                actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], p=augmentations[aug]['probability'])
             elif ('elastic' in aug) or ('swap' in aug):
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             elif ('blur' in aug):
