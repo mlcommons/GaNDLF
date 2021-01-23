@@ -224,7 +224,7 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
     if train and not(augmentations == None):
         for aug in augmentations:
 
-            if 'flip' in aug:
+            if aug == 'flip':
                 if not('axes_to_flip' in augmentations[aug]):
                     axes_to_flip = [0,1,2]
                 else:
@@ -232,11 +232,11 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
             elif aug in ['rotate_90', 'rotate_180']:
                 actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], p=augmentations[aug]['probability'])
-            elif ('elastic' in aug) or ('swap' in aug):
+            elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
-            elif ('blur' in aug):
+            elif aug == 'blur':
                 actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
-            elif ('noise' in aug):
+            elif aug == 'noise':
                 actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
             else:
                 actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
