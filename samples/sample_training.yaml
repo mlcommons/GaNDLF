@@ -130,6 +130,6 @@ q_max_length: 40
 # this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower
 q_samples_per_volume: 5
 # this determines the number subprocesses to use for data loading; '0' means main process is used
-q_num_workers: 2
+q_num_workers: 2 # scale this according to available CPU resources
 # used for debugging
 q_verbose: False
