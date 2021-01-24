@@ -9,8 +9,8 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
-from GANDLF.preprocessing import NonZeroNormalize
-from GANDLF.preprocessing import threshold_intensities, clip_intensities, resize_image_resolution, tensor_rotate_90, tensor_rotate_180, crop_image_outside_zeros
+from GANDLF.preprocessing import NonZeroNormalize, CropExternalZeroplanes
+from GANDLF.preprocessing import threshold_intensities, clip_intensities, resize_image_resolution, tensor_rotate_90, tensor_rotate_180
 
 import copy, sys
 
