@@ -10,7 +10,7 @@ from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
 from GANDLF.preprocessing import NonZeroNormalize
-from GANDLF.preprocessing import threshold_intensities, clip_intensities, resize_image_resolution
+from GANDLF.preprocessing import threshold_intensities, clip_intensities, resize_image_resolution, tensor_rotate_90, tensor_rotate_180, crop_image_outside_zeros
 
 import copy, sys
 
@@ -56,19 +56,34 @@ def flip(axes = 0, p=1):
 # def anisotropy(axes = 0, p=1):
 #     return RandomFlip(axes = axes, p = p)
 
+def crop_external_zero_planes(psize, p=1):
+    # p is only accepted as a parameter to capture when values other than one are attempted
+    if p != 1:
+        raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
+    return CropExternalZeroplanes(psize=psize, p=p)
+
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
-    return Lambda(lambda x: threshold_intensities(x, min, max))
+    return Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
 
 def clip_transform(min, max, p=1):
-    return Lambda(lambda x: clip_intensities(x, min, max))
+    return Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
+
+def rotate_90(axis, p=1):
+    return Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
+
+def rotate_180(axis, p=1):
+    return Lambda(function=(lambda x: tensor_rotate_180(x, axis=axis)), p=p)
+
+
 
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0)
+    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0), 
+    'crop_external_zero_planes': crop_external_zero_planes
 }
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object
@@ -81,7 +96,9 @@ global_augs_dict = {
     'noise' : noise,
     'gamma' : gamma,
     'swap' : swap,
-    'flip' : flip
+    'flip' : flip, 
+    'rotate_90': rotate_90, 
+    'rotate_180': rotate_180
 }
 
 global_sampler_dict = {
@@ -182,6 +199,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not(preprocessing is None):
+        if 'crop_external_zero_planes' in preprocessing:
+            augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
         for key in ['threshold','clip']:
             if key in preprocessing:
                 augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
@@ -206,17 +225,19 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
     if train and not(augmentations == None):
         for aug in augmentations:
 
-            if 'flip' in aug:
+            if aug == 'flip':
                 if not('axes_to_flip' in augmentations[aug]):
                     axes_to_flip = [0,1,2]
                 else:
                     axes_to_flip = augmentations[aug]['axes_to_flip']
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
-            elif ('elastic' in aug) or ('swap' in aug):
+            elif aug in ['rotate_90', 'rotate_180']:
+                actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], p=augmentations[aug]['probability'])
+            elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
-            elif ('blur' in aug):
+            elif aug == 'blur':
                 actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
-            elif ('noise' in aug):
+            elif aug == 'noise':
                 actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
             else:
                 actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
