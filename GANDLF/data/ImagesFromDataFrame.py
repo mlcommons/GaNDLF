@@ -62,12 +62,19 @@ def threshold_transform(min, max, p=1):
 def clip_transform(min, max, p=1):
     return Lambda(lambda x: clip_intensities(x, min, max))
 
+def crop_external_zero_planes(psize, p=1):
+    # p is only accepted as a parameter to capture when values other than one are attempted
+    if p != 1:
+        raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
+    return CropExternalZeroplanes(psize=psize, p=p)
+
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0)
+    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0), 
+    'crop_external_zero_planes': crop_external_zero_planes
 }
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object
@@ -181,6 +188,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not(preprocessing is None):
+        if 'crop_external_zero_planes' in preprocessing:
+            augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
         for key in ['threshold','clip']:
             if key in preprocessing:
                 augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
