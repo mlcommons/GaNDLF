@@ -83,6 +83,7 @@ data_preprocessing:
       'resolution': [1,2,3]
     },
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
+    'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
@@ -111,7 +112,9 @@ data_augmentation:
     }
     'flip':{
       'axes_to_flip': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
-    }
+    },
+    'rotate_90', # explicitly rotate image by 90
+    'rotate_180', # explicitly rotate image by 180
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
