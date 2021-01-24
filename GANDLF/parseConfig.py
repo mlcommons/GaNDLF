@@ -315,7 +315,7 @@ def parseConfig(config_file_path, version_check = True):
       scheduler = str(params['scheduler'])
   else:
       scheduler = 'triangle'
-  params['scheduler'] = scheduler
+  params['scheduler'] = scheduler.lower()
 
   if 'scaling_factor' in params:
       scaling_factor = params['scaling_factor']
