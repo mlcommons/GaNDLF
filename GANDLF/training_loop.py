@@ -271,6 +271,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                             loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                         else:
                             loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
+                    curr_loss = loss.cpu().data.item()
                     scaler.scale(loss).backward()
                     scaler.step(optimizer)
                 else:
