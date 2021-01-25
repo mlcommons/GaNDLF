@@ -279,11 +279,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                     else:
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
+                    curr_loss = loss.cpu().data.item()
                     loss.backward()
                     optimizer.step()
 
             #Pushing the dice to the cpu and only taking its value
-            curr_loss = loss.cpu().data.item()
+            print('=== curr_loss: ', curr_loss)
+            # curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
             total_train_loss += curr_loss
 
@@ -291,6 +293,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 #Computing the dice score  # Can be changed for multi-class outputs later.
                 curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
                 #print(curr_dice)
+                print('=== curr_dice: ', curr_dice)
                 #Computng the total dice
                 total_train_dice += curr_dice
             # update scale for next iteration
