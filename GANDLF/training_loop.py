@@ -356,7 +356,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_train_dice": best_train_dice,
             "best_train_loss": best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
             
-        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'), flush=True)
+        print("   Train Dice: ", format(average_train_dice,'.10f'), " | Best Train Dice: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'), flush=True)
 
         if save_condition_val:
             best_val_idx = ep
@@ -366,7 +366,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_val_dice": best_val_dice,
             "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'), flush=True)
+        print("     Val Dice: ", format(average_val_dice,'.10f'), " | Best Val   Dice: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'), flush=True)
 
         if save_condition_test:
             best_test_idx = ep
@@ -376,7 +376,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_test_dice": best_test_dice,
             "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'), flush=True)
+        print("    Test Dice: ", format(average_test_dice,'.10f'), " | Best Test  Dice: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'), flush=True)
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         
