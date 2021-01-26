@@ -176,11 +176,11 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     '''
     This function gets various statistics from the specified model and data loader
     '''
-    # if no weights are specified, use 1
-    if weights is None:
-        weights = [1]
-        for i in range(len(class_list) - 1):
-            weights.append(1)
+    # # if no weights are specified, use 1
+    # if weights is None:
+    #     weights = [1]
+    #     for i in range(len(class_list) - 1):
+    #         weights.append(1)
 
     outputToWrite = 'SubjectID,PredictedValue\n'
     model.eval()
@@ -237,8 +237,16 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
-
-            if not subject['label'] == ["NA"]:
+            
+            first = next(iter(subject['label']))
+            if first == 'NA':
+                if not (is_segmentation):
+                    avg_dice = 1 # we don't care about this for regression/classification
+                    # avg_loss = total_loss/len(loader.dataset)
+                    # return avg_dice, avg_loss
+                else:
+                    print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
+            else:
                 mask = subject_dict['label'][torchio.DATA] # get the label image
                 if mask.dim() == 4:
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
@@ -249,13 +257,6 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
                 #Computing the total dice
                 total_dice += curr_dice
-            else:
-                if not (is_segmentation):
-                    avg_dice = 1 # we don't care about this for regression/classification
-                    # avg_loss = total_loss/len(loader.dataset)
-                    # return avg_dice, avg_loss
-                else:
-                    print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
                 patient_name = subject['subject_id']
 
