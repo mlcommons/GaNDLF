@@ -49,6 +49,15 @@ def MCD_loss(pm, gt, num_class, weights = None):
     return acc_dice_loss
     # return 1 - MCD(pm, gt, num_class, weights) 
 
+def MCD_loss_new(pm, gt, num_class, weights = None):    # compute the actual dice score
+    dims = (1, 2, 3)
+    intersection = torch.sum(pm * gt, dims)
+    cardinality = torch.sum(pm + gt, dims)
+
+    dice_score = 2. * intersection / (cardinality + torch.finfo(torch.float32).eps)
+
+    return torch.mean(-dice_score + 1.)
+
 def MCD_log_loss(pm, gt, num_class, weights = None): 
     '''
     These weights should be the penalty weights, not penalty weights
