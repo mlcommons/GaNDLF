@@ -81,8 +81,8 @@ class NonZeroNormalize(NormalizationTransform):
         mean, std = values.mean(), values.std()
         if std == 0:
             return None
-        tensor -= mean
-        tensor /= std
+        tensor[mask] -= mean
+        tensor[mask] /= std
         return tensor
 
 # class NonZeroNormalize:
