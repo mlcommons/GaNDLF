@@ -288,6 +288,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # print('=== curr_loss: ', curr_loss)
             # curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
+            ## debugging new loss
+            temp_loss = MCD_loss_new(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item()
+            print('curr_loss:', curr_loss)
+            print('temp_loss:', temp_loss)
+            ## debugging new loss
+
             total_train_loss += curr_loss
 
             if not is_regression:
