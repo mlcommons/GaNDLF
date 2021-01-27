@@ -192,127 +192,130 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         start = time.time()
         print("\nEp# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())), flush=True)
         samples_for_train = 0
+        batch_idx = 0
         model.train()
-        for batch_idx, (subject) in enumerate(train_loader):
-            # uncomment line to debug memory issues
-            # # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
-            # Load the subject and its ground truth
-            # read and concat the images
-            image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-            
-            # if regression, concatenate values to predict
-            if is_regression:
-                valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
-                valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
-                valuesToPredict = valuesToPredict*scaling_factor
+        while batch_idx < batch_size:
+            for subject in train_loader:
+                # uncomment line to debug memory issues
+                # # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
+                # Load the subject and its ground truth
+                # read and concat the images
+                image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+                
+                # if regression, concatenate values to predict
+                if is_regression:
+                    valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
+                    valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
+                    valuesToPredict = valuesToPredict*scaling_factor
+                    if device.type != 'cpu':
+                        valuesToPredict = valuesToPredict.to(device)
+                
+                # read the mask
+                first = next(iter(subject['label']))
+                if first == 'NA':
+                    mask_present = False
+                else:
+                    mask_present = True
+                    mask = subject['label'][torchio.DATA] # get the label image
+                ## special case for 2D            
+                if image.shape[-1] == 1:
+                    model_2d = True
+                    image = torch.squeeze(image, -1)
+                    if mask_present:
+                        mask = torch.squeeze(mask, -1)
+                else:
+                    model_2d = False
+                # Why are we doing this? Please check again
+                #mask = one_hot(mask.cpu().float().numpy(), class_list)
+                if mask_present:
+                    one_hot_mask = one_hot(mask, class_list)
+                    #temp = reverse_one_hot(one_hot_mask, class_list)
+                # one_hot_mask = one_hot_mask.unsqueeze(0)
+                #mask = torch.from_numpy(mask)
+                # Loading images into the GPU and ignoring the affine
                 if device.type != 'cpu':
-                    valuesToPredict = valuesToPredict.to(device)
-            
-            # read the mask
-            first = next(iter(subject['label']))
-            if first == 'NA':
-                mask_present = False
-            else:
-                mask_present = True
-                mask = subject['label'][torchio.DATA] # get the label image
-            ## special case for 2D            
-            if image.shape[-1] == 1:
-                model_2d = True
-                image = torch.squeeze(image, -1)
-                if mask_present:
-                    mask = torch.squeeze(mask, -1)
-            else:
-                model_2d = False
-            # Why are we doing this? Please check again
-            #mask = one_hot(mask.cpu().float().numpy(), class_list)
-            if mask_present:
-                one_hot_mask = one_hot(mask, class_list)
-                #temp = reverse_one_hot(one_hot_mask, class_list)
-            # one_hot_mask = one_hot_mask.unsqueeze(0)
-            #mask = torch.from_numpy(mask)
-            # Loading images into the GPU and ignoring the affine
-            if device.type != 'cpu':
-                image = image.float().to(device)
-                if mask_present:
-                    one_hot_mask = one_hot_mask.to(device)
+                    image = image.float().to(device)
+                    if mask_present:
+                        one_hot_mask = one_hot_mask.to(device)
 
-            # Making sure that the optimizer has been reset
-            optimizer.zero_grad()
-            # Forward Propagation to get the output from the models
-            # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            # might help solve OOM
-            # torch.cuda.empty_cache()
-            # Casts operations to mixed precision
-            output = model(image)
-            if is_regression or is_classification:
-                #print("Output:", output) #U
-                #print("Values to predict:", valuesToPredict)  #U
-                output = output.clone().type(dtype=torch.float) #U
-                valuesToPredict = valuesToPredict.clone().type(dtype=torch.float) #U
+                # Making sure that the optimizer has been reset
+                optimizer.zero_grad()
+                # Forward Propagation to get the output from the models
+                # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
+                # might help solve OOM
+                # torch.cuda.empty_cache()
+                # Casts operations to mixed precision
+                output = model(image)
+                if is_regression or is_classification:
+                    #print("Output:", output) #U
+                    #print("Values to predict:", valuesToPredict)  #U
+                    output = output.clone().type(dtype=torch.float) #U
+                    valuesToPredict = valuesToPredict.clone().type(dtype=torch.float) #U
 
-                #loss = MSE(output, valuesToPredict) 
-                loss = torch.nn.MSELoss()(output, valuesToPredict)
-                if amp:
-                    with torch.cuda.amp.autocast(): 
+                    #loss = MSE(output, valuesToPredict) 
+                    loss = torch.nn.MSELoss()(output, valuesToPredict)
+                    if amp:
+                        with torch.cuda.amp.autocast(): 
+                            scaler.scale(loss).backward()
+                            scaler.step(optimizer)
+                    else:
+                        loss.backward()
+                        optimizer.step()
+                else:
+                    if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
+                        one_hot_mask = one_hot_mask.unsqueeze(-1)
+                        output = output.unsqueeze(-1)
+                
+                if not is_regression:
+                    if amp:
+                        with torch.cuda.amp.autocast(): 
+                        # Computing the loss
+                            if MSE_requested:
+                                loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                            else:
+                                loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
+                        curr_loss = loss.cpu().data.item()
                         scaler.scale(loss).backward()
                         scaler.step(optimizer)
-                else:
-                    loss.backward()
-                    optimizer.step()
-            else:
-                if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
-                    one_hot_mask = one_hot_mask.unsqueeze(-1)
-                    output = output.unsqueeze(-1)
-            
-            if not is_regression:
-                if amp:
-                    with torch.cuda.amp.autocast(): 
-                    # Computing the loss
+                    else:
+                        # Computing the loss
                         if MSE_requested:
                             loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
                         else:
                             loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                    curr_loss = loss.cpu().data.item()
-                    scaler.scale(loss).backward()
-                    scaler.step(optimizer)
-                else:
-                    # Computing the loss
-                    if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
-                    else:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                    curr_loss = loss.cpu().data.item()
-                    loss.backward()
-                    optimizer.step()
+                        curr_loss = loss.cpu().data.item()
+                        loss.backward()
+                        optimizer.step()
 
-            #Pushing the dice to the cpu and only taking its value
-            # print('=== curr_loss: ', curr_loss)
-            # curr_loss = loss.cpu().data.item()
-            #train_loss_list.append(loss.cpu().data.item())
-            ## debugging new loss
-            # temp_loss = MCD_loss_new(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item()
-            # print('curr_loss:', curr_loss)
-            # print('temp_loss:', temp_loss)
-            ## debugging new loss
+                #Pushing the dice to the cpu and only taking its value
+                # print('=== curr_loss: ', curr_loss)
+                # curr_loss = loss.cpu().data.item()
+                #train_loss_list.append(loss.cpu().data.item())
+                ## debugging new loss
+                # temp_loss = MCD_loss_new(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item()
+                # print('curr_loss:', curr_loss)
+                # print('temp_loss:', temp_loss)
+                ## debugging new loss
 
-            total_train_loss += curr_loss
-            samples_for_train += 1
+                total_train_loss += curr_loss
+                samples_for_train += 1
 
-            if not is_regression:
-                #Computing the dice score  # Can be changed for multi-class outputs later.
-                curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
+                if not is_regression:
+                    #Computing the dice score  # Can be changed for multi-class outputs later.
+                    curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
+                    #print(curr_dice)
+                    # print('=== curr_dice: ', curr_dice)
+                    #Computng the total dice
+                    total_train_dice += curr_dice
+                # update scale for next iteration
+                if amp:
+                    scaler.update() 
+                # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
+                # torch.cuda.empty_cache()
+                if scheduler == "triangular":
+                    scheduler_lr.step()            
                 #print(curr_dice)
-                # print('=== curr_dice: ', curr_dice)
-                #Computng the total dice
-                total_train_dice += curr_dice
-            # update scale for next iteration
-            if amp:
-                scaler.update() 
-            # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
-            # torch.cuda.empty_cache()
-            if scheduler == "triangular":
-                scheduler_lr.step()            
-            #print(curr_dice)
+            batch_idx += 1
 
         if is_segmentation:
             average_train_dice = total_train_dice/samples_for_train #len(train_loader.dataset) 
