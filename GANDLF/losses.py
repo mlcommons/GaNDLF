@@ -1,6 +1,5 @@
 import torch 
 from torch.nn import MSELoss
-import math
 
 
 # Dice scores and dice losses   
@@ -57,7 +56,7 @@ def MCD_log_loss(pm, gt, num_class, weights = None):
     acc_dice_loss = 0
     for i in range(0, num_class): # 0 is background
         currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
-        currentDiceLoss = -torch.log(currentDice) # subtract from 1 because this is a loss
+        currentDiceLoss = -torch.log(currentDice + torch.finfo(torch.float32).eps) # negative because we want positive losses
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
