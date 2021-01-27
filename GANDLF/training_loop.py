@@ -191,6 +191,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     for ep in range(num_epochs):
         start = time.time()
         print("\nEp# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())), flush=True)
+        samples_for_train = 0
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             # uncomment line to debug memory issues
@@ -289,12 +290,13 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
             ## debugging new loss
-            temp_loss = MCD_loss_new(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item()
-            print('curr_loss:', curr_loss)
-            print('temp_loss:', temp_loss)
+            # temp_loss = MCD_loss_new(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item()
+            # print('curr_loss:', curr_loss)
+            # print('temp_loss:', temp_loss)
             ## debugging new loss
 
             total_train_loss += curr_loss
+            samples_for_train += 1
 
             if not is_regression:
                 #Computing the dice score  # Can be changed for multi-class outputs later.
@@ -313,11 +315,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             #print(curr_dice)
 
         if is_segmentation:
-            average_train_dice = total_train_dice/len(train_loader.dataset) 
+            average_train_dice = total_train_dice/samples_for_train #len(train_loader.dataset) 
         else:
             average_train_dice = 1
 
-        average_train_loss = total_train_loss/len(train_loader.dataset)
+        average_train_loss = total_train_loss/samples_for_train #len(train_loader.dataset)
+        print('total_train_loss:', total_train_loss)
+        print('average_train_loss:', average_train_loss)
+        print('average_train_loss_old:', total_train_loss/len(train_loader.dataset))
 
         # initialize some bool variables to control model saving
         save_condition_train = False
