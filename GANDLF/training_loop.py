@@ -320,9 +320,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             average_train_dice = 1
 
         average_train_loss = total_train_loss/samples_for_train #len(train_loader.dataset)
-        print('total_train_loss:', total_train_loss)
-        print('average_train_loss:', average_train_loss)
-        print('average_train_loss_old:', total_train_loss/len(train_loader.dataset))
+        # print('total_train_loss:', total_train_loss)
+        # print('average_train_loss:', average_train_loss)
+        # print('average_train_loss_old:', total_train_loss/len(train_loader.dataset))
 
         # initialize some bool variables to control model saving
         save_condition_train = False
