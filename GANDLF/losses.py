@@ -23,7 +23,7 @@ def MCD(pm, gt, num_class, weights = None):
             currentDice = currentDice * weights[i]
         acc_dice += currentDice
         # print('==== currentDice_', i, ': ', currentDice.cpu().data.item())
-    if weights is not None:
+    if weights is None:
         acc_dice /= num_class # we should not be considering 0
     # print ('=== acc_dice: ', acc_dice.cpu().data.item())
 
