@@ -10,7 +10,7 @@ from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
 from GANDLF.preprocessing import NonZeroNormalize, CropExternalZeroplanes, ThresholdIntensities, ClipIntensities, Rotate
-from GANDLF.preprocessing import threshold_intensities, clip_intensities, resize_image_resolution, tensor_rotate_90, tensor_rotate_180
+from GANDLF.preprocessing import resize_image_resolution
 
 import copy, sys
 
