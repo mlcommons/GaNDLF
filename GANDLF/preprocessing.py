@@ -11,23 +11,6 @@ import nibabel as nib
 from torchio.data.subject import Subject
 from torchio.transforms.preprocessing.intensity.normalization_transform import NormalizationTransform, TypeMaskingMethod
 
-def threshold_intensities(input_tensor, min_val, max_val):
-    '''
-    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
-    '''
-    C = torch.zeros(input_tensor.size())
-    l1_tensor = torch.where(input_tensor < max_val, input_tensor, C)
-    l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
-    return l2_tensor
-
-
-def clip_intensities(input_tensor, min_val, max_val):
-    '''
-    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
-    '''
-    return torch.clamp(input_tensor, min_val, max_val)
-
-
 def resize_image_resolution(input_image, output_size):
     '''
     This function resizes the input image based on the output size and interpolator
@@ -172,25 +155,6 @@ class  ClipIntensities(NormalizationTransform):
     def is_invertible(self):
         return False
 
-# def tensor_rotate_90(input_image, axis):
-#     # with 'axis' axis of rotation, rotate 90 degrees
-#     # tensor image is expected to be of shape (1, a, b, c)
-#     if axis not in [1, 2, 3]:
-#         raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
-#     relevant_axes = set([1, 2, 3])
-#     affected_axes = list(relevant_axes - set([axis]) )
-#     return torch.transpose(input_image, affected_axes[0], affected_axes[1]).flip(affected_axes[1])
-
-
-# def tensor_rotate_180(input_image, axis):
-#     # with 'axis' axis of rotation, rotate 180 degrees
-#     # tensor image is expected to be of shape (1, a, b, c)
-#     if axis not in [1, 2, 3]:
-#         raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
-#     relevant_axes = set([1, 2, 3])
-#     affected_axes = list(relevant_axes - set([axis]) )
-#     return input_image.flip(affected_axes[0]).flip(affected_axes[1]) 
-
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/spatial/crop.py
 class  Rotate(SpatialTransform):
     """
@@ -235,7 +199,6 @@ class  Rotate(SpatialTransform):
             raise RuntimeError(message)
 
         return subject
-
 
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
 def crop_image_outside_zeros(array, psize):
