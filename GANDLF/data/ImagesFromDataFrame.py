@@ -66,7 +66,7 @@ def crop_external_zero_planes(psize, p=1):
 def threshold_transform(min, max, p=1):
     if p != 1:
         raise ValueError("Threshold cannot be performed with non-1 probability.")
-    return ThresholdIntensities(min=min, max=max) # Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
+    return ThresholdIntensities(min_val=min, max_val=max) # Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
 
 def clip_transform(min, max, p=1):
     if p != 1:
