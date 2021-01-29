@@ -99,10 +99,10 @@ class  ThresholdIntensities(NormalizationTransform):
     """
 
     def __init__(self, min_val, max_val, 
-            masking_method: TypeMaskingMethod = None, **kwargs):
+            **kwargs):
         super().__init__(**kwargs)
-        self.min = min_val
-        self.max = max_val
+        self.min_val = min_val
+        self.max_val = max_val
         self.args_names = ('min_val', 'max_val')
     
     def apply_normalization(
@@ -123,7 +123,7 @@ class  ThresholdIntensities(NormalizationTransform):
             raise RuntimeError(message)
         image.data = standardized
 
-    def threshold(tensor: torch.Tensor, min_val: float, max_val: float):
+    def threshold(self, tensor: torch.Tensor, min_val: float, max_val: float):
         test = 1
         tensor = tensor.clone().float()
         C = torch.zeros(tensor.size())
@@ -149,8 +149,8 @@ class  ClipIntensities(NormalizationTransform):
     def __init__(self, min_val, max_val, 
             masking_method: TypeMaskingMethod = None, **kwargs):
         super().__init__(**kwargs)
-        self.min = min_val
-        self.max = max_val
+        self.min_val = min_val
+        self.max_val = max_val
         self.args_names = ('min_val', 'max_val')
     
     def apply_normalization(
@@ -295,7 +295,7 @@ class  CropExternalZeroplanes(SpatialTransform):
     def __init__(self, psize, **kwargs):
         super().__init__(**kwargs)
         self.psize = psize
-        self.args_names = ('psize')
+        self.args_names = ('psize',)
     
     def apply_transform(self, subject):
 
