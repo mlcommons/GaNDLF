@@ -86,29 +86,6 @@ class NonZeroNormalize(NormalizationTransform):
         tensor[mask] /= std
         return tensor
 
-# class NonZeroNormalize:
-#     '''
-#     This class performs non-zero z-score normalize
-#     '''
-#     def __call__(self, x):
-#         tensor = x.clone().float()
-#         mask = tensor > 0
-#         values = x > tensor.masked_select(mask)
-#         mean, std = values.mean(), values.std()
-#         if std == 0:
-#             return None
-#         tensor -= mean
-#         tensor /= std
-#         return tensor
-
-# class ThresholdIntensities:
-#     def __call__(self, x, min_val, max_val):
-#         input_tensor = x.clone().float()
-#         C = torch.zeros(input_tensor.size())
-#         l1_tensor = torch.where(input_tensor < max_val, input_tensor, C)
-#         l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
-#         return l2_tensor
-
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
 class  ThresholdIntensities(NormalizationTransform):
     """
@@ -192,16 +169,6 @@ class  ClipIntensities(NormalizationTransform):
 
     def is_invertible(self):
         return False
-
-# class ClipIntensities:
-#     def __call__(self, x, min_val, max_val):
-#         input_tensor = x.clone().float()
-#         return torch.clamp(input_tensor, min_val, max_val)
-
-class ResizeImageResolution:
-    def __call__(self, x, min_val, max_val):
-        input_tensor = x.clone().float()
-        return torch.clamp(input_tensor, min_val, max_val)
 
 def tensor_rotate_90(input_image, axis):
     # with 'axis' axis of rotation, rotate 90 degrees
