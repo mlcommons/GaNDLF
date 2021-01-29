@@ -166,7 +166,7 @@ def parseConfig(config_file_path, version_check = True):
             if not(isinstance(params['data_augmentation'][rotation_aug], dict)):
                 params['data_augmentation'][rotation_aug] = {}
             if not('axis' in params['data_augmentation'][rotation_aug]):
-                params['data_augmentation'][rotation_aug]['axis'] = [0,1,2] # default
+                params['data_augmentation'][rotation_aug]['axis'] = [1,2,3] # default
       
       # for all others, ensure probability is present
       for key in params['data_augmentation']:
