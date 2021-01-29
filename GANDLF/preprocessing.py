@@ -38,6 +38,7 @@ def resize_image_resolution(input_image, output_size):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
     return outputSpacing
 
+# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
 class NonZeroNormalize(NormalizationTransform):
     """Subtract mean and divide by standard deviation.
 
@@ -100,18 +101,102 @@ class NonZeroNormalize(NormalizationTransform):
 #         tensor /= std
 #         return tensor
 
-class ThresholdIntensities:
-    def __call__(self, x, min_val, max_val):
-        input_tensor = x.clone().float()
-        C = torch.zeros(input_tensor.size())
-        l1_tensor = torch.where(input_tensor < max_val, input_tensor, C)
+# class ThresholdIntensities:
+#     def __call__(self, x, min_val, max_val):
+#         input_tensor = x.clone().float()
+#         C = torch.zeros(input_tensor.size())
+#         l1_tensor = torch.where(input_tensor < max_val, input_tensor, C)
+#         l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
+#         return l2_tensor
+
+# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
+class  ThresholdIntensities(NormalizationTransform):
+    """
+    Threshold input image
+
+    Args:
+        min_val: minimum value to threshold
+        max_val: maximum value to threshold
+        **kwargs: See :class:`~torchio.transforms.Transform` for additional
+            keyword arguments.
+    """
+
+    def __init__(self, min_val, max_val, 
+            masking_method: TypeMaskingMethod = None, **kwargs):
+        super().__init__(**kwargs)
+        self.min = min_val
+        self.max = max_val
+    
+    def apply_normalization(
+            self,
+            subject: Subject,
+            image_name: str,
+            mask: torch.Tensor,
+            ) -> None:
+        image = subject[image_name]
+        standardized = self.threshold(
+            image.data, self.min_val, self.max_val
+        )
+        if standardized is None:
+            message = (
+                'Threshold did not work correctly for'
+                f' in image "{image_name}" ({image.path})'
+            )
+            raise RuntimeError(message)
+        image.data = standardized
+
+    def threshold(tensor: torch.Tensor, min_val: float, max_val: float):
+        test = 1
+        tensor = tensor.clone().float()
+        C = torch.zeros(tensor.size())
+        l1_tensor = torch.where(tensor < max_val, tensor, C)
         l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
         return l2_tensor
 
-class ClipIntensities:
-    def __call__(self, x, min_val, max_val):
-        input_tensor = x.clone().float()
-        return torch.clamp(input_tensor, min_val, max_val)
+    def is_invertible(self):
+        return False
+
+# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
+class  ClipIntensities(NormalizationTransform):
+    """
+    Clip input image intensities.
+
+    Args:
+        min_val: minimum value to threshold
+        max_val: maximum value to threshold
+        **kwargs: See :class:`~torchio.transforms.Transform` for additional
+            keyword arguments.
+    """
+
+    def __init__(self, min_val, max_val, 
+            masking_method: TypeMaskingMethod = None, **kwargs):
+        super().__init__(**kwargs)
+        self.min = min_val
+        self.max = max_val
+    
+    def apply_normalization(
+            self,
+            subject: Subject,
+            image_name: str,
+            mask: torch.Tensor,
+            ) -> None:
+        image = subject[image_name]
+        standardized = torch.clamp(image.data, self.min_val, self.max_val) 
+        if standardized is None:
+            message = (
+                'Clipping did not work correctly for'
+                f' in image "{image_name}" ({image.path})'
+            )
+            raise RuntimeError(message)
+        image.data = standardized
+
+    def is_invertible(self):
+        return False
+
+# class ClipIntensities:
+#     def __call__(self, x, min_val, max_val):
+#         input_tensor = x.clone().float()
+#         return torch.clamp(input_tensor, min_val, max_val)
 
 class ResizeImageResolution:
     def __call__(self, x, min_val, max_val):
