@@ -103,6 +103,7 @@ class  ThresholdIntensities(NormalizationTransform):
         super().__init__(**kwargs)
         self.min = min_val
         self.max = max_val
+        self.args_names = ('min_val', 'max_val')
     
     def apply_normalization(
             self,
@@ -150,6 +151,7 @@ class  ClipIntensities(NormalizationTransform):
         super().__init__(**kwargs)
         self.min = min_val
         self.max = max_val
+        self.args_names = ('min_val', 'max_val')
     
     def apply_normalization(
             self,
@@ -206,6 +208,7 @@ class  Rotate(SpatialTransform):
         if axis not in [1, 2, 3]:
             raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
         self.axis = axis
+        self.args_names = ('degree', 'axis')
 
     def apply_transform(self, subject):
         # get dictionary of images
@@ -292,6 +295,7 @@ class  CropExternalZeroplanes(SpatialTransform):
     def __init__(self, psize, **kwargs):
         super().__init__(**kwargs)
         self.psize = psize
+        self.args_names = ('psize')
     
     def apply_transform(self, subject):
 
