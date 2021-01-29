@@ -113,6 +113,7 @@ class  CropExternalZeroplanes(SpatialTransform):
     def __init__(self, psize, **kwargs):
         super().__init__(**kwargs)
         self.psize = psize
+        self.args_names = ('psize',)
     
     def apply_transform(self, subject):
 
