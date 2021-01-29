@@ -60,14 +60,18 @@ def crop_external_zero_planes(psize, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
         raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
-    return CropExternalZeroplanes(psize=psize, p=p)
+    return CropExternalZeroplanes(psize=psize)
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
-    return ThresholdIntensities(min=min, max=max, p=p) # Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
+    if p != 1:
+        raise ValueError("Threshold cannot be performed with non-1 probability.")
+    return ThresholdIntensities(min=min, max=max) # Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
 
 def clip_transform(min, max, p=1):
-    return ClipIntensities(min, max, p=p) # Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
+    if p != 1:
+        raise ValueError("Clipping cannot be performed with non-1 probability.")
+    return ClipIntensities(min, max) # Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
 
 def rotate_90(axis, p=1):
     return Rotate(90, axis, p=p) # Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
