@@ -1,5 +1,7 @@
 import torch
 import numpy as np
+from functools import partial
+
 import torchio
 from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike,
                                 RandomAffine, RandomElasticDeformation,
@@ -69,10 +71,10 @@ def clip_transform(min, max, p=1):
     return Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
 
 def rotate_90(axis, p=1):
-    return Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
+    return Lambda(function=partial(tensor_rotate_90(axis=axis)), p=p)
 
 def rotate_180(axis, p=1):
-    return Lambda(function=(lambda x: tensor_rotate_180(x, axis=axis)), p=p)
+    return Lambda(function=partial(tensor_rotate_180(axis=axis)), p=p)
 
 
 
