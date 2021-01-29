@@ -9,7 +9,7 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
-from GANDLF.preprocessing import NonZeroNormalize, CropExternalZeroplanes
+from GANDLF.preprocessing import NonZeroNormalize, CropExternalZeroplanes, ThresholdIntensities, ClipIntensities, Rotate
 from GANDLF.preprocessing import threshold_intensities, clip_intensities, resize_image_resolution, tensor_rotate_90, tensor_rotate_180
 
 import copy, sys
@@ -64,17 +64,16 @@ def crop_external_zero_planes(psize, p=1):
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
-    return Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
+    return ThresholdIntensities(min=min, max=max, p=p) # Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
 
 def clip_transform(min, max, p=1):
-    return Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
+    return ClipIntensities(min, max, p=p) # Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
 
 def rotate_90(axis, p=1):
-    return Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
+    return Rotate(90, axis, p=p) # Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
 
 def rotate_180(axis, p=1):
-    return Lambda(function=(lambda x: tensor_rotate_180(x, axis=axis)), p=p)
-
+    return Rotate(180, axis, p=p) # Lambda(function=(lambda x: tensor_rotate_180(x, axis=axis)), p=p)
 
 
 # defining dict for pre-processing - key is the string and the value is the transform object
