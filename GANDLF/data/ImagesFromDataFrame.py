@@ -232,7 +232,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
                     axes_to_flip = augmentations[aug]['axes_to_flip']
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
             elif aug in ['rotate_90', 'rotate_180']:
-                actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], p=augmentations[aug]['probability'])
+                for axis in augmentations[aug]['axis']:
+                    actual_function = global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability'])
             elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             elif aug == 'blur':
