@@ -160,6 +160,14 @@ def parseConfig(config_file_path, version_check = True):
           if not('mean' in params['data_augmentation']['noise']):
               params['data_augmentation']['noise']['mean'] = 0 # default
       
+      # special case for random noise - which takes a mean range
+      for rotation_aug in ['rotate_90', 'rotate_180']:
+        if rotation_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][rotation_aug], dict)):
+                params['data_augmentation'][rotation_aug] = {}
+            if not('axis' in params['data_augmentation'][rotation_aug]):
+                params['data_augmentation'][rotation_aug]['axis'] = [0,1,2] # default
+      
       # for all others, ensure probability is present
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
