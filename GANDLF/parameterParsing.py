@@ -137,19 +137,19 @@ def get_optimizer(which_optimizer, model_parameters, learning_rate):
     '''
     if which_optimizer == 'sgd':
         optimizer = optim.SGD(model_parameters,
-                              lr=learning_rate,
-                              momentum = 0.9)
+                                lr=learning_rate,
+                                momentum = 0.9)
     elif which_optimizer == 'adam':        
         optimizer = optim.Adam(model_parameters,
-                               lr=learning_rate,
-                               betas = (0.9,0.999),
-                               weight_decay = 0.00005)
+                                lr=learning_rate,
+                                betas = (0.9,0.999),
+                                weight_decay = 0.00005)
     else:
         print('WARNING: Could not find the requested optimizer \'' + which_optimizer + '\' in the implementation, using sgd, instead', file = sys.stderr)
         opt = 'sgd'
         optimizer = optim.SGD(model_parameters,
-                              lr= learning_rate,
-                              momentum = 0.9)
+                                lr= learning_rate,
+                                momentum = 0.9)
 
     return optimizer
 
@@ -173,14 +173,14 @@ def get_scheduler(which_scheduler, optimizer, batch_size, training_samples_size,
         scheduler_lr = StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
     elif which_scheduler == "reduce-on-plateau":
         scheduler_lr = ReduceLROnPlateau(optimizer, mode='min', factor=0.1,
-                                                                  patience=10, threshold=0.0001, threshold_mode='rel',
-                                                                  cooldown=0, min_lr=0, eps=1e-08, verbose=False)
+                                        patience=10, threshold=0.0001, threshold_mode='rel',
+                                        cooldown=0, min_lr=0, eps=1e-08, verbose=False)
     elif which_scheduler == "triangular":
         scheduler_lr = CyclicLR(optimizer, learning_rate * 0.001, learning_rate,
-                                                         step_size_up=step_size,
-                                                         step_size_down=None, mode='triangular', gamma=1.0,
-                                                         scale_fn=None, scale_mode='cycle', cycle_momentum=True,
-                                                         base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+                                step_size_up=step_size,
+                                step_size_down=None, mode='triangular', gamma=1.0,
+                                scale_fn=None, scale_mode='cycle', cycle_momentum=True,
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
     elif which_scheduler == 'cosineannealing':
         scheduler_lr = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=1, eta_min=1e-6, last_epoch=-1)
     else:
