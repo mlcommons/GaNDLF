@@ -54,6 +54,9 @@ def gamma(p=1):
 def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
 
+def positive_voxel_mask(image):
+    return image > 0
+
 # def anisotropy(axes = 0, p=1):
 #     return RandomFlip(axes = axes, p = p)
 
@@ -82,7 +85,7 @@ global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0), 
+    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask), 
     'crop_external_zero_planes': crop_external_zero_planes
 }
 
