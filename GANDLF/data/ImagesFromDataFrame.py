@@ -117,7 +117,18 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_per_volume = 1, q_num_workers = 2, q_verbose = False, sampler = 'label', train = True, augmentations = None, preprocessing = None):
+def ImagesFromDataFrame(dataframe, 
+                        psize, 
+                        headers, 
+                        q_max_length = 10, 
+                        q_samples_per_volume = 1, 
+                        q_num_workers = 2, 
+                        q_verbose = False, 
+                        sampler = 'label', 
+                        train = True, 
+                        augmentations = None, 
+                        preprocessing = None, 
+                        in_memory = False):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -151,6 +162,8 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
         for channel in channelHeaders:
             # assigning the dict key to the channel
             subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
+            if in_memory:
+                subject_dict[str(channel)].load()
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
@@ -174,6 +187,9 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
 
         if labelHeader is not None:
             subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
+            if in_memory:
+                subject_dict['label'].load()
+            
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
             subject_dict['label'] = "NA"
