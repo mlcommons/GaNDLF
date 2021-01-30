@@ -65,17 +65,16 @@ def crop_external_zero_planes(psize, p=1):
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
-    return Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
+    return Lambda(function=partial(threshold_intensities, min=min, max=max), p=p)
 
 def clip_transform(min, max, p=1):
-    return Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
+    return Lambda(function=partial(clip_intensities, min=min, max=max), p=p)
 
 def rotate_90(axis, p=1):
     return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
 
 def rotate_180(axis, p=1):
     return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
-
 
 
 # defining dict for pre-processing - key is the string and the value is the transform object
