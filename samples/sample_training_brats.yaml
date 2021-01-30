@@ -64,9 +64,11 @@ nested_training:
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
+# crop_external_zero_planes: crops all non-zero planes from input tensor to reduce image search space
 data_preprocessing:
   {
     'normalize_nonZero',
+    'crop_external_zero_planes',
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
@@ -76,14 +78,30 @@ data_preprocessing:
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
-    'affine',
-    'elastic',
+    'affine':{
+      'probability': 0.25
+    },
+    'elastic':{
+      'probability': 0.1
+    },
     'kspace':{
+      'probability': 0.25
+    },
+    'bias':{
+      'probability': 0.25
+    },
+    'blur':{
       'probability': 0.5
     },
-    'bias',
-    'blur',
-    'noise',
+    'noise':{
+      'probability': 0.5
+    },
+    'rotate_90':{
+      'probability': 0.5
+    },
+    'rotate_180':{
+      'probability': 0.5
+    },
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training

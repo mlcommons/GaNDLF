@@ -63,9 +63,9 @@ nested_training:
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
+# 'crop_external_zero_planes': crops all non-zero planes from input tensor to reduce image search space
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
-# resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is 
 # resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
 data_preprocessing:
   {
