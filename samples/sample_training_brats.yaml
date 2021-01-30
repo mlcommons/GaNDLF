@@ -11,7 +11,7 @@ model:
     base_filters: 30, # 30 is for a GPU with 11GB VRAM - can be decreased/increased appropriately
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
-    class_list: '[0,1||2||4,1||4,4]', # Set the list of labels the model should train on and predict
+    class_list: '[1||2||4,1||4,4]', # Set the list of labels the model should train on and predict
     amp: True, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
@@ -23,15 +23,15 @@ patch_size: [128,128,128]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: uniform
 # Number of epochs
-num_epochs: 200
+num_epochs: 500
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
-patience: 20
+patience: 50
 # Set the batch size
 batch_size: 1 # change according to available GPU memory - this is for 11GB
 # Set the initial learning rate
-learning_rate: 0.0001
+learning_rate: 0.5
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
-scheduler: triangle
+scheduler: triangle_modified
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), dc_log (-log of dice), ce (), dcce (sum of dice and ce), mse () ...
 # mse is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
