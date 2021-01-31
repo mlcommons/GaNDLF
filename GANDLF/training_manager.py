@@ -90,6 +90,8 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         if not os.path.exists(currentModelConfigPickle):
             with open(currentModelConfigPickle, 'wb') as handle:
                 pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            currentModelConfigPickle = pickle.load(currentOutputFolder,"rb")
 
         # save the current training+validation and testing datasets 
         if noTestingData:
