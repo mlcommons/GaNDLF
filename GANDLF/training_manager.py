@@ -138,8 +138,12 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
             if not os.path.exists(currentTrainingDataPickle):
                 trainingData.to_pickle(currentTrainingDataPickle)
+            else:
+                trainingData = pd.read_pickle(currentTrainingDataPickle)
             if not os.path.exists(currentValidationDataPickle):
                 validationData.to_pickle(currentValidationDataPickle)
+            else:
+                validationData = pd.read_pickle(currentValidationDataPickle)
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
