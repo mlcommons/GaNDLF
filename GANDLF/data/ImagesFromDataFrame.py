@@ -157,16 +157,15 @@ def ImagesFromDataFrame(dataframe,
         # such as different image modalities, labels, any other data
         subject_dict = {}
         subject_dict['subject_id'] = dataframe[subjectIDHeader][patient]
-
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
             # assigning the dict key to the channel
-            if in_memory:
+            if not in_memory:
                 subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
             else:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                array = sitk.getArrayFromImage(img)
-                subject_dict['label'] = Image(tensor=array, type=torchio.INTENSITY)
+                array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
+                subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY)
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
@@ -193,7 +192,7 @@ def ImagesFromDataFrame(dataframe,
                 subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
             else:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                array = sitk.getArrayFromImage(img)
+                array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
                 subject_dict['label'] = Image(tensor=array, type=torchio.LABEL)
 
             
