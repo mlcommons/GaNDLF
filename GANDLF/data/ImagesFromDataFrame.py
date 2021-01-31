@@ -161,9 +161,12 @@ def ImagesFromDataFrame(dataframe,
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
             # assigning the dict key to the channel
-            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
             if in_memory:
-                subject_dict[str(channel)].load()
+                subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
+            else:
+                img = sitk.ReadImage(str(dataframe[labelHeader][patient])
+                array = sitk.getArrayFromImage(img)
+                subject_dict['label'] = Image(tensor=array, type=torchio.INTENSITY)
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
@@ -186,9 +189,13 @@ def ImagesFromDataFrame(dataframe,
         #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
-            subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
-            if in_memory:
-                subject_dict['label'].load()
+            if not in_memory:
+                subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
+            else:
+                img = sitk.ReadImage(str(dataframe[labelHeader][patient])
+                array = sitk.getArrayFromImage(img)
+                subject_dict['label'] = Image(tensor=array, type=torchio.LABEL)
+
             
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
