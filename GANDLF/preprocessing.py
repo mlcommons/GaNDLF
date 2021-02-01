@@ -15,7 +15,7 @@ def threshold_intensities(input_tensor, min, max):
     '''
     This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
     '''
-    C = torch.zeros(input_tensor.size())
+    C = torch.zeros(input_tensor.size(), dtype=input_tensor.dtype)
     l1_tensor = torch.where(input_tensor < max, input_tensor, C)
     l2_tensor = torch.where(l1_tensor > min, l1_tensor, C)
     return l2_tensor
