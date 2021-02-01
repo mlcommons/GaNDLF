@@ -246,7 +246,7 @@ def ImagesFromDataFrame(dataframe,
         if 'normalize' in preprocessing:
             augmentation_list.append(global_preprocessing_dict['normalize'])
         elif 'normalize_nonZero' in preprocessing:
-            augmentation_list.append(NonZeroNormalize())
+            augmentation_list.append(NonZeroNormalizeOnMaskedRegion())
 
     # other augmentations should only happen for training - and also setting the probabilities
     # for the augmentations
