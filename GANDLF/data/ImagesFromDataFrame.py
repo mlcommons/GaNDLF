@@ -11,8 +11,8 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
-from GANDLF.preprocessing import NonZeroNormalize, CropExternalZeroplanes, ThresholdIntensities, ClipIntensities, Rotate
-from GANDLF.preprocessing import resize_image_resolution
+from GANDLF.preprocessing import NonZeroNormalizeOnMaskedRegion, CropExternalZeroplanes
+from GANDLF.preprocessing import resize_image_resolution, threshold_intensities, tensor_rotate_180, tensor_rotate_90, clip_intensities
 
 import copy, sys
 
@@ -86,7 +86,8 @@ global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask), 
+    # 'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
+    'normalize_nonZero': NonZeroNormalizeOnMaskedRegion(), 
     'crop_external_zero_planes': crop_external_zero_planes
 }
 
