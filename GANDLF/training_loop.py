@@ -51,6 +51,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     amp = parameters['model']['amp']
     patience = parameters['patience']
     use_weights = parameters['weighted_loss']
+    in_memory = parameters['in_memory']
 
     ## model configuration
     which_model = parameters['model']['architecture']
@@ -75,9 +76,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
   
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing)
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory) # may or may not need to add augmentations here
     if testingDataFromPickle is None:
         print('No testing data is defined, using validation data for those metrics', flush=True)
         testingDataFromPickle = validationDataFromPickle
@@ -275,7 +276,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         else:
                             loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                     curr_loss = loss.cpu().data.item()
-                    if not math.isnan(loss.cpu().data.item()):
+                    if not math.isnan(curr_loss):
                         scaler.scale(loss).backward()
                     scaler.step(optimizer)
                 else:
