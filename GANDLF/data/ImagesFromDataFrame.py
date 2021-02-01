@@ -1,5 +1,7 @@
 import torch
 import numpy as np
+from functools import partial
+
 import torchio
 from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike,
                                 RandomAffine, RandomElasticDeformation,
@@ -52,6 +54,9 @@ def gamma(p=1):
 def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
 
+def positive_voxel_mask(image):
+    return image > 0
+
 # def anisotropy(axes = 0, p=1):
 #     return RandomFlip(axes = axes, p = p)
 
@@ -63,17 +68,16 @@ def crop_external_zero_planes(psize, p=1):
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
-    return Lambda(function=(lambda x: threshold_intensities(x, min, max)), p=p)
+    return Lambda(function=partial(threshold_intensities, min=min, max=max), p=p)
 
 def clip_transform(min, max, p=1):
-    return Lambda(function=(lambda x: clip_intensities(x, min, max)), p=p)
+    return Lambda(function=partial(clip_intensities, min=min, max=max), p=p)
 
 def rotate_90(axis, p=1):
-    return Lambda(function=(lambda x: tensor_rotate_90(x, axis=axis)), p=p)
+    return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
 
 def rotate_180(axis, p=1):
-    return Lambda(function=(lambda x: tensor_rotate_180(x, axis=axis)), p=p)
-
+    return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
 
 
 # defining dict for pre-processing - key is the string and the value is the transform object
@@ -81,7 +85,7 @@ global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0), 
+    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask), 
     'crop_external_zero_planes': crop_external_zero_planes
 }
 
