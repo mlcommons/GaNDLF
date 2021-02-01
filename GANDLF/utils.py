@@ -73,17 +73,17 @@ def reverse_one_hot(predmask_array,class_list):
                         max = int(i)
     
     if special_case_detected:
-        output = predmask_array[:,1,:,:,:].long()
-        for i in range(2,len(class_list)):
-            output += predmask_array[:,i,:,:,:].long()
+        start_idx = 0
+        if (class_list[0] == 0) or (class_list[0] == '0'):
+            start_idx = 1
+        
+        final_mask = np.asarray(predmask_array[start_idx,:,:,:], dtype=int) # predmask_array[0,:,:,:].long()
+        start_idx += 1
+        for i in range(start_idx,len(class_list)):
+            final_mask += np.asarray(predmask_array[0,:,:,:], dtype=int) # predmask_array[i,:,:,:].long()
             # temp_sum = torch.sum(output)
         # output_2 = (max - torch.sum(output)) % max 
         # test_2 = 1
-        '''
-        for i in len(class_list):
-            output = predmask_array[:,:,:,i]
-            (max – sum(output)) mod max 
-        '''
     else:        
         for idx, _class in enumerate(class_list):
             final_mask = final_mask +  (idx_argmax == idx)*_class
@@ -258,11 +258,12 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 #Computing the total dice
                 total_dice += curr_dice
             if save_mask:
-                patient_name = subject['subject_id']
+                patient_name = subject['subject_id'][0]
 
                 if is_segmentation:
-                    inputImage = sitk.ReadImage(subject['path_to_metadata'])
-                    _, ext = os.path.splitext(subject['path_to_metadata'])
+                    path_to_metadata = subject['path_to_metadata'][0]
+                    inputImage = sitk.ReadImage(path_to_metadata)
+                    _, ext = os.path.splitext(path_to_metadata)
                     pred_mask = pred_mask.numpy()
                     pred_mask = reverse_one_hot(pred_mask[0],class_list)
                     if not(model_2d):
