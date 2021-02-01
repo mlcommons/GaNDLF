@@ -202,8 +202,9 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not(preprocessing is None):
-        if 'crop_external_zero_planes' in preprocessing:
-            augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
+        if train: # we want the crop to only happen during training
+            if 'crop_external_zero_planes' in preprocessing:
+                augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
         for key in ['threshold','clip']:
             if key in preprocessing:
                 augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
