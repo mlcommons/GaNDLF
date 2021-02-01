@@ -50,12 +50,12 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         n_channels = parameters['model']['n_channels']
 
     base_filters = parameters['model']['base_filters']
+    amp = parameters['model']['amp']
+    class_list = parameters['model']['class_list']
+    
     batch_size = parameters['batch_size']
     loss_function = parameters['loss_function']
     scaling_factor = parameters['scaling_factor']
-    amp = parameters['amp']
-    
-    class_list = parameters['model']['class_list']
     n_classList = len(class_list)
 
     # Defining our model here according to parameters mentioned in the configuration file
@@ -64,7 +64,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
     # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+    model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
 
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
@@ -77,7 +77,14 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
     # Loading the weights into the model
-    main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best_val.pth.tar"))
+    main_dict = outputDir
+    if os.path.isdir(outputDir):
+        file_to_check = os.path.join(outputDir,str(which_model) + "_best_val.pth.tar")
+        if not os.path.isfile(file_to_check):
+            file_to_check = os.path.join(outputDir,str(which_model) + "_best_train.pth.tar")
+    else:
+        file_to_check = outputDir
+    main_dict = torch.load(file_to_check)
     model.load_state_dict(main_dict['model_state_dict'])
     
     if not(os.environ.get('HOSTNAME') is None):
