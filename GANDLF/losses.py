@@ -51,10 +51,11 @@ def MCD_loss(pm, gt, num_class, weights = None):
 
 def MCD_loss_new(pm, gt, num_class, weights = None):    # compute the actual dice score
     dims = (1, 2, 3)
+    eps = torch.finfo(torch.float32).eps
     intersection = torch.sum(pm * gt, dims)
     cardinality = torch.sum(pm + gt, dims)
 
-    dice_score = 2. * intersection / (cardinality + torch.finfo(torch.float32).eps)
+    dice_score = (2. * intersection + eps) / (cardinality + eps)
 
     return torch.mean(-dice_score + 1.)
 
