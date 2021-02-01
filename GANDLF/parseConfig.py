@@ -219,7 +219,7 @@ def parseConfig(config_file_path, version_check = True):
     which_model = 'resunet'
     # print('Using default model: ', which_model)
   params['which_model'] = which_model
-
+  
   if 'model' in params:
 
     if not(isinstance(params['model'], dict)):
@@ -318,6 +318,9 @@ def parseConfig(config_file_path, version_check = True):
     print('Using default folds for validation split: ', kfolds)
     params['nested_training']['validation'] = kfolds
 
+  if not 'in_memory' in params:
+    params['in_memory'] = False
+    
   # Setting default values to the params
   if 'scheduler' in params:
       scheduler = str(params['scheduler'])
