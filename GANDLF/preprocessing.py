@@ -11,6 +11,23 @@ import nibabel as nib
 from torchio.data.subject import Subject
 from torchio.transforms.preprocessing.intensity.normalization_transform import NormalizationTransform, TypeMaskingMethod
 
+def threshold_intensities(input_tensor, min_val, max_val):
+    '''
+    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
+    '''
+    C = torch.zeros(input_tensor.size())
+    l1_tensor = torch.where(input_tensor < max_val, input_tensor, C)
+    l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
+    return l2_tensor
+
+
+def clip_intensities(input_tensor, min_val, max_val):
+    '''
+    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
+    '''
+    return torch.clamp(input_tensor, min_val, max_val)
+
+
 def resize_image_resolution(input_image, output_size):
     '''
     This function resizes the input image based on the output size and interpolator
@@ -21,8 +38,28 @@ def resize_image_resolution(input_image, output_size):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
     return outputSpacing
 
+
+def tensor_rotate_90(input_image, axis):
+    # with 'axis' axis of rotation, rotate 90 degrees
+    # tensor image is expected to be of shape (1, a, b, c)
+    if axis not in [1, 2, 3]:
+        raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
+    relevant_axes = set([1, 2, 3])
+    affected_axes = list(relevant_axes - set([axis]) )
+    return torch.transpose(input_image, affected_axes[0], affected_axes[1]).flip(affected_axes[1])
+
+
+def tensor_rotate_180(input_image, axis):
+    # with 'axis' axis of rotation, rotate 180 degrees
+    # tensor image is expected to be of shape (1, a, b, c)
+    if axis not in [1, 2, 3]:
+        raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
+    relevant_axes = set([1, 2, 3])
+    affected_axes = list(relevant_axes - set([axis]) )
+    return input_image.flip(affected_axes[0]).flip(affected_axes[1]) 
+
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
-class NonZeroNormalize(NormalizationTransform):
+class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
     """Subtract mean and divide by standard deviation.
 
     Args:
@@ -68,137 +105,6 @@ class NonZeroNormalize(NormalizationTransform):
         tensor[mask] -= mean
         tensor[mask] /= std
         return tensor
-
-# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
-class  ThresholdIntensities(NormalizationTransform):
-    """
-    Threshold input image
-
-    Args:
-        min_val: minimum value to threshold
-        max_val: maximum value to threshold
-        **kwargs: See :class:`~torchio.transforms.Transform` for additional
-            keyword arguments.
-    """
-
-    def __init__(self, min_val, max_val, 
-            **kwargs):
-        super().__init__(**kwargs)
-        self.min_val = min_val
-        self.max_val = max_val
-        self.args_names = ('min_val', 'max_val')
-    
-    def apply_normalization(
-            self,
-            subject: Subject,
-            image_name: str,
-            mask: torch.Tensor,
-            ) -> None:
-        image = subject[image_name]
-        standardized = self.threshold(
-            image.data, self.min_val, self.max_val
-        )
-        if standardized is None:
-            message = (
-                'Threshold did not work correctly for'
-                f' in image "{image_name}" ({image.path})'
-            )
-            raise RuntimeError(message)
-        image.data = standardized
-
-    def threshold(self, tensor: torch.Tensor, min_val: float, max_val: float):
-        test = 1
-        tensor = tensor.clone().float()
-        C = torch.zeros(tensor.size())
-        l1_tensor = torch.where(tensor < max_val, tensor, C)
-        l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
-        return l2_tensor
-
-    def is_invertible(self):
-        return False
-
-# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
-class  ClipIntensities(NormalizationTransform):
-    """
-    Clip input image intensities.
-
-    Args:
-        min_val: minimum value to threshold
-        max_val: maximum value to threshold
-        **kwargs: See :class:`~torchio.transforms.Transform` for additional
-            keyword arguments.
-    """
-
-    def __init__(self, min_val, max_val, 
-            masking_method: TypeMaskingMethod = None, **kwargs):
-        super().__init__(**kwargs)
-        self.min_val = min_val
-        self.max_val = max_val
-        self.args_names = ('min_val', 'max_val')
-    
-    def apply_normalization(
-            self,
-            subject: Subject,
-            image_name: str,
-            mask: torch.Tensor,
-            ) -> None:
-        image = subject[image_name]
-        standardized = torch.clamp(image.data, self.min_val, self.max_val) 
-        if standardized is None:
-            message = (
-                'Clipping did not work correctly for'
-                f' in image "{image_name}" ({image.path})'
-            )
-            raise RuntimeError(message)
-        image.data = standardized
-
-    def is_invertible(self):
-        return False
-
-# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/spatial/crop.py
-class  Rotate(SpatialTransform):
-    """
-    Rotation by 90 or 180 augmentation
-
-    Args:
-        psize: patch size (used to ensure we do not crop to smaller size than this)
-        **kwargs: See :class:`~torchio.transforms.Transform` for additional
-            keyword arguments.
-    """
-
-    def __init__(self, degree, axis, **kwargs):
-        super().__init__(**kwargs)
-        self.degree = degree
-        if axis not in [1, 2, 3]:
-            raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", axis)
-        self.axis = axis
-        self.args_names = ('degree', 'axis')
-
-    def apply_transform(self, subject):
-        # get dictionary of images
-        images_dict = subject.get_images_dict(intensity_only=False)
-
-        # make sure shapes are consistent across images, and get this shape
-        subject.check_consistent_spatial_shape()
-        
-        relevant_axes = set([1, 2, 3])
-        affected_axes = list(relevant_axes - set([self.axis]))
-        
-        allDefined = True
-        for name, image in images_dict.items():
-            if self.degree == 90:
-                images_dict[name]['data'] = torch.transpose(images_dict[name]['data'], affected_axes[0], affected_axes[1]).flip(affected_axes[1])
-            elif self.degree == 180:
-                images_dict[name]['data'] = images_dict[name]['data'].flip(affected_axes[0]).flip(affected_axes[1]) 
-            else:
-                allDefined = False
-        
-        if not allDefined:    
-            degree_str = str(self.degree)
-            message = ('Rotation of ' + degree_str + ' is not defined')
-            raise RuntimeError(message)
-
-        return subject
 
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
 def crop_image_outside_zeros(array, psize):
