@@ -17,7 +17,7 @@ from torchio import Image, Subject
 from sklearn.model_selection import KFold
 from shutil import copyfile
 from copy import deepcopy
-import time
+import time, math
 import sys
 import pickle
 from pathlib import Path
@@ -257,7 +257,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         scaler.scale(loss).backward()
                         scaler.step(optimizer)
                 else:
-                    loss.backward()
+                    curr_loss = loss.cpu().data.item()
+                    if not math.isnan(curr_loss):
+                        loss.backward()
                     optimizer.step()
             else:
                 if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
@@ -273,7 +275,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                         else:
                             loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                     curr_loss = loss.cpu().data.item()
-                    scaler.scale(loss).backward()
+                    if not math.isnan(loss.cpu().data.item()):
+                        scaler.scale(loss).backward()
                     scaler.step(optimizer)
                 else:
                     # Computing the loss
@@ -282,7 +285,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     else:
                         loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
                     curr_loss = loss.cpu().data.item()
-                    loss.backward()
+                    if not math.isnan(curr_loss):
+                        loss.backward()
                     optimizer.step()
 
             #Pushing the dice to the cpu and only taking its value
@@ -295,7 +299,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # print('temp_loss:', temp_loss)
             ## debugging new loss
 
-            total_train_loss += curr_loss
+            if not math.isnan(curr_loss):
+                total_train_loss += curr_loss
             samples_for_train += 1
 
             if not is_regression:
