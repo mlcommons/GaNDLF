@@ -8,7 +8,7 @@ from pathlib import Path
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, headers, outputDir, parameters, device):
+def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_prev):
 
     # check for single fold training
     singleFoldValidation = False
@@ -71,7 +71,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
         # save the current model configuration as a sanity check
         currentModelConfigPickle = os.path.join(currentOutputFolder, 'parameters.pkl')
-        if not os.path.exists(currentModelConfigPickle):
+        if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
             with open(currentModelConfigPickle, 'wb') as handle:
                 pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -88,9 +88,9 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             currentTrainingAndValidationDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
             currentTestingDataPickle = os.path.join(currentOutputFolder, 'testing.pkl')
             
-            if not os.path.exists(currentTestingDataPickle):
+            if (not os.path.exists(currentTestingDataPickle)) or reset_prev:
                 testingData.to_pickle(currentTestingDataPickle)
-            if not os.path.exists(currentTrainingAndValidationDataPickle):
+            if (not os.path.exists(currentTrainingAndValidationDataPickle)) or reset_prev:
                 trainingAndValidationData.to_pickle(currentTrainingAndValidationDataPickle)
             
             current_training_subject_indeces_full = trainingAndValidationData[trainingAndValidationData.columns[headers['subjectIDHeader']]].unique().tolist()
@@ -122,11 +122,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             # pickle the data
             currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
             currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
-            if not os.path.exists(currentTrainingDataPickle):
+            if (not os.path.exists(currentTrainingDataPickle)) or reset_prev:
                 trainingData.to_pickle(currentTrainingDataPickle)
             else:
                 trainingData = pd.read_pickle(currentTrainingDataPickle)
-            if not os.path.exists(currentValidationDataPickle):
+            if (not os.path.exists(currentValidationDataPickle)) or reset_prev:
                 validationData.to_pickle(currentValidationDataPickle)
             else:
                 validationData = pd.read_pickle(currentValidationDataPickle)
