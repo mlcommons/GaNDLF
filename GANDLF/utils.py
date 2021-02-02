@@ -273,8 +273,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     # if parameters['resize'] is not None:
                     #     originalSize = inputImage.GetSize()
                     #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor) # change this for resample
-                    # sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + '_seg' + ext))
-                    sitk.WriteImage(result_image, "C:/Users/sarth/Downloads/gandlf_brats/normal_noZeroCrop/test_TCGA-02-0003_seg.nii.gz")
+                    sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + '_seg' + ext))
                 elif len(value_keys) > 0:
                     outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
         
