@@ -86,8 +86,8 @@ global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    # 'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
-    'normalize_nonZero': NonZeroNormalizeOnMaskedRegion(), 
+    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
+    'normalize_nonZero_masked': NonZeroNormalizeOnMaskedRegion(), 
     'crop_external_zero_planes': crop_external_zero_planes
 }
 
@@ -246,7 +246,9 @@ def ImagesFromDataFrame(dataframe,
         if 'normalize' in preprocessing:
             augmentation_list.append(global_preprocessing_dict['normalize'])
         elif 'normalize_nonZero' in preprocessing:
-            augmentation_list.append(NonZeroNormalizeOnMaskedRegion())
+            augmentation_list.append(global_preprocessing_dict['normalize_nonZero'])
+        elif 'normalize_nonZero_masked' in preprocessing:
+            augmentation_list.append(global_preprocessing_dict['normalize_nonZero_masked'])
 
     # other augmentations should only happen for training - and also setting the probabilities
     # for the augmentations
