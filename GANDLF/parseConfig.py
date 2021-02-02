@@ -246,12 +246,6 @@ def parseConfig(config_file_path, version_check = True):
       print('Using default \'base_filters\' in \'model\': ', base_filters)
     if not('class_list' in params['model']): 
       params['model']['class_list'] = [] # ensure that this is initialized
-      # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
-    # if not('n_channels' in params['model']):
-    #   n_channels = 32
-    #   params['model']['n_channels'] = n_channels
-    #   print('Using default \'n_channels\' in \'model\': ', n_channels)
-    #   # sys.exit('The \'model\' parameter needs \'n_channels\' key to be defined') # uncomment if we need this to be passed by user
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
@@ -267,38 +261,6 @@ def parseConfig(config_file_path, version_check = True):
         temp_classList= temp_classList.replace('[', '') # we don't need the brackets
         temp_classList= temp_classList.replace(']', '') # we don't need the brackets
         params['model']['class_list'] = temp_classList.split(',')
-        # # sanity check
-        # class_list_check = params['model']['class_list']
-        # base_label = None
-        # special_cases_to_check = [ '||', '&&'] 
-        # prevLabelCombo_split = []
-        # for i in range(len(class_list_check),0,-1):
-        #   currentLabelCombo = class_list_check[i] 
-        #   if base_label is None:
-        #     for case in special_cases_to_check:
-        #       if case in currentLabelCombo:
-        #         sys.exit('Combinatorial label training needs a single label in the final layer for consistency')
-        #       else:         
-        #         base_label = int(currentLabelCombo)
-        #   else:
-        #     currentLabelCombo_split = currentLabelCombo.split('||')
-        #     if len(currentLabelCombo) == 1:
-        #       currentLabelCombo_split = currentLabelCombo.split('&&')
-        #       if len(currentLabelCombo) == 1:
-        #         sys.exit('Combinatorial label training currently only works with \'||\' and \'&&\'')
-        #     if len(prevLabelCombo_split) == 0: # first combinatorial label - no need for comparison
-        #       prevLabelCombo_split = currentLabelCombo_split
-        #     else:
-        #       if not(set(prevLabelCombo_split).issubset(currentLabelCombo_split)):
-        #         sys.exit('Combinatorial label training needs each combined label to be a subset of the previous, for example: \'[0,1||2||4,1||4,4]')
-
-        #       test = 1
-        #     prevLabelCombo = class_list_check[i-1]
-        #     prevLabelCombo_split = prevLabelCombo.split('||')
-        #     if len(prevLabelCombo) == 1:
-        #       prevLabelCombo_split = prevLabelCombo.split('&&')
-        #       if len(prevLabelCombo) == 1:
-        #         sys.exit('Combinatorial label training currently only works with \'||\' and \'&&\'')
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
