@@ -65,12 +65,13 @@ def reverse_one_hot(predmask_array,class_list):
     
     for _class in class_list:
         for case in special_cases_to_check:
-            if case in _class: # check if any of the special cases are present
-                special_case_detected = True
-                class_split = _class.split(case) # if present, then split the sub-class
-                for i in class_split: # find the max for computation later on
-                    if int(i) > max:
-                        max = int(i)
+            if isinstance(_class, str):
+                if case in _class: # check if any of the special cases are present
+                    special_case_detected = True
+                    class_split = _class.split(case) # if present, then split the sub-class
+                    for i in class_split: # find the max for computation later on
+                        if int(i) > max:
+                            max = int(i)
     
     if special_case_detected:
         start_idx = 0
@@ -272,7 +273,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     # if parameters['resize'] is not None:
                     #     originalSize = inputImage.GetSize()
                     #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor) # change this for resample
-                    sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + '_seg' + ext))
+                    # sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + '_seg' + ext))
+                    sitk.WriteImage(result_image, "C:/Users/sarth/Downloads/gandlf_brats/normal_noZeroCrop/test_TCGA-02-0003_seg.nii.gz")
                 elif len(value_keys) > 0:
                     outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
         
