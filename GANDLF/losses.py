@@ -13,7 +13,7 @@ def dice(inp, target):
 
 def MCD(pm, gt, num_class, weights = None): 
     '''
-    These weights should be the dice weights, not penalty weights
+    These weights should be the dice weights, not dice weights
     '''
     acc_dice = 0
     for i in range(0, num_class): # 0 is background
@@ -22,17 +22,13 @@ def MCD(pm, gt, num_class, weights = None):
         if weights is not None:
             currentDice = currentDice * weights[i]
         acc_dice += currentDice
-        # print('==== currentDice_', i, ': ', currentDice.cpu().data.item())
     if weights is None:
         acc_dice /= num_class # we should not be considering 0
-    # print ('=== acc_dice: ', acc_dice.cpu().data.item())
-
-    # print('=== accDice: ', acc_dice)
     return acc_dice
 
 def MCD_loss(pm, gt, num_class, weights = None): 
     '''
-    These weights should be the penalty weights, not penalty weights
+    These weights should be the penalty weights, not dice weights
     '''
     acc_dice_loss = 0
     for i in range(0, num_class): # 0 is background
@@ -41,13 +37,9 @@ def MCD_loss(pm, gt, num_class, weights = None):
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
-        # print('==== currentDiceLoss_', i, ': ', currentDiceLoss.cpu().data.item())
     if weights is None:
         acc_dice_loss /= num_class # we should not be considering 0
-    # print ('=== acc_dice_loss: ', acc_dice_loss.cpu().data.item())
-    # print('=== accDiceLoss_: ', acc_dice_loss)
     return acc_dice_loss
-    # return 1 - MCD(pm, gt, num_class, weights) 
 
 def MCD_loss_new(pm, gt, num_class, weights = None):    # compute the actual dice score
     dims = (1, 2, 3)
@@ -61,7 +53,7 @@ def MCD_loss_new(pm, gt, num_class, weights = None):    # compute the actual dic
 
 def MCD_log_loss(pm, gt, num_class, weights = None): 
     '''
-    These weights should be the penalty weights, not penalty weights
+    These weights should be the penalty weights, not dice weights
     '''
     acc_dice_loss = 0
     for i in range(0, num_class): # 0 is background
@@ -70,9 +62,7 @@ def MCD_log_loss(pm, gt, num_class, weights = None):
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
-        # print('==== currentDiceLoss_', i, ': ', currentDiceLoss)
     acc_dice_loss /= num_class # we should not be considering 0
-    # print('=== accDiceLoss_: ', acc_dice_loss)
     return acc_dice_loss
 
 def CE(out,target):
