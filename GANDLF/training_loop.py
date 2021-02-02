@@ -85,7 +85,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
-    train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True, pin_memory=in_memory)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
