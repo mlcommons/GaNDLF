@@ -45,9 +45,8 @@ def main():
 
     if mode == 0: # inference mode
         pretrainedModelPath = args.modelDir
-
-    # safe directory creation
-    Path(model_path).mkdir(parents=True, exist_ok=True)
+    else:
+        Path(model_path).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
     data_full, headers = parseTrainingCSV(file_data_full)
