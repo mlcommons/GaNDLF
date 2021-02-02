@@ -264,6 +264,7 @@ def ImagesFromDataFrame(dataframe,
             elif aug in ['rotate_90', 'rotate_180']:
                 for axis in augmentations[aug]['axis']:
                     actual_function = global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability'])
+                    augmentation_list.append(actual_function)
             elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             elif aug == 'blur':
