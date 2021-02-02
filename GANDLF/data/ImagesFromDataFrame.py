@@ -1,5 +1,7 @@
 import torch
 import numpy as np
+from functools import partial
+
 import torchio
 from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike,
                                 RandomAffine, RandomElasticDeformation,
@@ -9,7 +11,8 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
-from GANDLF.preprocessing import *
+from GANDLF.preprocessing import NonZeroNormalizeOnMaskedRegion, CropExternalZeroplanes
+from GANDLF.preprocessing import resize_image_resolution, threshold_intensities, tensor_rotate_180, tensor_rotate_90, clip_intensities
 
 import copy, sys
 
@@ -52,22 +55,40 @@ def gamma(p=1):
 def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
 
+def positive_voxel_mask(image):
+    return image > 0
+
 # def anisotropy(axes = 0, p=1):
 #     return RandomFlip(axes = axes, p = p)
 
+def crop_external_zero_planes(psize, p=1):
+    # p is only accepted as a parameter to capture when values other than one are attempted
+    if p != 1:
+        raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
+    return CropExternalZeroplanes(psize=psize)
+
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
-    return Lambda(lambda x: threshold_intensities(x, min, max))
+    return Lambda(function=partial(threshold_intensities, min=min, max=max), p=p)
 
 def clip_transform(min, max, p=1):
-    return Lambda(lambda x: clip_intensities(x, min, max))
+    return Lambda(function=partial(clip_intensities, min=min, max=max), p=p)
+
+def rotate_90(axis, p=1):
+    return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
+
+def rotate_180(axis, p=1):
+    return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
+
 
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = lambda x: x > 0)
+    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
+    'normalize_nonZero_masked': NonZeroNormalizeOnMaskedRegion(), 
+    'crop_external_zero_planes': crop_external_zero_planes
 }
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object
@@ -80,7 +101,9 @@ global_augs_dict = {
     'noise' : noise,
     'gamma' : gamma,
     'swap' : swap,
-    'flip' : flip
+    'flip' : flip, 
+    'rotate_90': rotate_90, 
+    'rotate_180': rotate_180
 }
 
 global_sampler_dict = {
@@ -96,7 +119,18 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_per_volume = 1, q_num_workers = 2, q_verbose = False, sampler = 'label', train = True, augmentations = None, preprocessing = None):
+def ImagesFromDataFrame(dataframe, 
+                        psize, 
+                        headers, 
+                        q_max_length = 10, 
+                        q_samples_per_volume = 1, 
+                        q_num_workers = 2, 
+                        q_verbose = False, 
+                        sampler = 'label', 
+                        train = True, 
+                        augmentations = None, 
+                        preprocessing = None, 
+                        in_memory = False):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
@@ -125,11 +159,15 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
         # such as different image modalities, labels, any other data
         subject_dict = {}
         subject_dict['subject_id'] = dataframe[subjectIDHeader][patient]
-
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
             # assigning the dict key to the channel
-            subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
+            if not in_memory:
+                subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
+            else:
+                img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
+                array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
+                subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY)
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
@@ -152,7 +190,14 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
         #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
-            subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
+            if not in_memory:
+                subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
+            else:
+                img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
+                array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
+                subject_dict['label'] = Image(tensor=array, type=torchio.LABEL)
+
+            
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
         else:
             subject_dict['label'] = "NA"
@@ -181,6 +226,9 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not(preprocessing is None):
+        if train: # we want the crop to only happen during training
+            if 'crop_external_zero_planes' in preprocessing:
+                augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
         for key in ['threshold','clip']:
             if key in preprocessing:
                 augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
@@ -199,23 +247,28 @@ def ImagesFromDataFrame(dataframe, psize, headers, q_max_length = 10, q_samples_
             augmentation_list.append(global_preprocessing_dict['normalize'])
         elif 'normalize_nonZero' in preprocessing:
             augmentation_list.append(global_preprocessing_dict['normalize_nonZero'])
+        elif 'normalize_nonZero_masked' in preprocessing:
+            augmentation_list.append(global_preprocessing_dict['normalize_nonZero_masked'])
 
     # other augmentations should only happen for training - and also setting the probabilities
     # for the augmentations
     if train and not(augmentations == None):
         for aug in augmentations:
 
-            if 'flip' in aug:
+            if aug == 'flip':
                 if not('axes_to_flip' in augmentations[aug]):
                     axes_to_flip = [0,1,2]
                 else:
                     axes_to_flip = augmentations[aug]['axes_to_flip']
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
-            elif ('elastic' in aug) or ('swap' in aug):
+            elif aug in ['rotate_90', 'rotate_180']:
+                for axis in augmentations[aug]['axis']:
+                    actual_function = global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability'])
+            elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
-            elif ('blur' in aug):
+            elif aug == 'blur':
                 actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
-            elif ('noise' in aug):
+            elif aug == 'noise':
                 actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
             else:
                 actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])

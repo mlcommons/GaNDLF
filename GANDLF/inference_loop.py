@@ -50,12 +50,12 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         n_channels = parameters['model']['n_channels']
 
     base_filters = parameters['model']['base_filters']
+    amp = parameters['model']['amp']
+    class_list = parameters['model']['class_list']
+    
     batch_size = parameters['batch_size']
     loss_function = parameters['loss_function']
     scaling_factor = parameters['scaling_factor']
-    amp = parameters['amp']
-    
-    class_list = parameters['model']['class_list']
     n_classList = len(class_list)
 
     # Defining our model here according to parameters mentioned in the configuration file
@@ -64,7 +64,7 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
     # Defining our model here according to parameters mentioned in the configuration file
-    model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize)
+    model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
 
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
@@ -77,12 +77,18 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
     # Loading the weights into the model
-    main_dict = torch.load(os.path.join(outputDir,str(which_model) + "_best_val.pth.tar"))
+    main_dict = outputDir
+    if os.path.isdir(outputDir):
+        file_to_check = os.path.join(outputDir,str(which_model) + "_best_val.pth.tar")
+        if not os.path.isfile(file_to_check):
+            file_to_check = os.path.join(outputDir,str(which_model) + "_best_train.pth.tar")
+    else:
+        file_to_check = outputDir
+    main_dict = torch.load(file_to_check)
     model.load_state_dict(main_dict['model_state_dict'])
     
     if not(os.environ.get('HOSTNAME') is None):
-        print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
-        sys.stdout.flush()
+        print("\nHostname     :" + str(os.environ.get('HOSTNAME')), flush=True)
 
     # get the channel keys for concatenation later (exclude non numeric channel keys)
     batch = next(iter(inference_loader))
@@ -96,19 +102,17 @@ def inferenceLoop(inferenceDataFromPickle, headers, device, parameters, outputDi
         elif 'value' in item:
             value_keys.append(item)
 
-    print("Data Samples: ", len(inference_loader.dataset))
-    sys.stdout.flush()
+    print("Data Samples: ", len(inference_loader.dataset), flush=True)
     model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
     
     # print stats
-    print('Using device:', device)
-    sys.stdout.flush()
+    print('Using device:', device, flush=True)
 
     # get loss function
     loss_fn, MSE_requested = get_loss(loss_function)
 
     average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
-    print(average_dice, average_loss)
+    print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
 if __name__ == "__main__":
 
