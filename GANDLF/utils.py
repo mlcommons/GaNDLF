@@ -19,13 +19,76 @@ def one_hot(segmask_array, class_list):
     for b in range(batch_size):
         one_hot_stack = []
         segmask_array_iter = segmask_array[b,0]
-        for class_ in class_list:
-            bin_mask = (segmask_array_iter == int(class_))
+        bin_mask = (segmask_array_iter == 0) # initialize bin_mask
+        for _class in class_list: # this implementation allows users to combine logical operands 
+            if isinstance(_class, str):
+                if '||' in _class: # special case
+                    class_split = _class.split('||')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                elif '|' in _class: # special case
+                    class_split = _class.split('|')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                elif '&&' in _class: # special case
+                    class_split = _class.split('&&')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
+                elif '&' in _class: # special case
+                    class_split = _class.split('&')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
+                else:
+                    # assume that it is a simple int
+                    bin_mask = (segmask_array_iter == int(_class)) 
+            else:
+                bin_mask = (segmask_array_iter == int(_class))
             one_hot_stack.append(bin_mask)
         one_hot_stack = torch.stack(one_hot_stack)
         batch_stack.append(one_hot_stack)
     batch_stack = torch.stack(batch_stack)    
     return batch_stack
+
+def reverse_one_hot(predmask_array,class_list):
+    '''
+    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
+    '''
+    idx_argmax  = np.argmax(predmask_array,axis=0)
+    final_mask = 0
+    special_cases_to_check = [ '||', '&&'] 
+    special_case_detected = False
+    max = 0
+    
+    for _class in class_list:
+        for case in special_cases_to_check:
+            if isinstance(_class, str):
+                if case in _class: # check if any of the special cases are present
+                    special_case_detected = True
+                    class_split = _class.split(case) # if present, then split the sub-class
+                    for i in class_split: # find the max for computation later on
+                        if int(i) > max:
+                            max = int(i)
+    
+    if special_case_detected:
+        start_idx = 0
+        if (class_list[0] == 0) or (class_list[0] == '0'):
+            start_idx = 1
+        
+        final_mask = np.asarray(predmask_array[start_idx,:,:,:], dtype=int) # predmask_array[0,:,:,:].long()
+        start_idx += 1
+        for i in range(start_idx,len(class_list)):
+            final_mask += np.asarray(predmask_array[0,:,:,:], dtype=int) # predmask_array[i,:,:,:].long()
+            # temp_sum = torch.sum(output)
+        # output_2 = (max - torch.sum(output)) % max 
+        # test_2 = 1
+    else:        
+        for idx, _class in enumerate(class_list):
+            final_mask = final_mask +  (idx_argmax == idx)*_class
+    return final_mask
 
 def checkPatchDivisibility(patch_size, number = 16):
     '''
@@ -40,16 +103,6 @@ def checkPatchDivisibility(patch_size, number = 16):
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
         return False
     return True
-
-def reverse_one_hot(predmask_array,class_list):
-    '''
-    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
-    '''
-    idx_argmax  = np.argmax(predmask_array,axis=0)
-    final_mask = 0
-    for idx, class_ in enumerate(class_list):
-        final_mask = final_mask +  (idx_argmax == idx)*class_
-    return final_mask
 
 def send_model_to_device(model, ampInput, device, optimizer):
     '''
@@ -124,11 +177,11 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     '''
     This function gets various statistics from the specified model and data loader
     '''
-    # if no weights are specified, use 1
-    if weights is None:
-        weights = [1]
-        for i in range(len(class_list) - 1):
-            weights.append(1)
+    # # if no weights are specified, use 1
+    # if weights is None:
+    #     weights = [1]
+    #     for i in range(len(class_list) - 1):
+    #         weights.append(1)
 
     outputToWrite = 'SubjectID,PredictedValue\n'
     model.eval()
@@ -185,8 +238,16 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
-
-            if not subject['label'] == ["NA"]:
+            
+            first = next(iter(subject['label']))
+            if first == 'NA':
+                if not (is_segmentation):
+                    avg_dice = 1 # we don't care about this for regression/classification
+                    # avg_loss = total_loss/len(loader.dataset)
+                    # return avg_dice, avg_loss
+                else:
+                    print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
+            else:
                 mask = subject_dict['label'][torchio.DATA] # get the label image
                 if mask.dim() == 4:
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
@@ -197,19 +258,13 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
                 #Computing the total dice
                 total_dice += curr_dice
-            else:
-                if not (is_segmentation):
-                    avg_dice = 1 # we don't care about this for regression/classification
-                    # avg_loss = total_loss/len(loader.dataset)
-                    # return avg_dice, avg_loss
-                else:
-                    print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
             if save_mask:
-                patient_name = subject['subject_id']
+                patient_name = subject['subject_id'][0]
 
                 if is_segmentation:
-                    inputImage = sitk.ReadImage(subject['path_to_metadata'])
-                    _, ext = os.path.splitext(subject['path_to_metadata'])
+                    path_to_metadata = subject['path_to_metadata'][0]
+                    inputImage = sitk.ReadImage(path_to_metadata)
+                    _, ext = os.path.splitext(path_to_metadata)
                     pred_mask = pred_mask.numpy()
                     pred_mask = reverse_one_hot(pred_mask[0],class_list)
                     if not(model_2d):
@@ -218,7 +273,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     # if parameters['resize'] is not None:
                     #     originalSize = inputImage.GetSize()
                     #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor) # change this for resample
-                    sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + '_seg' + ext))
+                    # sitk.WriteImage(result_image, os.path.join(outputDir, "pred_mask_" + patient_name + '_seg' + ext))
+                    sitk.WriteImage(result_image, "C:/Users/sarth/Downloads/gandlf_brats/normal_noZeroCrop/test_TCGA-02-0003_seg.nii.gz")
                 elif len(value_keys) > 0:
                     outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
         

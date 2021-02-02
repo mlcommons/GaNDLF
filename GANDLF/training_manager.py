@@ -90,6 +90,8 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
         if not os.path.exists(currentModelConfigPickle):
             with open(currentModelConfigPickle, 'wb') as handle:
                 pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            parameters = pickle.load(open(currentModelConfigPickle,"rb"))
 
         # save the current training+validation and testing datasets 
         if noTestingData:
@@ -131,21 +133,25 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 validationData = validationData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
 
 
+            # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+            ## pickle/unpickle data
+            # pickle the data
+            currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
+            currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
+            if not os.path.exists(currentTrainingDataPickle):
+                trainingData.to_pickle(currentTrainingDataPickle)
+            else:
+                trainingData = pd.read_pickle(currentTrainingDataPickle)
+            if not os.path.exists(currentValidationDataPickle):
+                validationData.to_pickle(currentValidationDataPickle)
+            else:
+                validationData = pd.read_pickle(currentValidationDataPickle)
+
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
                             device=device, parameters=parameters, testingDataFromPickle=testingData)
 
             else:
-                # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-                ## pickle/unpickle data
-                # pickle the data
-                currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
-                currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
-                if not os.path.exists(currentTrainingDataPickle):
-                    trainingData.to_pickle(currentTrainingDataPickle)
-                if not os.path.exists(currentValidationDataPickle):
-                    validationData.to_pickle(currentValidationDataPickle)
-
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
                 if not os.path.exists(headersPickle):
                     with open(headersPickle, 'wb') as handle:

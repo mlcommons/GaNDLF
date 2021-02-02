@@ -11,7 +11,8 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
-from GANDLF.preprocessing import *
+from GANDLF.preprocessing import NonZeroNormalizeOnMaskedRegion, CropExternalZeroplanes
+from GANDLF.preprocessing import resize_image_resolution, threshold_intensities, tensor_rotate_180, tensor_rotate_90, clip_intensities
 
 import copy, sys
 
@@ -64,7 +65,7 @@ def crop_external_zero_planes(psize, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
         raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
-    return CropExternalZeroplanes(psize=psize, p=p)
+    return CropExternalZeroplanes(psize=psize)
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
@@ -85,7 +86,8 @@ global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask), 
+    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
+    'normalize_nonZero_masked': NonZeroNormalizeOnMaskedRegion(), 
     'crop_external_zero_planes': crop_external_zero_planes
 }
 
@@ -224,8 +226,9 @@ def ImagesFromDataFrame(dataframe,
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not(preprocessing is None):
-        if 'crop_external_zero_planes' in preprocessing:
-            augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
+        if train: # we want the crop to only happen during training
+            if 'crop_external_zero_planes' in preprocessing:
+                augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
         for key in ['threshold','clip']:
             if key in preprocessing:
                 augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
@@ -244,6 +247,8 @@ def ImagesFromDataFrame(dataframe,
             augmentation_list.append(global_preprocessing_dict['normalize'])
         elif 'normalize_nonZero' in preprocessing:
             augmentation_list.append(global_preprocessing_dict['normalize_nonZero'])
+        elif 'normalize_nonZero_masked' in preprocessing:
+            augmentation_list.append(global_preprocessing_dict['normalize_nonZero_masked'])
 
     # other augmentations should only happen for training - and also setting the probabilities
     # for the augmentations
@@ -257,7 +262,8 @@ def ImagesFromDataFrame(dataframe,
                     axes_to_flip = augmentations[aug]['axes_to_flip']
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
             elif aug in ['rotate_90', 'rotate_180']:
-                actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], p=augmentations[aug]['probability'])
+                for axis in augmentations[aug]['axis']:
+                    actual_function = global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability'])
             elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             elif aug == 'blur':

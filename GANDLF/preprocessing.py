@@ -8,21 +8,24 @@ import SimpleITK as sitk
 import nibabel as nib
 
 
-def threshold_intensities(input_tensor, min_val, max_val):
+from torchio.data.subject import Subject
+from torchio.transforms.preprocessing.intensity.normalization_transform import NormalizationTransform, TypeMaskingMethod
+
+def threshold_intensities(input_tensor, min, max):
     '''
     This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
     '''
-    C = torch.zeros(input_tensor.size())
-    l1_tensor = torch.where(input_tensor < max_val, input_tensor, C)
-    l2_tensor = torch.where(l1_tensor > min_val, l1_tensor, C)
+    C = torch.zeros(input_tensor.size(), dtype=input_tensor.dtype)
+    l1_tensor = torch.where(input_tensor < max, input_tensor, C)
+    l2_tensor = torch.where(l1_tensor > min, l1_tensor, C)
     return l2_tensor
 
 
-def clip_intensities(input_tensor, min_val, max_val):
+def clip_intensities(input_tensor, min, max):
     '''
-    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min_val' and largest values as 'max_val'
+    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min' and largest values as 'max'
     '''
-    return torch.clamp(input_tensor, min_val, max_val)
+    return torch.clamp(input_tensor, min, max)
 
 
 def resize_image_resolution(input_image, output_size):
@@ -55,6 +58,54 @@ def tensor_rotate_180(input_image, axis):
     affected_axes = list(relevant_axes - set([axis]) )
     return input_image.flip(affected_axes[0]).flip(affected_axes[1]) 
 
+# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
+class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
+    """Subtract mean and divide by standard deviation.
+
+    Args:
+        masking_method: See
+            :class:`~torchio.transforms.preprocessing.intensity.NormalizationTransform`.
+        **kwargs: See :class:`~torchio.transforms.Transform` for additional keyword arguments.
+    """
+    def __init__(
+            self,
+            masking_method: TypeMaskingMethod = None,
+            **kwargs
+            ):
+        super().__init__(masking_method=masking_method, **kwargs)
+        self.args_names = ('masking_method',)
+
+    def apply_normalization(
+            self,
+            subject: Subject,
+            image_name: str,
+            mask: torch.Tensor,
+            ) -> None:
+        image = subject[image_name]
+        mask = image.data > 0
+        standardized = self.znorm(
+            image.data,
+            mask,
+        )
+        if standardized is None:
+            message = (
+                'Standard deviation is 0 for masked values'
+                f' in image "{image_name}" ({image.path})'
+            )
+            raise RuntimeError(message)
+        image.data = standardized
+
+    @staticmethod
+    def znorm(tensor: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        tensor = tensor.clone().float()
+        values = tensor.masked_select(mask)
+        mean, std = values.mean(), values.std()
+        if std == 0:
+            return None
+        tensor[mask] -= mean
+        tensor[mask] /= std
+        return tensor
+
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
 def crop_image_outside_zeros(array, psize):
     dimensions = len(array.shape)
@@ -65,7 +116,7 @@ def crop_image_outside_zeros(array, psize):
     mask = array.sum(axis=0) > 0
 
     # get the small and large corners
-  
+
     m0 = mask.any(1).any(1)
     m1 = mask.any(0)
     m2 = m1.any(0)
@@ -91,9 +142,9 @@ def crop_image_outside_zeros(array, psize):
     new_corner_idxs = np.array([small[0], small[1], small[2]])
     # Get the contents of the bounding box from the array
     new_array = array[:,
-                      small[0]:large[0],
-                      small[1]:large[1],
-                      small[2]:large[2]]
+                    small[0]:large[0],
+                    small[1]:large[1],
+                    small[2]:large[2]]
     
     return new_corner_idxs, new_array
 
