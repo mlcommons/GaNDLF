@@ -1,6 +1,7 @@
 ## 0.0.7
 
 - Class list can now be defined as a range
+- Added option to train and infer on fused labels
 
 ## 0.0.6
 
