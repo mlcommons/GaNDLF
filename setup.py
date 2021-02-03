@@ -39,6 +39,7 @@ setup(
   author="Ujjwal Baid, Megh Bhalerao, Caleb Grenko, Sarthak Pati, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
+  packages=find_packages(),
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
     'Development Status :: 1 - Planning',
