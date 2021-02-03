@@ -254,6 +254,7 @@ def ImagesFromDataFrame(dataframe,
     # for the augmentations
     if train and not(augmentations == None):
         for aug in augmentations:
+            actual_function = None
 
             if aug == 'flip':
                 if not('axes_to_flip' in augmentations[aug]):
@@ -263,8 +264,7 @@ def ImagesFromDataFrame(dataframe,
                 actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
             elif aug in ['rotate_90', 'rotate_180']:
                 for axis in augmentations[aug]['axis']:
-                    actual_function = global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability'])
-                    augmentation_list.append(actual_function)
+                    augmentation_list.append(global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability']))
             elif aug in ['swap', 'elastic']:
                 actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
             elif aug == 'blur':
@@ -273,7 +273,8 @@ def ImagesFromDataFrame(dataframe,
                 actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
             else:
                 actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
-            augmentation_list.append(actual_function)
+            if actual_function is not None:
+                augmentation_list.append(actual_function)
     
     if augmentation_list:
         transform = Compose(augmentation_list)
