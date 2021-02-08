@@ -18,7 +18,7 @@ class in_conv(nn.Module):
         
         Keyword Arguments:
             kernel_size {number} -- [size of filter] (default: {3})
-            dropout_p {number} -- [dropout probablity] (default: {0.3})
+            dropout_p {number} -- [dropout probability] (default: {0.3})
             leakiness {number} -- [the negative leakiness] (default: {1e-2})
             conv_bias {bool} -- [to use the bias in filters] (default: {True})
             inst_norm_affine {bool} -- [affine use in norm] (default: {True})
