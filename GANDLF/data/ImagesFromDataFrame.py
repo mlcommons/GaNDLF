@@ -135,6 +135,7 @@ def ImagesFromDataFrame(dataframe,
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
     # changing the column indices to make it easier
+    print("Dataframe colums and first row is: ",dataframe.columns)
     dataframe.columns = range(0,num_col)
     dataframe.index = range(0,num_row)
     # This list will later contain the list of subjects
