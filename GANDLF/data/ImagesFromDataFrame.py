@@ -165,7 +165,7 @@ def ImagesFromDataFrame(dataframe,
             if not in_memory:
                 subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
             else:
-                img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
+                img = sitk.ReadImage(str(dataframe[channel][patient]))
                 array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
                 subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY)
 
