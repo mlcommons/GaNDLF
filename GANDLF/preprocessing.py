@@ -93,7 +93,7 @@ class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
                 f' in image "{image_name}" ({image.path})'
             )
             raise RuntimeError(message)
-        image.data = standardized
+        subject.get_images_dict(intensity_only=True)[image_name]['data'] = standardized
 
     @staticmethod
     def znorm(tensor: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
