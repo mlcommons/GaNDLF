@@ -282,6 +282,9 @@ def parseConfig(config_file_path, version_check = True):
 
   if not 'in_memory' in params:
     params['in_memory'] = False
+  
+  if not 'save_mask' in params:
+    params['save_mask'] = False
     
   # Setting default values to the params
   if 'scheduler' in params:
