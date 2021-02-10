@@ -20,6 +20,8 @@ model:
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
+# this will save the generated masks for validation and testing data for qualitative analysis
+save_masks: False
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
