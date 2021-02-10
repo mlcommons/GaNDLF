@@ -79,9 +79,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory) # may or may not need to add augmentations here
+    testingDataDefined = True
     if testingDataFromPickle is None:
         print('No testing data is defined, using validation data for those metrics', flush=True)
         testingDataFromPickle = validationDataFromPickle
+        testingDataDefined = False
     inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
@@ -340,7 +342,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_mask'], outputDir = outputDir + '/validationMasks')
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_mask'], outputDir = outputDir + '/testingMasks')
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_mask'] & testingDataDefined, outputDir = outputDir + '/testingMasks')
     
         # regression or classification, use the loss to drive the model saving
         if is_segmentation:
