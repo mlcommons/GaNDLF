@@ -168,7 +168,7 @@ def get_scheduler(which_scheduler, optimizer, batch_size, training_samples_size,
         scheduler_lr = LambdaLR(optimizer, [clr])
         print("Initial Learning Rate: ",learning_rate)
     elif which_scheduler == "exp":
-        scheduler_lr = ExponentialLR(optimizer, 0.1, last_epoch=-1)
+        scheduler_lr = ExponentialLR(optimizer, learning_rate, last_epoch=-1)
     elif which_scheduler == "step":
         scheduler_lr = StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
     elif which_scheduler == "reduce-on-plateau":
