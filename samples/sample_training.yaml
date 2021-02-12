@@ -121,10 +121,14 @@ data_augmentation:
       'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
     }
     'flip':{
-      'axes_to_flip': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
+      'axis': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
     },
     'rotate_90', # explicitly rotate image by 90
     'rotate_180', # explicitly rotate image by 180
+    'anisotropic':{
+      'axis': [0,1],
+      'downsampling': [2,2.5]
+    }
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
