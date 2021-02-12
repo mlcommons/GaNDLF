@@ -171,8 +171,9 @@ def parseConfig(config_file_path, version_check = True):
       # for all others, ensure probability is present
       default_probability = 0.5
       if 'default_probability' in params['data_augmentation']:
-        default_probability = float(params['data_augmentation'])['default_probability']
+        default_probability = float(params['data_augmentation']['default_probability'])
       for key in params['data_augmentation']:
+        if key != 'default_probability':
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
               if not isinstance(params['data_augmentation'][key], dict):
                 params['data_augmentation'][key] = {}
