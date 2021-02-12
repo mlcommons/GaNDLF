@@ -169,11 +169,14 @@ def parseConfig(config_file_path, version_check = True):
                 params['data_augmentation'][rotation_aug]['axis'] = [1,2,3] # default
       
       # for all others, ensure probability is present
+      default_probability = 0.5
+      if 'default_probability' in params['data_augmentation']:
+        default_probability = float(params['data_augmentation'])['default_probability']
       for key in params['data_augmentation']:
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
               if not isinstance(params['data_augmentation'][key], dict):
                 params['data_augmentation'][key] = {}
-              params['data_augmentation'][key]['probability'] = 1
+              params['data_augmentation'][key]['probability'] = default_probability
 
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
   params = initialize_key(params, 'data_preprocessing')
