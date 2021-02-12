@@ -56,7 +56,7 @@ def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
 
 def anisotropy(axes = 0, downsampling = 1, p=1):
-    return RandomAnisotropy(axes=axes, downsampling=downsampling, p=p)
+    return RandomAnisotropy(axes=axes, downsampling=downsampling, scalars_only=True, p=p)
 
 def positive_voxel_mask(image):
     return image > 0
