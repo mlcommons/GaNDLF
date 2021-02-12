@@ -254,27 +254,28 @@ def ImagesFromDataFrame(dataframe,
     # for the augmentations
     if train and not(augmentations == None):
         for aug in augmentations:
-            actual_function = None
+            if aug != 'default_probability':
+                actual_function = None
 
-            if aug == 'flip':
-                if not('axes_to_flip' in augmentations[aug]):
-                    axes_to_flip = [0,1,2]
+                if aug == 'flip':
+                    if not('axes_to_flip' in augmentations[aug]):
+                        axes_to_flip = [0,1,2]
+                    else:
+                        axes_to_flip = augmentations[aug]['axes_to_flip']
+                    actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
+                elif aug in ['rotate_90', 'rotate_180']:
+                    for axis in augmentations[aug]['axis']:
+                        augmentation_list.append(global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability']))
+                elif aug in ['swap', 'elastic']:
+                    actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
+                elif aug == 'blur':
+                    actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
+                elif aug == 'noise':
+                    actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
                 else:
-                    axes_to_flip = augmentations[aug]['axes_to_flip']
-                actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
-            elif aug in ['rotate_90', 'rotate_180']:
-                for axis in augmentations[aug]['axis']:
-                    augmentation_list.append(global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability']))
-            elif aug in ['swap', 'elastic']:
-                actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
-            elif aug == 'blur':
-                actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
-            elif aug == 'noise':
-                actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
-            else:
-                actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
-            if actual_function is not None:
-                augmentation_list.append(actual_function)
+                    actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
+                if actual_function is not None:
+                    augmentation_list.append(actual_function)
     
     if augmentation_list:
         transform = Compose(augmentation_list)
