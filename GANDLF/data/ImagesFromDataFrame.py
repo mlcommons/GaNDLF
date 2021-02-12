@@ -167,7 +167,7 @@ def ImagesFromDataFrame(dataframe,
             else:
                 img = sitk.ReadImage(str(dataframe[channel][patient]))
                 array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
-                subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY)
+                subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY, path=dataframe[channel][patient])
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
@@ -195,7 +195,7 @@ def ImagesFromDataFrame(dataframe,
             else:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
                 array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
-                subject_dict['label'] = Image(tensor=array, type=torchio.LABEL)
+                subject_dict['label'] = Image(tensor=array, type=torchio.LABEL, path=dataframe[labelHeader][patient])
 
             
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
