@@ -103,7 +103,8 @@ global_augs_dict = {
     'swap' : swap,
     'flip' : flip, 
     'rotate_90': rotate_90, 
-    'rotate_180': rotate_180
+    'rotate_180': rotate_180,
+    'anisotropic': anisotropy
 }
 
 global_sampler_dict = {
