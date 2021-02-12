@@ -169,7 +169,7 @@ def parseConfig(config_file_path, version_check = True):
                 params['data_augmentation'][rotation_aug]['axis'] = [1,2,3] # default
       
       # for all others, ensure probability is present
-      default_probability = 1
+      default_probability = 0.5
       if 'default_probability' in params['data_augmentation']:
         default_probability = float(params['data_augmentation'])['default_probability']
       for key in params['data_augmentation']:
