@@ -102,6 +102,7 @@ data_preprocessing:
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
+    default_probability: 0.5,
     'affine',
     'elastic',
     'kspace':{
