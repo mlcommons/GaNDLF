@@ -62,7 +62,8 @@ def MCD_log_loss(pm, gt, num_class, weights = None):
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
-    acc_dice_loss /= num_class # we should not be considering 0
+    if weights is None:
+        acc_dice /= num_class # we should not be considering 0
     return acc_dice_loss
 
 def CE(out,target):
@@ -76,16 +77,17 @@ def CE(out,target):
 def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
     for i in range(0, num_class):
-        acc_ce_loss += CE(out[:,i,:,:,:], target[:,i,:,:,:])
+        curr_ce_loss = CE(out[:,i,:,:,:], target[:,i,:,:,:])
         if weights is not None:
-            acc_ce_loss *= weights[i]
-    acc_ce_loss /= (num_class-1)
+            curr_ce_loss = curr_ce_loss * weights[i]
+        acc_ce_loss += curr_ce_loss
+    if weights is None:
+        acc_dice /= num_class # we should not be considering 0
     return acc_ce_loss
         
 def DCCE(out,target, n_classes, weights):
-    l = MCD_loss(out,target, n_classes, weights) + CCE(out, target,n_classes, weights)
-    return l
-
+    dcce_loss = MCD_loss(out,target, n_classes, weights) + CCE(out, target,n_classes, weights)
+    return dcce_loss
 
 def tversky(inp, target, alpha):
     smooth = 1e-7
