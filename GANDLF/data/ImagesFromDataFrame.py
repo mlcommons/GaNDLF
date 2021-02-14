@@ -6,7 +6,7 @@ import torchio
 from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike,
                                 RandomAffine, RandomElasticDeformation,
                                 RandomBiasField, RandomBlur,
-                                RandomNoise, RandomSwap, ZNormalization,
+                                RandomNoise, RandomSwap, RandomAnisotropy, ZNormalization,
                                 Resample, Compose, Lambda, RandomFlip, RandomGamma, Pad)
 from torchio import Image, Subject
 import SimpleITK as sitk
@@ -55,11 +55,11 @@ def gamma(p=1):
 def flip(axes = 0, p=1):
     return RandomFlip(axes = axes, p = p)
 
+def anisotropy(axes = 0, downsampling = 1, p=1):
+    return RandomAnisotropy(axes=axes, downsampling=downsampling, scalars_only=True, p=p)
+
 def positive_voxel_mask(image):
     return image > 0
-
-# def anisotropy(axes = 0, p=1):
-#     return RandomFlip(axes = axes, p = p)
 
 def crop_external_zero_planes(psize, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
@@ -103,7 +103,8 @@ global_augs_dict = {
     'swap' : swap,
     'flip' : flip, 
     'rotate_90': rotate_90, 
-    'rotate_180': rotate_180
+    'rotate_180': rotate_180,
+    'anisotropic': anisotropy
 }
 
 global_sampler_dict = {
@@ -167,7 +168,7 @@ def ImagesFromDataFrame(dataframe,
             else:
                 img = sitk.ReadImage(str(dataframe[channel][patient]))
                 array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
-                subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY)
+                subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY, path=dataframe[channel][patient])
 
             # if resize has been defined but resample is not (or is none)
             if not resizeCheck:
@@ -195,7 +196,7 @@ def ImagesFromDataFrame(dataframe,
             else:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
                 array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
-                subject_dict['label'] = Image(tensor=array, type=torchio.LABEL)
+                subject_dict['label'] = Image(tensor=array, type=torchio.LABEL, path=dataframe[labelHeader][patient])
 
             
             subject_dict['path_to_metadata'] = str(dataframe[labelHeader][patient])
@@ -258,11 +259,10 @@ def ImagesFromDataFrame(dataframe,
                 actual_function = None
 
                 if aug == 'flip':
-                    if not('axes_to_flip' in augmentations[aug]):
-                        axes_to_flip = [0,1,2]
-                    else:
-                        axes_to_flip = augmentations[aug]['axes_to_flip']
-                    actual_function = global_augs_dict[aug](axes = axes_to_flip, p=augmentations[aug]['probability'])
+                    if ('axes_to_flip' in augmentations[aug]):
+                        print('WARNING: \'flip\' augmentation needs the key \'axis\' instead of \'axes_to_flip\'', file = sys.stderr)
+                        augmentations[aug]['axis'] = augmentations[aug]['axes_to_flip']
+                    actual_function = global_augs_dict[aug](axes = augmentations[aug]['axis'], p=augmentations[aug]['probability'])
                 elif aug in ['rotate_90', 'rotate_180']:
                     for axis in augmentations[aug]['axis']:
                         augmentation_list.append(global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability']))
@@ -272,6 +272,8 @@ def ImagesFromDataFrame(dataframe,
                     actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
                 elif aug == 'noise':
                     actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
+                elif aug == 'anisotropic':
+                    actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], downsampling=augmentations[aug]['downsampling'], p=augmentations[aug]['probability'])
                 else:
                     actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
                 if actual_function is not None:
