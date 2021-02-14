@@ -82,7 +82,7 @@ def CCE(out, target, num_class, weights):
             curr_ce_loss = curr_ce_loss * weights[i]
         acc_ce_loss += curr_ce_loss
     if weights is None:
-        acc_dice /= num_class 
+        acc_ce_loss /= num_class 
     return acc_ce_loss
         
 def DCCE(out,target, n_classes, weights):
