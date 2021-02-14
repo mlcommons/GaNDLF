@@ -63,7 +63,7 @@ def MCD_log_loss(pm, gt, num_class, weights = None):
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
     if weights is None:
-        acc_dice /= num_class # we should not be considering 0
+        acc_dice_loss /= num_class # we should not be considering 0
     return acc_dice_loss
 
 def CE(out,target):
