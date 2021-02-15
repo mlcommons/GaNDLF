@@ -255,42 +255,37 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
                 #loss = MSE(output, valuesToPredict) 
                 loss = torch.nn.MSELoss()(output, valuesToPredict)
+                curr_loss = loss.cpu().data.item()
                 if amp:
                     with torch.cuda.amp.autocast(): 
-                        scaler.scale(loss).backward()
-                        scaler.step(optimizer)
+                        if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
+                            scaler.scale(loss).backward()
+                            scaler.step(optimizer)
                 else:
-                    curr_loss = loss.cpu().data.item()
-                    if not math.isnan(curr_loss):
+                    if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
                         loss.backward()
-                    optimizer.step()
+                        optimizer.step()
             else:
                 if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
                     one_hot_mask = one_hot_mask.unsqueeze(-1)
                     output = output.unsqueeze(-1)
             
             if not is_regression:
+                # Computing the loss
+                if MSE_requested:
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                else:
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
+                curr_loss = loss.cpu().data.item()
                 if amp:
                     with torch.cuda.amp.autocast(): 
-                    # Computing the loss
-                        if MSE_requested:
-                            loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
-                        else:
-                            loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                    curr_loss = loss.cpu().data.item()
-                    if not math.isnan(curr_loss):
-                        scaler.scale(loss).backward()
-                    scaler.step(optimizer)
+                        if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
+                            scaler.scale(loss).backward()
+                            scaler.step(optimizer)
                 else:
-                    # Computing the loss
-                    if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
-                    else:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                    curr_loss = loss.cpu().data.item()
-                    if not math.isnan(curr_loss):
+                    if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
                         loss.backward()
-                    optimizer.step()
+                        optimizer.step()
 
             #Pushing the dice to the cpu and only taking its value
             # print('=== curr_loss: ', curr_loss)
