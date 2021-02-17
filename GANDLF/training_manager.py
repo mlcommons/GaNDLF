@@ -1,30 +1,14 @@
 
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-import torch
-from torch.utils.data.dataset import Dataset
-import torch.optim as optim
-import numpy as np
 import pandas as pd
-from torch.utils.data import DataLoader
-import os
-import random
-import torchio
-from torchio.transforms import *
-from torchio import Image, Subject
+import os, sys, pickle, subprocess
 from sklearn.model_selection import KFold
-from shutil import copyfile
-import time
-import sys
-import ast 
-import pickle
 from pathlib import Path
-import subprocess
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.training_loop import trainingLoop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def TrainingManager(dataframe, headers, outputDir, parameters, device):
+def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_prev):
 
     # check for single fold training
     singleFoldValidation = False
@@ -87,9 +71,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
 
         # save the current model configuration as a sanity check
         currentModelConfigPickle = os.path.join(currentOutputFolder, 'parameters.pkl')
-        if not os.path.exists(currentModelConfigPickle):
+        if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
             with open(currentModelConfigPickle, 'wb') as handle:
                 pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            parameters = pickle.load(open(currentModelConfigPickle,"rb"))
 
         # save the current training+validation and testing datasets 
         if noTestingData:
@@ -102,9 +88,9 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
             currentTrainingAndValidationDataPickle = os.path.join(currentOutputFolder, 'trainAndVal.pkl')
             currentTestingDataPickle = os.path.join(currentOutputFolder, 'testing.pkl')
             
-            if not os.path.exists(currentTestingDataPickle):
+            if (not os.path.exists(currentTestingDataPickle)) or reset_prev:
                 testingData.to_pickle(currentTestingDataPickle)
-            if not os.path.exists(currentTrainingAndValidationDataPickle):
+            if (not os.path.exists(currentTrainingAndValidationDataPickle)) or reset_prev:
                 trainingAndValidationData.to_pickle(currentTrainingAndValidationDataPickle)
             
             current_training_subject_indeces_full = trainingAndValidationData[trainingAndValidationData.columns[headers['subjectIDHeader']]].unique().tolist()
@@ -131,21 +117,25 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device):
                 validationData = validationData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
 
 
+            # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+            ## pickle/unpickle data
+            # pickle the data
+            currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
+            currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
+            if (not os.path.exists(currentTrainingDataPickle)) or reset_prev:
+                trainingData.to_pickle(currentTrainingDataPickle)
+            else:
+                trainingData = pd.read_pickle(currentTrainingDataPickle)
+            if (not os.path.exists(currentValidationDataPickle)) or reset_prev:
+                validationData.to_pickle(currentValidationDataPickle)
+            else:
+                validationData = pd.read_pickle(currentValidationDataPickle)
+
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
                 trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
                             device=device, parameters=parameters, testingDataFromPickle=testingData)
 
             else:
-                # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-                ## pickle/unpickle data
-                # pickle the data
-                currentTrainingDataPickle = os.path.join(currentValOutputFolder, 'train.pkl')
-                currentValidationDataPickle = os.path.join(currentValOutputFolder, 'validation.pkl')
-                if not os.path.exists(currentTrainingDataPickle):
-                    trainingData.to_pickle(currentTrainingDataPickle)
-                if not os.path.exists(currentValidationDataPickle):
-                    validationData.to_pickle(currentValidationDataPickle)
-
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
                 if not os.path.exists(headersPickle):
                     with open(headersPickle, 'wb') as handle:

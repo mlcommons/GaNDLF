@@ -14,7 +14,7 @@ requirements = [
   'torch>=1.7',
   'torchvision',
   'tqdm',
-  'torchio==0.18.10',
+  'torchio==0.18.29',
   'pandas',
   'pylint',
   'torchsummary',
@@ -35,10 +35,11 @@ requirements = [
 
 setup(
   name='GANDLF',
-  version='0.0.7.NR', # NR: non-release; this should be changed when tagging\
+  version='0.0.7-dev', # NR: non-release; this should be changed when tagging
   author="Ujjwal Baid, Megh Bhalerao, Caleb Grenko, Sarthak Pati, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
+  packages=find_packages(),
   scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
   classifiers=[
     'Development Status :: 1 - Planning',
