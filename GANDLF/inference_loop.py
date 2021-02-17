@@ -54,9 +54,6 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     else:
         n_channels = parameters['model']['n_channels']
 
-    class_list = parameters['model']['class_list']
-    scaling_factor = parameters['scaling_factor']
-    n_classList = len(class_list)
     base_filters = parameters['model']['base_filters']
     amp = parameters['model']['amp']
     class_list = parameters['model']['class_list']
