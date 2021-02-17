@@ -1,7 +1,7 @@
 # affix version
 version:
   {
-    minimum: 0.0.6,
+    minimum: 0.0.7,
     maximum: 0.0.7 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
@@ -15,6 +15,9 @@ model:
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
+# this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
+# in I/O at the expense of memory consumption
+in_memory: False
 # Set the Modality : rad for radiology, path for histopathology
 modality: path
 # Patch size during training - 2D patch for breast images since third dimension is not patched 

@@ -80,11 +80,7 @@ def parseConfig(config_file_path, version_check = True):
   params['batch_size'] = batch_size
   
   if 'amp' in params:
-    amp = bool(params['amp'])
-  else:
-    amp = False
-    print("NOT using Mixed Precision Training")
-  params['amp'] = amp
+    print("Please define \'amp\' under \'model\'")
 
   if 'learning_rate' in params:
     learning_rate = float(params['learning_rate'])
@@ -173,12 +169,53 @@ def parseConfig(config_file_path, version_check = True):
           if not('mean' in params['data_augmentation']['noise']):
               params['data_augmentation']['noise']['mean'] = 0 # default
       
+      # special case for augmentations that need axis defined 
+      for axis_aug in ['flip', 'anisotropic']:
+        if axis_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][axis_aug], dict)):
+                params['data_augmentation'][axis_aug] = {}
+            if not('axis' in params['data_augmentation'][axis_aug]):
+                params['data_augmentation'][axis_aug]['axis'] = [0,1,2] # default
+      
+      # special case for augmentations that need axis defined in 1,2,3
+      for axis_aug in ['rotate_90', 'rotate_180']:
+        if axis_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][axis_aug], dict)):
+                params['data_augmentation'][axis_aug] = {}
+            if not('axis' in params['data_augmentation'][axis_aug]):
+                params['data_augmentation'][axis_aug]['axis'] = [1,2,3] # default
+      
+      if 'anisotropic' in params['data_augmentation']: # special case for anisotropic
+        if not('downsampling' in params['data_augmentation']['anisotropic']):
+          default_downsampling = 1.5
+        else:
+          default_downsampling = params['data_augmentation']['anisotropic']['downsampling']
+        
+        initialize_downsampling = False
+        if type(default_downsampling) is list:
+          if len(default_downsampling) != 2:
+            initialize_downsampling = True
+            print('WARNING: \'anisotropic\' augmentation needs to be either a single number of a list of 2 numbers: https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomswap#torchio.transforms.RandomAnisotropy.', file = sys.stderr)
+            default_downsampling = default_downsampling[0] # only 
+        else:
+          initialize_downsampling = True
+        
+        if initialize_downsampling:
+          if default_downsampling < 1:
+            print('WARNING: \'anisotropic\' augmentation needs the \'downsampling\' parameter to be greater than 1, defaulting to 1.5.', file = sys.stderr)
+            default_downsampling = 1.5 
+          params['data_augmentation']['anisotropic']['downsampling'] = default_downsampling # default
+      
       # for all others, ensure probability is present
+      default_probability = 0.5
+      if 'default_probability' in params['data_augmentation']:
+        default_probability = float(params['data_augmentation']['default_probability'])
       for key in params['data_augmentation']:
+        if key != 'default_probability':
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
               if not isinstance(params['data_augmentation'][key], dict):
                 params['data_augmentation'][key] = {}
-              params['data_augmentation'][key]['probability'] = 1
+              params['data_augmentation'][key]['probability'] = default_probability
 
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
   params = initialize_key(params, 'data_preprocessing')
@@ -224,13 +261,20 @@ def parseConfig(config_file_path, version_check = True):
     which_model = 'resunet'
     # print('Using default model: ', which_model)
   params['which_model'] = which_model
-
+  
   if 'model' in params:
 
     if not(isinstance(params['model'], dict)):
       sys.exit('The \'model\' parameter needs to be populated as a dictionary')
     elif len(params['model']) == 0: # only proceed if something is defined
       sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
+
+    if 'amp' in params['model']:
+      amp = params['model']['amp']
+    else:
+      amp = False
+      print("NOT using Mixed Precision Training")
+    params['model']['amp'] = amp
 
     if not('architecture' in params['model']):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
@@ -244,18 +288,21 @@ def parseConfig(config_file_path, version_check = True):
       print('Using default \'base_filters\' in \'model\': ', base_filters)
     if not('class_list' in params['model']): 
       params['model']['class_list'] = [] # ensure that this is initialized
-      # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
-    # if not('n_channels' in params['model']):
-    #   n_channels = 32
-    #   params['model']['n_channels'] = n_channels
-    #   print('Using default \'n_channels\' in \'model\': ', n_channels)
-    #   # sys.exit('The \'model\' parameter needs \'n_channels\' key to be defined') # uncomment if we need this to be passed by user
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
   
   if isinstance(params['model']['class_list'], str):
-    params['model']['class_list'] = eval(params['model']['class_list'])
+    try:
+      params['model']['class_list'] = eval(params['model']['class_list'])
+    except:
+      if ('||' in params['model']['class_list']) or ('&&' in params['model']['class_list']):
+        # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
+        print('This is a special case for multi-class computation, where different labels are processed together')
+        temp_classList = params['model']['class_list']
+        temp_classList= temp_classList.replace('[', '') # we don't need the brackets
+        temp_classList= temp_classList.replace(']', '') # we don't need the brackets
+        params['model']['class_list'] = temp_classList.split(',')
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
@@ -275,12 +322,18 @@ def parseConfig(config_file_path, version_check = True):
     print('Using default folds for validation split: ', kfolds)
     params['nested_training']['validation'] = kfolds
 
+  if not 'in_memory' in params:
+    params['in_memory'] = False
+  
+  if not 'save_masks' in params:
+    params['save_masks'] = False
+    
   # Setting default values to the params
   if 'scheduler' in params:
       scheduler = str(params['scheduler'])
   else:
       scheduler = 'triangle'
-  params['scheduler'] = scheduler
+  params['scheduler'] = scheduler.lower()
 
   if 'scaling_factor' in params:
       scaling_factor = params['scaling_factor']
