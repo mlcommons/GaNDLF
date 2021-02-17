@@ -5,11 +5,40 @@ import torch
 import torchio
 from torchio.transforms.spatial_transform import SpatialTransform
 import SimpleITK as sitk
-import torchvision.transforms as transforms
+import nibabel as nib
 
 
 from torchio.data.subject import Subject
 from torchio.transforms.preprocessing.intensity.normalization_transform import NormalizationTransform, TypeMaskingMethod
+
+def normalize_by_val(input_tensor, mean, std):
+    """
+    This function returns the tensor normalized by these particular values
+    """
+    return transforms.Normalize(mean, std)             
+    
+def normalize_imagenet(input_tensor):
+    """
+    This function returns the tensor normalized by standard imagenet values
+    """
+    return normalize_by_val(input_tensor, std=[0.229, 0.224, 0.225])
+                            mean=[0.485, 0.456, 0.406],
+
+def normalize_standardize(input_tensor):
+    """
+    This function returns the tensor normalized by subtracting 128 and dividing by 128
+    image = (image - 128)/128
+    """
+    return normalize_by_val(input_tensor, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    
+
+def normalize_div_by_255(input_tensor):
+    """
+    This function divides all values of the input tensor by 255 on all channels
+    image = image/255
+    """
+    return normalize_by_val(input_tensor, mean=[0., 0., 0.],
+                            std=[1., 1., 1.])
 
 def threshold_intensities(input_tensor, min, max):
     '''
@@ -28,33 +57,6 @@ def clip_intensities(input_tensor, min, max):
     return torch.clamp(input_tensor, min, max)
 
 
-
-                            std=[0.229, 0.224, 0.225])
-                            mean=[0.485, 0.456, 0.406],
-    return normalize_by_val(input_tensor,
-def normalize_imagenet(input_tensor):
-
-                            std=[0.5, 0.5, 0.5])
-                            mean=[0.5, 0.5, 0.5],
-    return normalize_by_val(input_tensor,
-    """
-def normalize_standardize(input_tensor):
-    """
-    This function
-
-                            mean=[0., 0., 0.],
-                            std=[1., 1., 1.])
-    return normalize_by_val(input_tensor,
-    """
-    """
-    This function divides all values of the input tensor by 255 on all channels
-def normalize_div_by_255(input_tensor):
-    """
-    return transforms.Normalize(mean, std)
-
-    This function returns the tensor normalized by these particular values
-    """
-def normalize_by_val(input_tensor, mean, std):
 def resize_image_resolution(input_image, output_size):
     '''
     This function resizes the input image based on the output size and interpolator
@@ -88,7 +90,6 @@ def tensor_rotate_180(input_image, axis):
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
 class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
     """Subtract mean and divide by standard deviation.
-
     Args:
         masking_method: See
             :class:`~torchio.transforms.preprocessing.intensity.NormalizationTransform`.
@@ -181,7 +182,6 @@ class  CropExternalZeroplanes(SpatialTransform):
     """
     Transformation class to enable taking the whole image stack (including segmentation) and removing 
     (starting from edges) physical-coordinate planes with all zero voxels until you reach a non-zero voxel.
-
     Args:
         psize: patch size (used to ensure we do not crop to smaller size than this)
         **kwargs: See :class:`~torchio.transforms.Transform` for additional
