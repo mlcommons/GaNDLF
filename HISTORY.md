@@ -1,5 +1,6 @@
 ## 0.0.7
 
+- New modality switch added for rad/path
 - Class list can now be defined as a range
 - Added option to train and infer on fused labels
 - Rotation 90 and 180 augmentation added

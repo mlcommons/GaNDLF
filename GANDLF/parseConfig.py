@@ -89,6 +89,15 @@ def parseConfig(config_file_path, version_check = True):
     print('Using default learning_rate: ', learning_rate)
   params['learning_rate'] = learning_rate
 
+  if 'modality' in params:
+    modality = str(params['modality'])
+    if modality.lower() == 'rad':
+      pass
+    if modality.lower() == 'path':
+      pass
+    else:
+      sys.exit('The \'modality\' should be set to either \'rad\' or \'path\'. Please check for spelling errors and it should be set to either of the two given options.')
+
   if 'loss_function' in params:
     defineDefaultLoss = False
     # check if user has passed a dict 

@@ -22,6 +22,8 @@ in_memory: False
 modality: path
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [512, 512]
+# Set the stride size : Not needed during training and validation, only during inference.
+stride_size: [256, 256]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: label
 # Number of epochs
