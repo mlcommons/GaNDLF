@@ -36,8 +36,7 @@ def normalize_div_by_255(input_tensor):
     This function divides all values of the input tensor by 255 on all channels
     image = image/255
     """
-    return normalize_by_val(input_tensor, mean=[0., 0., 0.],
-                            std=[1., 1., 1.])
+    return normalize_by_val(input_tensor, mean=[0., 0., 0.], std=[1., 1., 1.])
 
 def threshold_intensities(input_tensor, min, max):
     '''
