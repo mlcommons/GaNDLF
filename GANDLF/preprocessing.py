@@ -21,8 +21,7 @@ def normalize_imagenet(input_tensor):
     """
     This function returns the tensor normalized by standard imagenet values
     """
-    return normalize_by_val(input_tensor, std=[0.229, 0.224, 0.225])
-                            mean=[0.485, 0.456, 0.406],
+    return normalize_by_val(input_tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])                            
 
 def normalize_standardize(input_tensor):
     """
