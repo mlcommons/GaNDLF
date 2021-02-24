@@ -178,7 +178,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
-    
+    print("Channel Keys : ", all_keys)
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)
@@ -202,7 +202,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
-            
             # if regression, concatenate values to predict
             if is_regression:
                 valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
