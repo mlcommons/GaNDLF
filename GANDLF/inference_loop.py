@@ -118,23 +118,21 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor=scaling_factor, weights=None, save_mask=True, outputDir=outputDir)
     print(average_dice, average_loss)
 
-
-
 if os.name != 'nt':
     '''
     path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
-    '''
+    ''' 
     def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outputDir):
         '''
         This is the main inference loop for histopathology
         '''
         # extract variables form parameters dict
-        psize = parameters['psize']
+        patch_size = parameters['patch_size']
         augmentations = parameters['data_augmentation']
         preprocessing = parameters['data_preprocessing']
         which_model = parameters['model']['architecture']
-        class_list = parameters['class_list']
-        base_filters = parameters['base_filters']
+        class_list = parameters['model']['class_list']
+        base_filters = parameters['model']['base_filters']
         batch_size = parameters['batch_size']
         n_channels = len(headers['channelHeaders'])
         n_classList = len(class_list)
@@ -149,14 +147,14 @@ if os.name != 'nt':
         # PRINT PARSED ARGS
         print("\n\n")
         print("Output directory        :", outputDir)
-        print("Number of channels      :", parameters['num_channels'])
+        print("Number of channels      :", parameters['model']['n_channels'])
         print("Modalities              :", parameters['modality'])
-        print("Number of classes       :", parameters['num_classes'])
+        #print("Number of classes       :", parameters['modality']['num_classes']
         print("Batch Size              :", parameters['batch_size'])
         print("Patch Size              :", parameters['patch_size'])
         print("Sampling Stride         :", parameters['stride_size'])
-        print("Base Filters            :", parameters['base_filters'])
-        print("Load Weights            :", parameters['load_weights'])
+        print("Base Filters            :", parameters['model']['base_filters'])
+        #print("Load Weights            :", parameters['load_weights'])
         sys.stdout.flush()
         # We generate CSV for training if not provided
         print("Reading CSV Files")
@@ -222,8 +220,8 @@ if os.name != 'nt':
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_map)
-    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
-    print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
+        average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
+        print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
 if __name__ == "__main__":
 
