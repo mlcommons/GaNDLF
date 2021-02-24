@@ -11,8 +11,11 @@ from torchio.transforms import (OneOf, RandomMotion, RandomGhosting, RandomSpike
 from torchio import Image, Subject
 import SimpleITK as sitk
 # from GANDLF.utils import resize_image
-from GANDLF.preprocessing import NonZeroNormalizeOnMaskedRegion, CropExternalZeroplanes
-from GANDLF.preprocessing import resize_image_resolution, threshold_intensities, tensor_rotate_180, tensor_rotate_90, clip_intensities
+from GANDLF.preprocessing import (NonZeroNormalizeOnMaskedRegion, CropExternalZeroplanes,
+                                  resize_image_resolution, threshold_intensities,
+                                  tensor_rotate_180, tensor_rotate_90, clip_intensities,
+                                  normalize_imagenet, normalize_standardize,
+                                  normalize_div_by_255)
 
 import copy, sys
 
@@ -88,7 +91,10 @@ global_preprocessing_dict = {
     'normalize' : ZNormalization(),
     'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
     'normalize_nonZero_masked': NonZeroNormalizeOnMaskedRegion(), 
-    'crop_external_zero_planes': crop_external_zero_planes
+    'crop_external_zero_planes': crop_external_zero_planes,
+    'normalize_imagenet': normalize_imagenet,
+    'normalize_standardize' : normalize_standardize,
+    'normalize_div_by_255': normalize_div_by_255
 }
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object

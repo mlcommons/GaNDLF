@@ -31,7 +31,7 @@ num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
 patience: 10
 # Set the batch size
-batch_size: 16
+batch_size: 8
 # Set the initial learning rate
 learning_rate: 0.01
 # Learning rate scheduler - options: triangle, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
@@ -70,7 +70,7 @@ nested_training:
 # resize the image(s) and mask (this should be greater than or equal to patch_size) - https://github.com/FETS-AI/GANDLF/issues/116; resize is done ONLY when resample is not defined
 data_preprocessing:
   {
-    'normalize', # This is model specific
+    'normalize_div_by_255', # This is model specific
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
   }
 # various data augmentation techniques
