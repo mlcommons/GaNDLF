@@ -3,6 +3,7 @@ from collections import Counter
 import numpy as np
 
 import torch.optim as optim
+from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
@@ -97,7 +98,7 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         if not checkPatchDivisibility(psize, divisibilityCheck_denom_patch):
             sys.exit('The \'patch_size\' should be divisible by \'' + str(divisibilityCheck_denom_patch) + '\' for the \'' + which_model + '\' architecture')
     if divisibilityCheck_baseFilter:
-        if not checkPatchDivisibility(base_filters, divisibilityCheck_denom_baseFilter):
+        if base_filters % divisibilityCheck_denom_baseFilter != 0:
             sys.exit('The \'base_filters\' should be divisible by \'' + str(divisibilityCheck_denom_baseFilter) + '\' for the \'' + which_model + '\' architecture')
     
     return model
@@ -115,6 +116,8 @@ def get_loss(which_loss):
         MSE_requested = False
         if which_loss == 'dc':
             loss_fn = MCD_loss
+        elif which_loss == 'dc_log':
+            loss_fn = MCD_log_loss
         elif which_loss == 'dcce':
             loss_fn = DCCE
         elif which_loss == 'ce':
@@ -134,19 +137,19 @@ def get_optimizer(which_optimizer, model_parameters, learning_rate):
     '''
     if which_optimizer == 'sgd':
         optimizer = optim.SGD(model_parameters,
-                              lr=learning_rate,
-                              momentum = 0.9)
+                                lr=learning_rate,
+                                momentum = 0.9)
     elif which_optimizer == 'adam':        
         optimizer = optim.Adam(model_parameters,
-                               lr=learning_rate,
-                               betas = (0.9,0.999),
-                               weight_decay = 0.00005)
+                                lr=learning_rate,
+                                betas = (0.9,0.999),
+                                weight_decay = 0.00005)
     else:
         print('WARNING: Could not find the requested optimizer \'' + which_optimizer + '\' in the implementation, using sgd, instead', file = sys.stderr)
         opt = 'sgd'
         optimizer = optim.SGD(model_parameters,
-                              lr= learning_rate,
-                              momentum = 0.9)
+                                lr= learning_rate,
+                                momentum = 0.9)
 
     return optimizer
 
@@ -157,24 +160,65 @@ def get_scheduler(which_scheduler, optimizer, batch_size, training_samples_size,
     step_size = 4*batch_size*training_samples_size
     if which_scheduler == "triangle":
         clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
-        scheduler_lr = torch.optim.lr_scheduler.LambdaLR(optimizer, [clr])
+        scheduler_lr = LambdaLR(optimizer, [clr])
+        print("Initial Learning Rate: ",learning_rate)
+    if which_scheduler == "triangle_modified":
+        step_size = training_samples_size/learning_rate
+        clr = cyclical_lr_modified(step_size)
+        scheduler_lr = LambdaLR(optimizer, [clr])
         print("Initial Learning Rate: ",learning_rate)
     elif which_scheduler == "exp":
-        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
+        scheduler_lr = ExponentialLR(optimizer, learning_rate, last_epoch=-1)
     elif which_scheduler == "step":
-        scheduler_lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
+        scheduler_lr = StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
     elif which_scheduler == "reduce-on-plateau":
-        scheduler_lr = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1,
-                                                                  patience=10, threshold=0.0001, threshold_mode='rel',
-                                                                  cooldown=0, min_lr=0, eps=1e-08, verbose=False)
+        scheduler_lr = ReduceLROnPlateau(optimizer, mode='min', factor=0.1,
+                                        patience=10, threshold=0.0001, threshold_mode='rel',
+                                        cooldown=0, min_lr=0, eps=1e-08, verbose=False)
     elif which_scheduler == "triangular":
-        scheduler_lr = torch.optim.lr_scheduler.CyclicLR(optimizer, learning_rate * 0.001, learning_rate,
-                                                         step_size_up=step_size,
-                                                         step_size_down=None, mode='triangular', gamma=1.0,
-                                                         scale_fn=None, scale_mode='cycle', cycle_momentum=True,
-                                                         base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+        scheduler_lr = CyclicLR(optimizer, learning_rate * 0.001, learning_rate,
+                                step_size_up=step_size,
+                                step_size_down=None, mode='triangular', gamma=1.0,
+                                scale_fn=None, scale_mode='cycle', cycle_momentum=True,
+                                base_momentum=0.8, max_momentum=0.9, last_epoch=-1)
+    elif which_scheduler == 'cosineannealing':
+        scheduler_lr = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=1, eta_min=1e-6, last_epoch=-1)
     else:
         print('WARNING: Could not find the requested Learning Rate scheduler \'' + which_scheduler + '\' in the implementation, using exp, instead', file=sys.stderr)
-        scheduler_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, 0.1, last_epoch=-1)
+        scheduler_lr = ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     return scheduler_lr
+
+    """
+    # initialize without considering background
+    dice_weights_dict = {} # average for "weighted averaging"
+    dice_penalty_dict = {} # penalty for misclassification
+    for i in range(1, n_classList):
+        dice_weights_dict[i] = 0
+        dice_penalty_dict[i] = 0
+
+    # define a seaparate data loader for penalty calculations
+    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
+    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
+    
+    # get the weights for use for dice loss
+    total_nonZeroVoxels = 0
+    for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
+        # accumulate dice weights for each label
+        mask = subject['label'][torchio.DATA]
+        one_hot_mask = one_hot(mask, class_list)
+        for i in range(1, n_classList):
+            currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
+            dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
+            total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
+    
+    # get the penalty values - dice_weights contains the overall number for each class in the training data
+    for i in range(1, n_classList):
+        penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
+        for j in range(1, n_classList):
+            if i != j: # for differing classes, subtract the number
+                penalty = penalty - dice_penalty_dict[j]
+        
+        dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+    dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
+    """

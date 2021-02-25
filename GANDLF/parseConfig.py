@@ -1,4 +1,3 @@
-
 import os
 import ast 
 import sys
@@ -27,25 +26,28 @@ def initialize_key(parameters, key):
 
   return parameters
 
-def parseConfig(config_file_path):
+def parseConfig(config_file_path, version_check = True):
   '''
   This function parses the configuration file and returns a dictionary of parameters
   '''
   with open(config_file_path) as f:
     params = yaml.load(f, Loader=yaml.FullLoader)
   
-  if not('version' in params):
-    sys.exit('The \'version\' key needs to be defined in config with \'minimum\' and \'maximum\' fields to determine the compatibility of configuration with code base')
-  else:
-    gandlf_version = pkg_resources.require('GANDLF')[0].version
-    gandlf_version_int = parse_version(gandlf_version)
-    min = parse_version(params['version']['minimum'])
-    max = parse_version(params['version']['maximum'])
-    if (min > gandlf_version_int) or (max < gandlf_version_int):
-      sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
+  if version_check: # this is only to be used for testing
+    if not('version' in params):
+      sys.exit('The \'version\' key needs to be defined in config with \'minimum\' and \'maximum\' fields to determine the compatibility of configuration with code base')
+    else:
+      gandlf_version = pkg_resources.require('GANDLF')[0].version
+      gandlf_version_int = parse_version(gandlf_version)
+      min = parse_version(params['version']['minimum'])
+      max = parse_version(params['version']['maximum'])
+      if (min > gandlf_version_int) or (max < gandlf_version_int):
+        sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
       
   if 'patch_size' in params:
     params['psize'] = params['patch_size'] 
+    if len(params['psize']) == 2: # 2d check
+        params['psize'].append(1) # ensuring same size during torchio processing
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
   
@@ -78,11 +80,7 @@ def parseConfig(config_file_path):
   params['batch_size'] = batch_size
   
   if 'amp' in params:
-    amp = bool(params['amp'])
-  else:
-    amp = False
-    print("NOT using Mixed Precision Training")
-  params['amp'] = amp
+    print("Please define \'amp\' under \'model\'")
 
   if 'learning_rate' in params:
     learning_rate = float(params['learning_rate'])
@@ -90,6 +88,15 @@ def parseConfig(config_file_path):
     learning_rate = 0.001
     print('Using default learning_rate: ', learning_rate)
   params['learning_rate'] = learning_rate
+
+  if 'modality' in params:
+    modality = str(params['modality'])
+    if modality.lower() == 'rad':
+      pass
+    if modality.lower() == 'path':
+      pass
+    else:
+      sys.exit('The \'modality\' should be set to either \'rad\' or \'path\'. Please check for spelling errors and it should be set to either of the two given options.')
 
   if 'loss_function' in params:
     defineDefaultLoss = False
@@ -131,10 +138,84 @@ def parseConfig(config_file_path):
   params = initialize_key(params, 'data_augmentation')
   if not(params['data_augmentation'] == None):
     if len(params['data_augmentation']) > 0: # only when augmentations are defined
+      
+      # special case for spatial augmentation, which is now deprecated 
+      if 'spatial' in params['data_augmentation']:
+          if not('affine' in params['data_augmentation']) or not('elastic' in params['data_augmentation']):
+              print('WARNING: \'spatial\' is now deprecated in favor of split \'affine\' and/or \'elastic\'', file = sys.stderr)
+              params['data_augmentation']['affine'] = {}
+              params['data_augmentation']['elastic'] = {}
+              del params['data_augmentation']['spatial']
+      
+      # special case for random swapping - which takes a patch size to swap pixels around
+      if 'swap' in params['data_augmentation']:
+          if not(isinstance(params['data_augmentation']['swap'], dict)):
+              params['data_augmentation']['swap'] = {}
+          if not('patch_size' in params['data_augmentation']['swap']):
+              params['data_augmentation']['swap']['patch_size'] = 15 # default
+      
+      # special case for random blur/noise - which takes a std-dev range
+      for std_aug in ['blur', 'noise']:
+        if std_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][std_aug], dict)):
+                params['data_augmentation'][std_aug] = {}
+            if not('std' in params['data_augmentation'][std_aug]):
+                params['data_augmentation'][std_aug]['std'] = [0, 1] # default
+
+      # special case for random noise - which takes a mean range
+      if 'noise' in params['data_augmentation']:
+          if not(isinstance(params['data_augmentation']['noise'], dict)):
+              params['data_augmentation']['noise'] = {}
+          if not('mean' in params['data_augmentation']['noise']):
+              params['data_augmentation']['noise']['mean'] = 0 # default
+      
+      # special case for augmentations that need axis defined 
+      for axis_aug in ['flip', 'anisotropic']:
+        if axis_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][axis_aug], dict)):
+                params['data_augmentation'][axis_aug] = {}
+            if not('axis' in params['data_augmentation'][axis_aug]):
+                params['data_augmentation'][axis_aug]['axis'] = [0,1,2] # default
+      
+      # special case for augmentations that need axis defined in 1,2,3
+      for axis_aug in ['rotate_90', 'rotate_180']:
+        if axis_aug in params['data_augmentation']:
+            if not(isinstance(params['data_augmentation'][axis_aug], dict)):
+                params['data_augmentation'][axis_aug] = {}
+            if not('axis' in params['data_augmentation'][axis_aug]):
+                params['data_augmentation'][axis_aug]['axis'] = [1,2,3] # default
+      
+      if 'anisotropic' in params['data_augmentation']: # special case for anisotropic
+        if not('downsampling' in params['data_augmentation']['anisotropic']):
+          default_downsampling = 1.5
+        else:
+          default_downsampling = params['data_augmentation']['anisotropic']['downsampling']
+        
+        initialize_downsampling = False
+        if type(default_downsampling) is list:
+          if len(default_downsampling) != 2:
+            initialize_downsampling = True
+            print('WARNING: \'anisotropic\' augmentation needs to be either a single number of a list of 2 numbers: https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomswap#torchio.transforms.RandomAnisotropy.', file = sys.stderr)
+            default_downsampling = default_downsampling[0] # only 
+        else:
+          initialize_downsampling = True
+        
+        if initialize_downsampling:
+          if default_downsampling < 1:
+            print('WARNING: \'anisotropic\' augmentation needs the \'downsampling\' parameter to be greater than 1, defaulting to 1.5.', file = sys.stderr)
+            default_downsampling = 1.5 
+          params['data_augmentation']['anisotropic']['downsampling'] = default_downsampling # default
+      
+      # for all others, ensure probability is present
+      default_probability = 0.5
+      if 'default_probability' in params['data_augmentation']:
+        default_probability = float(params['data_augmentation']['default_probability'])
       for key in params['data_augmentation']:
+        if key != 'default_probability':
           if (params['data_augmentation'][key] == None) or not('probability' in params['data_augmentation'][key]): # when probability is not present for an augmentation, default to '1'
-              params['data_augmentation'][key] = {}
-              params['data_augmentation'][key]['probability'] = 1
+              if not isinstance(params['data_augmentation'][key], dict):
+                params['data_augmentation'][key] = {}
+              params['data_augmentation'][key]['probability'] = default_probability
 
   # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing 
   params = initialize_key(params, 'data_preprocessing')
@@ -180,13 +261,20 @@ def parseConfig(config_file_path):
     which_model = 'resunet'
     # print('Using default model: ', which_model)
   params['which_model'] = which_model
-
+  
   if 'model' in params:
 
     if not(isinstance(params['model'], dict)):
       sys.exit('The \'model\' parameter needs to be populated as a dictionary')
     elif len(params['model']) == 0: # only proceed if something is defined
       sys.exit('The \'model\' parameter needs to be populated as a dictionary and should have all properties present')
+
+    if 'amp' in params['model']:
+      amp = params['model']['amp']
+    else:
+      amp = False
+      print("NOT using Mixed Precision Training")
+    params['model']['amp'] = amp
 
     if not('architecture' in params['model']):
       sys.exit('The \'model\' parameter needs \'architecture\' key to be defined')
@@ -198,15 +286,23 @@ def parseConfig(config_file_path):
       base_filters = 32
       params['model']['base_filters'] = base_filters
       print('Using default \'base_filters\' in \'model\': ', base_filters)
-      # sys.exit('The \'model\' parameter needs \'base_filters\' key to be defined') # uncomment if we need this to be passed by user
-    # if not('n_channels' in params['model']):
-    #   n_channels = 32
-    #   params['model']['n_channels'] = n_channels
-    #   print('Using default \'n_channels\' in \'model\': ', n_channels)
-    #   # sys.exit('The \'model\' parameter needs \'n_channels\' key to be defined') # uncomment if we need this to be passed by user
+    if not('class_list' in params['model']): 
+      params['model']['class_list'] = [] # ensure that this is initialized
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
+  
+  if isinstance(params['model']['class_list'], str):
+    try:
+      params['model']['class_list'] = eval(params['model']['class_list'])
+    except:
+      if ('||' in params['model']['class_list']) or ('&&' in params['model']['class_list']):
+        # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
+        print('This is a special case for multi-class computation, where different labels are processed together')
+        temp_classList = params['model']['class_list']
+        temp_classList= temp_classList.replace('[', '') # we don't need the brackets
+        temp_classList= temp_classList.replace(']', '') # we don't need the brackets
+        params['model']['class_list'] = temp_classList.split(',')
 
   if 'kcross_validation' in params:
     sys.exit('\'kcross_validation\' is no longer used, please use \'nested_training\' instead')
@@ -226,12 +322,24 @@ def parseConfig(config_file_path):
     print('Using default folds for validation split: ', kfolds)
     params['nested_training']['validation'] = kfolds
 
+  if not 'in_memory' in params:
+    params['in_memory'] = False
+  
+  if not 'save_masks' in params:
+    params['save_masks'] = False
+    
   # Setting default values to the params
   if 'scheduler' in params:
       scheduler = str(params['scheduler'])
   else:
       scheduler = 'triangle'
-  params['scheduler'] = scheduler
+  params['scheduler'] = scheduler.lower()
+
+  if 'scaling_factor' in params:
+      scaling_factor = params['scaling_factor']
+  else:
+      scaling_factor = 1
+  params['scaling_factor'] = scaling_factor
 
   if 'q_max_length' in params:
       q_max_length = int(params['q_max_length'])
@@ -244,6 +352,9 @@ def parseConfig(config_file_path):
   else:
       q_samples_per_volume = 10
   params['q_samples_per_volume'] = q_samples_per_volume
+
+  if int(params['q_max_length']) % int(params['q_samples_per_volume']) !=0:
+      sys.exit('\'q_max_length\' needs to be divisible by \'q_samples_per_volume\'')
 
   if 'q_num_workers' in params:
       q_num_workers = int(params['q_num_workers'])
@@ -263,5 +374,11 @@ def parseConfig(config_file_path):
       parallel_compute_command = parallel_compute_command.replace('\'', '')
       parallel_compute_command = parallel_compute_command.replace('\"', '')
   params['parallel_compute_command'] = parallel_compute_command
+
+  if 'weighted_loss' in params:
+    pass
+  else:
+    print("WARNING: NOT using weighted loss")
+    params['weighted_loss'] = False 
 
   return params
