@@ -67,6 +67,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         n_channels = parameters['model']['n_channels']
 
     # Defining our model here according to parameters mentioned in the configuration file
+    print("Num dimension      : ", parameters['model']['dimension'])
+    print("Number of channels : ", parameters['model']['n_channels'])
+    print("Number of classes  : ", n_classList)
     model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
 
     # initialize problem type    
@@ -202,6 +205,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # Load the subject and its ground truth
             # read and concat the images
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+            
             # if regression, concatenate values to predict
             if is_regression:
                 valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
