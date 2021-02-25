@@ -1,3 +1,13 @@
+## 0.0.7
+
+- New modality switch added for rad/path
+- Class list can now be defined as a range
+- Added option to train and infer on fused labels
+- Rotation 90 and 180 augmentation added
+- Cropping zero planes added for preprocessing
+- Normalization options added
+- Added option to save generated masks on validation and (if applicable) testing data
+
 ## 0.0.6
 
 - Added PyVIPS support

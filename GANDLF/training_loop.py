@@ -16,17 +16,18 @@ from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
 from shutil import copyfile
-import time
+from copy import deepcopy
+import time, math
 import sys
 import pickle
 from pathlib import Path
 import argparse
 import datetime
 import SimpleITK as sitk
+from GANDLF.utils import *
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.losses import *
-from GANDLF.utils import *
 from .parameterParsing import *
 
 def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, testingDataFromPickle = None):
@@ -47,25 +48,23 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
-    amp = parameters['amp']
+    amp = parameters['model']['amp']
     patience = parameters['patience']
+    use_weights = parameters['weighted_loss']
+    in_memory = parameters['in_memory']
 
     ## model configuration
     which_model = parameters['model']['architecture']
     dimension = parameters['model']['dimension']
     base_filters = parameters['model']['base_filters']
-    if 'class_list' in parameters['model']:
-        class_list = parameters['model']['class_list']
-        n_classList = len(class_list)
+    class_list = parameters['model']['class_list']
+    scaling_factor = parameters['scaling_factor']
+    n_classList = len(class_list)
+
     if not('n_channels' in parameters['model']):
         n_channels = len(headers['channelHeaders'])
     else:
         n_channels = parameters['model']['n_channels']
-
-    if 'scaling_factor' in parameters:
-        scaling_factor = parameters['scaling_factor']
-    else:
-        scaling_factor = 1
 
     # Defining our model here according to parameters mentioned in the configuration file
     model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
@@ -76,20 +75,19 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if is_regression or is_classification:
         n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
   
-    if len(psize) == 2:
-        psize.append(1) # ensuring same size during torchio processing
-
     trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing)
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory)
     validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
-                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing) # may or may not need to add augmentations here
+                                               q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory) # may or may not need to add augmentations here
+    testingDataDefined = True
     if testingDataFromPickle is None:
-        print('No testing data is defined, using validation data for those metrics')
+        print('No testing data is defined, using validation data for those metrics', flush=True)
         testingDataFromPickle = validationDataFromPickle
+        testingDataDefined = False
     inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
-    train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True, pin_memory=in_memory)
     val_loader = DataLoader(validationDataForTorch, batch_size=1)
     inference_loader = DataLoader(inferenceDataForTorch,batch_size=1)
     
@@ -106,8 +104,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # training_start_time = time.asctime()
     # startstamp = time.time()
     if not(os.environ.get('HOSTNAME') is None):
-        print("\nHostname     :" + str(os.environ.get('HOSTNAME')))
-        sys.stdout.flush()
+        print("\nHostname     :" + str(os.environ.get('HOSTNAME')), flush=True)
 
     # resume if compatible model was found
     if os.path.exists(os.path.join(outputDir,str(which_model) + "_best.pth.tar")):
@@ -116,81 +113,72 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         print("Model checkpoint found. Loading checkpoint from: ",os.path.join(outputDir,str(which_model) + "_best.pth.tar"))
 
-    print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)))
-    sys.stdout.flush()
+    print("Samples - Train: %d Val: %d Test: %d"%(len(train_loader.dataset),len(val_loader.dataset),len(inference_loader.dataset)), flush=True)
 
     model, amp, device = send_model_to_device(model, amp, device, optimizer=optimizer)
-    print('Using device:', device)        
-    sys.stdout.flush()
+    print('Using device:', device, flush=True)
 
     # Checking for the learning rate scheduler
     scheduler_lr = get_scheduler(scheduler, optimizer, batch_size, len(train_loader.dataset), learning_rate)
 
-    sys.stdout.flush()
     ############## STORING THE HISTORY OF THE LOSSES #################
-    best_val_dice = -1
-    best_train_dice = -1
-    best_test_dice = -1
-    
-    best_val_loss = 1000000
-    best_train_loss = 1000000
-    best_test_loss = 1000000
-    
-    total_train_loss = 0
-    total_train_dice = 0
-    patience_count = 0
-    
-    best_train_idx = 0
-    best_val_idx = 0
-    best_test_idx = 0
+    best_val_dice = best_train_dice = best_test_dice = -1
+    best_val_loss = best_train_loss = best_test_loss =  1000000
+    total_train_loss = total_train_dice = 0
+    patience_count = 0    
+    best_train_idx = best_val_idx = best_test_idx = 0
+
     # Creating a CSV to log training loop and writing the initial columns
     log_train_file = os.path.join(outputDir,"trainingScores_log.csv")
     log_train = open(log_train_file,"w")
     log_train.write("Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n")
     log_train.close()
 
-    # initialize without considering background
-    dice_weights_dict = {} # average for "weighted averaging"
-    dice_penalty_dict = {} # penalty for misclassification
-    for i in range(1, n_classList):
-        dice_weights_dict[i] = 0
-        dice_penalty_dict[i] = 0
-
-    # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
-    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
-    
-    # get the weights for use for dice loss
-    total_nonZeroVoxels = 0
-    
-    # For regression dice penalty need not be taken account
-    # For classification this should be calculated on the basis of predicted labels and mask
-    if not is_regression:
-        for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-            # accumulate dice weights for each label
-            mask = subject['label'][torchio.DATA]
-            one_hot_mask = one_hot(mask, class_list)
-            for i in range(1, n_classList):
-                currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-                dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-                total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
+    if use_weights:
+        print('Calculating penalty weights', flush=True)
+        dice_weights_dict = {} # average for "weighted averaging"
+        dice_penalty_dict = {} # penalty for misclassification
+        for i in range(0, n_classList):
+            dice_weights_dict[i] = 0
+            dice_penalty_dict[i] = 0
+        # define a seaparate data loader for penalty calculations
+        penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None, preprocessing=None) 
+        penalty_loader = DataLoader(penaltyData, batch_size=1)
+        
+        # get the weights for use for dice loss
+        total_nonZeroVoxels = 0
+        
+        # For regression dice penalty need not be taken account
+        # For classification this should be calculated on the basis of predicted labels and mask
+        if not is_regression:
+            for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
+                # accumulate dice weights for each label
+                mask = subject['label'][torchio.DATA]
+                one_hot_mask = one_hot(mask, class_list)
+                for i in range(0, n_classList):
+                    currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
+                    dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
+                    total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
+                
             
-            # get the penalty values - dice_weights contains the overall number for each class in the training data
-        for i in range(1, n_classList):
-            penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-            for j in range(1, n_classList):
-                if i != j: # for differing classes, subtract the number
-                    penalty = penalty - dice_penalty_dict[j]
-            
-            dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-        dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-     
+            # dice_weights_dict_temp = deepcopy(dice_weights_dict)
+            dice_weights_dict = {k: (v / total_nonZeroVoxels) for k, v in dice_weights_dict.items()} # divide each dice value by total nonzero
+            dice_penalty_dict = deepcopy(dice_weights_dict) # deep copy so that both values are preserved
+            dice_penalty_dict = {k: 1 - v for k, v in dice_weights_dict.items()} # subtract from 1 for penalty
+            total = sum(dice_penalty_dict.values())
+            dice_penalty_dict = {k: v / total for k, v in dice_penalty_dict.items()} # normalize penalty to ensure sum of 1
+            # dice_penalty_dict = get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, class_list) # this doesn't work because ImagesFromDataFrame gets import twice, causing a "'module' object is not callable" error
+    else:
+        dice_penalty_dict = None
+        # initialize without considering background
+        
     # Getting the channels for training and removing all the non numeric entries from the channels
-    batch = next(iter(train_loader))
+
+    batch = next(iter(val_loader)) # using train_loader makes this slower as train loader contains full augmentations
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
-
+    
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)
@@ -199,13 +187,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if amp:
+        print('Using automatic mixed precision', flush=True)
         scaler = torch.cuda.amp.GradScaler() 
 
     ################ TRAINING THE MODEL##############
     for ep in range(num_epochs):
         start = time.time()
-        print("\n")
-        print("Ep# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())))
+        print("\nEp# %03d | LR: %s | Start: %s "%(ep, str(optimizer.param_groups[0]['lr']), str(datetime.datetime.now())), flush=True)
+        samples_for_train = 0
         model.train()
         for batch_idx, (subject) in enumerate(train_loader):
             # uncomment line to debug memory issues
@@ -223,7 +212,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     valuesToPredict = valuesToPredict.to(device)
             
             # read the mask
-            if subject['label'] == ['NA']:
+            first = next(iter(subject['label']))
+            if first == 'NA':
                 mask_present = False
             else:
                 mask_present = True
@@ -240,12 +230,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             #mask = one_hot(mask.cpu().float().numpy(), class_list)
             if mask_present:
                 one_hot_mask = one_hot(mask, class_list)
+                #temp = reverse_one_hot(one_hot_mask, class_list)
             # one_hot_mask = one_hot_mask.unsqueeze(0)
             #mask = torch.from_numpy(mask)
             # Loading images into the GPU and ignoring the affine
-            image = image.float().to(device)
-            if mask_present:
-                one_hot_mask = one_hot_mask.to(device)
+            if device.type != 'cpu':
+                image = image.float().to(device)
+                if mask_present:
+                    one_hot_mask = one_hot_mask.to(device)
 
             # Making sure that the optimizer has been reset
             optimizer.zero_grad()
@@ -263,46 +255,57 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
                 #loss = MSE(output, valuesToPredict) 
                 loss = torch.nn.MSELoss()(output, valuesToPredict)
+                curr_loss = loss.cpu().data.item()
                 if amp:
                     with torch.cuda.amp.autocast(): 
-                        scaler.scale(loss).backward()
-                        scaler.step(optimizer)
+                        if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
+                            scaler.scale(loss).backward()
+                            scaler.step(optimizer)
                 else:
-                    loss.backward()
-                    optimizer.step()
+                    if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
+                        loss.backward()
+                        optimizer.step()
             else:
                 if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
                     one_hot_mask = one_hot_mask.unsqueeze(-1)
                     output = output.unsqueeze(-1)
             
             if not is_regression:
+                # Computing the loss
+                if MSE_requested:
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
+                else:
+                    loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
+                curr_loss = loss.cpu().data.item()
                 if amp:
                     with torch.cuda.amp.autocast(): 
-                    # Computing the loss
-                        if MSE_requested:
-                            loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
-                        else:
-                            loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                    scaler.scale(loss).backward()
-                    scaler.step(optimizer)
+                        if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
+                            scaler.scale(loss).backward()
+                            scaler.step(optimizer)
                 else:
-                    # Computing the loss
-                    if MSE_requested:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
-                    else:
-                        loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict)
-                    loss.backward()
-                    optimizer.step()
+                    if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
+                        loss.backward()
+                        optimizer.step()
 
             #Pushing the dice to the cpu and only taking its value
-            curr_loss = loss.cpu().data.item()
+            # print('=== curr_loss: ', curr_loss)
+            # curr_loss = loss.cpu().data.item()
             #train_loss_list.append(loss.cpu().data.item())
-            total_train_loss += curr_loss
+            ## debugging new loss
+            # temp_loss = MCD_loss_new(output.double(), one_hot_mask.double(), n_classList, dice_penalty_dict).cpu().data.item()
+            # print('curr_loss:', curr_loss)
+            # print('temp_loss:', temp_loss)
+            ## debugging new loss
+
+            if not math.isnan(curr_loss):
+                total_train_loss += curr_loss
+            samples_for_train += 1
 
             if not is_regression:
                 #Computing the dice score  # Can be changed for multi-class outputs later.
                 curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
                 #print(curr_dice)
+                # print('=== curr_dice: ', curr_dice)
                 #Computng the total dice
                 total_train_dice += curr_dice
             # update scale for next iteration
@@ -315,11 +318,14 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             #print(curr_dice)
 
         if is_segmentation:
-            average_train_dice = total_train_dice/len(train_loader.dataset) 
+            average_train_dice = total_train_dice/samples_for_train #len(train_loader.dataset) 
         else:
             average_train_dice = 1
 
-        average_train_loss = total_train_loss/len(train_loader.dataset)
+        average_train_loss = total_train_loss/samples_for_train #len(train_loader.dataset)
+        # print('total_train_loss:', total_train_loss)
+        # print('average_train_loss:', average_train_loss)
+        # print('average_train_loss_old:', total_train_loss/len(train_loader.dataset))
 
         # initialize some bool variables to control model saving
         save_condition_train = False
@@ -328,10 +334,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor)
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationMasks'))
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor)
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingMasks'))
     
         # regression or classification, use the loss to drive the model saving
         if is_segmentation:
@@ -341,6 +347,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             save_condition_val = average_val_dice > best_val_dice
             if save_condition_val:
                 best_val_dice = average_val_dice
+                patience_count = 0
             else: # patience is calculated on validation
                 patience_count = patience_count + 1 
             save_condition_test = average_test_dice > best_test_dice
@@ -367,7 +374,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_train_dice": best_train_dice,
             "best_train_loss": best_train_loss }, os.path.join(outputDir, which_model + "_best_train.pth.tar"))
             
-        print("   Train DCE: ", format(average_train_dice,'.10f'), " | Best Train DCE: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.1f'))
+        print("   Train Dice: ", format(average_train_dice,'.10f'), " | Best Train Dice: ", format(best_train_dice,'.10f'), " | Avg Train Loss: ", format(average_train_loss,'.10f'), " | Best Train Ep ", format(best_train_idx,'.0f'), flush=True)
 
         if save_condition_val:
             best_val_idx = ep
@@ -377,7 +384,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_val_dice": best_val_dice,
             "best_val_loss": best_val_loss }, os.path.join(outputDir, which_model + "_best_val.pth.tar"))
         
-        print("     Val DCE: ", format(average_val_dice,'.10f'), " | Best Val   DCE: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.1f'))
+        print("     Val Dice: ", format(average_val_dice,'.10f'), " | Best Val   Dice: ", format(best_val_dice,'.10f'), " | Avg Val   Loss: ", format(average_val_loss,'.10f'), " | Best Val   Ep ", format(best_val_idx,'.0f'), flush=True)
 
         if save_condition_test:
             best_test_idx = ep
@@ -387,7 +394,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             "best_test_dice": best_test_dice,
             "best_test_loss": best_test_loss }, os.path.join(outputDir, which_model + "_best_test.pth.tar"))
 
-        print("    Test DCE: ", format(average_test_dice,'.10f'), " | Best Test  DCE: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.1f'))
+        print("    Test Dice: ", format(average_test_dice,'.10f'), " | Best Test  Dice: ", format(best_test_dice,'.10f'), " | Avg Test  Loss: ", format(average_test_loss,'.10f'), " | Best Test  Ep ", format(best_test_idx,'.0f'), flush=True)
 
         # Updating the learning rate according to some conditions - reduce lr on plateau needs out loss to be monitored and schedules the LR accordingly. Others change irrespective of loss.
         
@@ -404,16 +411,15 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     "val_dice": average_val_dice, "val_loss": average_val_loss }, os.path.join(outputDir, which_model + "_latest.pth.tar"))
 
         stop = time.time()     
-        print("Time for epoch: ",(stop - start)/60," mins")        
+        print("Time for epoch: ",(stop - start)/60," mins", flush=True)        
 
         # Checking if patience is crossed
         if patience_count > patience:
-            print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience))
+            print("Performance Metric has not improved for %d epochs, exiting training loop"%(patience), flush=True)
             break
         
-        sys.stdout.flush()
         log_train = open(log_train_file, "a")
-        #log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
+        log_train.write(str(ep) + "," + str(average_train_loss) + "," + str(average_train_dice) + "," + str(average_val_loss) + "," + str(average_val_dice) + "," + str(average_test_loss) + "," + str(average_test_dice) + "\n")
         log_train.close()
         total_train_dice = 0
         total_train_loss = 0
