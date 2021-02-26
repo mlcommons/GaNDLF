@@ -101,5 +101,5 @@ if os.name != 'nt':
                                                         self._selected_level,
                                                         (self._patch_size[0], self._patch_size[1])).convert('RGB'))
             patch = np.array(patch/255)
-            patch = patch.transpose([2, 0, 1])[..., np.newaxis]
+            patch = patch.transpose([2, 0, 1])
             return patch, (x_loc, y_loc)

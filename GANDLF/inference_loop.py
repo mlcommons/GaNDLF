@@ -17,6 +17,7 @@ from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
 from shutil import copyfile
+from tqdm import tqdm
 import time
 import sys
 import ast 
@@ -25,6 +26,7 @@ from pathlib import Path
 import argparse
 import datetime
 import SimpleITK as sitk
+from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 if os.name != 'nt':
     '''
@@ -225,7 +227,7 @@ if os.name != 'nt':
                     count_map[x_coords[i]:x_coords[i]+patch_size[0],
                               y_coords[i]:y_coords[i]+patch_size[1]] += 1
                     probs_map[x_coords[i]:x_coords[i]+patch_size[0],
-                              y_coords[i]:y_coords[i]+patch_size[1]] += output[i][0].unsqueeze(-1)
+                              y_coords[i]:y_coords[i]+patch_size[1]] += output[i][0]
             probs_map = probs_map/count_map
             count_map = (count_map/count_map.max())
             out = count_map*probs_map
@@ -234,8 +236,8 @@ if os.name != 'nt':
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_map)
-        average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
-        print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
+        #average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
+        #print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
 if __name__ == "__main__":
 
