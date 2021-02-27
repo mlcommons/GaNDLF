@@ -17,6 +17,7 @@ from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
 from shutil import copyfile
+from tqdm import tqdm
 import time
 import sys
 import ast 
@@ -25,12 +26,14 @@ from pathlib import Path
 import argparse
 import datetime
 import SimpleITK as sitk
+from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 if os.name != 'nt':
     '''
     path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
     '''
     from GANDLF.inference_dataloader_histopath import InferTumorSegDataset
+from openslide import OpenSlide
 from GANDLF.schd import *
 from GANDLF.losses import *
 from GANDLF.utils import *
@@ -65,6 +68,9 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     n_classList = len(class_list)
 
     # Defining our model here according to parameters mentioned in the configuration file
+    print("Num dimension      : ", parameters['model']['dimension'])
+    print("Number of channels : ", parameters['model']['n_channels'])
+    print("Number of classes  : ", n_classList)
     model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
@@ -118,25 +124,29 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor=scaling_factor, weights=None, save_mask=True, outputDir=outputDir)
     print(average_dice, average_loss)
 
-
-
 if os.name != 'nt':
     '''
     path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
-    '''
+    ''' 
     def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outputDir):
         '''
         This is the main inference loop for histopathology
         '''
         # extract variables form parameters dict
-        psize = parameters['psize']
+        patch_size = parameters['patch_size']
+        stride = parameters['stride_size']
         augmentations = parameters['data_augmentation']
         preprocessing = parameters['data_preprocessing']
         which_model = parameters['model']['architecture']
-        class_list = parameters['class_list']
-        base_filters = parameters['base_filters']
+        class_list = parameters['model']['class_list']
+        base_filters = parameters['model']['base_filters']
+        amp = parameters['model']['amp']
         batch_size = parameters['batch_size']
         n_channels = len(headers['channelHeaders'])
+        if not('n_channels' in parameters['model']):
+            n_channels = len(headers['channelHeaders'])
+        else:
+            n_channels = parameters['model']['n_channels']
         n_classList = len(class_list)
         # Report the time stamp
         training_start_time = time.asctime()
@@ -149,26 +159,29 @@ if os.name != 'nt':
         # PRINT PARSED ARGS
         print("\n\n")
         print("Output directory        :", outputDir)
-        print("Number of channels      :", parameters['num_channels'])
+        print("Number of channels      :", parameters['model']['n_channels'])
         print("Modalities              :", parameters['modality'])
-        print("Number of classes       :", parameters['num_classes'])
+        #print("Number of classes       :", parameters['modality']['num_classes']
         print("Batch Size              :", parameters['batch_size'])
         print("Patch Size              :", parameters['patch_size'])
         print("Sampling Stride         :", parameters['stride_size'])
-        print("Base Filters            :", parameters['base_filters'])
-        print("Load Weights            :", parameters['load_weights'])
+        print("Base Filters            :", parameters['model']['base_filters'])
+        #print("Load Weights            :", parameters['load_weights'])
         sys.stdout.flush()
         # We generate CSV for training if not provided
         print("Reading CSV Files")
-
-        test_csv = parameters['test_csv']
+        n_classList = len(class_list)
+        #test_csv = parameters['test_csv']
 
         # Defining our model here according to parameters mentioned in the configuration file
-        model = get_model(which_model, parameters['dimension'], n_channels, n_classList, base_filters,
-                        final_convolution_layer=parameters['model']['final_layer'], psize=psize)
+        print("Num dimension      : ", parameters['model']['dimension'])
+        print("Number of channels : ", parameters['model']['n_channels'])
+        print("Number of classes  : ", n_classList)
+        model = get_model(which_model, n_dimensions=parameters['model']['dimension'], n_channels=n_channels, n_classes=n_classList,
+                          base_filters=base_filters, final_convolution_layer=parameters['model']['final_layer'], psize=patch_size, batch_size=batch_size)
 
         # Loading the weights into the model
-        main_dict = torch.load(os.path.join(outputDir, str(which_model) + "_best.pth.tar"))
+        main_dict = torch.load(os.path.join(outputDir, str(which_model) + "_best_val.pth.tar"))
         model.load_state_dict(main_dict['model_state_dict'])
         print('Loaded Weights successfully.')
         sys.stdout.flush()
@@ -176,18 +189,19 @@ if os.name != 'nt':
         model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
 
         model.eval()
-    # print stats
+        # print stats
         print('Using device:', device)
         sys.stdout.flush()
 
-        test_df = pd.read_csv(test_csv)
+        test_df = inferenceDataFromPickle 
         # Patch blocks
 
         for index, row in test_df.iterrows():
             subject_name = row[headers['subjectIDHeader']]
             print("Patient Slide       : ", row[headers['subjectIDHeader']])
             print("Patient Location    : ", row[headers['channelHeaders']])
-            os_image = OpenSlide(row[headers['channelHeaders']])
+            print(row[headers['channelHeaders']].values[0])
+            os_image = OpenSlide(row[headers['channelHeaders']].values[0])
             level_width, level_height = os_image.level_dimensions[int(parameters['slide_level'])]
             subject_dest_dir = os.path.join(outputDir, subject_name)
             os.makedirs(subject_dest_dir, exist_ok=True)
@@ -195,8 +209,8 @@ if os.name != 'nt':
             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
 
-            patient_dataset_obj = InferTumorSegDataset(row[headers['channelHeaders']],
-                                                    patch_size=psize,
+            patient_dataset_obj = InferTumorSegDataset(row[headers['channelHeaders']].values[0],
+                                                    patch_size=patch_size,
                                                     stride_size=stride,
                                                     selected_level=parameters['slide_level'],
                                                     mask_level=4)
@@ -210,10 +224,10 @@ if os.name != 'nt':
                     output = model(image_patches.half().cuda())
                 output = output.cpu().detach().numpy()
                 for i in range(int(output.shape[0])):
-                    count_map[x_coords[i]:x_coords[i]+psize,
-                            y_coords[i]:y_coords[i]+psize] += 1
-                    probs_map[x_coords[i]:x_coords[i]+psize,
-                            y_coords[i]:y_coords[i]+psize] += output[i][0].unsqueeze(-1)
+                    count_map[x_coords[i]:x_coords[i]+patch_size[0],
+                              y_coords[i]:y_coords[i]+patch_size[1]] += 1
+                    probs_map[x_coords[i]:x_coords[i]+patch_size[0],
+                              y_coords[i]:y_coords[i]+patch_size[1]] += output[i][0]
             probs_map = probs_map/count_map
             count_map = (count_map/count_map.max())
             out = count_map*probs_map
@@ -222,8 +236,8 @@ if os.name != 'nt':
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_map)
-    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
-    print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
+        #average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
+        #print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
 if __name__ == "__main__":
 
