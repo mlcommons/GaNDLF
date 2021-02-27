@@ -68,6 +68,7 @@ if os.name != 'nt':
 
         def _basic_preprocessing(self):
             mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
+            print(self._wsi_path, self._os_image)
             extracted_image = self._os_image.read_region((0, 0), self._mask_level,
                                                         (mask_xdim,
                                                         mask_ydim)).convert('RGB')
@@ -100,5 +101,5 @@ if os.name != 'nt':
                                                         self._selected_level,
                                                         (self._patch_size[0], self._patch_size[1])).convert('RGB'))
             patch = np.array(patch/255)
-            patch = patch.transpose([2, 0, 1])[..., np.newaxis]
+            patch = patch.transpose([2, 0, 1])
             return patch, (x_loc, y_loc)
