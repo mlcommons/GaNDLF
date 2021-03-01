@@ -1,6 +1,6 @@
-# GANDLF
+# GaNDLF
 
-A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
+A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
 ## Why use this?
 
@@ -28,5 +28,5 @@ Start at [./docs/index.md](./docs/index.md).
 
 Includes:
 - [Installation and setup](./docs/setup.md)
-- [Using GANDLF](./docs/usage.md)
-- [Extending GANDLF](./docs/extending.md)
+- [Using GaNDLF](./docs/usage.md)
+- [Extending GaNDLF](./docs/extending.md)
