@@ -18,6 +18,10 @@ A **G**ener**A**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 - No need to code to generate robust models
 - [Automatic mixed precision](https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/) support
 
+## Citation
+
+Publication pending on arXiv, due on 4th March 2021.
+
 ## Documentation
 
 Start at [./docs/index.md](./docs/index.md).
