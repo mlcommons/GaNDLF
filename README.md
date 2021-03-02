@@ -23,7 +23,7 @@ A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 Please cite the following article for GaNDLF:
 
 ```
-@misc{pati2021gandlf,
+@misc{gandlf2021,
       title={GaNDLF: A Generally Nuanced Deep Learning Framework for Scalable End-to-End Clinical Workflows in Medical Imaging}, 
       author={Sarthak Pati and Siddhesh P. Thakur and Megh Bhalerao and Ujjwal Baid and Caleb Grenko and Brandon Edwards and Micah Sheller and Jose Agraz and Bhakti Baheti and Vishnu Bashyam and Parth Sharma and Babak Haghighi and Aimilia Gastounioti and Mark Bergman and Bjoern Menze and Despina Kontos and Christos Davatzikos and Spyridon Bakas},
       year={2021},
