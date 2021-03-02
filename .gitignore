@@ -15,7 +15,7 @@ __pycache__
 *_build*
 *build*
 debug.log
-vips/*
+vips*
 testing/data/*
 testing/data_output/*
 .coverage
