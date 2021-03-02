@@ -35,9 +35,4 @@ Please cite the following article for GaNDLF:
 
 ## Documentation
 
-Start at [./docs/index.md](./docs/index.md).
-
-Includes:
-- [Installation and setup](./docs/setup.md)
-- [Using GaNDLF](./docs/usage.md)
-- [Extending GaNDLF](./docs/extending.md)
+Start at https://cbica.github.io/GaNDLF/
