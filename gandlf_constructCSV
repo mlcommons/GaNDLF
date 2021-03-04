@@ -15,13 +15,16 @@ def main():
   parser = argparse.ArgumentParser(prog='GANDLF_ConstructCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Generate training/inference CSV from data directory.\n\n" + copyrightMessage)
   parser.add_argument('-inputDir', type=str, help = 'Input data directory which contains images in specified format', required=True)
   parser.add_argument('-channelsID', type=str, help = 'Channels/modalities identifier string to check for in all files in \'input_dir\'; for example: -channelsID _t1.nii.gz,_t2.nii.gz', required=True)
-  parser.add_argument('-labelID', type=str, help = 'Label/mask identifier string to check for in all files in \'input_dir\'; for example: -labelID _seg.nii.gz', required=True)
+  parser.add_argument('-labelID', type=str, help = 'Label/mask identifier string to check for in all files in \'input_dir\'; for example: -labelID _seg.nii.gz', required=False)
   parser.add_argument('-outputFile', type=str, help = 'Output CSV file', required=True)
       
   args = parser.parse_args()
 
   inputDir = os.path.normpath(args.inputDir)
   outputFile = os.path.normpath(args.outputFile)
+
+  if not args.labelID:
+    args.labelID = ''
 
   writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
 
