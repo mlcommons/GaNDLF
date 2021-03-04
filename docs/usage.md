@@ -17,7 +17,7 @@ Recommended tool for tackling all aforementioned preprocessing tasks: https://gi
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](../samples/sample_train.csv) and needs to be structured with the following header format:
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format:
 
 ```csv
 SubjectID,Channel_0,Channel_1,...,Channel_X,Label
@@ -28,7 +28,7 @@ SubjectID,Channel_0,Channel_1,...,Channel_X,Label
 - `Label` can be substituted with `Mask` or `Segmentation`
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
-The [gandlf_constructCSV](../gandlf_constructCSV) can be used to make this easier:
+The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
 
 ```bash
 # continue from previous shell
@@ -39,7 +39,7 @@ python gandlf_constructCSV \
 
 Notes:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
-- If `SubjectID` or `PatientName` is present, the randomized split is done according to that instead of per-row. See https://github.com/FETS-AI/GANDLF/issues/285 for details.
+- `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 
 ## Customize the Training
 
@@ -64,7 +64,7 @@ GANDLF requires a YAML-based configuration that controls various aspects of the 
   - Testing 
   - Validation 
 
-Please see a [sample](../samples/sample_training.yaml) for detailed guide and comments.
+Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) for detailed guide and comments.
 ## Running GANDLF (Training/Inference)
 
 ```bash
@@ -80,7 +80,7 @@ python gandlf_run \
 
 ## Plot the final results
 
-After the testing/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](../gandlf_collectStats) can be used for this:
+After the testing/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/CBICA/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
 
 ```bash
 # continue from previous shell
@@ -95,4 +95,4 @@ python gandlf_collectStats \
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
 
-For an example how this is set, see [sge_wrapper](../samples/sge_wrapper).
+For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
