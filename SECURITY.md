@@ -11,4 +11,4 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Please report any vulnerabilities via [GitHub Issues](https://github.com/FETS-AI/GANDLF/issues/new/choose)
+Please report any vulnerabilities via [GitHub Issues](https://github.com/CBICA/GaNDLF/issues/new/choose)
