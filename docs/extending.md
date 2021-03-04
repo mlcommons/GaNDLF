@@ -1,11 +1,11 @@
 # Extending GANDLF
 
-For any new feature, please ensure the corresponding option in the [sample configuration](../samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
+For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
 ## Architecture
 
 - Command-line parsing: [gandlf_run](https://github.com/CBICA/GaNDLF/blob/master/gandlf_run)
-- Parameters from [training configuration](../samples/sample_training.yaml) getting passed as dict via [parameter parser](../GANDLF/parseConfig.py)
+- Parameters from [training configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) getting passed as dict via [parameter parser](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/parseConfig.py)
 - [Training Manager](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/training_manager.py): 
   - Handles k-fold training 
   - Main entry point from CLI
@@ -31,7 +31,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 
 ### Adding Pre-processing functionality
 
-- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [../GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
+- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
 
 ## Add Training Functionality
