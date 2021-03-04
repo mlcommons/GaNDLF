@@ -39,7 +39,7 @@ python gandlf_constructCSV \
 
 Notes:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
-- If `SubjectID` or `PatientName` is present, the randomized split is done according to that instead of per-row. See https://github.com/FETS-AI/GANDLF/issues/285 for details.
+- `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 
 ## Customize the Training
 
