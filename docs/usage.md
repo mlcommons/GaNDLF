@@ -36,7 +36,7 @@ python gandlf_constructCSV \
   -inputDir ./experiment_0/output_dir/ # this is the main output directory of training step
   -output ./experiment_0/output_dir_stats/ \ # output directory
   -channelsID _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
-  -labelID _seg.nii.gz # label identifier
+  -labelID _seg.nii.gz # label identifier - not needed for regression/classification
 ```
 
 Notes:
