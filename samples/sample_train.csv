@@ -3,4 +3,4 @@ subject_000,/full/path/subject_0/0.nii.gz,/full/path/subject_0/1.nii.gz,...,/ful
 .,.,.,...,.,.
 .,.,.,...,.,.
 .,.,.,...,.,.
-subject_X,/full/path/subject_N/0.nii.gz,/full/path/subject_N/1.nii.gz,...,/full/path/subject_N/X.nii.gz,/full/path/subject_N/segmentation.nii.gz
+subject_N,/full/path/subject_N/0.nii.gz,/full/path/subject_N/1.nii.gz,...,/full/path/subject_N/X.nii.gz,/full/path/subject_N/segmentation.nii.gz
