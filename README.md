@@ -36,3 +36,10 @@ Please cite the following article for GaNDLF:
 ## Documentation
 
 Start at https://cbica.github.io/GaNDLF/
+
+## Disclaimer
+- The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.
+- This code (excluding dependent libraries) is governed by the license provided in https://www.med.upenn.edu/cbica/software-agreement.html unless otherwise specified.
+
+## Contact
+For more information or any support, please post on the [Discussions](https://github.com/CBICA/GaNDLF/discussions) section or contact <a href="mailto:software@cbica.upenn.edu">CBICA Software</a>.
