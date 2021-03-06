@@ -3,6 +3,8 @@ show_downloads: True
 navigation:
   - title: Home
     url: /
+  - title: Installation
+    url: setup
   - title: Usage
     url: usage
   - title: Extending GaNDLF
