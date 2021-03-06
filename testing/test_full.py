@@ -75,7 +75,7 @@ def test_train_segmentation_rad_2d():
     parameters['model']['architecture'] = model 
     currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu')
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=False)
 
   print('passed')
 
@@ -89,7 +89,7 @@ def test_train_segmentation_rad_3d():
     parameters['model']['architecture'] = model 
     currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu')
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=False)
 
   print('passed')
 
