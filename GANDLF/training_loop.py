@@ -68,7 +68,8 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Num dimension      : ", parameters['model']['dimension'])
-    print("Number of channels : ", parameters['model']['n_channels'])
+    if 'n_channels' in parameters['model']:
+        print("Number of channels : ", parameters['model']['n_channels'])
     print("Number of classes  : ", n_classList)
     model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
 
