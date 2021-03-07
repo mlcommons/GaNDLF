@@ -1,4 +1,5 @@
-import torch 
+import torch
+import sys
 from torch.nn import MSELoss
 
 
@@ -127,3 +128,21 @@ def MSE_loss(inp, target, num_classes, reduction = 'mean'):
         acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
     acc_mse_loss/=num_classes
     return acc_mse_loss
+
+def fetch_loss_function(loss_name, params):
+    if loss_name == 'dc':
+        loss_function = MCD_loss
+    elif loss_name == 'dc_log':
+        loss_function = MCD_log_loss
+    elif loss_name == 'dcce':
+        loss_function = DCCE
+    elif loss_name == 'ce':
+        loss_function = CE
+    elif loss_name == 'mse':
+        loss_function = MSE_loss
+    else:
+        print('WARNING: Could not find the requested loss function \'' + loss_function +
+              '\' in the implementation, using dc, instead', file=sys.stderr)
+        loss_name = 'dc'
+        loss_function = MCD_loss
+    return loss_function

@@ -35,16 +35,11 @@ from .parameterParsing import *
 # 2. Multiple metrics can be given to evaluate against, but the training is stopped
 #    based on the metric to evaluate against is given
 
+def fetch_loss_function(loss_name):
+    return loss_fn
 
-def training_step(model, image, label, batch_idx, loss, metric=['dice']):
-    output = model(image)
-    loss_function = fetch_loss_function(loss)
-    loss = loss_function(output, label)
-    metric_output = {}
-    for metric in metrics:
-        metric_function = fetch_metric(metric)
-        metric_output[metric] = metric_function(output, label)
-    return loss, metric_output
+
+
 
 
 def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, device, parameters, outputDir, testingDataFromPickle = None):
@@ -52,7 +47,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     This is the main training loop
     '''
     # extract variables form parameters dict
-    psize = parameters['psize']
+    patch_size = parameters['patch_size']
     q_max_length = parameters['q_max_length']
     q_samples_per_volume = parameters['q_samples_per_volume']
     q_num_workers = parameters['q_num_workers']
@@ -65,12 +60,12 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     batch_size = parameters['batch_size']
     learning_rate = parameters['learning_rate']
     num_epochs = parameters['num_epochs']
-    amp = parameters['model']['amp']
     patience = parameters['patience']
     use_weights = parameters['weighted_loss']
     in_memory = parameters['in_memory']
 
     ## model configuration
+    amp = parameters['model']['amp']
     which_model = parameters['model']['architecture']
     dimension = parameters['model']['dimension']
     base_filters = parameters['model']['base_filters']
@@ -84,28 +79,30 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         n_channels = parameters['model']['n_channels']
 
     # Defining our model here according to parameters mentioned in the configuration file
-    print("Num dimension      : ", parameters['model']['dimension'])
     if 'n_channels' in parameters['model']:
         print("Number of channels : ", parameters['model']['n_channels'])
-    print("Number of classes  : ", n_classList)
-    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
+    model = get_model(which_model, dimension, n_channels, n_classList, base_filters,
+                      final_convolution_layer=parameters['model']['final_layer'],
+                      patch_size=patch_size, batch_size=batch_size)
 
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
     if is_regression or is_classification:
         n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
-  
-    trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+
+    # Setting up the dataloaders  
+    trainingDataForTorch = ImagesFromDataFrame(trainingDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=True, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory)
-    validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+    validationDataForTorch = ImagesFromDataFrame(validationDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume,
                                                q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing, in_memory=in_memory) # may or may not need to add augmentations here
+
     testingDataDefined = True
     if testingDataFromPickle is None:
         print('No testing data is defined, using validation data for those metrics', flush=True)
         testingDataFromPickle = validationDataFromPickle
         testingDataDefined = False
-    inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume,
+    inferenceDataForTorch = ImagesFromDataFrame(testingDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume,
                                             q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=augmentations, preprocessing = preprocessing)
     
     train_loader = DataLoader(trainingDataForTorch, batch_size=batch_size, shuffle=True, pin_memory=in_memory)
@@ -122,8 +119,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     # setting the loss function
     loss_fn, MSE_requested = get_loss(loss_function)
 
-    # training_start_time = time.asctime()
-    # startstamp = time.time()
     if not(os.environ.get('HOSTNAME') is None):
         print("\nHostname     :" + str(os.environ.get('HOSTNAME')), flush=True)
 
@@ -163,7 +158,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             dice_weights_dict[i] = 0
             dice_penalty_dict[i] = 0
         # define a seaparate data loader for penalty calculations
-        penaltyData = ImagesFromDataFrame(trainingDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None, preprocessing=None) 
+        penaltyData = ImagesFromDataFrame(trainingDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None, preprocessing=None) 
         penalty_loader = DataLoader(penaltyData, batch_size=1)
         
         # get the weights for use for dice loss
@@ -194,7 +189,6 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         # initialize without considering background
         
     # Getting the channels for training and removing all the non numeric entries from the channels
-
     batch = next(iter(val_loader)) # using train_loader makes this slower as train loader contains full augmentations
     all_keys = list(batch.keys())
     channel_keys = []
@@ -355,10 +349,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationMasks'))
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, patch_size, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationMasks'))
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingMasks'))
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, patch_size, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingMasks'))
     
         # regression or classification, use the loss to drive the model saving
         if is_segmentation:
