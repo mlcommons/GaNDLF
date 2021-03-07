@@ -75,6 +75,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
             with open(currentModelConfigPickle, 'wb') as handle:
                 pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
+            print('Using previously saved parameter file', currentModelConfigPickle, flush=True)
             parameters = pickle.load(open(currentModelConfigPickle,"rb"))
 
         # save the current training+validation and testing datasets 
