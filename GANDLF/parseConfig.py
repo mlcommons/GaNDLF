@@ -93,7 +93,7 @@ def parseConfig(config_file_path, version_check = True):
     modality = str(params['modality'])
     if modality.lower() == 'rad':
       pass
-    if modality.lower() == 'path':
+    elif modality.lower() == 'path':
       pass
     else:
       sys.exit('The \'modality\' should be set to either \'rad\' or \'path\'. Please check for spelling errors and it should be set to either of the two given options.')
