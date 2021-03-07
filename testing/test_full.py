@@ -1,7 +1,7 @@
 import math
 import sys
 from pathlib import Path
-import requests, zipfile, io, os
+import requests, zipfile, io, os, csv, random
 
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
@@ -64,6 +64,29 @@ def test_constructTrainingCSV():
       labelID = 'mask'
     writeTrainingCSV(currentApplicationDir, channelsID, labelID, inputDir + '/train_' + application_data + '.csv')
 
+    # write regression file
+    application_data_regression = application_data.replace('segmentation', 'regression')
+    application_data_classification = application_data.replace('segmentation', 'classification')
+    with open(inputDir + '/train_' + application_data + '.csv', 'r') as read_f, \
+    open(inputDir + '/train_' + application_data_regression + '.csv', 'w', newline='') as write_reg, \
+    open(inputDir + '/train_' + application_data_classification + '.csv', 'w', newline='') as write_class:
+      csv_reader = csv.reader(read_f)
+      csv_writer_1 = csv.writer(write_reg)
+      csv_writer_2 = csv.writer(write_class)
+      i = 0
+      for row in csv_reader:
+        if i == 0:
+          row.append('ValueToPredict')
+          csv_writer_1.writerow(row)
+          csv_writer_2.writerow(row)
+        else:
+          row_regression = row
+          row_classification = row
+          row_regression.append(str(random.uniform(0, 1)))
+          row_classification.append(str(random.randint(0,2)))
+          csv_writer_1.writerow(row_regression)
+          csv_writer_2.writerow(row_classification)
+        i += 1 
 
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
