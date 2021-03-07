@@ -7,8 +7,9 @@ import torch
 import torch.nn as nn
 import torchio
 from GANDLF.losses import *
-# from GANDLF.data import ImagesFromDataFrame
 from torch.utils.data import DataLoader
+from datetime import datetime
+
 
 def one_hot(segmask_array, class_list):
     '''
@@ -390,6 +391,12 @@ def parseTrainingCSV(inputTrainingCSVFile):
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
     return data_full, headers
     
+
+def get_date_time():
+    now = datetime.now()
+    date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    return now
+
 # def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, classList):
 #     '''
 #     This function calculates the penalty that is used for validation loss in multi-class problems

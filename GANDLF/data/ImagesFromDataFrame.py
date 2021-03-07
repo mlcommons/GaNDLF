@@ -134,10 +134,10 @@ def ImagesFromDataFrame(dataframe,
                         q_num_workers = 2, 
                         q_verbose = False, 
                         sampler = 'label', 
-                        train = True, 
                         augmentations = None, 
                         preprocessing = None, 
-                        in_memory = False):
+                        in_memory = False,
+                        train = True):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
