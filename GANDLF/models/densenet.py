@@ -159,6 +159,7 @@ class DenseNet(nn.Module):
     def __init__(
         self,
         n_dimensions,
+        in_channels,
         growth_rate: int = 32,
         block_config: Tuple[int, int, int, int] = (6, 12, 24, 16),
         num_init_features: int = 64,
@@ -186,7 +187,7 @@ class DenseNet(nn.Module):
 
         # First convolution
         self.features = nn.Sequential(OrderedDict([
-            ('conv0', self.Conv(3, num_init_features, kernel_size=7, stride=2,
+            ('conv0', self.Conv(in_channels, num_init_features, kernel_size=7, stride=2,
                                 padding=3, bias=False)),
             ('norm0', self.BatchNorm(num_init_features)),
             ('relu0', nn.ReLU(inplace=True)),
@@ -268,6 +269,7 @@ def _load_state_dict(model: nn.Module, model_url: str, progress: bool) -> None:
 
 def _densenet(
     n_dimensions,
+    in_channels,
     arch: str,
     growth_rate: int,
     block_config: Tuple[int, int, int, int],
@@ -277,7 +279,7 @@ def _densenet(
     final_convolution_layer: str = 'softmax',
     **kwargs: Any
 ) -> DenseNet:
-    model = DenseNet(n_dimensions, growth_rate, block_config, num_init_features, **kwargs)
+    model = DenseNet(n_dimensions, in_channels, growth_rate, block_config, num_init_features, **kwargs)
     
     if pretrained:
         _load_state_dict(model, model_urls[arch], progress)
