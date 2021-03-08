@@ -165,7 +165,8 @@ class DenseNet(nn.Module):
         bn_size: int = 4,
         drop_rate: float = 0,
         num_classes: int = 1000,
-        memory_efficient: bool = False
+        memory_efficient: bool = False,
+        final_convolution_layer = None
     ) -> None:
 
         super(DenseNet, self).__init__()
@@ -219,6 +220,8 @@ class DenseNet(nn.Module):
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
 
+        self.final_convolution_layer = get_final_layer(final_convolution_layer)
+
         # Official init from torch repo.
         for m in self.modules():
             if isinstance(m, self.Conv):
@@ -235,6 +238,13 @@ class DenseNet(nn.Module):
         out = self.adaptive_avg_pool(out, (1, 1))
         out = torch.flatten(out, 1)
         out = self.classifier(out)
+        
+        if not self.final_convolution_layer is None:
+            if self.final_convolution_layer == F.softmax:
+                out = self.final_convolution_layer(out, dim=1)
+            else:
+                out = self.final_convolution_layer(out)
+
         return out
 
 
@@ -267,13 +277,8 @@ def _densenet(
     final_convolution_layer: str = 'softmax',
     **kwargs: Any
 ) -> DenseNet:
-    model_dense = DenseNet(n_dimensions, growth_rate, block_config, num_init_features, **kwargs)
-
-    model = nn.Sequential(
-        model_dense,
-        get_final_layer(final_convolution_layer)
-    )
-
+    model = DenseNet(n_dimensions, growth_rate, block_config, num_init_features, **kwargs)
+    
     if pretrained:
         _load_state_dict(model, model_urls[arch], progress)
     return model
