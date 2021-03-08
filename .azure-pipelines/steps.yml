@@ -6,5 +6,8 @@ steps:
     conda install -c sdvillal openslide -y 
     conda install -c conda-forge libvips -y
     pip install -e .
-    pytest
-  displayName: 'Install dependencies and run tests'
+  displayName: 'Install dependencies'
+
+# - script: |
+#     pytest
+#   displayName: 'Run Tests'
