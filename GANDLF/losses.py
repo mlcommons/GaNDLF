@@ -18,7 +18,7 @@ def MCD(pm, gt, num_class, weights = None):
     '''
     acc_dice = 0
     for i in range(0, num_class): # 0 is background
-        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDice = dice(gt[:, i, ...], pm[:, i, ...])
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
         if weights is not None:
             currentDice = currentDice * weights[i]
@@ -33,7 +33,7 @@ def MCD_loss(pm, gt, num_class, weights = None):
     '''
     acc_dice_loss = 0
     for i in range(0, num_class): # 0 is background
-        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDice = dice(gt[:,i, ...], pm[:,i, ...])
         currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]

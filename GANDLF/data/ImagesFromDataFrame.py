@@ -279,7 +279,7 @@ def ImagesFromDataFrame(dataframe,
                 elif aug == 'noise':
                     actual_function = global_augs_dict[aug](mean=augmentations[aug]['mean'], std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
                 elif aug == 'anisotropic':
-                    actual_function = global_augs_dict[aug](axis=augmentations[aug]['axis'], downsampling=augmentations[aug]['downsampling'], p=augmentations[aug]['probability'])
+                    actual_function = global_augs_dict[aug](axes=augmentations[aug]['axis'], downsampling=augmentations[aug]['downsampling'], p=augmentations[aug]['probability'])
                 else:
                     actual_function = global_augs_dict[aug](p=augmentations[aug]['probability'])
                 if actual_function is not None:

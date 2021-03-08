@@ -9,7 +9,7 @@ from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
-from GANDLF.models.densenet import _densenet
+from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
@@ -87,48 +87,33 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
-    elif modelname == "densenet121":  # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(
-            num_dimensions,
-            "densenet121",
-            32,
-            (6, 12, 24, 16),
-            64,
-            final_convolution_layer=final_convolution_layer,
-        )  # are these configurations fine? - taken from torch
-    elif modelname == "densenet161":  # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(
-            num_dimensions,
-            "densenet161",
-            48,
-            (6, 12, 36, 24),
-            96,
-            final_convolution_layer=final_convolution_layer,
-        )  # are these configurations fine? - taken from torch
-    elif modelname == "densenet169":  # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(
-            num_dimensions,
-            "densenet169",
-            32,
-            (6, 12, 32, 32),
-            64,
-            final_convolution_layer=final_convolution_layer,
-        )  # are these configurations fine? - taken from torch
-    elif modelname == "densenet201":  # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(
-            num_dimensions,
-            "densenet201",
-            32,
-            (6, 12, 48, 32),
-            64,
-            final_convolution_layer=final_convolution_layer,
-        )  # are these configurations fine? - taken from torch
-    elif modelname == "vgg16":
-        vgg_config = cfg["D"]
+    elif which_model == 'densenet121': # regressor/classifier network
+        model = densenet.generate_model(model_depth=121,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet161': # regressor/classifier network
+        model = densenet.generate_model(model_depth=161,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet169': # regressor/classifier network
+        model = densenet.generate_model(model_depth=169,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet201': # regressor/classifier network
+        model = densenet.generate_model(model_depth=201,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet264': # regressor/classifier network
+        model = densenet.generate_model(model_depth=264,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'vgg16':
+        vgg_config = cfg['D']
         num_final_features = vgg_config[-2]
         divisibility_factor = Counter(vgg_config)["M"]
         if patch_size[-1] == 1:
@@ -239,7 +224,7 @@ def get_loss(which_loss):
         else:
             print(
                 "WARNING: Could not find the requested loss function '"
-                + loss_fn
+                + which_loss
                 + "' in the implementation, using dc, instead",
                 file=sys.stderr,
             )
