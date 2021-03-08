@@ -9,6 +9,7 @@ import torchio
 from GANDLF.losses import *
 # from GANDLF.data import ImagesFromDataFrame
 from torch.utils.data import DataLoader
+from pathlib import Path
 
 def one_hot(segmask_array, class_list):
     '''
@@ -182,7 +183,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     #     weights = [1]
     #     for i in range(len(class_list) - 1):
     #         weights.append(1)
-
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
     outputToWrite = 'SubjectID,PredictedValue\n'
     model.eval()
     with torch.no_grad():
@@ -235,19 +236,14 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             else:
                 pred_output = pred_output / len(locations) # average the predicted output across patches
                 pred_output = pred_output.cpu()
-                #loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
+                # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
             
             first = next(iter(subject['label']))
-            if first == 'NA':
-                if not (is_segmentation):
-                    avg_dice = 1 # we don't care about this for regression/classification
-                    # avg_loss = total_loss/len(loader.dataset)
-                    # return avg_dice, avg_loss
-                else:
+            if is_segmentation:
+                if first == 'NA':
                     print("Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly")
-            else:
                 mask = subject_dict['label'][torchio.DATA] # get the label image
                 if mask.dim() == 4:
                     mask = mask.unsqueeze(0) # increasing the number of dimension of the mask
@@ -258,6 +254,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
                 #Computing the total dice
                 total_dice += curr_dice
+                
             if save_mask:
                 patient_name = subject['subject_id'][0]
 
@@ -280,7 +277,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
         
         if len(value_keys) > 0:
-            file = open(os.path.join(outputDir,"output_predictions.csv", 'w'))
+            file = open(os.path.join(outputDir,"output_predictions.csv"), 'w')
             file.write(outputToWrite)
             file.close()
 
@@ -289,7 +286,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
         if is_segmentation:
             avg_dice = total_dice/len(loader.dataset)
         else:
-            avg_dice = 1
+            avg_dice = 1 # we don't care about this for regression/classification
         return avg_dice, avg_loss
 
 def fix_paths(cwd):
