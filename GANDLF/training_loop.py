@@ -154,7 +154,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
         
         # For regression dice penalty need not be taken account
         # For classification this should be calculated on the basis of predicted labels and mask
-        if not is_regression:
+        if is_segmentation:
             for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
                 # accumulate dice weights for each label
                 mask = subject['label'][torchio.DATA]
@@ -208,7 +208,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
             
             # if regression, concatenate values to predict
-            if is_regression:
+            if is_regression or is_classification:
                 valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
                 valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
                 valuesToPredict = valuesToPredict*scaling_factor
@@ -269,12 +269,11 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     if not math.isnan(curr_loss): # if loss is nan, dont backprop and dont step optimizer
                         loss.backward()
                         optimizer.step()
-            else:
+            
+            else: # segmentation
                 if model_2d: # for 2D, add a dimension so that loss can be computed without modifications
                     one_hot_mask = one_hot_mask.unsqueeze(-1)
                     output = output.unsqueeze(-1)
-            
-            if not is_regression:
                 # Computing the loss
                 if MSE_requested:
                     loss = loss_fn(output.double(), one_hot_mask.double(), n_classList, reduction = loss_function['mse']['reduction'])
@@ -305,7 +304,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                 total_train_loss += curr_loss
             samples_for_train += 1
 
-            if not is_regression:
+            if is_segmentation:
                 #Computing the dice score  # Can be changed for multi-class outputs later.
                 curr_dice = MCD(output.double(), one_hot_mask.double(), n_classList).cpu().data.item() # https://discuss.pytorch.org/t/cuda-memory-leakage/33970/3
                 #print(curr_dice)
@@ -318,7 +317,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # TODO: Not recommended? (https://discuss.pytorch.org/t/about-torch-cuda-empty-cache/34232/6)will try without
             # torch.cuda.empty_cache()
             if scheduler == "triangular":
-                scheduler_lr.step()            
+                scheduler_lr.step()
             #print(curr_dice)
 
         if is_segmentation:
@@ -338,10 +337,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationMasks'))
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationOutput'))
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingMasks'))
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingoutput'))
     
         # regression or classification, use the loss to drive the model saving
         if is_segmentation:
