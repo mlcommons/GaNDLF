@@ -125,7 +125,7 @@ def get_loss(which_loss):
         # elif loss_function == 'mse':
         #     loss_fn = MCD_MSE_loss
         else:
-            print('WARNING: Could not find the requested loss function \'' + loss_fn + '\' in the implementation, using dc, instead', file = sys.stderr)
+            print('WARNING: Could not find the requested loss function \'' + which_loss + '\' in the implementation, using dc, instead', file = sys.stderr)
             which_loss = 'dc'
             loss_fn = MCD_loss
 
