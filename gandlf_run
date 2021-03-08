@@ -53,7 +53,7 @@ def main():
 
     # parse training CSV
     data_full, headers = parseTrainingCSV(file_data_full)
-        
+    
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
