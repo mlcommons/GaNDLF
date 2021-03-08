@@ -1,7 +1,7 @@
 import math
 import sys
 from pathlib import Path
-import requests, zipfile, io, os
+import requests, zipfile, io, os, csv, random, copy
 
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
@@ -12,6 +12,7 @@ from GANDLF.inference_manager import InferenceManager
 # all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 all_models_segmentation = ['unet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 # all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
+all_models_regression = ['densenet121', 'vgg16']
 
 inputDir = os.path.abspath(os.path.normpath('./testing/data'))
 outputDir = os.path.abspath(os.path.normpath('./testing/data_output'))
@@ -64,6 +65,29 @@ def test_constructTrainingCSV():
       labelID = 'mask'
     writeTrainingCSV(currentApplicationDir, channelsID, labelID, inputDir + '/train_' + application_data + '.csv')
 
+    # write regression and classification files
+    application_data_regression = application_data.replace('segmentation', 'regression')
+    application_data_classification = application_data.replace('segmentation', 'classification')
+    with open(inputDir + '/train_' + application_data + '.csv', 'r') as read_f, \
+    open(inputDir + '/train_' + application_data_regression + '.csv', 'w', newline='') as write_reg, \
+    open(inputDir + '/train_' + application_data_classification + '.csv', 'w', newline='') as write_class:
+      csv_reader = csv.reader(read_f)
+      csv_writer_1 = csv.writer(write_reg)
+      csv_writer_2 = csv.writer(write_class)
+      i = 0
+      for row in csv_reader:
+        if i == 0:
+          row.append('ValueToPredict')
+          csv_writer_1.writerow(row)
+          csv_writer_2.writerow(row)
+        else:
+          row_regression = copy.deepcopy(row)
+          row_classification = copy.deepcopy(row)
+          row_regression.append(str(random.uniform(0, 1)))
+          row_classification.append(str(random.randint(0,2)))
+          csv_writer_1.writerow(row_regression)
+          csv_writer_2.writerow(row_classification)
+        i += 1 
 
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
@@ -75,7 +99,7 @@ def test_train_segmentation_rad_2d():
     parameters['model']['architecture'] = model 
     currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=False)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
@@ -89,15 +113,54 @@ def test_train_segmentation_rad_3d():
     parameters['model']['architecture'] = model 
     currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=False)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
-# def test_regression_rad_2d():
-#   application_data = '2d_rad_segmentation'
-#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml')
-#   # training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
-#   for model in all_models_regression:
-#     parameters['model']['architecture'] = model 
-#     # currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
-#     # TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu')
+def test_regression_rad_2d():
+  application_data = '2d_rad_segmentation'
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml')
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_regression')
+    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+
+  print('passed')
+
+def test_regression_rad_3d():
+  application_data = '3d_rad_segmentation'
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml')
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_regression')
+    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+
+  print('passed')
+
+def test_classification_rad_2d():
+  application_data = '2d_rad_segmentation'
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_classification')
+    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+
+  print('passed')
+
+def test_classification_rad_3d():
+  application_data = '3d_rad_segmentation'
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_classification')
+    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+
+  print('passed')
