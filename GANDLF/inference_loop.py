@@ -33,7 +33,7 @@ if os.name != 'nt':
     path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
     '''
     from GANDLF.inference_dataloader_histopath import InferTumorSegDataset
-from openslide import OpenSlide
+    from openslide import OpenSlide
 from GANDLF.schd import *
 from GANDLF.losses import *
 from GANDLF.utils import *
