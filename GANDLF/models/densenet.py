@@ -19,20 +19,20 @@ class _DenseLayer(nn.Sequential):
         self.add_module(
             'conv1',
             Conv(num_input_features,
-                      bn_size * growth_rate,
-                      kernel_size=1,
-                      stride=1,
-                      bias=False))
+                 bn_size * growth_rate,
+                 kernel_size=1,
+                 stride=1,
+                 bias=False))
         self.add_module('norm2', BatchNorm(bn_size * growth_rate))
         self.add_module('relu2', nn.ReLU(inplace=True))
         self.add_module(
             'conv2',
             Conv(bn_size * growth_rate,
-                      growth_rate,
-                      kernel_size=3,
-                      stride=1,
-                      padding=1,
-                      bias=False))
+                 growth_rate,
+                 kernel_size=3,
+                 stride=1,
+                 padding=1,
+                 bias=False))
         self.drop_rate = drop_rate
 
     def forward(self, x):
@@ -64,10 +64,10 @@ class _Transition(nn.Sequential):
         self.add_module(
             'conv',
             Conv(num_input_features,
-                      num_output_features,
-                      kernel_size=1,
-                      stride=1,
-                      bias=False))
+                 num_output_features,
+                 kernel_size=1,
+                 stride=1,
+                 bias=False))
         self.add_module('pool', AvgPool(kernel_size=2, stride=2))
 
 
@@ -87,7 +87,7 @@ class DenseNet(nn.Module):
                  n_input_channels=3,
                  n_dimensions=3,
                  conv1_t_size=7,
-                 conv1_t_stride=2,
+                 conv1_t_stride=1,
                  no_max_pool=False,
                  growth_rate=32,
                  block_config=(6, 12, 24, 16),
@@ -106,6 +106,7 @@ class DenseNet(nn.Module):
             self.AvgPool = nn.AvgPool2d
             self.adaptive_avg_pool = F.adaptive_avg_pool2d
             self.output_size = (1, 1)
+            self.conv_stride = (conv1_t_stride, 2)
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
             self.MaxPool = nn.MaxPool3d
@@ -113,13 +114,14 @@ class DenseNet(nn.Module):
             self.AvgPool = nn.AvgPool3d
             self.adaptive_avg_pool = F.adaptive_avg_pool3d
             self.output_size=(1, 1, 1)
+            self.conv_stride = (conv1_t_stride, 2, 2)
 
         # First convolution
         self.features = [('conv1',
                           self.Conv(n_input_channels,
                                     num_init_features,
                                     kernel_size=conv1_t_size,
-                                    stride=conv1_t_stride,
+                                    stride=self.conv_stride,
                                     padding=conv1_t_size // 2,
                                     bias=False)),
                          ('norm1', self.BatchNorm(num_init_features)),
