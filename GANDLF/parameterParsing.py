@@ -47,16 +47,16 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet121': # regressor network
         # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, 'densenet121', 32, (6, 12, 24, 16), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
+        model = _densenet(n_dimensions, 'densenet121', 32, (6, 12, 24, 16), 64, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
     elif which_model == 'densenet161': # regressor network 
         # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, 'densenet161', 48, (6, 12, 36, 24), 96, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
+        model = _densenet(n_dimensions, 'densenet161', 48, (6, 12, 36, 24), 96, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
     elif which_model == 'densenet169': # regressor network
         # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, 'densenet169', 32, (6, 12, 32, 32), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
+        model = _densenet(n_dimensions, 'densenet169', 32, (6, 12, 32, 32), 64, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
     elif which_model == 'densenet201': # regressor network
         # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, 'densenet201', 32, (6, 12, 48, 32), 64, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
+        model = _densenet(n_dimensions, 'densenet201', 32, (6, 12, 48, 32), 64, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
     elif which_model == 'vgg16':
         vgg_config = cfg['D']
         num_final_features = vgg_config[-2]
