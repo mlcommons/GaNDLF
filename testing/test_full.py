@@ -1,7 +1,7 @@
 import math
 import sys
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy
+import requests, zipfile, io, os, csv, random, copy, shutil
 
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
@@ -97,9 +97,9 @@ def test_train_segmentation_rad_2d():
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
@@ -111,9 +111,9 @@ def test_train_segmentation_rad_3d():
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
@@ -123,9 +123,9 @@ def test_regression_rad_2d():
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_regression')
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
@@ -135,9 +135,9 @@ def test_regression_rad_3d():
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_regression')
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
@@ -145,11 +145,13 @@ def test_classification_rad_2d():
   application_data = '2d_rad_segmentation'
   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  shutil.rmtree(outputDir) # overwrite previous results
+  Path(outputDir).mkdir(parents=True, exist_ok=True)
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_classification')
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
@@ -159,8 +161,8 @@ def test_classification_rad_3d():
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_classification')
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
