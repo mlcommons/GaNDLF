@@ -9,7 +9,7 @@ from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
-import GANDLF.models.densenet
+from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
@@ -46,27 +46,27 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
     elif which_model == 'msdnet':
         model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet121': # regressor/classifier network
-        model = GANDLF.models.densenet.generate_model(model_depth=121,
+        model = densenet.generate_model(model_depth=121,
                                         num_classes=n_classes,
                                         n_dimensions=n_dimensions,
                                         n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet161': # regressor/classifier network
-        model = GANDLF.models.densenet.generate_model(model_depth=161,
+        model = densenet.generate_model(model_depth=161,
                                         num_classes=n_classes,
                                         n_dimensions=n_dimensions,
                                         n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet169': # regressor/classifier network
-        model = GANDLF.models.densenet.generate_model(model_depth=169,
+        model = densenet.generate_model(model_depth=169,
                                         num_classes=n_classes,
                                         n_dimensions=n_dimensions,
                                         n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet201': # regressor/classifier network
-        model = GANDLF.models.densenet.generate_model(model_depth=201,
+        model = densenet.generate_model(model_depth=201,
                                         num_classes=n_classes,
                                         n_dimensions=n_dimensions,
                                         n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
     elif which_model == 'densenet264': # regressor/classifier network
-        model = GANDLF.models.densenet.generate_model(model_depth=264,
+        model = densenet.generate_model(model_depth=264,
                                         num_classes=n_classes,
                                         n_dimensions=n_dimensions,
                                         n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
