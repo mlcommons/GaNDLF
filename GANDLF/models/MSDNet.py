@@ -20,7 +20,7 @@ class MSDNet(ModelBase):
     @staticmethod
     def weight_init(m):
         if isinstance(m, nn.Linear):
-            nn.init.kaiming_normal(m, m.weight.data)
+            nn.init.kaiming_normal_(m, m.weight.data)
 
     def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, num_layers = 4):
 
