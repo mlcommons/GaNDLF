@@ -9,7 +9,7 @@ from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
-from GANDLF.models.densenet import _densenet
+import GANDLF.models.densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
@@ -45,18 +45,31 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         model = uinc(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'msdnet':
         model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet121': # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, n_channels, 'densenet121', 32, (6, 12, 24, 16), 64, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
-    elif which_model == 'densenet161': # regressor network 
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, n_channels, 'densenet161', 48, (6, 12, 36, 24), 96, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
-    elif which_model == 'densenet169': # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, n_channels, 'densenet169', 32, (6, 12, 32, 32), 64, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
-    elif which_model == 'densenet201': # regressor network
-        # ref: https://arxiv.org/pdf/1608.06993.pdf
-        model = _densenet(n_dimensions, n_channels, 'densenet201', 32, (6, 12, 48, 32), 64, num_classes=n_classes, final_convolution_layer = final_convolution_layer) # are these configurations fine? - taken from torch
+    elif which_model == 'densenet121': # regressor/classifier network
+        model = GANDLF.models.densenet.generate_model(model_depth=121,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet161': # regressor/classifier network
+        model = GANDLF.models.densenet.generate_model(model_depth=161,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet169': # regressor/classifier network
+        model = GANDLF.models.densenet.generate_model(model_depth=169,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet201': # regressor/classifier network
+        model = GANDLF.models.densenet.generate_model(model_depth=201,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+    elif which_model == 'densenet264': # regressor/classifier network
+        model = GANDLF.models.densenet.generate_model(model_depth=264,
+                                        num_classes=n_classes,
+                                        n_dimensions=n_dimensions,
+                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
     elif which_model == 'vgg16':
         vgg_config = cfg['D']
         num_final_features = vgg_config[-2]
