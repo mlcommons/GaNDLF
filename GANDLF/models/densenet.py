@@ -157,7 +157,7 @@ class DenseNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, self.Conv):
-                m.weight = nn.init.kaiming_normal(m.weight, mode='fan_out')
+                m.weight = nn.init.kaiming_normal_(m.weight, mode='fan_out')
             elif isinstance(m, self.BatchNorm):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
