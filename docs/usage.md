@@ -25,7 +25,8 @@ SubjectID,Channel_0,Channel_1,...,Channel_X,Label
 ```
 
 - `Channel` can be substituted with `Modality` or `Image`
-- `Label` can be substituted with `Mask` or `Segmentation`
+- `Label` can be substituted with `Mask` or `Segmentation`and is used to specify the annotation file for segmentation models
+- `ValueToPredict` is used for regression/classification models
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
 The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
@@ -49,6 +50,10 @@ GANDLF requires a YAML-based configuration that controls various aspects of the 
 
 - Model
   - Architecture
+    - Segmentation: unet, resunet, uinc, fcn
+    - Classification/Regression: 
+      - DenseNet configurations: densenet121, densenet161, densenet169, densenet201, densenet264 
+      - VGG configurations: vgg16
   - Dimensionality of computations 
   - Final layer of model
   - Mixed precision
@@ -67,6 +72,9 @@ GANDLF requires a YAML-based configuration that controls various aspects of the 
   - Validation 
 
 Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) for detailed guide and comments.
+
+**Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as https://yamlchecker.com/ or https://yamlvalidator.com/ **before** trying to train.
+
 ## Running GANDLF (Training/Inference)
 
 ```bash
