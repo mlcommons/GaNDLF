@@ -49,6 +49,10 @@ GANDLF requires a YAML-based configuration that controls various aspects of the 
 
 - Model
   - Architecture
+    - Segmentation: unet, resunet, uinc, fcn
+    - Classification/Regression: 
+      - DenseNet configurations: densenet121, densenet161, densenet169, densenet201, densenet264 
+      - VGG configurations: vgg16
   - Dimensionality of computations 
   - Final layer of model
   - Mixed precision
