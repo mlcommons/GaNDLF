@@ -8,8 +8,8 @@
 ## Instructions
 
 ```powershell
-git clone ${gandlf_repo_link}
-cd GANDLF
+git clone https://github.com/CBICA/GaNDLF.git
+cd GaNDLF
 conda create -p ./venv python=3.6 -y
 conda activate ./venv
 conda install requests pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch -y # install according to your cuda version https://pytorch.org/get-started/locally/
