@@ -25,7 +25,8 @@ SubjectID,Channel_0,Channel_1,...,Channel_X,Label
 ```
 
 - `Channel` can be substituted with `Modality` or `Image`
-- `Label` can be substituted with `Mask` or `Segmentation`
+- `Label` can be substituted with `Mask` or `Segmentation`and is used to specify the annotation file for segmentation models
+- `ValueToPredict` is used for regression/classification models
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
 The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
