@@ -176,7 +176,7 @@ if os.name != 'nt':
         #test_csv = parameters['test_csv']
 
         # Defining our model here according to parameters mentioned in the configuration file
-        print("Number of dims      : ", parameters['model']['dimension'])
+        print("Number of dims     : ", parameters['model']['dimension'])
         if 'n_channels' in parameters['model']:
             print("Number of channels : ", parameters['model']['n_channels'])
         print("Number of classes  : ", n_classList)
