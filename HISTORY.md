@@ -1,5 +1,8 @@
 ## 0.0.7
 
+- Pre-split training/validation data can now be provided
+## 0.0.7
+
 - New modality switch added for rad/path
 - Class list can now be defined as a range
 - Added option to train and infer on fused labels
