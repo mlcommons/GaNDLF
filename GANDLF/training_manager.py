@@ -165,3 +165,8 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
         if singleFoldTesting:
             break
         currentTestingFold = currentTestingFold + 1 # increment the fold
+
+# This function takes in 2 dataframes, one for training and another for validation data, with some other parameters and returns the dataloader
+def TrainingManager(dataframe_train, dataframe_validation, headers, outputDir, parameters, device, reset_prev):
+    trainingLoop(trainingDataFromPickle=dataframe_train, validationDataFromPickle=dataframe_validation, headers = headers, 
+                outputDir=outputDir, device=device, parameters=parameters, testingDataFromPickle=None)
