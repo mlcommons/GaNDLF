@@ -119,7 +119,7 @@ def test_train_segmentation_rad_3d():
 
 def test_regression_rad_2d():
   application_data = '2d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml')
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml', version_check = False)
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -131,7 +131,7 @@ def test_regression_rad_2d():
 
 def test_regression_rad_3d():
   application_data = '3d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml')
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml', version_check = False)
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -143,7 +143,7 @@ def test_regression_rad_3d():
 
 def test_classification_rad_2d():
   application_data = '2d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml', version_check = False)
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
   shutil.rmtree(outputDir) # overwrite previous results
   Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -157,7 +157,7 @@ def test_classification_rad_2d():
 
 def test_classification_rad_3d():
   application_data = '3d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
+  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml', version_check = False)
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
