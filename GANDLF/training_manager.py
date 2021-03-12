@@ -175,7 +175,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
         currentTestingFold = currentTestingFold + 1 # increment the fold
 
 
-def TrainingManager(dataframe_train, dataframe_validation, headers, outputDir, parameters, device, reset_prev):
+def TrainingManager_split(dataframe_train, dataframe_validation, headers, outputDir, parameters, device, reset_prev):
     '''
     This is the training manager that ties all the training functionality together
 
