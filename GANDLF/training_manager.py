@@ -1,4 +1,3 @@
-
 import pandas as pd
 import os, sys, pickle, subprocess
 from sklearn.model_selection import KFold
@@ -7,8 +6,17 @@ from pathlib import Path
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.training_loop import trainingLoop
 
-# This function takes in a dataframe, with some other parameters and returns the dataloader
 def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_prev):
+    '''
+    This is the training manager that ties all the training functionality together
+
+    dataframe = full data from CSV
+    headers = pre-sorted CSV headers
+    outputDir = the main output directory
+    parameters = parameters read from YAML
+    device = self-explanatory
+    reset_prev = whether the previous run in the same output directory is used or not
+    '''
 
     # check for single fold training
     singleFoldValidation = False
@@ -165,3 +173,26 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
         if singleFoldTesting:
             break
         currentTestingFold = currentTestingFold + 1 # increment the fold
+
+
+def TrainingManager_split(dataframe_train, dataframe_validation, headers, outputDir, parameters, device, reset_prev):
+    '''
+    This is the training manager that ties all the training functionality together
+
+    dataframe_train = training data from CSV
+    dataframe_validation = validation data from CSV
+    headers = pre-sorted CSV headers
+    outputDir = the main output directory
+    parameters = parameters read from YAML
+    device = self-explanatory
+    reset_prev = whether the previous run in the same output directory is used or not
+    '''
+    currentModelConfigPickle = os.path.join(outputDir, 'parameters.pkl')
+    if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
+        with open(currentModelConfigPickle, 'wb') as handle:
+            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        print('Using previously saved parameter file', currentModelConfigPickle, flush=True)
+        parameters = pickle.load(open(currentModelConfigPickle,"rb"))
+    trainingLoop(trainingDataFromPickle=dataframe_train, validationDataFromPickle=dataframe_validation, headers = headers, 
+                outputDir=outputDir, device=device, parameters=parameters, testingDataFromPickle=None)
