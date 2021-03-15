@@ -14,7 +14,7 @@ from pathlib import Path
 import pkg_resources
 from datetime import date
 
-from GANDLF.training_manager import TrainingManager
+from GANDLF.training_manager import *
 from GANDLF.inference_manager import InferenceManager 
 from GANDLF.parseConfig import parseConfig
 
@@ -22,7 +22,7 @@ def main():
     copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
     parser = argparse.ArgumentParser(prog='GANDLF', formatter_class=argparse.RawTextHelpFormatter, description = "Image Semantic Segmentation and Regression using Deep Learning.\n\n" + copyrightMessage)
     parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'modelDir\' during inference', required=True)
-    parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference', required=True)
+    parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
     parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
     parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=True)
     parser.add_argument('-modelDir', type=str, help = 'The pre-trained model directory that is used for inference, needs to contain the configuration', required=False)
@@ -52,7 +52,21 @@ def main():
         Path(model_path).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
-    data_full, headers = parseTrainingCSV(file_data_full)
+    if ',' in file_data_full:
+        # training and validation pre-split
+        test = 1
+        data_full = None
+        both_csvs = file_data_full.split(',')
+        data_train, headers_train = parseTrainingCSV(both_csvs[0])
+        data_validation, headers_validation = parseTrainingCSV(both_csvs[1])
+
+        if headers_train != headers_validation:
+            sys.exit('The training and validation CSVs do not have the same header information.')
+        
+        # if we are here, it is assumed that the user wants to do training
+        TrainingManager(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
+    else:
+        data_full, headers = parseTrainingCSV(file_data_full)
     
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
