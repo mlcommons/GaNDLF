@@ -45,15 +45,12 @@ def step(model, image, label, params):
         The computed metric from the label and the output
 
     """
-    if params["model"]["dimension"] == 2:
-        image = torch.squeeze(image, -1)
-        label = torch.squeeze(label, -1)
-    if params["model"]["amp"]:
+    if params["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
     else:
         output = model(image)
-    loss_function = fetch_loss_function(params["loss_function"], params)
+    loss_function = fetch_loss_function(params["loss"])  # Write a fetch_loss_function
     loss = loss_function(output, label, params)
     metric_output = {}
     # Metrics should be a list
@@ -91,7 +88,7 @@ def train_network(model, train_dataloader, optimizer, params):
     total_epoch_train_metric = {}
     average_epoch_train_metric = {}
 
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         total_epoch_train_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
@@ -108,7 +105,7 @@ def train_network(model, train_dataloader, optimizer, params):
         image = torch.cat(
             [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
         ).to(params["device"])
-        if len(params["value_keys"]) > 0:
+        if params["value_keys"] is not None:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             label = torch.reshape(
                 subject[params["value_keys"][0]], (params["batch_size"], 1)
@@ -116,8 +113,7 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
-        print("Train : ", label.shape, image.shape, flush=True)
-        loss, calculated_metrics = step(model, image, label, params)
+        loss, calculated_metrics = step(model, image, label, batch_idx, params)
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 if not torch.isnan(
@@ -138,14 +134,14 @@ def train_network(model, train_dataloader, optimizer, params):
         # For printing information at halftime during an epoch
         if batch_idx % (len(train_dataloader) // 2) == 0:
             print("Epoch Average Train loss : ", total_epoch_train_loss / batch_idx)
-            for metric in params["metrics"]:
+            for metric in params["metrics"].keys():
                 print(
                     "Epoch Average Train " + metric + " : ",
                     total_epoch_train_metric[metric] / batch_idx,
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
             train_dataloader
         )
@@ -182,12 +178,14 @@ def validate_network(model, valid_dataloader, params):
     total_epoch_valid_metric = {}
     average_epoch_valid_metric = {}
 
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         total_epoch_valid_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
         print("Using Automatic mixed precision", flush=True)
+
+    # Fetch the optimizer
 
     # Set the model to valid
     model.eval()
@@ -195,7 +193,7 @@ def validate_network(model, valid_dataloader, params):
         image = torch.cat(
             [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
         ).to(params["device"])
-        if len(params["value_keys"]) > 0:
+        if params["value_keys"] is not None:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             label = torch.reshape(
                 subject[params["value_keys"][0]], (params["batch_size"], 1)
@@ -203,8 +201,7 @@ def validate_network(model, valid_dataloader, params):
         else:
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
-        print("Validation :", label.shape, image.shape, flush=True)
-        loss, calculated_metrics = step(model, image, label, params)
+        loss, calculated_metrics = step(model, image, label, batch_idx, params)
 
         # Non network validing related
         total_epoch_valid_loss += loss
@@ -216,14 +213,14 @@ def validate_network(model, valid_dataloader, params):
             print(
                 "Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx
             )
-            for metric in params["metrics"]:
+            for metric in params["metrics"].keys():
                 print(
                     "Epoch Validation " + metric + " : ",
                     total_epoch_valid_metric[metric] / len(valid_dataloader),
                 )
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
         )
@@ -246,21 +243,15 @@ def training_loop(
     params["model"]["num_classes"] = num_classes
     params["headers"] = headers
     epochs = params["num_epochs"]
-    loss = params["loss_function"]
+    loss = params["loss"]
     metrics = params["metrics"]
     params["device"] = device
     device = params["device"]
 
-    if not ("num_channels" in params["model"]):
-        params["model"]["num_channels"] = len(headers["channelHeaders"])
-
-    # Defining our model here according to parameters mentioned in the configuration file
-    print("Number of channels : ", params["model"]["num_channels"])
-
     # Fetch the model according to params mentioned in the configuration file
     model = get_model(
         modelname=params["model"]["architecture"],
-        num_dimensions=params["model"]["dimension"],
+        num_dimension=params["model"]["dimension"],
         num_channels=params["model"]["num_channels"],
         num_classes=params["model"]["num_classes"],
         base_filters=params["model"]["base_filters"],
@@ -279,7 +270,7 @@ def training_loop(
         q_num_workers=params["q_num_workers"],
         q_verbose=params["q_verbose"],
         sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
+        augmentations=params["data_augmentations"],
         preprocessing=params["data_preprocessing"],
         in_memory=params["in_memory"],
         train=True,
@@ -294,7 +285,7 @@ def training_loop(
         q_num_workers=params["q_num_workers"],
         q_verbose=params["q_verbose"],
         sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
+        augmentations=params["data_augmentations"],
         preprocessing=params["data_preprocessing"],
         in_memory=params["in_memory"],
         train=False,
@@ -318,7 +309,7 @@ def training_loop(
         q_num_workers=params["q_num_workers"],
         q_verbose=params["q_verbose"],
         sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
+        augmentations=params["data_augmentations"],
         preprocessing=params["data_preprocessing"],
         in_memory=params["in_memory"],
         train=False,
@@ -337,13 +328,10 @@ def training_loop(
 
     test_dataloader = DataLoader(test_data_for_torch, batch_size=1)
 
-    # Calculat the weights here
-    params["weights"] = None
-
     # Fetch the optimizers
     optimizer = get_optimizer(
-        optimizer_name=params["opt"],
-        model=model,
+        optimizer_name=params["optimizer"],
+        model_parameters=model,
         learning_rate=params["learning_rate"],
     )
 
@@ -402,10 +390,10 @@ def training_loop(
         print("Epoch start time : ", get_date_time())
 
         epoch_train_loss, epoch_train_metric = train_network(
-            model, train_dataloader, optimizer, params
+            epoch, model, train_dataloader, optimizer, loss, metrics, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, params
+            epoch, model, val_dataloader, loss, metrics, params
         )
         patience += 1
 
