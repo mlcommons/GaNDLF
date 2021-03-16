@@ -97,7 +97,9 @@ def test_train_segmentation_rad_2d():
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
+  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
+  parameters['model']['class_list'] = [0,255]
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   # loop through selected models and train for single epoch
@@ -115,7 +117,9 @@ def test_train_segmentation_rad_3d():
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
+  parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
+  parameters['model']['class_list'] = [0,1]
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   # loop through selected models and train for single epoch
@@ -127,12 +131,14 @@ def test_train_segmentation_rad_3d():
 
   print('passed')
 
-def test_regression_rad_2d():
+def test_train_regression_rad_2d():
   application_data = '2d_rad_segmentation'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
+  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
+  parameters['model']['class_list'] = [0,255]
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   # loop through selected models and train for single epoch
@@ -144,12 +150,14 @@ def test_regression_rad_2d():
 
   print('passed')
 
-def test_regression_rad_3d():
+def test_train_regression_rad_3d():
   application_data = '3d_rad_segmentation'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
+  parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
+  parameters['model']['class_list'] = [0,1]
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   # loop through selected models and train for single epoch
@@ -161,13 +169,15 @@ def test_regression_rad_3d():
 
   print('passed')
 
-def test_classification_rad_2d():
+def test_train_classification_rad_2d():
   application_data = '2d_rad_segmentation'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['2D']
+  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
+  parameters['model']['class_list'] = [0,255]
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
   # loop through selected models and train for single epoch
@@ -179,12 +189,14 @@ def test_classification_rad_2d():
 
   print('passed')
 
-def test_classification_rad_3d():
+def test_train_classification_rad_3d():
   application_data = '3d_rad_segmentation'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
+  parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
+  parameters['model']['class_list'] = [0,1]
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   # loop through selected models and train for single epoch
