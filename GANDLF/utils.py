@@ -1,4 +1,5 @@
 import os, sys
+from datetime import datetime
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
 import pandas as pd
@@ -33,16 +34,6 @@ def one_hot(segmask_array, class_list):
                     bin_mask = (segmask_array_iter == int(class_split[0]))
                     for i in range(1,len(class_split)):
                         bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
-                elif '&&' in _class: # special case
-                    class_split = _class.split('&&')
-                    bin_mask = (segmask_array_iter == int(class_split[0]))
-                    for i in range(1,len(class_split)):
-                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
-                elif '&' in _class: # special case
-                    class_split = _class.split('&')
-                    bin_mask = (segmask_array_iter == int(class_split[0]))
-                    for i in range(1,len(class_split)):
-                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
                 else:
                     # assume that it is a simple int
                     bin_mask = (segmask_array_iter == int(_class)) 
@@ -60,7 +51,7 @@ def reverse_one_hot(predmask_array,class_list):
     '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
-    special_cases_to_check = [ '||', '&&'] 
+    special_cases_to_check = ['||'] 
     special_case_detected = False
     max = 0
     
@@ -91,6 +82,7 @@ def reverse_one_hot(predmask_array,class_list):
             final_mask = final_mask +  (idx_argmax == idx)*_class
     return final_mask
 
+
 def checkPatchDivisibility(patch_size, number = 16):
     '''
     This function checks the divisibility of a numpy array or integer for architectural integrity
@@ -105,11 +97,11 @@ def checkPatchDivisibility(patch_size, number = 16):
         return False
     return True
 
-def send_model_to_device(model, ampInput, device, optimizer):
+
+def send_model_to_device(model, amp, device, optimizer):
     '''
     This function reads the environment variable(s) and send model to correct device
     '''
-    amp = ampInput
     if device != 'cpu':
         if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
             sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')

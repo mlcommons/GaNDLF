@@ -1,7 +1,6 @@
-import os
+import sys
 from collections import Counter
 import numpy as np
-
 import torch.optim as optim
 from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
@@ -87,32 +86,32 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
-    elif which_model == 'densenet121': # regressor/classifier network
+    elif modelname == 'densenet121': # regressor/classifier network
         model = densenet.generate_model(model_depth=121,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet161': # regressor/classifier network
+                                        num_classes=num_classes,
+                                        num_dimensions=num_dimensions,
+                                        num_channels=num_channels, final_convolution_layer = final_convolution_layer)
+    elif modelname == 'densenet161': # regressor/classifier network
         model = densenet.generate_model(model_depth=161,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet169': # regressor/classifier network
+                                        num_classes=num_classes,
+                                        num_dimensions=num_dimensions,
+                                        num_channels=num_channels, final_convolution_layer = final_convolution_layer)
+    elif modelname == 'densenet169': # regressor/classifier network
         model = densenet.generate_model(model_depth=169,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet201': # regressor/classifier network
+                                        num_classes=num_classes,
+                                        num_dimensions=num_dimensions,
+                                        num_channels=num_channels, final_convolution_layer = final_convolution_layer)
+    elif modelname == 'densenet201': # regressor/classifier network
         model = densenet.generate_model(model_depth=201,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet264': # regressor/classifier network
+                                        num_classes=num_classes,
+                                        num_dimensions=num_dimensions,
+                                        num_channels=num_channels, final_convolution_layer = final_convolution_layer)
+    elif modelname == 'densenet264': # regressor/classifier network
         model = densenet.generate_model(model_depth=264,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'vgg16':
+                                        num_classes=num_classes,
+                                        num_dimensions=num_dimensions,
+                                        num_channels=num_channels, final_convolution_layer = final_convolution_layer)
+    elif modelname == 'vgg16':
         vgg_config = cfg['D']
         num_final_features = vgg_config[-2]
         divisibility_factor = Counter(vgg_config)["M"]
@@ -198,40 +197,6 @@ def get_model(
             )
 
     return model
-
-
-def get_loss(which_loss):
-    """
-    This function parses the loss coming from the config file and returns the appropriate object
-    """
-    MSE_requested = False
-    if isinstance(which_loss, dict):  # this is currently only happening for mse_torch
-        # check for mse_torch
-        loss_fn = MSE_loss
-        MSE_requested = True
-    else:  # this is a simple string, so proceed with previous workflow
-        MSE_requested = False
-        if which_loss == "dc":
-            loss_fn = MCD_loss
-        elif which_loss == "dc_log":
-            loss_fn = MCD_log_loss
-        elif which_loss == "dcce":
-            loss_fn = DCCE
-        elif which_loss == "ce":
-            loss_fn = CE
-        # elif loss_function == 'mse':
-        #     loss_fn = MCD_MSE_loss
-        else:
-            print(
-                "WARNING: Could not find the requested loss function '"
-                + which_loss
-                + "' in the implementation, using dc, instead",
-                file=sys.stderr,
-            )
-            which_loss = "dc"
-            loss_fn = MCD_loss
-
-    return loss_fn, MSE_requested
 
 
 def get_optimizer(optimizer_name, model, learning_rate):

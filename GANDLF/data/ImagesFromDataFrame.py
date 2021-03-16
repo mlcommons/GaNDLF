@@ -64,11 +64,11 @@ def anisotropy(axes = 0, downsampling = 1, p=1):
 def positive_voxel_mask(image):
     return image > 0
 
-def crop_external_zero_planes(psize, p=1):
+def crop_external_zero_planes(patch_size, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
         raise ValueError("crop_external_zero_planes cannot be performed with non-1 probability.")
-    return CropExternalZeroplanes(psize=psize)
+    return CropExternalZeroplanes(patch_size=patch_size)
 
 ## lambdas for pre-processing
 def threshold_transform(min, max, p=1):
@@ -127,7 +127,7 @@ global_sampler_dict = {
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, 
-                        psize, 
+                        patch_size, 
                         headers, 
                         q_max_length = 10, 
                         q_samples_per_volume = 1, 
@@ -155,7 +155,7 @@ def ImagesFromDataFrame(dataframe,
     sampler = sampler.lower() # for easier parsing
 
     # define the control points and swap axes for augmentation
-    augmentation_patchAxesPoints = copy.deepcopy(psize)
+    augmentation_patchAxesPoints = copy.deepcopy(patch_size)
     for i in range(len(augmentation_patchAxesPoints)):
         augmentation_patchAxesPoints[i] = max(round(augmentation_patchAxesPoints[i] / 10), 1) # always at least have 1
 
@@ -174,6 +174,8 @@ def ImagesFromDataFrame(dataframe,
             else:
                 img = sitk.ReadImage(str(dataframe[channel][patient]))
                 array = np.expand_dims(sitk.GetArrayFromImage(img), axis=0)
+                print("Image shape : ", img.shape, flush=True)
+                print("Array shape : ", array.shape, flush=True)
                 subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY, path=dataframe[channel][patient])
 
             # if resize has been defined but resample is not (or is none)
@@ -222,8 +224,8 @@ def ImagesFromDataFrame(dataframe,
 
         # padding image, but only for label sampler, because we don't want to pad for uniform
         if 'label' in sampler or 'weight' in sampler:
-            psize_pad = list(np.asarray(np.round(np.divide(psize,2)), dtype=int))
-            padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+            patch_size_pad = list(np.asarray(np.round(np.divide(patch_size,2)), dtype=int))
+            padder = Pad(patch_size_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
             subject = padder(subject)
 
         # Appending this subject to the list of subjects
@@ -235,7 +237,7 @@ def ImagesFromDataFrame(dataframe,
     if not(preprocessing is None):
         if train: # we want the crop to only happen during training
             if 'crop_external_zero_planes' in preprocessing:
-                augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](psize))
+                augmentation_list.append(global_preprocessing_dict['crop_external_zero_planes'](patch_size))
         for key in ['threshold','clip']:
             if key in preprocessing:
                 augmentation_list.append(global_preprocessing_dict[key](min=preprocessing[key]['min'], max=preprocessing[key]['max']))
@@ -293,9 +295,9 @@ def ImagesFromDataFrame(dataframe,
     if not train:
         return subjects_dataset
     if sampler in ('weighted', 'weightedsampler', 'weightedsample'):
-        sampler = global_sampler_dict[sampler](psize, probability_map = 'label')
+        sampler = global_sampler_dict[sampler](patch_size, probability_map = 'label')
     else:
-        sampler = global_sampler_dict[sampler](psize)
+        sampler = global_sampler_dict[sampler](patch_size)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(subjects_dataset, max_length=q_max_length,
                                   samples_per_volume=q_samples_per_volume,

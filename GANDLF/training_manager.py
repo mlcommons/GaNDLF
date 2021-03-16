@@ -5,7 +5,7 @@ from sklearn.model_selection import KFold
 from pathlib import Path
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.training_loop import trainingLoop
+from GANDLF.training_loop import training_loop
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_prev):
@@ -133,8 +133,9 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
                 validationData = pd.read_pickle(currentValidationDataPickle)
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
-                trainingLoop(trainingDataFromPickle=trainingData, validationDataFromPickle=validationData, headers = headers, outputDir=currentValOutputFolder,
-                            device=device, parameters=parameters, testingDataFromPickle=testingData)
+                training_loop(training_data=trainingData, validation_data=validationData, headers=headers,
+                              output_dir=currentValOutputFolder,
+                              device=device, params=parameters, testing_data=testingData)
 
             else:
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
