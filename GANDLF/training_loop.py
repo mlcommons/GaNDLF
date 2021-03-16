@@ -107,7 +107,7 @@ def train_network(model, train_dataloader, optimizer, params):
         optimizer.zero_grad()
         image = torch.cat(
             [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-        ).to(params["device"])
+        ).float().to(params["device"])
         if len(params["value_keys"]) > 0:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             label = torch.reshape(
@@ -216,7 +216,7 @@ def validate_network(model, valid_dataloader, params):
         for patches_batch in patch_loader:
             image = torch.cat(
                 [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-            ).to(params["device"])
+            ).float().to(params["device"])
             if len(params["value_keys"]) > 0:
                 label = torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
                 label = torch.reshape(
