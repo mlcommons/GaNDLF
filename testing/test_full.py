@@ -93,10 +93,8 @@ def test_constructTrainingCSV():
 
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
-  application_data = '2d_rad_segmentation'
   # read and parse csv 
-  training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml', version_check = False)
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_segmentation.csv')
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
   parameters['psize'] = patch_size['2D']
@@ -116,7 +114,6 @@ def test_train_segmentation_rad_2d():
 
 def test_train_segmentation_rad_3d():
   print('Starting 3D Rad segmentation tests')
-  application_data = '3d_rad_segmentation'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
@@ -124,7 +121,7 @@ def test_train_segmentation_rad_3d():
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
   # read and parse csv 
-  training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_segmentation.csv')
   # loop through selected models and train for single epoch
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
