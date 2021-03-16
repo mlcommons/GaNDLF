@@ -1,0 +1,102 @@
+# Choose the segmentation model here 
+# options: unet, resunet, fcn
+version:
+  {
+    minimum: 0.0.7,
+    maximum: 0.0.8
+  }
+model:
+  {
+    dimension: 2, # the dimension of the model and dataset: defines dimensionality of computations
+    base_filters: 32, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
+    architecture: resunet, # options: unet, resunet, fcn, uinc
+    final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
+    class_list: [0,255], # Set the list of labels the model should train on and predict
+    amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
+    # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
+  }
+# Patch size during training - 2D patch for breast images since third dimension is not patched 
+patch_size: [128,128]
+# Number of epochs
+num_epochs: 1
+patience: 1
+# Set the batch size
+batch_size: 1
+# Set the initial learning rate
+learning_rate: 0.001
+# Set the learning rate scheduler i.e. the way the initial learning rate must be updated while the training progresses
+# Options: steplr, exponentiallr, cosineannealinglr, reducelronplateau, cycliclr
+scheduler: triangle
+# Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
+# options: dc (dice only), ce (), dcce (sume of dice and ce), mse (), ...
+loss_function: dc
+# Which optimizer do you want to use - adam/sgd
+opt: adam
+# the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
+# randomized split is performed using sklearn's KFold method
+# for single fold run, use '-' before the fold number
+nested_training:
+  {
+    testing: -2, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
+    validation: -2 # this controls the validation data splits for model training
+  }
+# various data augmentation techniques
+# options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
+# keep/edit as needed
+# all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
+data_augmentation:
+  {
+  # 'spatial':{
+  #   'probability': 0.5
+  # },
+  # 'kspace':{
+  #   'probability': 0.5
+  # },
+  # 'bias':{
+  #   'probability': 0.5
+  # },
+  # 'blur':{
+  #   'probability': 0.5
+  # },
+  # 'noise':{
+  #   'probability': 0.5
+  # },
+  # 'swap':{
+  #   'probability': 0.5
+  # }
+  }
+data_preprocessing:
+  {
+    # 'threshold':{
+    #   'min': 10, 
+    #   'max': 75
+    # },
+    # 'clip':{
+    #   'min': 10, 
+    #   'max': 75
+    # }, 
+    'normalize',
+    # 'resample':{
+    #   'resolution': [1,2,3]
+    # },
+    #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
+  }
+# data postprocessing node
+data_postprocessing:
+  {
+    # 'largest_component',
+    # 'hole_filling'
+  }
+# parallel training on HPC - here goes the command to prepend to send to a high performance computing
+# cluster for parallel computing during multi-fold training
+# not used for single fold training
+# this gets passed before the training_loop, so ensure enough memory is provided along with other parameters
+# that your HPC would expect
+# ${outputDir} will be changed to the outputDir you pass in CLI + '/${fold_number}'
+#parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=80G -pe threaded 6 /cbica/home/patis/projects/deep-sage-experiments/brats/sge_wrapper /cbica/home/patis/projects/GANDLF_master/venv/bin/python '
+
+q_max_length: 1
+
+q_samples_per_volume: 1
+
+q_num_workers: 0
