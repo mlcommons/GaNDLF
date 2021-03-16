@@ -50,7 +50,7 @@ def multi_class_dice(output, label, params):
 
     """
     total_dice = 0
-    num_class = params["num_classes"]
+    num_class = params["model"]["num_classes"]
     if (
         params["weights"] is not None
     ):  # Reminder to add weights as a possible parameter in config
@@ -99,6 +99,40 @@ def accuracy(output, label, params):
     return correct / len(label)
 
 
+def MSE(output, label, reduction='mean', scaling_factor=1):
+    """
+    Calculate the mean square error between the output variable from the network and the target
+
+    Parameters
+    ----------
+    output : torch.Tensor
+        The output generated usually by the network
+    target : torch.Tensor
+        The label for the corresponding Tensor for which the output was generated
+    reduction : string, optional
+        DESCRIPTION. The default is 'mean'.
+    scaling_factor : integer, optional
+        The scaling factor to multiply the label with
+
+    Returns
+    -------
+    loss : torch.Tensor
+        Computed Mean Squared Error loss for the output and label
+
+    """
+    label = label*scaling_factor
+    loss = MSELoss(output, label, reduction=reduction)
+    return loss
+
+
+def MSE_loss_agg(inp, target, num_classes, reduction = 'mean'):
+    acc_mse_loss = 0
+    for i in range(0, num_classes):
+        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=reduction)
+    acc_mse_loss/=num_classes
+    return acc_mse_loss
+
+
 def identity(output, label, params):
     """
     Always returns 0
@@ -136,8 +170,10 @@ def fetch_metric(metric_name):
     """
     if (metric_name).lower() == "dice":
         metric_function = multi_class_dice
-    elif (metric_name).lower() == "acc":
+    elif (metric_name).lower() == "accuracy":
         metric_function = accuracy
+    elif (metric_name).lower() == "mse":
+        metric_function = MSE_loss_agg
     else:
         print("Metric was undefined")
         metric_function = identity

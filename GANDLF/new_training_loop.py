@@ -10,10 +10,11 @@ import torch
 import time
 import torchio
 from torch.utils.data import DataLoader
+from GANDLF.logger import Logger
 from GANDLF.losses import fetch_loss_function
 from GANDLF.metrics import fetch_metric
 from GANDLF.parameterParsing import get_model, get_optimizer
-from GANDLF.utils import get_date_time
+from GANDLF.utils import get_date_time, send_model_to_device
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
@@ -22,6 +23,28 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation reque
 
 
 def step(model, image, label, params):
+    """
+    Function that steps the model for a single batch
+
+    Parameters
+    ----------
+    model : torch.model
+        The model to process the input image with, it should support appropriate dimensions.
+    image : torch.Tensor
+        The input image stack according to requirements
+    label : torch.Tensor
+        The input label for the corresponding image label
+    params : dict
+        the parameters passed by the user yaml
+
+    Returns
+    -------
+    loss : torch.Tensor
+        The computed loss from the label and the output
+    metric_output : torch.Tensor
+        The computed metric from the label and the output
+
+    """
     if params["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
@@ -38,6 +61,28 @@ def step(model, image, label, params):
 
 
 def train_network(model, train_dataloader, optimizer, params):
+    """
+    Function to train a network for a single epoch
+
+    Parameters
+    ----------
+    model : torch.model
+        The model to process the input image with, it should support appropriate dimensions.
+    train_dataloader : torch.DataLoader
+        The dataloader for the training epoch
+    optimizer : torch.optim
+        Optimizer for optimizing network
+    params : dict
+        the parameters passed by the user yaml
+
+    Returns
+    -------
+    average_epoch_train_loss : float
+        Train loss for the current epoch
+    average_epoch_train_metric : dict
+        Train metrics for the current epoch
+
+    """
     # Initialize a few things
     total_epoch_train_loss = 0
     total_epoch_train_metric = {}
@@ -95,17 +140,36 @@ def train_network(model, train_dataloader, optimizer, params):
                     total_epoch_train_metric[metric] / batch_idx,
                 )
 
-    average_epoch_train_loss = total_epoch_train_loss / batch_idx
+    average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     for metric in params["metrics"].keys():
-        average_epoch_train_metric[metric] = (
-            total_epoch_train_metric[metric] / batch_idx
+        average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
+            train_dataloader
         )
 
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(epoch_count, model, valid_dataloader, params):
+def validate_network(model, valid_dataloader, params):
+    """
+    Function to validate a network for a single epoch
 
+    Parameters
+    ----------
+    model : torch.model
+        The model to process the input image with, it should support appropriate dimensions.
+    valid_dataloader : torch.DataLoader
+        The dataloader for the validation epoch
+    params : dict
+        the parameters passed by the user yaml
+
+    Returns
+    -------
+    average_epoch_valid_loss : float
+        Validation loss for the current epoch
+    average_epoch_valid_metric : dict
+        Validation metrics for the current epoch
+
+    """
     print("*" * 20)
     print("Starting Epoch : ")
     print("*" * 20)
@@ -146,75 +210,19 @@ def validate_network(epoch_count, model, valid_dataloader, params):
 
         # For printing information at halftime during an epoch
         if batch_idx % (len(valid_dataloader) // 2) == 0:
-            print("Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx)
+            print(
+                "Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx
+            )
             for metric in params["metrics"].keys():
                 print(
                     "Epoch Validation " + metric + " : ",
-                    total_epoch_valid_metric[metric] / batch_idx,
+                    total_epoch_valid_metric[metric] / len(valid_dataloader),
                 )
 
-    average_epoch_valid_loss = total_epoch_valid_loss / batch_idx
+    average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
     for metric in params["metrics"].keys():
-        average_epoch_valid_metric[metric] = (
-            total_epoch_valid_metric[metric] / batch_idx
-        )
-
-    return average_epoch_valid_loss, average_epoch_valid_metric
-
-
-def test_network(epoch_count, model, valid_dataloader, params):
-
-    print("*" * 20)
-    print("Starting Epoch : ")
-    print("*" * 20)
-    # Initialize a few things
-    total_epoch_valid_loss = 0
-    total_epoch_valid_metric = {}
-    average_epoch_valid_metric = {}
-
-    for metric in params["metrics"].keys():
-        total_epoch_valid_metric[metric] = 0
-
-    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    if params["model"]["amp"]:
-        print("Using Automatic mixed precision", flush=True)
-
-    # Fetch the optimizer
-
-    # Set the model to valid
-    model.eval()
-    for batch_idx, (subject) in enumerate(valid_dataloader):
-        image = torch.cat(
-            [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-        ).to(params["device"])
-        if params["value_keys"] is not None:
-            label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label = torch.reshape(
-                subject[params["value_keys"][0]], (params["batch_size"], 1)
-            )
-        else:
-            label = subject["label"][torchio.DATA]
-        label = label.to(params["device"])
-        loss, calculated_metrics = step(model, image, label, batch_idx, params)
-
-        # Non network validing related
-        total_epoch_valid_loss += loss
-        for metric in calculated_metrics.keys():
-            total_epoch_valid_metric[metric] += calculated_metrics[metric]
-
-        # For printing information at halftime during an epoch
-        if batch_idx % (len(valid_dataloader) // 2) == 0:
-            print("Epoch average loss : ", total_epoch_valid_loss / batch_idx)
-            for metric in params["metrics"].keys():
-                print(
-                    "Epoch Average " + metric + " : ",
-                    total_epoch_valid_metric[metric] / batch_idx,
-                )
-
-    average_epoch_valid_loss = total_epoch_valid_loss / batch_idx
-    for metric in params["metrics"].keys():
-        average_epoch_valid_metric[metric] = (
-            total_epoch_valid_metric[metric] / batch_idx
+        average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
+            valid_dataloader
         )
 
     return average_epoch_valid_loss, average_epoch_valid_metric
@@ -226,7 +234,7 @@ def training_loop(
     headers,
     device,
     params,
-    outputDir,
+    output_dir,
     testing_data=None,
 ):
 
@@ -253,7 +261,7 @@ def training_loop(
     )
 
     # Set up the dataloaders
-    trainingDataForTorch = ImagesFromDataFrame(
+    training_data_for_torch = ImagesFromDataFrame(
         training_data,
         patch_size=params["patch_size"],
         headers=params["headers"],
@@ -268,7 +276,7 @@ def training_loop(
         train=True,
     )
 
-    validationDataForTorch = ImagesFromDataFrame(
+    validation_data_for_torch = ImagesFromDataFrame(
         validation_data,
         patch_size=params["patch_size"],
         headers=params["headers"],
@@ -292,7 +300,7 @@ def training_loop(
         testing_data = validation_data
         testingDataDefined = False
 
-    testDataForTorch = ImagesFromDataFrame(
+    test_data_for_torch = ImagesFromDataFrame(
         testing_data,
         patch_size=params["patch_size"],
         headers=params["headers"],
@@ -308,15 +316,17 @@ def training_loop(
     )
 
     train_dataloader = DataLoader(
-        trainingDataForTorch,
+        training_data_for_torch,
         batch_size=params["batch_size"],
         shuffle=True,
         pin_memory=params["in_memory"],
     )
+
     val_dataloader = DataLoader(
-        validationDataForTorch, batch_size=1, pin_memory=params["in_memory"]
+        validation_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
     )
-    test_dataloader = DataLoader(testDataForTorch, batch_size=1)
+
+    test_dataloader = DataLoader(test_data_for_torch, batch_size=1)
 
     # Fetch the optimizers
     optimizer = get_optimizer(
@@ -348,14 +358,49 @@ def training_loop(
     # datetime object containing current date and time
     print("Initializing training at : ", get_date_time())
 
+    # Setup a few loggers for tracking
+    train_logger = Logger(
+        logger_csv_filename=os.path.join(output_dir, "train_logs.csv"),
+        metrics=params["metrics"],
+    )
+    valid_logger = Logger(
+        logger_csv_filename=os.path.join(output_dir, "valid_logs.csv"),
+        metrics=params["metrics"],
+    )
+    train_logger.write_header(mode="train")
+    valid_logger.write_header(mode="valid")
+
+    model, amp, device = send_model_to_device(
+        model, amp=params["amp"], device=params["device"], optimizer=optimizer
+    )
+
+    # Setup a few variables for tracking
+    best_loss = 1e7
+    patience = 0
+
     # Iterate for number of epochs
     for epoch in range(epochs):
+
+        print("Using device:", device, flush=True)
+
+        # Printing times
         epoch_start_time = time.time()
         print("*" * 20)
         print("Starting Epoch : ", epoch)
         print("Epoch start time : ", get_date_time())
-        train_network(epoch, model, train_dataloader, optimizer, loss, metrics, params)
-        validate_network(epoch, model, val_dataloader, loss, metrics, params)
+
+        epoch_train_loss, epoch_train_metric = train_network(
+            epoch, model, train_dataloader, optimizer, loss, metrics, params
+        )
+        epoch_valid_loss, epoch_valid_metric = validate_network(
+            epoch, model, val_dataloader, loss, metrics, params
+        )
+        patience += 1
+
+        # Write the losses to a logger
+        train_logger.write(epoch, epoch_train_loss, epoch_train_metric)
+        valid_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
+
         print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
         print(
@@ -364,6 +409,29 @@ def training_loop(
             " mins",
             flush=True,
         )
+
+        # Start to check for loss
+        if epoch_valid_loss <= best_loss:
+            best_loss = epoch_valid_loss
+            best_train_idx = epoch
+            patience = 0
+            torch.save(
+                {
+                    "epoch": best_train_idx,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "best_loss": best_loss,
+                },
+                os.path.join(output_dir, params['modelname'] + "_best.pth.tar"),
+            )
+
+        if patience > params["patience"]:
+            print(
+                "Performance Metric has not improved for %d epochs, exiting training loop!"
+                % (patience),
+                flush=True,
+            )
+            break
 
     # End train time
     end_time = time.time()
@@ -374,6 +442,3 @@ def training_loop(
         " mins",
         flush=True,
     )
-
-    test_network(model, test_dataloader, params)
-    # Do rest of the stuff later
