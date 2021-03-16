@@ -94,10 +94,13 @@ def test_constructTrainingCSV():
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
   application_data = '2d_rad_segmentation'
+  # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
-  parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['2D']
+  parameters['model']['dimension'] = 2
+  # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
+  # loop through selected models and train for single epoch
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
@@ -109,10 +112,13 @@ def test_train_segmentation_rad_2d():
 def test_train_segmentation_rad_3d():
   print('Starting 3D Rad segmentation tests')
   application_data = '3d_rad_segmentation'
+  # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
-  parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
+  # loop through selected models and train for single epoch
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
@@ -123,10 +129,13 @@ def test_train_segmentation_rad_3d():
 
 def test_regression_rad_2d():
   application_data = '2d_rad_segmentation'
+  # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
-  parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['2D']
+  parameters['model']['dimension'] = 2
+  # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
+  # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
@@ -137,10 +146,13 @@ def test_regression_rad_2d():
 
 def test_regression_rad_3d():
   application_data = '3d_rad_segmentation'
+  # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
-  parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
+  # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
@@ -151,12 +163,14 @@ def test_regression_rad_3d():
 
 def test_classification_rad_2d():
   application_data = '2d_rad_segmentation'
+  # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['2D']
+  parameters['model']['dimension'] = 2
+  # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
-  shutil.rmtree(outputDir) # overwrite previous results
-  Path(outputDir).mkdir(parents=True, exist_ok=True)
+  # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
@@ -167,10 +181,13 @@ def test_classification_rad_2d():
 
 def test_classification_rad_3d():
   application_data = '3d_rad_segmentation'
+  # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
-  parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
+  # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
