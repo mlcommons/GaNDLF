@@ -175,7 +175,7 @@ def get_scheduler(which_scheduler, optimizer, batch_size, training_samples_size,
         clr = cyclical_lr(step_size, min_lr = 10**-3, max_lr=1)
         scheduler_lr = LambdaLR(optimizer, [clr])
         print("Initial Learning Rate: ",learning_rate)
-    if which_scheduler == "triangle_modified":
+    elif which_scheduler == "triangle_modified":
         step_size = training_samples_size/learning_rate
         clr = cyclical_lr_modified(step_size)
         scheduler_lr = LambdaLR(optimizer, [clr])
