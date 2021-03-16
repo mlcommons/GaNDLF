@@ -13,7 +13,9 @@ from GANDLF.inference_manager import InferenceManager
 all_models_segmentation = ['unet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 # all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
 all_models_regression = ['densenet121', 'vgg16']
+patch_size = {'2D': [128,128,1], '3D': [32,32,32]}
 
+testingDir = os.path.abspath(os.path.normpath('./testing'))
 inputDir = os.path.abspath(os.path.normpath('./testing/data'))
 outputDir = os.path.abspath(os.path.normpath('./testing/data_output'))
 Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -92,8 +94,9 @@ def test_constructTrainingCSV():
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
   application_data = '2d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml', version_check = False)
+  parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['2D']
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
@@ -106,8 +109,9 @@ def test_train_segmentation_rad_2d():
 def test_train_segmentation_rad_3d():
   print('Starting 3D Rad segmentation tests')
   application_data = '3d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml', version_check = False)
+  parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['3D']
   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
@@ -119,7 +123,9 @@ def test_train_segmentation_rad_3d():
 
 def test_regression_rad_2d():
   application_data = '2d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml', version_check = False)
+  parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['2D']
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -131,7 +137,9 @@ def test_regression_rad_2d():
 
 def test_regression_rad_3d():
   application_data = '3d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml', version_check = False)
+  parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['3D']
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -143,7 +151,9 @@ def test_regression_rad_3d():
 
 def test_classification_rad_2d():
   application_data = '2d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml', version_check = False)
+  parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['2D']
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
   shutil.rmtree(outputDir) # overwrite previous results
   Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -157,7 +167,9 @@ def test_classification_rad_2d():
 
 def test_classification_rad_3d():
   application_data = '3d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml', version_check = False)
+  parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['3D']
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
