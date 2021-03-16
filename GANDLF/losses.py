@@ -1,4 +1,5 @@
-import torch 
+import torch
+import sys
 from torch.nn import MSELoss
 
 
@@ -17,7 +18,7 @@ def MCD(pm, gt, num_class, weights = None):
     '''
     acc_dice = 0
     for i in range(0, num_class): # 0 is background
-        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDice = dice(gt[:, i, ...], pm[:, i, ...])
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
         if weights is not None:
             currentDice = currentDice * weights[i]
@@ -26,19 +27,28 @@ def MCD(pm, gt, num_class, weights = None):
         acc_dice /= num_class # we should not be considering 0
     return acc_dice
 
-def MCD_loss(pm, gt, num_class, weights = None): 
+def MCD_loss(pm, gt, params): 
     '''
     These weights should be the penalty weights, not dice weights
     '''
     acc_dice_loss = 0
-    for i in range(0, num_class): # 0 is background
-        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+    num_class = params["model"]["num_classes"]
+
+    if params['weights'] is not None:
+        weights = params['weights']
+    else:
+        weights = None
+
+    for i in range(0, params["model"]["num_classes"]): # 0 is background
+        currentDice = dice(gt[:,i, ...], pm[:,i, ...])
         currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
+
     if weights is None:
         acc_dice_loss /= num_class # we should not be considering 0
+
     return acc_dice_loss
 
 def MCD_loss_new(pm, gt, num_class, weights = None):    # compute the actual dice score
@@ -57,7 +67,7 @@ def MCD_log_loss(pm, gt, num_class, weights = None):
     '''
     acc_dice_loss = 0
     for i in range(0, num_class): # 0 is background
-        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+        currentDice = dice(gt[:, i, ...], pm[:, i, ...])
         currentDiceLoss = -torch.log(currentDice + torch.finfo(torch.float32).eps) # negative because we want positive losses
         if weights is not None:
             currentDiceLoss = currentDiceLoss * weights[i]
@@ -77,7 +87,7 @@ def CE(out,target):
 def CCE(out, target, num_class, weights):
     acc_ce_loss = 0
     for i in range(0, num_class):
-        curr_ce_loss = CE(out[:,i,:,:,:], target[:,i,:,:,:])
+        curr_ce_loss = CE(out[:,i , ...], target[:, i, ...])
         if weights is not None:
             curr_ce_loss = curr_ce_loss * weights[i]
         acc_ce_loss += curr_ce_loss
@@ -113,17 +123,56 @@ def tversky_loss(inp, target, alpha):
 def MCT_loss(inp, target, num_class, weights):
     acc_tv_loss = 0
     for i in range(0, num_class):
-        acc_tv_loss += tversky_loss(inp[:,i,:,:,:], target[:,i,:,:,:]) * weights[i]
+        acc_tv_loss += tversky_loss(inp[:, i, ...], target[:, i, ...]) * weights[i]
     acc_tv_loss /= (num_class-1)
     return acc_tv_loss
 
-def MSE(inp, target, reduction = 'mean'):
-    l = MSELoss(inp, target, reduction = reduction) # for reductions options, see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
-    return l
+def MSE(output, label, reduction='mean', scaling_factor=1):
+    """
+    Calculate the mean square error between the output variable from the network and the target
+
+    Parameters
+    ----------
+    output : torch.Tensor
+        The output generated usually by the network
+    target : torch.Tensor
+        The label for the corresponding Tensor for which the output was generated
+    reduction : string, optional
+        DESCRIPTION. The default is 'mean'.
+    scaling_factor : integer, optional
+        The scaling factor to multiply the label with
+
+    Returns
+    -------
+    loss : torch.Tensor
+        Computed Mean Squared Error loss for the output and label
+
+    """
+    label = label*scaling_factor
+    loss = MSELoss(output, label, reduction=reduction)
+    return loss
 
 def MSE_loss(inp, target, num_classes, reduction = 'mean'):
     acc_mse_loss = 0
     for i in range(0, num_classes):
-        acc_mse_loss += MSE(inp[:,i,:,:,:], target[:,i,:,:,:], reduction = reduction)
+        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=reduction)
     acc_mse_loss/=num_classes
     return acc_mse_loss
+
+def fetch_loss_function(loss_name, params):
+    if loss_name == 'dc':
+        loss_function = MCD_loss
+    elif loss_name == 'dc_log':
+        loss_function = MCD_log_loss
+    elif loss_name == 'dcce':
+        loss_function = DCCE
+    elif loss_name == 'ce':
+        loss_function = CE
+    elif loss_name == 'mse':
+        loss_function = MSE_loss
+    else:
+        print('WARNING: Could not find the requested loss function \'' + loss_function +
+              '\' in the implementation, using dc, instead', file=sys.stderr)
+        loss_name = 'dc'
+        loss_function = MCD_loss
+    return loss_function
