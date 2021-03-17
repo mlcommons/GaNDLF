@@ -1,6 +1,7 @@
 ## 0.0.8
 
 - Pre-split training/validation data can now be provided
+- Major code refactoring to make extensions easier
 
 ## 0.0.7
 
