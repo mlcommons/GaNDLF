@@ -80,8 +80,12 @@ def step(model, image, label, params):
     else:
         output = model(image)
     
+    # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
     
+    if params["model"]["dimension"] == 2:
+        output = torch.unsqueeze(output, -1)
+
     return loss, metric_output, output
 
 
@@ -137,6 +141,7 @@ def train_network(model, train_dataloader, optimizer, params):
             )
         else:
             label = subject["label"][torchio.DATA]
+            # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
         print("Train : ", label.shape, image.shape, flush=True)
         loss, calculated_metrics, _ = step(model, image, label, params)
@@ -222,6 +227,7 @@ def validate_network(model, valid_dataloader, params):
             if (subject['label'] != ['NA']):
                 subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
                 label_ground_truth = subject["label"][torchio.DATA]
+                # one-hot encoding of 'label_ground_truth' will probably be needed for segmentation
         
         if len(params["value_keys"]) > 0: # for regression/classification
             label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
@@ -250,12 +256,13 @@ def validate_network(model, valid_dataloader, params):
                 label = torch.reshape(
                     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
                 )
+                # one-hot encoding of 'label' will probably be needed for segmentation
             else:
                 label = patches_batch["label"][torchio.DATA]
             label = label.to(params["device"])
             print("Validation :", label.shape, image.shape, flush=True)
             patch_location = patches_batch[torchio.LOCATION]
-            loss, calculated_metrics, output = step(model, image, label, params, aggregator, patch_location)
+            loss, calculated_metrics, output = step(model, image, label, params)
             if is_segmentation:
                 aggregator.add_batch(output, patch_location)
             else:
@@ -263,11 +270,13 @@ def validate_network(model, valid_dataloader, params):
         
         if is_segmentation:
             output_prediction = aggregator.get_output_tensor()
+            # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
         else:
             output_prediction = output_prediction / len(patch_loader) # final regression output
 
-        final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction)
-        print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
+        ## this is currently broken
+        # final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
+        # print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
         # Non network validing related
         total_epoch_valid_loss += loss
