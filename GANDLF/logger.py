@@ -7,6 +7,7 @@ Created on Thu Mar 11 14:55:44 2021
 """
 
 import os
+import torch
 
 class Logger():
     def __init__(self, logger_csv_filename, metrics):
@@ -61,8 +62,12 @@ class Logger():
 
         """
         self.csv.write(str(epoch_number)+","+str(loss)+",")
-        for metric in metrics:
-            self.csv.write(epoch_metrics[metric]+",")
+        for metric in epoch_metrics:
+            if torch.is_tensor(epoch_metrics[metric]):
+                to_write = str(epoch_metrics[metric].cpu().data.item())
+            else:
+                to_write = str(epoch_metrics[metric])
+            self.csv.write(to_write+",")
         self.csv.write("\b\n")
 
     def close(self):

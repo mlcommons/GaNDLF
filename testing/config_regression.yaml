@@ -1,0 +1,40 @@
+batch_size: 1
+data_augmentation: {}
+data_postprocessing: {}
+data_preprocessing:
+  normalize: null
+in_memory: false
+learning_rate: 0.001
+loss_function: mse
+model:
+  amp: false
+  architecture: densenet121
+  base_filters: 32
+  class_list:
+  - 0
+  - 255
+  dimension: 2
+  final_layer: None
+nested_training:
+  testing: -2
+  validation: -2
+num_epochs: 1
+opt: adam
+parallel_compute_command: ''
+patch_sampler: uniform
+patch_size: 
+- 128
+- 128
+patience: 1
+q_max_length: 1
+q_num_workers: 0
+q_samples_per_volume: 1
+q_verbose: false
+save_masks: false
+scaling_factor: 1
+scheduler: triangle
+version:
+  maximum: 0.0.8
+  minimum: 0.0.7
+weighted_loss: false
+which_model: resunet
