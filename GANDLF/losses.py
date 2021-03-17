@@ -11,17 +11,23 @@ def dice(inp, target):
     return ((2. * intersection + smooth) /
                 (iflat.sum() + tflat.sum() + smooth)) # 2 * intersection / union
 
-def MCD(pm, gt, num_class, weights = None): 
+def MCD(pm, gt, num_class, weights = None, ignore_class = None): 
     '''
     These weights should be the dice weights, not dice weights
     '''
     acc_dice = 0
     for i in range(0, num_class): # 0 is background
-        currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
-        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
-        if weights is not None:
-            currentDice = currentDice * weights[i]
-        acc_dice += currentDice
+        calculate_dice_for_label = True
+        if ignore_class is not None:
+            if i == ignore_class:
+                calculate_dice_for_label = False
+        
+        if calculate_dice_for_label:
+            currentDice = dice(gt[:,i,:,:,:], pm[:,i,:,:,:])
+            # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
+            if weights is not None:
+                currentDice = currentDice * weights[i]
+            acc_dice += currentDice
     if weights is None:
         acc_dice /= num_class # we should not be considering 0
     return acc_dice
