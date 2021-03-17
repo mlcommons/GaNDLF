@@ -21,6 +21,30 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation reque
 
 # Reminder, the scaling factor should go to the metric MSE, and all should support a scaling factor, right?
 
+def get_loss_and_metrics(ground_truth, predicted, params):
+    """
+    ground_truth : torch.Tensor
+        The input ground truth for the corresponding image label
+    predicted : torch.Tensor
+        The input predicted label for the corresponding image label
+    params : dict
+        The parameters passed by the user yaml
+
+    Returns
+    -------
+    loss : torch.Tensor
+        The computed loss from the label and the output
+    metric_output : torch.Tensor
+        The computed metric from the label and the output
+    """
+    loss_function = fetch_loss_function(params["loss_function"], params)
+    loss = loss_function(predicted, ground_truth, params)
+    metric_output = {}
+    # Metrics should be a list
+    for metric in params["metrics"]:
+        metric_function = fetch_metric(metric)  # Write a fetch_metric
+        metric_output[metric] = metric_function(predicted, ground_truth, params)
+    return loss, metric_output
 
 def step(model, image, label, params):
     """
@@ -35,7 +59,7 @@ def step(model, image, label, params):
     label : torch.Tensor
         The input label for the corresponding image label
     params : dict
-        the parameters passed by the user yaml
+        The parameters passed by the user yaml
 
     Returns
     -------
@@ -43,6 +67,8 @@ def step(model, image, label, params):
         The computed loss from the label and the output
     metric_output : torch.Tensor
         The computed metric from the label and the output
+    output: torch.Tensor
+        The final output of the model
 
     """
     if params["model"]["dimension"] == 2:
@@ -53,14 +79,10 @@ def step(model, image, label, params):
             output = model(image)
     else:
         output = model(image)
-    loss_function = fetch_loss_function(params["loss_function"], params)
-    loss = loss_function(output, label, params)
-    metric_output = {}
-    # Metrics should be a list
-    for metric in params["metrics"]:
-        metric_function = fetch_metric(metric)  # Write a fetch_metric
-        metric_output[metric] = metric_function(output, label, params)
-    return loss, metric_output
+    
+    loss, metric_output = get_loss_and_metrics(label, output, params)
+    
+    return loss, metric_output, output
 
 
 def train_network(model, train_dataloader, optimizer, params):
@@ -117,7 +139,7 @@ def train_network(model, train_dataloader, optimizer, params):
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
         print("Train : ", label.shape, image.shape, flush=True)
-        loss, calculated_metrics = step(model, image, label, params)
+        loss, calculated_metrics, _ = step(model, image, label, params)
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 if not torch.isnan(
@@ -195,15 +217,19 @@ def validate_network(model, valid_dataloader, params):
         
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
+        label_ground_truth = None
         if ('label' in subject):
             if (subject['label'] != ['NA']):
                 subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+                label_ground_truth = subject["label"][torchio.DATA]
         
         if len(params["value_keys"]) > 0: # for regression/classification
+            label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+            label_ground_truth = torch.reshape(
+                subject[params["value_keys"][0]], (params["batch_size"], 1)
+            )
             for key in params["value_keys"]:
                 subject_dict['value_' + key] = subject[key]
-        else:
-            label = subject["label"][torchio.DATA]
         
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
@@ -212,12 +238,14 @@ def validate_network(model, valid_dataloader, params):
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
         aggregator = torchio.inference.GridAggregator(grid_sampler)
         
-        pred_output = 0 # this is used for regression
+        is_segmentation = True
+        output_prediction = 0 # this is used for regression/classification
         for patches_batch in patch_loader:
             image = torch.cat(
                 [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
             ).float().to(params["device"])
             if len(params["value_keys"]) > 0:
+                is_segmentation = False
                 label = torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
                 label = torch.reshape(
                     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
@@ -226,7 +254,20 @@ def validate_network(model, valid_dataloader, params):
                 label = patches_batch["label"][torchio.DATA]
             label = label.to(params["device"])
             print("Validation :", label.shape, image.shape, flush=True)
-            loss, calculated_metrics = step(model, image, label, params)
+            patch_location = patches_batch[torchio.LOCATION]
+            loss, calculated_metrics, output = step(model, image, label, params, aggregator, patch_location)
+            if is_segmentation:
+                aggregator.add_batch(output, patch_location)
+            else:
+                output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
+        
+        if is_segmentation:
+            output_prediction = aggregator.get_output_tensor()
+        else:
+            output_prediction = output_prediction / len(patch_loader) # final regression output
+
+        final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction)
+        print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
         # Non network validing related
         total_epoch_valid_loss += loss
