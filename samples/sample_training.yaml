@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.7,
-    maximum: 0.0.7 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.8,
+    maximum: 0.0.8 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
 model:
@@ -27,7 +27,7 @@ modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
-patch_sampler: label
+patch_sampler: uniform
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs

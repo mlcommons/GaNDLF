@@ -1,4 +1,5 @@
-Fixes issue #(Enter issue number here)
+<!-- Replace (issue_number) with the issue that will be auto-linked to close after merging this PR -->
+Fixes #(issue_number)
 
 ## Proposed Changes
 <!-- Bullet pointed list of changes, please try to keep code changes as small as possible-->

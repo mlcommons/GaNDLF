@@ -1,7 +1,7 @@
 import math
 import sys
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy
+import requests, zipfile, io, os, csv, random, copy, shutil
 
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
@@ -13,7 +13,9 @@ from GANDLF.inference_manager import InferenceManager
 all_models_segmentation = ['unet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 # all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
 all_models_regression = ['densenet121', 'vgg16']
+patch_size = {'2D': [128,128,1], '3D': [32,32,32]}
 
+testingDir = os.path.abspath(os.path.normpath('./testing'))
 inputDir = os.path.abspath(os.path.normpath('./testing/data'))
 outputDir = os.path.abspath(os.path.normpath('./testing/data_output'))
 Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -35,7 +37,7 @@ def test_download_data():
   '''
   This function downloads the sample data, which is the first step towards getting everything ready
   '''
-  urlToDownload = 'https://github.com/sarthakpati/tempDownloads/raw/main/data.zip'
+  urlToDownload = 'https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip'
   # do not download data again
   if not Path(os.getcwd() + '/testing/data/test/3d_rad_segmentation/001/image.nii.gz').exists():
     print('Downloading and extracting sample data')
@@ -91,85 +93,113 @@ def test_constructTrainingCSV():
 
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
-  application_data = '2d_rad_segmentation'
-  parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml', version_check = False)
-  parameters['modality'] = 'rad'
-  parameters['metrics'] = ['dice']
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_segmentation.csv')
+  parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
+  parameters['patch_size'] = patch_size['2D']
+  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
-  training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
+  parameters['model']['class_list'] = [0,255]
+  parameters['metrics'] = ['dice']
   parameters['amp'] = True
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  # read and initialize parameters for specific data dimension
   for model in all_models_segmentation:
     parameters['model']['architecture'] = model 
-    currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
-    Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
   print('passed')
 
-# def test_train_segmentation_rad_3d():
-#   print('Starting 3D Rad segmentation tests')
-#   application_data = '3d_rad_segmentation'
-#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training.yaml', version_check = False)
-#   parameters['modality'] = 'rad'
-#   parameters['metrics'] = ['dice']
-#   training_data, headers = parseTrainingCSV(inputDir + '/train_' + application_data + '.csv')
-#   for model in all_models_segmentation:
-#     parameters['model']['architecture'] = model 
-#     currentOutputDir = os.path.join(outputDir, application_data + '_' + model)
-#     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-#     TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+def test_train_segmentation_rad_3d():
+  print('Starting 3D Rad segmentation tests')
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
+  parameters['patch_size'] = patch_size['3D']
+  parameters['psize'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  parameters['model']['class_list'] = [0,1]
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_segmentation.csv')
+  # loop through selected models and train for single epoch
+  for model in all_models_segmentation:
+    parameters['model']['architecture'] = model 
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
-#   print('passed')
+  print('passed')
 
-# def test_regression_rad_2d():
-#   application_data = '2d_rad_segmentation'
-#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml')
-#   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
-#   for model in all_models_regression:
-#     parameters['model']['architecture'] = model
-#     parameters['metrics'] = ['mse']
-#     currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_regression')
-#     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-#     TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+def test_train_regression_rad_2d():
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
+  parameters['patch_size'] = patch_size['2D']
+  parameters['psize'] = patch_size['2D']
+  parameters['model']['dimension'] = 2
+  parameters['model']['class_list'] = [0,255]
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
+  # loop through selected models and train for single epoch
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
-#   print('passed')
+  print('passed')
 
-# def test_regression_rad_3d():
-#   application_data = '3d_rad_segmentation'
-#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_regression.yaml')
-#   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
-#   for model in all_models_regression:
-#     parameters['model']['architecture'] = model
-#     parameters['metrics'] = ['mse']
-#     currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_regression')
-#     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-#     TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+def test_train_regression_rad_3d():
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
+  parameters['patch_size'] = patch_size['3D']
+  parameters['psize'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  parameters['model']['class_list'] = [0,1]
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
+  # loop through selected models and train for single epoch
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
-#   print('passed')
+  print('passed')
 
-# def test_classification_rad_2d():
-#   application_data = '2d_rad_segmentation'
-#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
-#   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
-#   for model in all_models_regression:
-#     parameters['model']['architecture'] = model
-#     parameters['metrics'] = ['acc']
-#     currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_classification')
-#     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-#     TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+def test_train_classification_rad_2d():
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['2D']
+  parameters['psize'] = patch_size['2D']
+  parameters['model']['dimension'] = 2
+  parameters['model']['class_list'] = [0,255]
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  # loop through selected models and train for single epoch
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
-#   print('passed')
+  print('passed')
 
-# def test_classification_rad_3d():
-#   application_data = '3d_rad_segmentation'
-#   parameters = parseConfig(inputDir + '/' + application_data + '/sample_training_classification.yaml')
-#   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
-#   for model in all_models_regression:
-#     parameters['model']['architecture'] = model
-#     parameters['metrics'] = ['acc']
-#     currentOutputDir = os.path.join(outputDir, application_data + '_' + model + '_classification')
-#     Path(currentOutputDir).mkdir(parents=True, exist_ok=True)
-#     TrainingManager(dataframe=training_data, headers = headers, outputDir=currentOutputDir, parameters=parameters, device='cpu', reset_prev=True)
+def test_train_classification_rad_3d():
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['patch_size'] = patch_size['3D']
+  parameters['psize'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  parameters['model']['class_list'] = [0,1]
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
+  # loop through selected models and train for single epoch
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
 
-#   print('passed')
+  print('passed')

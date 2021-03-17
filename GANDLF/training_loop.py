@@ -107,7 +107,7 @@ def train_network(model, train_dataloader, optimizer, params):
         optimizer.zero_grad()
         image = torch.cat(
             [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-        ).to(params["device"])
+        ).float().to(params["device"])
         if len(params["value_keys"]) > 0:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             label = torch.reshape(
@@ -192,19 +192,41 @@ def validate_network(model, valid_dataloader, params):
     # Set the model to valid
     model.eval()
     for batch_idx, (subject) in enumerate(valid_dataloader):
-        image = torch.cat(
-            [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-        ).to(params["device"])
-        if len(params["value_keys"]) > 0:
-            label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label = torch.reshape(
-                subject[params["value_keys"][0]], (params["batch_size"], 1)
-            )
+        
+        # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
+        subject_dict = {}
+        if ('label' in subject):
+            if (subject['label'] != ['NA']):
+                subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+        
+        if len(params["value_keys"]) > 0: # for regression/classification
+            for key in params["value_keys"]:
+                subject_dict['value_' + key] = subject[key]
         else:
             label = subject["label"][torchio.DATA]
-        label = label.to(params["device"])
-        print("Validation :", label.shape, image.shape, flush=True)
-        loss, calculated_metrics = step(model, image, label, params)
+        
+        for key in params["channel_keys"]:
+            subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
+            
+        grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), params['patch_size'])
+        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
+        aggregator = torchio.inference.GridAggregator(grid_sampler)
+        
+        pred_output = 0 # this is used for regression
+        for patches_batch in patch_loader:
+            image = torch.cat(
+                [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+            ).float().to(params["device"])
+            if len(params["value_keys"]) > 0:
+                label = torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
+                label = torch.reshape(
+                    patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
+                )
+            else:
+                label = patches_batch["label"][torchio.DATA]
+            label = label.to(params["device"])
+            print("Validation :", label.shape, image.shape, flush=True)
+            loss, calculated_metrics = step(model, image, label, params)
 
         # Non network validing related
         total_epoch_valid_loss += loss
@@ -434,7 +456,7 @@ def training_loop(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "best_loss": best_loss,
                 },
-                os.path.join(output_dir, params['modelname'] + "_best.pth.tar"),
+                os.path.join(output_dir, params['model']['architecture'] + "_best.pth.tar"),
             )
 
         if patience > params["patience"]:
