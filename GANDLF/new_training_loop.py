@@ -422,7 +422,7 @@ def training_loop(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "best_loss": best_loss,
                 },
-                os.path.join(output_dir, params['modelname'] + "_best.pth.tar"),
+                os.path.join(output_dir, params['model']['architecture'] + "_best.pth.tar"),
             )
 
         if patience > params["patience"]:
