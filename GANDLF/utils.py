@@ -174,7 +174,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False, ignore_label_validation = None):
     '''
     This function gets various statistics from the specified model and data loader
     '''
@@ -251,7 +251,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 loss = loss_fn(pred_mask.double(), mask.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 total_loss += loss
                 #Computing the dice score 
-                curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list)).cpu().data.item()
+                curr_dice = MCD(pred_mask.double(), mask.double(), len(class_list), ignore_class=ignore_label_validation).cpu().data.item()
                 #Computing the total dice
                 total_dice += curr_dice
                 
