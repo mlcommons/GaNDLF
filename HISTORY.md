@@ -1,6 +1,7 @@
 ## 0.0.8
 
 - Pre-split training/validation data can now be provided
+- Added a way to ignore a label during validation dice calculation
 
 ## 0.0.7
 
