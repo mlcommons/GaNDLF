@@ -44,32 +44,35 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
     elif which_model == 'uinc':
         model = uinc(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'msdnet':
-        model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet121': # regressor/classifier network
-        model = densenet.generate_model(model_depth=121,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet161': # regressor/classifier network
-        model = densenet.generate_model(model_depth=161,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet169': # regressor/classifier network
-        model = densenet.generate_model(model_depth=169,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet201': # regressor/classifier network
-        model = densenet.generate_model(model_depth=201,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet264': # regressor/classifier network
-        model = densenet.generate_model(model_depth=264,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)        
+    elif 'densenet' in which_model: # common parsing for densenet
+        if which_model == 'densenet121':
+            model = densenet.generate_model(model_depth=121,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet161': # regressor/classifier network
+            model = densenet.generate_model(model_depth=161,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet169': # regressor/classifier network
+            model = densenet.generate_model(model_depth=169,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet201': # regressor/classifier network
+            model = densenet.generate_model(model_depth=201,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet264': # regressor/classifier network
+            model = densenet.generate_model(model_depth=264,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        else:
+            sys.exit('Requested DENSENET type \'' + which_model + '\' has not been implemented')
     elif 'vgg' in which_model: # common parsing for vgg
         if which_model == 'vgg11':
             vgg_config = cfg['A']
