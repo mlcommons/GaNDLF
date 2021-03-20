@@ -9,7 +9,8 @@ model:
   {
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 30, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
-    architecture: resunet, # options: unet, resunet, fcn, uinc
+    architecture: resunet, # options: unet, resunet, fcn, uinc, vgg, densenet
+    batch_norm: True, # this is only used for vgg
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
     # class_list: '[*range(0,100,1)]' # a range of values from 0 to 99 with a step of 1 will be created; customize as needed, but ensure this is defined as a string as it will be passed through 'eval' function
@@ -27,14 +28,13 @@ modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
-patch_sampler: label
+patch_sampler: uniform
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
 patience: 50
 # Set the batch size
 batch_size: 1
-
 # Set the initial learning rate
 learning_rate: 0.001
 # Learning rate scheduler - options: triangle, triangle_modified, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code

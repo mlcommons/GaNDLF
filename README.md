@@ -20,7 +20,7 @@ A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 
 ## Citation
 
-Please cite the following article for GaNDLF:
+Please cite the following article for GaNDLF ([full PDF](https://arxiv.org/abs/2103.01006)):
 
 ```
 @misc{gandlf2021,

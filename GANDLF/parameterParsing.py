@@ -1,4 +1,3 @@
-import os
 from collections import Counter
 import numpy as np
 
@@ -13,7 +12,6 @@ from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
-import torch
 import torchvision
 import torch.nn as nn
 
@@ -44,44 +42,61 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
     elif which_model == 'uinc':
         model = uinc(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
     elif which_model == 'msdnet':
-        model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet121': # regressor/classifier network
-        model = densenet.generate_model(model_depth=121,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet161': # regressor/classifier network
-        model = densenet.generate_model(model_depth=161,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet169': # regressor/classifier network
-        model = densenet.generate_model(model_depth=169,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet201': # regressor/classifier network
-        model = densenet.generate_model(model_depth=201,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'densenet264': # regressor/classifier network
-        model = densenet.generate_model(model_depth=264,
-                                        num_classes=n_classes,
-                                        n_dimensions=n_dimensions,
-                                        n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'vgg16':
-        vgg_config = cfg['D']
+        model = MSDNet(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer = final_convolution_layer)        
+    elif 'densenet' in which_model: # common parsing for densenet
+        if which_model == 'densenet121':
+            model = densenet.generate_model(model_depth=121,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet161': # regressor/classifier network
+            model = densenet.generate_model(model_depth=161,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet169': # regressor/classifier network
+            model = densenet.generate_model(model_depth=169,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet201': # regressor/classifier network
+            model = densenet.generate_model(model_depth=201,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        elif which_model == 'densenet264': # regressor/classifier network
+            model = densenet.generate_model(model_depth=264,
+                                            num_classes=n_classes,
+                                            n_dimensions=n_dimensions,
+                                            n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
+        else:
+            sys.exit('Requested DENSENET type \'' + which_model + '\' has not been implemented')
+    elif 'vgg' in which_model: # common parsing for vgg
+        if which_model == 'vgg11':
+            vgg_config = cfg['A']
+        elif which_model == 'vgg13':
+            vgg_config = cfg['B']
+        elif which_model == 'vgg16':
+            vgg_config = cfg['D']
+        elif which_model == 'vgg19':
+            vgg_config = cfg['E']
+        else:
+            sys.exit('Requested VGG type \'' + which_model + '\' has not been implemented')
+
+        if 'batch_norm' in kwargs:
+            batch_norm = kwargs.get("batch_norm")
+        else:
+            batch_norm = True
         num_final_features = vgg_config[-2]
-        divisibility_factor = Counter(vgg_config)['M']
+        m_counter = Counter(vgg_config)['M']
         if psize[-1] == 1:
             psize_altered = np.array(psize[:-1])
         else:
             psize_altered = np.array(psize)
         divisibilityCheck_patch = False 
         divisibilityCheck_baseFilter = False
-        featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**divisibility_factor)
-        layers = make_layers(cfg['D'], n_dimensions, n_channels)
+        featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**m_counter)
+        layers = make_layers(vgg_config, n_dimensions, n_channels, batch_norm=batch_norm)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)
     elif which_model == 'brain_age':

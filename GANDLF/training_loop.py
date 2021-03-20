@@ -74,7 +74,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if len(headers['predictionHeaders']) > 0: # for regressin/classification
         n_classList = len(headers['predictionHeaders']) 
     print("Number of classes  : ", n_classList)
-    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
+    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size, batch_norm = parameters['model']['batch_norm'])
 
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
@@ -208,7 +208,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated(int(dev))/1024**3, 1), '; ', round(torch.cuda.memory_reserved(int(dev))/1024**3, 1))
             # Load the subject and its ground truth
             # read and concat the images
-            image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels 
+            image = torch.cat([subject[key][torchio.DATA] for key in channel_keys], dim=1) # concatenate channels
             
             # if regression, concatenate values to predict
             if is_regression or is_classification:
