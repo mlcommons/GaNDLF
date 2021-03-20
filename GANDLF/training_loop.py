@@ -74,7 +74,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
     if len(headers['predictionHeaders']) > 0: # for regressin/classification
         n_classList = len(headers['predictionHeaders']) 
     print("Number of classes  : ", n_classList)
-    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size)
+    model = get_model(which_model, dimension, n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = batch_size, batch_norm = parameters['model']['batch_norm'])
 
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
