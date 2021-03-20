@@ -1,5 +1,12 @@
 # GaNDLF
 
+<p align="center">
+  <a href="https://dev.azure.com/CBICA/GaNDLF/_build?definitionId=16" alt="Build Status"><img src="https://dev.azure.com/CBICA/GaNDLF/_apis/build/status/GaNDLF-CI?branchName=master" /></a>
+  <a href="https://github.com/CBICA/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-Green" /></a>
+  <a href="https://arxiv.org/abs/2103.01006" alt="Citation"><img src="https://img.shields.io/badge/cite-citation-blue" /></a>
+  <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://anaconda.org/conda-forge/gandlf/badges/installer/conda.svg" /></a>
+</p>
+
 A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
 ## Why use this?
