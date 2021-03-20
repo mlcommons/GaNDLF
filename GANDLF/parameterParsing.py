@@ -70,8 +70,22 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
                                         num_classes=n_classes,
                                         n_dimensions=n_dimensions,
                                         n_input_channels=n_channels, final_convolution_layer = final_convolution_layer)
-    elif which_model == 'vgg16':
-        vgg_config = cfg['D']
+    elif 'vgg' in which_model: # common parsing for vgg
+        if which_model == 'vgg11':
+            vgg_config = cfg['A']
+        elif which_model == 'vgg13':
+            vgg_config = cfg['B']
+        elif which_model == 'vgg16':
+            vgg_config = cfg['D']
+        elif which_model == 'vgg19':
+            vgg_config = cfg['E']
+        else:
+            sys.exit('Requested VGG type \'' + which_model + '\' has not been implemented')
+
+        if 'batch_norm' in kwargs:
+            batch_norm = kwargs.get("batch_norm")
+        else:
+            batch_norm = True
         num_final_features = vgg_config[-2]
         divisibility_factor = Counter(vgg_config)['M']
         if psize[-1] == 1:
@@ -81,7 +95,7 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         divisibilityCheck_patch = False 
         divisibilityCheck_baseFilter = False
         featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**divisibility_factor)
-        layers = make_layers(cfg['D'], n_dimensions, n_channels)
+        layers = make_layers(vgg_config, n_dimensions, n_channels, batch_norm=batch_norm)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)
     elif which_model == 'brain_age':
