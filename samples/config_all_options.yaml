@@ -28,14 +28,13 @@ modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
-patch_sampler: label
+patch_sampler: uniform
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
 patience: 50
 # Set the batch size
 batch_size: 1
-
 # Set the initial learning rate
 learning_rate: 0.001
 # Learning rate scheduler - options: triangle, triangle_modified, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
