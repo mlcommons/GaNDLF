@@ -90,14 +90,14 @@ def get_model(which_model, n_dimensions, n_channels, n_classes, base_filters, fi
         else:
             batch_norm = True
         num_final_features = vgg_config[-2]
-        divisibility_factor = Counter(vgg_config)['M']
+        m_counter = Counter(vgg_config)['M']
         if psize[-1] == 1:
             psize_altered = np.array(psize[:-1])
         else:
             psize_altered = np.array(psize)
         divisibilityCheck_patch = False 
         divisibilityCheck_baseFilter = False
-        featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**divisibility_factor)
+        featuresForClassifier = batch_size * num_final_features * np.prod(psize_altered // 2**m_counter)
         layers = make_layers(vgg_config, n_dimensions, n_channels, batch_norm=batch_norm)
         # n_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(n_dimensions, layers, featuresForClassifier, n_classes, final_convolution_layer = final_convolution_layer)
