@@ -1,4 +1,3 @@
-import os
 from collections import Counter
 import numpy as np
 
@@ -13,7 +12,6 @@ from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
-import torch
 import torchvision
 import torch.nn as nn
 
