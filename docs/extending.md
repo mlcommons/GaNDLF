@@ -2,6 +2,20 @@
 
 For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
+## Environment
+
+Before starting to work on the code-level on GaNDLF, please get the environment ready:
+
+```bash
+git clone https://github.com/CBICA/GaNDLF.git
+cd GaNDLF
+conda create -p ./venv python=3.6 -y
+conda activate ./venv
+conda install -c pytorch pytorch # 1.8.0 installs cuda 10.2 by default, personalize based on your cuda/driver availability via https://pytorch.org/get-started/locally/
+## conda install -c sdvillal openslide -y # this is required for windows
+## conda install -c conda-forge libvips openslide -y # this is required for linux
+pip install -e .
+```
 ## Architecture
 
 - Command-line parsing: [gandlf_run](https://github.com/CBICA/GaNDLF/blob/master/gandlf_run)
