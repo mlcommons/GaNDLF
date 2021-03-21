@@ -12,8 +12,10 @@ cd GaNDLF
 conda create -p ./venv python=3.6 -y
 conda activate ./venv
 conda install -c pytorch pytorch # 1.8.0 installs cuda 10.2 by default, personalize based on your cuda/driver availability via https://pytorch.org/get-started/locally/
-## conda install -c sdvillal openslide -y # this is required for windows
-## conda install -c conda-forge libvips openslide -y # this is required for linux
+## windows
+# conda install -c sdvillal openslide -y
+## linux
+# conda install -c conda-forge libvips openslide -y
 pip install -e .
 ```
 ## Architecture
