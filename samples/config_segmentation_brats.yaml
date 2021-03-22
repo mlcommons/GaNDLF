@@ -10,7 +10,7 @@ model:
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 30, # 30 is for a GPU with 11GB VRAM - can be decreased/increased appropriately
     architecture: resunet, # options: unet, resunet, fcn, uinc
-    final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
+    final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
     class_list: '[1||2||4,1||4,4]', # Set the list of labels the model should train on and predict
     amp: True, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
