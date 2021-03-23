@@ -79,7 +79,7 @@ def step(model, image, label, params):
             output = model(image)
     else:
         output = model(image)
-    
+    print("Output shape : ", output.shape, flush=True)
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
     
@@ -163,12 +163,12 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if batch_idx % (len(train_dataloader) // 2) == 0:
-            print("Epoch Average Train loss : ", total_epoch_train_loss / batch_idx)
+        if (batch_idx+1) % (len(train_dataloader) / 2) == 0:
+            print("Epoch Average Train loss : ", total_epoch_train_loss / (batch_idx+1))
             for metric in params["metrics"]:
                 print(
                     "Epoch Average Train " + metric + " : ",
-                    total_epoch_train_metric[metric] / batch_idx,
+                    total_epoch_train_metric[metric] / (batch_idx+1),
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
