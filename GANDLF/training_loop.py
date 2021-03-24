@@ -453,7 +453,7 @@ def training_loop(
     valid_logger.write_header(mode="valid")
 
     model, amp, device = send_model_to_device(
-        model, amp=params["amp"], device=params["device"], optimizer=optimizer
+        model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
     # Setup a few variables for tracking
