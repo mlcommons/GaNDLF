@@ -287,7 +287,11 @@ def parseConfig(config_file_path, version_check = True):
       params['model']['base_filters'] = base_filters
       print('Using default \'base_filters\' in \'model\': ', base_filters)
     if not('class_list' in params['model']): 
-      params['model']['class_list'] = [] # ensure that this is initialized
+      params['model']['class_list'] = [] # ensure that this is initialized      
+    if not('ignore_label_validation' in params['model']):
+      params['model']['ignore_label_validation'] = None
+    if not('batch_norm' in params['model']):
+      params['model']['batch_norm'] = False
 
   else:
     sys.exit('The \'model\' parameter needs to be populated as a dictionary')
@@ -380,5 +384,5 @@ def parseConfig(config_file_path, version_check = True):
   else:
     print("WARNING: NOT using weighted loss")
     params['weighted_loss'] = False 
-
+  
   return params

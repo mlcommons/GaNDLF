@@ -48,6 +48,26 @@ def dice(inp, target):
         iflat.sum() + tflat.sum() + smooth
     )  # 2 * intersection / union
 
+def MCD(pm, gt, num_class, weights = None, ignore_class = None): 
+    '''
+    These weights should be the dice weights, not dice weights
+    '''
+    acc_dice = 0
+    for i in range(0, num_class): # 0 is background
+        calculate_dice_for_label = True
+        if ignore_class is not None:
+            if i == ignore_class:
+                calculate_dice_for_label = False
+        
+        if calculate_dice_for_label:
+            currentDice = dice(gt[:, i, ...], pm[:, i, ...])
+            # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
+            if weights is not None:
+                currentDice = currentDice * weights[i]
+            acc_dice += currentDice
+    if weights is None:
+        acc_dice /= num_class # we should not be considering 0
+    return acc_dice
 
 def MCD_loss(pm, gt, params):
     """
@@ -181,21 +201,33 @@ def MSE(output, label, reduction="mean", scaling_factor=1):
         Computed Mean Squared Error loss for the output and label
 
     """
-    label = label * scaling_factor
-    loss = MSELoss(output, label, reduction=reduction)
+    label = label*scaling_factor
+    loss_fn = MSELoss(reduction=reduction)
+    loss = loss_fn(output, label)
     return loss
-
 
 def MSE_loss(inp, target, params):
     acc_mse_loss = 0
-    for i in range(0, params['num_classes']):
-        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=reduction)
-    acc_mse_loss /= num_classes
+    # if inp.shape != target.shape:
+    #     sys.exit('Input and target shapes are inconsistent')
+    
+    if inp.shape[0] == 1:
+        for i in range(0, params["model"]["num_classes"]):
+            acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
+    else:
+        for i in range(0, params["model"]["num_classes"]):
+            acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"])
+    acc_mse_loss/=params["model"]["num_classes"]
     return acc_mse_loss
 
 
 def fetch_loss_function(loss_name, params):
-    if loss_name == "dc":
+    
+    if isinstance(loss_name, dict): # this is currently only happening for mse_torch
+        # check for mse_torch
+        loss_function = MSE_loss
+        MSE_requested = True
+    elif loss_name == 'dc':
         loss_function = MCD_loss
     elif loss_name == "dc_log":
         loss_function = MCD_log_loss
@@ -206,12 +238,7 @@ def fetch_loss_function(loss_name, params):
     elif loss_name == "mse":
         loss_function = MSE_loss
     else:
-        print(
-            "WARNING: Could not find the requested loss function '"
-            + loss_name
-            + "' in the implementation, using dc, instead",
-            file=sys.stderr,
-        )
-        loss_name = "dc"
+        print('WARNING: Could not find the requested loss function \'' + loss_name + '\' in the implementation, using dc, instead', file=sys.stderr)
+        loss_name = 'dc'
         loss_function = MCD_loss
     return loss_function
