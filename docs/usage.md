@@ -71,7 +71,11 @@ GANDLF requires a YAML-based configuration that controls various aspects of the 
   - Testing 
   - Validation 
 
-Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) for detailed guide and comments.
+Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config_all_options.yaml) for detailed guide and comments.
+
+- [Segmentation example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
+- [Regression example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_regression.yaml)
+- [Classification example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_classification.yaml)
 
 **Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as https://yamlchecker.com/ or https://yamlvalidator.com/ **before** trying to train.
 
