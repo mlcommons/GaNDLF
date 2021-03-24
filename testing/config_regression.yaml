@@ -21,7 +21,7 @@ nested_training:
 num_epochs: 1
 opt: adam
 parallel_compute_command: ''
-patch_sampler: label
+patch_sampler: uniform
 patch_size: 
 - 128
 - 128

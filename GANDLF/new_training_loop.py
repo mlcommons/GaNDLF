@@ -21,30 +21,6 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation reque
 
 # Reminder, the scaling factor should go to the metric MSE, and all should support a scaling factor, right?
 
-def get_loss_and_metrics(ground_truth, predicted, params):
-    """
-    ground_truth : torch.Tensor
-        The input ground truth for the corresponding image label
-    predicted : torch.Tensor
-        The input predicted label for the corresponding image label
-    params : dict
-        The parameters passed by the user yaml
-
-    Returns
-    -------
-    loss : torch.Tensor
-        The computed loss from the label and the output
-    metric_output : torch.Tensor
-        The computed metric from the label and the output
-    """
-    loss_function = fetch_loss_function(params["loss_function"], params)
-    loss = loss_function(predicted, ground_truth, params)
-    metric_output = {}
-    # Metrics should be a list
-    for metric in params["metrics"]:
-        metric_function = fetch_metric(metric)  # Write a fetch_metric
-        metric_output[metric] = metric_function(predicted, ground_truth, params)
-    return loss, metric_output
 
 def step(model, image, label, params):
     """
@@ -59,7 +35,7 @@ def step(model, image, label, params):
     label : torch.Tensor
         The input label for the corresponding image label
     params : dict
-        The parameters passed by the user yaml
+        the parameters passed by the user yaml
 
     Returns
     -------
@@ -67,27 +43,21 @@ def step(model, image, label, params):
         The computed loss from the label and the output
     metric_output : torch.Tensor
         The computed metric from the label and the output
-    output: torch.Tensor
-        The final output of the model
 
     """
-    if params["model"]["dimension"] == 2:
-        image = torch.squeeze(image, -1)
-        if len(params['value_keys']) == 0: # squeeze label for segmentation only
-            label = torch.squeeze(label, -1)
     if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
     else:
         output = model(image)
-    print("Output shape : ", output.shape, flush=True)
-    # one-hot encoding of 'output' will probably be needed for segmentation
-    loss, metric_output = get_loss_and_metrics(label, output, params)
-    
-    if params["model"]["dimension"] == 2:
-        output = torch.unsqueeze(output, -1)
-
-    return loss, metric_output, output
+    loss_function = fetch_loss_function(params["loss"])  # Write a fetch_loss_function
+    loss = loss_function(output, label, params)
+    metric_output = {}
+    # Metrics should be a list
+    for metric in params["metrics"]:
+        metric_function = fetch_metric(metric)  # Write a fetch_metric
+        metric_output[metric] = metric_function(output, label, params)
+    return loss, metric_output
 
 
 def train_network(model, train_dataloader, optimizer, params):
@@ -118,7 +88,7 @@ def train_network(model, train_dataloader, optimizer, params):
     total_epoch_train_metric = {}
     average_epoch_train_metric = {}
 
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         total_epoch_train_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
@@ -134,16 +104,16 @@ def train_network(model, train_dataloader, optimizer, params):
         optimizer.zero_grad()
         image = torch.cat(
             [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-        ).float().to(params["device"])
-        if len(params["value_keys"]) > 0:
+        ).to(params["device"])
+        if params["value_keys"] is not None:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label = label.reshape(params['batch_size'], len(params['value_keys']))
+            label = torch.reshape(
+                subject[params["value_keys"][0]], (params["batch_size"], 1)
+            )
         else:
             label = subject["label"][torchio.DATA]
-            # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
-        print("Train : ", label.shape, image.shape, flush=True)
-        loss, calculated_metrics, _ = step(model, image, label, params)
+        loss, calculated_metrics = step(model, image, label, batch_idx, params)
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 if not torch.isnan(
@@ -162,16 +132,16 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if (batch_idx+1) % (len(train_dataloader) / 2) == 0:
-            print("Epoch Average Train loss : ", total_epoch_train_loss / (batch_idx+1))
-            for metric in params["metrics"]:
+        if batch_idx % (len(train_dataloader) // 2) == 0:
+            print("Epoch Average Train loss : ", total_epoch_train_loss / batch_idx)
+            for metric in params["metrics"].keys():
                 print(
                     "Epoch Average Train " + metric + " : ",
-                    total_epoch_train_metric[metric] / (batch_idx+1),
+                    total_epoch_train_metric[metric] / batch_idx,
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
             train_dataloader
         )
@@ -208,74 +178,30 @@ def validate_network(model, valid_dataloader, params):
     total_epoch_valid_metric = {}
     average_epoch_valid_metric = {}
 
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         total_epoch_valid_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
         print("Using Automatic mixed precision", flush=True)
 
+    # Fetch the optimizer
+
     # Set the model to valid
     model.eval()
     for batch_idx, (subject) in enumerate(valid_dataloader):
-        
-        # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
-        subject_dict = {}
-        label_ground_truth = None
-        if ('label' in subject):
-            if (subject['label'] != ['NA']):
-                subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
-                label_ground_truth = subject["label"][torchio.DATA]
-                # one-hot encoding of 'label_ground_truth' will probably be needed for segmentation
-        
-        if len(params["value_keys"]) > 0: # for regression/classification
-            label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label_ground_truth = torch.reshape(
+        image = torch.cat(
+            [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+        ).to(params["device"])
+        if params["value_keys"] is not None:
+            label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+            label = torch.reshape(
                 subject[params["value_keys"][0]], (params["batch_size"], 1)
             )
-            for key in params["value_keys"]:
-                subject_dict[key] = subject[key]
-        
-        for key in params["channel_keys"]:
-            subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
-            
-        grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), params['patch_size'])
-        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-        aggregator = torchio.inference.GridAggregator(grid_sampler)
-        
-        is_segmentation = True
-        output_prediction = 0 # this is used for regression/classification
-        for patches_batch in patch_loader:
-            image = torch.cat(
-                [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-            ).float().to(params["device"])
-            if len(params["value_keys"]) > 0:
-                is_segmentation = False
-                label = torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
-                label = torch.reshape(
-                    patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
-                )
-                # one-hot encoding of 'label' will probably be needed for segmentation
-            else:
-                label = patches_batch["label"][torchio.DATA]
-            label = label.to(params["device"])
-            print("Validation :", label.shape, image.shape, flush=True)
-            patch_location = patches_batch[torchio.LOCATION]
-            loss, calculated_metrics, output = step(model, image, label, params)
-            if is_segmentation:
-                aggregator.add_batch(output, patch_location)
-            else:
-                output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
-        
-        if is_segmentation:
-            output_prediction = aggregator.get_output_tensor()
-            # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
         else:
-            output_prediction = output_prediction / len(patch_loader) # final regression output
-
-        ## this is currently broken
-        # final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
-        # print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
+            label = subject["label"][torchio.DATA]
+        label = label.to(params["device"])
+        loss, calculated_metrics = step(model, image, label, batch_idx, params)
 
         # Non network validing related
         total_epoch_valid_loss += loss
@@ -287,14 +213,14 @@ def validate_network(model, valid_dataloader, params):
             print(
                 "Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx
             )
-            for metric in params["metrics"]:
+            for metric in params["metrics"].keys():
                 print(
                     "Epoch Validation " + metric + " : ",
                     total_epoch_valid_metric[metric] / len(valid_dataloader),
                 )
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
-    for metric in params["metrics"]:
+    for metric in params["metrics"].keys():
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
         )
@@ -317,20 +243,15 @@ def training_loop(
     params["model"]["num_classes"] = num_classes
     params["headers"] = headers
     epochs = params["num_epochs"]
-    loss = params["loss_function"]
+    loss = params["loss"]
     metrics = params["metrics"]
     params["device"] = device
-
-    if not ("num_channels" in params["model"]):
-        params["model"]["num_channels"] = len(headers["channelHeaders"])
-
-    # Defining our model here according to parameters mentioned in the configuration file
-    print("Number of channels : ", params["model"]["num_channels"])
+    device = params["device"]
 
     # Fetch the model according to params mentioned in the configuration file
     model = get_model(
         modelname=params["model"]["architecture"],
-        num_dimensions=params["model"]["dimension"],
+        num_dimension=params["model"]["dimension"],
         num_channels=params["model"]["num_channels"],
         num_classes=params["model"]["num_classes"],
         base_filters=params["model"]["base_filters"],
@@ -349,7 +270,7 @@ def training_loop(
         q_num_workers=params["q_num_workers"],
         q_verbose=params["q_verbose"],
         sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
+        augmentations=params["data_augmentations"],
         preprocessing=params["data_preprocessing"],
         in_memory=params["in_memory"],
         train=True,
@@ -364,7 +285,7 @@ def training_loop(
         q_num_workers=params["q_num_workers"],
         q_verbose=params["q_verbose"],
         sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
+        augmentations=params["data_augmentations"],
         preprocessing=params["data_preprocessing"],
         in_memory=params["in_memory"],
         train=False,
@@ -388,7 +309,7 @@ def training_loop(
         q_num_workers=params["q_num_workers"],
         q_verbose=params["q_verbose"],
         sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
+        augmentations=params["data_augmentations"],
         preprocessing=params["data_preprocessing"],
         in_memory=params["in_memory"],
         train=False,
@@ -407,13 +328,10 @@ def training_loop(
 
     test_dataloader = DataLoader(test_data_for_torch, batch_size=1)
 
-    # Calculat the weights here
-    params["weights"] = None
-
     # Fetch the optimizers
     optimizer = get_optimizer(
-        optimizer_name=params["opt"],
-        model=model,
+        optimizer_name=params["optimizer"],
+        model_parameters=model,
         learning_rate=params["learning_rate"],
     )
 
@@ -472,10 +390,10 @@ def training_loop(
         print("Epoch start time : ", get_date_time())
 
         epoch_train_loss, epoch_train_metric = train_network(
-            model, train_dataloader, optimizer, params
+            epoch, model, train_dataloader, optimizer, loss, metrics, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, params
+            epoch, model, val_dataloader, loss, metrics, params
         )
         patience += 1
 
