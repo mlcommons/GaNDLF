@@ -2,6 +2,7 @@
 All the metrics are to be called from here
 """
 import torch
+from .losses import MSE, MSE_loss
 
 # Dice scores and dice losses
 def dice(output, label):
@@ -120,17 +121,11 @@ def MSE(output, label, reduction='mean', scaling_factor=1):
         Computed Mean Squared Error loss for the output and label
 
     """
-    label = label*scaling_factor
-    loss = MSELoss(output, label, reduction=reduction)
-    return loss
+    return MSE(output, label, reduction=reduction, scaling_factor=scaling_factor)
 
 
-def MSE_loss_agg(inp, target, num_classes, reduction = 'mean'):
-    acc_mse_loss = 0
-    for i in range(0, num_classes):
-        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=reduction)
-    acc_mse_loss/=num_classes
-    return acc_mse_loss
+def MSE_loss_agg(inp, target, params):
+    return MSE_loss(inp, target, params)
 
 
 def identity(output, label, params):
