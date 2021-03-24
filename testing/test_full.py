@@ -140,12 +140,12 @@ def test_train_regression_rad_2d():
   parameters['patch_size'] = patch_size['2D']
   parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
-  parameters['model']['class_list'] = [0,255]
   parameters['metrics'] = ['mse']
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -161,12 +161,12 @@ def test_train_regression_rad_3d():
   parameters['patch_size'] = patch_size['3D']
   parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
-  parameters['model']['class_list'] = [0,1]
   parameters['metrics'] = ['mse']
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -183,12 +183,12 @@ def test_train_classification_rad_2d():
   parameters['patch_size'] = patch_size['2D']
   parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
-  parameters['model']['class_list'] = [0,255]
   parameters['metrics'] = ['mse']
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -204,12 +204,12 @@ def test_train_classification_rad_3d():
   parameters['patch_size'] = patch_size['3D']
   parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
-  parameters['model']['class_list'] = [0,1]
   parameters['metrics'] = ['mse']
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
