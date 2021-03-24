@@ -4,6 +4,7 @@
 - Major code refactoring to make extensions easier
 - Added a way to ignore a label during validation dice calculation
 - Added more options for VGG
+- Tests can now be run on GPU
 
 ## 0.0.7
 
