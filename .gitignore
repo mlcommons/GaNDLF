@@ -7,6 +7,8 @@ __pycache__
 *.py.*
 *.pkl
 *.swp
+dist/*
+*egg*
 
 *DS_Store
 *output*
