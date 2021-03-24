@@ -195,5 +195,5 @@ def TrainingManager_split(dataframe_train, dataframe_validation, headers, output
     else:
         print('Using previously saved parameter file', currentModelConfigPickle, flush=True)
         parameters = pickle.load(open(currentModelConfigPickle,"rb"))
-    trainingLoop(trainingDataFromPickle=dataframe_train, validationDataFromPickle=dataframe_validation, headers = headers, 
-                outputDir=outputDir, device=device, parameters=parameters, testingDataFromPickle=None)
+    training_loop(training_data=dataframe_train, validation_data=dataframe_validation, headers=headers,
+                  output_dir=outputDir, device=device, params=parameters, testing_data=None)
