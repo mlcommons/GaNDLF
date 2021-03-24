@@ -4,7 +4,8 @@ from pytest import fixture
 def pytest_addoption(parser):
     parser.addoption(
         "--device",
-        action="store"
+        action="store", default="cpu",
+        help="my option: cpu or cuda"
     )
 
 
