@@ -47,7 +47,7 @@ pip install -e .
 
 ### Adding Pre-processing functionality
 
-- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
+- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [./GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
 
 ## Add Training Functionality
