@@ -8,8 +8,6 @@ fix_paths(os.getcwd()) # add relevant vips path
 
 import argparse
 import sys
-import pandas as pd
-import gc
 from pathlib import Path
 import pkg_resources
 from datetime import date

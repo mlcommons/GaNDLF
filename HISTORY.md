@@ -2,6 +2,8 @@
 
 - Pre-split training/validation data can now be provided
 - Major code refactoring to make extensions easier
+- Added a way to ignore a label during validation dice calculation
+- Added more options for VGG
 
 ## 0.0.7
 
