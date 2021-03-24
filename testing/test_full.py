@@ -38,7 +38,6 @@ steps to follow to write tests:
 4. hopefully the various sys.exit messages throughout the code will catch issues
 """
 
-
 def test_download_data():
     """
     This function downloads the sample data, which is the first step towards getting everything ready
@@ -102,10 +101,8 @@ def test_constructTrainingCSV():
           csv_writer_2.writerow(row_classification)
         i += 1 
 
-def test_train_segmentation_rad_2d():
+def test_train_segmentation_rad_2d(device='cuda'):
   print('Starting 2D Rad segmentation tests')
-  if torch.cuda.is_available():
-    device = 'cuda'
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_segmentation.csv')
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
@@ -125,10 +122,8 @@ def test_train_segmentation_rad_2d():
 
   print('passed')
 
-def test_train_segmentation_rad_3d():
+def test_train_segmentation_rad_3d(device='cuda'):
   print('Starting 3D Rad segmentation tests')
-  if torch.cuda.is_available():
-    device = 'cuda'
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_segmentation.csv')
   # read and initialize parameters for specific data dimension
@@ -149,9 +144,7 @@ def test_train_segmentation_rad_3d():
 
   print('passed')
 
-def test_train_regression_rad_2d():
-  if torch.cuda.is_available():
-    device = 'cuda'
+def test_train_regression_rad_2d(device='cuda'):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
@@ -173,9 +166,7 @@ def test_train_regression_rad_2d():
 
   print('passed')
 
-def test_train_regression_rad_3d():
-  if torch.cuda.is_available():
-    device = 'cuda'
+def test_train_regression_rad_3d(device='cuda'):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
@@ -196,9 +187,7 @@ def test_train_regression_rad_3d():
 
   print('passed')
 
-def test_train_classification_rad_2d():
-  if torch.cuda.is_available():
-    device = 'cuda'
+def test_train_classification_rad_2d(device='cuda'):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['modality'] = 'rad'
@@ -220,9 +209,7 @@ def test_train_classification_rad_2d():
 
   print('passed')
 
-def test_train_classification_rad_3d():
-  if torch.cuda.is_available():
-    device = 'cuda'
+def test_train_classification_rad_3d(device='cuda'):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
