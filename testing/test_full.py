@@ -88,12 +88,14 @@ def test_constructTrainingCSV():
       for row in csv_reader:
         if i == 0:
           row.append('ValueToPredict')
-          csv_writer_1.writerow(row)
           csv_writer_2.writerow(row)
+          # row.append('ValueToPredict_2')
+          csv_writer_1.writerow(row)
         else:
           row_regression = copy.deepcopy(row)
           row_classification = copy.deepcopy(row)
           row_regression.append(str(random.uniform(0, 1)))
+          # row_regression.append(str(random.uniform(0, 1)))
           row_classification.append(str(random.randint(0,2)))
           csv_writer_1.writerow(row_regression)
           csv_writer_2.writerow(row_classification)
@@ -154,6 +156,7 @@ def test_train_regression_rad_2d():
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
+  parameters['scaling_factor'] = 1
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
