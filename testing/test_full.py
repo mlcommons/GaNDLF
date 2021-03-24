@@ -145,6 +145,7 @@ def test_train_regression_rad_2d():
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
+  parameters['model']['num_channels'] = len(headers["channelHeaders"])
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -165,6 +166,7 @@ def test_train_regression_rad_3d():
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
+  parameters['model']['num_channels'] = len(headers["channelHeaders"])
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -186,6 +188,7 @@ def test_train_classification_rad_2d():
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  parameters['model']['num_channels'] = len(headers["channelHeaders"])
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
@@ -206,6 +209,7 @@ def test_train_classification_rad_3d():
   parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
+  parameters['model']['num_channels'] = len(headers["channelHeaders"])
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
