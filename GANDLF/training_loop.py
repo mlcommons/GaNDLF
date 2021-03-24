@@ -80,7 +80,7 @@ def step(model, image, label, params):
             output = model(image)
     else:
         output = model(image)
-    print("Output shape : ", output.shape, flush=True)
+    # print("Output shape : ", output.shape, flush=True)
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
     
@@ -142,7 +142,7 @@ def train_network(model, train_dataloader, optimizer, params):
             label = subject["label"][torchio.DATA]
             # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
-        print("Train : ", label.shape, image.shape, flush=True)
+        # print("Train : ", label.shape, image.shape, flush=True)
         loss, calculated_metrics, _ = step(model, image, label, params)
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
@@ -201,7 +201,7 @@ def validate_network(model, valid_dataloader, params):
 
     """
     print("*" * 20)
-    print("Starting Epoch : ")
+    print("Starting validation : ")
     print("*" * 20)
     # Initialize a few things
     total_epoch_valid_loss = 0
@@ -259,7 +259,7 @@ def validate_network(model, valid_dataloader, params):
             else:
                 label = patches_batch["label"][torchio.DATA]
             label = label.to(params["device"])
-            print("Validation :", label.shape, image.shape, flush=True)
+            # print("Validation :", label.shape, image.shape, flush=True)
             patch_location = patches_batch[torchio.LOCATION]
             loss, calculated_metrics, output = step(model, image, label, params)
             if is_segmentation:
