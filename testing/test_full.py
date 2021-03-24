@@ -1,13 +1,15 @@
-import math
-import sys
 from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil
 
+import torch
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
 
+device = 'cpu'
+if torch.cuda.is_available():
+  device = 'cuda'
 ## global defines
 # all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 all_models_segmentation = [
@@ -23,6 +25,7 @@ testingDir = os.path.abspath(os.path.normpath("./testing"))
 inputDir = os.path.abspath(os.path.normpath("./testing/data"))
 outputDir = os.path.abspath(os.path.normpath("./testing/data_output"))
 Path(outputDir).mkdir(parents=True, exist_ok=True)
+
 
 """
 steps to follow to write tests:
@@ -118,7 +121,7 @@ def test_train_segmentation_rad_2d():
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
 
@@ -140,7 +143,7 @@ def test_train_segmentation_rad_3d():
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
 
@@ -162,7 +165,7 @@ def test_train_regression_rad_2d():
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
 
@@ -183,7 +186,7 @@ def test_train_regression_rad_3d():
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
 
@@ -205,7 +208,7 @@ def test_train_classification_rad_2d():
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
 
@@ -226,6 +229,6 @@ def test_train_classification_rad_3d():
     parameters['model']['architecture'] = model 
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device='cpu', reset_prev=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
