@@ -6,21 +6,25 @@ import requests, zipfile, io, os, csv, random, copy, shutil
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
-from GANDLF.inference_manager import InferenceManager 
+from GANDLF.inference_manager import InferenceManager
 
 ## global defines
 # all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
-all_models_segmentation = ['unet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
+all_models_segmentation = [
+    "unet",
+    "fcn",
+    "uinc",
+]  # pre-defined segmentation model types for testing
 # all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
-all_models_regression = ['densenet121', 'vgg16']
-patch_size = {'2D': [128,128,1], '3D': [32,32,32]}
+all_models_regression = ["densenet121", "vgg16"]
+patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
-testingDir = os.path.abspath(os.path.normpath('./testing'))
-inputDir = os.path.abspath(os.path.normpath('./testing/data'))
-outputDir = os.path.abspath(os.path.normpath('./testing/data_output'))
+testingDir = os.path.abspath(os.path.normpath("./testing"))
+inputDir = os.path.abspath(os.path.normpath("./testing/data"))
+outputDir = os.path.abspath(os.path.normpath("./testing/data_output"))
 Path(outputDir).mkdir(parents=True, exist_ok=True)
 
-'''
+"""
 steps to follow to write tests:
 [x] download sample data
 [x] construct the training csv
@@ -31,19 +35,23 @@ steps to follow to write tests:
   [x] call training manager with default parameters + current segmentation model arch
 [ ] for each dir (application type) and sub-dir (image dimension), run inference for a single trained model per testing/validation split for a single subject on cpu
 4. hopefully the various sys.exit messages throughout the code will catch issues
-'''
+"""
+
 
 def test_download_data():
-  '''
-  This function downloads the sample data, which is the first step towards getting everything ready
-  '''
-  urlToDownload = 'https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip'
-  # do not download data again
-  if not Path(os.getcwd() + '/testing/data/test/3d_rad_segmentation/001/image.nii.gz').exists():
-    print('Downloading and extracting sample data')
-    r = requests.get(urlToDownload)
-    z = zipfile.ZipFile(io.BytesIO(r.content))
-    z.extractall('./testing')
+    """
+    This function downloads the sample data, which is the first step towards getting everything ready
+    """
+    urlToDownload = "https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip"
+    # do not download data again
+    if not Path(
+        os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
+    ).exists():
+        print("Downloading and extracting sample data")
+        r = requests.get(urlToDownload)
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        z.extractall("./testing")
+
 
 def test_constructTrainingCSV():
   '''

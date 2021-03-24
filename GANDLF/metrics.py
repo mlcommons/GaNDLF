@@ -4,6 +4,41 @@ All the metrics are to be called from here
 import torch
 from .losses import MSE, MSE_loss
 
+# Should be removed later down the line and taken as an import instead.
+def one_hot(segmask_array, class_list):
+    '''
+    This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
+    '''
+    batch_size = segmask_array.shape[0]
+    batch_stack = []
+    for b in range(batch_size):
+        one_hot_stack = []
+        segmask_array_iter = segmask_array[b,0]
+        bin_mask = (segmask_array_iter == 0) # initialize bin_mask
+        for _class in class_list: # this implementation allows users to combine logical operands 
+            if isinstance(_class, str):
+                if '||' in _class: # special case
+                    class_split = _class.split('||')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                elif '|' in _class: # special case
+                    class_split = _class.split('|')
+                    bin_mask = (segmask_array_iter == int(class_split[0]))
+                    for i in range(1,len(class_split)):
+                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                else:
+                    # assume that it is a simple int
+                    bin_mask = (segmask_array_iter == int(_class)) 
+            else:
+                bin_mask = (segmask_array_iter == int(_class))
+                bin_mask = bin_mask.long()
+            one_hot_stack.append(bin_mask)
+        one_hot_stack = torch.stack(one_hot_stack)
+        batch_stack.append(one_hot_stack)
+    batch_stack = torch.stack(batch_stack)    
+    return batch_stack
+
 # Dice scores and dice losses
 def dice(output, label):
     """
@@ -50,22 +85,14 @@ def multi_class_dice(output, label, params):
         DESCRIPTION.
 
     """
+    label = one_hot(label, params["model"]["class_list"])
     total_dice = 0
     num_class = params["model"]["num_classes"]
-    if (
-        params["weights"] is not None
-    ):  # Reminder to add weights as a possible parameter in config
-        weights = params["weights"]
-    else:
-        weights = None
+    print("Number of classes : ", params["model"]["num_classes"])
     for i in range(0, num_class):  # 0 is background
         current_dice = dice(output[:, i, ...], label[:, i, ...])
-        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
-        if weights is not None:
-            current_dice = current_dice * weights[i]
-        total_dice += current_dice
-    if weights is None:
-        total_dice /= num_class
+        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss        
+    total_dice /= num_class
     return total_dice
 
 
