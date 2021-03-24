@@ -68,5 +68,5 @@ Once you have made changes to functionality, it is imperative that the unit test
 
 Once you have the virtual environment set up, tests can be run using the following command:
 ```powershell
-pytest
+pytest --device cpu # the device defaults to cuda and searches for CUDA_VISIBLE_DEVICES
 ```
