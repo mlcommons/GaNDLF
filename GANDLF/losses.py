@@ -155,13 +155,21 @@ def MSE(output, label, reduction='mean', scaling_factor=1):
 
     """
     label = label*scaling_factor
-    loss = MSELoss(output, label, reduction=reduction)
+    loss_fn = MSELoss(reduction=reduction)
+    loss = loss_fn(output, label)
     return loss
 
 def MSE_loss(inp, target, params):
     acc_mse_loss = 0
-    for i in range(0, params["model"]["num_classes"]):
-        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"])
+    # if inp.shape != target.shape:
+    #     sys.exit('Input and target shapes are inconsistent')
+    
+    if inp.shape[0] == 1:
+        for i in range(0, params["model"]["num_classes"]):
+            acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
+    else:
+        for i in range(0, params["model"]["num_classes"]):
+            acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"])
     acc_mse_loss/=params["model"]["num_classes"]
     return acc_mse_loss
 
