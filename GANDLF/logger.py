@@ -27,9 +27,9 @@ class Logger():
         """
         self.filename = logger_csv_filename
         self.metrics = metrics
-        self.csv = open(self.filename, "a")
 
     def write_header(self, mode='train'):
+        self.csv = open(self.filename, "a")
         if os.stat(self.filename).st_size == 0:
             if mode.lower() == 'train':
                 self.csv.write("epoch_no,train_loss,")
@@ -43,6 +43,7 @@ class Logger():
                     self.csv.write("\b\n")
         else:
             print("Found a pre-existing file for logging, now appending logs to that file!")
+        self.csv.close()
 
     def write(self, epoch_number, loss, epoch_metrics):
         """
@@ -61,6 +62,7 @@ class Logger():
         None.
 
         """
+        self.csv = open(self.filename, "a")
         self.csv.write(str(epoch_number)+","+str(loss)+",")
         for metric in epoch_metrics:
             if torch.is_tensor(epoch_metrics[metric]):
@@ -69,6 +71,7 @@ class Logger():
                 to_write = str(epoch_metrics[metric])
             self.csv.write(to_write+",")
         self.csv.write("\b\n")
+        self.csv.close()
 
     def close(self):
         self.csv.close()
