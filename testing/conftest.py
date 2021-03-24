@@ -5,7 +5,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--device",
         action="store", default="cpu",
-        help="my option: cpu or cuda"
+        help="device option: cpu or cuda"
     )
 
 
