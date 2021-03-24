@@ -111,7 +111,7 @@ def test_train_segmentation_rad_2d(device):
   parameters['model']['dimension'] = 2
   parameters['model']['class_list'] = [0,255]
   parameters['metrics'] = ['dice']
-  parameters['model']['amp'] = True
+  parameters['model']['amp'] = False
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   # read and initialize parameters for specific data dimension
   for model in all_models_segmentation:
@@ -133,7 +133,7 @@ def test_train_segmentation_rad_3d(device):
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
   parameters['metrics'] = ['dice']
-  parameters['model']['amp'] = True
+  parameters['model']['amp'] = False
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   # loop through selected models and train for single epoch
   for model in all_models_segmentation:
@@ -151,7 +151,7 @@ def test_train_regression_rad_2d(device):
   parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['metrics'] = ['mse']
-  parameters['model']['amp'] = True
+  parameters['model']['amp'] = False
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
@@ -173,7 +173,7 @@ def test_train_regression_rad_3d(device):
   parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['metrics'] = ['mse']
-  parameters['model']['amp'] = True
+  parameters['model']['amp'] = False
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
@@ -195,7 +195,7 @@ def test_train_classification_rad_2d(device):
   parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['metrics'] = ['mse']
-  parameters['model']['amp'] = True
+  parameters['model']['amp'] = False
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
@@ -216,7 +216,7 @@ def test_train_classification_rad_3d(device):
   parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['metrics'] = ['mse']
-  parameters['model']['amp'] = True
+  parameters['model']['amp'] = False
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
