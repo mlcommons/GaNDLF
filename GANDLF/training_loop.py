@@ -320,7 +320,6 @@ def training_loop(
     loss = params["loss_function"]
     metrics = params["metrics"]
     params["device"] = device
-    device = params["device"]
 
     if not ("num_channels" in params["model"]):
         params["model"]["num_channels"] = len(headers["channelHeaders"])
