@@ -233,7 +233,7 @@ def validate_network(model, valid_dataloader, params):
                 subject[params["value_keys"][0]], (params["batch_size"], 1)
             )
             for key in params["value_keys"]:
-                subject_dict['value_' + key] = subject[key]
+                subject_dict[key] = subject[key]
         
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
