@@ -62,7 +62,7 @@ pip install -e .
 
 ## Update Tests
 
-Once you have made changes to functionality, it is imperative that the unit tests be updated to cover the new code. Please see the [full testing suite](https://github.com/CBICA/GaNDLF/blob/master/testing/test_full.py) for details.
+Once you have made changes to functionality, it is imperative that the unit tests be updated to cover the new code. Please see the [full testing suite](https://github.com/CBICA/GaNDLF/blob/master/testing/test_full.py) for details and examples.
 
 ## Run Tests
 
