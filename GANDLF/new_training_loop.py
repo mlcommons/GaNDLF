@@ -45,7 +45,7 @@ def step(model, image, label, params):
         The computed metric from the label and the output
 
     """
-    if params["amp"]:
+    if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
     else:
@@ -371,7 +371,7 @@ def training_loop(
     valid_logger.write_header(mode="valid")
 
     model, amp, device = send_model_to_device(
-        model, amp=params["amp"], device=params["device"], optimizer=optimizer
+        model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
     # Setup a few variables for tracking
