@@ -158,15 +158,20 @@ def MSE(output, label, reduction='mean', scaling_factor=1):
     loss = MSELoss(output, label, reduction=reduction)
     return loss
 
-def MSE_loss(inp, target, num_classes, reduction = 'mean'):
+def MSE_loss(inp, target, params):
     acc_mse_loss = 0
-    for i in range(0, num_classes):
-        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=reduction)
-    acc_mse_loss/=num_classes
+    for i in range(0, params["model"]["num_classes"]):
+        acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"])
+    acc_mse_loss/=params["model"]["num_classes"]
     return acc_mse_loss
 
 def fetch_loss_function(loss_name, params):
-    if loss_name == 'dc':
+    
+    if isinstance(loss_name, dict): # this is currently only happening for mse_torch
+        # check for mse_torch
+        loss_function = MSE_loss
+        MSE_requested = True
+    elif loss_name == 'dc':
         loss_function = MCD_loss
     elif loss_name == 'dc_log':
         loss_function = MCD_log_loss
