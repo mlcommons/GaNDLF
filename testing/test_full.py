@@ -141,6 +141,8 @@ def test_train_regression_rad_2d():
   parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['model']['class_list'] = [0,255]
+  parameters['metrics'] = ['mse']
+  parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
   # loop through selected models and train for single epoch
@@ -159,6 +161,8 @@ def test_train_regression_rad_3d():
   parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
+  parameters['metrics'] = ['mse']
+  parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
   # loop through selected models and train for single epoch
@@ -178,6 +182,8 @@ def test_train_classification_rad_2d():
   parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['model']['class_list'] = [0,255]
+  parameters['metrics'] = ['mse']
+  parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
   # loop through selected models and train for single epoch
@@ -196,6 +202,8 @@ def test_train_classification_rad_3d():
   parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
+  parameters['metrics'] = ['mse']
+  parameters['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
   # loop through selected models and train for single epoch
