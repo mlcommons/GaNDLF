@@ -8,8 +8,6 @@ from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
 
 device = 'cpu'
-if torch.cuda.is_available():
-  device = 'cuda'
 ## global defines
 # all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
 all_models_segmentation = [
@@ -106,6 +104,8 @@ def test_constructTrainingCSV():
 
 def test_train_segmentation_rad_2d():
   print('Starting 2D Rad segmentation tests')
+  if torch.cuda.is_available():
+    device = 'cuda'
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_segmentation.csv')
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
@@ -127,6 +127,8 @@ def test_train_segmentation_rad_2d():
 
 def test_train_segmentation_rad_3d():
   print('Starting 3D Rad segmentation tests')
+  if torch.cuda.is_available():
+    device = 'cuda'
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_segmentation.csv')
   # read and initialize parameters for specific data dimension
@@ -148,6 +150,8 @@ def test_train_segmentation_rad_3d():
   print('passed')
 
 def test_train_regression_rad_2d():
+  if torch.cuda.is_available():
+    device = 'cuda'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
@@ -170,6 +174,8 @@ def test_train_regression_rad_2d():
   print('passed')
 
 def test_train_regression_rad_3d():
+  if torch.cuda.is_available():
+    device = 'cuda'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
@@ -191,6 +197,8 @@ def test_train_regression_rad_3d():
   print('passed')
 
 def test_train_classification_rad_2d():
+  if torch.cuda.is_available():
+    device = 'cuda'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['modality'] = 'rad'
@@ -213,6 +221,8 @@ def test_train_classification_rad_2d():
   print('passed')
 
 def test_train_classification_rad_3d():
+  if torch.cuda.is_available():
+    device = 'cuda'
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
