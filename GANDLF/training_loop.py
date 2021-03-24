@@ -5,7 +5,7 @@ Created on Sat Mar  6 21:45:06 2021
 
 @author: siddhesh
 """
-import os
+import os, math
 import torch
 import time
 import torchio
@@ -153,8 +153,9 @@ def train_network(model, train_dataloader, optimizer, params):
                     scaler.step(optimizer)
                     scaler.update()
         else:
-            loss.backward()
-            optimizer.step()
+            if not math.isnan(loss):
+                loss.backward()
+                optimizer.step()
 
         # Non network training related
         total_epoch_train_loss += loss
