@@ -31,16 +31,18 @@ class Logger():
     def write_header(self, mode='train'):
         self.csv = open(self.filename, "a")
         if os.stat(self.filename).st_size == 0:
+            row = ''
             if mode.lower() == 'train':
-                self.csv.write("epoch_no,train_loss,")
+                row += "epoch_no,train_loss,"
                 for metric in self.metrics:
-                    self.csv.write("train_"+metric+",")
-                    self.csv.write("\b\n")
+                    row += "train_" + metric + ","
             else:
-                self.csv.write("epoch_no,valid_loss,")
+                row += "epoch_no,valid_loss,"
                 for metric in self.metrics:
-                    self.csv.write("valid_"+metric+",")
-                    self.csv.write("\b\n")
+                    row += "valid_" + metric + ","
+            row = row[:-1]
+            row += "\n"
+            self.csv.write(row)
         else:
             print("Found a pre-existing file for logging, now appending logs to that file!")
         self.csv.close()
@@ -63,14 +65,23 @@ class Logger():
 
         """
         self.csv = open(self.filename, "a")
-        self.csv.write(str(epoch_number)+","+str(loss)+",")
+        row = ''
+        row += str(epoch_number) + "," 
+        if torch.is_tensor(loss):
+            row += str(loss.cpu().data.item())
+        else:
+            row += str(loss)
+        row += ','
+        
         for metric in epoch_metrics:
             if torch.is_tensor(epoch_metrics[metric]):
-                to_write = str(epoch_metrics[metric].cpu().data.item())
+                row += str(epoch_metrics[metric].cpu().data.item())
             else:
-                to_write = str(epoch_metrics[metric])
-            self.csv.write(to_write+",")
-        self.csv.write("\b\n")
+                row += str(epoch_metrics[metric])
+            row += ','
+        row = row[:-1]
+        self.csv.write(row)
+        self.csv.write("\n")
         self.csv.close()
 
     def close(self):
