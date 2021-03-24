@@ -73,7 +73,8 @@ def step(model, image, label, params):
     """
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
-        label = torch.squeeze(label, -1)
+        if len(params['value_keys']) == 0: # squeeze label for segmentation only
+            label = torch.squeeze(label, -1)
     if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
