@@ -201,6 +201,8 @@ def MSE(output, label, reduction="mean", scaling_factor=1):
         Computed Mean Squared Error loss for the output and label
 
     """
+    scaling_factor = torch.as_tensor(scaling_factor)
+    label = label.float()
     label = label*scaling_factor
     loss_fn = MSELoss(reduction=reduction)
     loss = loss_fn(output, label)
@@ -210,14 +212,14 @@ def MSE_loss(inp, target, params):
     acc_mse_loss = 0
     # if inp.shape != target.shape:
     #     sys.exit('Input and target shapes are inconsistent')
-    
+
     if inp.shape[0] == 1:
-        acc_mse_loss += MSE(inp, target, reduction=params["loss_function"]['mse']["reduction"])
+        acc_mse_loss += MSE(inp, target, reduction=params["loss_function"]['mse']["reduction"], scaling_factor=params['scaling_factor'])
         #for i in range(0, params["model"]["num_classes"]):
         #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
     else:
         for i in range(0, params["model"]["num_classes"]):
-            acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"])
+            acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"], scaling_factor=params['scaling_factor'])
     acc_mse_loss/=params["model"]["num_classes"]
     return acc_mse_loss
 
