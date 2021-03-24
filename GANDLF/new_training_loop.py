@@ -404,7 +404,7 @@ def training_loop(
         print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
         print(
-            "Time take for epoch : ",
+            "Time taken for epoch : ",
             (epoch_end_time - epoch_start_time) / 60,
             " mins",
             flush=True,
