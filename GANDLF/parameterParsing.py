@@ -39,6 +39,11 @@ def get_model(
     divisibilityCheck_denom_patch = 16  # for unet/resunet/uinc
     divisibilityCheck_denom_baseFilter = 4  # for uinc
 
+    if 'amp' in kwargs:
+        amp = kwargs.get("amp")
+    else:
+        amp = False
+
     if modelname == "resunet":
         model = unet(
             num_dimensions,
@@ -113,6 +118,9 @@ def get_model(
                                             num_channels=num_channels, final_convolution_layer = final_convolution_layer)
         else:
             sys.exit('Requested DENSENET type \'' + modelname + '\' has not been implemented')
+        
+        amp = False # this is not yet implemented for densenet 
+
     # elif modelname == 'vgg16':
     #     vgg_config = cfg['D']
     #     num_final_features = vgg_config[-2]
@@ -131,6 +139,8 @@ def get_model(
         else:
             sys.exit('Requested VGG type \'' + modelname + '\' has not been implemented')
 
+        amp = False # this is not yet implemented for vgg 
+        
         if 'batch_norm' in kwargs:
             batch_norm = kwargs.get("batch_norm")
         else:
@@ -218,7 +228,7 @@ def get_model(
                 + "' architecture"
             )
 
-    return model
+    return model, amp
 
 
 def get_optimizer(optimizer_name, model, learning_rate):
