@@ -212,9 +212,9 @@ def validate_network(model, valid_dataloader, params):
     for metric in params["metrics"]:
         total_epoch_valid_metric[metric] = 0
 
-    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    if params["model"]["amp"]:
-        print("Using Automatic mixed precision", flush=True)
+    # # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+    # if params["model"]["amp"]:
+    #     print("Using Automatic mixed precision", flush=True)
 
     # Set the model to valid
     model.eval()
@@ -329,7 +329,7 @@ def training_loop(
     print("Number of channels : ", params["model"]["num_channels"])
 
     # Fetch the model according to params mentioned in the configuration file
-    model = get_model(
+    model, params["model"]["amp"] = get_model(
         modelname=params["model"]["architecture"],
         num_dimensions=params["model"]["dimension"],
         num_channels=params["model"]["num_channels"],
@@ -338,6 +338,7 @@ def training_loop(
         final_convolution_layer=params["model"]["final_layer"],
         patch_size=params["patch_size"],
         batch_size=params["batch_size"],
+        amp=params["model"]["amp"]
     )
 
     # Set up the dataloaders
@@ -494,7 +495,7 @@ def training_loop(
         )
 
         # Start to check for loss
-        if epoch_valid_loss <= best_loss:
+        if epoch_valid_loss <= torch.tensor(best_loss):
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
