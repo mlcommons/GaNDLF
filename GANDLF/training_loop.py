@@ -494,7 +494,7 @@ def training_loop(
         )
 
         # Start to check for loss
-        if epoch_valid_loss <= best_loss:
+        if epoch_valid_loss <= torch.tensor(best_loss):
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
