@@ -1,5 +1,13 @@
 # Usage
 
+## Table of Contents
+- [Preparing the Data](#preparing-the-data)
+- [Constructing the Data CSV](#constructing-the-data-csv)
+- [Customize the Training](#customize-the-training)
+- [Running GaNDLF](#running-gandlf-traininginference)
+- [Plot the final results](#plot-the-final-results)
+- [Multi-GPU systems](#multi-gpu-systems)
+
 ## Preparing the Data
 
 It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
@@ -7,13 +15,16 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 - Registration
   - Within-modality co-registration [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)]
   - **OPTIONAL**: Registration of all datasets to patient atlas, if applicable [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)]
-- Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GANDLF's preprocessing module](#customize-the-training).
-- Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GANDLF's preprocessing module](#customize-the-training).
+- Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GaNDLF's preprocessing module](#customize-the-training).
+- Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GaNDLF's preprocessing module](#customize-the-training).
 
 Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
 
 **For Histopathology Only:**
-- Convert WSI/label map to patches with OPM: [See using OPM](./GANDLF/OPM/README.md)
+- Convert WSI/label map to patches with OPM: [See using OPM](./GaNDLF/OPM/README.md)
+
+[Back To Top &uarr;](#table-of-contents)
+
 
 ## Constructing the Data CSV
 
@@ -44,9 +55,11 @@ Notes:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 
+[Back To Top &uarr;](#table-of-contents)
+
 ## Customize the Training
 
-GANDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
+GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
 
 - Model
   - Architecture
@@ -79,7 +92,9 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 
 **Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as https://yamlchecker.com/ or https://yamlvalidator.com/ **before** trying to train.
 
-## Running GANDLF (Training/Inference)
+[Back To Top &uarr;](#table-of-contents)
+
+## Running GaNDLF (Training/Inference)
 
 ```bash
 # continue from previous shell
@@ -92,9 +107,11 @@ python gandlf_run \
   # -modelDir /path/to/model/weights # used in inference mode
 ```
 
+[Back To Top &uarr;](#table-of-contents)
+
 ## Plot the final results
 
-After the testing/validation training is finished, GANDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/CBICA/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
+After the testing/validation training is finished, GaNDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/CBICA/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
 
 ```bash
 # continue from previous shell
@@ -105,8 +122,12 @@ python gandlf_collectStats \
   -output ./experiment_0/output_dir_stats/ \ # output directory
 ```
 
+[Back To Top &uarr;](#table-of-contents)
+
 ### Multi-GPU systems
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
 
 For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
+
+[Back To Top &uarr;](#table-of-contents)
