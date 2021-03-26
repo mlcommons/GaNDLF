@@ -54,6 +54,7 @@ def get_model(
             residualConnections=True,
         )
         divisibilityCheck_baseFilter = False
+
     elif modelname == "unet":
         model = unet(
             num_dimensions,
@@ -63,6 +64,7 @@ def get_model(
             final_convolution_layer=final_convolution_layer,
         )
         divisibilityCheck_baseFilter = False
+
     elif modelname == "fcn":
         model = fcn(
             num_dimensions,
@@ -74,6 +76,7 @@ def get_model(
         # not enough information to perform checking for this, yet
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
+
     elif modelname == "uinc":
         model = uinc(
             num_dimensions,
@@ -82,6 +85,7 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
+
     elif modelname == "msdnet":
         model = MSDNet(
             num_dimensions,
@@ -90,6 +94,67 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
+
+    elif 'imagenet' in modelname: # these are generic imagenet-trained models and should be customized 
+        
+        if num_dimensions != 2:
+            sys.exit("ImageNet-trained models only work on 2D data")
+
+        divisibilityCheck_patch = False
+        divisibilityCheck_baseFilter = False
+
+        if 'batch_norm' in kwargs:
+            batch_norm = kwargs.get("batch_norm")
+        else:
+            batch_norm = True
+
+        if 'vgg11' in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg11_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg11(pretrained=True)
+        elif 'vgg13' in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg13_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg13(pretrained=True)
+        elif 'vgg16' in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg16_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg16(pretrained=True)
+        elif 'vgg19' in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg19_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg19(pretrained=True)
+        elif 'squeezenet1_0' in modelname:
+            model = torchvision.models.squeezenet1_0(pretrained=True)
+        elif 'squeezenet1_1' in modelname:
+            model = torchvision.models.squeezenet1_1(pretrained=True)
+        elif 'inceptionv3' in modelname:
+            model = torchvision.models.inception_v3(pretrained=True)
+        elif 'densenet121' in modelname:
+            model = torchvision.models.densenet121(pretrained=True)
+        elif 'densenet161' in modelname:
+            model = torchvision.models.densenet161(pretrained=True)
+        elif 'densenet169' in modelname:
+            model = torchvision.models.densenet169(pretrained=True)
+        elif 'densenet201' in modelname:
+            model = torchvision.models.densenet201(pretrained=True)
+        elif 'densenet264' in modelname:
+            model = torchvision.models.densenet264(pretrained=True)
+        elif 'resnet18' in modelname:
+            model = torchvision.models.resnet18(pretrained=True)
+        elif 'resnet34' in modelname:
+            model = torchvision.models.resnet34(pretrained=True)
+        elif 'resnet50' in modelname:
+            model = torchvision.models.resnet50(pretrained=True)
+        elif 'resnet101' in modelname:
+            model = torchvision.models.resnet101(pretrained=True)
+        elif 'resnet152' in modelname:
+            model = torchvision.models.resnet152(pretrained=True)
+        
     elif 'densenet' in modelname:
         if modelname == 'densenet121': # regressor/classifier network
             model = densenet.generate_model(model_depth=121,
@@ -121,12 +186,6 @@ def get_model(
         
         amp = False # this is not yet implemented for densenet 
 
-    # elif modelname == 'vgg16':
-    #     vgg_config = cfg['D']
-    #     num_final_features = vgg_config[-2]
-    #     divisibility_factor = Counter(vgg_config)["M"]
-    #     if patch_size[-1] == 1:
-    #         patch_size_altered = np.array(patch_size[:-1])
     elif 'vgg' in modelname: # common parsing for vgg
         if modelname == 'vgg11':
             vgg_config = cfg['A']
@@ -167,6 +226,7 @@ def get_model(
             num_classes,
             final_convolution_layer=final_convolution_layer,
         )
+
     elif modelname == "brain_age":
         if num_dimensions != 2:
             sys.exit("Brain Age predictions only works on 2D data")

@@ -6,6 +6,8 @@ data_preprocessing:
 in_memory: false
 learning_rate: 0.001
 loss_function: mse
+metrics:
+  - mse
 model:
   amp: false
   architecture: densenet121
