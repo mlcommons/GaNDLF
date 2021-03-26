@@ -107,7 +107,6 @@ def test_train_segmentation_rad_2d(device):
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_segmentation.csv')
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
-  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['model']['class_list'] = [0,255]
   parameters['model']['amp'] = True
@@ -128,7 +127,6 @@ def test_train_segmentation_rad_3d(device):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
-  parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
   parameters['model']['amp'] = True
@@ -146,7 +144,6 @@ def test_train_regression_rad_2d(device):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['2D']
-  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['model']['amp'] = True
   # read and parse csv 
@@ -167,7 +164,6 @@ def test_train_regression_rad_3d(device):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_regression.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
-  parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['amp'] = True
   # read and parse csv 
@@ -188,7 +184,6 @@ def test_train_classification_rad_2d(device):
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['2D']
-  parameters['psize'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['model']['amp'] = True
   # read and parse csv 
@@ -208,7 +203,6 @@ def test_train_classification_rad_3d(device):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
   parameters['patch_size'] = patch_size['3D']
-  parameters['psize'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['amp'] = True
   # read and parse csv 
