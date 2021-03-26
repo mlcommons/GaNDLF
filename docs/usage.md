@@ -1,5 +1,12 @@
 # Usage
 
+For any DL pipeline, the following flow needs to be performed:
+
+1. Data preparation
+2. Split data into training, validation, and testing
+3. Customize the training parameters
+
+GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
 - [Preparing the Data](#preparing-the-data)
 - [Constructing the Data CSV](#constructing-the-data-csv)
