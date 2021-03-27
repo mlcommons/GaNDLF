@@ -94,7 +94,8 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
-
+        amp = False # this is not yet implemented for msdnet 
+        
     elif 'imagenet' in modelname: # these are generic imagenet-trained models and should be customized 
         
         if num_dimensions != 2:
@@ -154,6 +155,12 @@ def get_model(
             model = torchvision.models.resnet101(pretrained=True)
         elif 'resnet152' in modelname:
             model = torchvision.models.resnet152(pretrained=True)
+        else:
+            sys.exit(
+                "Could not find the requested model '"
+                + modelname
+                + "' in the implementation"
+            )
         
     elif 'densenet' in modelname:
         if modelname == 'densenet121': # regressor/classifier network

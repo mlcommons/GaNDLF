@@ -1,4 +1,4 @@
-# GANDLF
+# GaNDLF
 
 A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification.
 
@@ -19,4 +19,4 @@ A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmenta
 
 - [Application Setup](./setup.md)
 - [Usage](./usage.md)
-- [Extending GANDLF](./extending.md)
+- [Extending GaNDLF](./extending.md)

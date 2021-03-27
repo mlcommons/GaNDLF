@@ -1,4 +1,4 @@
-The website for GANDLF; start with [index.md](./index.md).
+The website for GaNDLF; start with [index.md](./index.md).
 
 ## Flowchart
 
