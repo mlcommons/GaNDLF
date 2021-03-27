@@ -154,6 +154,12 @@ def get_model(
             model = torchvision.models.resnet101(pretrained=True)
         elif 'resnet152' in modelname:
             model = torchvision.models.resnet152(pretrained=True)
+        else:
+            sys.exit(
+                "Could not find the requested model '"
+                + modelname
+                + "' in the implementation"
+            )
         
     elif 'densenet' in modelname:
         if modelname == 'densenet121': # regressor/classifier network
