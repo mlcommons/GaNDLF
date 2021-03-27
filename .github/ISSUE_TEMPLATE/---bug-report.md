@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**GANDLF Version**
+**GaNDLF Version**
 Version information is found on Help > About
 
 **Desktop (please complete the following information):**
