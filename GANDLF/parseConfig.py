@@ -43,11 +43,15 @@ def parseConfig(config_file_path, version_check = True):
       max = parse_version(params['version']['maximum'])
       if (min > gandlf_version_int) or (max < gandlf_version_int):
         sys.exit('Incompatible version of GANDLF detected (' + gandlf_version + ')')
-      
+  
+  if ('psize' in params):
+    print('WARNING: \'psize\' has been deprecated in favor of \'patch_size\'', file = sys.stderr)
+    if not('patch_size' in params):
+      params['patch_size'] = params['psize']
+
   if 'patch_size' in params:
-    params['psize'] = params['patch_size'] 
-    if len(params['psize']) == 2: # 2d check
-        params['psize'].append(1) # ensuring same size during torchio processing
+    if len(params['patch_size']) == 2: # 2d check
+        params['patch_size'].append(1) # ensuring same size during torchio processing
   else:
     sys.exit('The \'patch_size\' parameter needs to be present in the configuration file')
   
