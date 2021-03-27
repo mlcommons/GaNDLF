@@ -94,7 +94,8 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
-
+        amp = False # this is not yet implemented for msdnet 
+        
     elif 'imagenet' in modelname: # these are generic imagenet-trained models and should be customized 
         
         if num_dimensions != 2:
