@@ -1,4 +1,4 @@
-# Extending GANDLF
+# Extending GaNDLF
 
 For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
