@@ -67,7 +67,7 @@ class MSDNet(ModelBase):
             x = f(x)
 
             if (i + 1) % 2 == 0 and not i == (len(self.layers) - 1):
-                x = nn.ReLU(x) #F.relu(x)
+                x = F.relu(x)
                 # Append output into previous features
                 prev_features.append(x)
                 x = torch.cat(prev_features, 1)
