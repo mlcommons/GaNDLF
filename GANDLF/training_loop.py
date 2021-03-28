@@ -74,7 +74,7 @@ def step(model, image, label, params):
     """
     if params['verbose']:
         #print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
-        torch.cuda.memory_summary()
+        print(torch.cuda.memory_summary())
         print('|===========================================================================|\n|                             CPU Utilization                            |\n|')
         print('Load_Percent   :', psutil.cpu_percent(interval=None))
         print('MemUtil_Percent:', psutil.virtual_memory()[2])
