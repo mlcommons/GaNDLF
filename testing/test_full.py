@@ -18,6 +18,7 @@ all_models_segmentation = [
 ]  # pre-defined segmentation model types for testing
 # all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
 all_models_regression = ["densenet121", "vgg16"]
+all_schedulers = ["triangle", "triangle_modified", "exp", "step", "reduce-on-plateau", "cosineannealing", "triangular", "triangular2", "exp_range"]
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
 testingDir = os.path.abspath(os.path.normpath("./testing"))
@@ -213,6 +214,27 @@ def test_train_classification_rad_3d(device):
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
+
+  print('passed')
+
+def test_scheduler_classification_rad_2d(device):
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['2D']
+  parameters['model']['dimension'] = 2
+  parameters['model']['amp'] = True
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  parameters['model']['class_list'] = headers["predictionHeaders"]
+  parameters['model']['architecture'] = "densenet121" 
+  # loop through selected models and train for single epoch
+  for scheduler in all_schedulers:
+    parameters['scheduler'] = scheduler
     shutil.rmtree(outputDir) # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
