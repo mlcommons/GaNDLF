@@ -71,6 +71,10 @@ def step(model, image, label, params):
         The final output of the model
 
     """
+    if params['verbose']:
+        #print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
+        torch.cuda.memory_summary()
+        
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
         if len(params['value_keys']) == 0: # squeeze label for segmentation only
