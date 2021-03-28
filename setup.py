@@ -30,7 +30,8 @@ requirements = [
   'pyvips',
   'pytest',
   'pytest-azurepipelines',
-  'coverage'
+  'coverage',
+  'psutil'
 ]
 
 setup(

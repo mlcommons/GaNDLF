@@ -9,6 +9,7 @@ import os, math
 import torch
 import time
 import torchio
+import psutil
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import fetch_loss_function
@@ -74,6 +75,10 @@ def step(model, image, label, params):
     if params['verbose']:
         #print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
         torch.cuda.memory_summary()
+        print('|===========================================================================|\n|                             CPU Utilization                            |\n|')
+        print('Load_Percent:', psutil.cpu_percent(interval=None))
+        print('MemUtil_Percent:', psutil.virtual_memory()[2])
+        print('|===========================================================================|\n|')
         
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
