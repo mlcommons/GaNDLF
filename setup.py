@@ -29,7 +29,8 @@ requirements = [
   'requests==2.25.0',
   'pyvips',
   'pytest',
-  'pytest-azurepipelines'
+  'pytest-azurepipelines',
+  'coverage'
 ]
 
 setup(
