@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import fetch_loss_function
 from GANDLF.metrics import fetch_metric
-from GANDLF.parameterParsing import get_model, get_optimizer
+from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler
 from GANDLF.utils import get_date_time, send_model_to_device
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
@@ -184,7 +184,7 @@ def train_network(model, train_dataloader, optimizer, params):
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(model, valid_dataloader, params):
+def validate_network(model, valid_dataloader, scheduler, params):
     """
     Function to validate a network for a single epoch
 
@@ -303,6 +303,11 @@ def validate_network(model, valid_dataloader, params):
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
         )
+    
+    if params['scheduler'] == "reduce-on-plateau":
+        scheduler.step(average_epoch_valid_loss)
+    else:
+        scheduler.step()
 
     return average_epoch_valid_loss, average_epoch_valid_metric
 
@@ -423,6 +428,14 @@ def training_loop(
         learning_rate=params["learning_rate"],
     )
 
+    scheduler = get_scheduler(
+        which_scheduler=params['scheduler'],
+        optimizer=optimizer, 
+        batch_size=params["batch_size"],
+        training_samples_size=len(train_dataloader.dataset), 
+        learning_rate=params["learning_rate"]
+    )
+
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(
@@ -481,7 +494,7 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, params
+            model, val_dataloader, scheduler, params
         )
         patience += 1
 
