@@ -270,7 +270,10 @@ def validate_network(model, valid_dataloader, scheduler, params):
             if is_segmentation:
                 aggregator.add_batch(output, patch_location)
             else:
-                output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
+                if torch.is_tensor(output):
+                    output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
+                else:
+                    output_prediction += output
         
         if is_segmentation:
             output_prediction = aggregator.get_output_tensor()
