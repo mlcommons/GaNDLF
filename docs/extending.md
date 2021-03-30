@@ -70,3 +70,10 @@ Once you have the virtual environment set up, tests can be run using the followi
 ```powershell
 pytest --device cuda # can be cuda or cpu, defaults to cpu
 ```
+
+### Code coverage
+
+The code coverage for the tests can be obtained by the following command:
+```powershell
+coverage run -m pytest --device cuda; coverage report -m
+```

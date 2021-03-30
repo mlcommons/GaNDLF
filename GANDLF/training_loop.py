@@ -9,11 +9,12 @@ import os, math
 import torch
 import time
 import torchio
+import psutil
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import fetch_loss_function
 from GANDLF.metrics import fetch_metric
-from GANDLF.parameterParsing import get_model, get_optimizer
+from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler
 from GANDLF.utils import get_date_time, send_model_to_device
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
@@ -71,6 +72,14 @@ def step(model, image, label, params):
         The final output of the model
 
     """
+    if params['verbose']:
+        #print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
+        print(torch.cuda.memory_summary())
+        print('|===========================================================================|\n|                             CPU Utilization                            |\n|')
+        print('Load_Percent   :', psutil.cpu_percent(interval=None))
+        print('MemUtil_Percent:', psutil.virtual_memory()[2])
+        print('|===========================================================================|\n|')
+        
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
         if len(params['value_keys']) == 0: # squeeze label for segmentation only
@@ -180,7 +189,7 @@ def train_network(model, train_dataloader, optimizer, params):
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(model, valid_dataloader, params):
+def validate_network(model, valid_dataloader, scheduler, params):
     """
     Function to validate a network for a single epoch
 
@@ -266,7 +275,10 @@ def validate_network(model, valid_dataloader, params):
             if is_segmentation:
                 aggregator.add_batch(output, patch_location)
             else:
-                output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
+                if torch.is_tensor(output):
+                    output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
+                else:
+                    output_prediction += output
         
         if is_segmentation:
             output_prediction = aggregator.get_output_tensor()
@@ -299,6 +311,11 @@ def validate_network(model, valid_dataloader, params):
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
         )
+    
+    if params['scheduler'] == "reduce-on-plateau":
+        scheduler.step(average_epoch_valid_loss)
+    else:
+        scheduler.step()
 
     return average_epoch_valid_loss, average_epoch_valid_metric
 
@@ -419,6 +436,14 @@ def training_loop(
         learning_rate=params["learning_rate"],
     )
 
+    scheduler = get_scheduler(
+        which_scheduler=params['scheduler'],
+        optimizer=optimizer, 
+        batch_size=params["batch_size"],
+        training_samples_size=len(train_dataloader.dataset), 
+        learning_rate=params["learning_rate"]
+    )
+
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
     batch = next(
@@ -477,7 +502,7 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, params
+            model, val_dataloader, scheduler, params
         )
         patience += 1
 
