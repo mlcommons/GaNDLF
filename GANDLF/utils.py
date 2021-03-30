@@ -254,6 +254,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     path_to_metadata = subject['path_to_metadata'][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
                     _, ext = os.path.splitext(path_to_metadata)
+                    if ext == '.gz':
+                        ext = '.nii.gz'
                     pred_mask = pred_mask.numpy()
                     pred_mask = reverse_one_hot(pred_mask[0],class_list)
                     if not(model_2d):
