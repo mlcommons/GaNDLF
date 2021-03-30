@@ -389,4 +389,9 @@ def parseConfig(config_file_path, version_check = True):
     print("WARNING: NOT using weighted loss")
     params['weighted_loss'] = False 
   
+  if 'verbose' in params:
+    pass
+  else:
+    params['verbose'] = False
+  
   return params

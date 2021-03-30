@@ -6,6 +6,7 @@ import torchio
 from torchio.transforms.spatial_transform import SpatialTransform
 import SimpleITK as sitk
 import nibabel as nib
+from torchvision.transforms import Normalize
 
 
 from torchio.data.subject import Subject
@@ -15,7 +16,8 @@ def normalize_by_val(input_tensor, mean, std):
     """
     This function returns the tensor normalized by these particular values
     """
-    return transforms.Normalize(mean, std)             
+    normalizer = Normalize(mean, std) 
+    return normalizer(input_tensor)             
     
 def normalize_imagenet(input_tensor):
     """

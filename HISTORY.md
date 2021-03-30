@@ -5,6 +5,7 @@
 - Added a way to ignore a label during validation dice calculation
 - Added more options for VGG
 - Tests can now be run on GPU
+- New scheduling options added
 
 ## 0.0.7
 

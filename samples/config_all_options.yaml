@@ -44,7 +44,8 @@ patience: 50
 batch_size: 1
 # Set the initial learning rate
 learning_rate: 0.001
-# Learning rate scheduler - options: triangle, triangle_modified, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
+# Learning rate scheduler - options:"triangle", "triangle_modified", "exp", "step", "reduce-on-plateau", "cosineannealing", "triangular", "triangular2", "exp_range"
+# triangle/triangle_modified use LambdaLR but triangular/triangular2/exp_range uses CyclicLR
 scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), dc_log (-log of dice), ce (), dcce (sum of dice and ce), mse () ...
