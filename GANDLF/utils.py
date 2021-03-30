@@ -168,6 +168,7 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
         outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
     resampler = sitk.ResampleImageFilter()
     resampler.SetSize(output_size)
+    resampler.SetInterpolator(interpolator)
     resampler.SetOutputSpacing(outputSpacing)
     resampler.SetOutputOrigin(input_image.GetOrigin())
     resampler.SetOutputDirection(input_image.GetDirection())
@@ -262,6 +263,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     path_to_metadata = subject['path_to_metadata'][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
                     _, ext = os.path.splitext(path_to_metadata)
+                    if ext == '.gz':
+                        ext = '.nii.gz'
                     pred_mask = pred_mask.numpy()
                     pred_mask = reverse_one_hot(pred_mask[0],class_list)
                     if not(model_2d):
@@ -270,8 +273,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                         result_image = pred_mask
                     result_image.CopyInformation(inputImage)
                     # if parameters['resize'] is not None:
-                    #     originalSize = inputImage.GetSize()
-                    #     result_image = resize_image(resize_image, originalSize, sitk.sitkNearestNeighbor) # change this for resample
+                    #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
                     sitk.WriteImage(result_image, os.path.join(outputDir, patient_name + '_seg' + ext))
                 elif len(value_keys) > 0:
                     outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
