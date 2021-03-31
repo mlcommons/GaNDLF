@@ -341,7 +341,8 @@ def training_loop(
     if not ("num_channels" in params["model"]):
         params["model"]["num_channels"] = len(headers["channelHeaders"])
     
-    if "predictionHeaders" in headers:
+    # ensure the number of output classes for model prediction is working correctly
+    if len(headers["predictionHeaders"]) > 0:
         params["model"]["num_classes"] = len(headers["predictionHeaders"])
     else:
         params["model"]["num_classes"] = num_classes
