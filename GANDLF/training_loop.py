@@ -332,7 +332,6 @@ def training_loop(
 
     # Some autodetermined factors
     num_classes = len(params["model"]["class_list"])
-    params["model"]["num_classes"] = num_classes
     params["headers"] = headers
     epochs = params["num_epochs"]
     loss = params["loss_function"]
@@ -341,6 +340,12 @@ def training_loop(
 
     if not ("num_channels" in params["model"]):
         params["model"]["num_channels"] = len(headers["channelHeaders"])
+    
+    # ensure the number of output classes for model prediction is working correctly
+    if len(headers["predictionHeaders"]) > 0:
+        params["model"]["num_classes"] = len(headers["predictionHeaders"])
+    else:
+        params["model"]["num_classes"] = num_classes
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
