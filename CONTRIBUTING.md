@@ -1,6 +1,6 @@
 # Contribution Guidelines
 
-CaPTk is a package that is primarily worked on by the CBICA Software Development team and its collaborators - additional members from the community are welcome!
+GaNDLF is a package that is primarily worked on by the CBICA Software Development team and its collaborators - additional members from the community are welcome!
 
 ## Issues
 
