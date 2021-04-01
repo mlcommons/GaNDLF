@@ -90,7 +90,7 @@ def multi_class_dice(output, label, params):
     num_class = params["model"]["num_classes"]
     # print("Number of classes : ", params["model"]["num_classes"])
     for i in range(0, num_class):  # 0 is background
-        if num_class != params["model"]["ignore_label_validation"]:
+        if num_class != params["model"]["ignore_label_validation"]: # this check should only happen during validation
             total_dice += dice(output[:, i, ...], label[:, i, ...])
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss        
     total_dice /= num_class
