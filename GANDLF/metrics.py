@@ -88,9 +88,10 @@ def multi_class_dice(output, label, params):
     label = one_hot(label, params["model"]["class_list"])
     total_dice = 0
     num_class = params["model"]["num_classes"]
-    print("Number of classes : ", params["model"]["num_classes"])
+    # print("Number of classes : ", params["model"]["num_classes"])
     for i in range(0, num_class):  # 0 is background
-        current_dice = dice(output[:, i, ...], label[:, i, ...])
+        if num_class != params["model"]["ignore_label_validation"]:
+            total_dice += dice(output[:, i, ...], label[:, i, ...])
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss        
     total_dice /= num_class
     return total_dice
