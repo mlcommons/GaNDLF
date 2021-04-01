@@ -44,7 +44,7 @@ def get_loss_and_metrics(ground_truth, predicted, params):
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_function = fetch_metric(metric)  # Write a fetch_metric
-        metric_output[metric] = metric_function(predicted, ground_truth, params)
+        metric_output[metric] = metric_function(predicted, ground_truth, params).cpu().data.item()
     return loss, metric_output
 
 def step(model, image, label, params):
@@ -167,7 +167,7 @@ def train_network(model, train_dataloader, optimizer, params):
                 optimizer.step()
 
         # Non network training related
-        total_epoch_train_loss += loss
+        total_epoch_train_loss += loss.cpu().data.item()
         for metric in calculated_metrics.keys():
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
