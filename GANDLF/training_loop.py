@@ -296,15 +296,16 @@ def validate_network(model, valid_dataloader, scheduler, params):
             total_epoch_valid_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if batch_idx % (len(valid_dataloader) // 2) == 0:
-            print(
-                "Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx
-            )
-            for metric in params["metrics"]:
+        if batch_idx != 0:
+            if batch_idx % (len(valid_dataloader) // 2) == 0:
                 print(
-                    "Epoch Validation " + metric + " : ",
-                    total_epoch_valid_metric[metric] / len(valid_dataloader),
+                    "Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx
                 )
+                for metric in params["metrics"]:
+                    print(
+                        "Epoch Validation " + metric + " : ",
+                        total_epoch_valid_metric[metric] / len(valid_dataloader),
+                    )
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
     for metric in params["metrics"]:
