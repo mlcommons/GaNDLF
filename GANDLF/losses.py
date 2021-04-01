@@ -81,7 +81,7 @@ def MCD_loss(pm, gt, params):
     else:
         weights = None
     gt = one_hot(gt, params["model"]["class_list"])
-    print("Param classes : ", params["model"]["num_classes"], gt.shape, flush=True)
+    # print("Param classes : ", params["model"]["num_classes"], gt.shape, flush=True)
     for i in range(0, params["model"]["num_classes"]):  # 0 is background
         currentDice = dice(gt[:, i, ...], pm[:, i, ...])
         currentDiceLoss = 1 - currentDice  # subtract from 1 because this is a loss
