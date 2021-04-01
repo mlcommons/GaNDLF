@@ -43,8 +43,8 @@ class Logger():
             row = row[:-1]
             row += "\n"
             self.csv.write(row)
-        else:
-            print("Found a pre-existing file for logging, now appending logs to that file!")
+        # else:
+        #     print("Found a pre-existing file for logging, now appending logs to that file!")
         self.csv.close()
 
     def write(self, epoch_number, loss, epoch_metrics):
