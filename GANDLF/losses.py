@@ -106,12 +106,12 @@ def MCD_loss_new(pm, gt, num_class, weights=None):  # compute the actual dice sc
     return torch.mean(-dice_score + 1.0)
 
 
-def MCD_log_loss(pm, gt, num_class, weights=None):
+def MCD_log_loss(pm, gt, params, weights=None):
     """
     These weights should be the penalty weights, not dice weights
     """
     acc_dice_loss = 0
-    for i in range(0, num_class):  # 0 is background
+    for i in range(0, params["model"]["num_classes"]):  # 0 is background
         currentDice = dice(gt[:, i, ...], pm[:, i, ...])
         currentDiceLoss = -torch.log(
             currentDice + torch.finfo(torch.float32).eps
@@ -120,7 +120,7 @@ def MCD_log_loss(pm, gt, num_class, weights=None):
             currentDiceLoss = currentDiceLoss * weights[i]
         acc_dice_loss += currentDiceLoss
     if weights is None:
-        acc_dice_loss /= num_class  # we should not be considering 0
+        acc_dice_loss /= params["model"]["num_classes"]  # we should not be considering 0
     return acc_dice_loss
 
 
