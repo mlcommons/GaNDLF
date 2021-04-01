@@ -291,7 +291,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
         # print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
         # Non network validing related
-        total_epoch_valid_loss += loss
+        total_epoch_valid_loss += loss.cpu().data.item()
         for metric in calculated_metrics.keys():
             total_epoch_valid_metric[metric] += calculated_metrics[metric]
 
