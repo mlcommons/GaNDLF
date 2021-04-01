@@ -93,6 +93,8 @@ def checkPatchDivisibility(patch_size, number = 16):
         patch_size_to_check = patch_size
     if patch_size_to_check[-1] == 1: # for 2D, don't check divisibility of last dimension
         patch_size_to_check = patch_size_to_check[:-1]
+    elif patch_size_to_check[0] == 1: # for 2D, don't check divisibility of first dimension
+        patch_size_to_check = patch_size_to_check[1:]
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
         return False
     return True
