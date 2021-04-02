@@ -70,6 +70,7 @@ nested_training:
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
 # 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
+# 'normalize_positive':perform z-score normalize but with mean and std-dev calculated on only pixels > 0 
 # 'normalize_nonZero': perform z-score normalize but with mean and std-dev calculated on only non-zero pixels
 # 'normalize_nonZero_masked': perform z-score normalize but with mean and std-dev calculated on only non-zero pixels with the stats applied on non-zero pixels
 # 'crop_external_zero_planes': crops all non-zero planes from input tensor to reduce image search space
