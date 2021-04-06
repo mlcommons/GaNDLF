@@ -44,7 +44,7 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     This is the main inference loop
     '''
     # extract variables form parameters dict
-    psize = parameters['psize']
+    patch_size = parameters['patch_size']
     q_max_length = parameters['q_max_length']
     q_samples_per_volume = parameters['q_samples_per_volume']
     q_num_workers = parameters['q_num_workers']
@@ -52,10 +52,10 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     augmentations = parameters['data_augmentation']
     preprocessing = parameters['data_preprocessing']
     which_model = parameters['model']['architecture']
-    if not('n_channels' in parameters['model']):
-        n_channels = len(headers['channelHeaders'])
+    if not('num_channels' in parameters['model']):
+        num_channels = len(headers['channelHeaders'])
     else:
-        n_channels = parameters['model']['n_channels']
+        num_channels = parameters['model']['num_channels']
 
     base_filters = parameters['model']['base_filters']
     amp = parameters['model']['amp']
@@ -69,10 +69,10 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of dims     : ", parameters['model']['dimension'])
-    if 'n_channels' in parameters['model']:
-        print("Number of channels : ", parameters['model']['n_channels'])
+    if 'num_channels' in parameters['model']:
+        print("Number of channels : ", parameters['model']['num_channels'])
     print("Number of classes  : ", n_classList)
-    model = get_model(which_model, parameters['model']['dimension'], n_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], psize = psize, batch_size = 1)
+    model = get_model(which_model, parameters['model']['dimension'], num_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], patch_size = patch_size, batch_size = 1)
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
@@ -83,7 +83,7 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
         n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
 
     # Setting up the inference loader
-    inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
+    inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
 
     # Loading the weights into the model
@@ -122,7 +122,7 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     loss_fn, MSE_requested = get_loss(loss_function)
 
     model.eval()
-    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor=scaling_factor, weights=None, save_mask=True, outputDir=outputDir)
+    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, patch_size, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor=scaling_factor, weights=None, save_mask=True, outputDir=outputDir)
     print(average_dice, average_loss)
 
 if os.name != 'nt':
@@ -143,11 +143,11 @@ if os.name != 'nt':
         base_filters = parameters['model']['base_filters']
         amp = parameters['model']['amp']
         batch_size = parameters['batch_size']
-        n_channels = len(headers['channelHeaders'])
-        if not('n_channels' in parameters['model']):
-            n_channels = len(headers['channelHeaders'])
+        num_channels = len(headers['channelHeaders'])
+        if not('num_channels' in parameters['model']):
+            num_channels = len(headers['channelHeaders'])
         else:
-            n_channels = parameters['model']['n_channels']
+            num_channels = parameters['model']['num_channels']
         n_classList = len(class_list)
         # Report the time stamp
         training_start_time = time.asctime()
@@ -160,8 +160,8 @@ if os.name != 'nt':
         # PRINT PARSED ARGS
         print("\n\n")
         print("Output directory        :", outputDir)
-        if 'n_channels' in parameters['model']:
-            print("Number of channels      :", parameters['model']['n_channels'])
+        if 'num_channels' in parameters['model']:
+            print("Number of channels      :", parameters['model']['num_channels'])
         print("Modalities              :", parameters['modality'])
         #print("Number of classes       :", parameters['modality']['num_classes']
         print("Batch Size              :", parameters['batch_size'])
@@ -177,11 +177,11 @@ if os.name != 'nt':
 
         # Defining our model here according to parameters mentioned in the configuration file
         print("Number of dims     : ", parameters['model']['dimension'])
-        if 'n_channels' in parameters['model']:
-            print("Number of channels : ", parameters['model']['n_channels'])
+        if 'num_channels' in parameters['model']:
+            print("Number of channels : ", parameters['model']['num_channels'])
         print("Number of classes  : ", n_classList)
-        model = get_model(which_model, n_dimensions=parameters['model']['dimension'], n_channels=n_channels, n_classes=n_classList,
-                          base_filters=base_filters, final_convolution_layer=parameters['model']['final_layer'], psize=patch_size, batch_size=batch_size)
+        model = get_model(which_model, n_dimensions=parameters['model']['dimension'], num_channels=num_channels, n_classes=n_classList,
+                          base_filters=base_filters, final_convolution_layer=parameters['model']['final_layer'], patch_size=patch_size, batch_size=batch_size)
 
         # Loading the weights into the model
         main_dict = torch.load(os.path.join(outputDir, str(which_model) + "_best_val.pth.tar"))
@@ -239,7 +239,7 @@ if os.name != 'nt':
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_map)
-        #average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
+        #average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, patch_size, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
         #print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
 if __name__ == "__main__":
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-    psize = pickle.load(open(args.psize_pickle,"rb"))
+    patch_size = pickle.load(open(args.patch_size_pickle,"rb"))
     headers = pickle.load(open(args.headers_pickle,"rb"))
     label_header = pickle.load(open(args.label_header_pickle,"rb"))
     parameters = pickle.load(open(args.parameter_pickle,"rb"))
