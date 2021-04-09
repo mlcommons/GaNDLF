@@ -167,7 +167,9 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
                     dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
                     total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
                 
-            
+            if total_nonZeroVoxels == 0:
+                raise RuntimeError('Trying to train on data where every label mask is background class only.')
+
             # dice_weights_dict_temp = deepcopy(dice_weights_dict)
             dice_weights_dict = {k: (v / total_nonZeroVoxels) for k, v in dice_weights_dict.items()} # divide each dice value by total nonzero
             dice_penalty_dict = deepcopy(dice_weights_dict) # deep copy so that both values are preserved
