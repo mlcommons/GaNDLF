@@ -180,7 +180,7 @@ if os.name != 'nt':
         if 'num_channels' in parameters['model']:
             print("Number of channels : ", parameters['model']['num_channels'])
         print("Number of classes  : ", n_classList)
-        model = get_model(which_model, n_dimensions=parameters['model']['dimension'], num_channels=num_channels, n_classes=n_classList,
+        model = get_model(which_model, num_dimensions=parameters['model']['dimension'], num_channels=num_channels, num_classes=n_classList,
                           base_filters=base_filters, final_convolution_layer=parameters['model']['final_layer'], patch_size=patch_size, batch_size=batch_size)
 
         # Loading the weights into the model
@@ -223,7 +223,10 @@ if os.name != 'nt':
                                     shuffle=False, num_workers=2)
             for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                with autocast():
+                if params['amp']:
+                    with autocast():
+                        output = model(image_patches.half().cuda())
+                else:
                     output = model(image_patches.half().cuda())
                 output = output.cpu().detach().numpy()
                 for i in range(int(output.shape[0])):
