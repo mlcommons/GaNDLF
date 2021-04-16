@@ -26,7 +26,7 @@ requirements = [
   'openslide-python',
   'scikit-image',
   'matplotlib',
-  'requests==2.25.0',
+  'requests>=2.25.0',
   'pyvips',
   'pytest',
   'pytest-azurepipelines'
