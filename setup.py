@@ -17,7 +17,6 @@ requirements = [
   'torchio==0.18.29',
   'pandas',
   'pylint',
-  'torchsummary',
   'scikit-learn==0.23.1',
   'pickle5==0.0.11',
   'setuptools',
