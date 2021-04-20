@@ -64,6 +64,9 @@ def anisotropy(axes = 0, downsampling = 1, p=1):
 def positive_voxel_mask(image):
     return image > 0
 
+def nonzero_voxel_mask(image):
+    return image != 0
+
 def crop_external_zero_planes(patch_size, p=1):
     # p is only accepted as a parameter to capture when values other than one are attempted
     if p != 1:
@@ -89,7 +92,8 @@ global_preprocessing_dict = {
     'threshold' : threshold_transform,
     'clip' : clip_transform,
     'normalize' : ZNormalization(),
-    'normalize_nonZero' : ZNormalization(masking_method = positive_voxel_mask),
+    'normalize_positive' : ZNormalization(masking_method = positive_voxel_mask),
+    'normalize_nonZero' : ZNormalization(masking_method = nonzero_voxel_mask),
     'normalize_nonZero_masked': NonZeroNormalizeOnMaskedRegion(), 
     'crop_external_zero_planes': crop_external_zero_planes,
     'normalize_imagenet': normalize_imagenet,
