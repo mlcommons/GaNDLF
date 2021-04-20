@@ -34,7 +34,7 @@ save_masks: false
 scaling_factor: 1
 scheduler: triangle
 version:
-  maximum: 0.0.8
+  maximum: 0.0.9
   minimum: 0.0.7
 weighted_loss: false
 which_model: resunet
