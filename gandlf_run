@@ -37,16 +37,16 @@ def main():
     device = args.device
     model_path = args.output
     mode = args.train
+    shuffle_dataframe = True
 
     reset_prev = args.reset_prev
 
     if '-1' in device:
         device = 'cpu'
 
-    if mode == 0: # inference mode
-        pretrainedModelPath = args.modelDir
-    else:
+    if mode != 0: # train mode
         Path(model_path).mkdir(parents=True, exist_ok=True)
+        shuffle_dataframe = False
 
     # parse training CSV
     if ',' in file_data_full:
@@ -63,7 +63,7 @@ def main():
         # if we are here, it is assumed that the user wants to do training
         TrainingManager(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
-        data_full, headers = parseTrainingCSV(file_data_full)
+        data_full, headers = parseTrainingCSV(file_data_full, shuffle_dataframe)
     
     if mode != 0: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)

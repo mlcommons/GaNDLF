@@ -354,14 +354,15 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     file.write(outputToWrite)
     file.close()
 
-def parseTrainingCSV(inputTrainingCSVFile):
+def parseTrainingCSV(inputTrainingCSVFile, train = True):
     '''
     This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
     '''
     ## read training dataset into data frame
     data_full = pd.read_csv(inputTrainingCSVFile)
     # shuffle the data - this is a useful level of randomization for the training process
-    data_full=data_full.sample(frac=1).reset_index(drop=True)
+    if train:
+        data_full=data_full.sample(frac=1).reset_index(drop=True)
 
     # find actual header locations for input channel and label
     # the user might put the label first and the channels afterwards 
