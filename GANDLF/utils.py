@@ -274,6 +274,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     else:
                         result_image = pred_mask
                     result_image.CopyInformation(inputImage)
+                    result_image = sitk.Cast(result_image, inputImage.GetPixelID()) # cast as the same data type 
                     # if parameters['resize'] is not None:
                     #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
                     sitk.WriteImage(result_image, os.path.join(outputDir, patient_name + '_seg' + ext))
