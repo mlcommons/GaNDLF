@@ -22,7 +22,7 @@ def main():
     parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'modelDir\' during inference', required=True)
     parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
     parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
-    parser.add_argument('-train', default=1, type=int, help = '1 == training and 0 == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=True)
+    parser.add_argument('-train', type=int, help = 'True == training and False == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=True)
     parser.add_argument('-device', default='cuda', type=str, help = 'Device to perform requested session on \'cpu\' or \'cuda\'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set', required=True)
     parser.add_argument('-reset_prev', default=False, type=bool, help = 'Whether the previous run in the output directory will be discarded or not', required=False)
     
@@ -36,17 +36,20 @@ def main():
     parameters = parseConfig(model_parameters)
     device = args.device
     model_path = args.output
-    mode = args.train
-    shuffle_dataframe = True
+
+    # fixme: for some reason, the 'bool' type is not working for train, needs to be checked
+    if args.train == 0:
+        args.train = False
+    else:
+        args.train = True
 
     reset_prev = args.reset_prev
 
     if '-1' in device:
         device = 'cpu'
 
-    if mode != 0: # train mode
+    if args.train: # train mode
         Path(model_path).mkdir(parents=True, exist_ok=True)
-        shuffle_dataframe = False
 
     # parse training CSV
     if ',' in file_data_full:
@@ -54,8 +57,8 @@ def main():
         test = 1
         data_full = None
         both_csvs = file_data_full.split(',')
-        data_train, headers_train = parseTrainingCSV(both_csvs[0])
-        data_validation, headers_validation = parseTrainingCSV(both_csvs[1])
+        data_train, headers_train = parseTrainingCSV(both_csvs[0], train=args.train)
+        data_validation, headers_validation = parseTrainingCSV(both_csvs[1], train=args.train)
 
         if headers_train != headers_validation:
             sys.exit('The training and validation CSVs do not have the same header information.')
@@ -63,9 +66,9 @@ def main():
         # if we are here, it is assumed that the user wants to do training
         TrainingManager(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
-        data_full, headers = parseTrainingCSV(file_data_full, shuffle_dataframe)
+        data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
-    if mode != 0: # training mode
+    if args.train: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
         InferenceManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)
