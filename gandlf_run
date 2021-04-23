@@ -19,10 +19,10 @@ from GANDLF.parseConfig import parseConfig
 def main():
     copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
     parser = argparse.ArgumentParser(prog='GANDLF', formatter_class=argparse.RawTextHelpFormatter, description = "Image Semantic Segmentation and Regression using Deep Learning.\n\n" + copyrightMessage)
-    parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'modelDir\' during inference', required=True)
+    parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'output\' during inference', required=True)
     parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
     parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
-    parser.add_argument('-train', type=int, help = 'True == training and False == inference; for 0, there needs to be a compatible model saved in \'-modelDir\'', required=True)
+    parser.add_argument('-train', type=int, help = '1: training and 0: inference; for 0, there needs to be a compatible model saved in \'-output\'', required=True)
     parser.add_argument('-device', default='cuda', type=str, help = 'Device to perform requested session on \'cpu\' or \'cuda\'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set', required=True)
     parser.add_argument('-reset_prev', default=False, type=bool, help = 'Whether the previous run in the output directory will be discarded or not', required=False)
     
