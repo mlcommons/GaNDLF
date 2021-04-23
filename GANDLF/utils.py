@@ -258,12 +258,14 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 
             if save_mask:
                 patient_name = subject['subject_id'][0]
+                if torch.is_tensor(patient_name):
+                    patient_name = str(patient_name.item())
 
                 if is_segmentation:
                     path_to_metadata = subject['path_to_metadata'][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
                     _, ext = os.path.splitext(path_to_metadata)
-                    if ext == '.gz':
+                    if (ext == '.gz') or (ext == '.nii'):
                         ext = '.nii.gz'
                     pred_mask = pred_mask.numpy()
                     pred_mask = reverse_one_hot(pred_mask[0],class_list)
@@ -272,6 +274,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     else:
                         result_image = pred_mask
                     result_image.CopyInformation(inputImage)
+                    result_image = sitk.Cast(result_image, inputImage.GetPixelID()) # cast as the same data type 
                     # if parameters['resize'] is not None:
                     #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
                     sitk.WriteImage(result_image, os.path.join(outputDir, patient_name + '_seg' + ext))
@@ -354,14 +357,15 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     file.write(outputToWrite)
     file.close()
 
-def parseTrainingCSV(inputTrainingCSVFile):
+def parseTrainingCSV(inputTrainingCSVFile, train = True):
     '''
     This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
     '''
     ## read training dataset into data frame
     data_full = pd.read_csv(inputTrainingCSVFile)
     # shuffle the data - this is a useful level of randomization for the training process
-    data_full=data_full.sample(frac=1).reset_index(drop=True)
+    if train:
+        data_full=data_full.sample(frac=1).reset_index(drop=True)
 
     # find actual header locations for input channel and label
     # the user might put the label first and the channels afterwards 
@@ -387,6 +391,7 @@ def parseTrainingCSV(inputTrainingCSVFile):
                 headers['labelHeader'] = currentHeaderLoc
             else:
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
+    
     return data_full, headers
     
 # def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, classList):
