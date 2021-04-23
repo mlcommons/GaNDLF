@@ -373,6 +373,8 @@ def parseTrainingCSV(inputTrainingCSVFile, train = True):
     headers['labelHeader'] = None
     headers['subjectIDHeader'] = None
 
+    subjectid_header = ''
+
     for col in data_full.columns: 
         # add appropriate headers to read here, as needed
         col_lower = col.lower()
@@ -383,11 +385,15 @@ def parseTrainingCSV(inputTrainingCSVFile, train = True):
             headers['predictionHeaders'].append(currentHeaderLoc)
         elif ('subject' in col_lower) or ('patient' in col_lower) or ('pid' in col_lower):
             headers['subjectIDHeader'] = currentHeaderLoc
+            subjectid_header = col
         elif ('label' in col_lower) or ('mask' in col_lower) or ('segmentation' in col_lower) or ('ground_truth' in col_lower) or ('groundtruth' in col_lower):
             if (headers['labelHeader'] == None):
                 headers['labelHeader'] = currentHeaderLoc
             else:
                 print('WARNING: Multiple label headers found in training CSV, only the first one will be used', file = sys.stderr)
+    
+    if not train:
+        data_full.sort_values(by=[subjectid_header])
     return data_full, headers
     
 # def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, classList):
