@@ -258,6 +258,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 
             if save_mask:
                 patient_name = subject['subject_id'][0]
+                if torch.is_tensor(patient_name):
+                    patient_name = str(patient_name.item())
 
                 if is_segmentation:
                     path_to_metadata = subject['path_to_metadata'][0]
