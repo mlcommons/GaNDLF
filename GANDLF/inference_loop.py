@@ -78,7 +78,7 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
 
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, psize, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
-    inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
+    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
     # Loading the weights into the model
     main_dict = outputDir
