@@ -1,7 +1,6 @@
 # adapted from https://github.com/kenshohara/3D-ResNets-PyTorch
 
-import math
-
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -115,6 +114,8 @@ class DenseNet(nn.Module):
             self.adaptive_avg_pool = F.adaptive_avg_pool3d
             self.output_size=(1, 1, 1)
             self.conv_stride = (conv1_t_stride, 2, 2)
+        else:
+            sys.exit('Only 2D or 3D convolutions are supported.')
 
         # First convolution
         self.features = [('conv1',
