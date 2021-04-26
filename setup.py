@@ -17,7 +17,6 @@ requirements = [
   'torchio==0.18.29',
   'pandas',
   'pylint',
-  'torchsummary',
   'scikit-learn==0.23.1',
   'pickle5==0.0.11',
   'setuptools',
@@ -26,7 +25,7 @@ requirements = [
   'openslide-python',
   'scikit-image',
   'matplotlib',
-  'requests==2.25.0',
+  'requests>=2.25.0',
   'pyvips',
   'pytest',
   'pytest-azurepipelines',
@@ -36,8 +35,8 @@ requirements = [
 
 setup(
   name='GANDLF',
-  version='0.0.8-dev', # NR: non-release; this should be changed when tagging
-  author="Ujjwal Baid, Megh Bhalerao, Caleb Grenko, Sarthak Pati, Siddhesh Thakur", # alphabetical order
+  version='0.0.9-dev', # NR: non-release; this should be changed when tagging
+  author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   packages=find_packages(),

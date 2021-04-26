@@ -11,11 +11,13 @@ git clone https://github.com/CBICA/GaNDLF.git
 cd GaNDLF
 conda create -p ./venv python=3.6 -y
 conda activate ./venv
-conda install -c pytorch pytorch # 1.8.0 installs cuda 10.2 by default, personalize based on your cuda/driver availability via https://pytorch.org/get-started/locally/
+conda install -c conda-forge mamba -y # allows for faster dependency solving
+mamba install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 ## windows
 # conda install -c sdvillal openslide -y
 ## linux
 # conda install -c conda-forge libvips openslide -y
+mamba install -c conda-forge gandlf -y
 pip install -e .
 ```
 ## Architecture
