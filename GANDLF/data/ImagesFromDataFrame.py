@@ -163,8 +163,11 @@ def ImagesFromDataFrame(dataframe,
     for i in range(len(augmentation_patchAxesPoints)):
         augmentation_patchAxesPoints[i] = max(round(augmentation_patchAxesPoints[i] / 10), 1) # always at least have 1
 
+    # initialize resizeCheck if not present
+    if not('resizeCheck' in preprocessing):
+        preprocessing['resizeCheck'] = False
+
     # iterating through the dataframe
-    resizeCheck = False
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
@@ -183,10 +186,10 @@ def ImagesFromDataFrame(dataframe,
                 subject_dict[str(channel)] = Image(tensor=array, type=torchio.INTENSITY, path=dataframe[channel][patient])
 
             # if resize has been defined but resample is not (or is none)
-            if not resizeCheck:
+            if not preprocessing['resizeCheck']:
                 if not(preprocessing is None) and ('resize' in preprocessing):
                     if (preprocessing['resize'] is not None):
-                        resizeCheck = True
+                        preprocessing['resizeCheck'] = True
                         if not('resample' in preprocessing):
                             preprocessing['resample'] = {}
                             if not('resolution' in preprocessing['resample']):
@@ -194,7 +197,7 @@ def ImagesFromDataFrame(dataframe,
                         else:
                             print('WARNING: \'resize\' is ignored as \'resample\' is defined under \'data_processing\', this will be skipped', file = sys.stderr)
                 else:
-                    resizeCheck = True
+                    preprocessing['resizeCheck'] = True
         
         # # for regression
         # if predictionHeaders:
