@@ -83,7 +83,7 @@ def MCD_loss(pm, gt, params):
     These weights should be the penalty weights, not dice weights
     """
     gt = one_hot(gt, params["model"]["class_list"])
-    return MCD(pm, gt, params["weights"], params["model"]["ignore_label_validation"], 1)
+    return MCD(pm, gt, params["weights"], None, 1)
 
 def MCD_loss_new(pm, gt, num_class, weights=None):  # compute the actual dice score
     dims = (1, 2, 3)
@@ -101,7 +101,7 @@ def MCD_log_loss(pm, gt, params, weights=None):
     These weights should be the penalty weights, not dice weights
     """
     gt = one_hot(gt, params["model"]["class_list"])
-    return MCD(pm, gt, params["weights"], params["model"]["ignore_label_validation"], 2)
+    return MCD(pm, gt, params["weights"], None, 2)
 
 
 def CE(out, target, params):
