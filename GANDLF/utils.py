@@ -11,7 +11,7 @@ from GANDLF.losses import *
 from torch.utils.data import DataLoader
 from pathlib import Path
 
-def imgResample(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
+def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
     """Resample image to certain spacing and size.
     Parameters:
     ----------
