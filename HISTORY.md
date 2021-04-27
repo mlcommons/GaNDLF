@@ -1,4 +1,5 @@
 ## 0.0.9
+
 - Refactoring the training and inference code
 
 ## 0.0.8
