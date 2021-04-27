@@ -8,6 +8,7 @@ import SimpleITK as sitk
 import nibabel as nib
 from torchvision.transforms import Normalize
 
+from GANDLF.utils import resample_image
 
 from torchio.data.subject import Subject
 from torchio.transforms.preprocessing.intensity.normalization_transform import NormalizationTransform, TypeMaskingMethod
@@ -67,6 +68,9 @@ def resize_image_resolution(input_image, output_size):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
     return outputSpacing
 
+def apply_resize(input, preprocessing_params, interpolator=sitk.sitkLinear):
+    return resample_image(input, resize_image_resolution(input, preprocessing_params['resize']), interpolator=interpolator)
+        
 
 def tensor_rotate_90(input_image, axis):
     # with 'axis' axis of rotation, rotate 90 degrees
