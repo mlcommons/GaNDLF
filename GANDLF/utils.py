@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, math
 from datetime import datetime
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
@@ -11,6 +11,52 @@ from GANDLF.losses import *
 from torch.utils.data import DataLoader
 from pathlib import Path
 
+def imgResample(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
+    """Resample image to certain spacing and size.
+    Parameters:
+    ----------
+    img : {SimpleITK.SimpleITK.Image}
+        Input 3D image.
+    spacing : {list}
+        List of length 3 indicating the voxel spacing as [x, y, z]
+    size : {list}, optional
+        List of length 3 indicating the number of voxels per dim [x, y, z] (the default is [], which will use compute the appropriate size based on the spacing.)
+    interpolator : either sitk.sitkLinear or sitk.sitkNearestNeighbor or one of those
+    origin : {list}, optional
+        The location in physical space representing the [0,0,0] voxel in the input image. (the default is [0,0,0])
+    outsideValue : {int}, optional
+        value used to pad are outside image (the default is 0)
+    Returns
+    -------
+    SimpleITK.SimpleITK.Image
+        Resampled input image.
+    """
+
+    if len(spacing) != img.GetDimension():
+        raise Exception(
+            "len(spacing) != " + str(img.GetDimension()))
+
+    # Set Size
+    if size == []:
+        inSpacing = img.GetSpacing()
+        inSize = img.GetSize()
+        size = [int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
+                for i in range(img.GetDimension())]
+    else:
+        if len(size) != img.GetDimension():
+            raise Exception(
+                "len(size) != " + str(img.GetDimension()))
+
+    # Resample input image
+    return sitk.Resample(
+        img,
+        size,
+        sitk.Transform(),
+        interpolator,
+        img.GetOrigin(),
+        spacing,
+        img.GetDirection(),
+        outsideValue)
 
 def one_hot(segmask_array, class_list):
     '''
