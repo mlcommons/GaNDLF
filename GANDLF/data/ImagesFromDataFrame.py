@@ -36,7 +36,7 @@ def elastic(patch_size = None, p = 1):
         # use defaults defined in torchio
         num_controls = 7 
         max_displacement = 7.5
-    return RandomElasticDeformation(max_displacement = max_displacement, p = p)
+    return RandomElasticDeformation(num_control_points = num_controls, max_displacement = max_displacement, p = p)
 
 def swap(patch_size = 15, p=1):
     return RandomSwap(patch_size=patch_size, num_iterations=100, p=p)
