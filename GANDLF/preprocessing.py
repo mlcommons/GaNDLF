@@ -73,7 +73,7 @@ def apply_resize(input, preprocessing_params, interpolator=sitk.sitkLinear):
 
 def get_tensor_for_dataloader(input_sitk_image):
     input_image_tensor = torch.from_numpy(sitk.GetArrayFromImage(input_sitk_image)).unsqueeze(0) # single unsqueeze is always needed
-    if len(input_image_tensor) == 3: # this is for 2D images
+    if len(input_image_tensor.shape) == 3: # this is for 2D images
         input_image_tensor = input_image_tensor.unsqueeze(0)
     return input_image_tensor
 
