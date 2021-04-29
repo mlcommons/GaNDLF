@@ -128,8 +128,7 @@ def train_network(model, train_dataloader, optimizer, params):
     average_epoch_train_metric = {}
     
     for metric in params["metrics"]:
-        if isinstance(metric, dict):
-            total_epoch_train_metric[list(metric)[0]] = 0
+        total_epoch_train_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
