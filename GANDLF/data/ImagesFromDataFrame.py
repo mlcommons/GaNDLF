@@ -157,10 +157,11 @@ def ImagesFromDataFrame(dataframe,
     sampler = sampler.lower() # for easier parsing
 
     # define the control points and swap axes for augmentation
-    augmentation_patchAxesPoints = copy.deepcopy(patch_size)
-    for i in range(len(augmentation_patchAxesPoints)):
-        augmentation_patchAxesPoints[i] = max(round(augmentation_patchAxesPoints[i] / 10), 4) # always at least have 4
-
+    augmentation_patchAxesPoints = [] # copy.deepcopy(patch_size)
+    for i in range(len(patch_size)):
+        if patch_size[i] != 1: # this is a 2D case
+            augmentation_patchAxesPoints.append(max(round(patch_size[i] / 10), 4)) # always at least have 4
+    
     resize_images = False
     # if resize has been defined but resample is not (or is none)
     if not(preprocessing is None) and ('resize' in preprocessing):
