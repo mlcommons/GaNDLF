@@ -27,10 +27,15 @@ def affine(p = 1):
     return RandomAffine(p=p)
 
 def elastic(patch_size = None, p = 1):
+    
     if patch_size is not None:
-        num_controls = patch_size
-        max_displacement = np.divide(patch_size, 10)
-        if patch_size[-1] == 1:
+        # define the control points and swap axes for augmentation
+        num_controls = []
+        for i in range(len(patch_size)):
+            if patch_size[i] != 1: # this is a 2D case
+                num_controls.append(max(round(patch_size[i] / 10), 4)) # always at least have 4
+        max_displacement = np.divide(num_controls, 10)
+        if num_controls[-1] == 1:
             max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
     else:
         # use defaults defined in torchio
@@ -156,12 +161,6 @@ def ImagesFromDataFrame(dataframe,
     
     sampler = sampler.lower() # for easier parsing
 
-    # define the control points and swap axes for augmentation
-    augmentation_patchAxesPoints = [] # copy.deepcopy(patch_size)
-    for i in range(len(patch_size)):
-        if patch_size[i] != 1: # this is a 2D case
-            augmentation_patchAxesPoints.append(max(round(patch_size[i] / 10), 4)) # always at least have 4
-    
     resize_images = False
     # if resize has been defined but resample is not (or is none)
     if not(preprocessing is None) and ('resize' in preprocessing):
@@ -282,7 +281,7 @@ def ImagesFromDataFrame(dataframe,
                     for axis in augmentations[aug]['axis']:
                         augmentation_list.append(global_augs_dict[aug](axis=axis, p=augmentations[aug]['probability']))
                 elif aug in ['swap', 'elastic']:
-                    actual_function = global_augs_dict[aug](patch_size=augmentation_patchAxesPoints, p=augmentations[aug]['probability'])
+                    actual_function = global_augs_dict[aug](patch_size=patch_size, p=augmentations[aug]['probability'])
                 elif aug == 'blur':
                     actual_function = global_augs_dict[aug](std=augmentations[aug]['std'], p=augmentations[aug]['probability'])
                 elif aug == 'noise':
