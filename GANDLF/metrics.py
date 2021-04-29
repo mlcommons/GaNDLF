@@ -116,8 +116,8 @@ def accuracy(output, label, params):
         DESCRIPTION.
 
     """
-    if params['metrics']['accuracy'] is not None:
-        output = (output >= params['metrics']['accuracy']).float()
+    if params['metrics']['accuracy']['threshold'] is not None:
+        output = (output >= params['metrics']['accuracy']['threshold']).float()
     correct = (output == label).float().sum()
     return correct / len(label)
 
