@@ -185,6 +185,10 @@ def fetch_metric(metric_name):
         The function to compute the metric
 
     """
+    # if dict, only pick the first value
+    if isinstance(metric_name, dict):
+        metric_name = list(metric_name)[0]
+
     if (metric_name).lower() == "dice":
         metric_function = multi_class_dice
     elif (metric_name).lower() == "accuracy":
