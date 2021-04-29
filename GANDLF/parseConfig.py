@@ -136,7 +136,7 @@ def parseConfig(config_file_path, version_check = True):
       if 'threshold' in params['metrics']['accuracy']:
         pass
       else:
-        params['threshold'] = 0.5
+        params['metrics']['accuracy']['threshold'] = 0.5
       
   else:
     sys.exit('The key \'metrics\' needs to be defined')
