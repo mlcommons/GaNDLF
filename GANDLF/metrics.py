@@ -116,14 +116,8 @@ def accuracy(output, label, params):
         DESCRIPTION.
 
     """
-    # Reminder to add thresholding as a possible parameter in config
-    if params["thresh"] is not None:
-        thresh = params["thresh"]
-    else:
-        thresh = 0.5
-
-    if thresh is not None:
-        output = (output >= thresh).float()
+    if params['metrics']['accuracy'] is not None:
+        output = (output >= params['metrics']['accuracy']).float()
     correct = (output == label).float().sum()
     return correct / len(label)
 
