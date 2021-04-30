@@ -1,4 +1,4 @@
-import torch
+import os
 import numpy as np
 from functools import partial
 
@@ -175,8 +175,12 @@ def ImagesFromDataFrame(dataframe,
         # such as different image modalities, labels, any other data
         subject_dict = {}
         subject_dict['subject_id'] = dataframe[subjectIDHeader][patient]
+        skip_subject = False
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
+            # sanity check for malformed csv
+            if not os.path.isfile(str(dataframe[channel][patient])):
+                skip_subject = True
             # assigning the dict key to the channel
             if not in_memory:
                 subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
@@ -199,6 +203,8 @@ def ImagesFromDataFrame(dataframe,
         #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
+            if not os.path.isfile(str(dataframe[labelHeader][patient])):
+                skip_subject = True
             if not in_memory:
                 subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
             else:
@@ -225,17 +231,19 @@ def ImagesFromDataFrame(dataframe,
             subject_dict['value_' + str(valueCounter)] = np.array(dataframe[values][patient])
             valueCounter = valueCounter + 1
         
-        # Initializing the subject object using the dict
-        subject = Subject(subject_dict)
+        # skip subject the condition was tripped
+        if not skip_subject:
+            # Initializing the subject object using the dict
+            subject = Subject(subject_dict)
 
-        # padding image, but only for label sampler, because we don't want to pad for uniform
-        if 'label' in sampler or 'weight' in sampler:
-            patch_size_pad = list(np.asarray(np.round(np.divide(patch_size,2)), dtype=int))
-            padder = Pad(patch_size_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            subject = padder(subject)
+            # padding image, but only for label sampler, because we don't want to pad for uniform
+            if 'label' in sampler or 'weight' in sampler:
+                psize_pad = list(np.asarray(np.round(np.divide(psize,2)), dtype=int))
+                padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                subject = padder(subject)
 
-        # Appending this subject to the list of subjects
-        subjects_list.append(subject)
+            # Appending this subject to the list of subjects
+            subjects_list.append(subject)
 
     augmentation_list = []
 
