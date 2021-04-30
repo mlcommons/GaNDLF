@@ -2,7 +2,7 @@
 '''
 Modified from https://github.com/pytorch/vision.git
 '''
-import math
+import math, torch
 import torch.nn as nn
 from .modelBase import get_final_layer
 
@@ -36,7 +36,7 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(10, n_outputClasses) 
         )
-         # Initialize weights
+        # Initialize weights
         for m in self.modules():
             if isinstance(m, self.Conv):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -46,7 +46,8 @@ class VGG(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
+        # x = x.view(x.size(0), -1)
+        x = torch.flatten(x,0)
         x = self.classifier(x)
         return x
 
