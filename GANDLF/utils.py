@@ -211,6 +211,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 generator = sampler(tio_subject, num_patches=num_patches)
                 for patch in generator:
                     image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
+                    valuesToPredict = torch.cat([patch['value_' + key] for key in value_keys], dim=0)
                     image = image.unsqueeze(0)
                     image = image.float().to(device)
                     ## special case for 2D
