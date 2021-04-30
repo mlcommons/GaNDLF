@@ -195,21 +195,29 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             
             if ('label' in subject):
                 if (subject['label'] != ['NA']):
-                    subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+                    subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL,tensor=subject['label']['data'].squeeze(0)) # torchio.Image(subject['label']['path'], type = torchio.LABEL)
                     label_present = True
             
             for key in value_keys: # for regression/classification
                 subject_dict['value_' + key] = subject[key]
 
             for key in channel_keys:
-                subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
+                subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'],tensor=subject[key]['data'].squeeze(0)) # torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
 
             if not(is_segmentation) and label_present:
                 ## this is the case where it is regression/classification problem AND a label is present
-                sampler = torchio.data.LabelSampler(psize, probability_map = 'label', num_patches=num_patches)
-                generator = sampler(subject_dict)
+                sampler = torchio.data.LabelSampler(psize)
+                tio_subject = torchio.Subject(subject_dict)
+                generator = sampler(tio_subject, num_patches=num_patches)
                 for patch in generator:
-                    pred_output = model(patch)
+                    image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
+                    image = image.unsqueeze(0)
+                    image = image.float().to(device)
+                    ## special case for 2D
+                    if image.shape[-1] == 1:
+                        model_2d = True
+                        image = torch.squeeze(image, -1)
+                    pred_output = model(image)
                     pred_output = pred_output.cpu()
                     # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                     loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
@@ -226,7 +234,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                         valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
                     locations = patches_batch[torchio.LOCATION]
                     image = image.float().to(device)
-                    ## special case for 2D            
+                    ## special case for 2D
                     if image.shape[-1] == 1:
                         model_2d = True
                         image = torch.squeeze(image, -1)
