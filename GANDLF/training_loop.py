@@ -342,10 +342,10 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
 
         # Now we enter the evaluation/validation part of the epoch      
         # validation data scores
-        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationOutput'), ignore_label_validation=parameters['model']['ignore_label_validation'])
+        average_val_dice, average_val_loss = get_metrics_save_mask(model, device, val_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'], outputDir = os.path.join(outputDir, 'validationOutput'), ignore_label_validation=parameters['model']['ignore_label_validation'], num_patches=parameters['q_samples_per_volume'])
 
         # testing data scores
-        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingoutput'), ignore_label_validation=parameters['model']['ignore_label_validation'])
+        average_test_dice, average_test_loss = get_metrics_save_mask(model, device, inference_loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor, save_mask=parameters['save_masks'] & testingDataDefined, outputDir = os.path.join(outputDir, 'testingoutput'), ignore_label_validation=parameters['model']['ignore_label_validation'], num_patches=parameters['q_samples_per_volume'])
     
         # regression or classification, use the loss to drive the model saving
         if is_segmentation:
