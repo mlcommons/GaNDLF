@@ -212,6 +212,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 for patch in generator:
                     image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
                     valuesToPredict = torch.cat([patch['value_' + key] for key in value_keys], dim=0)
+                    valuesToPredict = valuesToPredict*scaling_factor
                     image = image.unsqueeze(0)
                     image = image.float().to(device)
                     ## special case for 2D
@@ -233,6 +234,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
                     if len(value_keys) > 0:
                         valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
+                        valuesToPredict = valuesToPredict*scaling_factor
                     locations = patches_batch[torchio.LOCATION]
                     image = image.float().to(device)
                     ## special case for 2D
