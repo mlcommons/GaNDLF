@@ -209,6 +209,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 sampler = torchio.data.LabelSampler(psize)
                 tio_subject = torchio.Subject(subject_dict)
                 generator = sampler(tio_subject, num_patches=num_patches)
+                pred_output = 0
                 for patch in generator:
                     image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
                     valuesToPredict = torch.cat([patch['value_' + key] for key in value_keys], dim=0)
@@ -219,11 +220,11 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     if image.shape[-1] == 1:
                         model_2d = True
                         image = torch.squeeze(image, -1)
-                    pred_output = model(image)
-                    pred_output = pred_output.cpu()
-                    # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
-                    loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
-                    total_loss += loss
+                    pred_output += model(image)
+                pred_output = pred_output.cpu() / num_patches
+                # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
+                loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
+                total_loss += loss
             else:
                 grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
                 patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
