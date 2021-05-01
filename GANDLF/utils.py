@@ -195,14 +195,14 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             
             if ('label' in subject):
                 if (subject['label'] != ['NA']):
-                    subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL,tensor=subject['label']['data'].squeeze(0)) # torchio.Image(subject['label']['path'], type = torchio.LABEL)
+                    subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL, tensor=subject['label']['data'].squeeze(0))
                     label_present = True
             
             for key in value_keys: # for regression/classification
                 subject_dict['value_' + key] = subject[key]
 
             for key in channel_keys:
-                subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'],tensor=subject[key]['data'].squeeze(0)) # torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
+                subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0)) 
 
             if not(is_segmentation) and label_present:
                 ## this is the case where it is regression/classification problem AND a label is present
