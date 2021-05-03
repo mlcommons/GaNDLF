@@ -189,6 +189,9 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0
+        # used for additional metrics 
+        all_targets = [] 
+        all_predics = [] 
         for batch_idx, (subject) in enumerate(loader):
             # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
             subject_dict = {}
@@ -213,7 +216,6 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 for patch in generator:
                     image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
                     valuesToPredict = torch.cat([patch['value_' + key] for key in value_keys], dim=0)
-                    valuesToPredict = valuesToPredict*scaling_factor
                     image = image.unsqueeze(0)
                     image = image.float().to(device)
                     ## special case for 2D
@@ -222,6 +224,9 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                         image = torch.squeeze(image, -1)
                     pred_output += model(image)
                 pred_output = pred_output.cpu() / num_patches
+                pred_output /= scaling_factor
+                all_predics.append(pred_output.double())
+                all_targets.append(valuesToPredict.double())
                 # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
@@ -235,7 +240,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
                     if len(value_keys) > 0:
                         valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
-                        valuesToPredict = valuesToPredict*scaling_factor
+                        # valuesToPredict = valuesToPredict*scaling_factor
                     locations = patches_batch[torchio.LOCATION]
                     image = image.float().to(device)
                     ## special case for 2D
@@ -263,6 +268,9 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                 else:
                     pred_output = pred_output / len(locations) # average the predicted output across patches
                     pred_output = pred_output.cpu()
+                    pred_output /= scaling_factor
+                    all_predics.append(pred_output.double())
+                    all_targets.append(valuesToPredict.double())
                     # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                     loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                     total_loss += loss
@@ -305,13 +313,30 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
                     sitk.WriteImage(result_image, os.path.join(outputDir, patient_name + '_seg' + ext))
                 elif len(value_keys) > 0:
-                    outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
+                    outputToWrite += patient_name + ',' + str(pred_output) + '\n' # str(pred_output / scaling_factor) + '\n'
         
         if len(value_keys) > 0:
             file = open(os.path.join(outputDir,"output_predictions.csv"), 'w')
             file.write(outputToWrite)
             file.close()
 
+        # import icc
+        # icc_input = np.stack([all_targets, all_predics]).transpose()
+        # print(icc_input)
+        # icc_1_1 = icc.icc(icc_input, model='oneway', type='agreement', unit='single')
+        # icc_1_k = icc.icc(icc_input, model='oneway', type='agreement', unit='average')
+        # icc_2_1 = icc.icc(icc_input, model='twoway', type='agreement', unit='single')
+        # icc_2_k = icc.icc(icc_input, model='twoway', type='agreement', unit='average')
+        # icc_3_1 = icc.icc(icc_input, model='twoway', type='consistency', unit='single')
+        # icc_3_k = icc.icc(icc_input, model='twoway', type='consistency', unit='average')
+        # print('=== ICC ===')
+        # print('icc_1_1:', icc_1_1)
+        # print('icc_1_k:', icc_1_k)
+        # print('icc_2_1:', icc_2_1)
+        # print('icc_2_k:', icc_2_k)
+        # print('icc_3_1:', icc_3_1)
+        # print('icc_3_k:', icc_3_k)
+        # print('=== ICC ===')
         # calculate average loss and dice
         avg_loss = total_loss/len(loader.dataset)
         if is_segmentation:
