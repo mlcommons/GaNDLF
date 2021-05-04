@@ -1,3 +1,27 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os, argparse
+from pathlib import Path
+from datetime import date
+
+from GANDLF.utils import parseTrainingCSV
+
+def main():
+  copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+
+  parser = argparse.ArgumentParser(prog='GANDLF_Padder', formatter_class=argparse.RawTextHelpFormatter, description = "Generate training/inference data which are padded.\n\n" + copyrightMessage)
+  parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'output\' during inference', required=True)
+  parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
+  parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
+      
+  args = parser.parse_args()
+
+  file_data_full = args.data
+  Path(args.output).mkdir(parents=True, exist_ok=True)
+
+  data_full, headers = parseTrainingCSV(args.data, train=False) # don't care if the dataframe gets shuffled or not
+
+# main function
+if __name__ == '__main__':
+  main()
