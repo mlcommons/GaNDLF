@@ -65,7 +65,7 @@ def main():
 
     # skip subject the condition was tripped
     if not skip_subject:
-      print('Started padding images...')
+      print('Started padding images for \'' + subject_dict['subject_id'] + '\'', flush=True)
       # Initializing the subject object using the dict
       subject = torchio.Subject(subject_dict)
   
@@ -73,7 +73,7 @@ def main():
       padder = torchio.transforms.Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
       subject = padder(subject)
 
-    print('Writing padded images...')
+    print('Writing padded images for \'' + subject_dict['subject_id'] + '\'', flush=True)
     # write new images
     for key in channelHeaders:
       pth = Path(subject[str(key)]['path'])
