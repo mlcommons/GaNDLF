@@ -232,11 +232,11 @@ def ImagesFromDataFrame(dataframe,
             # Initializing the subject object using the dict
             subject = Subject(subject_dict)
 
-            # padding image, but only for label sampler, because we don't want to pad for uniform
-            if 'label' in sampler or 'weight' in sampler:
-                psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
-                padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-                subject = padder(subject)
+            # # padding image, but only for label sampler, because we don't want to pad for uniform
+            # if 'label' in sampler or 'weight' in sampler:
+            #     psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
+            #     padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+            #     subject = padder(subject)
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
