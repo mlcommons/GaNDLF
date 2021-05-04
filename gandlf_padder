@@ -85,14 +85,18 @@ def main():
       pth = Path(subject[str(key)]['path'])
       image_to_write = subject[str(key)].as_sitk()
       image_file = os.path.join(current_output_dir, pth.name)
-      sitk.WriteImage(image_to_write, image_file)
+      if not os.path.isfile(image_file):
+        print('Writing',image_file)
+        sitk.WriteImage(image_to_write, image_file)
 
     # now try to write the label
     if 'label' in subject_label:
       pth = Path(subject_label['label']['path'])
       image_to_write = subject_label['label'].as_sitk()
       image_file = os.path.join(current_output_dir, pth.name)
-      sitk.WriteImage(image_to_write, image_file)
+      if not os.path.isfile(image_file):
+        print('Writing',image_file)
+        sitk.WriteImage(image_to_write, image_file)
 
 # main function
 if __name__ == '__main__':
