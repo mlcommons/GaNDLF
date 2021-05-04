@@ -19,7 +19,7 @@ def main():
   parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'output\' during inference', required=True)
   parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
   parser.add_argument('-output', type=str, help = 'Output directory to save intermediate files and model weights', required=True)
-  parser.add_argument('-labelPad', type=str, default='constant', help = 'Padding type for labels, defaults to \'0\' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]', required=False)
+  parser.add_argument('-labelPad', type=str, default='constant', help = 'Padding type for labels, defaults to \'constant:0\' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]', required=False)
       
   args = parser.parse_args()
 
@@ -35,6 +35,11 @@ def main():
   predictionHeaders = headers['predictionHeaders']
   subjectIDHeader = headers['subjectIDHeader']
   psize = parameters['psize']
+
+  if 'verbose' in parameters:
+    verbose = parameters['verbose']
+  else:
+    verbose = False
   
   num_row, num_col = dataframe.shape
   dataframe.columns = range(0,num_col)
@@ -67,7 +72,8 @@ def main():
 
     # skip subject the condition was tripped
     if not skip_subject:
-      print('Started padding images for \'' + subject_dict['subject_id'] + '\'', flush=True)
+      if verbose:
+        print('Started padding images for \'' + subject_dict['subject_id'] + '\'', flush=True)
       # Initializing the subject object using the dict
       subject = torchio.Subject(subject_dict)
       subject_label = torchio.Subject(subject_dict_label)
@@ -79,14 +85,16 @@ def main():
       padder = torchio.transforms.Pad(psize_pad, padding_mode = args.labelPad) # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
       subject_label = padder(subject_label)
 
-    print('Writing padded images for \'' + subject_dict['subject_id'] + '\'', flush=True)
+    if verbose:
+      print('Writing padded images for \'' + subject_dict['subject_id'] + '\'', flush=True)
     # write new images
     for key in channelHeaders:
       pth = Path(subject[str(key)]['path'])
       image_to_write = subject[str(key)].as_sitk()
       image_file = os.path.join(current_output_dir, pth.name)
       if not os.path.isfile(image_file):
-        print('Writing',image_file)
+        if verbose:
+          print('Writing',image_file)
         sitk.WriteImage(image_to_write, image_file)
 
     # now try to write the label
@@ -95,7 +103,8 @@ def main():
       image_to_write = subject_label['label'].as_sitk()
       image_file = os.path.join(current_output_dir, pth.name)
       if not os.path.isfile(image_file):
-        print('Writing',image_file)
+        if verbose:
+          print('Writing',image_file)
         sitk.WriteImage(image_to_write, image_file)
 
 # main function
