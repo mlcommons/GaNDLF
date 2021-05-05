@@ -95,7 +95,10 @@ def main():
       if not os.path.isfile(image_file):
         if verbose:
           print('Writing',image_file)
-        sitk.WriteImage(image_to_write, image_file)
+        try:
+          sitk.WriteImage(image_to_write, image_file)
+        except:
+          print('Could not write:',image_file)
 
     # now try to write the label
     if 'label' in subject_label:
@@ -105,7 +108,10 @@ def main():
       if not os.path.isfile(image_file):
         if verbose:
           print('Writing',image_file)
-        sitk.WriteImage(image_to_write, image_file)
+        try:
+          sitk.WriteImage(image_to_write, image_file)
+        except:
+          print('Could not write:',image_file)
 
 # main function
 if __name__ == '__main__':
