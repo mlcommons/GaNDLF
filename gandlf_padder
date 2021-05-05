@@ -32,7 +32,6 @@ def main():
   # csv headers
   channelHeaders = headers['channelHeaders']
   labelHeader = headers['labelHeader']
-  predictionHeaders = headers['predictionHeaders']
   subjectIDHeader = headers['subjectIDHeader']
   psize = parameters['psize']
 
