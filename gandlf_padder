@@ -81,11 +81,6 @@ def main():
       subject = torchio.Subject(subject_dict)
       subject_label = torchio.Subject(subject_dict_label)
 
-      # apply a different padding mode to image and label (so that label information is not duplicated)  
-      psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
-      padder = torchio.transforms.Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-      subject = padder(subject)
-    
       # first, we want to do the resampling, if it is present - required for inference as well
       resampler = None
       if 'resample' in preprocessing:
@@ -109,6 +104,11 @@ def main():
       if normalizer is not None:
         subject = normalizer(subject)
 
+      # apply a different padding mode to image and label (so that label information is not duplicated)  
+      psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
+      padder = torchio.transforms.Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+      subject = padder(subject)
+    
       if labelHeader is not None:
         if verbose:
           print('Applying specialized padding to label image and then generating crops based on it', flush=True)
