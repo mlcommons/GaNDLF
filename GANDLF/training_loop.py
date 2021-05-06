@@ -216,7 +216,7 @@ def trainingLoop(trainingDataFromPickle, validationDataFromPickle, headers, devi
             # if regression, concatenate values to predict
             if is_regression or is_classification:
                 valuesToPredict = torch.cat([subject[key] for key in value_keys], dim=0)
-                valuesToPredict = torch.reshape(subject[value_keys[0]], (batch_size,1))
+                valuesToPredict = torch.reshape(valuesToPredict, (batch_size,1))
                 valuesToPredict = valuesToPredict*scaling_factor
                 if device.type != 'cpu':
                     valuesToPredict = valuesToPredict.to(device)
