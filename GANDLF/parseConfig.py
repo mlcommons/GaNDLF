@@ -132,11 +132,32 @@ def parseConfig(config_file_path, version_check = True):
   params['loss_function'] = loss_function
 
   if 'metrics' in params:
-    if 'accuracy' in params['metrics']:      
-      if 'threshold' in params['metrics']['accuracy']:
-        pass
+    if not isinstance(params['metrics'], dict):
+      temp_dict = {}
+
+    # initialize metrics dict
+    for metric in params['metrics']:
+      temp_dict[metric] = None
+    
+    # special case for accuracy
+    if 'accuracy' in params['metrics']:
+      if isinstance(params['metrics'], list):
+        temp_dict['accuracy'] = {}
       else:
-        params['metrics']['accuracy']['threshold'] = 0.5
+        temp_dict['accuracy'] = params['metrics']['accuracy']
+
+      initialize_threshold = False
+      if isinstance(temp_dict['accuracy'], dict):  
+        if 'threshold' in temp_dict['accuracy']:
+          pass
+        else:
+          initialize_threshold = True
+      else:
+        initialize_threshold = True
+      
+      if initialize_threshold:
+        temp_dict['accuracy']['threshold'] = 0.5
+    params['metrics'] = temp_dict
       
   else:
     sys.exit('The key \'metrics\' needs to be defined')
