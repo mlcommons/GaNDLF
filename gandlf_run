@@ -54,7 +54,6 @@ def main():
     # parse training CSV
     if ',' in file_data_full:
         # training and validation pre-split
-        test = 1
         data_full = None
         both_csvs = file_data_full.split(',')
         data_train, headers_train = parseTrainingCSV(both_csvs[0], train=args.train)
