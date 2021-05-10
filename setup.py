@@ -70,7 +70,7 @@ if os.name == 'nt': # proceed for windows
     print('Downloading and extracting VIPS for Windows')
     url = 'https://github.com/libvips/libvips/releases/download/v8.10.2/vips-dev-w64-all-8.10.2.zip'
     zip_to_extract = './vips.zip'
-    import urllib.request, zipfile, io
+    import urllib.request, zipfile
     urllib.request.urlretrieve(url, zip_to_extract)
     z = zipfile.ZipFile(zip_to_extract)
     z.extractall('./vips')
