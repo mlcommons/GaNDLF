@@ -240,9 +240,9 @@ def validate_network(model, valid_dataloader, scheduler, params):
         
         if len(params["value_keys"]) > 0: # for regression/classification
             label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label_ground_truth = torch.reshape(
-                subject[params["value_keys"][0]], (params["batch_size"], 1)
-            )
+            # label_ground_truth = torch.reshape(
+            #     label_ground_truth, (params["batch_size"], 1)
+            # )
             for key in params["value_keys"]:
                 subject_dict[key] = subject[key]
         
@@ -255,45 +255,48 @@ def validate_network(model, valid_dataloader, scheduler, params):
         
         is_segmentation = True
         output_prediction = 0 # this is used for regression/classification
+        current_patch = 0
         for patches_batch in patch_loader:
+            print('Current patch:', current_patch, flush=True)
+            current_patch += 1
             image = torch.cat(
                 [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
             ).float().to(params["device"])
             if len(params["value_keys"]) > 0:
                 is_segmentation = False
                 label = torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
-                label = torch.reshape(
-                    patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
-                )
+                # label = torch.reshape(
+                #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
+                # )
                 # one-hot encoding of 'label' will probably be needed for segmentation
             else:
                 label = patches_batch["label"][torchio.DATA]
             label = label.to(params["device"])
             # print("Validation :", label.shape, image.shape, flush=True)
             patch_location = patches_batch[torchio.LOCATION]
-            loss, calculated_metrics, output = step(model, image, label, params)
+            _, _, output = step(model, image, label, params)
             if is_segmentation:
                 aggregator.add_batch(output, patch_location)
             else:
                 if torch.is_tensor(output):
-                    output_prediction += output.cpu().data.item()# this probably needs customization for classification (majority voting or median, perhaps?)
+                    output_prediction += output.cpu().data.item() # this probably needs customization for classification (majority voting or median, perhaps?)
                 else:
                     output_prediction += output
         
         if is_segmentation:
-            output_prediction = aggregator.get_output_tensor()
+            output_prediction = aggregator.get_output_tensor().cpu().data.item()
             # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
         else:
             output_prediction = output_prediction / len(patch_loader) # final regression output
 
-        ## this is currently broken
-        # final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
-        # print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
+        # this is currently broken
+        final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
+        print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
-        # Non network validing related
-        total_epoch_valid_loss += loss.cpu().data.item()
-        for metric in calculated_metrics.keys():
-            total_epoch_valid_metric[metric] += calculated_metrics[metric]
+        # # Non network validing related
+        total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
+        for metric in final_metric.keys():
+            total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
         if batch_idx != 0:
