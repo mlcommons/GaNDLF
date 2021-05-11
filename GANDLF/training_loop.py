@@ -153,21 +153,25 @@ def train_network(model, train_dataloader, optimizer, params):
         label = label.to(params["device"])
         # print("Train : ", label.shape, image.shape, flush=True)
         loss, calculated_metrics, _ = step(model, image, label, params)
+        nan_loss = True
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 if not torch.isnan(
                     loss
-                ):  # if loss is nan, dont backprop and dont step optimizer
+                ):  # if loss is nan, don't backprop and don't step optimizer
                     scaler.scale(loss).backward()
                     scaler.step(optimizer)
                     scaler.update()
+                    nan_loss = False
         else:
             if not math.isnan(loss):
                 loss.backward()
                 optimizer.step()
+                nan_loss = False
 
         # Non network training related
-        total_epoch_train_loss += loss.cpu().data.item()
+        if not nan_loss:
+            total_epoch_train_loss += loss.cpu().data.item()
         for metric in calculated_metrics.keys():
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
