@@ -290,7 +290,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
             patch_location = patches_batch[torchio.LOCATION]
             _, _, output = step(model, image, label, params)
             if is_segmentation:
-                aggregator.add_batch(output, patch_location)
+                aggregator.add_batch(output.cpu(), patch_location)
             else:
                 if torch.is_tensor(output):
                     output_prediction += output.cpu().data.item() # this probably needs customization for classification (majority voting or median, perhaps?)
