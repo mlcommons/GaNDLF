@@ -12,10 +12,10 @@ import torchio
 import psutil
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
-from GANDLF.losses import fetch_loss_function
+from GANDLF.losses import fetch_loss_function, one_hot
 from GANDLF.metrics import fetch_metric
 from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler
-from GANDLF.utils import get_date_time, send_model_to_device
+from GANDLF.utils import get_date_time, send_model_to_device, one_hot
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
@@ -221,14 +221,16 @@ def validate_network(model, valid_dataloader, scheduler, params):
     for metric in params["metrics"]:
         total_epoch_valid_metric[metric] = 0
 
-    # # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    # if params["model"]["amp"]:
-    #     print("Using Automatic mixed precision", flush=True)
+    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+    if params['verbose']:
+        if params["model"]["amp"]:
+            print("Using Automatic mixed precision", flush=True)
 
     # Set the model to valid
     model.eval()
     for batch_idx, (subject) in enumerate(valid_dataloader):
-        print('=== Current subject:', subject['subject_id'], flush=True)
+        if params['verbose']:
+            print('== Current subject:', subject['subject_id'], flush=True)
         
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
@@ -272,7 +274,8 @@ def validate_network(model, valid_dataloader, scheduler, params):
         output_prediction = 0 # this is used for regression/classification
         current_patch = 0
         for patches_batch in patch_loader:
-            print('=== Current patch:', current_patch, flush=True)
+            if params['verbose']:
+                print('=== Current patch:', current_patch, ', time : ', get_date_time(), ', location :', patches_batch[torchio.LOCATION], flush=True)
             current_patch += 1
             image = torch.cat(
                 [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
@@ -287,24 +290,26 @@ def validate_network(model, valid_dataloader, scheduler, params):
             else:
                 label = patches_batch["label"][torchio.DATA]
             label = label.to(params["device"])
-            print("Validation :", label.shape, image.shape, flush=True)
-            patch_location = patches_batch[torchio.LOCATION]
+            if params['verbose']:
+                print("=== Validation shapes : label:", label.shape, ', image:', image.shape, flush=True)
             _, _, output = step(model, image, label, params)
             if is_segmentation:
-                aggregator.add_batch(output.cpu(), patch_location)
+                aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])
             else:
                 if torch.is_tensor(output):
-                    output_prediction += output.cpu().data.item() # this probably needs customization for classification (majority voting or median, perhaps?)
+                    output_prediction += output.detach().cpu() # this probably needs customization for classification (majority voting or median, perhaps?)
                 else:
                     output_prediction += output
         
         if is_segmentation:
-            output_prediction = aggregator.get_output_tensor().cpu().data.item()
+            output_prediction = aggregator.get_output_tensor()
+            output_prediction = one_hot(output_prediction.unsqueeze(0), params["model"]["class_list"])
             # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
         else:
-            output_prediction = output_prediction / (len(patch_loader) + current_patch) # final regression output
+            output_prediction = output_prediction / len(patch_loader) # final regression output
 
         # this is currently broken
+        label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
         final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
         print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
