@@ -311,7 +311,8 @@ def validate_network(model, valid_dataloader, scheduler, params):
         # this is currently broken
         label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
         final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
-        print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
+        if params['verbose']:
+            print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
         # # Non network validing related
         total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
