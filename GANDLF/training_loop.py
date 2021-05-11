@@ -228,6 +228,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
     # Set the model to valid
     model.eval()
     for batch_idx, (subject) in enumerate(valid_dataloader):
+        print('=== Current subject:', subject['subject_id'], flush=True)
         
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
@@ -271,7 +272,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
         output_prediction = 0 # this is used for regression/classification
         current_patch = 0
         for patches_batch in patch_loader:
-            print('Current patch:', current_patch, flush=True)
+            print('=== Current patch:', current_patch, flush=True)
             current_patch += 1
             image = torch.cat(
                 [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
