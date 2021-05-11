@@ -232,22 +232,36 @@ def validate_network(model, valid_dataloader, scheduler, params):
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
+        # this is when we want the valid_dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations
         if ('label' in subject):
             if (subject['label'] != ['NA']):
-                subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
-                label_ground_truth = subject["label"][torchio.DATA]
-                # one-hot encoding of 'label_ground_truth' will probably be needed for segmentation
+                subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL, tensor=subject['label']['data'].squeeze(0))
+                label_present = True
+                label_ground_truth = subject_dict['label']['data']
         
-        if len(params["value_keys"]) > 0: # for regression/classification
+        for key in params["value_keys"]: # for regression/classification
+            # subject_dict['value_' + key] = subject[key]
             label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            # label_ground_truth = torch.reshape(
-            #     label_ground_truth, (params["batch_size"], 1)
-            # )
-            for key in params["value_keys"]:
-                subject_dict[key] = subject[key]
-        
+
         for key in params["channel_keys"]:
-            subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
+            subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0))
+        
+        # if ('label' in subject):
+        #     if (subject['label'] != ['NA']):
+        #         subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+        #         label_ground_truth = subject["label"][torchio.DATA]
+        #         # one-hot encoding of 'label_ground_truth' will probably be needed for segmentation
+        
+        # if len(params["value_keys"]) > 0: # for regression/classification
+        #     label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+        #     # label_ground_truth = torch.reshape(
+        #     #     label_ground_truth, (params["batch_size"], 1)
+        #     # )
+        #     for key in params["value_keys"]:
+        #         subject_dict[key] = subject[key]
+        
+        # for key in params["channel_keys"]:
+        #     subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
             
         grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), params['patch_size'])
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
@@ -272,7 +286,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
             else:
                 label = patches_batch["label"][torchio.DATA]
             label = label.to(params["device"])
-            # print("Validation :", label.shape, image.shape, flush=True)
+            print("Validation :", label.shape, image.shape, flush=True)
             patch_location = patches_batch[torchio.LOCATION]
             _, _, output = step(model, image, label, params)
             if is_segmentation:
@@ -287,7 +301,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
             output_prediction = aggregator.get_output_tensor().cpu().data.item()
             # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
         else:
-            output_prediction = output_prediction / len(patch_loader) # final regression output
+            output_prediction = output_prediction / (len(patch_loader) + current_patch) # final regression output
 
         # this is currently broken
         final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
