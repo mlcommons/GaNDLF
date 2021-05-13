@@ -65,6 +65,28 @@ def get_model(
         )
         divisibilityCheck_baseFilter = False
 
+    if modelname == "light_resunet":
+        model = light_unet(
+            num_dimensions,
+            num_channels,
+            num_classes,
+            base_filters,
+            final_convolution_layer=final_convolution_layer,
+            residualConnections=True,
+        )
+        divisibilityCheck_baseFilter = False
+
+    elif modelname == "light_unet":
+        model = light_unet(
+            num_dimensions,
+            num_channels,
+            num_classes,
+            base_filters,
+            final_convolution_layer=final_convolution_layer,
+        )
+        divisibilityCheck_baseFilter = False
+
+
     elif modelname == "fcn":
         model = fcn(
             num_dimensions,
