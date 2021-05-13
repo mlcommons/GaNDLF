@@ -286,7 +286,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
             ).float().to(params["device"])
             if len(params["value_keys"]) > 0:
                 is_segmentation = False
-                label = torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
+                label = label_ground_truth # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
                 # label = torch.reshape(
                 #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
                 # )
