@@ -247,7 +247,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
                 label_ground_truth = subject_dict['label']['data']
         
         for key in params["value_keys"]: # for regression/classification
-            # subject_dict['value_' + key] = subject[key]
+            subject_dict['value_' + key] = subject[key]
             label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
 
         for key in params["channel_keys"]:
