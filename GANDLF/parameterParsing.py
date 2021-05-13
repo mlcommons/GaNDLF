@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
-from GANDLF.models.unet import unet
+from GANDLF.models.unet import unet, light_unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
 from GANDLF.models import densenet
