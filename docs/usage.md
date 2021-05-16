@@ -139,7 +139,7 @@ For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDL
 
 [Back To Top &uarr;](#table-of-contents)
 
-### M3D-CAM usage
+## M3D-CAM usage
 
 The integration of the M3D-CAM library into GaNDLF enables the generation of attention maps for 3D/2D images in the validation epoch for classification and segmentation tasks.
 To activate M3D-CAM one simply needs to add the following parameter to the config:
