@@ -30,7 +30,8 @@ requirements = [
   'pytest',
   'pytest-azurepipelines',
   'coverage',
-  'psutil'
+  'psutil',
+  'medcam'
 ]
 
 setup(
