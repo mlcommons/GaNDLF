@@ -520,7 +520,7 @@ def training_loop(
     )
 
     if "medcam" in params:
-        model = medcam.inject(model, output_dir=os.path.join(output_dir, "attention_maps", params["medcam"]["backend"]), backend=params["medcam"]["backend"], save_maps=False, return_attention=True, enabled=False)
+        model = medcam.inject(model, output_dir=os.path.join(output_dir, "attention_maps", params["medcam"]["backend"]), backend=params["medcam"]["backend"], layer=params["medcam"]["layer"], save_maps=False, return_attention=True, enabled=False)
         params["medcam_enabled"] = False
 
     # Setup a few variables for tracking
