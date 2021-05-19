@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import fetch_loss_function, one_hot
 from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
-from GANDLF.utils import get_date_time, send_model_to_device, one_hot
+from GANDLF.utils import get_date_time, send_model_to_device, one_hot, populate_channel_keys_in_params
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
@@ -455,21 +455,8 @@ def training_loop(
 
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
-    batch = next(
-        iter(val_dataloader)
-    )  # using train_loader makes this slower as train loader contains full augmentations
-    all_keys = list(batch.keys())
-    channel_keys = []
-    value_keys = []
-    print("Channel Keys : ", all_keys)
-    for item in all_keys:
-        if item.isnumeric():
-            channel_keys.append(item)
-        elif "value" in item:
-            value_keys.append(item)
-    params["channel_keys"] = channel_keys
-    params["value_keys"] = value_keys
-
+    params = populate_channel_keys_in_params(val_dataloader, params)
+    
     # Start training time here
     start_time = time.time()
     print("\n\n")
