@@ -12,6 +12,7 @@ from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
+from GANDLF.metrics import fetch_metric
 import torchvision
 import torch.nn as nn
 
@@ -472,3 +473,28 @@ def get_scheduler(
         dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
     dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
     """
+
+def get_loss_and_metrics(ground_truth, predicted, params):
+    """
+    ground_truth : torch.Tensor
+        The input ground truth for the corresponding image label
+    predicted : torch.Tensor
+        The input predicted label for the corresponding image label
+    params : dict
+        The parameters passed by the user yaml
+
+    Returns
+    -------
+    loss : torch.Tensor
+        The computed loss from the label and the output
+    metric_output : torch.Tensor
+        The computed metric from the label and the output
+    """
+    loss_function = fetch_loss_function(params["loss_function"], params)
+    loss = loss_function(predicted, ground_truth, params)
+    metric_output = {}
+    # Metrics should be a list
+    for metric in params["metrics"]:
+        metric_function = fetch_metric(metric)  # Write a fetch_metric
+        metric_output[metric] = metric_function(predicted, ground_truth, params).cpu().data.item()
+    return loss, metric_output
