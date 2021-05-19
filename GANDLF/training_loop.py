@@ -13,39 +13,13 @@ import psutil
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import fetch_loss_function, one_hot
-from GANDLF.metrics import fetch_metric
-from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler
+from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
 from GANDLF.utils import get_date_time, send_model_to_device, one_hot
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
 # Reminder, the scaling factor should go to the metric MSE, and all should support a scaling factor, right?
-
-def get_loss_and_metrics(ground_truth, predicted, params):
-    """
-    ground_truth : torch.Tensor
-        The input ground truth for the corresponding image label
-    predicted : torch.Tensor
-        The input predicted label for the corresponding image label
-    params : dict
-        The parameters passed by the user yaml
-
-    Returns
-    -------
-    loss : torch.Tensor
-        The computed loss from the label and the output
-    metric_output : torch.Tensor
-        The computed metric from the label and the output
-    """
-    loss_function = fetch_loss_function(params["loss_function"], params)
-    loss = loss_function(predicted, ground_truth, params)
-    metric_output = {}
-    # Metrics should be a list
-    for metric in params["metrics"]:
-        metric_function = fetch_metric(metric)  # Write a fetch_metric
-        metric_output[metric] = metric_function(predicted, ground_truth, params).cpu().data.item()
-    return loss, metric_output
 
 def step(model, image, label, params):
     """
