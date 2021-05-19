@@ -529,3 +529,37 @@ def get_date_time():
 #         # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
 #     return dice_penalty_dict
         
+def populate_channel_keys_in_params(data_loader, parameters):
+    """
+    Function to read channel key information from specified data loader
+
+    Parameters
+    ----------
+    data_loader : torch.DataLoader
+        The data loader to query key information from 
+    parameters : dict
+        The parameters passed by the user yaml
+
+    Returns
+    -------
+    parameters : dict
+        Updated parameters that include key information
+
+    """
+    '''
+    This function reads the data_loaderparses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    '''
+    batch = next(
+        iter(data_loader)
+    )  # using train_loader makes this slower as train loader contains full augmentations
+    all_keys = list(batch.keys())
+    channel_keys = []
+    value_keys = []
+    print("Channel Keys : ", all_keys)
+    for item in all_keys:
+        if item.isnumeric():
+            channel_keys.append(item)
+        elif "value" in item:
+            value_keys.append(item)
+    parameters["channel_keys"] = channel_keys
+    parameters["value_keys"] = value_keys
