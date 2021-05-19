@@ -1,3 +1,4 @@
+from GANDLF.training_loop import validate_network
 import os
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 
@@ -95,29 +96,16 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
         print("\nHostname     :" + str(os.environ.get('HOSTNAME')), flush=True)
 
     # get the channel keys for concatenation later (exclude non numeric channel keys)
-    batch = next(iter(inference_loader))
-    channel_keys = list(batch.keys())
-    channel_keys_new = []
-    value_keys = []
-    for item in channel_keys:
-        if item.isnumeric():
-            channel_keys_new.append(item)
-        elif 'value' in item:
-            value_keys.append(item)
-    channel_keys = channel_keys_new
+    parameters = populate_channel_keys_in_params(inference_loader, parameters)
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    model, amp, device = send_model_to_device(model, amp, device, optimizer=None)
+    model, parameters['model']['amp'], parameters["device"] = send_model_to_device(model, amp, device, optimizer=None)
     
-    # print stats
-    print('Using device:', device, flush=True)
-
-    # get loss function
-    loss_fn, MSE_requested = get_loss(loss_function)
+    print('Using device:', parameters["device"], flush=True)
 
     model.eval()
-    average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, patch_size, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor=scaling_factor, weights=None, save_mask=True, outputDir=outputDir)
-    print(average_dice, average_loss)
+    average_epoch_valid_loss, average_epoch_valid_metric = validate_network(model, inference_loader, None, parameters)
+    print(average_epoch_valid_loss, average_epoch_valid_metric)
 
 if os.name != 'nt':
     '''
