@@ -315,10 +315,11 @@ def validate_network(model, valid_dataloader, scheduler, params):
             valid_dataloader
         )
     
-    if params['scheduler'] == "reduce-on-plateau":
-        scheduler.step(average_epoch_valid_loss)
-    else:
-        scheduler.step()
+    if scheduler is not None: # this is useful for inference
+        if params['scheduler'] == "reduce-on-plateau":
+            scheduler.step(average_epoch_valid_loss)
+        else:
+            scheduler.step()
 
     return average_epoch_valid_loss, average_epoch_valid_metric
 
