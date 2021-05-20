@@ -36,6 +36,10 @@ class Logger():
                 row += "epoch_no,train_loss,"
                 for metric in self.metrics:
                     row += "train_" + metric + ","
+            elif mode.lower() == 'test':
+                row += "epoch_no,test_loss,"
+                for metric in self.metrics:
+                    row += "test_" + metric + ","
             else:
                 row += "epoch_no,valid_loss,"
                 for metric in self.metrics:
