@@ -35,7 +35,7 @@ def main():
     model_parameters = args.config
     parameters = parseConfig(model_parameters)
     device = args.device
-    model_path = args.output
+    parameters['output_dir'] = args.output
 
     # fixme: for some reason, the 'bool' type is not working for train, needs to be checked
     if args.train == 0:
@@ -49,7 +49,7 @@ def main():
         device = 'cpu'
 
     if args.train: # train mode
-        Path(model_path).mkdir(parents=True, exist_ok=True)
+        Path(args.output).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
     if ',' in file_data_full:
@@ -63,14 +63,14 @@ def main():
             sys.exit('The training and validation CSVs do not have the same header information.')
         
         # if we are here, it is assumed that the user wants to do training
-        TrainingManager(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
     if args.train: # training mode
-        TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
-        InferenceManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)
+        InferenceManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device)
 
 if __name__ == '__main__':
     main()
