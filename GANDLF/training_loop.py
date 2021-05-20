@@ -315,7 +315,9 @@ def validate_network(model, valid_dataloader, scheduler, params):
             valid_dataloader
         )
     
-    if scheduler is not None: # this is useful for inference
+    if scheduler is None:
+        current_output_dir = params['output_dir'] # this is in inference mode
+    else: # this is useful for inference
         if params['scheduler'] == "reduce-on-plateau":
             scheduler.step(average_epoch_valid_loss)
         else:
@@ -341,6 +343,7 @@ def training_loop(
     loss = params["loss_function"]
     metrics = params["metrics"]
     params["device"] = device
+    params['output_dir'] = output_dir
 
     if not ("num_channels" in params["model"]):
         params["model"]["num_channels"] = len(headers["channelHeaders"])
@@ -433,9 +436,11 @@ def training_loop(
         validation_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
     )
 
-    test_dataloader = DataLoader(test_data_for_torch, batch_size=1)
+    test_dataloader = DataLoader(
+        test_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
+    )
 
-    # Calculat the weights here
+    # Calculate the weights here
     params["weights"] = None
 
     # Fetch the optimizers
@@ -472,10 +477,15 @@ def training_loop(
         logger_csv_filename=os.path.join(output_dir, "valid_logs.csv"),
         metrics=params["metrics"],
     )
+    test_logger = Logger(
+        logger_csv_filename=os.path.join(output_dir, "test_logs.csv"),
+        metrics=params["metrics"],
+    )
     train_logger.write_header(mode="train")
     valid_logger.write_header(mode="valid")
+    test_logger.write_header(mode="valid")
 
-    model, amp, device = send_model_to_device(
+    model, params["model"]["amp"], device = send_model_to_device(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
@@ -500,11 +510,15 @@ def training_loop(
         epoch_valid_loss, epoch_valid_metric = validate_network(
             model, val_dataloader, scheduler, params
         )
+        epoch_test_loss, epoch_test_metric = validate_network(
+            model, test_dataloader, scheduler, params
+        )
         patience += 1
 
         # Write the losses to a logger
         train_logger.write(epoch, epoch_train_loss, epoch_train_metric)
         valid_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
+        test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
         print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
