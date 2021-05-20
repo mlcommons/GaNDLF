@@ -103,7 +103,6 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     
     print('Using device:', parameters["device"], flush=True)
 
-    model.eval()
     average_epoch_valid_loss, average_epoch_valid_metric = validate_network(model, inference_loader, None, parameters)
     print(average_epoch_valid_loss, average_epoch_valid_metric)
 
