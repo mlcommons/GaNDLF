@@ -32,7 +32,7 @@ q_max_length: 1
 q_num_workers: 0
 q_samples_per_volume: 1
 q_verbose: false
-save_masks: false
+save_output: false
 scaling_factor: 1
 scheduler: triangle
 version:
