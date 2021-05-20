@@ -97,6 +97,7 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
 
     # get the channel keys for concatenation later (exclude non numeric channel keys)
     parameters = populate_channel_keys_in_params(inference_loader, parameters)
+    parameters['save_output'] = True
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
     model, parameters['model']['amp'], parameters["device"] = send_model_to_device(model, amp, device, optimizer=None)
