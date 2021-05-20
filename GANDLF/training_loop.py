@@ -167,7 +167,7 @@ def train_network(model, train_dataloader, optimizer, params):
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(model, valid_dataloader, scheduler, params):
+def validate_network(model, valid_dataloader, scheduler, params, mode = 'validation'):
     """
     Function to validate a network for a single epoch
 
@@ -178,7 +178,9 @@ def validate_network(model, valid_dataloader, scheduler, params):
     valid_dataloader : torch.DataLoader
         The dataloader for the validation epoch
     params : dict
-        the parameters passed by the user yaml
+        The parameters passed by the user yaml
+    mode: str
+        The mode of validation, used to write outputs, if requested
 
     Returns
     -------
@@ -204,8 +206,16 @@ def validate_network(model, valid_dataloader, scheduler, params):
         if params["model"]["amp"]:
             print("Using Automatic mixed precision", flush=True)
 
+    if scheduler is None:
+        current_output_dir = params['output_dir'] # this is in inference mode
+    else: # this is useful for inference
+        current_output_dir = os.path.join(params['output_dir'], mode + '_output')
+
     # Set the model to valid
     model.eval()
+    # # putting stuff in individual arrays for correlation analysis
+    # all_targets = [] 
+    # all_predics = [] 
     for batch_idx, (subject) in enumerate(valid_dataloader):
         if params['verbose']:
             print('== Current subject:', subject['subject_id'], flush=True)
@@ -213,7 +223,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
-        # this is when we want the valid_dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations
+        # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
         if ('label' in subject):
             if (subject['label'] != ['NA']):
                 subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL, tensor=subject['label']['data'].squeeze(0))
@@ -227,75 +237,82 @@ def validate_network(model, valid_dataloader, scheduler, params):
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0))
         
-        # if ('label' in subject):
-        #     if (subject['label'] != ['NA']):
-        #         subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
-        #         label_ground_truth = subject["label"][torchio.DATA]
-        #         # one-hot encoding of 'label_ground_truth' will probably be needed for segmentation
-        
-        # if len(params["value_keys"]) > 0: # for regression/classification
-        #     label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-        #     # label_ground_truth = torch.reshape(
-        #     #     label_ground_truth, (params["batch_size"], 1)
-        #     # )
-        #     for key in params["value_keys"]:
-        #         subject_dict[key] = subject[key]
-        
-        # for key in params["channel_keys"]:
-        #     subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
+        if ('value_keys' in params) and label_present: # regression/classification problem AND label is present
+            sampler = torchio.data.LabelSampler(params['patch_size'])
+            tio_subject = torchio.Subject(subject_dict)
+            generator = sampler(tio_subject, num_patches=params['q_samples_per_volume'])
+            pred_output = 0
+            for patch in generator:
+                image = torch.cat([patch[key][torchio.DATA] for key in params["channel_keys"]], dim=1)
+                valuesToPredict = torch.cat([patch['value_' + key] for key in params["value_keys"]], dim=0)
+                image = image.unsqueeze(0)
+                image = image.float().to(params["device"])
+                ## special case for 2D
+                if image.shape[-1] == 1:
+                    image = torch.squeeze(image, -1)
+                pred_output += model(image)
+            pred_output = pred_output.cpu() / params['q_samples_per_volume']
+            pred_output /= params['scaling_factor']
+            # all_predics.append(pred_output.double())
+            # all_targets.append(valuesToPredict.double())
+            final_loss, final_metric = get_loss_and_metrics(valuesToPredict, pred_output, params)
+            # # Non network validing related
+            total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
+            for metric in final_metric.keys():
+                total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
+
+        else: # for segmentation problems OR regression/classification when no label is present
+            grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), params['patch_size'])
+            patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
+            aggregator = torchio.inference.GridAggregator(grid_sampler)
             
-        grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), params['patch_size'])
-        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-        aggregator = torchio.inference.GridAggregator(grid_sampler)
-        
-        is_segmentation = True
-        output_prediction = 0 # this is used for regression/classification
-        current_patch = 0
-        for patches_batch in patch_loader:
-            if params['verbose']:
-                print('=== Current patch:', current_patch, ', time : ', get_date_time(), ', location :', patches_batch[torchio.LOCATION], flush=True)
-            current_patch += 1
-            image = torch.cat(
-                [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-            ).float().to(params["device"])
-            if len(params["value_keys"]) > 0:
-                is_segmentation = False
-                label = label_ground_truth # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
-                # label = torch.reshape(
-                #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
-                # )
-                # one-hot encoding of 'label' will probably be needed for segmentation
-            else:
-                label = patches_batch["label"][torchio.DATA]
-            label = label.to(params["device"])
-            if params['verbose']:
-                print("=== Validation shapes : label:", label.shape, ', image:', image.shape, flush=True)
-            _, _, output = step(model, image, label, params)
-            if is_segmentation:
-                aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])
-            else:
-                if torch.is_tensor(output):
-                    output_prediction += output.detach().cpu() # this probably needs customization for classification (majority voting or median, perhaps?)
+            output_prediction = 0 # this is used for regression/classification
+            current_patch = 0
+            for patches_batch in patch_loader:
+                if params['verbose']:
+                    print('=== Current patch:', current_patch, ', time : ', get_date_time(), ', location :', patches_batch[torchio.LOCATION], flush=True)
+                current_patch += 1
+                image = torch.cat(
+                    [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+                ).float().to(params["device"])
+                if len(params["value_keys"]) > 0:
+                    is_segmentation = False
+                    label = label_ground_truth # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
+                    # label = torch.reshape(
+                    #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
+                    # )
+                    # one-hot encoding of 'label' will probably be needed for segmentation
                 else:
-                    output_prediction += output
-        
-        if is_segmentation:
-            output_prediction = aggregator.get_output_tensor()
-            output_prediction = one_hot(output_prediction.unsqueeze(0), params["model"]["class_list"])
-            # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
-        else:
-            output_prediction = output_prediction / len(patch_loader) # final regression output
+                    label = patches_batch["label"][torchio.DATA]
+                label = label.to(params["device"])
+                if params['verbose']:
+                    print("=== Validation shapes : label:", label.shape, ', image:', image.shape, flush=True)
+                _, _, output = step(model, image, label, params)
+                if is_segmentation:
+                    aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])
+                else:
+                    if torch.is_tensor(output):
+                        output_prediction += output.detach().cpu() # this probably needs customization for classification (majority voting or median, perhaps?)
+                    else:
+                        output_prediction += output
+            
+            if is_segmentation:
+                output_prediction = aggregator.get_output_tensor()
+                output_prediction = one_hot(output_prediction.unsqueeze(0), params["model"]["class_list"])
+                # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
+            else:
+                output_prediction = output_prediction / len(patch_loader) # final regression output
 
-        # this is currently broken
-        label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
-        final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
-        if params['verbose']:
-            print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
+            # this is currently broken
+            label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
+            final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
+            if params['verbose']:
+                print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
 
-        # # Non network validing related
-        total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
-        for metric in final_metric.keys():
-            total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
+            # # Non network validing related
+            total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
+            for metric in final_metric.keys():
+                total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
         if batch_idx != 0:
@@ -315,9 +332,7 @@ def validate_network(model, valid_dataloader, scheduler, params):
             valid_dataloader
         )
     
-    if scheduler is None:
-        current_output_dir = params['output_dir'] # this is in inference mode
-    else: # this is useful for inference
+    if scheduler is not None:
         if params['scheduler'] == "reduce-on-plateau":
             scheduler.step(average_epoch_valid_loss)
         else:
@@ -508,10 +523,10 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, scheduler, params
+            model, val_dataloader, scheduler, params, mode='validation'
         )
         epoch_test_loss, epoch_test_metric = validate_network(
-            model, test_dataloader, scheduler, params
+            model, test_dataloader, scheduler, params, mode='testing'
         )
         patience += 1
 
