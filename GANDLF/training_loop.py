@@ -12,10 +12,12 @@ import torchio
 import psutil
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
-from GANDLF.losses import fetch_loss_function, one_hot
+from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
-from GANDLF.utils import get_date_time, send_model_to_device, one_hot, populate_channel_keys_in_params
+from GANDLF.utils import get_date_time, resample_image, send_model_to_device, one_hot, populate_channel_keys_in_params, reverse_one_hot
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+import SimpleITK as sitk
+import numpy as np
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
@@ -233,6 +235,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
         for key in params["value_keys"]: # for regression/classification
             subject_dict['value_' + key] = subject[key]
             label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+            outputToWrite = 'SubjectID,PredictedValue\n' # used to write output
 
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0))
@@ -255,6 +258,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             pred_output /= params['scaling_factor']
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
+            outputToWrite += subject['subject_id'][0] + ',' + str(pred_output) + '\n'
             final_loss, final_metric = get_loss_and_metrics(valuesToPredict, pred_output, params)
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
@@ -298,10 +302,30 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
+                if params['save_output']:
+                    path_to_metadata = subject['path_to_metadata'][0]
+                    inputImage = sitk.ReadImage(path_to_metadata)
+                    _, ext = os.path.splitext(path_to_metadata)
+                    if (ext == '.gz') or (ext == '.nii'):
+                        ext = '.nii.gz'
+                    pred_mask = output_prediction.numpy()
+                    pred_mask = reverse_one_hot(pred_mask[0],params["model"]["class_list"])
+                    ## special case for 2D
+                    if image.shape[-1] > 1:
+                        result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2)) # ITK expects array as Z,X,Y
+                    else:
+                        result_image = pred_mask
+                    result_image.CopyInformation(inputImage)
+                    result_image = sitk.Cast(result_image, inputImage.GetPixelID()) # cast as the same data type 
+                    # this handles cases that need resampling/resizing
+                    if 'resample' in params['data_preprocessing']:
+                        result_image = resample_image(result_image, inputImage.GetSpacing(), interpolator=sitk.sitkNearestNeighbor)
+                    sitk.WriteImage(result_image, os.path.join(current_output_dir, subject['subject_id'][0] + '_seg' + ext))
                 output_prediction = one_hot(output_prediction.unsqueeze(0), params["model"]["class_list"])
                 # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
             else:
                 output_prediction = output_prediction / len(patch_loader) # final regression output
+                outputToWrite += subject['subject_id'][0] + ',' + str(output_prediction) + '\n'
 
             # this is currently broken
             label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
@@ -337,6 +361,13 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             scheduler.step(average_epoch_valid_loss)
         else:
             scheduler.step()
+    
+    # write the predictions, if appropriate
+    if params['save_output']:
+        if len(params["value_keys"]) > 0:
+            file = open(os.path.join(current_output_dir,"output_predictions.csv"), 'w')
+            file.write(outputToWrite)
+            file.close()
 
     return average_epoch_valid_loss, average_epoch_valid_metric
 
