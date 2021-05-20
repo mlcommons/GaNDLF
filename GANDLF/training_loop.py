@@ -539,10 +539,10 @@ def training_loop(
     best_loss = 1e7
     patience = 0
 
+    print("Using device:", device, flush=True)
+
     # Iterate for number of epochs
     for epoch in range(epochs):
-
-        print("Using device:", device, flush=True)
 
         # Printing times
         epoch_start_time = time.time()
