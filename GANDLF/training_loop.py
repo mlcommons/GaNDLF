@@ -453,23 +453,24 @@ def training_loop(
             "No testing data is defined, using validation data for those metrics",
             flush=True,
         )
-        testing_data = validation_data
+        # testing_data = validation_data
         testingDataDefined = False
 
-    test_data_for_torch = ImagesFromDataFrame(
-        testing_data,
-        patch_size=params["patch_size"],
-        headers=params["headers"],
-        q_max_length=params["q_max_length"],
-        q_samples_per_volume=params["q_samples_per_volume"],
-        q_num_workers=params["q_num_workers"],
-        q_verbose=params["q_verbose"],
-        sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
-        preprocessing=params["data_preprocessing"],
-        in_memory=params["in_memory"],
-        train=False,
-    )
+    if testingDataDefined:
+        test_data_for_torch = ImagesFromDataFrame(
+            testing_data,
+            patch_size=params["patch_size"],
+            headers=params["headers"],
+            q_max_length=params["q_max_length"],
+            q_samples_per_volume=params["q_samples_per_volume"],
+            q_num_workers=params["q_num_workers"],
+            q_verbose=params["q_verbose"],
+            sampler=params["patch_sampler"],
+            augmentations=params["data_augmentation"],
+            preprocessing=params["data_preprocessing"],
+            in_memory=params["in_memory"],
+            train=False,
+        )
 
     train_dataloader = DataLoader(
         training_data_for_torch,
@@ -482,9 +483,10 @@ def training_loop(
         validation_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
     )
 
-    test_dataloader = DataLoader(
-        test_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
-    )
+    if testingDataDefined:
+        test_dataloader = DataLoader(
+            test_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
+        )
 
     # Calculate the weights here
     params["weights"] = None
@@ -556,16 +558,19 @@ def training_loop(
         epoch_valid_loss, epoch_valid_metric = validate_network(
             model, val_dataloader, scheduler, params, mode='validation'
         )
-        epoch_test_loss, epoch_test_metric = validate_network(
-            model, test_dataloader, scheduler, params, mode='testing'
-        )
+        
         patience += 1
 
         # Write the losses to a logger
         train_logger.write(epoch, epoch_train_loss, epoch_train_metric)
         valid_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
-        test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
+        if testingDataDefined:
+            epoch_test_loss, epoch_test_metric = validate_network(
+                model, test_dataloader, scheduler, params, mode='testing'
+            )
+            test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
+        
         print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
         print(
