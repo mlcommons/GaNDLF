@@ -64,7 +64,7 @@ def main():
             sys.exit('The training and validation CSVs do not have the same header information.')
         
         # if we are here, it is assumed that the user wants to do training
-        TrainingManager(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager_split(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
