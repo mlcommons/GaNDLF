@@ -450,7 +450,7 @@ def training_loop(
     testingDataDefined = True
     if testing_data is None:
         print(
-            "No testing data is defined, using validation data for those metrics",
+            "Testing data is not defined...",
             flush=True,
         )
         # testing_data = validation_data
