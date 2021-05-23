@@ -169,6 +169,7 @@ def parseConfig(config_file_path, version_check=True):
             else:
                 temp_dict["accuracy"] = params["metrics"]["accuracy"]
 
+            # accuracy needs an associated threshold, if not defined, default to '0.5'
             initialize_threshold = False
             if isinstance(temp_dict["accuracy"], dict):
                 if "threshold" in temp_dict["accuracy"]:
