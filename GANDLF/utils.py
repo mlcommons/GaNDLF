@@ -219,6 +219,8 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     '''
     This function gets various statistics from the specified model and data loader
     '''
+    print('WARNING: This function has been superceded by \'validated_network\'')
+    return None, None
     # # if no weights are specified, use 1
     # if weights is None:
     #     weights = [1]
@@ -360,23 +362,6 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
             file.write(outputToWrite)
             file.close()
 
-        # import icc
-        # icc_input = np.stack([all_targets, all_predics]).transpose()
-        # print(icc_input)
-        # icc_1_1 = icc.icc(icc_input, model='oneway', type='agreement', unit='single')
-        # icc_1_k = icc.icc(icc_input, model='oneway', type='agreement', unit='average')
-        # icc_2_1 = icc.icc(icc_input, model='twoway', type='agreement', unit='single')
-        # icc_2_k = icc.icc(icc_input, model='twoway', type='agreement', unit='average')
-        # icc_3_1 = icc.icc(icc_input, model='twoway', type='consistency', unit='single')
-        # icc_3_k = icc.icc(icc_input, model='twoway', type='consistency', unit='average')
-        # print('=== ICC ===')
-        # print('icc_1_1:', icc_1_1)
-        # print('icc_1_k:', icc_1_k)
-        # print('icc_2_1:', icc_2_1)
-        # print('icc_2_k:', icc_2_k)
-        # print('icc_3_1:', icc_3_1)
-        # print('icc_3_k:', icc_3_k)
-        # print('=== ICC ===')
         # calculate average loss and dice
         avg_loss = total_loss/len(loader.dataset)
         if is_segmentation:
