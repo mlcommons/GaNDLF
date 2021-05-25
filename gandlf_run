@@ -17,7 +17,7 @@ from GANDLF.inference_manager import InferenceManager
 from GANDLF.parseConfig import parseConfig
 
 def main():
-    copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+    copyrightMessage = 'Contact: gandlf@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
     parser = argparse.ArgumentParser(prog='GANDLF', formatter_class=argparse.RawTextHelpFormatter, description = "Image Semantic Segmentation and Regression using Deep Learning.\n\n" + copyrightMessage)
     parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'output\' during inference', required=True)
     parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
