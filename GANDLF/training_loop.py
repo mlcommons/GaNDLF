@@ -18,6 +18,7 @@ from GANDLF.utils import get_date_time, resample_image, send_model_to_device, on
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 import SimpleITK as sitk
 import numpy as np
+from medcam import medcam
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
@@ -65,14 +66,23 @@ def step(model, image, label, params):
             output = model(image)
     else:
         output = model(image)
+
+    if "medcam_enabled" in params and params["medcam_enabled"]:
+        output, attention_map = output
+
     # print("Output shape : ", output.shape, flush=True)
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
     
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)
+        if "medcam_enabled" in params and params["medcam_enabled"]:
+            attention_map = torch.unsqueeze(attention_map, -1)
 
-    return loss, metric_output, output
+    if not ("medcam_enabled" in params and params["medcam_enabled"]):
+        return loss, metric_output, output
+    else:
+        return loss, metric_output, output, attention_map
 
 
 def train_network(model, train_dataloader, optimizer, params):
@@ -218,6 +228,10 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = [] 
     # all_predics = [] 
+    if "medcam_enabled" in params:
+        model.enable_medcam()
+        params["medcam_enabled"] = True
+    
     for batch_idx, (subject) in enumerate(valid_dataloader):
         if params['verbose']:
             print('== Current subject:', subject['subject_id'], flush=True)
@@ -270,6 +284,9 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(grid_sampler)
             
+            if params["medcam_enabled"]:
+                attention_map_aggregator = torchio.inference.GridAggregator(grid_sampler)
+            
             output_prediction = 0 # this is used for regression/classification
             current_patch = 0
             for patches_batch in patch_loader:
@@ -291,17 +308,26 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 label = label.to(params["device"])
                 if params['verbose']:
                     print("=== Validation shapes : label:", label.shape, ', image:', image.shape, flush=True)
-                _, _, output = step(model, image, label, params)
+                
+                result = step(model, image, label, params)
+                if "medcam_enabled" not in params:
+                    _, _, output = result
+                else:
+                    _, _, output, attention_map = result
+                    attention_map_aggregator.add_batch(attention_map, patches_batch[torchio.LOCATION])
+                
                 if is_segmentation:
-                    aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])
+                    aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])                    
                 else:
                     if torch.is_tensor(output):
                         output_prediction += output.detach().cpu() # this probably needs customization for classification (majority voting or median, perhaps?)
                     else:
                         output_prediction += output
             
+            # save outputs
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
+                label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
                 if params['save_output']:
                     path_to_metadata = subject['path_to_metadata'][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
@@ -328,11 +354,10 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 outputToWrite += subject['subject_id'][0] + ',' + str(output_prediction) + '\n'
 
             # this is currently broken
-            label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
             final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
             if params['verbose']:
                 print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
-
+                
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
             for metric in final_metric.keys():
@@ -349,6 +374,10 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                         "Epoch Validation " + metric + " : ",
                         total_epoch_valid_metric[metric] / len(valid_dataloader),
                     )
+
+    if "medcam_enabled" in params:
+        model.disable_medcam()
+        params["medcam_enabled"] = False
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
     for metric in params["metrics"]:
@@ -536,6 +565,10 @@ def training_loop(
     model, params["model"]["amp"], device = send_model_to_device(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
+
+    if "medcam" in params:
+        model = medcam.inject(model, output_dir=os.path.join(output_dir, "attention_maps", params["medcam"]["backend"]), backend=params["medcam"]["backend"], layer=params["medcam"]["layer"], save_maps=False, return_attention=True, enabled=False)
+        params["medcam_enabled"] = False
 
     # Setup a few variables for tracking
     best_loss = 1e7
