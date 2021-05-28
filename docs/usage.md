@@ -138,3 +138,27 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref]
 For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
+
+## M3D-CAM usage
+
+The integration of the M3D-CAM library into GaNDLF enables the generation of attention maps for 3D/2D images in the validation epoch for classification and segmentation tasks.
+To activate M3D-CAM one simply needs to add the following parameter to the config:
+
+medcam: 
+{
+    backend: "gcam",
+    layer: "auto"
+}
+
+One can choose from the following backends:
+
+- Grad-CAM (gcam)
+- Guided Backpropagation (gbp)
+- Guided Grad-CAM (ggcam)
+- Grad-CAM++ (gcampp)
+
+Optionally one can also change the name of the layer for which the attention maps should be generated.
+The default behaviour is "auto" which chooses the last convolutional layer.
+
+All generated attention maps can be found in the experiment output_dir.
+Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
