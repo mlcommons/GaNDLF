@@ -547,4 +547,7 @@ def populate_channel_keys_in_params(data_loader, parameters):
         elif "value" in item:
             value_keys.append(item)
     parameters["channel_keys"] = channel_keys
-    parameters["value_keys"] = value_keys
+    if value_keys:
+        parameters["value_keys"] = value_keys
+
+    return parameters

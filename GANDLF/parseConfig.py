@@ -5,6 +5,20 @@ import numpy as np
 import yaml
 import pkg_resources
 
+parameters_to_initialize_as_false = ["weighted_loss", "verbose", "medcam_enabled", "save_output", "in_memory", "save_masks" ] # this variable stores the parameters that need to be initialized to false
+
+def initialize_parameter(params, parameter_to_initialize, value = None):
+    """
+    Initializes the specified parameter with supplied value
+    """
+    if parameter_to_initialize in params:
+        pass
+    else:
+        print("WARNING: Initializing \'" + parameter_to_initialize + "\' as " + str(value))
+        params[parameter_to_initialize] = value
+    
+    return params
+
 
 def parse_version(version_string):
     """
@@ -451,12 +465,6 @@ def parseConfig(config_file_path, version_check=True):
         print("Using default folds for validation split: ", kfolds)
         params["nested_training"]["validation"] = kfolds
 
-    if not "in_memory" in params:
-        params["in_memory"] = False
-
-    if not "save_masks" in params:
-        params["save_masks"] = False
-
     # Setting default values to the params
     if "scheduler" in params:
         scheduler = str(params["scheduler"])
@@ -504,15 +512,7 @@ def parseConfig(config_file_path, version_check=True):
         parallel_compute_command = parallel_compute_command.replace('"', "")
     params["parallel_compute_command"] = parallel_compute_command
 
-    if "weighted_loss" in params:
-        pass
-    else:
-        print("WARNING: NOT using weighted loss")
-        params["weighted_loss"] = False
-
-    if "verbose" in params:
-        pass
-    else:
-        params["verbose"] = False
-
+    for current_parameter in parameters_to_initialize_as_false:
+        params = initialize_parameter(params, current_parameter, False)
+    
     return params
