@@ -59,7 +59,7 @@ def step(model, image, label, params):
         
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
-        if len(params['value_keys']) == 0: # squeeze label for segmentation only
+        if "value_keys" in params: # squeeze label for segmentation only
             label = torch.squeeze(label, -1)
     if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
@@ -130,7 +130,7 @@ def train_network(model, train_dataloader, optimizer, params):
         image = torch.cat(
             [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
         ).float().to(params["device"])
-        if len(params["value_keys"]) > 0:
+        if "value_keys" in params:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             label = label.reshape(params['batch_size'], len(params['value_keys']))
         else:
@@ -228,7 +228,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = [] 
     # all_predics = [] 
-    if "medcam_enabled" in params:
+    if params["medcam_enabled"]:
         model.enable_medcam()
         params["medcam_enabled"] = True
     
@@ -246,10 +246,11 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 label_present = True
                 label_ground_truth = subject_dict['label']['data']
         
-        for key in params["value_keys"]: # for regression/classification
-            subject_dict['value_' + key] = subject[key]
-            label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            outputToWrite = 'SubjectID,PredictedValue\n' # used to write output
+        if "value_keys" in params: # for regression/classification
+            for key in params["value_keys"]: 
+                subject_dict['value_' + key] = subject[key]
+                label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+                outputToWrite = 'SubjectID,PredictedValue\n' # used to write output
 
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0))
@@ -289,6 +290,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             
             output_prediction = 0 # this is used for regression/classification
             current_patch = 0
+            is_segmentation = True
             for patches_batch in patch_loader:
                 if params['verbose']:
                     print('=== Current patch:', current_patch, ', time : ', get_date_time(), ', location :', patches_batch[torchio.LOCATION], flush=True)
@@ -296,7 +298,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 image = torch.cat(
                     [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
                 ).float().to(params["device"])
-                if len(params["value_keys"]) > 0:
+                if "value_keys" in params:
                     is_segmentation = False
                     label = label_ground_truth # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
                     # label = torch.reshape(
@@ -307,14 +309,16 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                     label = patches_batch["label"][torchio.DATA]
                 label = label.to(params["device"])
                 if params['verbose']:
-                    print("=== Validation shapes : label:", label.shape, ', image:', image.shape, flush=True)
+                    print("=== Validation shapes : label:", label.shape, ", image:", image.shape, flush=True)
                 
                 result = step(model, image, label, params)
-                if "medcam_enabled" not in params:
-                    _, _, output = result
-                else:
+                
+                # get the current attention map and add it to its aggregator
+                if params["medcam_enabled"]:
                     _, _, output, attention_map = result
                     attention_map_aggregator.add_batch(attention_map, patches_batch[torchio.LOCATION])
+                else:
+                    _, _, output = result
                 
                 if is_segmentation:
                     aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])                    
@@ -353,6 +357,12 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 output_prediction = output_prediction / len(patch_loader) # final regression output
                 outputToWrite += subject['subject_id'][0] + ',' + str(output_prediction) + '\n'
 
+            # get the final attention map and save it
+            if params["medcam_enabled"]:
+                attention_map = attention_map_aggregator.get_output_tensor()
+                for i in range(len(attention_map)):
+                    model.save_attention_map(attention_map[i].squeeze(), raw_input=image[i].squeeze(-1))
+
             # this is currently broken
             final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
             if params['verbose']:
@@ -375,7 +385,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                         total_epoch_valid_metric[metric] / len(valid_dataloader),
                     )
 
-    if "medcam_enabled" in params:
+    if params["medcam_enabled"]:
         model.disable_medcam()
         params["medcam_enabled"] = False
 
@@ -393,7 +403,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
     
     # write the predictions, if appropriate
     if params['save_output']:
-        if len(params["value_keys"]) > 0:
+        if "value_keys" in params:
             file = open(os.path.join(current_output_dir,"output_predictions.csv"), 'w')
             file.write(outputToWrite)
             file.close()
