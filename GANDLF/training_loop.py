@@ -261,7 +261,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             generator = sampler(tio_subject, num_patches=params['q_samples_per_volume'])
             pred_output = 0
             for patch in generator:
-                image = torch.cat([patch[key][torchio.DATA] for key in params["channel_keys"]], dim=1)
+                image = torch.cat([patch[key][torchio.DATA] for key in params["channel_keys"]], dim=0)
                 valuesToPredict = torch.cat([patch['value_' + key] for key in params["value_keys"]], dim=0)
                 image = image.unsqueeze(0)
                 image = image.float().to(params["device"])
@@ -273,7 +273,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             pred_output /= params['scaling_factor']
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
-            outputToWrite += subject['subject_id'][0] + ',' + str(pred_output) + '\n'
+            outputToWrite += str(subject['subject_id'][0].data.item()) + ',' + str(pred_output.cpu().data.item()) + '\n'
             final_loss, final_metric = get_loss_and_metrics(valuesToPredict, pred_output, params)
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
