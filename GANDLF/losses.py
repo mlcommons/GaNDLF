@@ -144,7 +144,7 @@ def tversky(inp, target, alpha):
 def tversky_loss(inp, target, alpha):
     smooth = 1e-7
     iflat = inp.view(-1)
-    tflat = inp.view(-1)
+    tflat = target.view(-1)
     intersection = (iflat * tflat).sum()
     fps = (inp * (1 - target)).sum()
     fns = (inp * (1 - target)).sum()
@@ -185,7 +185,9 @@ def MSE(output, label, reduction="mean", scaling_factor=1):
     label = label.float()
     label = label*scaling_factor
     loss_fn = MSELoss(reduction=reduction)
-    loss = loss_fn(output, label)
+    iflat = output.contiguous().view(-1)
+    tflat = label.contiguous().view(-1)
+    loss = loss_fn(iflat, tflat)
     return loss
 
 def MSE_loss(inp, target, params):
