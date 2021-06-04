@@ -497,7 +497,15 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     if not ("value_keys" in parameters): # basically, do this for segmentation tasks
         for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
             # accumulate dice weights for each label
-            mask = subject['label'][torchio.DATA]
+            mask = subject["label"][torchio.DATA]
+            if parameters["verbose"]:
+                image = torch.cat(
+                    [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+                )
+                print('===\nSubject:', subject["subject_id"])
+                print('image.shape:', image.shape)
+                print('mask.shape:', mask.shape)
+
             one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
             for i in range(0, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
