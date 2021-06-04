@@ -523,6 +523,10 @@ def training_loop(
             test_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
         )
 
+    # Fetch the appropriate channel keys
+    # Getting the channels for training and removing all the non numeric entries from the channels
+    params = populate_channel_keys_in_params(val_dataloader, params)
+    
     # Calculate the weights here
     if params["weighted_loss"]:
         params["weights"] = get_class_imbalance_weights(train_dataloader, params)
@@ -544,10 +548,6 @@ def training_loop(
         learning_rate=params["learning_rate"]
     )
 
-    # Fetch the appropriate channel keys
-    # Getting the channels for training and removing all the non numeric entries from the channels
-    params = populate_channel_keys_in_params(val_dataloader, params)
-    
     # Start training time here
     start_time = time.time()
     print("\n\n")
