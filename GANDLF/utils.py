@@ -475,44 +475,53 @@ def get_date_time():
     date_string = now.strftime("%d/%m/%Y %H:%M:%S")
     return now
 
-# def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, classList):
-#     '''
-#     This function calculates the penalty that is used for validation loss in multi-class problems
-#     '''
-#     dice_weights_dict = {} # average for "weighted averaging"
-#     dice_penalty_dict = {} # penalty for misclassification
-#     for i in range(1, classList):
-#         dice_weights_dict[i] = 0
-#         dice_penalty_dict[i] = 0
-#     # define a seaparate data loader for penalty calculations
-#     penaltyData = ImagesFromDataFrame(trainingDataFromPickle, parameters['psize'], headers, train=False) 
-#     penalty_loader = DataLoader(penaltyData, batch_size=1)
+def get_class_imbalance_weights(training_data_loader, parameters):
+    '''
+    This function calculates the penalty that is used for validation loss in multi-class problems
+    '''
+    dice_weights_dict = {} # average for "weighted averaging"
+    dice_penalty_dict = None # penalty for misclassification
+    if not ("value_keys" in parameters): # basically, do this for segmentation tasks, need to extend for classification
+        dice_penalty_dict = {}
+        for i in range(0, len(parameters["model"]["class_list"])):
+            dice_weights_dict[i] = 0
+            dice_penalty_dict[i] = 0
+        
+    penalty_loader = training_data_loader
     
-#     # get the weights for use for dice loss
-#     total_nonZeroVoxels = 0
+    # get the weights for use for dice loss
+    total_nonZeroVoxels = 0
     
-#     # For regression dice penalty need not be taken account
-#     # For classification this should be calculated on the basis of predicted labels and mask
-#     if not is_regression:
-#         for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-#             # accumulate dice weights for each label
-#             mask = subject['label'][torchio.DATA]
-#             one_hot_mask = one_hot(mask, classList)
-#             for i in range(1, len(classList)):
-#                 currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-#                 dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-#                 total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
+    # For regression dice penalty need not be taken account
+    # For classification this should be calculated on the basis of predicted labels and mask
+    if not ("value_keys" in parameters): # basically, do this for segmentation tasks
+        for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
+            # accumulate dice weights for each label
+            mask = subject["label"][torchio.DATA]
+            if parameters["verbose"]:
+                image = torch.cat(
+                    [subject[key][torchio.DATA] for key in parameters["channel_keys"]], dim=1
+                )
+                print('===\nSubject:', subject["subject_id"])
+                print('image.shape:', image.shape)
+                print('mask.shape:', mask.shape)
+
+            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+            for i in range(0, len(parameters["model"]["class_list"])):
+                currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
+                dice_weights_dict[i] += currentNumber # class-specific non-zero voxels
+                total_nonZeroVoxels += currentNumber # total number of non-zero voxels to be considered
             
-#             # get the penalty values - dice_weights contains the overall number for each class in the training data
-#         for i in range(1, len(classList)):
-#             penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-#             for j in range(1, len(classList)):
-#                 if i != j: # for differing classes, subtract the number
-#                     penalty = penalty - dice_penalty_dict[j]
+            # get the penalty values - dice_weights contains the overall number for each class in the training data
+        for i in range(0, len(parameters["model"]["class_list"])):
+            penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
+            for j in range(0, len(parameters["model"]["class_list"])):
+                if i != j: # for differing classes, subtract the number
+                    penalty -= dice_weights_dict[j]
             
-#             dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-#         # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-#     return dice_penalty_dict
+            dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+        # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
+    return dice_penalty_dict
         
 def populate_channel_keys_in_params(data_loader, parameters):
     """

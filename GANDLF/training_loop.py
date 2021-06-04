@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
-from GANDLF.utils import get_date_time, resample_image, send_model_to_device, one_hot, populate_channel_keys_in_params, reverse_one_hot
+from GANDLF.utils import get_date_time, resample_image, send_model_to_device, one_hot, populate_channel_keys_in_params, reverse_one_hot, get_class_imbalance_weights
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 import SimpleITK as sitk
 import numpy as np
@@ -273,7 +273,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             pred_output /= params['scaling_factor']
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
-            outputToWrite += str(subject['subject_id'][0].data.item()) + ',' + str(pred_output.cpu().data.item()) + '\n'
+            outputToWrite += subject['subject_id'][0] + ',' + str(pred_output.cpu().data.item()) + '\n'
             final_loss, final_metric = get_loss_and_metrics(valuesToPredict, pred_output, params)
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
@@ -488,10 +488,6 @@ def training_loop(
 
     testingDataDefined = True
     if testing_data is None:
-        print(
-            "Testing data is not defined...",
-            flush=True,
-        )
         # testing_data = validation_data
         testingDataDefined = False
 
@@ -527,8 +523,37 @@ def training_loop(
             test_data_for_torch, batch_size=1, pin_memory=params["in_memory"]
         )
 
+    # Fetch the appropriate channel keys
+    # Getting the channels for training and removing all the non numeric entries from the channels
+    params = populate_channel_keys_in_params(validation_data_for_torch, params)
+    
     # Calculate the weights here
-    params["weights"] = None
+    if params["weighted_loss"]:
+        # Set up the dataloader for penalty calculation
+        penalty_data = ImagesFromDataFrame(
+            training_data,
+            patch_size=params["patch_size"],
+            headers=params["headers"],
+            q_max_length=1,
+            q_samples_per_volume=1,
+            q_num_workers=1,
+            q_verbose=False,
+            sampler=params["patch_sampler"],
+            augmentations=params["data_augmentation"],
+            preprocessing=params["data_preprocessing"],
+            in_memory=params["in_memory"],
+            train=False,
+        )
+        penalty_loader = DataLoader(
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
+        )
+
+        params["weights"] = get_class_imbalance_weights(penalty_loader, params)
+    else:
+        params["weights"] = None
 
     # Fetch the optimizers
     optimizer = get_optimizer(
@@ -545,10 +570,6 @@ def training_loop(
         learning_rate=params["learning_rate"]
     )
 
-    # Fetch the appropriate channel keys
-    # Getting the channels for training and removing all the non numeric entries from the channels
-    params = populate_channel_keys_in_params(val_dataloader, params)
-    
     # Start training time here
     start_time = time.time()
     print("\n\n")

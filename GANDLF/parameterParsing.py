@@ -66,7 +66,7 @@ def get_model(
         )
         divisibilityCheck_baseFilter = False
 
-    if modelname == "light_resunet":
+    elif modelname == "light_resunet":
         model = light_unet(
             num_dimensions,
             num_channels,

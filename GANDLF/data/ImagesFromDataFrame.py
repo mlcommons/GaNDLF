@@ -33,7 +33,7 @@ def elastic(patch_size = None, p = 1):
         num_controls = []
         for i in range(len(patch_size)):
             if patch_size[i] != 1: # this is a 2D case
-                num_controls.append(max(round(patch_size[i] / 10), 4)) # always at least have 4
+                num_controls.append(max(round(patch_size[i] / 10), 7)) # always at least have 4
         max_displacement = np.divide(num_controls, 10)
         if num_controls[-1] == 1:
             max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
@@ -147,7 +147,6 @@ def ImagesFromDataFrame(dataframe,
                         train = True):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
-    # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
     # changing the column indices to make it easier
     dataframe.columns = range(0,num_col)
     dataframe.index = range(0,num_row)
@@ -174,7 +173,7 @@ def ImagesFromDataFrame(dataframe,
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
         subject_dict = {}
-        subject_dict['subject_id'] = dataframe[subjectIDHeader][patient]
+        subject_dict['subject_id'] = str(dataframe[subjectIDHeader][patient])
         skip_subject = False
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
