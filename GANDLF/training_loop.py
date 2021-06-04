@@ -529,7 +529,29 @@ def training_loop(
     
     # Calculate the weights here
     if params["weighted_loss"]:
-        params["weights"] = get_class_imbalance_weights(train_dataloader, params)
+        # Set up the dataloader for penalty calculation
+        penalty_data = ImagesFromDataFrame(
+            training_data,
+            patch_size=params["patch_size"],
+            headers=params["headers"],
+            q_max_length=1,
+            q_samples_per_volume=1,
+            q_num_workers=1,
+            q_verbose=False,
+            sampler=params["patch_sampler"],
+            augmentations=params["data_augmentation"],
+            preprocessing=params["data_preprocessing"],
+            in_memory=params["in_memory"],
+            train=False,
+        )
+        penalty_loader = DataLoader(
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
+        )
+
+        params["weights"] = get_class_imbalance_weights(penalty_loader, params)
     else:
         params["weights"] = None
 
