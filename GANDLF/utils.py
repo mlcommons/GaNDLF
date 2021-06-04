@@ -482,7 +482,8 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     dice_weights_dict = {} # average for "weighted averaging"
     dice_penalty_dict = None # penalty for misclassification
     if not ("value_keys" in parameters): # basically, do this for segmentation tasks, need to extend for classification
-        for i in range(1, parameters["class_list"]):
+        dice_penalty_dict = {}
+        for i in range(1, len(parameters["model"]["class_list"])):
             dice_weights_dict[i] = 0
             dice_penalty_dict[i] = 0
         
@@ -497,16 +498,16 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
             # accumulate dice weights for each label
             mask = subject['label'][torchio.DATA]
-            one_hot_mask = one_hot(mask, parameters["class_list"])
-            for i in range(1, len(parameters["class_list"])):
+            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+            for i in range(1, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
                 dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
                 total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
             
             # get the penalty values - dice_weights contains the overall number for each class in the training data
-        for i in range(1, len(parameters["class_list"])):
+        for i in range(1, len(parameters["model"]["class_list"])):
             penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-            for j in range(1, len(parameters["class_list"])):
+            for j in range(1, len(parameters["model"]["class_list"])):
                 if i != j: # for differing classes, subtract the number
                     penalty = penalty - dice_penalty_dict[j]
             
