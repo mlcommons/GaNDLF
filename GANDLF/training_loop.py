@@ -273,7 +273,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             pred_output /= params['scaling_factor']
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
-            outputToWrite += str(subject['subject_id'][0].data.item()) + ',' + str(pred_output.cpu().data.item()) + '\n'
+            outputToWrite += subject['subject_id'][0] + ',' + str(pred_output.cpu().data.item()) + '\n'
             final_loss, final_metric = get_loss_and_metrics(valuesToPredict, pred_output, params)
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
