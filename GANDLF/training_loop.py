@@ -525,7 +525,7 @@ def training_loop(
 
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
-    params = populate_channel_keys_in_params(val_dataloader, params)
+    params = populate_channel_keys_in_params(validation_data_for_torch, params)
     
     # Calculate the weights here
     if params["weighted_loss"]:
