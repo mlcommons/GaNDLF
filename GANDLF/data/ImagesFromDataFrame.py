@@ -173,7 +173,7 @@ def ImagesFromDataFrame(dataframe,
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
         subject_dict = {}
-        subject_dict['subject_id'] = dataframe[subjectIDHeader][patient]
+        subject_dict['subject_id'] = str(dataframe[subjectIDHeader][patient])
         skip_subject = False
         # iterating through the channels/modalities/timepoints of the subject
         for channel in channelHeaders:
