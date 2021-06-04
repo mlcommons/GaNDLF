@@ -528,7 +528,10 @@ def training_loop(
         )
 
     # Calculate the weights here
-    params["weights"] = get_class_imbalance_weights(train_dataloader, params)
+    if params["weighted_loss"]:
+        params["weights"] = get_class_imbalance_weights(train_dataloader, params)
+    else:
+        params["weights"] = None
 
     # Fetch the optimizers
     optimizer = get_optimizer(
