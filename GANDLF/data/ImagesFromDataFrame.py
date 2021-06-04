@@ -33,7 +33,7 @@ def elastic(patch_size = None, p = 1):
         num_controls = []
         for i in range(len(patch_size)):
             if patch_size[i] != 1: # this is a 2D case
-                num_controls.append(max(round(patch_size[i] / 10), 4)) # always at least have 4
+                num_controls.append(max(round(patch_size[i] / 10), 7)) # always at least have 4
         max_displacement = np.divide(num_controls, 10)
         if num_controls[-1] == 1:
             max_displacement[-1] = 0.1 # ensure maximum displacement is never grater than patch size
