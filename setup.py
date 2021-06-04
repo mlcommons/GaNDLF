@@ -37,7 +37,7 @@ requirements = [
 setup(
   name='GANDLF',
   version='0.0.9-dev', # NR: non-release; this should be changed when tagging
-  author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur", # alphabetical order
+  author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   packages=find_packages(),
@@ -74,7 +74,7 @@ if os.name == 'nt': # proceed for windows
     print('Downloading and extracting VIPS for Windows')
     url = 'https://github.com/libvips/libvips/releases/download/v8.10.2/vips-dev-w64-all-8.10.2.zip'
     zip_to_extract = './vips.zip'
-    import urllib.request, zipfile, io
+    import urllib.request, zipfile
     urllib.request.urlretrieve(url, zip_to_extract)
     z = zipfile.ZipFile(zip_to_extract)
     z.extractall('./vips')

@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, math
 from datetime import datetime
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
@@ -11,6 +11,52 @@ from GANDLF.losses import *
 from torch.utils.data import DataLoader
 from pathlib import Path
 
+def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
+    """Resample image to certain spacing and size.
+    Parameters:
+    ----------
+    img : {SimpleITK.SimpleITK.Image}
+        Input 3D image.
+    spacing : {list}
+        List of length 3 indicating the voxel spacing as [x, y, z]
+    size : {list}, optional
+        List of length 3 indicating the number of voxels per dim [x, y, z] (the default is [], which will use compute the appropriate size based on the spacing.)
+    interpolator : either sitk.sitkLinear or sitk.sitkNearestNeighbor or one of those
+    origin : {list}, optional
+        The location in physical space representing the [0,0,0] voxel in the input image. (the default is [0,0,0])
+    outsideValue : {int}, optional
+        value used to pad are outside image (the default is 0)
+    Returns
+    -------
+    SimpleITK.SimpleITK.Image
+        Resampled input image.
+    """
+
+    if len(spacing) != img.GetDimension():
+        raise Exception(
+            "len(spacing) != " + str(img.GetDimension()))
+
+    # Set Size
+    if size == []:
+        inSpacing = img.GetSpacing()
+        inSize = img.GetSize()
+        size = [int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
+                for i in range(img.GetDimension())]
+    else:
+        if len(size) != img.GetDimension():
+            raise Exception(
+                "len(size) != " + str(img.GetDimension()))
+
+    # Resample input image
+    return sitk.Resample(
+        img,
+        size,
+        sitk.Transform(),
+        interpolator,
+        img.GetOrigin(),
+        spacing,
+        img.GetDirection(),
+        outsideValue)
 
 def one_hot(segmask_array, class_list):
     '''
@@ -169,10 +215,12 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False, ignore_label_validation = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False, ignore_label_validation = None, num_patches = 1):
     '''
     This function gets various statistics from the specified model and data loader
     '''
+    print('WARNING: This function has been superceded by \'validated_network\'')
+    return None, None
     # # if no weights are specified, use 1
     # if weights is None:
     #     weights = [1]
@@ -183,57 +231,91 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0
+        # used for additional metrics 
+        all_targets = [] 
+        all_predics = [] 
         for batch_idx, (subject) in enumerate(loader):
             # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
             subject_dict = {}
+            
             if ('label' in subject):
                 if (subject['label'] != ['NA']):
-                    subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+                    subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL, tensor=subject['label']['data'].squeeze(0))
+                    label_present = True
             
             for key in value_keys: # for regression/classification
                 subject_dict['value_' + key] = subject[key]
 
             for key in channel_keys:
-                subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
-            grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
-            patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-            aggregator = torchio.inference.GridAggregator(grid_sampler)
+                subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0)) 
 
-            pred_output = 0 # this is used for regression
-            for patches_batch in patch_loader:
-                image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
-                if len(value_keys) > 0:
-                    valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
-                locations = patches_batch[torchio.LOCATION]
-                image = image.float().to(device)
-                ## special case for 2D            
-                if image.shape[-1] == 1:
-                    model_2d = True
-                    image = torch.squeeze(image, -1)
-                    locations = torch.squeeze(locations, -1)
-                else:
-                    model_2d = False
-                
-                if is_segmentation: # for segmentation, get the predicted mask
-                    pred_mask = model(image)
-                    if model_2d:
-                        pred_mask = pred_mask.unsqueeze(-1)
-                else: # for regression/classification, get the predicted output and add it together to average later on
+            if not(is_segmentation) and label_present:
+                ## this is the case where it is regression/classification problem AND a label is present
+                sampler = torchio.data.LabelSampler(psize)
+                tio_subject = torchio.Subject(subject_dict)
+                generator = sampler(tio_subject, num_patches=num_patches)
+                pred_output = 0
+                for patch in generator:
+                    image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
+                    valuesToPredict = torch.cat([patch['value_' + key] for key in value_keys], dim=0)
+                    image = image.unsqueeze(0)
+                    image = image.float().to(device)
+                    ## special case for 2D
+                    if image.shape[-1] == 1:
+                        model_2d = True
+                        image = torch.squeeze(image, -1)
                     pred_output += model(image)
-                
-                if is_segmentation: # aggregate the predicted mask
-                    aggregator.add_batch(pred_mask, locations)
-            
-            if is_segmentation:
-                pred_mask = aggregator.get_output_tensor()
-                pred_mask = pred_mask.cpu() # the validation is done on CPU
-                pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
-            else:
-                pred_output = pred_output / len(locations) # average the predicted output across patches
-                pred_output = pred_output.cpu()
+                pred_output = pred_output.cpu() / num_patches
+                pred_output /= scaling_factor
+                all_predics.append(pred_output.double())
+                all_targets.append(valuesToPredict.double())
                 # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
+            else:
+                grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
+                patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
+                aggregator = torchio.inference.GridAggregator(grid_sampler)
+
+                pred_output = 0 # this is used for regression
+                for patches_batch in patch_loader:
+                    image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
+                    if len(value_keys) > 0:
+                        valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
+                        # valuesToPredict = valuesToPredict*scaling_factor
+                    locations = patches_batch[torchio.LOCATION]
+                    image = image.float().to(device)
+                    ## special case for 2D
+                    if image.shape[-1] == 1:
+                        model_2d = True
+                        image = torch.squeeze(image, -1)
+                        locations = torch.squeeze(locations, -1)
+                    else:
+                        model_2d = False
+                    
+                    if is_segmentation: # for segmentation, get the predicted mask
+                        pred_mask = model(image)
+                        if model_2d:
+                            pred_mask = pred_mask.unsqueeze(-1)
+                    else: # for regression/classification, get the predicted output and add it together to average later on
+                        pred_output += model(image)
+                    
+                    if is_segmentation: # aggregate the predicted mask
+                        aggregator.add_batch(pred_mask, locations)
+                
+                if is_segmentation:
+                    pred_mask = aggregator.get_output_tensor()
+                    pred_mask = pred_mask.cpu() # the validation is done on CPU
+                    pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
+                else:
+                    pred_output = pred_output / len(locations) # average the predicted output across patches
+                    pred_output = pred_output.cpu()
+                    pred_output /= scaling_factor
+                    all_predics.append(pred_output.double())
+                    all_targets.append(valuesToPredict.double())
+                    # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
+                    loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
+                    total_loss += loss
             
             first = next(iter(subject['label']))
             if is_segmentation:
@@ -273,7 +355,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
                     sitk.WriteImage(result_image, os.path.join(outputDir, patient_name + '_seg' + ext))
                 elif len(value_keys) > 0:
-                    outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
+                    outputToWrite += patient_name + ',' + str(pred_output) + '\n' # str(pred_output / scaling_factor) + '\n'
         
         if len(value_keys) > 0:
             file = open(os.path.join(outputDir,"output_predictions.csv"), 'w')
@@ -432,3 +514,40 @@ def get_date_time():
 #         # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
 #     return dice_penalty_dict
         
+def populate_channel_keys_in_params(data_loader, parameters):
+    """
+    Function to read channel key information from specified data loader
+
+    Parameters
+    ----------
+    data_loader : torch.DataLoader
+        The data loader to query key information from 
+    parameters : dict
+        The parameters passed by the user yaml
+
+    Returns
+    -------
+    parameters : dict
+        Updated parameters that include key information
+
+    """
+    '''
+    This function reads the data_loaderparses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    '''
+    batch = next(
+        iter(data_loader)
+    )  # using train_loader makes this slower as train loader contains full augmentations
+    all_keys = list(batch.keys())
+    channel_keys = []
+    value_keys = []
+    print("All Keys : ", all_keys)
+    for item in all_keys:
+        if item.isnumeric():
+            channel_keys.append(item)
+        elif "value" in item:
+            value_keys.append(item)
+    parameters["channel_keys"] = channel_keys
+    if value_keys:
+        parameters["value_keys"] = value_keys
+
+    return parameters

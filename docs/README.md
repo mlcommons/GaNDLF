@@ -37,3 +37,7 @@ graph TD;
     Save_Model-->Optimized_Model;
     Optimized_Model-->Inference;
 ```
+
+### Presentation of GaNDLF's capabilities
+
+Please see https://upenn.box.com/v/20210527-gandlf-tutorial
