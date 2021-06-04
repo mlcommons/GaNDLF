@@ -48,9 +48,13 @@ def dice(inp, target):
         iflat.sum() + tflat.sum() + smooth
     )  # 2 * intersection / union
 
-def MCD(pm, gt, num_class, weights = None, ignore_class = None): 
+def MCD(pm, gt, num_class, weights = None, ignore_class = None, loss_type = 0): 
     '''
     These weights should be the dice weights, not dice weights
+    loss_type:
+        0: no loss, normal dice calculation
+        1: dice loss, (1-dice)
+        2: log dice, -log(dice)
     '''
     acc_dice = 0
     for i in range(0, num_class): # 0 is background
@@ -61,7 +65,12 @@ def MCD(pm, gt, num_class, weights = None, ignore_class = None):
         
         if calculate_dice_for_label:
             currentDice = dice(gt[:, i, ...], pm[:, i, ...])
-            # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
+            if loss_type == 1:
+                currentDice = 1 - currentDice # subtract from 1 because this is a loss
+            elif loss_type == 2:
+                currentDice = -torch.log(
+                    currentDice + torch.finfo(torch.float32).eps
+                )  # negative because we want positive losses
             if weights is not None:
                 currentDice = currentDice * weights[i]
             acc_dice += currentDice
@@ -73,27 +82,8 @@ def MCD_loss(pm, gt, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    acc_dice_loss = 0
-    num_class = params["model"]["num_classes"]
-
-    if params["weights"] is not None:
-        weights = params["weights"]
-    else:
-        weights = None
     gt = one_hot(gt, params["model"]["class_list"])
-    # print("Param classes : ", params["model"]["num_classes"], gt.shape, flush=True)
-    for i in range(0, params["model"]["num_classes"]):  # 0 is background
-        currentDice = dice(gt[:, i, ...], pm[:, i, ...])
-        currentDiceLoss = 1 - currentDice  # subtract from 1 because this is a loss
-        if weights is not None:
-            currentDiceLoss = currentDiceLoss * weights[i]
-        acc_dice_loss += currentDiceLoss
-
-    if weights is None:
-        acc_dice_loss /= num_class  # we should not be considering 0
-
-    return acc_dice_loss
-
+    return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 1)
 
 def MCD_loss_new(pm, gt, num_class, weights=None):  # compute the actual dice score
     dims = (1, 2, 3)
@@ -106,22 +96,12 @@ def MCD_loss_new(pm, gt, num_class, weights=None):  # compute the actual dice sc
     return torch.mean(-dice_score + 1.0)
 
 
-def MCD_log_loss(pm, gt, params, weights=None):
+def MCD_log_loss(pm, gt, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    acc_dice_loss = 0
-    for i in range(0, params["model"]["num_classes"]):  # 0 is background
-        currentDice = dice(gt[:, i, ...], pm[:, i, ...])
-        currentDiceLoss = -torch.log(
-            currentDice + torch.finfo(torch.float32).eps
-        )  # negative because we want positive losses
-        if weights is not None:
-            currentDiceLoss = currentDiceLoss * weights[i]
-        acc_dice_loss += currentDiceLoss
-    if weights is None:
-        acc_dice_loss /= params["model"]["num_classes"]  # we should not be considering 0
-    return acc_dice_loss
+    gt = one_hot(gt, params["model"]["class_list"])
+    return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 2)
 
 
 def CE(out, target, params):
@@ -164,7 +144,7 @@ def tversky(inp, target, alpha):
 def tversky_loss(inp, target, alpha):
     smooth = 1e-7
     iflat = inp.view(-1)
-    tflat = inp.view(-1)
+    tflat = target.view(-1)
     intersection = (iflat * tflat).sum()
     fps = (inp * (1 - target)).sum()
     fns = (inp * (1 - target)).sum()
@@ -205,7 +185,9 @@ def MSE(output, label, reduction="mean", scaling_factor=1):
     label = label.float()
     label = label*scaling_factor
     loss_fn = MSELoss(reduction=reduction)
-    loss = loss_fn(output, label)
+    iflat = output.contiguous().view(-1)
+    tflat = label.contiguous().view(-1)
+    loss = loss_fn(iflat, tflat)
     return loss
 
 def MSE_loss(inp, target, params):
