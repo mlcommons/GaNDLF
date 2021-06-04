@@ -147,7 +147,6 @@ def ImagesFromDataFrame(dataframe,
                         train = True):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
-    # num_channels = num_col - 1 # for non-segmentation tasks, this might be different
     # changing the column indices to make it easier
     dataframe.columns = range(0,num_col)
     dataframe.index = range(0,num_row)
