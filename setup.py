@@ -8,7 +8,7 @@ with open('README.md') as readme_file:
   readme = readme_file.read()
 
 requirements = [
-  'numpy',
+  'numpy==1.19.2',
   'scipy',
   'SimpleITK==1.2.4',
   'torch>=1.7',
