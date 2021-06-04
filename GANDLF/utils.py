@@ -500,7 +500,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
             mask = subject["label"][torchio.DATA]
             if parameters["verbose"]:
                 image = torch.cat(
-                    [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+                    [subject[key][torchio.DATA] for key in parameters["channel_keys"]], dim=1
                 )
                 print('===\nSubject:', subject["subject_id"])
                 print('image.shape:', image.shape)
