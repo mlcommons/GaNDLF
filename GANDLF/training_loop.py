@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
-from GANDLF.utils import get_date_time, resample_image, send_model_to_device, one_hot, populate_channel_keys_in_params, reverse_one_hot
+from GANDLF.utils import get_date_time, resample_image, send_model_to_device, one_hot, populate_channel_keys_in_params, reverse_one_hot, get_class_imbalance_weights
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 import SimpleITK as sitk
 import numpy as np
