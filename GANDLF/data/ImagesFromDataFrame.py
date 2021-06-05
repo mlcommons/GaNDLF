@@ -134,17 +134,40 @@ global_sampler_dict = {
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, 
-                        patch_size, 
-                        headers, 
-                        q_max_length = 10, 
-                        q_samples_per_volume = 1, 
-                        q_num_workers = 2, 
-                        q_verbose = False, 
-                        sampler = 'label', 
-                        augmentations = None, 
-                        preprocessing = None, 
-                        in_memory = False,
-                        train = True):
+                        parameters,
+                        train):
+    """
+    Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
+
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
+        The main input dataframe which is calculated after splitting the data CSV
+    parameters : dict
+        The parameters dictionary
+    train : bool
+        If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
+
+    Returns
+    -------
+    subjects_dataset: torchio.SubjectsDataset
+        This is the output for validation/testing, where patching and data augmentation is disregarded
+    patches_queue: torchio.Queue
+        This is the output for training, which is the subjects_dataset queue after patching and data augmentation is taken into account
+    """
+    # store in previous variable names
+    patch_size=parameters["patch_size"]
+    headers=parameters["headers"]
+    q_max_length=parameters["q_max_length"]
+    q_samples_per_volume=parameters["q_samples_per_volume"]
+    q_num_workers=parameters["q_num_workers"]
+    q_verbose=parameters["q_verbose"]
+    sampler=parameters["patch_sampler"]
+    augmentations=parameters["data_augmentation"]
+    preprocessing=parameters["data_preprocessing"]
+    in_memory=parameters["in_memory"]
+    enable_padding=parameters["enable_padding"]
+
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # changing the column indices to make it easier
@@ -236,10 +259,11 @@ def ImagesFromDataFrame(dataframe,
             subject = Subject(subject_dict)
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
-            # if 'label' in sampler or 'weight' in sampler:
-            #     psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
-            #     padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            #     subject = padder(subject)
+            if 'label' in sampler or 'weight' in sampler:
+                if enable_padding:
+                    psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
+                    padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                    subject = padder(subject)
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)

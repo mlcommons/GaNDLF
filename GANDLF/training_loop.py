@@ -458,32 +458,14 @@ def training_loop(
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(
         training_data,
-        patch_size=params["patch_size"],
-        headers=params["headers"],
-        q_max_length=params["q_max_length"],
-        q_samples_per_volume=params["q_samples_per_volume"],
-        q_num_workers=params["q_num_workers"],
-        q_verbose=params["q_verbose"],
-        sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
-        preprocessing=params["data_preprocessing"],
-        in_memory=params["in_memory"],
-        train=True,
+        params,
+        train=True
     )
 
     validation_data_for_torch = ImagesFromDataFrame(
         validation_data,
-        patch_size=params["patch_size"],
-        headers=params["headers"],
-        q_max_length=params["q_max_length"],
-        q_samples_per_volume=params["q_samples_per_volume"],
-        q_num_workers=params["q_num_workers"],
-        q_verbose=params["q_verbose"],
-        sampler=params["patch_sampler"],
-        augmentations=params["data_augmentation"],
-        preprocessing=params["data_preprocessing"],
-        in_memory=params["in_memory"],
-        train=False,
+        params,
+        train=False
     )
 
     testingDataDefined = True
@@ -494,17 +476,8 @@ def training_loop(
     if testingDataDefined:
         test_data_for_torch = ImagesFromDataFrame(
             testing_data,
-            patch_size=params["patch_size"],
-            headers=params["headers"],
-            q_max_length=params["q_max_length"],
-            q_samples_per_volume=params["q_samples_per_volume"],
-            q_num_workers=params["q_num_workers"],
-            q_verbose=params["q_verbose"],
-            sampler=params["patch_sampler"],
-            augmentations=params["data_augmentation"],
-            preprocessing=params["data_preprocessing"],
-            in_memory=params["in_memory"],
-            train=False,
+            params,
+            train=False
         )
 
     train_dataloader = DataLoader(
