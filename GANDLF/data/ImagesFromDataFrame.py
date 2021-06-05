@@ -136,6 +136,25 @@ global_sampler_dict = {
 def ImagesFromDataFrame(dataframe, 
                         parameters,
                         train):
+    """
+    Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
+
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
+        The main input dataframe which is calculated after splitting the data CSV
+    parameters : dict
+        The parameters dictionary
+    train : bool
+        If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
+
+    Returns
+    -------
+    subjects_dataset: torchio.SubjectsDataset
+        This is the output for validation/testing, where patching and data augmentation is disregarded
+    patches_queue: torchio.Queue
+        This is the output for training, which is the subjects_dataset queue after patching and data augmentation is taken into account
+    """
     # store in previous variable names
     patch_size=parameters["patch_size"]
     headers=parameters["headers"]
