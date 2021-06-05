@@ -144,7 +144,8 @@ def ImagesFromDataFrame(dataframe,
                         augmentations = None, 
                         preprocessing = None, 
                         in_memory = False,
-                        train = True):
+                        train = True,
+                        enable_padding = False):
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # changing the column indices to make it easier
@@ -236,10 +237,11 @@ def ImagesFromDataFrame(dataframe,
             subject = Subject(subject_dict)
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
-            # if 'label' in sampler or 'weight' in sampler:
-            #     psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
-            #     padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            #     subject = padder(subject)
+            if 'label' in sampler or 'weight' in sampler:
+                if enable_padding:
+                    psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
+                    padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                    subject = padder(subject)
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
