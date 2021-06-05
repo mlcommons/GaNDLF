@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 import pkg_resources
 
-parameters_to_initialize_as_false = ["weighted_loss", "verbose", "medcam_enabled", "save_output", "in_memory", "save_masks" ] # this variable stores the parameters that need to be initialized to false
+parameters_to_initialize_as_false = ["weighted_loss", "verbose", "medcam_enabled", "save_output", "in_memory", "save_masks", "enable_padding" ] # this variable stores the parameters that need to be initialized to false
 
 def initialize_parameter(params, parameter_to_initialize, value = None):
     """
