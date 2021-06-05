@@ -142,14 +142,8 @@ def tversky(inp, target, alpha):
 
 
 def tversky_loss(inp, target, alpha):
-    smooth = 1e-7
-    iflat = inp.view(-1)
-    tflat = target.view(-1)
-    intersection = (iflat * tflat).sum()
-    fps = (inp * (1 - target)).sum()
-    fns = (inp * (1 - target)).sum()
-    denominator = intersection + (alpha * fps) + ((1 - alpha) * fns) + smooth
-    return 1 - ((intersection + smooth) / denominator)
+    tversky_val = tversky(inp, target, alpha)
+    return 1 - tversky_val
 
 
 def MCT_loss(inp, target, num_class, weights):
