@@ -134,18 +134,21 @@ global_sampler_dict = {
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(dataframe, 
-                        patch_size, 
-                        headers, 
-                        q_max_length = 10, 
-                        q_samples_per_volume = 1, 
-                        q_num_workers = 2, 
-                        q_verbose = False, 
-                        sampler = 'label', 
-                        augmentations = None, 
-                        preprocessing = None, 
-                        in_memory = False,
-                        train = True,
-                        enable_padding = False):
+                        parameters,
+                        train):
+    # store in previous variable names
+    patch_size=parameters["patch_size"]
+    headers=parameters["headers"]
+    q_max_length=parameters["q_max_length"]
+    q_samples_per_volume=parameters["q_samples_per_volume"]
+    q_num_workers=parameters["q_num_workers"]
+    q_verbose=parameters["q_verbose"]
+    sampler=parameters["patch_sampler"]
+    augmentations=parameters["data_augmentation"]
+    preprocessing=parameters["data_preprocessing"]
+    in_memory=parameters["in_memory"]
+    enable_padding=parameters["enable_padding"]
+
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
     # changing the column indices to make it easier
