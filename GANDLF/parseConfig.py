@@ -394,11 +394,10 @@ def parseConfig(config_file_path, version_check=True):
             )
 
         if "amp" in params["model"]:
-            amp = params["model"]["amp"]
+            pass
         else:
-            amp = False
             print("NOT using Mixed Precision Training")
-        params["model"]["amp"] = amp
+            params["model"]["amp"] = False
 
         if not ("architecture" in params["model"]):
             sys.exit("The 'model' parameter needs 'architecture' key to be defined")
@@ -418,6 +417,12 @@ def parseConfig(config_file_path, version_check=True):
             params["model"]["ignore_label_validation"] = None
         if not ("batch_norm" in params["model"]):
             params["model"]["batch_norm"] = False
+        
+        channel_keys_to_check = ["n_channels", "channels", "model_channels"]
+        for key in channel_keys_to_check:
+            if key in params["model"]:
+                params["model"]["num_channels"] = params["model"][key]
+                break
 
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
