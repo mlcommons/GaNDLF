@@ -208,7 +208,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
 
     """
     print("*" * 20)
-    print("Starting validation : ")
+    print("Starting " + mode + " : ")
     print("*" * 20)
     # Initialize a few things
     total_epoch_valid_loss = 0
@@ -336,6 +336,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             # save outputs
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
+                output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
                 if params['save_output']:
                     path_to_metadata = subject['path_to_metadata'][0]
@@ -356,7 +357,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                     if 'resample' in params['data_preprocessing']:
                         result_image = resample_image(result_image, inputImage.GetSpacing(), interpolator=sitk.sitkNearestNeighbor)
                     sitk.WriteImage(result_image, os.path.join(current_output_dir, subject['subject_id'][0] + '_seg' + ext))
-                output_prediction = output_prediction.unsqueeze(0)
                 # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
             else:
                 output_prediction = output_prediction / len(patch_loader) # final regression output
@@ -370,7 +370,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
 
             final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
             if params['verbose']:
-                print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
+                print("Full image " + mode + ":: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
                 
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
@@ -380,11 +380,11 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
         # For printing information at halftime during an epoch
         if ((batch_idx+1) % (len(valid_dataloader) / 2) == 0) and ((batch_idx+1) < len(valid_dataloader)):
             print(
-                "Half-Epoch Average Validation loss : ", total_epoch_valid_loss / (batch_idx+1)
+                "Half-Epoch Average " + mode + " loss : ", total_epoch_valid_loss / (batch_idx+1)
             )
             for metric in params["metrics"]:
                 print(
-                    "Half-Epoch Average Validation " + metric + " : ",
+                    "Half-Epoch Average " + mode + " " + metric + " : ",
                     total_epoch_valid_metric[metric] / (batch_idx+1),
                 )
 
@@ -393,13 +393,13 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
         params["medcam_enabled"] = False
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
-    print("     Epoch Final   Validation loss : ", average_epoch_valid_loss)
+    print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
     for metric in params["metrics"]:
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
         )
         print(
-            "     Epoch Final   Validation " + metric + " : ",
+            "     Epoch Final   " + mode + " " + metric + " : ",
             average_epoch_valid_metric[metric],
         )
     
@@ -430,22 +430,11 @@ def training_loop(
 ):
 
     # Some autodetermined factors
-    num_classes = len(params["model"]["class_list"])
-    params["headers"] = headers
     epochs = params["num_epochs"]
     loss = params["loss_function"]
     metrics = params["metrics"]
     params["device"] = device
     params['output_dir'] = output_dir
-
-    if not ("num_channels" in params["model"]):
-        params["model"]["num_channels"] = len(headers["channelHeaders"])
-    
-    # ensure the number of output classes for model prediction is working correctly
-    if len(headers["predictionHeaders"]) > 0:
-        params["model"]["num_classes"] = len(headers["predictionHeaders"])
-    else:
-        params["model"]["num_classes"] = num_classes
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])

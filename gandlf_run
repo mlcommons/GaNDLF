@@ -15,6 +15,7 @@ from datetime import date
 from GANDLF.training_manager import *
 from GANDLF.inference_manager import InferenceManager 
 from GANDLF.parseConfig import parseConfig
+from GANDLF.utils import populate_header_in_parameters
 
 def main():
     copyrightMessage = 'Contact: gandlf@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
@@ -67,10 +68,15 @@ def main():
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
+    parameters = populate_header_in_parameters(parameters, headers)
+
+    # # start computation - either training or inference
     if args.train: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
         InferenceManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device)
+    
+    print("Finished.")
 
 if __name__ == '__main__':
     main()

@@ -38,57 +38,42 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     '''
     This is the main inference loop
     '''
-    # extract variables form parameters dict
-    patch_size = parameters['patch_size']
-    q_max_length = parameters['q_max_length']
-    q_samples_per_volume = parameters['q_samples_per_volume']
-    q_num_workers = parameters['q_num_workers']
-    q_verbose = parameters['q_verbose']
-    augmentations = parameters['data_augmentation']
-    preprocessing = parameters['data_preprocessing']
-    which_model = parameters['model']['architecture']
-    if not('num_channels' in parameters['model']):
-        num_channels = len(headers['channelHeaders'])
-    else:
-        num_channels = parameters['model']['num_channels']
-
-    base_filters = parameters['model']['base_filters']
-    amp = parameters['model']['amp']
-    class_list = parameters['model']['class_list']
-    
-    batch_size = parameters['batch_size']
-    loss_function = parameters['loss_function']
-
-    scaling_factor = parameters['scaling_factor']
-    n_classList = len(class_list)
-
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of dims     : ", parameters['model']['dimension'])
     if 'num_channels' in parameters['model']:
         print("Number of channels : ", parameters['model']['num_channels'])
-    print("Number of classes  : ", n_classList)
-    model = get_model(which_model, parameters['model']['dimension'], num_channels, n_classList, base_filters, final_convolution_layer = parameters['model']['final_layer'], patch_size = patch_size, batch_size = 1)
+    print("Number of classes  : ", len(parameters['model']['class_list']))
+
+    model, parameters["model"]["amp"] = get_model(
+        modelname=parameters["model"]["architecture"],
+        num_dimensions=parameters["model"]["dimension"],
+        num_channels=parameters["model"]["num_channels"],
+        num_classes=parameters["model"]["num_classes"],
+        base_filters=parameters["model"]["base_filters"],
+        final_convolution_layer=parameters["model"]["final_layer"],
+        patch_size=parameters["patch_size"],
+        batch_size=1,
+        amp=parameters["model"]["amp"]
+    )
     # initialize problem type    
     is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
-
-    # initialize problem type    
-    is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
-
-    if is_regression or is_classification:
-        n_classList = len(headers['predictionHeaders']) # ensure the output class list is correctly populated
 
     # Setting up the inference loader
-    inferenceDataForTorch = ImagesFromDataFrame(inferenceDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train = False, augmentations = augmentations, preprocessing = preprocessing)
-    inference_loader = DataLoader(inferenceDataForTorch, batch_size=batch_size)
+    
+    inferenceDataForTorch = ImagesFromDataFrame(
+        inferenceDataFromPickle,
+        parameters,
+        train=False
+    )
+
+    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
     # Loading the weights into the model
     main_dict = outputDir
     if os.path.isdir(outputDir):
-        file_to_check = os.path.join(outputDir,str(which_model) + "_best_val.pth.tar")
+        file_to_check = os.path.join(outputDir,str(parameters["model"]["architecture"]) + "_best.pth.tar")
         if not os.path.isfile(file_to_check):
-            file_to_check = os.path.join(outputDir,str(which_model) + "_best_train.pth.tar")
-    else:
-        file_to_check = outputDir
+            raise ValueError("The model specified model was not found:", file_to_check)
     main_dict = torch.load(file_to_check)
     model.load_state_dict(main_dict['model_state_dict'])
     
@@ -100,11 +85,17 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
     parameters['save_output'] = True
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    model, parameters['model']['amp'], parameters["device"] = send_model_to_device(model, amp, device, optimizer=None)
+    model, parameters['model']['amp'], parameters["device"] = send_model_to_device(model, parameters['model']['amp'], device, optimizer=None)
     
     print('Using device:', parameters["device"], flush=True)
 
-    average_epoch_valid_loss, average_epoch_valid_metric = validate_network(model, inference_loader, None, parameters)
+    average_epoch_valid_loss, average_epoch_valid_metric = validate_network(
+        model, 
+        inference_loader, 
+        None, 
+        parameters,
+        mode="inference"
+    )
     print(average_epoch_valid_loss, average_epoch_valid_metric)
 
 if os.name != 'nt':

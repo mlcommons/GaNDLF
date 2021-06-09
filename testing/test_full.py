@@ -107,6 +107,7 @@ def test_train_segmentation_rad_2d(device):
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_segmentation.csv')
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['patch_size'] = patch_size['2D']
   parameters['model']['dimension'] = 2
   parameters['model']['class_list'] = [0,255]
@@ -127,6 +128,7 @@ def test_train_segmentation_rad_3d(device):
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_segmentation.csv')
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_segmentation.yaml', version_check = False)
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['patch_size'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
@@ -149,6 +151,7 @@ def test_train_regression_rad_2d(device):
   parameters['model']['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_regression.csv')
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
   parameters['scaling_factor'] = 1
@@ -169,6 +172,7 @@ def test_train_regression_rad_3d(device):
   parameters['model']['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_regression.csv')
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
@@ -189,6 +193,7 @@ def test_train_classification_rad_2d(device):
   parameters['model']['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
@@ -208,6 +213,7 @@ def test_train_classification_rad_3d(device):
   parameters['model']['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
@@ -228,6 +234,7 @@ def test_scheduler_classification_rad_2d(device):
   parameters['model']['amp'] = True
   # read and parse csv 
   training_data, headers = parseTrainingCSV(inputDir + '/train_2d_rad_classification.csv')
+  parameters = populate_header_in_parameters(parameters, headers)
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
   parameters['model']['architecture'] = "densenet121" 

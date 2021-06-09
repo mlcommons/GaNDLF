@@ -41,7 +41,7 @@ setup(
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   packages=find_packages(),
-  scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
+  scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner', 'gandlf_padder'],
   classifiers=[
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Science/Research',
@@ -52,14 +52,14 @@ setup(
     'Programming Language :: Python :: 3.7',
   ],
   description=(
-    "Segmentation/regression/classification using various DL architectures using PyTorch."
+    "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
   ),
   install_requires=requirements,
   license="BSD-3-Clause License",
   long_description=readme,
   long_description_content_type='text/markdown',
   include_package_data=True,
-  keywords='semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation',
+  keywords='semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation, medical-imaging',
   zip_safe=False,
 )
 
