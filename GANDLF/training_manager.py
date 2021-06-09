@@ -1,5 +1,5 @@
 import pandas as pd
-import os, sys, pickle, subprocess
+import os, sys, pickle, subprocess, shutil
 from sklearn.model_selection import KFold
 from pathlib import Path
 
@@ -17,6 +17,10 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
     device = self-explanatory
     reset_prev = whether the previous run in the same output directory is used or not
     '''
+
+    if reset_prev:
+        shutil.rmtree(outputDir)
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
 
     # check for single fold training
     singleFoldValidation = False
