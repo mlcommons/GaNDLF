@@ -378,6 +378,23 @@ def fix_paths(cwd):
         vipshome = os.path.join(cwd, 'vips/vips-dev-8.10/bin')
         os.environ['PATH'] = vipshome + ';' + os.environ['PATH']
 
+def populate_header_in_parameters(parameters, headers):
+    '''
+    This function populates the parameters with information from the header in a common manner
+    '''
+    # initialize common parameters based on headers
+    parameters["headers"] = headers
+    # ensure the number of output classes for model prediction is working correctly
+    if len(headers["predictionHeaders"]) > 0:
+        parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
+    else:
+        parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
+    # initialize number of channels for processing
+    if not("num_channels" in parameters["model"]):
+        parameters["model"]["num_channels"] = len(headers["channelHeaders"])
+    
+    return parameters
+
 def find_problem_type(headersFromCSV, model_final_layer):
     '''
     This function determines the type of problem at hand - regression, classification or segmentation
