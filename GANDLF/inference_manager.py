@@ -30,14 +30,22 @@ def InferenceManager(dataframe, headers, outputDir, parameters, device):
     '''
     # get the indeces for kfold splitting
     inferenceData_full = dataframe
-    # inference_indeces_full = list(inferenceData_full.index.values)
-
-    if parameters['modality'] == 'rad':
-        inferenceLoopRad(inferenceDataFromPickle=inferenceData_full, headers=headers, outputDir=outputDir,
-                         device=device, parameters=parameters)
-    elif parameters['modality'] == 'path':
-        inferenceLoopPath(inferenceDataFromPickle=inferenceData_full, headers=headers, outputDir=outputDir,
-                          device=device, parameters=parameters)
+    
+    # # initialize parameters for inference
+    if not("weights" in parameters):
+        parameters["weights"] = None # no need for loss weights for inference
+    
+    if parameters["modality"] == "rad":
+        function_to_call = inferenceLoopRad
+    elif (parameters["modality"] == "path") or (parameters["modality"] == "histo"):
+        function_to_call = inferenceLoopPath
     else:
-        print('Modality should be on of rad or path. Please set the correct on in the config file.')
-        sys.exit(0)
+        sys.exit("Modality should be one of rad/histo/path. Please set the correct on in the config file.")
+    
+    function_to_call(
+            inferenceDataFromPickle=inferenceData_full, 
+            headers=headers, 
+            outputDir=outputDir,
+            device=device, 
+            parameters=parameters
+        )
