@@ -220,10 +220,9 @@ def test_train_classification_rad_3d(device):
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
-    # want to save these models for inference test
-    current_output = os.path.join(outputDir, model)
-    Path(current_output).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=current_output, parameters=parameters, device=device, reset_prev=True)
+    shutil.rmtree(outputDir) # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
   print('passed')
 
@@ -240,13 +239,14 @@ def test_inference_classification_rad_3d(device):
   parameters['model']['num_channels'] = len(headers["channelHeaders"])
   parameters['model']['class_list'] = headers["predictionHeaders"]
   # loop through selected models and train for single epoch
-  for model in all_models_regression:
-    parameters['model']['architecture'] = model 
-    current_output = os.path.join(outputDir, model)
-    Path(current_output).mkdir(parents=True, exist_ok=True)
-    parameters['output_dir'] = current_output # this is in inference mode
-    InferenceManager(dataframe=training_data, headers = headers, outputDir=current_output, parameters=parameters, device=device)
+  model = all_models_regression[0]
+  parameters['model']['architecture'] = model 
+  Path(outputDir).mkdir(parents=True, exist_ok=True)
+  TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
+  parameters['output_dir'] = outputDir # this is in inference mode
+  InferenceManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device)
 
+  # shutil.rmtree(outputDir)
   print('passed')
 
 def test_scheduler_classification_rad_2d(device):
