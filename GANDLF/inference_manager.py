@@ -35,14 +35,7 @@ def InferenceManager(dataframe, headers, outputDir, parameters, device):
     if not("weights" in parameters):
         parameters["weights"] = None # no need for loss weights for inference
     
-    if parameters["modality"] == "rad":
-        function_to_call = inferenceLoopRad
-    elif (parameters["modality"] == "path") or (parameters["modality"] == "histo"):
-        function_to_call = inferenceLoopPath
-    else:
-        sys.exit("Modality should be one of rad/histo/path. Please set the correct on in the config file.")
-    
-    function_to_call(
+    inference_loop(
             inferenceDataFromPickle=inferenceData_full, 
             headers=headers, 
             outputDir=outputDir,
