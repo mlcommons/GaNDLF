@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
-from GANDLF.utils import get_date_time, resample_image, send_model_to_device, one_hot, populate_channel_keys_in_params, reverse_one_hot, get_class_imbalance_weights
+from GANDLF.utils import get_date_time, resample_image, send_model_to_device, populate_channel_keys_in_params, reverse_one_hot, get_class_imbalance_weights
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 import SimpleITK as sitk
 import numpy as np
@@ -162,18 +162,23 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if (batch_idx+1) % (len(train_dataloader) / 2) == 0:
-            print("Epoch Average Train loss : ", total_epoch_train_loss / (batch_idx+1))
+        if ((batch_idx+1) % (len(train_dataloader) / 2) == 0) and ((batch_idx+1) < len(train_dataloader)):
+            print("Half-Epoch Average Train loss : ", total_epoch_train_loss / (batch_idx+1))
             for metric in params["metrics"]:
                 print(
-                    "Epoch Average Train " + metric + " : ",
+                    "Half-Epoch Average Train " + metric + " : ",
                     total_epoch_train_metric[metric] / (batch_idx+1),
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
+    print("Epoch Final Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
         average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
             train_dataloader
+        )
+        print(
+            "Epoch Final Train " + metric + " : ",
+            average_epoch_train_metric[metric],
         )
 
     return average_epoch_train_loss, average_epoch_train_metric
@@ -331,7 +336,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             # save outputs
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
-                label_ground_truth = one_hot(label_ground_truth.unsqueeze(0), params["model"]["class_list"])
+                label_ground_truth = label_ground_truth.unsqueeze(0)
                 if params['save_output']:
                     path_to_metadata = subject['path_to_metadata'][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
@@ -351,7 +356,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                     if 'resample' in params['data_preprocessing']:
                         result_image = resample_image(result_image, inputImage.GetSpacing(), interpolator=sitk.sitkNearestNeighbor)
                     sitk.WriteImage(result_image, os.path.join(current_output_dir, subject['subject_id'][0] + '_seg' + ext))
-                output_prediction = one_hot(output_prediction.unsqueeze(0), params["model"]["class_list"])
+                output_prediction = output_prediction.unsqueeze(0)
                 # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
             else:
                 output_prediction = output_prediction / len(patch_loader) # final regression output
@@ -363,7 +368,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 for i in range(len(attention_map)):
                     model.save_attention_map(attention_map[i].squeeze(), raw_input=image[i].squeeze(-1))
 
-            # this is currently broken
             final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
             if params['verbose']:
                 print("Full image validation:: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
@@ -374,25 +378,29 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if batch_idx != 0:
-            if batch_idx % (len(valid_dataloader) // 2) == 0:
+        if ((batch_idx+1) % (len(valid_dataloader) / 2) == 0) and ((batch_idx+1) < len(valid_dataloader)):
+            print(
+                "Half-Epoch Average Validation loss : ", total_epoch_valid_loss / (batch_idx+1)
+            )
+            for metric in params["metrics"]:
                 print(
-                    "Epoch Average Validation loss : ", total_epoch_valid_loss / batch_idx
+                    "Half-Epoch Average Validation " + metric + " : ",
+                    total_epoch_valid_metric[metric] / (batch_idx+1),
                 )
-                for metric in params["metrics"]:
-                    print(
-                        "Epoch Validation " + metric + " : ",
-                        total_epoch_valid_metric[metric] / len(valid_dataloader),
-                    )
 
     if params["medcam_enabled"]:
         model.disable_medcam()
         params["medcam_enabled"] = False
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
+    print("Epoch Final Validation loss : ", average_epoch_valid_loss)
     for metric in params["metrics"]:
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
+        )
+        print(
+            "Epoch Final Validation " + metric + " : ",
+            average_epoch_valid_metric[metric],
         )
     
     if scheduler is not None:
@@ -505,16 +513,7 @@ def training_loop(
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
             training_data,
-            patch_size=params["patch_size"],
-            headers=params["headers"],
-            q_max_length=1,
-            q_samples_per_volume=1,
-            q_num_workers=1,
-            q_verbose=False,
-            sampler=params["patch_sampler"],
-            augmentations=params["data_augmentation"],
-            preprocessing=params["data_preprocessing"],
-            in_memory=params["in_memory"],
+            parameters=params,
             train=False,
         )
         penalty_loader = DataLoader(
@@ -599,6 +598,7 @@ def training_loop(
         patience += 1
 
         # Write the losses to a logger
+
         train_logger.write(epoch, epoch_train_loss, epoch_train_metric)
         valid_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
 
