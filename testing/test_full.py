@@ -246,7 +246,6 @@ def test_inference_classification_rad_3d(device):
   parameters['output_dir'] = outputDir # this is in inference mode
   InferenceManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device)
 
-  # shutil.rmtree(outputDir)
   print('passed')
 
 def test_scheduler_classification_rad_2d(device):
@@ -269,4 +268,5 @@ def test_scheduler_classification_rad_2d(device):
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
 
+  shutil.rmtree(outputDir)
   print('passed')
