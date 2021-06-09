@@ -67,6 +67,7 @@ def main():
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
+    parameters["headers"] = headers
     if args.train: # training mode
         TrainingManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
