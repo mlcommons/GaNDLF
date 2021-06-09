@@ -208,6 +208,7 @@ def test_train_classification_rad_2d(device):
 def test_train_classification_rad_3d(device):
   # read and initialize parameters for specific data dimension
   parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['modality'] = 'rad'
   parameters['patch_size'] = patch_size['3D']
   parameters['model']['dimension'] = 3
   parameters['model']['amp'] = True
@@ -219,9 +220,32 @@ def test_train_classification_rad_3d(device):
   # loop through selected models and train for single epoch
   for model in all_models_regression:
     parameters['model']['architecture'] = model 
-    shutil.rmtree(outputDir) # overwrite previous results
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(dataframe=training_data, headers = headers, outputDir=outputDir, parameters=parameters, device=device, reset_prev=True)
+    # want to save these models for inference test
+    current_output = os.path.join(outputDir, model)
+    Path(current_output).mkdir(parents=True, exist_ok=True)
+    TrainingManager(dataframe=training_data, headers = headers, outputDir=current_output, parameters=parameters, device=device, reset_prev=True)
+
+  print('passed')
+
+def test_inference_classification_rad_3d(device):
+  # read and initialize parameters for specific data dimension
+  parameters = parseConfig(testingDir + '/config_classification.yaml', version_check = False)
+  parameters['modality'] = 'rad'
+  parameters['patch_size'] = patch_size['3D']
+  parameters['model']['dimension'] = 3
+  parameters['model']['amp'] = True
+  # read and parse csv 
+  training_data, headers = parseTrainingCSV(inputDir + '/train_3d_rad_classification.csv')
+  parameters = populate_header_in_parameters(parameters, headers)
+  parameters['model']['num_channels'] = len(headers["channelHeaders"])
+  parameters['model']['class_list'] = headers["predictionHeaders"]
+  # loop through selected models and train for single epoch
+  for model in all_models_regression:
+    parameters['model']['architecture'] = model 
+    current_output = os.path.join(outputDir, model)
+    Path(current_output).mkdir(parents=True, exist_ok=True)
+    parameters['output_dir'] = current_output # this is in inference mode
+    InferenceManager(dataframe=training_data, headers = headers, outputDir=current_output, parameters=parameters, device=device)
 
   print('passed')
 
