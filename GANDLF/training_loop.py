@@ -171,13 +171,13 @@ def train_network(model, train_dataloader, optimizer, params):
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
-    print("Epoch Final Train loss : ", average_epoch_train_loss)
+    print("     Epoch Final Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
         average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
             train_dataloader
         )
         print(
-            "Epoch Final Train " + metric + " : ",
+            "     Epoch Final Train " + metric + " : ",
             average_epoch_train_metric[metric],
         )
 
@@ -393,13 +393,13 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
         params["medcam_enabled"] = False
 
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
-    print("Epoch Final Validation loss : ", average_epoch_valid_loss)
+    print("     Epoch Final Validation loss : ", average_epoch_valid_loss)
     for metric in params["metrics"]:
         average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
             valid_dataloader
         )
         print(
-            "Epoch Final Validation " + metric + " : ",
+            "     Epoch Final Validation " + metric + " : ",
             average_epoch_valid_metric[metric],
         )
     
