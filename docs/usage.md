@@ -35,11 +35,14 @@ Recommended tool for tackling all aforementioned preprocessing tasks: https://gi
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format:
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
 
 ```csv
 SubjectID,Channel_0,Channel_1,...,Channel_X,Label
-001,/full/path/0.nii.gz,/full/path/1.nii.gz,...,/full/path/X.nii.gz,/full/path/segmentation.nii.gz
+001,/full/path/001/0.nii.gz,/full/path/001/1.nii.gz,...,/full/path/001/X.nii.gz,/full/path/001/segmentation.nii.gz
+002,/full/path/002/0.nii.gz,/full/path/002/1.nii.gz,...,/full/path/002/X.nii.gz,/full/path/002/segmentation.nii.gz
+...
+N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/path/N/segmentation.nii.gz
 ```
 
 - `Channel` can be substituted with `Modality` or `Image`
@@ -52,10 +55,26 @@ The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_con
 ```bash
 # continue from previous shell
 python gandlf_constructCSV \
-  -inputDir ./experiment_0/output_dir/ # this is the main output directory of training step
+  -inputDir ./experiment_0/data_dir/ # this is the main data directory
   -channelsID _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
   -labelID _seg.nii.gz # label identifier - not needed for regression/classification
-  -outputFile ./experiment_0/train_data.csv \ # output CSV
+  -outputFile ./experiment_0/train_data.csv \ # output CSV to be used for training
+```
+
+This assumes the data is in the following format:
+```
+./experiment_0/data_dir/
+  │   │
+  │   └───Patient_001 # this is used to construct the "SubjectID" header of the CSV
+  │   │   │ Patient_001_brain_t1.nii.gz
+  │   │   │ Patient_001_brain_t1ce.nii.gz
+  │   │   │ Patient_001_brain_t2.nii.gz
+  │   │   │ Patient_001_brain_flair.nii.gz
+  │   │   │ Patient_001_brain_seg.nii.gz
+  │   │   
+  │   └───Patient_002 # this is used to construct the "Subject_ID" header of the CSV
+  │   │   │ ...
+  │
 ```
 
 Notes:
@@ -73,7 +92,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
     - Segmentation: unet, resunet, uinc, fcn
     - Classification/Regression: 
       - DenseNet configurations: densenet121, densenet161, densenet169, densenet201, densenet264 
-      - VGG configurations: vgg16
+      - VGG configurations: vgg11, vgg13, vgg16, vgg19
   - Dimensionality of computations 
   - Final layer of model
   - Mixed precision
@@ -110,8 +129,7 @@ python gandlf_run \
   -data ./experiment_0/train.csv \ # data in CSV format 
   -output ./experiment_0/output_dir/ \ # output directory
   -train 1 \ # 1 == train, 0 == inference
-  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, -1 for CPU
-  # -modelDir /path/to/model/weights # used in inference mode
+  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
 ```
 
 [Back To Top &uarr;](#table-of-contents)
@@ -144,11 +162,13 @@ For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDL
 The integration of the M3D-CAM library into GaNDLF enables the generation of attention maps for 3D/2D images in the validation epoch for classification and segmentation tasks.
 To activate M3D-CAM one simply needs to add the following parameter to the config:
 
+```yaml
 medcam: 
 {
-    backend: "gcam",
-    layer: "auto"
+  backend: "gcam",
+  layer: "auto"
 }
+```
 
 One can choose from the following backends:
 
@@ -158,7 +178,7 @@ One can choose from the following backends:
 - Grad-CAM++ (gcampp)
 
 Optionally one can also change the name of the layer for which the attention maps should be generated.
-The default behaviour is "auto" which chooses the last convolutional layer.
+The default behavior is "auto" which chooses the last convolutional layer.
 
 All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
