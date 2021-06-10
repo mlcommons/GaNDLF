@@ -6,12 +6,11 @@ from pathlib import Path
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.training_loop import training_loop
 
-def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_prev):
+def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     '''
     This is the training manager that ties all the training functionality together
 
     dataframe = full data from CSV
-    headers = pre-sorted CSV headers
     outputDir = the main output directory
     parameters = parameters read from YAML
     device = self-explanatory
@@ -48,7 +47,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
     currentTestingFold = 0
 
     # split across subjects
-    subjectIDs_full = dataframe[dataframe.columns[headers['subjectIDHeader']]].unique().tolist()
+    subjectIDs_full = dataframe[dataframe.columns[parameters["headers"]["subjectIDHeader"]]].unique().tolist()
 
     # get the indeces for kfold splitting
     trainingData_full = dataframe
@@ -67,11 +66,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
         else:
             # loop over all trainAndVal_index and construct new dataframe
             for subject_idx in trainAndVal_index:                 
-                trainingAndValidationData = trainingAndValidationData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+                trainingAndValidationData = trainingAndValidationData.append(trainingData_full[trainingData_full[trainingData_full.columns[parameters["headers"]['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
 
             # loop over all testing_index and construct new dataframe
             for subject_idx in testing_index:                 
-                testingData = testingData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+                testingData = testingData.append(trainingData_full[trainingData_full[trainingData_full.columns[parameters["headers"]['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
 
 
         # the output of the current fold is only needed if multi-fold training is happening
@@ -106,7 +105,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
             if (not os.path.exists(currentTrainingAndValidationDataPickle)) or reset_prev:
                 trainingAndValidationData.to_pickle(currentTrainingAndValidationDataPickle)
             
-            current_training_subject_indeces_full = trainingAndValidationData[trainingAndValidationData.columns[headers['subjectIDHeader']]].unique().tolist()
+            current_training_subject_indeces_full = trainingAndValidationData[trainingAndValidationData.columns[parameters["headers"]['subjectIDHeader']]].unique().tolist()
 
         # start the kFold train for validation
         for train_index, val_index in kf_validation.split(current_training_subject_indeces_full):
@@ -123,11 +122,11 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
 
             # loop over all train_index and construct new dataframe
             for subject_idx in train_index:                 
-                trainingData = trainingData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+                trainingData = trainingData.append(trainingData_full[trainingData_full[trainingData_full.columns[parameters["headers"]['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
 
             # loop over all val_index and construct new dataframe
             for subject_idx in val_index:                 
-                validationData = validationData.append(trainingData_full[trainingData_full[trainingData_full.columns[headers['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
+                validationData = validationData.append(trainingData_full[trainingData_full[trainingData_full.columns[parameters["headers"]['subjectIDHeader']]] == subjectIDs_full[subject_idx]])
 
 
             # # write parameters to pickle - this should not change for the different folds, so keeping is independent
@@ -145,7 +144,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
                 validationData = pd.read_pickle(currentValidationDataPickle)
 
             if (not parameters['parallel_compute_command']) or (singleFoldValidation): # parallel_compute_command is an empty string, thus no parallel computing requested
-                training_loop(training_data=trainingData, validation_data=validationData, headers=headers,
+                training_loop(training_data=trainingData, validation_data=validationData,
                               output_dir=currentValOutputFolder,
                               device=device, params=parameters, testing_data=testingData)
 
@@ -153,7 +152,7 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
                 headersPickle = os.path.join(currentValOutputFolder,'headers.pkl')
                 if not os.path.exists(headersPickle):
                     with open(headersPickle, 'wb') as handle:
-                        pickle.dump(headers, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                        pickle.dump(parameters["headers"], handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 # call qsub here
                 parallel_compute_command_actual = parameters['parallel_compute_command'].replace('${outputDir}', currentValOutputFolder)
@@ -180,13 +179,12 @@ def TrainingManager(dataframe, headers, outputDir, parameters, device, reset_pre
         currentTestingFold = currentTestingFold + 1 # increment the fold
 
 
-def TrainingManager_split(dataframe_train, dataframe_validation, headers, outputDir, parameters, device, reset_prev):
+def TrainingManager_split(dataframe_train, dataframe_validation, outputDir, parameters, device, reset_prev):
     '''
     This is the training manager that ties all the training functionality together
 
     dataframe_train = training data from CSV
     dataframe_validation = validation data from CSV
-    headers = pre-sorted CSV headers
     outputDir = the main output directory
     parameters = parameters read from YAML
     device = self-explanatory
@@ -199,5 +197,5 @@ def TrainingManager_split(dataframe_train, dataframe_validation, headers, output
     else:
         print('Using previously saved parameter file', currentModelConfigPickle, flush=True)
         parameters = pickle.load(open(currentModelConfigPickle,"rb"))
-    training_loop(training_data=dataframe_train, validation_data=dataframe_validation, headers=headers,
+    training_loop(training_data=dataframe_train, validation_data=dataframe_validation,
                   output_dir=outputDir, device=device, params=parameters, testing_data=None)
