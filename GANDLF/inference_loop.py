@@ -34,7 +34,7 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 from .parameterParsing import *
 
-def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outputDir):
+def inferenceLoopRad(inferenceDataFromPickle, device, parameters, outputDir):
     '''
     This is the main inference loop
     '''
@@ -55,17 +55,13 @@ def inferenceLoopRad(inferenceDataFromPickle, headers, device, parameters, outpu
         batch_size=1,
         amp=parameters["model"]["amp"]
     )
-    # initialize problem type    
-    is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
-    # Setting up the inference loader
-    
+    # Setting up the inference loader    
     inferenceDataForTorch = ImagesFromDataFrame(
         inferenceDataFromPickle,
         parameters,
         train=False
     )
-
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
     # Loading the weights into the model

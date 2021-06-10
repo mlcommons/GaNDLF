@@ -24,7 +24,7 @@ import subprocess
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.inference_loop import *
 
-def InferenceManager(dataframe, headers, outputDir, parameters, device):
+def InferenceManager(dataframe, outputDir, parameters, device):
     '''
     This function takes in a dataframe, with some other parameters and performs the inference
     '''
@@ -43,8 +43,7 @@ def InferenceManager(dataframe, headers, outputDir, parameters, device):
         sys.exit("Modality should be one of rad/histo/path. Please set the correct on in the config file.")
     
     function_to_call(
-            inferenceDataFromPickle=inferenceData_full, 
-            headers=headers, 
+            inferenceDataFromPickle=inferenceData_full,
             outputDir=outputDir,
             device=device, 
             parameters=parameters
