@@ -422,7 +422,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
 def training_loop(
     training_data,
     validation_data,
-    headers,
     device,
     params,
     output_dir,
