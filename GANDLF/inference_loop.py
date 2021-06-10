@@ -34,7 +34,7 @@ from GANDLF.losses import *
 from GANDLF.utils import *
 from .parameterParsing import *
 
-def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputDir):
+def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     '''
     This is the main inference loop
     '''
@@ -55,17 +55,13 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
         batch_size=1,
         amp=parameters["model"]["amp"]
     )
-    # initialize problem type    
-    is_regression, is_classification, is_segmentation = find_problem_type(headers, model.final_convolution_layer)
 
-    # Setting up the inference loader
-    
+    # Setting up the inference loader    
     inferenceDataForTorch = ImagesFromDataFrame(
         inferenceDataFromPickle,
         parameters,
         train=False
     )
-
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
     # Loading the weights into the model
@@ -110,11 +106,11 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
 
             # actual computation
             for index, row in inferenceDataForTorch.iterrows():
-                subject_name = row[headers['subjectIDHeader']]
-                print("Patient Slide       : ", row[headers['subjectIDHeader']])
-                print("Patient Location    : ", row[headers['channelHeaders']])
-                print(row[headers['channelHeaders']].values[0])
-                os_image = OpenSlide(row[headers['channelHeaders']].values[0])
+                subject_name = row[parameters["headers"]['subjectIDHeader']]
+                print("Patient Slide       : ", row[parameters["headers"]['subjectIDHeader']])
+                print("Patient Location    : ", row[parameters["headers"]['channelHeaders']])
+                print(row[parameters["headers"]['channelHeaders']].values[0])
+                os_image = OpenSlide(row[parameters["headers"]['channelHeaders']].values[0])
                 level_width, level_height = os_image.level_dimensions[int(parameters['slide_level'])]
                 subject_dest_dir = os.path.join(outputDir, subject_name)
                 os.makedirs(subject_dest_dir, exist_ok=True)
@@ -122,7 +118,7 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
                 probs_map = np.zeros((level_height, level_width), dtype=np.float16)
                 count_map = np.zeros((level_height, level_width), dtype=np.uint8)
 
-                patient_dataset_obj = InferTumorSegDataset(row[headers['channelHeaders']].values[0],
+                patient_dataset_obj = InferTumorSegDataset(row[parameters["headers"]['channelHeaders']].values[0],
                                                         patch_size=patch_size,
                                                         stride_size=stride,
                                                         selected_level=parameters['slide_level'],
@@ -149,9 +145,9 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
                 out = count_map*probs_map
                 count_map = np.array(count_map*255, dtype=np.uint16)
                 out_thresh = np.array((out > 0.5)*255, dtype=np.uint16)
-                imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
-                imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
-                imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_map)
+                imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_prob.png'), out)
+                imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_seg.png'), out_thresh)
+                imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_count.png'), count_map)
             else:
                 print("histo/path inference is Linux-only because openslide for Windows works only for Python-3.8, whereas pickle5 works only for 3.6 and 3.7")
 
@@ -175,9 +171,9 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
 #         base_filters = parameters['model']['base_filters']
 #         amp = parameters['model']['amp']
 #         batch_size = parameters['batch_size']
-#         num_channels = len(headers['channelHeaders'])
+#         num_channels = len(parameters["headers"]['channelHeaders'])
 #         if not('num_channels' in parameters['model']):
-#             num_channels = len(headers['channelHeaders'])
+#             num_channels = len(parameters["headers"]['channelHeaders'])
 #         else:
 #             num_channels = parameters['model']['num_channels']
 #         n_classList = len(class_list)
@@ -232,11 +228,11 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
 #         # Patch blocks
 
 #         for index, row in test_df.iterrows():
-#             subject_name = row[headers['subjectIDHeader']]
-#             print("Patient Slide       : ", row[headers['subjectIDHeader']])
-#             print("Patient Location    : ", row[headers['channelHeaders']])
-#             print(row[headers['channelHeaders']].values[0])
-#             os_image = OpenSlide(row[headers['channelHeaders']].values[0])
+#             subject_name = row[parameters["headers"]['subjectIDHeader']]
+#             print("Patient Slide       : ", row[parameters["headers"]['subjectIDHeader']])
+#             print("Patient Location    : ", row[parameters["headers"]['channelHeaders']])
+#             print(row[parameters["headers"]['channelHeaders']].values[0])
+#             os_image = OpenSlide(row[parameters["headers"]['channelHeaders']].values[0])
 #             level_width, level_height = os_image.level_dimensions[int(parameters['slide_level'])]
 #             subject_dest_dir = os.path.join(outputDir, subject_name)
 #             os.makedirs(subject_dest_dir, exist_ok=True)
@@ -244,7 +240,7 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
 #             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
 #             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
 
-#             patient_dataset_obj = InferTumorSegDataset(row[headers['channelHeaders']].values[0],
+#             patient_dataset_obj = InferTumorSegDataset(row[parameters["headers"]['channelHeaders']].values[0],
 #                                                     patch_size=patch_size,
 #                                                     stride_size=stride,
 #                                                     selected_level=parameters['slide_level'],
@@ -271,9 +267,9 @@ def inference_loop(inferenceDataFromPickle, headers, device, parameters, outputD
 #             out = count_map*probs_map
 #             count_map = np.array(count_map*255, dtype=np.uint16)
 #             out_thresh = np.array((out > 0.5)*255, dtype=np.uint16)
-#             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_prob.png'), out)
-#             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_seg.png'), out_thresh)
-#             imsave(os.path.join(subject_dest_dir, row[headers['subjectIDHeader']]+'_count.png'), count_map)
+#             imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_prob.png'), out)
+#             imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_seg.png'), out_thresh)
+#             imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_count.png'), count_map)
 #         #average_dice, average_loss = get_metrics_save_mask(model, device, inference_loader, patch_size, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = scaling_factor, weights = None, save_mask = True, outputDir = outputDir, with_roi = True)
 #         #print('Average dice: ', average_dice, '; Average loss: ', average_loss, flush=True)
 
