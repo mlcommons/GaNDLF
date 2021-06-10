@@ -567,6 +567,8 @@ def training_loop(
 
     print("Using device:", device, flush=True)
 
+    first_model_saved = False
+
     # Iterate for number of epochs
     for epoch in range(epochs):
 
@@ -606,7 +608,7 @@ def training_loop(
         )
 
         # Start to check for loss
-        if epoch_valid_loss <= torch.tensor(best_loss):
+        if not(first_model_saved) or (epoch_valid_loss <= torch.tensor(best_loss)):
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
@@ -619,6 +621,7 @@ def training_loop(
                 },
                 os.path.join(output_dir, params['model']['architecture'] + "_best.pth.tar"),
             )
+            first_model_saved = True
 
         if patience > params["patience"]:
             print(
