@@ -63,8 +63,9 @@ def main():
         if headers_train != headers_validation:
             sys.exit('The training and validation CSVs do not have the same header information.')
         
+        parameters = populate_header_in_parameters(parameters, headers_train)
         # if we are here, it is assumed that the user wants to do training
-        TrainingManager_split(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager_split(dataframe_train=data_train, dataframe_validation=data_validation, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
@@ -72,9 +73,9 @@ def main():
 
     # # start computation - either training or inference
     if args.train: # training mode
-        TrainingManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager(dataframe=data_full, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
-        InferenceManager(dataframe=data_full, headers = headers, outputDir=args.output, parameters=parameters, device=device)
+        InferenceManager(dataframe=data_full, outputDir=args.output, parameters=parameters, device=device)
     
     print("Finished.")
 
