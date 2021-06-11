@@ -1,4 +1,5 @@
-import os, sys
+import os, sys, math
+from datetime import datetime
 os.environ['TORCHIO_HIDE_CITATION_PROMPT'] = '1' # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 import numpy as np
 import pandas as pd
@@ -7,9 +8,55 @@ import torch
 import torch.nn as nn
 import torchio
 from GANDLF.losses import *
-# from GANDLF.data import ImagesFromDataFrame
 from torch.utils.data import DataLoader
 from pathlib import Path
+
+def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
+    """Resample image to certain spacing and size.
+    Parameters:
+    ----------
+    img : {SimpleITK.SimpleITK.Image}
+        Input 3D image.
+    spacing : {list}
+        List of length 3 indicating the voxel spacing as [x, y, z]
+    size : {list}, optional
+        List of length 3 indicating the number of voxels per dim [x, y, z] (the default is [], which will use compute the appropriate size based on the spacing.)
+    interpolator : either sitk.sitkLinear or sitk.sitkNearestNeighbor or one of those
+    origin : {list}, optional
+        The location in physical space representing the [0,0,0] voxel in the input image. (the default is [0,0,0])
+    outsideValue : {int}, optional
+        value used to pad are outside image (the default is 0)
+    Returns
+    -------
+    SimpleITK.SimpleITK.Image
+        Resampled input image.
+    """
+
+    if len(spacing) != img.GetDimension():
+        raise Exception(
+            "len(spacing) != " + str(img.GetDimension()))
+
+    # Set Size
+    if size == []:
+        inSpacing = img.GetSpacing()
+        inSize = img.GetSize()
+        size = [int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
+                for i in range(img.GetDimension())]
+    else:
+        if len(size) != img.GetDimension():
+            raise Exception(
+                "len(size) != " + str(img.GetDimension()))
+
+    # Resample input image
+    return sitk.Resample(
+        img,
+        size,
+        sitk.Transform(),
+        interpolator,
+        img.GetOrigin(),
+        spacing,
+        img.GetDirection(),
+        outsideValue)
 
 def one_hot(segmask_array, class_list):
     '''
@@ -33,16 +80,6 @@ def one_hot(segmask_array, class_list):
                     bin_mask = (segmask_array_iter == int(class_split[0]))
                     for i in range(1,len(class_split)):
                         bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
-                elif '&&' in _class: # special case
-                    class_split = _class.split('&&')
-                    bin_mask = (segmask_array_iter == int(class_split[0]))
-                    for i in range(1,len(class_split)):
-                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
-                elif '&' in _class: # special case
-                    class_split = _class.split('&')
-                    bin_mask = (segmask_array_iter == int(class_split[0]))
-                    for i in range(1,len(class_split)):
-                        bin_mask = bin_mask & (segmask_array_iter == int(class_split[i]))
                 else:
                     # assume that it is a simple int
                     bin_mask = (segmask_array_iter == int(_class)) 
@@ -60,7 +97,7 @@ def reverse_one_hot(predmask_array,class_list):
     '''
     idx_argmax  = np.argmax(predmask_array,axis=0)
     final_mask = 0
-    special_cases_to_check = [ '||', '&&'] 
+    special_cases_to_check = ['||'] 
     special_case_detected = False
     max = 0
     
@@ -91,6 +128,7 @@ def reverse_one_hot(predmask_array,class_list):
             final_mask = final_mask +  (idx_argmax == idx)*_class
     return final_mask
 
+
 def checkPatchDivisibility(patch_size, number = 16):
     '''
     This function checks the divisibility of a numpy array or integer for architectural integrity
@@ -101,15 +139,23 @@ def checkPatchDivisibility(patch_size, number = 16):
         patch_size_to_check = patch_size
     if patch_size_to_check[-1] == 1: # for 2D, don't check divisibility of last dimension
         patch_size_to_check = patch_size_to_check[:-1]
+    elif patch_size_to_check[0] == 1: # for 2D, don't check divisibility of first dimension
+        patch_size_to_check = patch_size_to_check[1:]
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
+        return False
+    
+    # adding check to address https://github.com/CBICA/GaNDLF/issues/53
+    # there is quite possibly a better way to do this
+    unique = np.unique(patch_size_to_check)
+    if (unique.shape[0] == 1) and (unique[0] <= number):
         return False
     return True
 
-def send_model_to_device(model, ampInput, device, optimizer):
+
+def send_model_to_device(model, amp, device, optimizer):
     '''
     This function reads the environment variable(s) and send model to correct device
     '''
-    amp = ampInput
     if device != 'cpu':
         if os.environ.get('CUDA_VISIBLE_DEVICES') is None:
             sys.exit('Please set the environment variable \'CUDA_VISIBLE_DEVICES\' correctly before trying to run GANDLF on GPU')
@@ -175,10 +221,12 @@ def resize_image(input_image, output_size, interpolator = sitk.sitkLinear):
     resampler.SetDefaultPixelValue(0)
     return resampler.Execute(input_image)
 
-def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False, ignore_label_validation = None):
+def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys, class_list, loss_fn, is_segmentation, scaling_factor = 1, weights = None, save_mask = False, outputDir = None, with_roi = False, ignore_label_validation = None, num_patches = 1):
     '''
     This function gets various statistics from the specified model and data loader
     '''
+    print('WARNING: This function has been superceded by \'validated_network\'')
+    return None, None
     # # if no weights are specified, use 1
     # if weights is None:
     #     weights = [1]
@@ -189,57 +237,91 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
     model.eval()
     with torch.no_grad():
         total_loss = total_dice = 0
+        # used for additional metrics 
+        all_targets = [] 
+        all_predics = [] 
         for batch_idx, (subject) in enumerate(loader):
             # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
             subject_dict = {}
+            
             if ('label' in subject):
                 if (subject['label'] != ['NA']):
-                    subject_dict['label'] = torchio.Image(subject['label']['path'], type = torchio.LABEL)
+                    subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL, tensor=subject['label']['data'].squeeze(0))
+                    label_present = True
             
             for key in value_keys: # for regression/classification
                 subject_dict['value_' + key] = subject[key]
 
             for key in channel_keys:
-                subject_dict[key] = torchio.Image(subject[key]['path'], type=torchio.INTENSITY)
-            grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
-            patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-            aggregator = torchio.inference.GridAggregator(grid_sampler)
+                subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0)) 
 
-            pred_output = 0 # this is used for regression
-            for patches_batch in patch_loader:
-                image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
-                if len(value_keys) > 0:
-                    valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
-                locations = patches_batch[torchio.LOCATION]
-                image = image.float().to(device)
-                ## special case for 2D            
-                if image.shape[-1] == 1:
-                    model_2d = True
-                    image = torch.squeeze(image, -1)
-                    locations = torch.squeeze(locations, -1)
-                else:
-                    model_2d = False
-                
-                if is_segmentation: # for segmentation, get the predicted mask
-                    pred_mask = model(image)
-                    if model_2d:
-                        pred_mask = pred_mask.unsqueeze(-1)
-                else: # for regression/classification, get the predicted output and add it together to average later on
+            if not(is_segmentation) and label_present:
+                ## this is the case where it is regression/classification problem AND a label is present
+                sampler = torchio.data.LabelSampler(psize)
+                tio_subject = torchio.Subject(subject_dict)
+                generator = sampler(tio_subject, num_patches=num_patches)
+                pred_output = 0
+                for patch in generator:
+                    image = torch.cat([patch[key][torchio.DATA] for key in channel_keys], dim=1)
+                    valuesToPredict = torch.cat([patch['value_' + key] for key in value_keys], dim=0)
+                    image = image.unsqueeze(0)
+                    image = image.float().to(device)
+                    ## special case for 2D
+                    if image.shape[-1] == 1:
+                        model_2d = True
+                        image = torch.squeeze(image, -1)
                     pred_output += model(image)
-                
-                if is_segmentation: # aggregate the predicted mask
-                    aggregator.add_batch(pred_mask, locations)
-            
-            if is_segmentation:
-                pred_mask = aggregator.get_output_tensor()
-                pred_mask = pred_mask.cpu() # the validation is done on CPU
-                pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
-            else:
-                pred_output = pred_output / len(locations) # average the predicted output across patches
-                pred_output = pred_output.cpu()
+                pred_output = pred_output.cpu() / num_patches
+                pred_output /= scaling_factor
+                all_predics.append(pred_output.double())
+                all_targets.append(valuesToPredict.double())
                 # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
                 loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
                 total_loss += loss
+            else:
+                grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), psize)
+                patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
+                aggregator = torchio.inference.GridAggregator(grid_sampler)
+
+                pred_output = 0 # this is used for regression
+                for patches_batch in patch_loader:
+                    image = torch.cat([patches_batch[key][torchio.DATA] for key in channel_keys], dim=1)
+                    if len(value_keys) > 0:
+                        valuesToPredict = torch.cat([patches_batch['value_' + key] for key in value_keys], dim=0)
+                        # valuesToPredict = valuesToPredict*scaling_factor
+                    locations = patches_batch[torchio.LOCATION]
+                    image = image.float().to(device)
+                    ## special case for 2D
+                    if image.shape[-1] == 1:
+                        model_2d = True
+                        image = torch.squeeze(image, -1)
+                        locations = torch.squeeze(locations, -1)
+                    else:
+                        model_2d = False
+                    
+                    if is_segmentation: # for segmentation, get the predicted mask
+                        pred_mask = model(image)
+                        if model_2d:
+                            pred_mask = pred_mask.unsqueeze(-1)
+                    else: # for regression/classification, get the predicted output and add it together to average later on
+                        pred_output += model(image)
+                    
+                    if is_segmentation: # aggregate the predicted mask
+                        aggregator.add_batch(pred_mask, locations)
+                
+                if is_segmentation:
+                    pred_mask = aggregator.get_output_tensor()
+                    pred_mask = pred_mask.cpu() # the validation is done on CPU
+                    pred_mask = pred_mask.unsqueeze(0) # increasing the number of dimension of the mask
+                else:
+                    pred_output = pred_output / len(locations) # average the predicted output across patches
+                    pred_output = pred_output.cpu()
+                    pred_output /= scaling_factor
+                    all_predics.append(pred_output.double())
+                    all_targets.append(valuesToPredict.double())
+                    # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
+                    loss = torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double()).cpu().data.item() # this needs to be revisited for multi-class output
+                    total_loss += loss
             
             first = next(iter(subject['label']))
             if is_segmentation:
@@ -279,7 +361,7 @@ def get_metrics_save_mask(model, device, loader, psize, channel_keys, value_keys
                     #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
                     sitk.WriteImage(result_image, os.path.join(outputDir, patient_name + '_seg' + ext))
                 elif len(value_keys) > 0:
-                    outputToWrite += patient_name + ',' + str(pred_output / scaling_factor) + '\n'
+                    outputToWrite += patient_name + ',' + str(pred_output) + '\n' # str(pred_output / scaling_factor) + '\n'
         
         if len(value_keys) > 0:
             file = open(os.path.join(outputDir,"output_predictions.csv"), 'w')
@@ -301,6 +383,23 @@ def fix_paths(cwd):
     if os.name == 'nt': # proceed for windows
         vipshome = os.path.join(cwd, 'vips/vips-dev-8.10/bin')
         os.environ['PATH'] = vipshome + ';' + os.environ['PATH']
+
+def populate_header_in_parameters(parameters, headers):
+    '''
+    This function populates the parameters with information from the header in a common manner
+    '''
+    # initialize common parameters based on headers
+    parameters["headers"] = headers
+    # ensure the number of output classes for model prediction is working correctly
+    if len(headers["predictionHeaders"]) > 0:
+        parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
+    else:
+        parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
+    # initialize number of channels for processing
+    if not("num_channels" in parameters["model"]):
+        parameters["model"]["num_channels"] = len(headers["channelHeaders"])
+    
+    return parameters
 
 def find_problem_type(headersFromCSV, model_final_layer):
     '''
@@ -393,42 +492,94 @@ def parseTrainingCSV(inputTrainingCSVFile, train = True):
     
     return data_full, headers
     
-# def get_class_imbalance_weights(trainingDataFromPickle, parameters, headers, is_regression, classList):
-#     '''
-#     This function calculates the penalty that is used for validation loss in multi-class problems
-#     '''
-#     dice_weights_dict = {} # average for "weighted averaging"
-#     dice_penalty_dict = {} # penalty for misclassification
-#     for i in range(1, classList):
-#         dice_weights_dict[i] = 0
-#         dice_penalty_dict[i] = 0
-#     # define a seaparate data loader for penalty calculations
-#     penaltyData = ImagesFromDataFrame(trainingDataFromPickle, parameters['psize'], headers, train=False) 
-#     penalty_loader = DataLoader(penaltyData, batch_size=1)
-    
-#     # get the weights for use for dice loss
-#     total_nonZeroVoxels = 0
-    
-#     # For regression dice penalty need not be taken account
-#     # For classification this should be calculated on the basis of predicted labels and mask
-#     if not is_regression:
-#         for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-#             # accumulate dice weights for each label
-#             mask = subject['label'][torchio.DATA]
-#             one_hot_mask = one_hot(mask, classList)
-#             for i in range(1, len(classList)):
-#                 currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-#                 dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-#                 total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
-            
-#             # get the penalty values - dice_weights contains the overall number for each class in the training data
-#         for i in range(1, len(classList)):
-#             penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-#             for j in range(1, len(classList)):
-#                 if i != j: # for differing classes, subtract the number
-#                     penalty = penalty - dice_penalty_dict[j]
-            
-#             dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-#         # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-#     return dice_penalty_dict
+
+def get_date_time():
+    now = datetime.now()
+    date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    return now
+
+def get_class_imbalance_weights(training_data_loader, parameters):
+    '''
+    This function calculates the penalty that is used for validation loss in multi-class problems
+    '''
+    dice_weights_dict = {} # average for "weighted averaging"
+    dice_penalty_dict = None # penalty for misclassification
+    if not ("value_keys" in parameters): # basically, do this for segmentation tasks, need to extend for classification
+        dice_penalty_dict = {}
+        for i in range(0, len(parameters["model"]["class_list"])):
+            dice_weights_dict[i] = 0
+            dice_penalty_dict[i] = 0
         
+    penalty_loader = training_data_loader
+    
+    # get the weights for use for dice loss
+    total_nonZeroVoxels = 0
+    
+    # For regression dice penalty need not be taken account
+    # For classification this should be calculated on the basis of predicted labels and mask
+    if not ("value_keys" in parameters): # basically, do this for segmentation tasks
+        for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
+            # accumulate dice weights for each label
+            mask = subject["label"][torchio.DATA]
+            if parameters["verbose"]:
+                image = torch.cat(
+                    [subject[key][torchio.DATA] for key in parameters["channel_keys"]], dim=1
+                )
+                print('===\nSubject:', subject["subject_id"])
+                print('image.shape:', image.shape)
+                print('mask.shape:', mask.shape)
+
+            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+            for i in range(0, len(parameters["model"]["class_list"])):
+                currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
+                dice_weights_dict[i] += currentNumber # class-specific non-zero voxels
+                total_nonZeroVoxels += currentNumber # total number of non-zero voxels to be considered
+            
+            # get the penalty values - dice_weights contains the overall number for each class in the training data
+        for i in range(0, len(parameters["model"]["class_list"])):
+            penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
+            for j in range(0, len(parameters["model"]["class_list"])):
+                if i != j: # for differing classes, subtract the number
+                    penalty -= dice_weights_dict[j]
+            
+            dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
+        # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
+    return dice_penalty_dict
+        
+def populate_channel_keys_in_params(data_loader, parameters):
+    """
+    Function to read channel key information from specified data loader
+
+    Parameters
+    ----------
+    data_loader : torch.DataLoader
+        The data loader to query key information from 
+    parameters : dict
+        The parameters passed by the user yaml
+
+    Returns
+    -------
+    parameters : dict
+        Updated parameters that include key information
+
+    """
+    '''
+    This function reads the data_loaderparses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    '''
+    batch = next(
+        iter(data_loader)
+    )  # using train_loader makes this slower as train loader contains full augmentations
+    all_keys = list(batch.keys())
+    channel_keys = []
+    value_keys = []
+    print("All Keys : ", all_keys)
+    for item in all_keys:
+        if item.isnumeric():
+            channel_keys.append(item)
+        elif "value" in item:
+            value_keys.append(item)
+    parameters["channel_keys"] = channel_keys
+    if value_keys:
+        parameters["value_keys"] = value_keys
+
+    return parameters

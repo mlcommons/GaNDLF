@@ -6,6 +6,8 @@ data_preprocessing:
 in_memory: false
 learning_rate: 0.001
 loss_function: mse
+metrics:
+  - mse
 model:
   amp: false
   architecture: densenet121
@@ -21,7 +23,7 @@ nested_training:
 num_epochs: 1
 opt: adam
 parallel_compute_command: ''
-patch_sampler: label
+patch_sampler: uniform
 patch_size: 
 - 128
 - 128
@@ -30,7 +32,7 @@ q_max_length: 1
 q_num_workers: 0
 q_samples_per_volume: 1
 q_verbose: false
-save_masks: false
+save_output: false
 scaling_factor: 1
 scheduler: triangle
 version:

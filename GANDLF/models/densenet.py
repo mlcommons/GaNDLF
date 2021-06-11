@@ -1,7 +1,6 @@
 # adapted from https://github.com/kenshohara/3D-ResNets-PyTorch
 
-import math
-
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -84,8 +83,8 @@ class DenseNet(nn.Module):
     """
 
     def __init__(self,
-                 n_input_channels=3,
-                 n_dimensions=3,
+                 num_channels=3,
+                 num_dimensions=3,
                  conv1_t_size=7,
                  conv1_t_stride=1,
                  no_max_pool=False,
@@ -99,7 +98,7 @@ class DenseNet(nn.Module):
 
         super().__init__()
 
-        if n_dimensions == 2:
+        if num_dimensions == 2:
             self.Conv = nn.Conv2d
             self.MaxPool = nn.MaxPool2d
             self.BatchNorm = nn.BatchNorm2d
@@ -107,7 +106,7 @@ class DenseNet(nn.Module):
             self.adaptive_avg_pool = F.adaptive_avg_pool2d
             self.output_size = (1, 1)
             self.conv_stride = (conv1_t_stride, 2)
-        elif n_dimensions == 3:
+        elif num_dimensions == 3:
             self.Conv = nn.Conv3d
             self.MaxPool = nn.MaxPool3d
             self.BatchNorm = nn.BatchNorm3d
@@ -115,10 +114,12 @@ class DenseNet(nn.Module):
             self.adaptive_avg_pool = F.adaptive_avg_pool3d
             self.output_size=(1, 1, 1)
             self.conv_stride = (conv1_t_stride, 2, 2)
+        else:
+            sys.exit('Only 2D or 3D convolutions are supported.')
 
         # First convolution
         self.features = [('conv1',
-                          self.Conv(n_input_channels,
+                          self.Conv(num_channels,
                                     num_init_features,
                                     kernel_size=conv1_t_size,
                                     stride=self.conv_stride,

@@ -18,11 +18,20 @@ model:
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
+# metrics to evaluate the validation performance
+metrics:
+  {
+    dice, # segmentation
+    # accuracy # regression/classification
+    # mse # regression/classification
+  }
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
 # this will save the generated masks for validation and testing data for qualitative analysis
-save_masks: False
+save_output: False
+# If enabled, this parameter pads images and labels when label sampler is used
+enable_padding: False
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
@@ -37,7 +46,8 @@ patience: 50
 batch_size: 1
 # Set the initial learning rate
 learning_rate: 0.001
-# Learning rate scheduler - options: triangle, triangle_modified, exp, reduce-on-lr, step, more to come soon - default hyperparameters can be changed thru code
+# Learning rate scheduler - options:"triangle", "triangle_modified", "exp", "step", "reduce-on-plateau", "cosineannealing", "triangular", "triangular2", "exp_range"
+# triangle/triangle_modified use LambdaLR but triangular/triangular2/exp_range uses CyclicLR
 scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), dc_log (-log of dice), ce (), dcce (sum of dice and ce), mse () ...
@@ -54,6 +64,12 @@ weighted_loss: True
 #  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
+# this parameter controls the validation information collected during the training process
+# currently implemented: dice, accuracy (this can be a dict containing value for threshold), mse
+metrics:
+{
+    'dice'
+}
 # this parameter controls the nested training process
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method

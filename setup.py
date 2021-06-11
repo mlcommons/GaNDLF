@@ -8,7 +8,7 @@ with open('README.md') as readme_file:
   readme = readme_file.read()
 
 requirements = [
-  'numpy',
+  'numpy==1.19.2',
   'scipy',
   'SimpleITK==1.2.4',
   'torch>=1.7',
@@ -28,16 +28,20 @@ requirements = [
   'requests>=2.25.0',
   'pyvips',
   'pytest',
+  'pytest-azurepipelines',
+  'coverage',
+  'psutil',
+  'medcam'
 ]
 
 setup(
   name='GANDLF',
-  version='0.0.9-dev', # NR: non-release; this should be changed when tagging
-  author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur", # alphabetical order
+  version='0.0.9', # NR: non-release; this should be changed when tagging
+  author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur", # alphabetical order
   author_email='software@cbica.upenn.edu',
   python_requires='>=3.6',
   packages=find_packages(),
-  scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner'],
+  scripts=['gandlf_run', 'gandlf_constructCSV', 'gandlf_collectStats', 'gandlf_patchMiner', 'gandlf_padder'],
   classifiers=[
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Science/Research',
@@ -48,14 +52,14 @@ setup(
     'Programming Language :: Python :: 3.7',
   ],
   description=(
-    "Segmentation/regression/classification using various DL architectures using PyTorch."
+    "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
   ),
   install_requires=requirements,
   license="BSD-3-Clause License",
   long_description=readme,
   long_description_content_type='text/markdown',
   include_package_data=True,
-  keywords='semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation',
+  keywords='semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation, medical-imaging',
   zip_safe=False,
 )
 
@@ -70,7 +74,7 @@ if os.name == 'nt': # proceed for windows
     print('Downloading and extracting VIPS for Windows')
     url = 'https://github.com/libvips/libvips/releases/download/v8.10.2/vips-dev-w64-all-8.10.2.zip'
     zip_to_extract = './vips.zip'
-    import urllib.request, zipfile, io
+    import urllib.request, zipfile
     urllib.request.urlretrieve(url, zip_to_extract)
     z = zipfile.ZipFile(zip_to_extract)
     z.extractall('./vips')
