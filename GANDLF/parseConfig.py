@@ -1,11 +1,28 @@
-import os
-import ast
-import sys
-import numpy as np
-import yaml
-import pkg_resources
+import sys, yaml, pkg_resources
 
-parameters_to_initialize_as_false = ["weighted_loss", "verbose", "medcam_enabled", "save_output", "in_memory", "save_masks", "enable_padding" ] # this variable stores the parameters that need to be initialized to false
+## dictionary to define defaults for appropriate options
+parameter_defaults = {
+    "weighted_loss": False, # whether weighted loss is to be used or not
+    "verbose": False, # general application verbosity
+    "q_verbose": False, # queue construction verbosity
+    "medcam_enabled": False, # interpretability via medcam
+    "save_output": False, # save outputs during validation/testing
+    "in_memory": False, # pin data to gpu memory
+    "patch_sampler": "uniform", # type of sampling strategy
+    "enable_padding": False, # if padding needs to be done when "patch_sampler" is "label"
+    "scaling_factor": 1, # scaling factor for regression problems
+    "scheduler": "triangle_modified", # the default scheduler
+    "opt": "adam", # the optimizer
+    "q_max_length": 100, # the max length of queue
+    "q_samples_per_volume": 10, # number of samples per volume
+    "q_num_workers": 4, # number of worker threads to use
+    "loss_function": "dc", # default loss
+    "num_epochs":  100, # total number of epochs to train
+    "patience":  100, # number of epochs to wait for performance improvement
+    "batch_size": 1, # default batch size of training
+    "amp": False, # automatic mixed precision
+    "learning_rate": 0.001, # default learning rate
+}
 
 def initialize_parameter(params, parameter_to_initialize, value = None):
     """
@@ -83,46 +100,11 @@ def parseConfig(config_file_path, version_check=True):
             "The 'patch_size' parameter needs to be present in the configuration file"
         )
 
-    if not ("patch_sampler" in params):
-        params["patch_sampler"] = "label"
-
     if "resize" in params:
         print(
             "WARNING: 'resize' should be defined under 'data_processing', this will be skipped",
             file=sys.stderr,
         )
-
-    # Extrating the training parameters from the dictionary
-    if "num_epochs" in params:
-        num_epochs = int(params["num_epochs"])
-    else:
-        num_epochs = 100
-        print("Using default num_epochs: ", num_epochs)
-    params["num_epochs"] = num_epochs
-
-    if "patience" in params:
-        patience = int(params["patience"])
-    else:
-        print("Patience not given, train for full number of epochs")
-        patience = num_epochs
-    params["patience"] = patience
-
-    if "batch_size" in params:
-        batch_size = int(params["batch_size"])
-    else:
-        batch_size = 1
-        print("Using default batch_size: ", batch_size)
-    params["batch_size"] = batch_size
-
-    if "amp" in params:
-        print("Please define 'amp' under 'model'")
-
-    if "learning_rate" in params:
-        learning_rate = float(params["learning_rate"])
-    else:
-        learning_rate = 0.001
-        print("Using default learning_rate: ", learning_rate)
-    params["learning_rate"] = learning_rate
 
     if "modality" in params:
         modality = str(params["modality"])
@@ -199,13 +181,6 @@ def parseConfig(config_file_path, version_check=True):
 
     else:
         sys.exit("The key 'metrics' needs to be defined")
-
-    if "opt" in params:
-        opt = str(params["opt"])
-    else:
-        opt = "adam"
-        print("Using default opt: ", opt)
-    params["opt"] = opt
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
     params = initialize_key(params, "data_augmentation")
@@ -470,46 +445,6 @@ def parseConfig(config_file_path, version_check=True):
         print("Using default folds for validation split: ", kfolds)
         params["nested_training"]["validation"] = kfolds
 
-    # Setting default values to the params
-    if "scheduler" in params:
-        scheduler = str(params["scheduler"])
-    else:
-        scheduler = "triangle"
-    params["scheduler"] = scheduler.lower()
-
-    if "scaling_factor" in params:
-        scaling_factor = params["scaling_factor"]
-    else:
-        scaling_factor = 1
-    params["scaling_factor"] = scaling_factor
-
-    if "q_max_length" in params:
-        q_max_length = int(params["q_max_length"])
-    else:
-        q_max_length = 100
-    params["q_max_length"] = q_max_length
-
-    if "q_samples_per_volume" in params:
-        q_samples_per_volume = int(params["q_samples_per_volume"])
-    else:
-        q_samples_per_volume = 10
-    params["q_samples_per_volume"] = q_samples_per_volume
-
-    if int(params["q_max_length"]) % int(params["q_samples_per_volume"]) != 0:
-        sys.exit("'q_max_length' needs to be divisible by 'q_samples_per_volume'")
-
-    if "q_num_workers" in params:
-        q_num_workers = int(params["q_num_workers"])
-    else:
-        q_num_workers = 4
-    params["q_num_workers"] = q_num_workers
-
-    q_verbose = False
-    if "q_verbose" in params:
-        if params["q_verbose"] == "True":
-            q_verbose = True
-    params["q_verbose"] = q_verbose
-
     parallel_compute_command = ""
     if "parallel_compute_command" in params:
         parallel_compute_command = params["parallel_compute_command"]
@@ -517,7 +452,7 @@ def parseConfig(config_file_path, version_check=True):
         parallel_compute_command = parallel_compute_command.replace('"', "")
     params["parallel_compute_command"] = parallel_compute_command
 
-    for current_parameter in parameters_to_initialize_as_false:
-        params = initialize_parameter(params, current_parameter, False)
+    for current_parameter in parameter_defaults:
+        params = initialize_parameter(params, current_parameter, parameter_defaults[current_parameter])
     
     return params
