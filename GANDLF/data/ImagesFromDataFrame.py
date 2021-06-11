@@ -203,13 +203,11 @@ def ImagesFromDataFrame(dataframe,
             # sanity check for malformed csv
             if not os.path.isfile(str(dataframe[channel][patient])):
                 skip_subject = True
+
             # assigning the dict key to the channel
-            if not in_memory:
-                subject_dict[str(channel)] = Image(str(dataframe[channel][patient]), type=torchio.INTENSITY)
-            else:
-                img = sitk.ReadImage(str(dataframe[channel][patient]))
-                img_tensor = get_tensor_for_dataloader(img)
-                subject_dict[str(channel)] = Image(tensor=img_tensor, type=torchio.INTENSITY, path=dataframe[channel][patient])
+            img = sitk.ReadImage(str(dataframe[channel][patient]))
+            img_tensor = get_tensor_for_dataloader(img)
+            subject_dict[str(channel)] = Image(tensor=img_tensor, type=torchio.INTENSITY, path=dataframe[channel][patient])
             
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
@@ -227,12 +225,10 @@ def ImagesFromDataFrame(dataframe,
         if labelHeader is not None:
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
                 skip_subject = True
-            if not in_memory:
-                subject_dict['label'] = Image(str(dataframe[labelHeader][patient]), type=torchio.LABEL)
-            else:
-                img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                img_tensor = get_tensor_for_dataloader(img)
-                subject_dict['label'] = Image(tensor=img_tensor, type=torchio.LABEL, path=dataframe[labelHeader][patient])
+                
+            img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
+            img_tensor = get_tensor_for_dataloader(img)
+            subject_dict['label'] = Image(tensor=img_tensor, type=torchio.LABEL, path=dataframe[labelHeader][patient])
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
@@ -261,9 +257,13 @@ def ImagesFromDataFrame(dataframe,
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if 'label' in sampler or 'weight' in sampler:
                 if enable_padding:
-                    psize_pad = list(np.asarray(np.ceil(np.divide(psize,2)), dtype=int))
+                    psize_pad = list(np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int))
                     padder = Pad(psize_pad, padding_mode = 'symmetric') # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
                     subject = padder(subject)
+            
+            # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
+            if in_memory:
+                subject.load()
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
