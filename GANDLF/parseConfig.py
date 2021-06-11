@@ -1,7 +1,6 @@
-import sys
-import yaml
-import pkg_resources
+import sys, yaml, pkg_resources
 
+## dictionary to define defaults for appropriate options
 parameter_defaults = {
     "weighted_loss": False, # whether weighted loss is to be used or not
     "verbose": False, # general application verbosity
