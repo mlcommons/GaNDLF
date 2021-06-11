@@ -1,11 +1,17 @@
 ## 0.0.9
+
 - Refactoring the training and inference code
+- Added offline mechanism to generate padded images to improve training RAM requirements
+- Half-time epoch loss and metric output added for increased information
 
 ## 0.0.8
 
 - Pre-split training/validation data can now be provided
+- Major code refactoring to make extensions easier
 - Added a way to ignore a label during validation dice calculation
 - Added more options for VGG
+- Tests can now be run on GPU
+- New scheduling options added
 
 ## 0.0.7
 
@@ -59,7 +65,7 @@
 
 ## 0.0.1 (2020/08/25)
 
-- First tag of GANDLF
+- First tag of GaNDLF
 - Initial feature list:
   - Supports multiple
     - Deep Learning model architectures

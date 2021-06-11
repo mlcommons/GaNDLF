@@ -6,7 +6,9 @@ import torchio
 from torchio.transforms.spatial_transform import SpatialTransform
 import SimpleITK as sitk
 import nibabel as nib
+from torchvision.transforms import Normalize
 
+from GANDLF.utils import resample_image
 
 from torchio.data.subject import Subject
 from torchio.transforms.preprocessing.intensity.normalization_transform import NormalizationTransform, TypeMaskingMethod
@@ -15,7 +17,8 @@ def normalize_by_val(input_tensor, mean, std):
     """
     This function returns the tensor normalized by these particular values
     """
-    return transforms.Normalize(mean, std)             
+    normalizer = Normalize(mean, std) 
+    return normalizer(input_tensor)             
     
 def normalize_imagenet(input_tensor):
     """
@@ -64,6 +67,15 @@ def resize_image_resolution(input_image, output_size):
     for i in range(len(output_size)):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
     return outputSpacing
+
+def apply_resize(input, preprocessing_params, interpolator=sitk.sitkLinear):
+    return resample_image(input, resize_image_resolution(input, preprocessing_params['resize']), interpolator=interpolator)
+
+def get_tensor_for_dataloader(input_sitk_image):
+    input_image_tensor = torch.from_numpy(sitk.GetArrayFromImage(input_sitk_image)).unsqueeze(0) # single unsqueeze is always needed
+    if len(input_image_tensor.shape) == 3: # this is for 2D images
+        input_image_tensor = input_image_tensor.unsqueeze(0)
+    return input_image_tensor
 
 
 def tensor_rotate_90(input_image, axis):
@@ -133,7 +145,7 @@ class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
         return tensor
 
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
-def crop_image_outside_zeros(array, psize):
+def crop_image_outside_zeros(array, patch_size):
     dimensions = len(array.shape)
     if dimensions != 4:
         raise ValueError("Array expected to be 4D but got {} dimensions.".format(dimensions)) 
@@ -156,13 +168,13 @@ def crop_image_outside_zeros(array, psize):
     # for each axis
     for i in range(3):
         # if less than patch size, extend the small corner out
-        if large[i] - small[i] < psize[i]:
-            small[i] = large[i] - psize[i]
+        if large[i] - small[i] < patch_size[i]:
+            small[i] = large[i] - patch_size[i]
 
         # if bottom fell off array, extend the large corner and set small to 0
         if small[i] < 0:
             small[i] = 0
-            large[i] = psize[i]
+            large[i] = patch_size[i]
 
     # calculate pixel location of new bounding box corner (will use to update the reference of the image to physical space)
     new_corner_idxs = np.array([small[0], small[1], small[2]])
@@ -181,15 +193,15 @@ class  CropExternalZeroplanes(SpatialTransform):
     Transformation class to enable taking the whole image stack (including segmentation) and removing 
     (starting from edges) physical-coordinate planes with all zero voxels until you reach a non-zero voxel.
     Args:
-        psize: patch size (used to ensure we do not crop to smaller size than this)
+        patch_size: patch size (used to ensure we do not crop to smaller size than this)
         **kwargs: See :class:`~torchio.transforms.Transform` for additional
             keyword arguments.
     """
 
-    def __init__(self, psize, **kwargs):
+    def __init__(self, patch_size, **kwargs):
         super().__init__(**kwargs)
-        self.psize = psize
-        self.args_names = ('psize',)
+        self.patch_size = patch_size
+        self.args_names = ('patch_size',)
     
     def apply_transform(self, subject):
 
@@ -209,7 +221,7 @@ class  CropExternalZeroplanes(SpatialTransform):
         numpy_stack = np.concatenate(numpy_stack_list, axis=0)
 
         # crop away the external zero-planes on the whole stack
-        new_corner_idxs, new_stack = crop_image_outside_zeros(array=numpy_stack, psize=self.psize)
+        new_corner_idxs, new_stack = crop_image_outside_zeros(array=numpy_stack, patch_size=self.patch_size)
 
         # recompute origin of affine matrix using initial image shape
         new_origin = nib.affines.apply_affine(example_image_affine, new_corner_idxs)

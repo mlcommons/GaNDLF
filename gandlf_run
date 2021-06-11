@@ -15,9 +15,10 @@ from datetime import date
 from GANDLF.training_manager import *
 from GANDLF.inference_manager import InferenceManager 
 from GANDLF.parseConfig import parseConfig
+from GANDLF.utils import populate_header_in_parameters
 
 def main():
-    copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+    copyrightMessage = 'Contact: gandlf@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
     parser = argparse.ArgumentParser(prog='GANDLF', formatter_class=argparse.RawTextHelpFormatter, description = "Image Semantic Segmentation and Regression using Deep Learning.\n\n" + copyrightMessage)
     parser.add_argument('-config', type=str, help = 'The configuration file (contains all the information related to the training/inference session), this is read from \'output\' during inference', required=True)
     parser.add_argument('-data', type=str, help = 'Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV', required=True)
@@ -35,7 +36,7 @@ def main():
     model_parameters = args.config
     parameters = parseConfig(model_parameters)
     device = args.device
-    model_path = args.output
+    parameters['output_dir'] = args.output
 
     # fixme: for some reason, the 'bool' type is not working for train, needs to be checked
     if args.train == 0:
@@ -49,12 +50,11 @@ def main():
         device = 'cpu'
 
     if args.train: # train mode
-        Path(model_path).mkdir(parents=True, exist_ok=True)
+        Path(args.output).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
     if ',' in file_data_full:
         # training and validation pre-split
-        test = 1
         data_full = None
         both_csvs = file_data_full.split(',')
         data_train, headers_train = parseTrainingCSV(both_csvs[0], train=args.train)
@@ -63,15 +63,21 @@ def main():
         if headers_train != headers_validation:
             sys.exit('The training and validation CSVs do not have the same header information.')
         
+        parameters = populate_header_in_parameters(parameters, headers_train)
         # if we are here, it is assumed that the user wants to do training
-        TrainingManager_split(dataframe_train=data_train, dataframe_validation=data_validation, headers = headers_train, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager_split(dataframe_train=data_train, dataframe_validation=data_validation, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
     
+    parameters = populate_header_in_parameters(parameters, headers)
+
+    # # start computation - either training or inference
     if args.train: # training mode
-        TrainingManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device, reset_prev = reset_prev)
+        TrainingManager(dataframe=data_full, outputDir=args.output, parameters=parameters, device=device, reset_prev = reset_prev)
     else:
-        InferenceManager(dataframe=data_full, headers = headers, outputDir=model_path, parameters=parameters, device=device)
+        InferenceManager(dataframe=data_full, outputDir=args.output, parameters=parameters, device=device)
+    
+    print("Finished.")
 
 if __name__ == '__main__':
     main()

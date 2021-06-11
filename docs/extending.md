@@ -1,4 +1,4 @@
-# Extending GANDLF
+# Extending GaNDLF
 
 For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
@@ -49,7 +49,7 @@ pip install -e .
 
 ### Adding Pre-processing functionality
 
-- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
+- All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [./GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
 
 ## Add Training Functionality
@@ -64,11 +64,18 @@ pip install -e .
 
 ## Update Tests
 
-Once you have made changes to functionality, it is imperative that the unit tests be updated to cover the new code. Please see the [full testing suite](https://github.com/CBICA/GaNDLF/blob/master/testing/test_full.py) for details.
+Once you have made changes to functionality, it is imperative that the unit tests be updated to cover the new code. Please see the [full testing suite](https://github.com/CBICA/GaNDLF/blob/master/testing/test_full.py) for details and examples.
 
 ## Run Tests
 
 Once you have the virtual environment set up, tests can be run using the following command:
 ```powershell
-pytest
+pytest --device cuda # can be cuda or cpu, defaults to cpu
+```
+
+### Code coverage
+
+The code coverage for the tests can be obtained by the following command:
+```powershell
+coverage run -m pytest --device cuda; coverage report -m
 ```

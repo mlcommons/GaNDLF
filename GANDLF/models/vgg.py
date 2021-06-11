@@ -2,7 +2,7 @@
 '''
 Modified from https://github.com/pytorch/vision.git
 '''
-import math
+import sys, math
 import torch.nn as nn
 from .modelBase import get_final_layer
 
@@ -24,6 +24,8 @@ class VGG(nn.Module):
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
+        else:
+            sys.exit('Only 2D or 3D convolutions are supported.')
 
         self.classifier = nn.Sequential(
             nn.Dropout(),
@@ -36,7 +38,7 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(10, n_outputClasses) 
         )
-         # Initialize weights
+        # Initialize weights
         for m in self.modules():
             if isinstance(m, self.Conv):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
