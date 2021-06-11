@@ -17,6 +17,7 @@ from torchio import Image, Subject
 from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
+from skimage.io import imsave
 from shutil import copyfile
 from tqdm import tqdm
 import time
@@ -131,9 +132,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                     x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
                     if params['amp']:
                         with autocast():
-                            output = model(image_patches.half().cuda())
+                            output = model(image_patches.float().cuda()) # should this be model(image_patches.float().to(params["device"]))
                     else:
-                        output = model(image_patches.half().cuda())
+                        output = model(image_patches.float().cuda()) # should this be model(image_patches.float().to(params["device"]))
                     output = output.cpu().detach().numpy()
                     for i in range(int(output.shape[0])):
                         count_map[x_coords[i]:x_coords[i]+patch_size[0],
@@ -150,7 +151,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 imsave(os.path.join(subject_dest_dir, row[parameters["headers"]['subjectIDHeader']]+'_count.png'), count_map)
         else:
             print("ERROR: histo/path inference is Linux-only because openslide for Windows works only for Python-3.8, whereas pickle5 works only for 3.6 and 3.7")
-
 
 if __name__ == "__main__":
 
