@@ -7,7 +7,8 @@ parameter_defaults = {
     "q_verbose": False, # queue construction verbosity
     "medcam_enabled": False, # interpretability via medcam
     "save_output": False, # save outputs during validation/testing
-    "in_memory": False, # pin data to gpu memory
+    "in_memory": False, # pin data to cpu memory
+    "in_memory_gpu": False, # pin data to gpu memory 
     "patch_sampler": "uniform", # type of sampling strategy
     "enable_padding": False, # if padding needs to be done when "patch_sampler" is "label"
     "scaling_factor": 1, # scaling factor for regression problems
