@@ -17,6 +17,7 @@ from torchio import Image, Subject
 from torchio.transforms import *
 from torchio import Image, Subject
 from sklearn.model_selection import KFold
+from skimage.io import imsave
 from shutil import copyfile
 from tqdm import tqdm
 import time
@@ -98,7 +99,7 @@ if os.name != 'nt':
     '''
     path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
     ''' 
-    def inferenceLoopPath(inferenceDataFromPickle, headers, device, parameters, outputDir):
+    def inferenceLoopPath(inferenceDataFromPickle, device, parameters, outputDir):
         from GANDLF.inference_dataloader_histopath import InferTumorSegDataset
         from openslide import OpenSlide
         '''
@@ -114,6 +115,7 @@ if os.name != 'nt':
         base_filters = parameters['model']['base_filters']
         amp = parameters['model']['amp']
         batch_size = parameters['batch_size']
+        headers = parameters['headers']
         num_channels = len(headers['channelHeaders'])
         if not('num_channels' in parameters['model']):
             num_channels = len(headers['channelHeaders'])
@@ -151,11 +153,11 @@ if os.name != 'nt':
         if 'num_channels' in parameters['model']:
             print("Number of channels : ", parameters['model']['num_channels'])
         print("Number of classes  : ", n_classList)
-        model = get_model(which_model, num_dimensions=parameters['model']['dimension'], num_channels=num_channels, num_classes=n_classList,
+        model, parameters["model"]["amp"] = get_model(which_model, num_dimensions=parameters['model']['dimension'], num_channels=num_channels, num_classes=n_classList,
                           base_filters=base_filters, final_convolution_layer=parameters['model']['final_layer'], patch_size=patch_size, batch_size=batch_size)
 
         # Loading the weights into the model
-        main_dict = torch.load(os.path.join(outputDir, str(which_model) + "_best_val.pth.tar"))
+        main_dict = torch.load(os.path.join(outputDir, str(which_model) + "_best.pth.tar"))
         model.load_state_dict(main_dict['model_state_dict'])
         print('Loaded Weights successfully.')
         sys.stdout.flush()
@@ -194,11 +196,11 @@ if os.name != 'nt':
                                     shuffle=False, num_workers=2)
             for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                if params['amp']:
+                if parameters["model"]['amp']:
                     with autocast():
-                        output = model(image_patches.half().cuda())
+                        output = model(image_patches.float().cuda())
                 else:
-                    output = model(image_patches.half().cuda())
+                    output = model(image_patches.float().cuda())
                 output = output.cpu().detach().numpy()
                 for i in range(int(output.shape[0])):
                     count_map[x_coords[i]:x_coords[i]+patch_size[0],
