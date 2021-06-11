@@ -111,11 +111,11 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                                         shuffle=False, num_workers=parameters["q_num_workers"])
                 for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                     x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                    if params['amp']:
+                    if parameters['model']['amp']:
                         with autocast():
-                            output = model(image_patches.float().cuda()) # should this be model(image_patches.float().to(params["device"]))
+                            output = model(image_patches.float().to(params["device"]))
                     else:
-                        output = model(image_patches.float().cuda()) # should this be model(image_patches.float().to(params["device"]))
+                        output = model(image_patches.float().to(params["device"]))
                     output = output.cpu().detach().numpy()
                     for i in range(int(output.shape[0])):
                         count_map[x_coords[i]:x_coords[i]+patch_size[0],
