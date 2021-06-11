@@ -1,7 +1,4 @@
-import os
-import ast
 import sys
-import numpy as np
 import yaml
 import pkg_resources
 
@@ -11,21 +8,21 @@ parameter_defaults = {
     "q_verbose": False, # queue construction verbosity
     "medcam_enabled": False, # interpretability via medcam
     "save_output": False, # save outputs during validation/testing
-    "in_memory": False, #
-    "enable_padding": False, 
-    "scaling_factor": 1,
-    "scheduler": "triangle_modified",
-    "q_max_length": 100,
-    "q_samples_per_volume": 10,
-    "q_num_workers": 4,
-    "loss_function": "dc",
-    "num_epochs":  100,
-    "patience":  100,
-    "batch_size": 1,
-    "amp": False,
-    "learning_rate": 0.001,
-    "opt": "adam",
-    "patch_sampler": "uniform"
+    "in_memory": False, # pin data to gpu memory
+    "patch_sampler": "uniform", # type of sampling strategy
+    "enable_padding": False, # if padding needs to be done when "patch_sampler" is "label"
+    "scaling_factor": 1, # scaling factor for regression problems
+    "scheduler": "triangle_modified", # the default scheduler
+    "opt": "adam", # the optimizer
+    "q_max_length": 100, # the max length of queue
+    "q_samples_per_volume": 10, # number of samples per volume
+    "q_num_workers": 4, # number of worker threads to use
+    "loss_function": "dc", # default loss
+    "num_epochs":  100, # total number of epochs to train
+    "patience":  100, # number of epochs to wait for performance improvement
+    "batch_size": 1, # default batch size of training
+    "amp": False, # automatic mixed precision
+    "learning_rate": 0.001, # default learning rate
 }
 
 def initialize_parameter(params, parameter_to_initialize, value = None):
