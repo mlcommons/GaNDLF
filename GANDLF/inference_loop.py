@@ -108,7 +108,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
                 dataloader = DataLoader(patient_dataset_obj,
                                         batch_size=int(parameters['batch_size']),
-                                        shuffle=False, num_workers=2)
+                                        shuffle=False, num_workers=parameters["q_num_workers"])
                 for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                     x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
                     if params['amp']:
