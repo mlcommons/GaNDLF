@@ -1,6 +1,6 @@
 import sys, yaml, pkg_resources
 
-## dictionary to define defaults for appropriate options
+## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
     "weighted_loss": False, # whether weighted loss is to be used or not
     "verbose": False, # general application verbosity
@@ -9,15 +9,11 @@ parameter_defaults = {
     "save_output": False, # save outputs during validation/testing
     "in_memory": False, # pin data to cpu memory
     "in_memory_gpu": False, # pin data to gpu memory 
-    "patch_sampler": "uniform", # type of sampling strategy
     "enable_padding": False, # if padding needs to be done when "patch_sampler" is "label"
     "scaling_factor": 1, # scaling factor for regression problems
-    "scheduler": "triangle_modified", # the default scheduler
-    "opt": "adam", # the optimizer
     "q_max_length": 100, # the max length of queue
     "q_samples_per_volume": 10, # number of samples per volume
     "q_num_workers": 4, # number of worker threads to use
-    "loss_function": "dc", # default loss
     "num_epochs":  100, # total number of epochs to train
     "patience":  100, # number of epochs to wait for performance improvement
     "batch_size": 1, # default batch size of training
@@ -25,12 +21,22 @@ parameter_defaults = {
     "learning_rate": 0.001, # default learning rate
 }
 
-def initialize_parameter(params, parameter_to_initialize, value = None):
+## dictionary to define string defaults for appropriate options
+parameter_defaults_string = {
+    "opt": "adam", # the optimizer
+    "patch_sampler": "uniform", # type of sampling strategy
+    "scheduler": "triangle_modified", # the default scheduler
+    "loss_function": "dc", # default loss
+}
+
+def initialize_parameter(params, parameter_to_initialize, value = None, evaluate = True):
     """
     Initializes the specified parameter with supplied value
     """
     if parameter_to_initialize in params:
-        pass
+        if evaluate:
+            if isinstance(params[parameter_to_initialize], str):
+                params[parameter_to_initialize] = eval(params[parameter_to_initialize])
     else:
         print("WARNING: Initializing \'" + parameter_to_initialize + "\' as " + str(value))
         params[parameter_to_initialize] = value
@@ -454,6 +460,9 @@ def parseConfig(config_file_path, version_check=True):
     params["parallel_compute_command"] = parallel_compute_command
 
     for current_parameter in parameter_defaults:
-        params = initialize_parameter(params, current_parameter, parameter_defaults[current_parameter])
+        params = initialize_parameter(params, current_parameter, parameter_defaults[current_parameter], True)
+    
+    for current_parameter in parameter_defaults_string:
+        params = initialize_parameter(params, current_parameter, parameter_defaults_string[current_parameter], False)
     
     return params
