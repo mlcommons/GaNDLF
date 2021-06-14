@@ -8,7 +8,7 @@ parameter_defaults = {
     "medcam_enabled": False, # interpretability via medcam
     "save_output": False, # save outputs during validation/testing
     "in_memory": False, # pin data to cpu memory
-    "in_memory_gpu": False, # pin data to gpu memory 
+    "pin_memory_dataloader": False, # pin data to gpu memory 
     "enable_padding": False, # if padding needs to be done when "patch_sampler" is "label"
     "scaling_factor": 1, # scaling factor for regression problems
     "q_max_length": 100, # the max length of queue
