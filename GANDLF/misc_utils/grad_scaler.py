@@ -1,6 +1,7 @@
 import torch
 from GANDLF.misc_utils.clip_gradients import clip_gradients
 
+
 class GradScaler:
     def __init__(self):
         self._scaler = torch.cuda.amp.GradScaler()
@@ -29,3 +30,10 @@ class GradScaler:
 
     def load_state_dict(self, state_dict):
         self._scaler.load_state_dict(state_dict)
+
+
+def model_parameters(model, exclude_head=False):
+    if exclude_head:
+        return [p for p in model.parameters()][:-2]
+    else:
+        return model.parameters()
