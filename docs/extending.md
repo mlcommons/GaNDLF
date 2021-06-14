@@ -13,6 +13,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - [Update Tests](#update-tests)
 - [Run Tests](#run-tests)
 - [Code Coverage](#code-coverage)
+
 ## Environment
 
 Before starting to work on the code-level on GaNDLF, please get the environment ready:
