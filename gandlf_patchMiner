@@ -3,7 +3,8 @@
 
 import os
 from GANDLF.utils import *
-fix_paths(os.getcwd()) # add relevant vips path
+
+fix_paths(os.getcwd())  # add relevant vips path
 
 import time
 import warnings
@@ -35,35 +36,50 @@ def generate_initial_mask(slide_path, scale):
     slide_dims = slide.dimensions
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
-    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0]//scale, slide_dims[1]//scale)))
-    real_scale = (slide_dims[0]/slide_thumbnail.shape[1], slide_dims[1]/slide_thumbnail.shape[0])
-
+    slide_thumbnail = np.asarray(
+        slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale))
+    )
+    real_scale = (
+        slide_dims[0] / slide_thumbnail.shape[1],
+        slide_dims[1] / slide_thumbnail.shape[0],
+    )
 
     return tissue_mask(slide_thumbnail), real_scale
+
 
 def parse_gandlf_csv(fpath):
     df = pd.read_csv(fpath, dtype=str)
     df = df.drop_duplicates()
     for index, row in df.iterrows():
-        yield row['SubjectID'], row['Channel_0'], row['Label']
+        yield row["SubjectID"], row["Channel_0"], row["Label"]
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-i', '--input_CSV',
-                        dest='input_path',
-                        help="input path for the tissue",
-                        required=True)
-    parser.add_argument('-o', '--output_path',
-                        dest='output_path',
-                        default=None,
-                        required=True,
-                        help="output path for the patches")
-    parser.add_argument('-c', '--config',
-                        type=str,
-                        dest='config',
-                        help="config.yml for running OPM. ",
-                        required=True)
+    parser.add_argument(
+        "-i",
+        "--input_CSV",
+        dest="input_path",
+        help="input path for the tissue",
+        required=True,
+    )
+    parser.add_argument(
+        "-o",
+        "--output_path",
+        dest="output_path",
+        default=None,
+        required=True,
+        help="output path for the patches",
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        dest="config",
+        help="config.yml for running OPM. ",
+        required=True,
+    )
 
     args = parser.parse_args()
 
@@ -77,7 +93,7 @@ if __name__ == '__main__':
     if not out_dir.endswith("/"):
         out_dir += "/"
 
-    out_csv_path = os.path.join(out_dir, 'opm_train.csv')
+    out_csv_path = os.path.join(out_dir, "opm_train.csv")
 
     for sid, slide, label in parse_gandlf_csv(args.input_path):
         start = time.time()
@@ -88,16 +104,18 @@ if __name__ == '__main__':
         manager.set_subjectID(sid)
 
         # Generate an initial validity mask
-        mask, scale = generate_initial_mask(slide, cfg['scale'])
+        mask, scale = generate_initial_mask(slide, cfg["scale"])
         print("Setting valid mask...")
         manager.set_valid_mask(mask, scale)
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
         # Reject patch if image dimensions are not equal to PATCH_SIZE
-        patch_dims_check = partial(patch_size_check, patch_height=cfg['patch_size'][0], patch_width=cfg['patch_size'][1])
+        patch_dims_check = partial(
+            patch_size_check,
+            patch_height=cfg["patch_size"][0],
+            patch_width=cfg["patch_size"][1],
+        )
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, output_csv=out_csv_path,
-                             config=cfg)
+        manager.mine_patches(out_dir, output_csv=out_csv_path, config=cfg)
         print("Total time: {}".format(time.time() - start))
-
