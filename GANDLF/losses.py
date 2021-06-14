@@ -4,32 +4,38 @@ from torch.nn import MSELoss
 
 
 def one_hot(segmask_array, class_list):
-    '''
+    """
     This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
-    '''
+    """
     batch_size = segmask_array.shape[0]
     batch_stack = []
     for b in range(batch_size):
         one_hot_stack = []
-        segmask_array_iter = segmask_array[b,0]
-        bin_mask = (segmask_array_iter == 0) # initialize bin_mask
-        for _class in class_list: # this implementation allows users to combine logical operands 
+        segmask_array_iter = segmask_array[b, 0]
+        bin_mask = segmask_array_iter == 0  # initialize bin_mask
+        for (
+            _class
+        ) in class_list:  # this implementation allows users to combine logical operands
             if isinstance(_class, str):
-                if '||' in _class: # special case
-                    class_split = _class.split('||')
-                    bin_mask = (segmask_array_iter == int(class_split[0]))
-                    for i in range(1,len(class_split)):
-                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
-                elif '|' in _class: # special case
-                    class_split = _class.split('|')
-                    bin_mask = (segmask_array_iter == int(class_split[0]))
-                    for i in range(1,len(class_split)):
-                        bin_mask = bin_mask | (segmask_array_iter == int(class_split[i]))
+                if "||" in _class:  # special case
+                    class_split = _class.split("||")
+                    bin_mask = segmask_array_iter == int(class_split[0])
+                    for i in range(1, len(class_split)):
+                        bin_mask = bin_mask | (
+                            segmask_array_iter == int(class_split[i])
+                        )
+                elif "|" in _class:  # special case
+                    class_split = _class.split("|")
+                    bin_mask = segmask_array_iter == int(class_split[0])
+                    for i in range(1, len(class_split)):
+                        bin_mask = bin_mask | (
+                            segmask_array_iter == int(class_split[i])
+                        )
                 else:
                     # assume that it is a simple int
-                    bin_mask = (segmask_array_iter == int(_class)) 
+                    bin_mask = segmask_array_iter == int(_class)
             else:
-                bin_mask = (segmask_array_iter == int(_class))
+                bin_mask = segmask_array_iter == int(_class)
                 bin_mask = bin_mask.long()
             one_hot_stack.append(bin_mask)
         one_hot_stack = torch.stack(one_hot_stack)
@@ -48,25 +54,26 @@ def dice(inp, target):
         iflat.sum() + tflat.sum() + smooth
     )  # 2 * intersection / union
 
-def MCD(pm, gt, num_class, weights = None, ignore_class = None, loss_type = 0): 
-    '''
+
+def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
+    """
     These weights should be the dice weights, not dice weights
     loss_type:
         0: no loss, normal dice calculation
         1: dice loss, (1-dice)
         2: log dice, -log(dice)
-    '''
+    """
     acc_dice = 0
-    for i in range(0, num_class): # 0 is background
+    for i in range(0, num_class):  # 0 is background
         calculate_dice_for_label = True
         if ignore_class is not None:
             if i == ignore_class:
                 calculate_dice_for_label = False
-        
+
         if calculate_dice_for_label:
             currentDice = dice(gt[:, i, ...], pm[:, i, ...])
             if loss_type == 1:
-                currentDice = 1 - currentDice # subtract from 1 because this is a loss
+                currentDice = 1 - currentDice  # subtract from 1 because this is a loss
             elif loss_type == 2:
                 currentDice = -torch.log(
                     currentDice + torch.finfo(torch.float32).eps
@@ -75,8 +82,9 @@ def MCD(pm, gt, num_class, weights = None, ignore_class = None, loss_type = 0):
                 currentDice = currentDice * weights[i]
             acc_dice += currentDice
     if weights is None:
-        acc_dice /= num_class # we should not be considering 0
+        acc_dice /= num_class  # we should not be considering 0
     return acc_dice
+
 
 def MCD_loss(pm, gt, params):
     """
@@ -84,6 +92,7 @@ def MCD_loss(pm, gt, params):
     """
     gt = one_hot(gt, params["model"]["class_list"])
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 1)
+
 
 def MCD_loss_new(pm, gt, num_class, weights=None):  # compute the actual dice score
     dims = (1, 2, 3)
@@ -110,6 +119,7 @@ def CE(out, target):
     loss = torch.nn.BCELoss()
     loss_val = loss(iflat, tflat)
     return loss_val
+
 
 # This is wrong, that is not how categorical cross entropy works
 def CCE(out, target, params):
@@ -177,12 +187,13 @@ def MSE(output, label, reduction="mean", scaling_factor=1):
     """
     scaling_factor = torch.as_tensor(scaling_factor)
     label = label.float()
-    label = label*scaling_factor
+    label = label * scaling_factor
     loss_fn = MSELoss(reduction=reduction)
     iflat = output.contiguous().view(-1)
     tflat = label.contiguous().view(-1)
     loss = loss_fn(iflat, tflat)
     return loss
+
 
 def MSE_loss(inp, target, params):
     acc_mse_loss = 0
@@ -190,24 +201,34 @@ def MSE_loss(inp, target, params):
     #     sys.exit('Input and target shapes are inconsistent')
 
     if inp.shape[0] == 1:
-        acc_mse_loss += MSE(inp, target, reduction=params["loss_function"]['mse']["reduction"], scaling_factor=params['scaling_factor'])
-        #for i in range(0, params["model"]["num_classes"]):
+        acc_mse_loss += MSE(
+            inp,
+            target,
+            reduction=params["loss_function"]["mse"]["reduction"],
+            scaling_factor=params["scaling_factor"],
+        )
+        # for i in range(0, params["model"]["num_classes"]):
         #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
     else:
         for i in range(0, params["model"]["num_classes"]):
-            acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=params["loss_function"]["reduction"], scaling_factor=params['scaling_factor'])
-    acc_mse_loss/=params["model"]["num_classes"]
-    
+            acc_mse_loss += MSE(
+                inp[:, i, ...],
+                target[:, i, ...],
+                reduction=params["loss_function"]["reduction"],
+                scaling_factor=params["scaling_factor"],
+            )
+    acc_mse_loss /= params["model"]["num_classes"]
+
     return acc_mse_loss
 
 
 def fetch_loss_function(loss_name, params):
-    
-    if isinstance(loss_name, dict): # this is currently only happening for mse_torch
+
+    if isinstance(loss_name, dict):  # this is currently only happening for mse_torch
         # check for mse_torch
         loss_function = MSE_loss
         MSE_requested = True
-    elif loss_name == 'dc':
+    elif loss_name == "dc":
         loss_function = MCD_loss
     elif loss_name == "dc_log":
         loss_function = MCD_log_loss
@@ -218,7 +239,12 @@ def fetch_loss_function(loss_name, params):
     elif loss_name == "mse":
         loss_function = MSE_loss
     else:
-        print('WARNING: Could not find the requested loss function \'' + loss_name + '\' in the implementation, using dc, instead', file=sys.stderr)
-        loss_name = 'dc'
+        print(
+            "WARNING: Could not find the requested loss function '"
+            + loss_name
+            + "' in the implementation, using dc, instead",
+            file=sys.stderr,
+        )
+        loss_name = "dc"
         loss_function = MCD_loss
     return loss_function
