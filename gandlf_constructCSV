@@ -5,25 +5,52 @@ import os, argparse
 from datetime import date
 from GANDLF.utils import writeTrainingCSV
 
+
 def main():
-  copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
 
-  parser = argparse.ArgumentParser(prog='GANDLF_ConstructCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Generate training/inference CSV from data directory.\n\n" + copyrightMessage)
-  parser.add_argument('-inputDir', type=str, help = 'Input data directory which contains images in specified format', required=True)
-  parser.add_argument('-channelsID', type=str, help = 'Channels/modalities identifier string to check for in all files in \'input_dir\'; for example: -channelsID _t1.nii.gz,_t2.nii.gz', required=True)
-  parser.add_argument('-labelID', type=str, help = 'Label/mask identifier string to check for in all files in \'input_dir\'; for example: -labelID _seg.nii.gz', required=False)
-  parser.add_argument('-outputFile', type=str, help = 'Output CSV file', required=True)
-      
-  args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_ConstructCSV",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate training/inference CSV from data directory.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-inputDir",
+        type=str,
+        help="Input data directory which contains images in specified format",
+        required=True,
+    )
+    parser.add_argument(
+        "-channelsID",
+        type=str,
+        help="Channels/modalities identifier string to check for in all files in 'input_dir'; for example: -channelsID _t1.nii.gz,_t2.nii.gz",
+        required=True,
+    )
+    parser.add_argument(
+        "-labelID",
+        type=str,
+        help="Label/mask identifier string to check for in all files in 'input_dir'; for example: -labelID _seg.nii.gz",
+        required=False,
+    )
+    parser.add_argument("-outputFile", type=str, help="Output CSV file", required=True)
 
-  inputDir = os.path.normpath(args.inputDir)
-  outputFile = os.path.normpath(args.outputFile)
+    args = parser.parse_args()
 
-  if not args.labelID:
-    args.labelID = ''
+    inputDir = os.path.normpath(args.inputDir)
+    outputFile = os.path.normpath(args.outputFile)
 
-  writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
+    if not args.labelID:
+        args.labelID = ""
+
+    writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
+
 
 # main function
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()
