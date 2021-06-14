@@ -134,6 +134,7 @@ def test_train_segmentation_rad_3d(device):
   parameters['model']['dimension'] = 3
   parameters['model']['class_list'] = [0,1]
   parameters['model']['amp'] = True
+  parameters['in_memory'] = True
   parameters['model']['num_channels'] = len(parameters["headers"]["channelHeaders"])
   # loop through selected models and train for single epoch
   for model in all_models_segmentation:
