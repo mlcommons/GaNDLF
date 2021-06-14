@@ -13,8 +13,20 @@ import psutil
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import one_hot
-from GANDLF.parameterParsing import get_model, get_optimizer, get_scheduler, get_loss_and_metrics
-from GANDLF.utils import get_date_time, resample_image, send_model_to_device, populate_channel_keys_in_params, reverse_one_hot, get_class_imbalance_weights
+from GANDLF.parameterParsing import (
+    get_model,
+    get_optimizer,
+    get_scheduler,
+    get_loss_and_metrics,
+)
+from GANDLF.utils import (
+    get_date_time,
+    resample_image,
+    send_model_to_device,
+    populate_channel_keys_in_params,
+    reverse_one_hot,
+    get_class_imbalance_weights,
+)
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 import SimpleITK as sitk
 import numpy as np
@@ -23,6 +35,7 @@ from medcam import medcam
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
 # Reminder, the scaling factor should go to the metric MSE, and all should support a scaling factor, right?
+
 
 def step(model, image, label, params):
     """
@@ -49,17 +62,21 @@ def step(model, image, label, params):
         The final output of the model
 
     """
-    if params['verbose']:
-        #print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
+    if params["verbose"]:
+        # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
         print(torch.cuda.memory_summary())
-        print('|===========================================================================|\n|                             CPU Utilization                            |\n|')
-        print('Load_Percent   :', psutil.cpu_percent(interval=None))
-        print('MemUtil_Percent:', psutil.virtual_memory()[2])
-        print('|===========================================================================|\n|')
-        
+        print(
+            "|===========================================================================|\n|                             CPU Utilization                            |\n|"
+        )
+        print("Load_Percent   :", psutil.cpu_percent(interval=None))
+        print("MemUtil_Percent:", psutil.virtual_memory()[2])
+        print(
+            "|===========================================================================|\n|"
+        )
+
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
-        if "value_keys" in params: # squeeze label for segmentation only
+        if "value_keys" in params:  # squeeze label for segmentation only
             label = torch.squeeze(label, -1)
     if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
@@ -73,7 +90,7 @@ def step(model, image, label, params):
     # print("Output shape : ", output.shape, flush=True)
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
-    
+
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)
         if "medcam_enabled" in params and params["medcam_enabled"]:
@@ -112,7 +129,7 @@ def train_network(model, train_dataloader, optimizer, params):
     total_epoch_train_loss = 0
     total_epoch_train_metric = {}
     average_epoch_train_metric = {}
-    
+
     for metric in params["metrics"]:
         total_epoch_train_metric[metric] = 0
 
@@ -127,12 +144,16 @@ def train_network(model, train_dataloader, optimizer, params):
     model.train()
     for batch_idx, (subject) in enumerate(train_dataloader):
         optimizer.zero_grad()
-        image = torch.cat(
-            [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-        ).float().to(params["device"])
+        image = (
+            torch.cat(
+                [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+            )
+            .float()
+            .to(params["device"])
+        )
         if "value_keys" in params:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label = label.reshape(params['batch_size'], len(params['value_keys']))
+            label = label.reshape(params["batch_size"], len(params["value_keys"]))
         else:
             label = subject["label"][torchio.DATA]
             # one-hot encoding of 'label' will probably be needed for segmentation
@@ -162,12 +183,17 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if ((batch_idx+1) % (len(train_dataloader) / 2) == 0) and ((batch_idx+1) < len(train_dataloader)):
-            print("Half-Epoch Average Train loss : ", total_epoch_train_loss / (batch_idx+1))
+        if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
+            (batch_idx + 1) < len(train_dataloader)
+        ):
+            print(
+                "Half-Epoch Average Train loss : ",
+                total_epoch_train_loss / (batch_idx + 1),
+            )
             for metric in params["metrics"]:
                 print(
                     "Half-Epoch Average Train " + metric + " : ",
-                    total_epoch_train_metric[metric] / (batch_idx+1),
+                    total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
@@ -184,7 +210,7 @@ def train_network(model, train_dataloader, optimizer, params):
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(model, valid_dataloader, scheduler, params, mode = 'validation'):
+def validate_network(model, valid_dataloader, scheduler, params, mode="validation"):
     """
     Function to validate a network for a single epoch
 
@@ -219,93 +245,140 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
         total_epoch_valid_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    if params['verbose']:
+    if params["verbose"]:
         if params["model"]["amp"]:
             print("Using Automatic mixed precision", flush=True)
 
     if scheduler is None:
-        current_output_dir = params['output_dir'] # this is in inference mode
-    else: # this is useful for inference
-        current_output_dir = os.path.join(params['output_dir'], mode + '_output')
+        current_output_dir = params["output_dir"]  # this is in inference mode
+    else:  # this is useful for inference
+        current_output_dir = os.path.join(params["output_dir"], mode + "_output")
 
     # Set the model to valid
     model.eval()
     # # putting stuff in individual arrays for correlation analysis
-    # all_targets = [] 
-    # all_predics = [] 
+    # all_targets = []
+    # all_predics = []
     if params["medcam_enabled"]:
         model.enable_medcam()
         params["medcam_enabled"] = True
-    
+
     for batch_idx, (subject) in enumerate(valid_dataloader):
-        if params['verbose']:
-            print('== Current subject:', subject['subject_id'], flush=True)
-        
+        if params["verbose"]:
+            print("== Current subject:", subject["subject_id"], flush=True)
+
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
         # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
-        if ('label' in subject):
-            if (subject['label'] != ['NA']):
-                subject_dict['label'] = torchio.Image(path=subject['label']['path'], type=torchio.LABEL, tensor=subject['label']['data'].squeeze(0))
+        if "label" in subject:
+            if subject["label"] != ["NA"]:
+                subject_dict["label"] = torchio.Image(
+                    path=subject["label"]["path"],
+                    type=torchio.LABEL,
+                    tensor=subject["label"]["data"].squeeze(0),
+                )
                 label_present = True
-                label_ground_truth = subject_dict['label']['data']
-        
-        if "value_keys" in params: # for regression/classification
-            for key in params["value_keys"]: 
-                subject_dict['value_' + key] = subject[key]
-                label_ground_truth = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-                outputToWrite = 'SubjectID,PredictedValue\n' # used to write output
+                label_ground_truth = subject_dict["label"]["data"]
+
+        if "value_keys" in params:  # for regression/classification
+            for key in params["value_keys"]:
+                subject_dict["value_" + key] = subject[key]
+                label_ground_truth = torch.cat(
+                    [subject[key] for key in params["value_keys"]], dim=0
+                )
+                outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
 
         for key in params["channel_keys"]:
-            subject_dict[key] = torchio.Image(path=subject[key]['path'], type=subject[key]['type'], tensor=subject[key]['data'].squeeze(0))
-        
-        if ('value_keys' in params) and label_present: # regression/classification problem AND label is present
-            sampler = torchio.data.LabelSampler(params['patch_size'])
+            subject_dict[key] = torchio.Image(
+                path=subject[key]["path"],
+                type=subject[key]["type"],
+                tensor=subject[key]["data"].squeeze(0),
+            )
+
+        if (
+            "value_keys" in params
+        ) and label_present:  # regression/classification problem AND label is present
+            sampler = torchio.data.LabelSampler(params["patch_size"])
             tio_subject = torchio.Subject(subject_dict)
-            generator = sampler(tio_subject, num_patches=params['q_samples_per_volume'])
+            generator = sampler(tio_subject, num_patches=params["q_samples_per_volume"])
             pred_output = 0
             for patch in generator:
-                image = torch.cat([patch[key][torchio.DATA] for key in params["channel_keys"]], dim=0)
-                valuesToPredict = torch.cat([patch['value_' + key] for key in params["value_keys"]], dim=0)
+                image = torch.cat(
+                    [patch[key][torchio.DATA] for key in params["channel_keys"]], dim=0
+                )
+                valuesToPredict = torch.cat(
+                    [patch["value_" + key] for key in params["value_keys"]], dim=0
+                )
                 image = image.unsqueeze(0)
                 image = image.float().to(params["device"])
                 ## special case for 2D
                 if image.shape[-1] == 1:
                     image = torch.squeeze(image, -1)
                 pred_output += model(image)
-            pred_output = pred_output.cpu() / params['q_samples_per_volume']
-            pred_output /= params['scaling_factor']
+            pred_output = pred_output.cpu() / params["q_samples_per_volume"]
+            pred_output /= params["scaling_factor"]
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
-            outputToWrite += subject['subject_id'][0] + ',' + str(pred_output.cpu().data.item()) + '\n'
-            final_loss, final_metric = get_loss_and_metrics(valuesToPredict, pred_output, params)
+            outputToWrite += (
+                subject["subject_id"][0]
+                + ","
+                + str(pred_output.cpu().data.item())
+                + "\n"
+            )
+            final_loss, final_metric = get_loss_and_metrics(
+                valuesToPredict, pred_output, params
+            )
             # # Non network validing related
-            total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
+            total_epoch_valid_loss += (
+                final_loss.cpu().data.item()
+            )  # loss.cpu().data.item()
             for metric in final_metric.keys():
-                total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
+                total_epoch_valid_metric[metric] += final_metric[
+                    metric
+                ]  # calculated_metrics[metric]
 
-        else: # for segmentation problems OR regression/classification when no label is present
-            grid_sampler = torchio.inference.GridSampler(torchio.Subject(subject_dict), params['patch_size'])
+        else:  # for segmentation problems OR regression/classification when no label is present
+            grid_sampler = torchio.inference.GridSampler(
+                torchio.Subject(subject_dict), params["patch_size"]
+            )
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(grid_sampler)
-            
+
             if params["medcam_enabled"]:
-                attention_map_aggregator = torchio.inference.GridAggregator(grid_sampler)
-            
-            output_prediction = 0 # this is used for regression/classification
+                attention_map_aggregator = torchio.inference.GridAggregator(
+                    grid_sampler
+                )
+
+            output_prediction = 0  # this is used for regression/classification
             current_patch = 0
             is_segmentation = True
             for patches_batch in patch_loader:
-                if params['verbose']:
-                    print('=== Current patch:', current_patch, ', time : ', get_date_time(), ', location :', patches_batch[torchio.LOCATION], flush=True)
+                if params["verbose"]:
+                    print(
+                        "=== Current patch:",
+                        current_patch,
+                        ", time : ",
+                        get_date_time(),
+                        ", location :",
+                        patches_batch[torchio.LOCATION],
+                        flush=True,
+                    )
                 current_patch += 1
-                image = torch.cat(
-                    [patches_batch[key][torchio.DATA] for key in params["channel_keys"]], dim=1
-                ).float().to(params["device"])
+                image = (
+                    torch.cat(
+                        [
+                            patches_batch[key][torchio.DATA]
+                            for key in params["channel_keys"]
+                        ],
+                        dim=1,
+                    )
+                    .float()
+                    .to(params["device"])
+                )
                 if "value_keys" in params:
                     is_segmentation = False
-                    label = label_ground_truth # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
+                    label = label_ground_truth  # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
                     # label = torch.reshape(
                     #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
                     # )
@@ -313,79 +386,127 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
                 else:
                     label = patches_batch["label"][torchio.DATA]
                 label = label.to(params["device"])
-                if params['verbose']:
-                    print("=== Validation shapes : label:", label.shape, ", image:", image.shape, flush=True)
-                
+                if params["verbose"]:
+                    print(
+                        "=== Validation shapes : label:",
+                        label.shape,
+                        ", image:",
+                        image.shape,
+                        flush=True,
+                    )
+
                 result = step(model, image, label, params)
-                
+
                 # get the current attention map and add it to its aggregator
                 if params["medcam_enabled"]:
                     _, _, output, attention_map = result
-                    attention_map_aggregator.add_batch(attention_map, patches_batch[torchio.LOCATION])
+                    attention_map_aggregator.add_batch(
+                        attention_map, patches_batch[torchio.LOCATION]
+                    )
                 else:
                     _, _, output = result
-                
+
                 if is_segmentation:
-                    aggregator.add_batch(output.detach().cpu(), patches_batch[torchio.LOCATION])                    
+                    aggregator.add_batch(
+                        output.detach().cpu(), patches_batch[torchio.LOCATION]
+                    )
                 else:
                     if torch.is_tensor(output):
-                        output_prediction += output.detach().cpu() # this probably needs customization for classification (majority voting or median, perhaps?)
+                        output_prediction += (
+                            output.detach().cpu()
+                        )  # this probably needs customization for classification (majority voting or median, perhaps?)
                     else:
                         output_prediction += output
-            
+
             # save outputs
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
-                if params['save_output']:
-                    path_to_metadata = subject['path_to_metadata'][0]
+                if params["save_output"]:
+                    path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
                     _, ext = os.path.splitext(path_to_metadata)
-                    if (ext == '.gz') or (ext == '.nii'):
-                        ext = '.nii.gz'
+                    if (ext == ".gz") or (ext == ".nii"):
+                        ext = ".nii.gz"
                     pred_mask = output_prediction.numpy()
-                    pred_mask = reverse_one_hot(pred_mask[0],params["model"]["class_list"])
+                    pred_mask = reverse_one_hot(
+                        pred_mask[0], params["model"]["class_list"]
+                    )
                     ## special case for 2D
                     if image.shape[-1] > 1:
-                        result_image = sitk.GetImageFromArray(np.swapaxes(pred_mask,0,2)) # ITK expects array as Z,X,Y
+                        result_image = sitk.GetImageFromArray(
+                            np.swapaxes(pred_mask, 0, 2)
+                        )  # ITK expects array as Z,X,Y
                     else:
                         result_image = pred_mask
                     result_image.CopyInformation(inputImage)
-                    result_image = sitk.Cast(result_image, inputImage.GetPixelID()) # cast as the same data type 
+                    result_image = sitk.Cast(
+                        result_image, inputImage.GetPixelID()
+                    )  # cast as the same data type
                     # this handles cases that need resampling/resizing
-                    if 'resample' in params['data_preprocessing']:
-                        result_image = resample_image(result_image, inputImage.GetSpacing(), interpolator=sitk.sitkNearestNeighbor)
-                    sitk.WriteImage(result_image, os.path.join(current_output_dir, subject['subject_id'][0] + '_seg' + ext))
+                    if "resample" in params["data_preprocessing"]:
+                        result_image = resample_image(
+                            result_image,
+                            inputImage.GetSpacing(),
+                            interpolator=sitk.sitkNearestNeighbor,
+                        )
+                    sitk.WriteImage(
+                        result_image,
+                        os.path.join(
+                            current_output_dir, subject["subject_id"][0] + "_seg" + ext
+                        ),
+                    )
                 # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
             else:
-                output_prediction = output_prediction / len(patch_loader) # final regression output
-                outputToWrite += subject['subject_id'][0] + ',' + str(output_prediction) + '\n'
+                output_prediction = output_prediction / len(
+                    patch_loader
+                )  # final regression output
+                outputToWrite += (
+                    subject["subject_id"][0] + "," + str(output_prediction) + "\n"
+                )
 
             # get the final attention map and save it
             if params["medcam_enabled"]:
                 attention_map = attention_map_aggregator.get_output_tensor()
                 for i in range(len(attention_map)):
-                    model.save_attention_map(attention_map[i].squeeze(), raw_input=image[i].squeeze(-1))
+                    model.save_attention_map(
+                        attention_map[i].squeeze(), raw_input=image[i].squeeze(-1)
+                    )
 
-            final_loss, final_metric = get_loss_and_metrics(label_ground_truth, output_prediction, params)
-            if params['verbose']:
-                print("Full image " + mode + ":: Loss: ", final_loss, "; Metric: ", final_metric, flush=True)
-                
+            final_loss, final_metric = get_loss_and_metrics(
+                label_ground_truth, output_prediction, params
+            )
+            if params["verbose"]:
+                print(
+                    "Full image " + mode + ":: Loss: ",
+                    final_loss,
+                    "; Metric: ",
+                    final_metric,
+                    flush=True,
+                )
+
             # # Non network validing related
-            total_epoch_valid_loss += final_loss.cpu().data.item() # loss.cpu().data.item()
+            total_epoch_valid_loss += (
+                final_loss.cpu().data.item()
+            )  # loss.cpu().data.item()
             for metric in final_metric.keys():
-                total_epoch_valid_metric[metric] += final_metric[metric] # calculated_metrics[metric]
+                total_epoch_valid_metric[metric] += final_metric[
+                    metric
+                ]  # calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
-        if ((batch_idx+1) % (len(valid_dataloader) / 2) == 0) and ((batch_idx+1) < len(valid_dataloader)):
+        if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
+            (batch_idx + 1) < len(valid_dataloader)
+        ):
             print(
-                "Half-Epoch Average " + mode + " loss : ", total_epoch_valid_loss / (batch_idx+1)
+                "Half-Epoch Average " + mode + " loss : ",
+                total_epoch_valid_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
                 print(
                     "Half-Epoch Average " + mode + " " + metric + " : ",
-                    total_epoch_valid_metric[metric] / (batch_idx+1),
+                    total_epoch_valid_metric[metric] / (batch_idx + 1),
                 )
 
     if params["medcam_enabled"]:
@@ -402,17 +523,17 @@ def validate_network(model, valid_dataloader, scheduler, params, mode = 'validat
             "     Epoch Final   " + mode + " " + metric + " : ",
             average_epoch_valid_metric[metric],
         )
-    
+
     if scheduler is not None:
-        if params['scheduler'] == "reduce-on-plateau":
+        if params["scheduler"] == "reduce-on-plateau":
             scheduler.step(average_epoch_valid_loss)
         else:
             scheduler.step()
-    
+
     # write the predictions, if appropriate
-    if params['save_output']:
+    if params["save_output"]:
         if "value_keys" in params:
-            file = open(os.path.join(current_output_dir,"output_predictions.csv"), 'w')
+            file = open(os.path.join(current_output_dir, "output_predictions.csv"), "w")
             file.write(outputToWrite)
             file.close()
 
@@ -433,7 +554,7 @@ def training_loop(
     loss = params["loss_function"]
     metrics = params["metrics"]
     params["device"] = device
-    params['output_dir'] = output_dir
+    params["output_dir"] = output_dir
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
@@ -448,20 +569,14 @@ def training_loop(
         final_convolution_layer=params["model"]["final_layer"],
         patch_size=params["patch_size"],
         batch_size=params["batch_size"],
-        amp=params["model"]["amp"]
+        amp=params["model"]["amp"],
     )
 
     # Set up the dataloaders
-    training_data_for_torch = ImagesFromDataFrame(
-        training_data,
-        params,
-        train=True
-    )
+    training_data_for_torch = ImagesFromDataFrame(training_data, params, train=True)
 
     validation_data_for_torch = ImagesFromDataFrame(
-        validation_data,
-        params,
-        train=False
+        validation_data, params, train=False
     )
 
     testingDataDefined = True
@@ -470,32 +585,32 @@ def training_loop(
         testingDataDefined = False
 
     if testingDataDefined:
-        test_data_for_torch = ImagesFromDataFrame(
-            testing_data,
-            params,
-            train=False
-        )
+        test_data_for_torch = ImagesFromDataFrame(testing_data, params, train=False)
 
     train_dataloader = DataLoader(
         training_data_for_torch,
         batch_size=params["batch_size"],
         shuffle=True,
-        pin_memory=False #params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
+        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
 
     val_dataloader = DataLoader(
-        validation_data_for_torch, batch_size=1, pin_memory=False #params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
+        validation_data_for_torch,
+        batch_size=1,
+        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
 
     if testingDataDefined:
         test_dataloader = DataLoader(
-            test_data_for_torch, batch_size=1, pin_memory=False #params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
+            test_data_for_torch,
+            batch_size=1,
+            pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
         )
 
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
     params = populate_channel_keys_in_params(validation_data_for_torch, params)
-    
+
     # Calculate the weights here
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
@@ -523,11 +638,11 @@ def training_loop(
     )
 
     scheduler = get_scheduler(
-        which_scheduler=params['scheduler'],
-        optimizer=optimizer, 
+        which_scheduler=params["scheduler"],
+        optimizer=optimizer,
         batch_size=params["batch_size"],
-        training_samples_size=len(train_dataloader.dataset), 
-        learning_rate=params["learning_rate"]
+        training_samples_size=len(train_dataloader.dataset),
+        learning_rate=params["learning_rate"],
     )
 
     # Start training time here
@@ -558,7 +673,17 @@ def training_loop(
     )
 
     if "medcam" in params:
-        model = medcam.inject(model, output_dir=os.path.join(output_dir, "attention_maps", params["medcam"]["backend"]), backend=params["medcam"]["backend"], layer=params["medcam"]["layer"], save_maps=False, return_attention=True, enabled=False)
+        model = medcam.inject(
+            model,
+            output_dir=os.path.join(
+                output_dir, "attention_maps", params["medcam"]["backend"]
+            ),
+            backend=params["medcam"]["backend"],
+            layer=params["medcam"]["layer"],
+            save_maps=False,
+            return_attention=True,
+            enabled=False,
+        )
         params["medcam_enabled"] = False
 
     # Setup a few variables for tracking
@@ -582,9 +707,9 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, scheduler, params, mode='validation'
+            model, val_dataloader, scheduler, params, mode="validation"
         )
-        
+
         patience += 1
 
         # Write the losses to a logger
@@ -594,10 +719,10 @@ def training_loop(
 
         if testingDataDefined:
             epoch_test_loss, epoch_test_metric = validate_network(
-                model, test_dataloader, scheduler, params, mode='testing'
+                model, test_dataloader, scheduler, params, mode="testing"
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
-        
+
         print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
         print(
@@ -608,7 +733,7 @@ def training_loop(
         )
 
         # Start to check for loss
-        if not(first_model_saved) or (epoch_valid_loss <= torch.tensor(best_loss)):
+        if not (first_model_saved) or (epoch_valid_loss <= torch.tensor(best_loss)):
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
@@ -619,7 +744,9 @@ def training_loop(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "best_loss": best_loss,
                 },
-                os.path.join(output_dir, params['model']['architecture'] + "_best.pth.tar"),
+                os.path.join(
+                    output_dir, params["model"]["architecture"] + "_best.pth.tar"
+                ),
             )
             first_model_saved = True
 

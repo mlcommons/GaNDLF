@@ -4,7 +4,10 @@ Add Conv Block for MSDNet
 """
 import torch.nn as nn
 
-def add_conv_block(Conv, BatchNorm, in_ch=1, out_ch=1, kernel_size=3, dilate=1, last=False):
+
+def add_conv_block(
+    Conv, BatchNorm, in_ch=1, out_ch=1, kernel_size=3, dilate=1, last=False
+):
     """
     Helper function
     """

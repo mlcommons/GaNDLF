@@ -9,6 +9,7 @@ import torch
 from GANDLF.models.seg_modules.add_conv_block import add_conv_block
 from .modelBase import ModelBase
 
+
 class MSDNet(ModelBase):
     """
     Paper: A mixed-scale dense convolutional neural network for image analysis
@@ -17,14 +18,25 @@ class MSDNet(ModelBase):
     DOI: 10.1073/pnas.1715832114
     Derived from Shubham Dokania's https://github.com/shubham1810/MS-D_Net_PyTorch
     """
+
     @staticmethod
     def weight_init(m):
         if isinstance(m, nn.Linear):
             nn.init.kaiming_normal_(m, m.weight.data)
 
-    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer, num_layers = 4):
+    def __init__(
+        self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        final_convolution_layer,
+        num_layers=4,
+    ):
 
-        super(MSDNet, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
+        super(MSDNet, self).__init__(
+            n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+        )
 
         self.layer_list = add_conv_block(self.Conv, self.BatchNorm, in_ch=n_channels)
 
@@ -33,10 +45,7 @@ class MSDNet(ModelBase):
         for i in range(num_layers):
             s = i % 10 + 1
             self.layer_list += add_conv_block(
-                self.Conv,
-                self.BatchNorm,
-                in_ch=current_in_channels,
-                dilate=s
+                self.Conv, self.BatchNorm, in_ch=current_in_channels, dilate=s
             )
             current_in_channels += 1
 
@@ -47,7 +56,7 @@ class MSDNet(ModelBase):
             in_ch=current_in_channels + n_channels,
             out_ch=n_classes,
             kernel_size=1,
-            last=True
+            last=True,
         )
 
         # Add to Module List
