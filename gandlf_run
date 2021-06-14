@@ -18,6 +18,8 @@ from GANDLF.inference_manager import InferenceManager
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import populate_header_in_parameters
 
+from GANDLF import version
+
 
 def main():
     copyrightMessage = (
@@ -75,9 +77,7 @@ def main():
         "-v",
         "--version",
         action="version",
-        version=format(parser.prog)
-        + " v"
-        + pkg_resources.require(parser.prog)[0].version
+        version='%(prog)s v{}'.format(version)
         + "\n\n"
         + copyrightMessage,
         help="Show program's version number and exit.",
