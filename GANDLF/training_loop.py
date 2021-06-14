@@ -170,7 +170,7 @@ def train_network(model, train_dataloader, optimizer, params):
                 if not torch.isnan(
                     loss
                 ):  # if loss is nan, don't backprop and don't step optimizer
-                    scaler.scale(
+                    scaler(
                         loss=loss,
                         optimizer=optimizer,
                         clip_grad=params["clip_grad"],
