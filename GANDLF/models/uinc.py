@@ -13,6 +13,7 @@ from GANDLF.models.seg_modules.IncConv import IncConv
 from GANDLF.models.seg_modules.IncDropout import IncDropout
 from .modelBase import ModelBase
 
+
 class uinc(ModelBase):
     """
     This is the implementation of the following paper: https://arxiv.org/abs/1907.02110
@@ -22,30 +23,162 @@ class uinc(ModelBase):
     not the initial input but the input after the first convolution is addded to the final output
     since the initial input and the final one do not have the same dimensions.
     """
-    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
-        super(uinc, self).__init__(n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer)
-        self.conv0_1x1 = IncConv(n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm)
-        self.rn_0 = ResNetModule(base_filters, base_filters, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.ri_0 = InceptionModule(base_filters, base_filters, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.ds_0 = IncDownsamplingModule(base_filters, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm)
-        self.ri_1 = InceptionModule(base_filters*2, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.ds_1 = IncDownsamplingModule(base_filters*2, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm)
-        self.ri_2 = InceptionModule(base_filters*4, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.ds_2 = IncDownsamplingModule(base_filters*4, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm)
-        self.ri_3 = InceptionModule(base_filters*8, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.ds_3 = IncDownsamplingModule(base_filters*8, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm)
-        self.ri_4 = InceptionModule(base_filters*16, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.us_3 = IncUpsamplingModule(base_filters*16, base_filters*8, self.ConvTranspose, self.Dropout, self.InstanceNorm)
-        self.ri_5 = InceptionModule(base_filters*16, base_filters*16, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.us_2 = IncUpsamplingModule(base_filters*16, base_filters*4, self.ConvTranspose, self.Dropout, self.InstanceNorm)
-        self.ri_6 = InceptionModule(base_filters*8, base_filters*8, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.us_1 = IncUpsamplingModule(base_filters*8, base_filters*2, self.ConvTranspose, self.Dropout, self.InstanceNorm)
-        self.ri_7 = InceptionModule(base_filters*4, base_filters*4, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.us_0 = IncUpsamplingModule(base_filters*4, base_filters, self.ConvTranspose, self.Dropout, self.InstanceNorm)
-        self.ri_8 = InceptionModule(base_filters*2, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.conv9_1x1 = IncConv(base_filters*2, base_filters, self.Conv, self.Dropout, self.InstanceNorm)
-        self.rn_10 = ResNetModule(base_filters*2, base_filters*2, self.Conv, self.Dropout, self.InstanceNorm, res=True)
-        self.dropout = IncDropout(base_filters*2, n_classes, self.Conv, self.Dropout, self.InstanceNorm)
+
+    def __init__(
+        self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+    ):
+        super(uinc, self).__init__(
+            n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+        )
+        self.conv0_1x1 = IncConv(
+            n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm
+        )
+        self.rn_0 = ResNetModule(
+            base_filters,
+            base_filters,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.ri_0 = InceptionModule(
+            base_filters,
+            base_filters,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.ds_0 = IncDownsamplingModule(
+            base_filters, base_filters * 2, self.Conv, self.Dropout, self.InstanceNorm
+        )
+        self.ri_1 = InceptionModule(
+            base_filters * 2,
+            base_filters * 2,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.ds_1 = IncDownsamplingModule(
+            base_filters * 2,
+            base_filters * 4,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_2 = InceptionModule(
+            base_filters * 4,
+            base_filters * 4,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.ds_2 = IncDownsamplingModule(
+            base_filters * 4,
+            base_filters * 8,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_3 = InceptionModule(
+            base_filters * 8,
+            base_filters * 8,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.ds_3 = IncDownsamplingModule(
+            base_filters * 8,
+            base_filters * 16,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_4 = InceptionModule(
+            base_filters * 16,
+            base_filters * 16,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.us_3 = IncUpsamplingModule(
+            base_filters * 16,
+            base_filters * 8,
+            self.ConvTranspose,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_5 = InceptionModule(
+            base_filters * 16,
+            base_filters * 16,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.us_2 = IncUpsamplingModule(
+            base_filters * 16,
+            base_filters * 4,
+            self.ConvTranspose,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_6 = InceptionModule(
+            base_filters * 8,
+            base_filters * 8,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.us_1 = IncUpsamplingModule(
+            base_filters * 8,
+            base_filters * 2,
+            self.ConvTranspose,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_7 = InceptionModule(
+            base_filters * 4,
+            base_filters * 4,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.us_0 = IncUpsamplingModule(
+            base_filters * 4,
+            base_filters,
+            self.ConvTranspose,
+            self.Dropout,
+            self.InstanceNorm,
+        )
+        self.ri_8 = InceptionModule(
+            base_filters * 2,
+            base_filters * 2,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.conv9_1x1 = IncConv(
+            base_filters * 2, base_filters, self.Conv, self.Dropout, self.InstanceNorm
+        )
+        self.rn_10 = ResNetModule(
+            base_filters * 2,
+            base_filters * 2,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
+            res=True,
+        )
+        self.dropout = IncDropout(
+            base_filters * 2, n_classes, self.Conv, self.Dropout, self.InstanceNorm
+        )
 
     def forward(self, x):
         """
