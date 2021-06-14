@@ -8,13 +8,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 import sys
 
-def get_final_layer(final_convolution_layer):
-    none_list = ['none', None, 'None', 'regression']
 
-    if final_convolution_layer == 'sigmoid':
+def get_final_layer(final_convolution_layer):
+    none_list = ["none", None, "None", "regression"]
+
+    if final_convolution_layer == "sigmoid":
         final_convolution_layer = torch.sigmoid
 
-    elif final_convolution_layer == 'softmax':
+    elif final_convolution_layer == "softmax":
         final_convolution_layer = F.softmax
 
     elif final_convolution_layer in none_list:
@@ -24,10 +25,13 @@ def get_final_layer(final_convolution_layer):
 
 
 class ModelBase(nn.Module):
-    '''
+    """
     This is the base model class that all other architectures will need to derive from
-    '''
-    def __init__(self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer):
+    """
+
+    def __init__(
+        self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+    ):
         """
         This defines all defaults that the model base uses
         """
@@ -61,6 +65,6 @@ class ModelBase(nn.Module):
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool3d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
         else:
-            sys.exit('Currently, only 2D or 3D datasets are supported.')
-        
+            sys.exit("Currently, only 2D or 3D datasets are supported.")
+
         self.final_convolution_layer = get_final_layer(final_convolution_layer)

@@ -1,0 +1,7 @@
+[tool.black]
+extend-exclude = '''
+/(
+  | testing/data
+  | GANDLF/OPM
+)/
+'''

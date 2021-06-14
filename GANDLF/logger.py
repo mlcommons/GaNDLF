@@ -9,7 +9,8 @@ Created on Thu Mar 11 14:55:44 2021
 import os
 import torch
 
-class Logger():
+
+class Logger:
     def __init__(self, logger_csv_filename, metrics):
         """
 
@@ -28,15 +29,15 @@ class Logger():
         self.filename = logger_csv_filename
         self.metrics = metrics
 
-    def write_header(self, mode='train'):
+    def write_header(self, mode="train"):
         self.csv = open(self.filename, "a")
         if os.stat(self.filename).st_size == 0:
-            row = ''
-            if mode.lower() == 'train':
+            row = ""
+            if mode.lower() == "train":
                 row += "epoch_no,train_loss,"
                 for metric in self.metrics:
                     row += "train_" + metric + ","
-            elif mode.lower() == 'test':
+            elif mode.lower() == "test":
                 row += "epoch_no,test_loss,"
                 for metric in self.metrics:
                     row += "test_" + metric + ","
@@ -69,20 +70,20 @@ class Logger():
 
         """
         self.csv = open(self.filename, "a")
-        row = ''
-        row += str(epoch_number) + "," 
+        row = ""
+        row += str(epoch_number) + ","
         if torch.is_tensor(loss):
             row += str(loss.cpu().data.item())
         else:
             row += str(loss)
-        row += ','
-        
+        row += ","
+
         for metric in epoch_metrics:
             if torch.is_tensor(epoch_metrics[metric]):
                 row += str(epoch_metrics[metric].cpu().data.item())
             else:
                 row += str(epoch_metrics[metric])
-            row += ','
+            row += ","
         row = row[:-1]
         self.csv.write(row)
         self.csv.write("\n")
