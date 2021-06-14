@@ -480,16 +480,16 @@ def training_loop(
         training_data_for_torch,
         batch_size=params["batch_size"],
         shuffle=True,
-        pin_memory=params["in_memory_gpu"],
+        pin_memory=False #params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
 
     val_dataloader = DataLoader(
-        validation_data_for_torch, batch_size=1, pin_memory=params["in_memory_gpu"]
+        validation_data_for_torch, batch_size=1, pin_memory=False #params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
 
     if testingDataDefined:
         test_dataloader = DataLoader(
-            test_data_for_torch, batch_size=1, pin_memory=params["in_memory_gpu"]
+            test_data_for_torch, batch_size=1, pin_memory=False #params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
         )
 
     # Fetch the appropriate channel keys
