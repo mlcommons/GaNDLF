@@ -1,6 +1,6 @@
 # GaNDLF
 
-A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification.
+The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation and classification.
 
 ## Why use this?
 
