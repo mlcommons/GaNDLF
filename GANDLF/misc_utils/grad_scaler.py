@@ -1,5 +1,5 @@
 import torch
-from GANDLF.misc_utils.clip_gradients import clip_gradients
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
 
 
 class GradScaler:
