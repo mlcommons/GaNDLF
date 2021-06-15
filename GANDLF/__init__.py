@@ -1,4 +1,5 @@
-name = "GANDLF"
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+from .version import __version__
+version = __version__ # alias
 
-__version__ = "0.0.10-dev"
-version = __version__

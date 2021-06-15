@@ -24,11 +24,15 @@ jobs:
     
       - template: .azure-pipelines/steps.yml
 
-  - job: macOS
-    pool:
-      vmImage: macOS-latest
-    steps:
-      - bash: echo "##vso[task.prependpath]$CONDA/bin"
-        displayName: Add conda to PATH
-    
-      - template: .azure-pipelines/steps.yml
+  ## this takes a **really** long time, so has been disabled
+  # - job: macOS
+  #  pool:
+  #    vmImage: macOS-latest
+  #  steps:
+  #    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+  #      displayName: Add conda to PATH
+  #      
+  #    - bash: sudo chown -R $USER $CONDA
+  #      displayName: Take ownership of conda installation
+  #  
+  #    - template: .azure-pipelines/steps.yml
