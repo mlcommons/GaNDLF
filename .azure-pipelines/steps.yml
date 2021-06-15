@@ -2,10 +2,10 @@ steps:
 - script: |
     conda create -p ./venv python=3.6 -y
     source activate ./venv
+    pip install -e .
     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
     conda install -c sdvillal openslide -y 
     conda install -c conda-forge libvips -y
-    pip install -e .
   displayName: 'Install dependencies'
 
 - script: |
