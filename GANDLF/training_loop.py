@@ -10,6 +10,7 @@ import torch
 import time
 import torchio
 import psutil
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from GANDLF.logger import Logger
 from GANDLF.losses import one_hot
@@ -125,6 +126,9 @@ def train_network(model, train_dataloader, optimizer, params):
         Train metrics for the current epoch
 
     """
+    print("*" * 20)
+    print("Starting Training : ")
+    print("*" * 20)
     # Initialize a few things
     total_epoch_train_loss = 0
     total_epoch_train_metric = {}
@@ -142,7 +146,7 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # Set the model to train
     model.train()
-    for batch_idx, (subject) in enumerate(train_dataloader):
+    for batch_idx, (subject) in enumerate(tqdm(train_dataloader)):
         optimizer.zero_grad()
         image = (
             torch.cat(
@@ -263,7 +267,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         model.enable_medcam()
         params["medcam_enabled"] = True
 
-    for batch_idx, (subject) in enumerate(valid_dataloader):
+    for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
 
