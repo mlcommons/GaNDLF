@@ -9,5 +9,6 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
+    source activate ./venv
     pytest
   displayName: 'Run Tests'
