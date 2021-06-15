@@ -51,7 +51,7 @@ setup(
     version=__version__,
     author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur",  # alphabetical order
     author_email="software@cbica.upenn.edu",
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     packages=find_packages(),
     scripts=[
         "gandlf_run",
