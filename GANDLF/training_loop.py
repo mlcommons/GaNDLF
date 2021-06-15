@@ -30,6 +30,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     get_class_imbalance_weights,
 )
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters
 from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
 
@@ -184,13 +185,13 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             if not math.isnan(loss):
                 loss.backward(create_graph=second_order)
-                if parmas["clip_grad"] is not None:
+                if params["clip_grad"] is not None:
                     dispatch_clip_grad(
                         parameters=model_parameters(
-                            model, exclude_head="agc" in args.clip_mode
+                            model, exclude_head="agc" in params["clip_mode"]
                         ),
-                        value=args.clip_grad,
-                        mode=args.clip_mode,
+                        value=params["clip_grad"],
+                        mode=params["clip_mode"],
                     )
                 optimizer.step()
                 nan_loss = False

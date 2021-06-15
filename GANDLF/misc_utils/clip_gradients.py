@@ -4,7 +4,7 @@ Implementation of functions to clip gradients
 """
 
 import torch
-from GANDLF.misc_utils.adaptive_gradient_clipping import adaptive_clip_grad
+from GANDLF.misc_utils.adaptive_gradient_clipping import adaptive_gradient_clip
 
 
 def dispatch_clip_grad(
@@ -23,6 +23,6 @@ def dispatch_clip_grad(
     elif mode == "value":
         torch.nn.utils.clip_grad_value_(parameters, value)
     elif mode == "agc":
-        adaptive_clip_grad(parameters, value, norm_type=norm_type)
+        adaptive_gradient_clip(parameters, value, norm_type=norm_type)
     else:
         assert False, f"Unknown clip mode ({mode})."
