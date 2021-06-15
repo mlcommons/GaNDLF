@@ -4,6 +4,7 @@ Modified from https://github.com/pytorch/vision.git
 """
 import sys, math
 import torch.nn as nn
+import torch.nn.functional as F
 from .modelBase import get_final_layer
 
 __all__ = [
@@ -18,6 +19,21 @@ __all__ = [
     "pool_test19",
 ]
 
+class GlobalAveragePooling(nn.Module):
+    def __init__(self, n_dimensions):
+        super(GlobalAveragePooling, self).__init__()
+        self.dimensions = n_dimensions
+        
+    def forward(self, x):
+
+        if self.dimensions == 2:
+            assert len(x.size()) == 4, x.size()
+            B, C, W, H = x.size()
+            return F.avg_pool2d(x, (W, H)).view(B, C)
+        elif self.dimensions == 3:
+            assert len(x.size()) == 5, x.size()
+            B, C, W, H, D = x.size()
+            return F.avg_pool3d(x, (W, H, D)).view(B, C)
 
 class POOL_TEST(nn.Module):
     """
@@ -35,23 +51,26 @@ class POOL_TEST(nn.Module):
         super(POOL_TEST, self).__init__()
         self.features = features
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
+        self.global_pooling = GlobalAveragePooling(n_dimensions)
+        
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
         else:
-            sys.exit("Only 2D or 3D convolutions are supported.")
+            raise ValueError("Only 2D or 3D convolutions are supported.")
 
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(inputFeaturesForClassifier, 512),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(512, 512),
-            nn.ReLU(True),
-            nn.Linear(512, 10),
-            nn.ReLU(True),
-            nn.Linear(10, n_outputClasses),
+            self.global_pooling,
+            # nn.Linear(inputFeaturesForClassifier, 512),
+            # nn.ReLU(True),
+            # nn.Dropout(),
+            # nn.Linear(512, 512),
+            # nn.ReLU(True),
+            # nn.Linear(512, 10),
+            # nn.ReLU(True),
+            # nn.Linear(10, n_outputClasses),
         )
         # Initialize weights
         for m in self.modules():
@@ -61,9 +80,12 @@ class POOL_TEST(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, x):
+        print('x.shape:',x.shape)
         x = self.features(x)
-        x = x.view(x.size(0), -1)
+        print('x.shape:',x.shape)
+        # x = x.view(x.size(0), -1)
         x = self.classifier(x)
+        print('x.shape:',x.shape)
         return x
 
 
