@@ -63,19 +63,20 @@ if os.name != "nt":
             self._stride_size = stride_size
             self._selected_level = selected_level
             self._mask_level = mask_level
-            self._os_image = OpenSlide(os.path.join(self._wsi_path))
+            self._os_image = pyvips.Image.openslideload(path, level=0)
+            self._mask_image = pyvips.Image.openslideload(path, level=2)
             self._points = []
             self._basic_preprocessing()
 
         def _basic_preprocessing(self):
-            mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
-            print(self._wsi_path, self._os_image)
-            extracted_image = self._os_image.read_region(
+            mask_xdim, mask_ydim = self._mask_image.width, self._mask_image.height 
+            print(self._wsi_path, self._mask_image)
+            extracted_image = self._mask_image.fetch(
                 (0, 0), self._mask_level, (mask_xdim, mask_ydim)
             ).convert("RGB")
             mask = tissue_mask_generation(extracted_image)
             del extracted_image
-            ydim, xdim = self._os_image.level_dimensions[self._selected_level]
+            ydim, xdim = self._mask_image.height, self._mask_image.width
             mask = resize(mask, (xdim, ydim))
             mask = (mask > 0).astype(np.uint8)
             for i in range(0, ydim - self._patch_size[0], self._stride_size[0]):
@@ -102,13 +103,9 @@ if os.name != "nt":
 
         def __getitem__(self, idx):
             x_loc, y_loc = self._points[idx]
-            patch = np.array(
-                self._os_image.read_region(
-                    (x_loc * 4, y_loc * 4),
-                    self._selected_level,
-                    (self._patch_size[0], self._patch_size[1]),
-                ).convert("RGB")
-            )
+            pid = self.df.iloc[patient_id, 0]
+            slide_ob = self.slide_ob
+            patch = np.array(self.slide_ob.fetch((x, y), 0, (self._patch_size[0], self._patch_size[1])).convert("RGB"))
             patch = np.array(patch / 255)
             patch = patch.transpose([2, 0, 1])
             return patch, (x_loc, y_loc)
