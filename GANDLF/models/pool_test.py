@@ -69,9 +69,11 @@ class POOL_TEST(nn.Module):
             # nn.Linear(512, 512),
             # nn.ReLU(True),
             # nn.Linear(512, 10),
-            # nn.ReLU(True),
-            # nn.Linear(10, n_outputClasses),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(512, n_outputClasses),
         )
+        
         # Initialize weights
         for m in self.modules():
             if isinstance(m, self.Conv):
@@ -80,12 +82,12 @@ class POOL_TEST(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, x):
-        print('x.shape:',x.shape)
+        # print('x.shape:',x.shape)
         x = self.features(x)
-        print('x.shape:',x.shape)
+        # print('x.shape:',x.shape)
         # x = x.view(x.size(0), -1)
         x = self.classifier(x)
-        print('x.shape:',x.shape)
+        # print('x.shape:',x.shape)
         return x
 
 
