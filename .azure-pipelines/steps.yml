@@ -6,6 +6,7 @@ steps:
     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
     conda install -c sdvillal openslide -y 
     conda install -c conda-forge libvips -y
+    pip install numpy==1.19.2
   displayName: 'Install dependencies'
 
 - script: |
