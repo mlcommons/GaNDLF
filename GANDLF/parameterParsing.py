@@ -10,6 +10,7 @@ from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
 from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
+from GANDLF.models.pool_test import POOL_TEST, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
 from GANDLF.metrics import fetch_metric
@@ -268,6 +269,47 @@ def get_model(
         )
         # num_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(
+            num_dimensions,
+            layers,
+            features_for_classifier,
+            num_classes,
+            final_convolution_layer=final_convolution_layer,
+        )
+
+    elif "pool_test" in modelname:  # common parsing for pool_test
+        if modelname == "pool_test11":
+            pool_test_config = cfg["A"]
+        elif modelname == "pool_test13":
+            pool_test_config = cfg["B"]
+        elif modelname == "pool_test16":
+            pool_test_config = cfg["D"]
+        elif modelname == "pool_test19":
+            pool_test_config = cfg["E"]
+        else:
+            sys.exit("Requested pool_test type '" + modelname + "' has not been implemented")
+
+        amp = False  # this is not yet implemented for pool_test
+
+        if "batch_norm" in kwargs:
+            batch_norm = kwargs.get("batch_norm")
+        else:
+            batch_norm = True
+        num_final_features = pool_test_config[-2]
+        m_counter = Counter(pool_test_config)["M"]
+        if patch_size[-1] == 1:
+            patch_size_altered = np.array(patch_size[:-1])
+        else:
+            patch_size_altered = np.array(patch_size)
+        divisibilityCheck_patch = False
+        divisibilityCheck_baseFilter = False
+        features_for_classifier = num_final_features * np.prod(
+            patch_size_altered // 2 ** m_counter
+        )
+        layers = make_layers(
+            pool_test_config, num_dimensions, num_channels, batch_norm=batch_norm
+        )
+        # num_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
+        model = POOL_TEST(
             num_dimensions,
             layers,
             features_for_classifier,
