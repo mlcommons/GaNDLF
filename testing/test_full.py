@@ -29,6 +29,7 @@ all_schedulers = [
     "triangular2",
     "exp_range",
 ]
+all_clip_modes = ["norm", "value", "agc"]
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
 testingDir = os.path.abspath(os.path.normpath("./testing"))
@@ -145,17 +146,20 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     # read and initialize parameters for specific data dimension
-    for model in all_models_segmentation:
-        parameters["model"]["architecture"] = model
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+    # 
+    for clip_mode in all_clip_modes:
+        for model in all_models_segmentation:
+            parameters["model"]["architecture"] = model
+            parameters["clip_mode"] = clip_mode
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     print("passed")
 
@@ -179,17 +183,20 @@ def test_train_segmentation_rad_3d(device):
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     # loop through selected models and train for single epoch
-    for model in all_models_segmentation:
-        parameters["model"]["architecture"] = model
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+
+    for clip_mode in all_clip_modes:
+        for model in all_models_segmentation:
+            parameters["model"]["architecture"] = model
+            parameters["clip_mode"] = clip_mode
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     print("passed")
 
@@ -211,17 +218,20 @@ def test_train_regression_rad_2d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     # loop through selected models and train for single epoch
-    for model in all_models_regression:
-        parameters["model"]["architecture"] = model
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+
+    for clip_mode in all_clip_modes:
+        for model in all_models_regression:
+            parameters["model"]["architecture"] = model
+            parameters["clip_mode"] = clip_mode
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     print("passed")
 
@@ -242,17 +252,19 @@ def test_train_regression_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
-    for model in all_models_regression:
-        parameters["model"]["architecture"] = model
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+    for clip_mode in all_clip_modes:
+        for model in all_models_regression:
+            parameters["model"]["architecture"] = model
+            parameters["clip_mode"] = clip_mode
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     print("passed")
 
@@ -274,17 +286,19 @@ def test_train_classification_rad_2d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
-    for model in all_models_regression:
-        parameters["model"]["architecture"] = model
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+    for clip_mode in all_clip_modes:
+        for model in all_models_regression:
+            parameters["model"]["architecture"] = model
+            parameters["clip_mode"] = clip_mode
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     print("passed")
 
@@ -306,17 +320,19 @@ def test_train_classification_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
-    for model in all_models_regression:
-        parameters["model"]["architecture"] = model
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+    for clip_mode in all_clip_modes:
+        for model in all_models_regression:
+            parameters["model"]["architecture"] = model
+            parameters["clip_mode"] = clip_mode
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     print("passed")
 
@@ -339,22 +355,24 @@ def test_inference_classification_rad_3d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
-    parameters["model"]["architecture"] = model
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        reset_prev=True,
-    )
-    parameters["output_dir"] = outputDir  # this is in inference mode
-    InferenceManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-    )
+    for clip_mode in all_clip_modes:
+        parameters["model"]["architecture"] = model
+        parameters["clip_mode"] = clip_mode
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            reset_prev=True,
+        )
+        parameters["output_dir"] = outputDir  # this is in inference mode
+        InferenceManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+        )
 
     print("passed")
 
@@ -377,17 +395,19 @@ def test_scheduler_classification_rad_2d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["model"]["architecture"] = "densenet121"
     # loop through selected models and train for single epoch
-    for scheduler in all_schedulers:
-        parameters["scheduler"] = scheduler
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
+    for clip_mode in all_clip_modes:
+        for scheduler in all_schedulers:
+            parameters["clip_mode"] = clip_mode
+            parameters["scheduler"] = scheduler
+            shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
 
     shutil.rmtree(outputDir)
     print("passed")
