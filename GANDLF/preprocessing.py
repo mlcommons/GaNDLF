@@ -69,7 +69,7 @@ def clip_intensities(input_tensor, min, max):
 
 def resize_image_resolution(input_image, output_size):
     """
-    This function resizes the input image based on the output size and interpolator
+    This function gets the output image spacing based on the input image and output size
     """
     inputSize = input_image.GetSize()
     outputSpacing = np.array(input_image.GetSpacing())
@@ -79,6 +79,9 @@ def resize_image_resolution(input_image, output_size):
 
 
 def apply_resize(input, preprocessing_params, interpolator=sitk.sitkLinear):
+    """
+    This function resizes the input image based on the output size and interpolator
+    """
     return resample_image(
         input,
         resize_image_resolution(input, preprocessing_params["resize"]),
@@ -87,9 +90,13 @@ def apply_resize(input, preprocessing_params, interpolator=sitk.sitkLinear):
 
 
 def get_tensor_for_dataloader(input_sitk_image):
-    input_image_tensor = torch.from_numpy(
-        sitk.GetArrayFromImage(input_sitk_image)
-    ).unsqueeze(
+    """
+    This function obtains the tensor to load into the data loader
+    """
+    temp_array = sitk.GetArrayFromImage(input_sitk_image)
+    if temp_array.dtype == np.uint16: # this 
+        temp_array = temp_array.astype(np.int32)
+    input_image_tensor = torch.from_numpy(temp_array).unsqueeze(
         0
     )  # single unsqueeze is always needed
     if len(input_image_tensor.shape) == 3:  # this is for 2D images
