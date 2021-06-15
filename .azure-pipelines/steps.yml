@@ -8,6 +8,6 @@ steps:
     pip install -e .
   displayName: 'Install dependencies'
 
-# - script: |
-#     pytest
-#   displayName: 'Run Tests'
+- script: |
+    pytest
+  displayName: 'Run Tests'
