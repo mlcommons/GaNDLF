@@ -1,6 +1,6 @@
 steps:
 - script: |
-    conda create -p ./venv python=3.6 -y
+    conda create -p ./venv python=3.7 -y
     source activate ./venv
     pip install -e .
     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
@@ -8,6 +8,13 @@ steps:
     conda install -c conda-forge libvips -y
   displayName: 'Install dependencies'
 
+- script: |
+    source activate ./venv
+    python -c "import numpy as np;print(np.__version__)"
+    python -c "import torch as t;print(t.__version__)"
+    python -c "import torchio as tio;print(tio.__version__)"    
+  displayName: 'Testing versions'
+  
 - script: |
     source activate ./venv
     pytest
