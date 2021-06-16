@@ -652,6 +652,10 @@ def training_loop(
     # Start training time here
     start_time = time.time()
     print("\n\n")
+    
+    if not (os.environ.get("HOSTNAME") is None):
+        print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
+
     # datetime object containing current date and time
     print("Initializing training at : ", get_date_time())
 
