@@ -1,13 +1,15 @@
 steps:
 - script: |
-    conda create -p ./venv python=3.6 -y
+    conda create -p ./venv python=3.7 -y
     source activate ./venv
+    pip install -e .
     conda install requests pytorch torchvision torchaudio cpuonly -c pytorch -y
     conda install -c sdvillal openslide -y 
     conda install -c conda-forge libvips -y
-    pip install -e .
+    pip install numpy==1.19.2
   displayName: 'Install dependencies'
-
-# - script: |
-#     pytest
-#   displayName: 'Run Tests'
+ 
+- script: |
+    source activate ./venv
+    pytest
+  displayName: 'Run Tests'
