@@ -18,7 +18,7 @@ def unitwise_norm(x, norm_type=2.0):
         return x.norm(norm_type, dim=tuple(range(1, x.ndim)), keepdim=True)
 
 
-def adaptive_gradient_clip(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.0):
+def adaptive_gradient_clip_(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.0):
     """
         Adaptive Gradient Clipping
         Original implementation of Adaptive Gradient Clipping derived from
