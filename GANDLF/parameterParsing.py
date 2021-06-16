@@ -5,13 +5,14 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
-from GANDLF.models.unet import unet
+from GANDLF.models.unet import unet, light_unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
 from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
 from GANDLF.utils import *
+from GANDLF.metrics import fetch_metric
 import torchvision
 import torch.nn as nn
 
@@ -39,6 +40,11 @@ def get_model(
     divisibilityCheck_denom_patch = 16  # for unet/resunet/uinc
     divisibilityCheck_denom_baseFilter = 4  # for uinc
 
+    if "amp" in kwargs:
+        amp = kwargs.get("amp")
+    else:
+        amp = False
+
     if modelname == "resunet":
         model = unet(
             num_dimensions,
@@ -49,6 +55,7 @@ def get_model(
             residualConnections=True,
         )
         divisibilityCheck_baseFilter = False
+
     elif modelname == "unet":
         model = unet(
             num_dimensions,
@@ -58,6 +65,28 @@ def get_model(
             final_convolution_layer=final_convolution_layer,
         )
         divisibilityCheck_baseFilter = False
+
+    elif modelname == "light_resunet":
+        model = light_unet(
+            num_dimensions,
+            num_channels,
+            num_classes,
+            base_filters,
+            final_convolution_layer=final_convolution_layer,
+            residualConnections=True,
+        )
+        divisibilityCheck_baseFilter = False
+
+    elif modelname == "light_unet":
+        model = light_unet(
+            num_dimensions,
+            num_channels,
+            num_classes,
+            base_filters,
+            final_convolution_layer=final_convolution_layer,
+        )
+        divisibilityCheck_baseFilter = False
+
     elif modelname == "fcn":
         model = fcn(
             num_dimensions,
@@ -69,6 +98,7 @@ def get_model(
         # not enough information to perform checking for this, yet
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
+
     elif modelname == "uinc":
         model = uinc(
             num_dimensions,
@@ -77,6 +107,7 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
+
     elif modelname == "msdnet":
         model = MSDNet(
             num_dimensions,
@@ -85,70 +116,156 @@ def get_model(
             base_filters,
             final_convolution_layer=final_convolution_layer,
         )
-    elif 'densenet' in modelname:
-        if modelname == 'densenet121': # regressor/classifier network
-            model = densenet.generate_model(model_depth=121,
-                                            num_classes=num_classes,
-                                            num_dimensions=num_dimensions,
-                                            num_channels=num_channels, final_convolution_layer = final_convolution_layer)
-        elif modelname == 'densenet161': # regressor/classifier network
-            model = densenet.generate_model(model_depth=161,
-                                            num_classes=num_classes,
-                                            num_dimensions=num_dimensions,
-                                            num_channels=num_channels, final_convolution_layer = final_convolution_layer)
-        elif modelname == 'densenet169': # regressor/classifier network
-            model = densenet.generate_model(model_depth=169,
-                                            num_classes=num_classes,
-                                            num_dimensions=num_dimensions,
-                                            num_channels=num_channels, final_convolution_layer = final_convolution_layer)
-        elif modelname == 'densenet201': # regressor/classifier network
-            model = densenet.generate_model(model_depth=201,
-                                            num_classes=num_classes,
-                                            num_dimensions=num_dimensions,
-                                            num_channels=num_channels, final_convolution_layer = final_convolution_layer)
-        elif modelname == 'densenet264': # regressor/classifier network
-            model = densenet.generate_model(model_depth=264,
-                                            num_classes=num_classes,
-                                            num_dimensions=num_dimensions,
-                                            num_channels=num_channels, final_convolution_layer = final_convolution_layer)
-        else:
-            sys.exit('Requested DENSENET type \'' + modelname + '\' has not been implemented')
-    # elif modelname == 'vgg16':
-    #     vgg_config = cfg['D']
-    #     num_final_features = vgg_config[-2]
-    #     divisibility_factor = Counter(vgg_config)["M"]
-    #     if patch_size[-1] == 1:
-    #         patch_size_altered = np.array(patch_size[:-1])
-    elif 'vgg' in modelname: # common parsing for vgg
-        if modelname == 'vgg11':
-            vgg_config = cfg['A']
-        elif modelname == 'vgg13':
-            vgg_config = cfg['B']
-        elif modelname == 'vgg16':
-            vgg_config = cfg['D']
-        elif modelname == 'vgg19':
-            vgg_config = cfg['E']
-        else:
-            sys.exit('Requested VGG type \'' + modelname + '\' has not been implemented')
+        amp = False  # this is not yet implemented for msdnet
 
-        if 'batch_norm' in kwargs:
+    elif (
+        "imagenet" in modelname
+    ):  # these are generic imagenet-trained models and should be customized
+
+        if num_dimensions != 2:
+            sys.exit("ImageNet-trained models only work on 2D data")
+
+        divisibilityCheck_patch = False
+        divisibilityCheck_baseFilter = False
+
+        if "batch_norm" in kwargs:
+            batch_norm = kwargs.get("batch_norm")
+        else:
+            batch_norm = True
+
+        if "vgg11" in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg11_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg11(pretrained=True)
+        elif "vgg13" in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg13_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg13(pretrained=True)
+        elif "vgg16" in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg16_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg16(pretrained=True)
+        elif "vgg19" in modelname:
+            if batch_norm:
+                model = torchvision.models.vgg19_bn(pretrained=True)
+            else:
+                model = torchvision.models.vgg19(pretrained=True)
+        elif "squeezenet1_0" in modelname:
+            model = torchvision.models.squeezenet1_0(pretrained=True)
+        elif "squeezenet1_1" in modelname:
+            model = torchvision.models.squeezenet1_1(pretrained=True)
+        elif "inceptionv3" in modelname:
+            model = torchvision.models.inception_v3(pretrained=True)
+        elif "densenet121" in modelname:
+            model = torchvision.models.densenet121(pretrained=True)
+        elif "densenet161" in modelname:
+            model = torchvision.models.densenet161(pretrained=True)
+        elif "densenet169" in modelname:
+            model = torchvision.models.densenet169(pretrained=True)
+        elif "densenet201" in modelname:
+            model = torchvision.models.densenet201(pretrained=True)
+        elif "densenet264" in modelname:
+            model = torchvision.models.densenet264(pretrained=True)
+        elif "resnet18" in modelname:
+            model = torchvision.models.resnet18(pretrained=True)
+        elif "resnet34" in modelname:
+            model = torchvision.models.resnet34(pretrained=True)
+        elif "resnet50" in modelname:
+            model = torchvision.models.resnet50(pretrained=True)
+        elif "resnet101" in modelname:
+            model = torchvision.models.resnet101(pretrained=True)
+        elif "resnet152" in modelname:
+            model = torchvision.models.resnet152(pretrained=True)
+        else:
+            sys.exit(
+                "Could not find the requested model '"
+                + modelname
+                + "' in the implementation"
+            )
+
+    elif "densenet" in modelname:
+        if modelname == "densenet121":  # regressor/classifier network
+            model = densenet.generate_model(
+                model_depth=121,
+                num_classes=num_classes,
+                num_dimensions=num_dimensions,
+                num_channels=num_channels,
+                final_convolution_layer=final_convolution_layer,
+            )
+        elif modelname == "densenet161":  # regressor/classifier network
+            model = densenet.generate_model(
+                model_depth=161,
+                num_classes=num_classes,
+                num_dimensions=num_dimensions,
+                num_channels=num_channels,
+                final_convolution_layer=final_convolution_layer,
+            )
+        elif modelname == "densenet169":  # regressor/classifier network
+            model = densenet.generate_model(
+                model_depth=169,
+                num_classes=num_classes,
+                num_dimensions=num_dimensions,
+                num_channels=num_channels,
+                final_convolution_layer=final_convolution_layer,
+            )
+        elif modelname == "densenet201":  # regressor/classifier network
+            model = densenet.generate_model(
+                model_depth=201,
+                num_classes=num_classes,
+                num_dimensions=num_dimensions,
+                num_channels=num_channels,
+                final_convolution_layer=final_convolution_layer,
+            )
+        elif modelname == "densenet264":  # regressor/classifier network
+            model = densenet.generate_model(
+                model_depth=264,
+                num_classes=num_classes,
+                num_dimensions=num_dimensions,
+                num_channels=num_channels,
+                final_convolution_layer=final_convolution_layer,
+            )
+        else:
+            sys.exit(
+                "Requested DENSENET type '" + modelname + "' has not been implemented"
+            )
+
+        amp = False  # this is not yet implemented for densenet
+
+    elif "vgg" in modelname:  # common parsing for vgg
+        if modelname == "vgg11":
+            vgg_config = cfg["A"]
+        elif modelname == "vgg13":
+            vgg_config = cfg["B"]
+        elif modelname == "vgg16":
+            vgg_config = cfg["D"]
+        elif modelname == "vgg19":
+            vgg_config = cfg["E"]
+        else:
+            sys.exit("Requested VGG type '" + modelname + "' has not been implemented")
+
+        amp = False  # this is not yet implemented for vgg
+
+        if "batch_norm" in kwargs:
             batch_norm = kwargs.get("batch_norm")
         else:
             batch_norm = True
         num_final_features = vgg_config[-2]
-        m_counter = Counter(vgg_config)['M']
+        m_counter = Counter(vgg_config)["M"]
         if patch_size[-1] == 1:
             patch_size_altered = np.array(patch_size[:-1])
         else:
             patch_size_altered = np.array(patch_size)
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
-        features_for_classifier = (
-            batch_size
-            * num_final_features
-            * np.prod(patch_size_altered // 2 ** m_counter)
+        features_for_classifier = num_final_features * np.prod(
+            patch_size_altered // 2 ** m_counter
         )
-        layers = make_layers(vgg_config, num_dimensions, num_channels, batch_norm=batch_norm)
+        layers = make_layers(
+            vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
+        )
         # num_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
         model = VGG(
             num_dimensions,
@@ -157,6 +274,7 @@ def get_model(
             num_classes,
             final_convolution_layer=final_convolution_layer,
         )
+
     elif modelname == "brain_age":
         if num_dimensions != 2:
             sys.exit("Brain Age predictions only works on 2D data")
@@ -218,7 +336,7 @@ def get_model(
                 + "' architecture"
             )
 
-    return model
+    return model, amp
 
 
 def get_optimizer(optimizer_name, model, learning_rate):
@@ -255,9 +373,9 @@ def get_scheduler(
     if which_scheduler == "triangle":
         clr = cyclical_lr(step_size, min_lr=10 ** -3, max_lr=1)
         scheduler_lr = LambdaLR(optimizer, [clr])
-        print("Initial Learning Rate: ",learning_rate)
+        print("Initial Learning Rate: ", learning_rate)
     elif which_scheduler == "triangle_modified":
-        step_size = training_samples_size/learning_rate
+        step_size = training_samples_size / learning_rate
         clr = cyclical_lr_modified(step_size)
         scheduler_lr = LambdaLR(optimizer, [clr])
         print("Initial Learning Rate: ", learning_rate)
@@ -289,7 +407,39 @@ def get_scheduler(
             gamma=1.0,
             scale_fn=None,
             scale_mode="cycle",
-            cycle_momentum=True,
+            cycle_momentum=False,
+            base_momentum=0.8,
+            max_momentum=0.9,
+            last_epoch=-1,
+        )
+    elif which_scheduler == "triangular2":
+        scheduler_lr = CyclicLR(
+            optimizer,
+            learning_rate * 0.001,
+            learning_rate,
+            step_size_up=step_size,
+            step_size_down=None,
+            mode="triangular2",
+            gamma=1.0,
+            scale_fn=None,
+            scale_mode="cycle",
+            cycle_momentum=False,
+            base_momentum=0.8,
+            max_momentum=0.9,
+            last_epoch=-1,
+        )
+    elif which_scheduler == "exp_range":
+        scheduler_lr = CyclicLR(
+            optimizer,
+            learning_rate * 0.001,
+            learning_rate,
+            step_size_up=step_size,
+            step_size_down=None,
+            mode="exp_range",
+            gamma=1.0,
+            scale_fn=None,
+            scale_mode="cycle",
+            cycle_momentum=False,
             base_momentum=0.8,
             max_momentum=0.9,
             last_epoch=-1,
@@ -342,3 +492,31 @@ def get_scheduler(
         dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
     dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
     """
+
+
+def get_loss_and_metrics(ground_truth, predicted, params):
+    """
+    ground_truth : torch.Tensor
+        The input ground truth for the corresponding image label
+    predicted : torch.Tensor
+        The input predicted label for the corresponding image label
+    params : dict
+        The parameters passed by the user yaml
+
+    Returns
+    -------
+    loss : torch.Tensor
+        The computed loss from the label and the output
+    metric_output : torch.Tensor
+        The computed metric from the label and the output
+    """
+    loss_function = fetch_loss_function(params["loss_function"], params)
+    loss = loss_function(predicted, ground_truth, params)
+    metric_output = {}
+    # Metrics should be a list
+    for metric in params["metrics"]:
+        metric_function = fetch_metric(metric)  # Write a fetch_metric
+        metric_output[metric] = (
+            metric_function(predicted, ground_truth, params).cpu().data.item()
+        )
+    return loss, metric_output

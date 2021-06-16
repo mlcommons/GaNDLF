@@ -5,6 +5,7 @@
   <a href="https://github.com/CBICA/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-Green" /></a>
   <a href="https://arxiv.org/abs/2103.01006" alt="Citation"><img src="https://img.shields.io/badge/cite-citation-blue" /></a>
   <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://anaconda.org/conda-forge/gandlf/badges/installer/conda.svg" /></a>
+  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
 A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
@@ -52,4 +53,4 @@ Start at https://cbica.github.io/GaNDLF/. Includes the following:
 - This code (excluding dependent libraries) is governed by the license provided in https://www.med.upenn.edu/cbica/software-agreement.html unless otherwise specified.
 
 ## Contact
-For more information or any support, please post on the [Discussions](https://github.com/CBICA/GaNDLF/discussions) section or contact <a href="mailto:software@cbica.upenn.edu">CBICA Software</a>.
+For more information or any support, please post on the [Discussions](https://github.com/CBICA/GaNDLF/discussions) section or contact <a href="mailto:gandlf@cbica.upenn.edu">CBICA Software</a>.

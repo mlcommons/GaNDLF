@@ -15,80 +15,119 @@ from io import StringIO
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 def main():
-  copyrightMessage = 'Contact: software@cbica.upenn.edu\n\n' + 'This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) ' + str(date.today().year) + ' University of Pennsylvania. All rights reserved.' 
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
 
-  parser = argparse.ArgumentParser(prog='GANDLF_CollectCSV', formatter_class=argparse.RawTextHelpFormatter, description = "Collect statistics from different testing/validation combinations from output directory.\n\n" + copyrightMessage)
-  parser.add_argument('-inputDir', type=str, help = 'Input directory which contains testing and validation models', required=True)
-  parser.add_argument('-outputDir', type=str, help = 'Output directory to save stats and plot', required=True)
-      
-  args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_CollectCSV",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Collect statistics from different testing/validation combinations from output directory.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-inputDir",
+        type=str,
+        help="Input directory which contains testing and validation models",
+        required=True,
+    )
+    parser.add_argument(
+        "-outputDir",
+        type=str,
+        help="Output directory to save stats and plot",
+        required=True,
+    )
 
-  inputDir = os.path.normpath(args.inputDir)
-  outputDir = os.path.normpath(args.outputDir)
-  Path(outputDir).mkdir(parents=True, exist_ok=True)
-  outputFile = os.path.join(outputDir, 'data.csv') # data file name
-  outputPlot = os.path.join(outputDir, 'plot.png') # plot file
-  
-  final_stats = 'Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n' # the columns that need to be present in final output; epoch is always removed
-  
-  # loop through output directory
-  for dirs in os.listdir(inputDir):
+    args = parser.parse_args()
 
-    currentTestingDir = os.path.join(inputDir, dirs)
-    if os.path.isdir(currentTestingDir): # go in only if it is a directory
-      if 'testing_' in dirs: # ensure it is part of the testing structure
+    inputDir = os.path.normpath(args.inputDir)
+    outputDir = os.path.normpath(args.outputDir)
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    outputFile = os.path.join(outputDir, "data.csv")  # data file name
+    outputPlot = os.path.join(outputDir, "plot.png")  # plot file
 
-        for val in os.listdir(currentTestingDir): # loop through all validation directories
+    final_stats = "Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n"  # the columns that need to be present in final output; epoch is always removed
 
-          currentValidationDir = os.path.join(currentTestingDir, val)
-          if os.path.isdir(currentValidationDir):
+    # loop through output directory
+    for dirs in os.listdir(inputDir):
 
-            filesInDir = os.listdir(currentValidationDir) # get all files in each directory
+        currentTestingDir = os.path.join(inputDir, dirs)
+        if os.path.isdir(currentTestingDir):  # go in only if it is a directory
+            if "testing_" in dirs:  # ensure it is part of the testing structure
 
-            for i in range(len(filesInDir)):
+                for val in os.listdir(
+                    currentTestingDir
+                ):  # loop through all validation directories
 
-              if 'trainingScores_log' in filesInDir[i]: # when the log has been found, collect the final numbers
+                    currentValidationDir = os.path.join(currentTestingDir, val)
+                    if os.path.isdir(currentValidationDir):
 
-                log_file = os.path.join(currentValidationDir, filesInDir[i])
-                with open(log_file) as f:
-                  for line in f:
-                      pass
-                  final_stats = final_stats + line
-  
-  data_string = StringIO(final_stats)
-  data_full = pd.read_csv(data_string, sep=",")
-  del data_full['Epoch'] # no need for epoch
-  data_full.to_csv(outputFile, index=False) # save updated data
+                        filesInDir = os.listdir(
+                            currentValidationDir
+                        )  # get all files in each directory
 
-  # perform deep copy
-  data_loss = data_full.copy()
-  data_dice = data_full.copy()
+                        for i in range(len(filesInDir)):
 
-  cols = ['Train', 'Val', 'Testing'] # set the datasets that need to be plotted
-  for i in cols:
-    
-    del data_dice[i + '_Loss'] # keep only dice    
-    del data_loss[i + '_Dice'] # keep only loss
+                            if (
+                                "trainingScores_log" in filesInDir[i]
+                            ):  # when the log has been found, collect the final numbers
 
-    data_loss.rename(columns = {i + '_Loss':i}, inplace = True) # rename the columns
-    data_dice.rename(columns = {i + '_Dice':i}, inplace = True) # rename the columns
+                                log_file = os.path.join(
+                                    currentValidationDir, filesInDir[i]
+                                )
+                                with open(log_file) as f:
+                                    for line in f:
+                                        pass
+                                    final_stats = final_stats + line
 
-  fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True) # set plot properties
+    data_string = StringIO(final_stats)
+    data_full = pd.read_csv(data_string, sep=",")
+    del data_full["Epoch"]  # no need for epoch
+    data_full.to_csv(outputFile, index=False)  # save updated data
 
-  bplot = sns.boxplot(data=data_dice, width=0.5, palette="colorblind", ax=axes[0]) # plot the data
-  bplot.set(ylim=(0, 1)) # set limits for y-axis for proper visualization
-  bplot.set(xlabel='Dataset', ylabel='Dice', title='Dice plot') # set labels
-  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right") # rotate so that everything is visible
+    # perform deep copy
+    data_loss = data_full.copy()
+    data_dice = data_full.copy()
 
-  bplot = sns.boxplot(data=data_loss, width=0.5, palette="colorblind", ax=axes[1]) # plot the data
-  bplot.set(ylim=(0, 1)) # set limits for y-axis for proper visualization
-  bplot.set(xlabel='Dataset', ylabel='Loss', title='Loss plot') # set labels
-  bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right") # rotate so that everything is visible
+    cols = ["Train", "Val", "Testing"]  # set the datasets that need to be plotted
+    for i in cols:
 
-  plt.savefig(outputPlot, dpi=600)
-      
+        del data_dice[i + "_Loss"]  # keep only dice
+        del data_loss[i + "_Dice"]  # keep only loss
+
+        data_loss.rename(columns={i + "_Loss": i}, inplace=True)  # rename the columns
+        data_dice.rename(columns={i + "_Dice": i}, inplace=True)  # rename the columns
+
+    fig, axes = plt.subplots(
+        nrows=1, ncols=2, constrained_layout=True
+    )  # set plot properties
+
+    bplot = sns.boxplot(
+        data=data_dice, width=0.5, palette="colorblind", ax=axes[0]
+    )  # plot the data
+    bplot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
+    bplot.set(xlabel="Dataset", ylabel="Dice", title="Dice plot")  # set labels
+    bplot.set_xticklabels(
+        bplot.get_xticklabels(), rotation=15, ha="right"
+    )  # rotate so that everything is visible
+
+    bplot = sns.boxplot(
+        data=data_loss, width=0.5, palette="colorblind", ax=axes[1]
+    )  # plot the data
+    bplot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
+    bplot.set(xlabel="Dataset", ylabel="Loss", title="Loss plot")  # set labels
+    bplot.set_xticklabels(
+        bplot.get_xticklabels(), rotation=15, ha="right"
+    )  # rotate so that everything is visible
+
+    plt.savefig(outputPlot, dpi=600)
+
 
 # main function
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

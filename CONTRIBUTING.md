@@ -1,6 +1,6 @@
 # Contribution Guidelines
 
-CaPTk is a package that is primarily worked on by the CBICA Software Development team and its collaborators - additional members from the community are welcome!
+GaNDLF is a package that is primarily worked on by the CBICA Software Development team and its collaborators - additional members from the community are welcome!
 
 ## Issues
 
@@ -15,7 +15,7 @@ Depending on our bandwidth, one of the team members will get around to it (we wi
 
 ## Pull Requests
 
-Thank you for your interest in contributing to **GANDLF**! To make the process as smooth as posssible, please follow these guidelines for speedy reviews and merges:
+Thank you for your interest in contributing to **GaNDLF**! To make the process as smooth as posssible, please follow these guidelines for speedy reviews and merges:
 
 - Ensure your PR addresses an existing issue (if none exists, please open one so that it can be triaged by the admins).
 - Your PR should be from a branch that either contains the issue number it fixes and/or contains as much top-level information as possible to help moderators review and merge it.
