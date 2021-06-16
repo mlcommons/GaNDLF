@@ -33,7 +33,7 @@ from GANDLF.utils import (
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters
-from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
@@ -187,7 +187,7 @@ def train_network(model, train_dataloader, optimizer, params):
             if not math.isnan(loss):
                 loss.backward(create_graph=second_order)
                 if params["clip_grad"] is not None:
-                    dispatch_clip_grad(
+                    dispatch_clip_grad_(
                         parameters=model_parameters(
                             model, exclude_head="agc" in params["clip_mode"]
                         ),

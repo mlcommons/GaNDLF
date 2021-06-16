@@ -1,5 +1,5 @@
 import torch
-from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 
 class GradScaler:
@@ -21,7 +21,7 @@ class GradScaler:
             self._scaler.unscale_(
                 optimizer
             )  # unscale the gradients of optimizer's assigned params in-place
-            dispatch_clip_grad(parameters, clip_grad, mode=clip_mode)
+            dispatch_clip_grad_(parameters, clip_grad, mode=clip_mode)
         self._scaler.step(optimizer)
         self._scaler.update()
 
