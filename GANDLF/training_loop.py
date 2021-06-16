@@ -10,6 +10,7 @@ import torch
 import time
 import torchio
 import psutil
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 import SimpleITK as sitk
 import numpy as np
@@ -144,7 +145,7 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # Set the model to train
     model.train()
-    for batch_idx, (subject) in enumerate(train_dataloader):
+    for batch_idx, (subject) in enumerate(tqdm(train_dataloader)):
         optimizer.zero_grad()
         image = (
             torch.cat(
@@ -283,7 +284,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         model.enable_medcam()
         params["medcam_enabled"] = True
 
-    for batch_idx, (subject) in enumerate(valid_dataloader):
+    for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
 
@@ -658,8 +659,12 @@ def training_loop(
     # Start training time here
     start_time = time.time()
     print("\n\n")
+
+    if not (os.environ.get("HOSTNAME") is None):
+        print("Hostname :", os.environ.get("HOSTNAME"))
+
     # datetime object containing current date and time
-    print("Initializing training at : ", get_date_time())
+    print("Initializing training at :", get_date_time(), flush=True)
 
     # Setup a few loggers for tracking
     train_logger = Logger(
