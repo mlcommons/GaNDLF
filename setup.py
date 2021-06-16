@@ -7,6 +7,18 @@ from setuptools import setup, find_packages
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
+# read version.py
+import sys, re
+
+try:
+    filepath = "GANDLF/version.py"
+    version_file = open(filepath)
+    (__version__,) = re.findall('__version__ = "(.*)"', version_file.read())
+
+except Exception as error:
+    __version__ = "0.0.1"
+    sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
+
 requirements = [
     "numpy==1.19.2",
     "scipy",
@@ -34,11 +46,9 @@ requirements = [
     "medcam",
 ]
 
-import GANDLF
-
 setup(
-    name=GANDLF.name,
-    version=GANDLF.version,
+    name="GANDLF",
+    version=__version__,
     author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur",  # alphabetical order
     author_email="software@cbica.upenn.edu",
     python_requires=">=3.6",
