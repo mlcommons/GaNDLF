@@ -391,3 +391,38 @@ def test_scheduler_classification_rad_2d(device):
 
     shutil.rmtree(outputDir)
     print("passed")
+
+def test_clipping_classification_rad_2d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = True
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters["clip_mode"] = "norm"
+    parameters["clip_grad"] = 0.1
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["architecture"] = "densenet121"
+    # loop through selected models and train for single epoch
+    for scheduler in all_schedulers:
+        parameters["scheduler"] = scheduler
+        shutil.rmtree(outputDir)  # overwrite previous results
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            reset_prev=True,
+        )
+
+    shutil.rmtree(outputDir)
+    print("passed")
