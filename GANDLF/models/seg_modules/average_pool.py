@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class GlobalAveragePooling2D(nn.Module):
     def __init__(self):
         super(GlobalAveragePooling2D, self).__init__()
@@ -9,6 +10,7 @@ class GlobalAveragePooling2D(nn.Module):
         assert len(x.size()) == 4, x.size()
         B, C, W, H = x.size()
         return F.avg_pool2d(x, (W, H)).view(B, C)
+
 
 class GlobalAveragePooling3D(nn.Module):
     def __init__(self):

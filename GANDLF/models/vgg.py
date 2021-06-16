@@ -7,7 +7,10 @@ import sys, math
 import torch
 import torch.nn as nn
 from .modelBase import get_final_layer
-from GANDLF.models.seg_modules.average_pool import GlobalAveragePooling3D, GlobalAveragePooling2D
+from GANDLF.models.seg_modules.average_pool import (
+    GlobalAveragePooling3D,
+    GlobalAveragePooling2D,
+)
 
 __all__ = [
     "VGG",
@@ -48,7 +51,9 @@ class VGG(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(512, n_outputClasses) # Should be changed later, but works for all vgg right now
+            nn.Linear(
+                512, n_outputClasses
+            ),  # Should be changed later, but works for all vgg right now
         )
         # Initialize weights
         for m in self.modules():
