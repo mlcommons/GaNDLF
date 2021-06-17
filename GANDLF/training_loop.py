@@ -5,7 +5,7 @@ Created on Sat Mar  6 21:45:06 2021
 
 @author: siddhesh
 """
-import os, math
+import os, math, pathlib
 import torch
 import time
 import torchio
@@ -274,6 +274,8 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
         current_output_dir = os.path.join(params["output_dir"], mode + "_output")
+
+    pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set the model to valid
     model.eval()
