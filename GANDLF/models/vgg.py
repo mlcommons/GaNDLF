@@ -53,7 +53,7 @@ class VGG(nn.Module):
             nn.Dropout(),
             nn.Linear(
                 512, n_outputClasses
-            ),  # Should be changed later, but works for all vgg right now
+            ),  # number of input features should be changed later, but works for all vgg right now
         )
         # Initialize weights
         for m in self.modules():
