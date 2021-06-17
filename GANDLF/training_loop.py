@@ -571,7 +571,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
             file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
             if os.path.exists(file_to_write):
                 file = open(file_to_write, "a")
-            if os.path.exists(file_to_write):
+            else:
                 file = open(file_to_write, "w")
             file.write(outputToWrite)
             file.close()
