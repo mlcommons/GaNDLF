@@ -270,7 +270,6 @@ def get_model(
         model = VGG(
             num_dimensions,
             layers,
-            features_for_classifier,
             num_classes,
             final_convolution_layer=final_convolution_layer,
         )
