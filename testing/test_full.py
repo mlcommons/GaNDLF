@@ -29,6 +29,7 @@ all_schedulers = [
     "triangular2",
     "exp_range",
 ]
+all_clip_modes = ["norm", "value", "agc"]
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
 testingDir = os.path.abspath(os.path.normpath("./testing"))
@@ -390,4 +391,38 @@ def test_scheduler_classification_rad_2d(device):
         )
 
     shutil.rmtree(outputDir)
+    print("passed")
+
+
+def test_clip_train_classification_rad_3d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["amp"] = True
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    # loop through selected models and train for single epoch
+    for clip_mode in all_clip_modes:
+        for model in ["vgg16"]:
+            parameters["clip_mode"] = clip_mode
+            parameters["model"]["architecture"] = model
+            # shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
+    shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
