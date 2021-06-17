@@ -297,6 +297,8 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         model.enable_medcam()
         params["medcam_enabled"] = True
 
+    outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
+
     for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
@@ -321,7 +323,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
                 label_ground_truth = torch.cat(
                     [subject[key] for key in params["value_keys"]], dim=0
                 )
-                outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
 
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(
