@@ -568,7 +568,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     # write the predictions, if appropriate
     if params["save_output"]:
         if "value_keys" in params:
-            file = open(os.path.join(current_output_dir, "output_predictions.csv"), "w")
+            file = open(os.path.join(current_output_dir, "output_predictions.csv"), "a")
             file.write(outputToWrite)
             file.close()
 
