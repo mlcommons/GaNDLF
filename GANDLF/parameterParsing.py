@@ -1,5 +1,4 @@
 import sys
-from collections import Counter
 import torch.optim as optim
 from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
