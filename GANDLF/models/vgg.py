@@ -62,7 +62,7 @@ class VGG(nn.Module):
                 m.weight.data.normal_(0, math.sqrt(2.0 / n))
                 m.bias.data.zero_()
             elif isinstance(m, nn.Linear):
-                torch.nn.init.xavier_uniform(m.weight)
+                torch.nn.init.xavier_uniform_(m.weight)
             else:
                 pass
 
