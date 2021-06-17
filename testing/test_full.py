@@ -415,7 +415,7 @@ def test_clip_train_classification_rad_3d(device):
         for model in ["vgg16"]:
             parameters["clip_mode"] = clip_mode
             parameters["model"]["architecture"] = model
-            #shutil.rmtree(outputDir)  # overwrite previous results
+            # shutil.rmtree(outputDir)  # overwrite previous results
             Path(outputDir).mkdir(parents=True, exist_ok=True)
             TrainingManager(
                 dataframe=training_data,
