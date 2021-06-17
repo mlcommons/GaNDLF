@@ -252,17 +252,8 @@ def get_model(
             batch_norm = kwargs.get("batch_norm")
         else:
             batch_norm = True
-        num_final_features = vgg_config[-2]
-        m_counter = Counter(vgg_config)["M"]
-        if patch_size[-1] == 1:
-            patch_size_altered = np.array(patch_size[:-1])
-        else:
-            patch_size_altered = np.array(patch_size)
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
-        features_for_classifier = num_final_features * np.prod(
-            patch_size_altered // 2 ** m_counter
-        )
         layers = make_layers(
             vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
         )
