@@ -19,7 +19,7 @@ parameter_defaults = {
     "batch_size": 1,  # default batch size of training
     "amp": False,  # automatic mixed precision
     "learning_rate": 0.001,  # default learning rate
-    "clip_grad": 0.1, # clip_gradient value
+    "clip_grad": None, # clip_gradient value
 }
 
 ## dictionary to define string defaults for appropriate options
@@ -28,7 +28,6 @@ parameter_defaults_string = {
     "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "loss_function": "dc",  # default loss
-    "clip_mode": "norm", # gradient clip method
 }
 
 
