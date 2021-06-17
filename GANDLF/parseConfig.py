@@ -28,6 +28,7 @@ parameter_defaults_string = {
     "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "loss_function": "dc",  # default loss
+    "clip_mode": "agc",  # default clip mode
 }
 
 
