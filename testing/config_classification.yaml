@@ -22,6 +22,8 @@ nested_training:
   validation: -2
 num_epochs: 1
 opt: adam
+clip_mode: norm
+clip_grad: 0.1
 parallel_compute_command: ''
 patch_sampler: uniform
 patch_size: 
