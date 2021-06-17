@@ -148,7 +148,6 @@ def test_train_segmentation_rad_2d(device):
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -183,7 +182,6 @@ def test_train_segmentation_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -216,7 +214,6 @@ def test_train_regression_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -248,7 +245,6 @@ def test_train_regression_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -281,7 +277,6 @@ def test_train_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -314,7 +309,6 @@ def test_train_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -346,24 +340,22 @@ def test_inference_classification_rad_3d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
-    for clip_mode in all_clip_modes:
-        parameters["model"]["architecture"] = model
-        parameters["clip_mode"] = clip_mode
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            reset_prev=True,
-        )
-        parameters["output_dir"] = outputDir  # this is in inference mode
-        InferenceManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-        )
+    parameters["model"]["architecture"] = model
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    InferenceManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+    )
 
     print("passed")
 
@@ -387,7 +379,6 @@ def test_scheduler_classification_rad_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     # loop through selected models and train for single epoch
     for scheduler in all_schedulers:
-        parameters["clip_mode"] = clip_mode
         parameters["scheduler"] = scheduler
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -400,4 +391,38 @@ def test_scheduler_classification_rad_2d(device):
         )
 
     shutil.rmtree(outputDir)
+    print("passed")
+
+
+def test_clip_train_classification_rad_3d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["amp"] = True
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    # loop through selected models and train for single epoch
+    for clip_mode in all_clip_modes:
+        for model in ["vgg16"]:
+            parameters["clip_mode"] = clip_mode
+            parameters["model"]["architecture"] = model
+            #shutil.rmtree(outputDir)  # overwrite previous results
+            Path(outputDir).mkdir(parents=True, exist_ok=True)
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                reset_prev=True,
+            )
+    shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
