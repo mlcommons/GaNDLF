@@ -16,7 +16,6 @@ import SimpleITK as sitk
 import numpy as np
 from medcam import medcam
 from GANDLF.logger import Logger
-from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import (
     get_model,
     get_optimizer,
