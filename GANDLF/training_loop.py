@@ -177,7 +177,7 @@ def train_network(model, train_dataloader, optimizer, params):
                 if not torch.isnan(
                     loss
                 ):  # if loss is nan, don't backprop and don't step optimizer
-                    if params["clip_grad"] is not None: # if clipping is enabled
+                    if params["clip_grad"] is not None:  # if clipping is enabled
                         scaler(
                             loss=loss,
                             optimizer=optimizer,
@@ -188,7 +188,7 @@ def train_network(model, train_dataloader, optimizer, params):
                             ),
                             create_graph=second_order,
                         )
-                    else:                        
+                    else:
                         scaler.scale(loss).backward()
                         scaler.step(optimizer)
                         scaler.update()
@@ -579,7 +579,12 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
 
 
 def training_loop(
-    training_data, validation_data, device, params, output_dir, testing_data=None,
+    training_data,
+    validation_data,
+    device,
+    params,
+    output_dir,
+    testing_data=None,
 ):
 
     # Some autodetermined factors
@@ -648,10 +653,15 @@ def training_loop(
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
-            training_data, parameters=params, train=False,
+            training_data,
+            parameters=params,
+            train=False,
         )
         penalty_loader = DataLoader(
-            penalty_data, batch_size=1, shuffle=True, pin_memory=False,
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
         )
 
         params["weights"] = get_class_imbalance_weights(penalty_loader, params)
