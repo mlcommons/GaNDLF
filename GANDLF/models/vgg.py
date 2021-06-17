@@ -2,9 +2,15 @@
 """
 Modified from https://github.com/pytorch/vision.git
 """
+
 import sys, math
+import torch
 import torch.nn as nn
 from .modelBase import get_final_layer
+from GANDLF.models.seg_modules.average_pool import (
+    GlobalAveragePooling3D,
+    GlobalAveragePooling2D,
+)
 
 __all__ = [
     "VGG",
@@ -28,7 +34,6 @@ class VGG(nn.Module):
         self,
         n_dimensions,
         features,
-        inputFeaturesForClassifier,
         n_outputClasses,
         final_convolution_layer: str = "softmax",
     ):
@@ -37,21 +42,18 @@ class VGG(nn.Module):
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
+            self.avg_pool = GlobalAveragePooling2D()
         elif n_dimensions == 3:
             self.Conv = nn.Conv3d
+            self.avg_pool = GlobalAveragePooling3D()
         else:
             sys.exit("Only 2D or 3D convolutions are supported.")
 
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(inputFeaturesForClassifier, 512),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(512, 512),
-            nn.ReLU(True),
-            nn.Linear(512, 10),
-            nn.ReLU(True),
-            nn.Linear(10, n_outputClasses),
+            nn.Linear(
+                512, n_outputClasses
+            ),  # Should be changed later, but works for all vgg right now
         )
         # Initialize weights
         for m in self.modules():
@@ -59,12 +61,15 @@ class VGG(nn.Module):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0, math.sqrt(2.0 / n))
                 m.bias.data.zero_()
+            elif isinstance(m, nn.Linear):
+                torch.nn.init.xavier_uniform(m.weight)
+            else:
+                pass
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
-        x = self.classifier(x)
-        return x
+        x = self.avg_pool(x)
+        return self.classifier(x)
 
 
 def make_layers(cfg, n_dimensions, in_channels, batch_norm=False):
