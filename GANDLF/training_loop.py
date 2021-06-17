@@ -12,6 +12,9 @@ import torchio
 import psutil
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+import SimpleITK as sitk
+import numpy as np
+from medcam import medcam
 from GANDLF.logger import Logger
 from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import (
@@ -29,9 +32,8 @@ from GANDLF.utils import (
     get_class_imbalance_weights,
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-import SimpleITK as sitk
-import numpy as np
-from medcam import medcam
+from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
@@ -140,7 +142,7 @@ def train_network(model, train_dataloader, optimizer, params):
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
         print("Using Automatic mixed precision", flush=True)
-        scaler = torch.cuda.amp.GradScaler()
+        scaler = GradScaler()
 
     # Fetch the optimizer
 
@@ -165,18 +167,36 @@ def train_network(model, train_dataloader, optimizer, params):
         # print("Train : ", label.shape, image.shape, flush=True)
         loss, calculated_metrics, _ = step(model, image, label, params)
         nan_loss = True
+        second_order = (
+            hasattr(optimizer, "is_second_order") and optimizer.is_second_order
+        )
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 if not torch.isnan(
                     loss
                 ):  # if loss is nan, don't backprop and don't step optimizer
-                    scaler.scale(loss).backward()
-                    scaler.step(optimizer)
-                    scaler.update()
+                    scaler(
+                        loss=loss,
+                        optimizer=optimizer,
+                        clip_grad=params["clip_grad"],
+                        clip_mode=params["clip_mode"],
+                        parameters=model_parameters(
+                            model, exclude_head="agc" in params["clip_mode"]
+                        ),
+                        create_graph=second_order,
+                    )
                     nan_loss = False
         else:
             if not math.isnan(loss):
-                loss.backward()
+                loss.backward(create_graph=second_order)
+                if params["clip_grad"] is not None:
+                    dispatch_clip_grad(
+                        parameters=model_parameters(
+                            model, exclude_head="agc" in params["clip_mode"]
+                        ),
+                        value=params["clip_grad"],
+                        mode=params["clip_mode"],
+                    )
                 optimizer.step()
                 nan_loss = False
 
@@ -545,12 +565,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
 
 
 def training_loop(
-    training_data,
-    validation_data,
-    device,
-    params,
-    output_dir,
-    testing_data=None,
+    training_data, validation_data, device, params, output_dir, testing_data=None,
 ):
 
     # Some autodetermined factors
@@ -619,15 +634,10 @@ def training_loop(
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
+            training_data, parameters=params, train=False,
         )
         penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
+            penalty_data, batch_size=1, shuffle=True, pin_memory=False,
         )
 
         params["weights"] = get_class_imbalance_weights(penalty_loader, params)
@@ -652,12 +662,12 @@ def training_loop(
     # Start training time here
     start_time = time.time()
     print("\n\n")
-    
+
     if not (os.environ.get("HOSTNAME") is None):
-        print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
+        print("Hostname :", os.environ.get("HOSTNAME"))
 
     # datetime object containing current date and time
-    print("Initializing training at : ", get_date_time())
+    print("Initializing training at :", get_date_time(), flush=True)
 
     # Setup a few loggers for tracking
     train_logger = Logger(
