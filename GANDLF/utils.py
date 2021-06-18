@@ -304,8 +304,14 @@ def fix_paths(cwd):
 
 
 def populate_header_in_parameters(parameters, headers):
-    """
-    This function populates the parameters with information from the header in a common manner
+    """This function populates the parameters with information from the header in a common manner
+
+    Args:
+        parameters (dict): The parameters dictionary.
+        headers (dict): The CSV headers dictionary.
+
+    Returns:
+        dict: Combined parameter dictionary containing header information
     """
     # initialize common parameters based on headers
     parameters["headers"] = headers
