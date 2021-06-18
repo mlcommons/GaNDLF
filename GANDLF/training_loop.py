@@ -141,12 +141,7 @@ def train_network(model, train_dataloader, optimizer, params):
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
         print("Using Automatic mixed precision", flush=True)
-        if params["clip_grad"] is not None:
-            scaler = GradScaler()
-        else:
-            scaler = torch.cuda.amp.GradScaler()
-
-    # Fetch the optimizer
+        scaler = GradScaler()
 
     # Set the model to train
     model.train()
@@ -177,21 +172,16 @@ def train_network(model, train_dataloader, optimizer, params):
                 if not torch.isnan(
                     loss
                 ):  # if loss is nan, don't backprop and don't step optimizer
-                    if params["clip_grad"] is not None:  # if clipping is enabled
-                        scaler(
-                            loss=loss,
-                            optimizer=optimizer,
-                            clip_grad=params["clip_grad"],
-                            clip_mode=params["clip_mode"],
-                            parameters=model_parameters(
-                                model, exclude_head="agc" in params["clip_mode"]
-                            ),
-                            create_graph=second_order,
-                        )
-                    else:
-                        scaler.scale(loss).backward()
-                        scaler.step(optimizer)
-                        scaler.update()
+                    scaler(
+                        loss=loss,
+                        optimizer=optimizer,
+                        clip_grad=params["clip_grad"],
+                        clip_mode=params["clip_mode"],
+                        parameters=model_parameters(
+                            model, exclude_head="agc" in params["clip_mode"]
+                        ),
+                        create_graph=second_order,
+                    )
                     nan_loss = False
         else:
             if not math.isnan(loss):
