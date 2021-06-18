@@ -31,7 +31,7 @@ from GANDLF.utils import (
     get_class_imbalance_weights,
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters
+from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
@@ -172,18 +172,13 @@ def train_network(model, train_dataloader, optimizer, params):
                 if not torch.isnan(
                     loss
                 ):  # if loss is nan, don't backprop and don't step optimizer
-
-                    if params["clip_mode"] is None:
-                        exclude_head = False
-                    else:
-                        exclude_head = "agc" in params["clip_mode"]
                     scaler(
                         loss=loss,
                         optimizer=optimizer,
                         clip_grad=params["clip_grad"],
                         clip_mode=params["clip_mode"],
-                        parameters=model_parameters(
-                            model, exclude_head=exclude_head
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
                         ),
                         create_graph=second_order,
                     )
@@ -193,8 +188,8 @@ def train_network(model, train_dataloader, optimizer, params):
                 loss.backward(create_graph=second_order)
                 if params["clip_grad"] is not None:
                     dispatch_clip_grad_(
-                        parameters=model_parameters(
-                            model, exclude_head="agc" in params["clip_mode"]
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
                         ),
                         value=params["clip_grad"],
                         mode=params["clip_mode"],
