@@ -10,12 +10,12 @@ class EncodingModule(nn.Module):
         output_channels,
         Conv,
         Dropout,
-        InstanceNorm,
+        Norm,
         kernel_size=3,
         dropout_p=0.3,
         leakiness=1e-2,
         conv_bias=True,
-        inst_norm_affine=True,
+        norm_affine=True,
         res=False,
         lrelu_inplace=True,
     ):
@@ -34,7 +34,7 @@ class EncodingModule(nn.Module):
             dropout_p {number} -- [dropout probability] (default: {0.3})
             leakiness {number} -- [the negative leakiness] (default: {1e-2})
             conv_bias {bool} -- [to use the bias in filters] (default: {True})
-            inst_norm_affine {bool} -- [affine use in norm] (default: {True})
+            norm_affine {bool} -- [affine use in norm] (default: {True})
             res {bool} -- [to use residual connections] (default: {False})
             lrelu_inplace {bool} -- [To update conv outputs with lrelu outputs]
                                     (default: {True})
@@ -44,14 +44,18 @@ class EncodingModule(nn.Module):
         self.dropout_p = dropout_p
         self.conv_bias = conv_bias
         self.leakiness = leakiness
-        self.inst_norm_affine = inst_norm_affine
+        self.norm_affine = norm_affine
         self.lrelu_inplace = lrelu_inplace
         self.dropout = nn.Dropout3d(dropout_p)
-        self.in_0 = InstanceNorm(
-            output_channels, affine=self.inst_norm_affine, track_running_stats=True
+        self.in_0 = (
+            Norm(output_channels, affine=self.norm_affine, track_running_stats=True)
+            if Norm is not None
+            else nn.Identity()
         )
-        self.in_1 = InstanceNorm(
-            output_channels, affine=self.inst_norm_affine, track_running_stats=True
+        self.in_1 = (
+            Norm(output_channels, affine=self.norm_affine, track_running_stats=True)
+            if Norm is not None
+            else nn.Identity()
         )
         self.conv0 = Conv(
             output_channels,
@@ -97,5 +101,4 @@ class EncodingModule(nn.Module):
         x = self.conv1(x)
         if self.res == True:
             x = x + skip
-        # print(x.shape)
         return x
