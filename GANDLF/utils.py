@@ -84,8 +84,14 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
 
 
 def one_hot(segmask_array, class_list):
-    """
-    This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
+    """This function creates a one-hot-encoded mask from the segmentation mask tensor and specified class list
+
+    Args:
+        segmask_array (torch.Tensor): The segmentation mask tensor
+        class_list (list): The list of classes based on which one-hot encoding needs to happen
+
+    Returns:
+        torch.Tensor: The one-hot encoded torch.Tensor
     """
     batch_size = segmask_array.shape[0]
     batch_stack = []
