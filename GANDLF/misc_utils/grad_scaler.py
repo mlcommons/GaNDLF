@@ -1,5 +1,5 @@
 import torch
-from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 
 class GradScaler:
@@ -21,7 +21,9 @@ class GradScaler:
             self._scaler.unscale_(
                 optimizer
             )  # unscale the gradients of optimizer's assigned params in-place
-            dispatch_clip_grad(parameters, clip_grad, mode=clip_mode)
+            if (clip_mode is None) or (str(clip_mode).lower() == "none"):
+                clip_mode == "norm" # default, in case none gets passed
+            dispatch_clip_grad_(parameters, clip_grad, mode=clip_mode)
         self._scaler.step(optimizer)
         self._scaler.update()
 
@@ -32,7 +34,11 @@ class GradScaler:
         self._scaler.load_state_dict(state_dict)
 
 
-def model_parameters(model, exclude_head=False):
+def model_parameters_exclude_head(model, clip_mode=None):
+    exclude_head = False 
+    if clip_mode is not None:
+        if clip_mode == "agc":
+            exclude_head = True
     if exclude_head:
         return [p for p in model.parameters()][:-2]
     else:

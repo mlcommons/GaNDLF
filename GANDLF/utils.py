@@ -10,7 +10,6 @@ import SimpleITK as sitk
 import torch
 import torch.nn as nn
 import torchio
-from GANDLF.losses import *
 from torch.utils.data import DataLoader
 from pathlib import Path
 
@@ -97,6 +96,7 @@ def one_hot(segmask_array, class_list):
                     bin_mask = segmask_array_iter == int(_class)
             else:
                 bin_mask = segmask_array_iter == int(_class)
+                bin_mask = bin_mask.long()
             one_hot_stack.append(bin_mask)
         one_hot_stack = torch.stack(one_hot_stack)
         batch_stack.append(one_hot_stack)
