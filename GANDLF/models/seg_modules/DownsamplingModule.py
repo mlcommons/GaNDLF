@@ -9,13 +9,11 @@ class DownsamplingModule(nn.Module):
         input_channels,
         output_channels,
         Conv,
-        Dropout,
-        InstanceNorm,
+        Norm,
         leakiness=1e-2,
-        dropout_p=0.3,
         kernel_size=3,
         conv_bias=True,
-        inst_norm_affine=True,
+        norm_affine=True,
         lrelu_inplace=True,
     ):
         """[To Downsample a given input with convolution operation]
@@ -32,24 +30,25 @@ class DownsamplingModule(nn.Module):
         Keyword Arguments:
             leakiness {float} -- [the negative leakiness] (default: {1e-2})
             conv_bias {bool} -- [to use the bias in filters] (default: {True})
-            inst_norm_affine {bool} -- [affine use in norm] (default: {True})
+            norm_affine {bool} -- [affine use in norm] (default: {True})
             lrelu_inplace {bool} -- [To update conv outputs with lrelu outputs]
                                     (default: {True})
         """
         # nn.Module.__init__(self)
         super(DownsamplingModule, self).__init__()
-        self.dropout_p = dropout_p
         self.conv_bias = conv_bias
         self.leakiness = leakiness
-        self.inst_norm_affine = inst_norm_affine
+        self.norm_affine = norm_affine
         self.lrelu_inplace = True
-        self.in_0 = InstanceNorm(
-            output_channels, affine=self.inst_norm_affine, track_running_stats=True
+        self.in_0 = (
+            Norm(output_channels, affine=self.norm_affine, track_running_stats=True)
+            if Norm is not None
+            else nn.Identity()
         )
         self.conv0 = Conv(
             input_channels,
             output_channels,
-            kernel_size=3,
+            kernel_size=kernel_size,
             stride=2,
             padding=(kernel_size - 1) // 2,
             bias=self.conv_bias,
@@ -71,5 +70,4 @@ class DownsamplingModule(nn.Module):
             negative_slope=self.leakiness,
             inplace=self.lrelu_inplace,
         )
-        # print(x.shape)
         return x
