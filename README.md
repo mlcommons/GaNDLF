@@ -9,7 +9,7 @@
   <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
-A **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
+The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
 ## Why use this?
 
