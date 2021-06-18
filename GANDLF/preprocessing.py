@@ -94,7 +94,9 @@ def get_tensor_for_dataloader(input_sitk_image):
     This function obtains the tensor to load into the data loader
     """
     temp_array = sitk.GetArrayFromImage(input_sitk_image)
-    if temp_array.dtype == np.uint16:  # this is a contingency, because torch cannot convert this
+    if (
+        temp_array.dtype == np.uint16
+    ):  # this is a contingency, because torch cannot convert this
         temp_array = temp_array.astype(np.int32)
     input_image_tensor = torch.from_numpy(temp_array).unsqueeze(
         0
