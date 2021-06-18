@@ -18,8 +18,8 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
     """Resample image to certain spacing and size.
 
     Args:
-        img (SimpleITK.Image): The input image to resample
-        spacing (list): List of length 3 indicating the voxel spacing as [x, y, z]
+        img (SimpleITK.Image): The input image to resample.
+        spacing (list): List of length 3 indicating the voxel spacing as [x, y, z].
         size (list, optional): List of length 3 indicating the number of voxels per dim [x, y, z], which will use compute the appropriate size based on the spacing. Defaults to [].
         interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
         origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
@@ -61,8 +61,8 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     """This function resizes the input image based on the output size and interpolator
 
     Args:
-        input_image (SimpleITK.Image): The input image to resample
-        output_size (numpy.array): The output size to resample input_image to
+        input_image (SimpleITK.Image): The input image to resample.
+        output_size (numpy.array): The output size to resample input_image to.
         interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
 
     Returns:
@@ -84,11 +84,11 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
 
 
 def one_hot(segmask_array, class_list):
-    """This function creates a one-hot-encoded mask from the segmentation mask tensor and specified class list
+    """This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
-        segmask_array (torch.Tensor): The segmentation mask tensor
-        class_list (list): The list of classes based on which one-hot encoding needs to happen
+        segmask_array (torch.Tensor): The segmentation mask Tensor.
+        class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
@@ -131,8 +131,14 @@ def one_hot(segmask_array, class_list):
 
 
 def reverse_one_hot(predmask_array, class_list):
-    """
-    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
+    """This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
+
+    Args:
+        predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
+        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+
+    Returns:
+        torch.Tensor: The final mask torch.Tensor.
     """
     idx_argmax = np.argmax(predmask_array, axis=0)
     final_mask = 0
