@@ -328,8 +328,16 @@ def populate_header_in_parameters(parameters, headers):
 
 
 def find_problem_type(headersFromCSV, model_final_layer):
-    """
-    This function determines the type of problem at hand - regression, classification or segmentation
+    """This function determines the type of problem at hand - regression, classification or segmentation
+
+    Args:
+        headersFromCSV (dict): The CSV headers dictionary.
+        model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
+
+    Returns:
+        bool: If problem is regression.
+        bool: If problem is classification.
+        bool: If problem is segmentation.
     """
     # initialize problem type
     is_regression = False
