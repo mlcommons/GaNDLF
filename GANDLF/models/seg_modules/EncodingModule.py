@@ -46,7 +46,7 @@ class EncodingModule(nn.Module):
         self.leakiness = leakiness
         self.norm_affine = norm_affine
         self.lrelu_inplace = lrelu_inplace
-        self.dropout = nn.Dropout3d(dropout_p)
+        self.dropout = Dropout(dropout_p)
         self.in_0 = (
             Norm(output_channels, affine=self.norm_affine, track_running_stats=True)
             if Norm is not None
