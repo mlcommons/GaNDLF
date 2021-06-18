@@ -357,8 +357,13 @@ def find_problem_type(headersFromCSV, model_final_layer):
 
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
-    """
-    This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    """This function writes the CSV file based on the input directory, channelsID + labelsID strings
+
+    Args:
+        inputDir (str): The input directory.
+        channelsID (str): The channel header(s) identifiers.
+        labelID (str): The label header identifier.
+        outputFile (str): The output files to write
     """
     channelsID_list = channelsID.split(",")  # split into list
 
