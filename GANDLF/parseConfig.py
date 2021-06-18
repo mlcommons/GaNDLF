@@ -20,6 +20,7 @@ parameter_defaults = {
     "amp": False,  # automatic mixed precision
     "learning_rate": 0.001,  # default learning rate
     "clip_grad": None,  # clip_gradient value
+    "clip_mode": None,  # default clip mode
 }
 
 ## dictionary to define string defaults for appropriate options
@@ -28,7 +29,6 @@ parameter_defaults_string = {
     "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "loss_function": "dc",  # default loss
-    "clip_mode": "agc",  # default clip mode
 }
 
 
