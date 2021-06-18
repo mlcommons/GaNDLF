@@ -4,7 +4,6 @@ Modified from https://github.com/pytorch/vision.git
 """
 
 import sys, math
-import torch
 import torch.nn as nn
 from .modelBase import get_final_layer
 from GANDLF.models.seg_modules.average_pool import (
