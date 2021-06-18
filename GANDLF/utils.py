@@ -181,8 +181,14 @@ def reverse_one_hot(predmask_array, class_list):
 
 
 def checkPatchDivisibility(patch_size, number=16):
-    """
-    This function checks the divisibility of a numpy array or integer for architectural integrity
+    """This function checks the divisibility of a numpy array or integer for architectural integrity
+
+    Args:
+        patch_size (numpy.array): The patch size for checking.
+        number (int, optional): The number to check divisibility for. Defaults to 16.
+
+    Returns:
+        bool: If all elements of array are divisible or not, after taking 2D patches into account.
     """
     if isinstance(patch_size, int):
         patch_size_to_check = np.array(patch_size)
