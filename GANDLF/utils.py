@@ -57,6 +57,32 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
     )
 
 
+def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
+    """This function resizes the input image based on the output size and interpolator
+
+    Args:
+        input_image (SimpleITK.Image): The input image to resample
+        output_size (numpy.array): The output size to resample input_image to
+        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
+
+    Returns:
+        SimpleITK.Image: The resized input image.
+    """
+    inputSize = input_image.GetSize()
+    inputSpacing = np.array(input_image.GetSpacing())
+    outputSpacing = np.array(inputSpacing)
+
+    if len(output_size) != len(inputSpacing):
+        sys.exit(
+            "The output size dimension is inconsistent with the input dataset, please check parameters."
+        )
+
+    for i in range(len(output_size)):
+        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+    
+    return resample_image(input_image, outputSpacing, interpolator=interpolator)
+
+
 def one_hot(segmask_array, class_list):
     """
     This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
@@ -236,32 +262,6 @@ def send_model_to_device(model, amp, device, optimizer):
         print("Since Device is CPU, Mixed Precision Training is set to False")
 
     return model, amp, device
-
-
-def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
-    """This function resizes the input image based on the output size and interpolator
-
-    Args:
-        input_image (SimpleITK.Image): The input image to resample
-        output_size (numpy.array): The output size to resample input_image to
-        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
-
-    Returns:
-        SimpleITK.Image: The resized input image.
-    """
-    inputSize = input_image.GetSize()
-    inputSpacing = np.array(input_image.GetSpacing())
-    outputSpacing = np.array(inputSpacing)
-
-    if len(output_size) != len(inputSpacing):
-        sys.exit(
-            "The output size dimension is inconsistent with the input dataset, please check parameters."
-        )
-
-    for i in range(len(output_size)):
-        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
-    
-    return resample_image(input_image, outputSpacing, interpolator=interpolator)
 
 
 def get_metrics_save_mask(
