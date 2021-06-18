@@ -231,7 +231,9 @@ def train_network(model, train_dataloader, optimizer, params):
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(model, valid_dataloader, scheduler, params, mode="validation"):
+def validate_network(
+    model, valid_dataloader, scheduler, params, epoch=0, mode="validation"
+):
     """
     Function to validate a network for a single epoch
 
@@ -286,7 +288,14 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         model.enable_medcam()
         params["medcam_enabled"] = True
 
-    outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
+    file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
+    if os.path.exists(file_to_write):
+        # append to previously generated file
+        file = open(file_to_write, "a")
+    else:
+        # if file was absent, write header information
+        file = open(file_to_write, "w")
+        outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
 
     for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
@@ -345,7 +354,9 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
             outputToWrite += (
-                subject["subject_id"][0]
+                str(epoch)
+                + ","
+                + subject["subject_id"][0]
                 + ","
                 + str(pred_output.cpu().data.item())
                 + "\n"
@@ -487,7 +498,12 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
                     patch_loader
                 )  # final regression output
                 outputToWrite += (
-                    subject["subject_id"][0] + "," + str(output_prediction) + "\n"
+                    str(epoch)
+                    + ","
+                    + subject["subject_id"][0]
+                    + ","
+                    + str(output_prediction)
+                    + "\n"
                 )
 
             # get the final attention map and save it
@@ -557,11 +573,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     # write the predictions, if appropriate
     if params["save_output"]:
         if "value_keys" in params:
-            file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
-            if os.path.exists(file_to_write):
-                file = open(file_to_write, "a")
-            else:
-                file = open(file_to_write, "w")
             file.write(outputToWrite)
             file.close()
 
@@ -739,7 +750,7 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, scheduler, params, mode="validation"
+            model, val_dataloader, scheduler, params, epoch, mode="validation"
         )
 
         patience += 1
@@ -751,7 +762,7 @@ def training_loop(
 
         if testingDataDefined:
             epoch_test_loss, epoch_test_metric = validate_network(
-                model, test_dataloader, scheduler, params, mode="testing"
+                model, test_dataloader, scheduler, params, epoch, mode="testing"
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
