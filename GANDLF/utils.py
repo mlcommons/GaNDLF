@@ -214,8 +214,18 @@ def checkPatchDivisibility(patch_size, number=16):
 
 
 def send_model_to_device(model, amp, device, optimizer):
-    """
-    This function reads the environment variable(s) and send model to correct device
+    """This function reads the environment variable(s) and send model to correct device
+
+    Args:
+        model (torch.nn.Module): The model that needs to be sent to specified device.
+        amp (bool): Whether automatic mixed precision is to be used.
+        device (str): Device type.
+        optimizer (torch.optim): The optimizer for training.
+
+    Returns:
+        torch.nn.Module: The model after it has been sent to specified device
+        bool: Whether automatic mixed precision is to be used or not.
+        torch.device: Device type.
     """
     if device != "cpu":
         if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
