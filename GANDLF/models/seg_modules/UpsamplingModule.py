@@ -10,7 +10,6 @@ class UpsamplingModule(nn.Module):
         input_channels,
         output_channels,
         Conv,
-        Dropout,
         kernel_size=3,
         scale_factor=2,
         conv_bias=True,
