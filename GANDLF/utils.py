@@ -401,8 +401,15 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
 
 
 def parseTrainingCSV(inputTrainingCSVFile, train=True):
-    """
-    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    """This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+
+    Args:
+        inputTrainingCSVFile (str): The input data CSV file which contains all training data.
+        train (bool, optional): Whether performing training. Defaults to True.
+
+    Returns:
+        pandas.DataFrame: The full dataset for computation.
+        dict: The dictionary containing all relevant CSV headers.
     """
     ## read training dataset into data frame
     data_full = pd.read_csv(inputTrainingCSVFile)
@@ -454,8 +461,12 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
 
 
 def get_date_time():
-    now = datetime.now()
-    date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    """Get a well-parsed date string
+
+    Returns:
+        str: The date in format YYYY/MM/DD::HH:MM:SS
+    """
+    now = datetime.now().strftime("%Y/%m/%d::%H:%M:%S")
     return now
 
 
