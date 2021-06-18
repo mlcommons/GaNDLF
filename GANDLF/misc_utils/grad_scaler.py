@@ -22,7 +22,7 @@ class GradScaler:
                 optimizer
             )  # unscale the gradients of optimizer's assigned params in-place
             if (clip_mode is None) or (str(clip_mode).lower() == "none"):
-                clip_mode == "norm" # default, in case none gets passed
+                clip_mode == "norm"  # default, in case none gets passed
             dispatch_clip_grad_(parameters, clip_grad, mode=clip_mode)
         self._scaler.step(optimizer)
         self._scaler.update()
@@ -35,7 +35,7 @@ class GradScaler:
 
 
 def model_parameters_exclude_head(model, clip_mode=None):
-    exclude_head = False 
+    exclude_head = False
     if clip_mode is not None:
         if clip_mode == "agc":
             exclude_head = True
