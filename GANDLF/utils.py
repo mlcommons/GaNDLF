@@ -293,8 +293,10 @@ def send_model_to_device(model, amp, device, optimizer):
 
 
 def fix_paths(cwd):
-    """
-    This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+    """This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+
+    Args:
+        cwd (str): The current working directory.
     """
     if os.name == "nt":  # proceed for windows
         vipshome = os.path.join(cwd, "vips/vips-dev-8.10/bin")
