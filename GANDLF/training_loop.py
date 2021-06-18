@@ -172,13 +172,18 @@ def train_network(model, train_dataloader, optimizer, params):
                 if not torch.isnan(
                     loss
                 ):  # if loss is nan, don't backprop and don't step optimizer
+
+                    if params["clip_mode"] is None:
+                        exclude_head = False
+                    else:
+                        exclude_head = "agc" in params["clip_mode"]
                     scaler(
                         loss=loss,
                         optimizer=optimizer,
                         clip_grad=params["clip_grad"],
                         clip_mode=params["clip_mode"],
                         parameters=model_parameters(
-                            model, exclude_head="agc" in params["clip_mode"]
+                            model, exclude_head=exclude_head
                         ),
                         create_graph=second_order,
                     )
