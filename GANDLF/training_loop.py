@@ -5,7 +5,7 @@ Created on Sat Mar  6 21:45:06 2021
 
 @author: siddhesh
 """
-import os, math
+import os, math, pathlib
 import torch
 import time
 import torchio
@@ -16,7 +16,6 @@ import SimpleITK as sitk
 import numpy as np
 from medcam import medcam
 from GANDLF.logger import Logger
-from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import (
     get_model,
     get_optimizer,
@@ -32,8 +31,8 @@ from GANDLF.utils import (
     get_class_imbalance_weights,
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters
-from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
+from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
@@ -128,6 +127,9 @@ def train_network(model, train_dataloader, optimizer, params):
         Train metrics for the current epoch
 
     """
+    print("*" * 20)
+    print("Starting Training : ")
+    print("*" * 20)
     # Initialize a few things
     total_epoch_train_loss = 0
     total_epoch_train_metric = {}
@@ -140,8 +142,6 @@ def train_network(model, train_dataloader, optimizer, params):
     if params["model"]["amp"]:
         print("Using Automatic mixed precision", flush=True)
         scaler = GradScaler()
-
-    # Fetch the optimizer
 
     # Set the model to train
     model.train()
@@ -177,8 +177,8 @@ def train_network(model, train_dataloader, optimizer, params):
                         optimizer=optimizer,
                         clip_grad=params["clip_grad"],
                         clip_mode=params["clip_mode"],
-                        parameters=model_parameters(
-                            model, exclude_head="agc" in params["clip_mode"]
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
                         ),
                         create_graph=second_order,
                     )
@@ -187,9 +187,9 @@ def train_network(model, train_dataloader, optimizer, params):
             if not math.isnan(loss):
                 loss.backward(create_graph=second_order)
                 if params["clip_grad"] is not None:
-                    dispatch_clip_grad(
-                        parameters=model_parameters(
-                            model, exclude_head="agc" in params["clip_mode"]
+                    dispatch_clip_grad_(
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
                         ),
                         value=params["clip_grad"],
                         mode=params["clip_mode"],
@@ -275,6 +275,8 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     else:  # this is useful for inference
         current_output_dir = os.path.join(params["output_dir"], mode + "_output")
 
+    pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
+
     # Set the model to valid
     model.eval()
     # # putting stuff in individual arrays for correlation analysis
@@ -283,6 +285,8 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     if params["medcam_enabled"]:
         model.enable_medcam()
         params["medcam_enabled"] = True
+
+    outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
 
     for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
@@ -308,7 +312,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
                 label_ground_truth = torch.cat(
                     [subject[key] for key in params["value_keys"]], dim=0
                 )
-                outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
 
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(
@@ -554,7 +557,11 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     # write the predictions, if appropriate
     if params["save_output"]:
         if "value_keys" in params:
-            file = open(os.path.join(current_output_dir, "output_predictions.csv"), "w")
+            file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
+            if os.path.exists(file_to_write):
+                file = open(file_to_write, "a")
+            else:
+                file = open(file_to_write, "w")
             file.write(outputToWrite)
             file.close()
 
@@ -562,7 +569,12 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
 
 
 def training_loop(
-    training_data, validation_data, device, params, output_dir, testing_data=None,
+    training_data,
+    validation_data,
+    device,
+    params,
+    output_dir,
+    testing_data=None,
 ):
 
     # Some autodetermined factors
@@ -631,10 +643,15 @@ def training_loop(
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
-            training_data, parameters=params, train=False,
+            training_data,
+            parameters=params,
+            train=False,
         )
         penalty_loader = DataLoader(
-            penalty_data, batch_size=1, shuffle=True, pin_memory=False,
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
         )
 
         params["weights"] = get_class_imbalance_weights(penalty_loader, params)

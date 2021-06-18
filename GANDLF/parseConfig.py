@@ -19,6 +19,8 @@ parameter_defaults = {
     "batch_size": 1,  # default batch size of training
     "amp": False,  # automatic mixed precision
     "learning_rate": 0.001,  # default learning rate
+    "clip_grad": None,  # clip_gradient value
+    "clip_mode": None,  # default clip mode
 }
 
 ## dictionary to define string defaults for appropriate options

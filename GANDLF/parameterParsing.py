@@ -1,6 +1,4 @@
 import sys
-from collections import Counter
-import numpy as np
 import torch.optim as optim
 from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
@@ -252,17 +250,8 @@ def get_model(
             batch_norm = kwargs.get("batch_norm")
         else:
             batch_norm = True
-        num_final_features = vgg_config[-2]
-        m_counter = Counter(vgg_config)["M"]
-        if patch_size[-1] == 1:
-            patch_size_altered = np.array(patch_size[:-1])
-        else:
-            patch_size_altered = np.array(patch_size)
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
-        features_for_classifier = num_final_features * np.prod(
-            patch_size_altered // 2 ** m_counter
-        )
         layers = make_layers(
             vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
         )
@@ -270,7 +259,6 @@ def get_model(
         model = VGG(
             num_dimensions,
             layers,
-            features_for_classifier,
             num_classes,
             final_convolution_layer=final_convolution_layer,
         )
@@ -458,40 +446,6 @@ def get_scheduler(
         scheduler_lr = ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
     return scheduler_lr
-
-    """
-    # initialize without considering background
-    dice_weights_dict = {} # average for "weighted averaging"
-    dice_penalty_dict = {} # penalty for misclassification
-    for i in range(1, n_classList):
-        dice_weights_dict[i] = 0
-        dice_penalty_dict[i] = 0
-
-    # define a seaparate data loader for penalty calculations
-    penaltyData = ImagesFromDataFrame(trainingDataFromPickle, patch_size, headers, q_max_length, q_samples_per_volume, q_num_workers, q_verbose, sampler = parameters['patch_sampler'], train=False, augmentations=None,preprocessing=preprocessing) 
-    penalty_loader = DataLoader(penaltyData, batch_size=batch_size, shuffle=True)
-    
-    # get the weights for use for dice loss
-    total_nonZeroVoxels = 0
-    for batch_idx, (subject) in enumerate(penalty_loader): # iterate through full training data
-        # accumulate dice weights for each label
-        mask = subject['label'][torchio.DATA]
-        one_hot_mask = one_hot(mask, class_list)
-        for i in range(1, n_classList):
-            currentNumber = torch.nonzero(one_hot_mask[:,i,:,:,:], as_tuple=False).size(0)
-            dice_weights_dict[i] = dice_weights_dict[i] + currentNumber # class-specific non-zero voxels
-            total_nonZeroVoxels = total_nonZeroVoxels + currentNumber # total number of non-zero voxels to be considered
-    
-    # get the penalty values - dice_weights contains the overall number for each class in the training data
-    for i in range(1, n_classList):
-        penalty = total_nonZeroVoxels # start with the assumption that all the non-zero voxels make up the penalty
-        for j in range(1, n_classList):
-            if i != j: # for differing classes, subtract the number
-                penalty = penalty - dice_penalty_dict[j]
-        
-        dice_penalty_dict[i] = penalty / total_nonZeroVoxels # this is to be used to weight the loss function
-    dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-    """
 
 
 def get_loss_and_metrics(ground_truth, predicted, params):
