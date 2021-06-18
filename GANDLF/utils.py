@@ -16,23 +16,17 @@ from pathlib import Path
 
 def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
     """Resample image to certain spacing and size.
-    Parameters:
-    ----------
-    img : {SimpleITK.SimpleITK.Image}
-        Input 3D image.
-    spacing : {list}
-        List of length 3 indicating the voxel spacing as [x, y, z]
-    size : {list}, optional
-        List of length 3 indicating the number of voxels per dim [x, y, z] (the default is [], which will use compute the appropriate size based on the spacing.)
-    interpolator : either sitk.sitkLinear or sitk.sitkNearestNeighbor or one of those
-    origin : {list}, optional
-        The location in physical space representing the [0,0,0] voxel in the input image. (the default is [0,0,0])
-    outsideValue : {int}, optional
-        value used to pad are outside image (the default is 0)
-    Returns
-    -------
-    SimpleITK.SimpleITK.Image
-        Resampled input image.
+
+    Args:
+        img (SimpleITK.Image): The input image to resample
+        spacing (list): List of length 3 indicating the voxel spacing as [x, y, z]
+        size (list, optional): List of length 3 indicating the number of voxels per dim [x, y, z], which will use compute the appropriate size based on the spacing. Defaults to [].
+        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
+        origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
+        outsideValue (int, optional): value used to pad are outside image.  Defaults to 0.
+
+    Returns:
+        SimpleITK.Image: The resampled input image.
     """
 
     if len(spacing) != img.GetDimension():
@@ -253,7 +247,7 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
         interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
 
     Returns:
-        SimpleITK.Image: The resampled output image based on the inputs
+        SimpleITK.Image: The resized input image.
     """
     inputSize = input_image.GetSize()
     inputSpacing = np.array(input_image.GetSpacing())
@@ -266,14 +260,8 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
 
     for i in range(len(output_size)):
         outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
-    resampler = sitk.ResampleImageFilter()
-    resampler.SetSize(output_size)
-    resampler.SetInterpolator(interpolator)
-    resampler.SetOutputSpacing(outputSpacing)
-    resampler.SetOutputOrigin(input_image.GetOrigin())
-    resampler.SetOutputDirection(input_image.GetDirection())
-    resampler.SetDefaultPixelValue(0)
-    return resampler.Execute(input_image)
+    
+    return resample_image(input_image, outputSpacing, interpolator=interpolator)
 
 
 def get_metrics_save_mask(
