@@ -245,8 +245,15 @@ def send_model_to_device(model, amp, device, optimizer):
 
 
 def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
-    """
-    This function resizes the input image based on the output size and interpolator
+    """This function resizes the input image based on the output size and interpolator
+
+    Args:
+        input_image (SimpleITK.Image): The input image to resample
+        output_size (numpy.array): The output size to resample input_image to
+        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
+
+    Returns:
+        SimpleITK.Image: The resampled output image based on the inputs
     """
     inputSize = input_image.GetSize()
     inputSpacing = np.array(input_image.GetSpacing())
