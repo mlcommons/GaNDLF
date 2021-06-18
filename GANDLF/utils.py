@@ -471,8 +471,14 @@ def get_date_time():
 
 
 def get_class_imbalance_weights(training_data_loader, parameters):
-    """
-    This function calculates the penalty that is used for validation loss in multi-class problems
+    """This function calculates the penalty that is used for validation loss in multi-class problems
+
+    Args:
+        training_data_loader (torch.utils.data.DataLoader): The training data loader.
+        parameters (dict): The parameter dictionary.
+
+    Returns:
+        dict: The penalty weights for different classes under consideration.
     """
     dice_weights_dict = {}  # average for "weighted averaging"
     dice_penalty_dict = None  # penalty for misclassification
