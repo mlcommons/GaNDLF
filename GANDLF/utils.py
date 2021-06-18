@@ -307,7 +307,7 @@ def populate_header_in_parameters(parameters, headers):
     """This function populates the parameters with information from the header in a common manner
 
     Args:
-        parameters (dict): The parameters dictionary.
+        parameters (dict): The parameters passed by the user yaml.
         headers (dict): The CSV headers dictionary.
 
     Returns:
@@ -475,7 +475,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
 
     Args:
         training_data_loader (torch.utils.data.DataLoader): The training data loader.
-        parameters (dict): The parameter dictionary.
+        parameters (dict): The parameters passed by the user yaml.
 
     Returns:
         dict: The penalty weights for different classes under consideration.
@@ -537,24 +537,14 @@ def get_class_imbalance_weights(training_data_loader, parameters):
 
 
 def populate_channel_keys_in_params(data_loader, parameters):
-    """
-    Function to read channel key information from specified data loader
+    """Function to read channel key information from specified data loader
 
-    Parameters
-    ----------
-    data_loader : torch.DataLoader
-        The data loader to query key information from
-    parameters : dict
-        The parameters passed by the user yaml
+    Args:
+        data_loader (torch.DataLoader): The data loader to query key information from.
+        parameters (dict): The parameters passed by the user yaml.
 
-    Returns
-    -------
-    parameters : dict
-        Updated parameters that include key information
-
-    """
-    """
-    This function reads the data_loaderparses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    Returns:
+        dict: Updated parameters that include key information
     """
     batch = next(
         iter(data_loader)
