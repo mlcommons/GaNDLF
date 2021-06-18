@@ -34,7 +34,11 @@ class GradScaler:
         self._scaler.load_state_dict(state_dict)
 
 
-def model_parameters(model, exclude_head=False):
+def model_parameters_exclude_head(model, clip_mode=None):
+    exclude_head = False 
+    if clip_mode is not None:
+        if clip_mode == "agc":
+            exclude_head = True
     if exclude_head:
         return [p for p in model.parameters()][:-2]
     else:
