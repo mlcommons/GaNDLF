@@ -411,6 +411,10 @@ def parseConfig(config_file_path, version_check=True):
                 params["model"]["num_channels"] = params["model"][key]
                 break
 
+        if not ("norm_type" in params["model"]):
+            print("Using default 'norm_type' in 'model': batch")
+            params["model"]["norm_type"] = "batch"
+
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
