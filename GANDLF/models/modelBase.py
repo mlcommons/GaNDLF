@@ -30,7 +30,13 @@ class ModelBase(nn.Module):
     """
 
     def __init__(
-        self, n_dimensions, n_channels, n_classes, base_filters, norm_type, final_convolution_layer
+        self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
     ):
         """
         This defines all defaults that the model base uses
