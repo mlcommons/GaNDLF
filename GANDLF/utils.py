@@ -16,23 +16,17 @@ from pathlib import Path
 
 def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
     """Resample image to certain spacing and size.
-    Parameters:
-    ----------
-    img : {SimpleITK.SimpleITK.Image}
-        Input 3D image.
-    spacing : {list}
-        List of length 3 indicating the voxel spacing as [x, y, z]
-    size : {list}, optional
-        List of length 3 indicating the number of voxels per dim [x, y, z] (the default is [], which will use compute the appropriate size based on the spacing.)
-    interpolator : either sitk.sitkLinear or sitk.sitkNearestNeighbor or one of those
-    origin : {list}, optional
-        The location in physical space representing the [0,0,0] voxel in the input image. (the default is [0,0,0])
-    outsideValue : {int}, optional
-        value used to pad are outside image (the default is 0)
-    Returns
-    -------
-    SimpleITK.SimpleITK.Image
-        Resampled input image.
+
+    Args:
+        img (SimpleITK.Image): The input image to resample.
+        spacing (list): List of length 3 indicating the voxel spacing as [x, y, z].
+        size (list, optional): List of length 3 indicating the number of voxels per dim [x, y, z], which will use compute the appropriate size based on the spacing. Defaults to [].
+        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
+        origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
+        outsideValue (int, optional): value used to pad are outside image.  Defaults to 0.
+
+    Returns:
+        SimpleITK.Image: The resampled input image.
     """
 
     if len(spacing) != img.GetDimension():
@@ -63,9 +57,41 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
     )
 
 
-def one_hot(segmask_array, class_list):
+def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
+    """This function resizes the input image based on the output size and interpolator
+
+    Args:
+        input_image (SimpleITK.Image): The input image to resample.
+        output_size (numpy.array): The output size to resample input_image to.
+        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
+
+    Returns:
+        SimpleITK.Image: The resized input image.
     """
-    This function creates a one-hot-encoded mask from the segmentation mask array and specified class list
+    inputSize = input_image.GetSize()
+    inputSpacing = np.array(input_image.GetSpacing())
+    outputSpacing = np.array(inputSpacing)
+
+    if len(output_size) != len(inputSpacing):
+        sys.exit(
+            "The output size dimension is inconsistent with the input dataset, please check parameters."
+        )
+
+    for i in range(len(output_size)):
+        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+    
+    return resample_image(input_image, outputSpacing, interpolator=interpolator)
+
+
+def one_hot(segmask_array, class_list):
+    """This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
+
+    Args:
+        segmask_array (torch.Tensor): The segmentation mask Tensor.
+        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+
+    Returns:
+        torch.Tensor: The one-hot encoded torch.Tensor
     """
     batch_size = segmask_array.shape[0]
     batch_stack = []
@@ -105,8 +131,14 @@ def one_hot(segmask_array, class_list):
 
 
 def reverse_one_hot(predmask_array, class_list):
-    """
-    This function creates a full segmentation mask array from a one-hot-encoded mask and specified class list
+    """This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
+
+    Args:
+        predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
+        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+
+    Returns:
+        torch.Tensor: The final mask torch.Tensor.
     """
     idx_argmax = np.argmax(predmask_array, axis=0)
     final_mask = 0
@@ -149,8 +181,14 @@ def reverse_one_hot(predmask_array, class_list):
 
 
 def checkPatchDivisibility(patch_size, number=16):
-    """
-    This function checks the divisibility of a numpy array or integer for architectural integrity
+    """This function checks the divisibility of a numpy array or integer for architectural integrity
+
+    Args:
+        patch_size (numpy.array): The patch size for checking.
+        number (int, optional): The number to check divisibility for. Defaults to 16.
+
+    Returns:
+        bool: If all elements of array are divisible or not, after taking 2D patches into account.
     """
     if isinstance(patch_size, int):
         patch_size_to_check = np.array(patch_size)
@@ -176,8 +214,18 @@ def checkPatchDivisibility(patch_size, number=16):
 
 
 def send_model_to_device(model, amp, device, optimizer):
-    """
-    This function reads the environment variable(s) and send model to correct device
+    """This function reads the environment variable(s) and send model to correct device
+
+    Args:
+        model (torch.nn.Module): The model that needs to be sent to specified device.
+        amp (bool): Whether automatic mixed precision is to be used.
+        device (str): Device type.
+        optimizer (torch.optim): The optimizer for training.
+
+    Returns:
+        torch.nn.Module: The model after it has been sent to specified device
+        bool: Whether automatic mixed precision is to be used or not.
+        torch.device: Device type.
     """
     if device != "cpu":
         if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
@@ -244,266 +292,11 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device
 
 
-def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
-    """
-    This function resizes the input image based on the output size and interpolator
-    """
-    inputSize = input_image.GetSize()
-    inputSpacing = np.array(input_image.GetSpacing())
-    outputSpacing = np.array(inputSpacing)
-
-    if len(output_size) != len(inputSpacing):
-        sys.exit(
-            "The output size dimension is inconsistent with the input dataset, please check parameters."
-        )
-
-    for i in range(len(output_size)):
-        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
-    resampler = sitk.ResampleImageFilter()
-    resampler.SetSize(output_size)
-    resampler.SetInterpolator(interpolator)
-    resampler.SetOutputSpacing(outputSpacing)
-    resampler.SetOutputOrigin(input_image.GetOrigin())
-    resampler.SetOutputDirection(input_image.GetDirection())
-    resampler.SetDefaultPixelValue(0)
-    return resampler.Execute(input_image)
-
-
-def get_metrics_save_mask(
-    model,
-    device,
-    loader,
-    psize,
-    channel_keys,
-    value_keys,
-    class_list,
-    loss_fn,
-    is_segmentation,
-    scaling_factor=1,
-    weights=None,
-    save_mask=False,
-    outputDir=None,
-    with_roi=False,
-    ignore_label_validation=None,
-    num_patches=1,
-):
-    """
-    This function gets various statistics from the specified model and data loader
-    """
-    print("WARNING: This function has been superceded by 'validated_network'")
-    return None, None
-    # # if no weights are specified, use 1
-    # if weights is None:
-    #     weights = [1]
-    #     for i in range(len(class_list) - 1):
-    #         weights.append(1)
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    outputToWrite = "SubjectID,PredictedValue\n"
-    model.eval()
-    with torch.no_grad():
-        total_loss = total_dice = 0
-        # used for additional metrics
-        all_targets = []
-        all_predics = []
-        for batch_idx, (subject) in enumerate(loader):
-            # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
-            subject_dict = {}
-
-            if "label" in subject:
-                if subject["label"] != ["NA"]:
-                    subject_dict["label"] = torchio.Image(
-                        path=subject["label"]["path"],
-                        type=torchio.LABEL,
-                        tensor=subject["label"]["data"].squeeze(0),
-                    )
-                    label_present = True
-
-            for key in value_keys:  # for regression/classification
-                subject_dict["value_" + key] = subject[key]
-
-            for key in channel_keys:
-                subject_dict[key] = torchio.Image(
-                    path=subject[key]["path"],
-                    type=subject[key]["type"],
-                    tensor=subject[key]["data"].squeeze(0),
-                )
-
-            if not (is_segmentation) and label_present:
-                ## this is the case where it is regression/classification problem AND a label is present
-                sampler = torchio.data.LabelSampler(psize)
-                tio_subject = torchio.Subject(subject_dict)
-                generator = sampler(tio_subject, num_patches=num_patches)
-                pred_output = 0
-                for patch in generator:
-                    image = torch.cat(
-                        [patch[key][torchio.DATA] for key in channel_keys], dim=1
-                    )
-                    valuesToPredict = torch.cat(
-                        [patch["value_" + key] for key in value_keys], dim=0
-                    )
-                    image = image.unsqueeze(0)
-                    image = image.float().to(device)
-                    ## special case for 2D
-                    if image.shape[-1] == 1:
-                        model_2d = True
-                        image = torch.squeeze(image, -1)
-                    pred_output += model(image)
-                pred_output = pred_output.cpu() / num_patches
-                pred_output /= scaling_factor
-                all_predics.append(pred_output.double())
-                all_targets.append(valuesToPredict.double())
-                # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
-                loss = (
-                    torch.nn.MSELoss()(pred_output.double(), valuesToPredict.double())
-                    .cpu()
-                    .data.item()
-                )  # this needs to be revisited for multi-class output
-                total_loss += loss
-            else:
-                grid_sampler = torchio.inference.GridSampler(
-                    torchio.Subject(subject_dict), psize
-                )
-                patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-                aggregator = torchio.inference.GridAggregator(grid_sampler)
-
-                pred_output = 0  # this is used for regression
-                for patches_batch in patch_loader:
-                    image = torch.cat(
-                        [patches_batch[key][torchio.DATA] for key in channel_keys],
-                        dim=1,
-                    )
-                    if len(value_keys) > 0:
-                        valuesToPredict = torch.cat(
-                            [patches_batch["value_" + key] for key in value_keys], dim=0
-                        )
-                        # valuesToPredict = valuesToPredict*scaling_factor
-                    locations = patches_batch[torchio.LOCATION]
-                    image = image.float().to(device)
-                    ## special case for 2D
-                    if image.shape[-1] == 1:
-                        model_2d = True
-                        image = torch.squeeze(image, -1)
-                        locations = torch.squeeze(locations, -1)
-                    else:
-                        model_2d = False
-
-                    if is_segmentation:  # for segmentation, get the predicted mask
-                        pred_mask = model(image)
-                        if model_2d:
-                            pred_mask = pred_mask.unsqueeze(-1)
-                    else:  # for regression/classification, get the predicted output and add it together to average later on
-                        pred_output += model(image)
-
-                    if is_segmentation:  # aggregate the predicted mask
-                        aggregator.add_batch(pred_mask, locations)
-
-                if is_segmentation:
-                    pred_mask = aggregator.get_output_tensor()
-                    pred_mask = pred_mask.cpu()  # the validation is done on CPU
-                    pred_mask = pred_mask.unsqueeze(
-                        0
-                    )  # increasing the number of dimension of the mask
-                else:
-                    pred_output = pred_output / len(
-                        locations
-                    )  # average the predicted output across patches
-                    pred_output = pred_output.cpu()
-                    pred_output /= scaling_factor
-                    all_predics.append(pred_output.double())
-                    all_targets.append(valuesToPredict.double())
-                    # loss = loss_fn(pred_output.double(), valuesToPredict.double(), len(class_list), weights).cpu().data.item() # this would need to be customized for regression/classification
-                    loss = (
-                        torch.nn.MSELoss()(
-                            pred_output.double(), valuesToPredict.double()
-                        )
-                        .cpu()
-                        .data.item()
-                    )  # this needs to be revisited for multi-class output
-                    total_loss += loss
-
-            first = next(iter(subject["label"]))
-            if is_segmentation:
-                if first == "NA":
-                    print(
-                        "Ground Truth Mask not found. Generating the Segmentation based one the METADATA of one of the modalities, The Segmentation will be named accordingly"
-                    )
-                mask = subject_dict["label"][torchio.DATA]  # get the label image
-                if mask.dim() == 4:
-                    mask = mask.unsqueeze(
-                        0
-                    )  # increasing the number of dimension of the mask
-                mask = one_hot(mask, class_list)
-                loss = (
-                    loss_fn(pred_mask.double(), mask.double(), len(class_list), weights)
-                    .cpu()
-                    .data.item()
-                )  # this would need to be customized for regression/classification
-                total_loss += loss
-                # Computing the dice score
-                curr_dice = (
-                    MCD(
-                        pred_mask.double(),
-                        mask.double(),
-                        len(class_list),
-                        ignore_class=ignore_label_validation,
-                    )
-                    .cpu()
-                    .data.item()
-                )
-                # Computing the total dice
-                total_dice += curr_dice
-
-            if save_mask:
-                patient_name = subject["subject_id"][0]
-                if torch.is_tensor(patient_name):
-                    patient_name = str(patient_name.item())
-
-                if is_segmentation:
-                    path_to_metadata = subject["path_to_metadata"][0]
-                    inputImage = sitk.ReadImage(path_to_metadata)
-                    _, ext = os.path.splitext(path_to_metadata)
-                    if (ext == ".gz") or (ext == ".nii"):
-                        ext = ".nii.gz"
-                    pred_mask = pred_mask.numpy()
-                    pred_mask = reverse_one_hot(pred_mask[0], class_list)
-                    if not (model_2d):
-                        result_image = sitk.GetImageFromArray(
-                            np.swapaxes(pred_mask, 0, 2)
-                        )
-                    else:
-                        result_image = pred_mask
-                    result_image.CopyInformation(inputImage)
-                    result_image = sitk.Cast(
-                        result_image, inputImage.GetPixelID()
-                    )  # cast as the same data type
-                    # if parameters['resize'] is not None:
-                    #     result_image = resize_image(result_image, inputImage.GetSize(), sitk.sitkNearestNeighbor) # change this for resample
-                    sitk.WriteImage(
-                        result_image,
-                        os.path.join(outputDir, patient_name + "_seg" + ext),
-                    )
-                elif len(value_keys) > 0:
-                    outputToWrite += (
-                        patient_name + "," + str(pred_output) + "\n"
-                    )  # str(pred_output / scaling_factor) + '\n'
-
-        if len(value_keys) > 0:
-            file = open(os.path.join(outputDir, "output_predictions.csv"), "w")
-            file.write(outputToWrite)
-            file.close()
-
-        # calculate average loss and dice
-        avg_loss = total_loss / len(loader.dataset)
-        if is_segmentation:
-            avg_dice = total_dice / len(loader.dataset)
-        else:
-            avg_dice = 1  # we don't care about this for regression/classification
-        return avg_dice, avg_loss
-
-
 def fix_paths(cwd):
-    """
-    This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+    """This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+
+    Args:
+        cwd (str): The current working directory.
     """
     if os.name == "nt":  # proceed for windows
         vipshome = os.path.join(cwd, "vips/vips-dev-8.10/bin")
@@ -511,8 +304,14 @@ def fix_paths(cwd):
 
 
 def populate_header_in_parameters(parameters, headers):
-    """
-    This function populates the parameters with information from the header in a common manner
+    """This function populates the parameters with information from the header in a common manner
+
+    Args:
+        parameters (dict): The parameters passed by the user yaml.
+        headers (dict): The CSV headers dictionary.
+
+    Returns:
+        dict: Combined parameter dictionary containing header information
     """
     # initialize common parameters based on headers
     parameters["headers"] = headers
@@ -529,8 +328,16 @@ def populate_header_in_parameters(parameters, headers):
 
 
 def find_problem_type(headersFromCSV, model_final_layer):
-    """
-    This function determines the type of problem at hand - regression, classification or segmentation
+    """This function determines the type of problem at hand - regression, classification or segmentation
+
+    Args:
+        headersFromCSV (dict): The CSV headers dictionary.
+        model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
+
+    Returns:
+        bool: If problem is regression.
+        bool: If problem is classification.
+        bool: If problem is segmentation.
     """
     # initialize problem type
     is_regression = False
@@ -550,8 +357,13 @@ def find_problem_type(headersFromCSV, model_final_layer):
 
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
-    """
-    This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    """This function writes the CSV file based on the input directory, channelsID + labelsID strings
+
+    Args:
+        inputDir (str): The input directory.
+        channelsID (str): The channel header(s) identifiers.
+        labelID (str): The label header identifier.
+        outputFile (str): The output files to write
     """
     channelsID_list = channelsID.split(",")  # split into list
 
@@ -589,8 +401,15 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
 
 
 def parseTrainingCSV(inputTrainingCSVFile, train=True):
-    """
-    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    """This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+
+    Args:
+        inputTrainingCSVFile (str): The input data CSV file which contains all training data.
+        train (bool, optional): Whether performing training. Defaults to True.
+
+    Returns:
+        pandas.DataFrame: The full dataset for computation.
+        dict: The dictionary containing all relevant CSV headers.
     """
     ## read training dataset into data frame
     data_full = pd.read_csv(inputTrainingCSVFile)
@@ -642,14 +461,24 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
 
 
 def get_date_time():
-    now = datetime.now()
-    date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    """Get a well-parsed date string
+
+    Returns:
+        str: The date in format YYYY/MM/DD::HH:MM:SS
+    """
+    now = datetime.now().strftime("%Y/%m/%d::%H:%M:%S")
     return now
 
 
 def get_class_imbalance_weights(training_data_loader, parameters):
-    """
-    This function calculates the penalty that is used for validation loss in multi-class problems
+    """This function calculates the penalty that is used for validation loss in multi-class problems
+
+    Args:
+        training_data_loader (torch.utils.data.DataLoader): The training data loader.
+        parameters (dict): The parameters passed by the user yaml.
+
+    Returns:
+        dict: The penalty weights for different classes under consideration.
     """
     dice_weights_dict = {}  # average for "weighted averaging"
     dice_penalty_dict = None  # penalty for misclassification
@@ -708,24 +537,14 @@ def get_class_imbalance_weights(training_data_loader, parameters):
 
 
 def populate_channel_keys_in_params(data_loader, parameters):
-    """
-    Function to read channel key information from specified data loader
+    """Function to read channel key information from specified data loader
 
-    Parameters
-    ----------
-    data_loader : torch.DataLoader
-        The data loader to query key information from
-    parameters : dict
-        The parameters passed by the user yaml
+    Args:
+        data_loader (torch.DataLoader): The data loader to query key information from.
+        parameters (dict): The parameters passed by the user yaml.
 
-    Returns
-    -------
-    parameters : dict
-        Updated parameters that include key information
-
-    """
-    """
-    This function reads the data_loaderparses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    Returns:
+        dict: Updated parameters that include key information
     """
     batch = next(
         iter(data_loader)
