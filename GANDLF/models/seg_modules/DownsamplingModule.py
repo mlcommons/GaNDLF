@@ -8,51 +8,33 @@ class DownsamplingModule(nn.Module):
         self,
         input_channels,
         output_channels,
-        Conv,
-        Norm,
-        leakiness=1e-2,
-        kernel_size=3,
-        conv_bias=True,
-        norm_affine=True,
-        lrelu_inplace=True,
+        conv=nn.Conv2d,
+        conv_kwargs=None,
+        norm=nn.BatchNorm2d,
+        norm_kwargs=None,
+        act=nn.LeakyReLU,
+        act_kwargs=None,
     ):
-        """[To Downsample a given input with convolution operation]
-
-        [This one will be used to downsample a given comvolution while doubling
-        the number filters]
-
-        Arguments:
-            input_channels {[int]} -- [The input number of channels are taken
-                                       and then are downsampled to double usually]
-            output_channels {[int]} -- [the output number of channels are
-                                        usually the double of what of input]
-
-        Keyword Arguments:
-            leakiness {float} -- [the negative leakiness] (default: {1e-2})
-            conv_bias {bool} -- [to use the bias in filters] (default: {True})
-            norm_affine {bool} -- [affine use in norm] (default: {True})
-            lrelu_inplace {bool} -- [To update conv outputs with lrelu outputs]
-                                    (default: {True})
-        """
-        # nn.Module.__init__(self)
         super(DownsamplingModule, self).__init__()
-        self.conv_bias = conv_bias
-        self.leakiness = leakiness
-        self.norm_affine = norm_affine
-        self.lrelu_inplace = True
+        if conv_kwargs is None:
+            conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
+        if norm_kwargs is None:
+            norm_kwargs = {
+                "eps": 1e-5,
+                "affine": True,
+                "momentum": 0.1,
+                "track_running_stats": True,
+            }
+        if act_kwargs is None:
+            act_kwargs = {"negative_slope": 1e-2, "inplace": True}
+
         self.in_0 = (
-            Norm(output_channels, affine=self.norm_affine, track_running_stats=True)
-            if Norm is not None
-            else nn.Identity()
+            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
         )
-        self.conv0 = Conv(
-            input_channels,
-            output_channels,
-            kernel_size=kernel_size,
-            stride=2,
-            padding=(kernel_size - 1) // 2,
-            bias=self.conv_bias,
-        )
+
+        self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
+
+        self.act = self.act(**act_kwargs)
 
     def forward(self, x):
         """[This is a forward function for ]
@@ -65,9 +47,6 @@ class DownsamplingModule(nn.Module):
         Returns:
             [Tensor] -- [Returns a torch Tensor]
         """
-        x = F.leaky_relu(
-            self.in_0(self.conv0(x)),
-            negative_slope=self.leakiness,
-            inplace=self.lrelu_inplace,
-        )
+        x = self.act(self.in_0(self.conv0(x)))
+
         return x
