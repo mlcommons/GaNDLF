@@ -41,13 +41,19 @@ class out_conv(nn.Module):
             norm(input_channels, **norm_kwargs) if norm is not None else nn.Identity()
         )
         self.in_1 = (
-            norm(input_channels//2, **norm_kwargs) if norm is not None else nn.Identity()
+            norm(input_channels // 2, **norm_kwargs)
+            if norm is not None
+            else nn.Identity()
         )
         self.in_2 = (
-            norm(input_channels//2, **norm_kwargs) if norm is not None else nn.Identity()
+            norm(input_channels // 2, **norm_kwargs)
+            if norm is not None
+            else nn.Identity()
         )
         self.in_3 = (
-            norm(input_channels//2, **norm_kwargs) if norm is not None else nn.Identity()
+            norm(input_channels // 2, **norm_kwargs)
+            if norm is not None
+            else nn.Identity()
         )
 
         self.act = self.act(**act_kwargs)
