@@ -4,20 +4,17 @@ import torch.nn.functional as F
 
 
 class Interpolate(nn.Module):
-    def __init__(
-        self, size=None, scale_factor=None, mode="nearest", align_corners=True
-    ):
+    def __init__(self, interp_args=None):
         super(Interpolate, self).__init__()
-        self.align_corners = align_corners
-        self.mode = mode
-        self.scale_factor = scale_factor
-        self.size = size
+        if interp_args is None:
+            interp_args = {
+                "size": None,
+                "scale_factor": 2,
+                "mode": "nearest",
+                "align_corners": True,
+            }
+
+        self.interp = nn.Interpolate(**interp_args)
 
     def forward(self, x):
-        return nn.functional.interpolate(
-            x,
-            size=self.size,
-            scale_factor=self.scale_factor,
-            mode=self.mode,
-            align_corners=self.align_corners,
-        )
+        return self.interp(x)
