@@ -590,8 +590,6 @@ def training_loop(
 
     # Some autodetermined factors
     epochs = params["num_epochs"]
-    loss = params["loss_function"]
-    metrics = params["metrics"]
     params["device"] = device
     params["output_dir"] = output_dir
 
