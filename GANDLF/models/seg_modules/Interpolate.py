@@ -14,7 +14,7 @@ class Interpolate(nn.Module):
                 "align_corners": True,
             }
 
-        self.interp = nn.Interpolate(**interp_args)
+        self.interp = nn.functional.interpolate(**interp_args)
 
     def forward(self, x):
         return self.interp(x)
