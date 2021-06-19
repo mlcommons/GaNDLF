@@ -17,7 +17,7 @@ class DownsamplingModule(nn.Module):
     ):
         super(DownsamplingModule, self).__init__()
         if conv_kwargs is None:
-            conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
+            conv_kwargs = {"kernel_size": 3, "stride": 2, "padding": 1, "bias": True}
         if norm_kwargs is None:
             norm_kwargs = {
                 "eps": 1e-5,
