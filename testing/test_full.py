@@ -1,7 +1,6 @@
 from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil
 
-import torch
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
@@ -30,6 +29,8 @@ all_schedulers = [
     "exp_range",
 ]
 all_clip_modes = ["norm", "value", "agc"]
+all_norm_type = ["batch", "instance", "none"]
+
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
 testingDir = os.path.abspath(os.path.normpath("./testing"))
@@ -410,19 +411,51 @@ def test_clip_train_classification_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["architecture"] = "vgg16"
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
-        for model in ["vgg16"]:
-            parameters["clip_mode"] = clip_mode
-            parameters["model"]["architecture"] = model
-            # shutil.rmtree(outputDir)  # overwrite previous results
-            Path(outputDir).mkdir(parents=True, exist_ok=True)
-            TrainingManager(
-                dataframe=training_data,
-                outputDir=outputDir,
-                parameters=parameters,
-                device=device,
-                reset_prev=True,
-            )
+        parameters["clip_mode"] = clip_mode
+        # shutil.rmtree(outputDir)  # overwrite previous results
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            reset_prev=True,
+        )
+    shutil.rmtree(outputDir)  # overwrite previous results
+    print("passed")
+
+
+def test_normtype_train_classification_rad_3d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["amp"] = True
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["architecture"] = "vgg16"
+    # loop through selected models and train for single epoch
+    for norm_type in all_norm_type:
+        parameters["model"]["norm_type"] = norm_type
+        # shutil.rmtree(outputDir)  # overwrite previous results
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            reset_prev=True,
+        )
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
