@@ -4,7 +4,6 @@ Modified from https://github.com/pytorch/vision.git
 """
 
 import sys, math
-import torch
 import torch.nn as nn
 from .modelBase import get_final_layer
 from GANDLF.models.seg_modules.average_pool import (
@@ -62,7 +61,7 @@ class VGG(nn.Module):
                 m.weight.data.normal_(0, math.sqrt(2.0 / n))
                 m.bias.data.zero_()
             elif isinstance(m, nn.Linear):
-                torch.nn.init.xavier_uniform_(m.weight)
+                nn.init.xavier_uniform_(m.weight)
             else:
                 pass
 
