@@ -40,7 +40,9 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
         if evaluate:
             if isinstance(params[parameter_to_initialize], str):
                 if params[parameter_to_initialize].lower() == "none":
-                    params[parameter_to_initialize] = eval(params[parameter_to_initialize])
+                    params[parameter_to_initialize] = eval(
+                        params[parameter_to_initialize]
+                    )
     else:
         print(
             "WARNING: Initializing '" + parameter_to_initialize + "' as " + str(value)
