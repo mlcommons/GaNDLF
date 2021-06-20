@@ -292,6 +292,7 @@ def validate_network(
     if os.path.exists(file_to_write):
         # append to previously generated file
         file = open(file_to_write, "a")
+        outputToWrite = ""
     else:
         # if file was absent, write header information
         file = open(file_to_write, "w")
