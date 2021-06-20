@@ -39,7 +39,7 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
     if parameter_to_initialize in params:
         if evaluate:
             if isinstance(params[parameter_to_initialize], str):
-                if params[parameter_to_initialize].lower() != "none":
+                if params[parameter_to_initialize].lower() == "none":
                     params[parameter_to_initialize] = eval(params[parameter_to_initialize])
     else:
         print(
