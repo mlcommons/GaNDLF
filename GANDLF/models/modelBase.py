@@ -49,16 +49,16 @@ class ModelBase(nn.Module):
         self.norm_type = norm_type
         if self.norm_type.lower() == "batch":
             if self.n_dimensions == 2:
-                self.norm = nn.BatchNorm2d
+                self.Norm = nn.BatchNorm2d
             else:
-                self.norm = nn.BatchNorm3d
+                self.Norm = nn.BatchNorm3d
         elif self.norm_type.lower() == "instance":
-            if self.n_dimensions == 3:
-                self.norm = nn.InstanceNorm2d
+            if self.n_dimensions == 2:
+                self.Norm = nn.InstanceNorm2d
             else:
-                self.norm = nn.InstanceNorm3d
+                self.Norm = nn.InstanceNorm3d
         else:
-            self.norm = None
+            sys.exit("Currently, only batch or instance datasets are supported.")
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout

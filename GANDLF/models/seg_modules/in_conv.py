@@ -32,7 +32,7 @@ class in_conv(nn.Module):
         if act_kwargs is None:
             act_kwargs = {"negative_slope": 1e-2, "inplace": True}
         if dropout_kwargs is None:
-            dropout_kwargs = {"p": 0.5, "inplace": True}
+            dropout_kwargs = {"p": 0.5, "inplace": False}
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
@@ -51,12 +51,8 @@ class in_conv(nn.Module):
         self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
         self.conv2 = conv(output_channels, output_channels, **conv_kwargs)
 
-        self.in_0 = (
-            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
-        self.in_1 = (
-            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
+        self.in_0 = norm(output_channels, **norm_kwargs)
+        self.in_1 = norm(output_channels, **norm_kwargs)
 
         self.act = self.act(**act_kwargs)
 
@@ -81,7 +77,7 @@ class in_conv(nn.Module):
         x = self.act(self.in_0(x))
 
         x = self.conv1(x)
-        if self.dropout_p is not None:
+        if self.dropout is not None:
             x = self.dropout(x)
         x = self.act(self.in_1(x))
 
