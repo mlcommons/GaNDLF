@@ -16,15 +16,23 @@ class UpsamplingModule(nn.Module):
         nn.Module.__init__(self)
         if conv_kwargs is None:
             conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
-        self.scale_factor = scale_factor
+
         if conv == nn.Conv2d:
             mode = "bilinear"
         else:
             mode = "trilinear"
+
+        self.interp_kwargs = {
+            "size": None,
+            "scale_factor": scale_factor,
+            "mode": mode,
+            "align_corners": True,
+        }
         self.interpolate = Interpolate(
-            scale_factor=self.scale_factor, mode=mode, align_corners=True
+            interp_kwargs = self.interp_kwargs
         )
-        self.conv0 = Conv(input_channels, output_channels, **conv_kwargs)
+
+        self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 
     def forward(self, x):
         x = self.conv0(self.interpolate(x))

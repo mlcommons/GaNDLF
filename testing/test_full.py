@@ -29,7 +29,7 @@ all_schedulers = [
     "exp_range",
 ]
 all_clip_modes = ["norm", "value", "agc"]
-all_norm_type = ["batch", "instance", "none"]
+all_norm_type = ["batch", "instance"]
 
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
@@ -428,7 +428,7 @@ def test_clip_train_classification_rad_3d(device):
     print("passed")
 
 
-def test_normtype_train_classification_rad_3d(device):
+def test_normtype_train_segmentation_rad_3d(device):
     # read and initialize parameters for specific data dimension
     print("Starting 3D Rad segmentation tests")
     # read and parse csv
@@ -448,8 +448,10 @@ def test_normtype_train_classification_rad_3d(device):
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     # loop through selected models and train for single epoch
-    for norm in all_norm_type:
-        for model in ["resunet"]:
+    for norm in ["batch", "instance"]:
+        for model in ["resunet", "unet"]:
+            print("$"*80)
+            print("Executing : ", norm)
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
             shutil.rmtree(outputDir)  # overwrite previous results
