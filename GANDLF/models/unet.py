@@ -30,7 +30,14 @@ class unet(ModelBase):
         residualConnections=False,
     ):
         self.network_kwargs["res"] = False
-        super(unet, self).__init__()
+        super(unet, self).__init__(
+            n_dimensions,
+            n_channels,
+            n_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer,
+        )
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
@@ -249,9 +256,7 @@ class light_unet(ModelBase):
             norm=self.norm,
         )
         self.us_3 = UpsamplingModule(
-            input_channels=base_filters,
-            output_channels=base_filters,
-            conv=self.Conv,
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
         )
         self.de_3 = DecodingModule(
             input_channels=base_filters,
@@ -260,9 +265,7 @@ class light_unet(ModelBase):
             norm=self.norm,
         )
         self.us_2 = UpsamplingModule(
-            input_channels=base_filters,
-            output_channels=base_filters,
-            conv=self.Conv,
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
         )
         self.de_2 = DecodingModule(
             input_channels=base_filters,
@@ -271,9 +274,7 @@ class light_unet(ModelBase):
             norm=self.norm,
         )
         self.us_1 = UpsamplingModule(
-            input_channels=base_filters,
-            output_channels=base_filters,
-            conv=self.Conv,
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
         )
         self.de_1 = DecodingModule(
             input_channels=base_filters,
@@ -282,9 +283,7 @@ class light_unet(ModelBase):
             norm=self.norm,
         )
         self.us_0 = UpsamplingModule(
-            input_channels=base_filters,
-            output_channels=base_filters,
-            conv=self.Conv,
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
         )
         self.out = out_conv(
             input_channels=base_filters,
