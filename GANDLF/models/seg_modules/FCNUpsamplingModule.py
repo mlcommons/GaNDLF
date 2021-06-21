@@ -11,10 +11,6 @@ class FCNUpsamplingModule(nn.Module):
         output_channels,
         conv=nn.Conv2d,
         conv_kwargs=None,
-        norm=nn.BatchNorm2d,
-        norm_kwargs=None,
-        act=nn.LeakyReLU,
-        act_kwargs=None,
         scale_factor=2
     ):
         nn.Module.__init__(self)
