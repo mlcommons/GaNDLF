@@ -256,7 +256,9 @@ class light_unet(ModelBase):
             norm=self.Norm,
         )
         self.us_3 = UpsamplingModule(
-            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
         )
         self.de_3 = DecodingModule(
             input_channels=base_filters,
@@ -265,7 +267,9 @@ class light_unet(ModelBase):
             norm=self.Norm,
         )
         self.us_2 = UpsamplingModule(
-            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
         )
         self.de_2 = DecodingModule(
             input_channels=base_filters,
@@ -274,7 +278,9 @@ class light_unet(ModelBase):
             norm=self.Norm,
         )
         self.us_1 = UpsamplingModule(
-            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
         )
         self.de_1 = DecodingModule(
             input_channels=base_filters,
@@ -283,7 +289,9 @@ class light_unet(ModelBase):
             norm=self.Norm,
         )
         self.us_0 = UpsamplingModule(
-            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
         )
         self.out = out_conv(
             input_channels=base_filters,
