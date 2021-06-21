@@ -275,7 +275,7 @@ def validate_network(
     if scheduler is None:
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
-        current_output_dir = os.path.join(params["output_dir"], mode + "_output")
+        current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
 
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -305,6 +305,7 @@ def validate_network(
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
+        label_present = False
         # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
         if "label" in subject:
             if subject["label"] != ["NA"]:
@@ -696,15 +697,15 @@ def training_loop(
 
     # Setup a few loggers for tracking
     train_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "train_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_train.csv"),
         metrics=params["metrics"],
     )
     valid_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "valid_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=params["metrics"],
     )
     test_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "test_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
         metrics=params["metrics"],
     )
     train_logger.write_header(mode="train")
@@ -809,4 +810,48 @@ def training_loop(
         (end_time - start_time) / 60,
         " mins",
         flush=True,
+    )
+
+
+if __name__ == "__main__":
+
+    import argparse, pickle, pandas
+
+    torch.multiprocessing.freeze_support()
+    # parse the cli arguments here
+    parser = argparse.ArgumentParser(description="Training Loop of GANDLF")
+    parser.add_argument(
+        "-train_loader_pickle", type=str, help="Train loader pickle", required=True
+    )
+    parser.add_argument(
+        "-val_loader_pickle", type=str, help="Validation loader pickle", required=True
+    )
+    parser.add_argument(
+        "-testing_loader_pickle", type=str, help="Testing loader pickle", required=True
+    )
+    parser.add_argument(
+        "-parameter_pickle", type=str, help="Parameters pickle", required=True
+    )
+    parser.add_argument("-outputDir", type=str, help="Output directory", required=True)
+    parser.add_argument("-device", type=str, help="Device to train on", required=True)
+
+    args = parser.parse_args()
+
+    # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+    parameters = pickle.load(open(args.parameter_pickle, "rb"))
+    trainingDataFromPickle = pandas.read_pickle(args.train_loader_pickle)
+    validationDataFromPickle = pandas.read_pickle(args.val_loader_pickle)
+    testingData_str = args.testing_loader_pickle
+    if testingData_str == "None":
+        testingDataFromPickle = None
+    else:
+        testingDataFromPickle = pandas.read_pickle(testingData_str)
+
+    training_loop(
+        training_data=trainingDataFromPickle,
+        validation_data=validationDataFromPickle,
+        output_dir=args.outputDir,
+        device=args.device,
+        params=parameters,
+        testing_data=testingDataFromPickle,
     )
