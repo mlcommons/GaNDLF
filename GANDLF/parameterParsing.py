@@ -21,6 +21,7 @@ def get_model(
     num_channels,
     num_classes,
     base_filters,
+    norm_type,
     final_convolution_layer,
     patch_size,
     batch_size,
@@ -49,6 +50,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
             residualConnections=True,
         )
@@ -60,6 +62,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
         divisibilityCheck_baseFilter = False
@@ -70,6 +73,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
             residualConnections=True,
         )
@@ -81,6 +85,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
         divisibilityCheck_baseFilter = False
@@ -91,6 +96,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
         # not enough information to perform checking for this, yet
@@ -103,6 +109,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
 
@@ -112,6 +119,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
         amp = False  # this is not yet implemented for msdnet

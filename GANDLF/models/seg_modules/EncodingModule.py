@@ -8,67 +8,44 @@ class EncodingModule(nn.Module):
         self,
         input_channels,
         output_channels,
-        Conv,
-        Dropout,
-        InstanceNorm,
-        kernel_size=3,
-        dropout_p=0.3,
-        leakiness=1e-2,
-        conv_bias=True,
-        inst_norm_affine=True,
-        res=False,
-        lrelu_inplace=True,
+        conv=nn.Conv2d,
+        conv_kwargs=None,
+        norm=nn.BatchNorm2d,
+        norm_kwargs=None,
+        act=nn.LeakyReLU,
+        act_kwargs=None,
+        dropout=nn.Dropout2d,
+        dropout_kwargs=None,
+        network_kwargs=None,
     ):
-        """[The Encoding convolution module to learn the information and use later]
-
-        [This function will create the Learning convolutions]
-
-        Arguments:
-            input_channels {[int]} -- [the input number of channels, in our case
-                                       the number of channels from downsample]
-            output_channels {[int]} -- [the output number of channels, will det-
-                                        -ermine the upcoming channels]
-
-        Keyword Arguments:
-            kernel_size {number} -- [size of filter] (default: {3})
-            dropout_p {number} -- [dropout probability] (default: {0.3})
-            leakiness {number} -- [the negative leakiness] (default: {1e-2})
-            conv_bias {bool} -- [to use the bias in filters] (default: {True})
-            inst_norm_affine {bool} -- [affine use in norm] (default: {True})
-            res {bool} -- [to use residual connections] (default: {False})
-            lrelu_inplace {bool} -- [To update conv outputs with lrelu outputs]
-                                    (default: {True})
-        """
         nn.Module.__init__(self)
-        self.res = res
-        self.dropout_p = dropout_p
-        self.conv_bias = conv_bias
-        self.leakiness = leakiness
-        self.inst_norm_affine = inst_norm_affine
-        self.lrelu_inplace = lrelu_inplace
-        self.dropout = nn.Dropout3d(dropout_p)
-        self.in_0 = InstanceNorm(
-            output_channels, affine=self.inst_norm_affine, track_running_stats=True
-        )
-        self.in_1 = InstanceNorm(
-            output_channels, affine=self.inst_norm_affine, track_running_stats=True
-        )
-        self.conv0 = Conv(
-            output_channels,
-            output_channels,
-            kernel_size=3,
-            stride=1,
-            padding=(kernel_size - 1) // 2,
-            bias=self.conv_bias,
-        )
-        self.conv1 = Conv(
-            output_channels,
-            output_channels,
-            kernel_size=3,
-            stride=1,
-            padding=(kernel_size - 1) // 2,
-            bias=self.conv_bias,
-        )
+        if conv_kwargs is None:
+            conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
+        if norm_kwargs is None:
+            norm_kwargs = {
+                "eps": 1e-5,
+                "affine": True,
+                "momentum": 0.1,
+                "track_running_stats": True,
+            }
+        if act_kwargs is None:
+            act_kwargs = {"negative_slope": 1e-2, "inplace": True}
+        if dropout_kwargs is None:
+            dropout_kwargs = {"p": 0.5, "inplace": False}
+        if network_kwargs is None:
+            network_kwargs = {"res": False}
+
+        self.res = network_kwargs["res"]
+
+        self.conv0 = conv(output_channels, output_channels, **conv_kwargs)
+        self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
+
+        self.in_0 = norm(output_channels, **norm_kwargs)
+        self.in_1 = norm(output_channels, **norm_kwargs)
+
+        self.act = act(**act_kwargs)
+
+        self.dropout = dropout(**dropout_kwargs)
 
     def forward(self, x):
         """The forward function for initial convolution
@@ -85,17 +62,15 @@ class EncodingModule(nn.Module):
         """
         if self.res == True:
             skip = x
-        x = F.leaky_relu(
-            self.in_0(x), negative_slope=self.leakiness, inplace=self.lrelu_inplace
-        )
+        x = self.act(self.in_0(x))
+
         x = self.conv0(x)
-        if self.dropout_p is not None and self.dropout_p > 0:
+        if self.dropout is not None:
             x = self.dropout(x)
-        x = F.leaky_relu(
-            self.in_1(x), negative_slope=self.leakiness, inplace=self.lrelu_inplace
-        )
+        x = self.act(self.in_1(x))
+
         x = self.conv1(x)
         if self.res == True:
             x = x + skip
-        # print(x.shape)
+
         return x

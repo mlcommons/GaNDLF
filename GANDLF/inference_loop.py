@@ -36,6 +36,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         num_channels=parameters["model"]["num_channels"],
         num_classes=parameters["model"]["num_classes"],
         base_filters=parameters["model"]["base_filters"],
+        norm_type=parameters["model"]["norm_type"],
         final_convolution_layer=parameters["model"]["final_layer"],
         patch_size=parameters["patch_size"],
         batch_size=1,
