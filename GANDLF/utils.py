@@ -79,7 +79,7 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
 
     for i in range(len(output_size)):
         outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
-    
+
     return resample_image(input_image, outputSpacing, interpolator=interpolator)
 
 
