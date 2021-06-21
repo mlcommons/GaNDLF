@@ -243,17 +243,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
                 )
 
             else:
-                headersPickle = os.path.join(
-                    currentValOutputFolder, "parameters_headers.pkl"
-                )
-                if not os.path.exists(headersPickle):
-                    with open(headersPickle, "wb") as handle:
-                        pickle.dump(
-                            parameters["headers"],
-                            handle,
-                            protocol=pickle.HIGHEST_PROTOCOL,
-                        )
-
                 # call qsub here
                 parallel_compute_command_actual = parameters[
                     "parallel_compute_command"
@@ -272,8 +261,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
                     + currentValidationDataPickle
                     + " -parameter_pickle "
                     + currentModelConfigPickle
-                    + " -headers_pickle "
-                    + headersPickle
                     + " -device "
                     + str(device)
                     + " -outputDir "
@@ -312,7 +299,7 @@ def TrainingManager_split(
     device = self-explanatory
     reset_prev = whether the previous run in the same output directory is used or not
     """
-    currentModelConfigPickle = os.path.join(outputDir, "parameters_full.pkl")
+    currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
     if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
