@@ -50,6 +50,9 @@ class VGG(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Dropout(),
+            self.avg_pool,
+            nn.ReLU(True),
+            nn.Dropout(),
             nn.Linear(
                 512, n_outputClasses
             ),  # number of input features should be changed later, but works for all vgg right now
@@ -67,7 +70,6 @@ class VGG(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = self.avg_pool(x)
         return self.classifier(x)
 
 
