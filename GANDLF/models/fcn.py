@@ -25,10 +25,21 @@ class fcn(ModelBase):
     """
 
     def __init__(
-        self, n_dimensions, n_channels, n_classes, base_filters, norm_type, final_convolution_layer
+        self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
     ):
         super(fcn, self).__init__(
-            n_dimensions, n_channels, n_classes, base_filters, norm_type, final_convolution_layer
+            n_dimensions,
+            n_channels,
+            n_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer,
         )
         self.ins = in_conv(
             input_channels=self.n_channels,
@@ -117,7 +128,7 @@ class fcn(ModelBase):
             input_channels=base_filters,
             output_channels=1,
             conv=self.Conv,
-            scale_factor=1
+            scale_factor=1,
         )
         self.conv_0 = self.Conv(
             in_channels=5,
