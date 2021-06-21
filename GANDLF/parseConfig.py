@@ -19,6 +19,8 @@ parameter_defaults = {
     "batch_size": 1,  # default batch size of training
     "amp": False,  # automatic mixed precision
     "learning_rate": 0.001,  # default learning rate
+    "clip_grad": None,  # clip_gradient value
+    "clip_mode": None,  # default clip mode
 }
 
 ## dictionary to define string defaults for appropriate options
@@ -37,7 +39,10 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
     if parameter_to_initialize in params:
         if evaluate:
             if isinstance(params[parameter_to_initialize], str):
-                params[parameter_to_initialize] = eval(params[parameter_to_initialize])
+                if params[parameter_to_initialize].lower() == "none":
+                    params[parameter_to_initialize] = eval(
+                        params[parameter_to_initialize]
+                    )
     else:
         print(
             "WARNING: Initializing '" + parameter_to_initialize + "' as " + str(value)
@@ -408,6 +413,10 @@ def parseConfig(config_file_path, version_check=True):
             if key in params["model"]:
                 params["model"]["num_channels"] = params["model"][key]
                 break
+
+        if not ("norm_type" in params["model"]):
+            print("Using default 'norm_type' in 'model': batch")
+            params["model"]["norm_type"] = "batch"
 
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")

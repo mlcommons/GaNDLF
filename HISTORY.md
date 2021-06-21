@@ -3,6 +3,8 @@
 - Refactoring the training and inference code
 - Added offline mechanism to generate padded images to improve training RAM requirements
 - Half-time epoch loss and metric output added for increased information
+- Gradient clipping added
+- Per-epoch details in validation output added
 
 ## 0.0.8
 

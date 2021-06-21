@@ -5,7 +5,7 @@ Created on Sat Mar  6 21:45:06 2021
 
 @author: siddhesh
 """
-import os, math
+import os, math, pathlib
 import torch
 import time
 import torchio
@@ -16,7 +16,6 @@ import SimpleITK as sitk
 import numpy as np
 from medcam import medcam
 from GANDLF.logger import Logger
-from GANDLF.losses import one_hot
 from GANDLF.parameterParsing import (
     get_model,
     get_optimizer,
@@ -32,8 +31,8 @@ from GANDLF.utils import (
     get_class_imbalance_weights,
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters
-from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad
+from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
 
@@ -128,6 +127,9 @@ def train_network(model, train_dataloader, optimizer, params):
         Train metrics for the current epoch
 
     """
+    print("*" * 20)
+    print("Starting Training : ")
+    print("*" * 20)
     # Initialize a few things
     total_epoch_train_loss = 0
     total_epoch_train_metric = {}
@@ -140,8 +142,6 @@ def train_network(model, train_dataloader, optimizer, params):
     if params["model"]["amp"]:
         print("Using Automatic mixed precision", flush=True)
         scaler = GradScaler()
-
-    # Fetch the optimizer
 
     # Set the model to train
     model.train()
@@ -177,8 +177,8 @@ def train_network(model, train_dataloader, optimizer, params):
                         optimizer=optimizer,
                         clip_grad=params["clip_grad"],
                         clip_mode=params["clip_mode"],
-                        parameters=model_parameters(
-                            model, exclude_head="agc" in params["clip_mode"]
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
                         ),
                         create_graph=second_order,
                     )
@@ -187,9 +187,9 @@ def train_network(model, train_dataloader, optimizer, params):
             if not math.isnan(loss):
                 loss.backward(create_graph=second_order)
                 if params["clip_grad"] is not None:
-                    dispatch_clip_grad(
-                        parameters=model_parameters(
-                            model, exclude_head="agc" in params["clip_mode"]
+                    dispatch_clip_grad_(
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
                         ),
                         value=params["clip_grad"],
                         mode=params["clip_mode"],
@@ -231,7 +231,9 @@ def train_network(model, train_dataloader, optimizer, params):
     return average_epoch_train_loss, average_epoch_train_metric
 
 
-def validate_network(model, valid_dataloader, scheduler, params, mode="validation"):
+def validate_network(
+    model, valid_dataloader, scheduler, params, epoch=0, mode="validation"
+):
     """
     Function to validate a network for a single epoch
 
@@ -273,7 +275,9 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     if scheduler is None:
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
-        current_output_dir = os.path.join(params["output_dir"], mode + "_output")
+        current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
+
+    pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set the model to valid
     model.eval()
@@ -284,6 +288,16 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         model.enable_medcam()
         params["medcam_enabled"] = True
 
+    file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
+    if os.path.exists(file_to_write):
+        # append to previously generated file
+        file = open(file_to_write, "a")
+        outputToWrite = ""
+    else:
+        # if file was absent, write header information
+        file = open(file_to_write, "w")
+        outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
+
     for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
@@ -291,6 +305,7 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
+        label_present = False
         # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
         if "label" in subject:
             if subject["label"] != ["NA"]:
@@ -308,7 +323,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
                 label_ground_truth = torch.cat(
                     [subject[key] for key in params["value_keys"]], dim=0
                 )
-                outputToWrite = "SubjectID,PredictedValue\n"  # used to write output
 
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.Image(
@@ -342,7 +356,9 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
             outputToWrite += (
-                subject["subject_id"][0]
+                str(epoch)
+                + ","
+                + subject["subject_id"][0]
                 + ","
                 + str(pred_output.cpu().data.item())
                 + "\n"
@@ -484,7 +500,12 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
                     patch_loader
                 )  # final regression output
                 outputToWrite += (
-                    subject["subject_id"][0] + "," + str(output_prediction) + "\n"
+                    str(epoch)
+                    + ","
+                    + subject["subject_id"][0]
+                    + ","
+                    + str(output_prediction)
+                    + "\n"
                 )
 
             # get the final attention map and save it
@@ -554,7 +575,6 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
     # write the predictions, if appropriate
     if params["save_output"]:
         if "value_keys" in params:
-            file = open(os.path.join(current_output_dir, "output_predictions.csv"), "w")
             file.write(outputToWrite)
             file.close()
 
@@ -562,13 +582,16 @@ def validate_network(model, valid_dataloader, scheduler, params, mode="validatio
 
 
 def training_loop(
-    training_data, validation_data, device, params, output_dir, testing_data=None,
+    training_data,
+    validation_data,
+    device,
+    params,
+    output_dir,
+    testing_data=None,
 ):
 
     # Some autodetermined factors
     epochs = params["num_epochs"]
-    loss = params["loss_function"]
-    metrics = params["metrics"]
     params["device"] = device
     params["output_dir"] = output_dir
 
@@ -582,6 +605,7 @@ def training_loop(
         num_channels=params["model"]["num_channels"],
         num_classes=params["model"]["num_classes"],
         base_filters=params["model"]["base_filters"],
+        norm_type=params["model"]["norm_type"],
         final_convolution_layer=params["model"]["final_layer"],
         patch_size=params["patch_size"],
         batch_size=params["batch_size"],
@@ -631,10 +655,15 @@ def training_loop(
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
-            training_data, parameters=params, train=False,
+            training_data,
+            parameters=params,
+            train=False,
         )
         penalty_loader = DataLoader(
-            penalty_data, batch_size=1, shuffle=True, pin_memory=False,
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
         )
 
         params["weights"] = get_class_imbalance_weights(penalty_loader, params)
@@ -668,15 +697,15 @@ def training_loop(
 
     # Setup a few loggers for tracking
     train_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "train_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_train.csv"),
         metrics=params["metrics"],
     )
     valid_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "valid_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=params["metrics"],
     )
     test_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "test_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
         metrics=params["metrics"],
     )
     train_logger.write_header(mode="train")
@@ -722,7 +751,7 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, scheduler, params, mode="validation"
+            model, val_dataloader, scheduler, params, epoch, mode="validation"
         )
 
         patience += 1
@@ -734,7 +763,7 @@ def training_loop(
 
         if testingDataDefined:
             epoch_test_loss, epoch_test_metric = validate_network(
-                model, test_dataloader, scheduler, params, mode="testing"
+                model, test_dataloader, scheduler, params, epoch, mode="testing"
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
@@ -781,4 +810,48 @@ def training_loop(
         (end_time - start_time) / 60,
         " mins",
         flush=True,
+    )
+
+
+if __name__ == "__main__":
+
+    import argparse, pickle, pandas
+
+    torch.multiprocessing.freeze_support()
+    # parse the cli arguments here
+    parser = argparse.ArgumentParser(description="Training Loop of GANDLF")
+    parser.add_argument(
+        "-train_loader_pickle", type=str, help="Train loader pickle", required=True
+    )
+    parser.add_argument(
+        "-val_loader_pickle", type=str, help="Validation loader pickle", required=True
+    )
+    parser.add_argument(
+        "-testing_loader_pickle", type=str, help="Testing loader pickle", required=True
+    )
+    parser.add_argument(
+        "-parameter_pickle", type=str, help="Parameters pickle", required=True
+    )
+    parser.add_argument("-outputDir", type=str, help="Output directory", required=True)
+    parser.add_argument("-device", type=str, help="Device to train on", required=True)
+
+    args = parser.parse_args()
+
+    # # write parameters to pickle - this should not change for the different folds, so keeping is independent
+    parameters = pickle.load(open(args.parameter_pickle, "rb"))
+    trainingDataFromPickle = pandas.read_pickle(args.train_loader_pickle)
+    validationDataFromPickle = pandas.read_pickle(args.val_loader_pickle)
+    testingData_str = args.testing_loader_pickle
+    if testingData_str == "None":
+        testingDataFromPickle = None
+    else:
+        testingDataFromPickle = pandas.read_pickle(testingData_str)
+
+    training_loop(
+        training_data=trainingDataFromPickle,
+        validation_data=validationDataFromPickle,
+        output_dir=args.outputDir,
+        device=args.device,
+        params=parameters,
+        testing_data=testingDataFromPickle,
     )

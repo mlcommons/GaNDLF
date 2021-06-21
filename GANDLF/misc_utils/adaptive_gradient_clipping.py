@@ -18,20 +18,20 @@ def unitwise_norm(x, norm_type=2.0):
         return x.norm(norm_type, dim=tuple(range(1, x.ndim)), keepdim=True)
 
 
-def adaptive_gradient_clip(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.0):
+def adaptive_gradient_clip_(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.0):
     """
-        Adaptive Gradient Clipping
-        Original implementation of Adaptive Gradient Clipping derived from
-        An impl of AGC, as per (https://arxiv.org/abs/2102.06171):
+    Adaptive Gradient Clipping
+    Original implementation of Adaptive Gradient Clipping derived from
+    An impl of AGC, as per (https://arxiv.org/abs/2102.06171):
 
 
-        Paper Name : High-Performance Large-Scale Image Recognition Without Normalization
-        Authors : Andrew Brock and Soham De and Samuel L. Smith and Karen Simonyan
-        Published : arXiv preprint arXiv: 2021
+    Paper Name : High-Performance Large-Scale Image Recognition Without Normalization
+    Authors : Andrew Brock and Soham De and Samuel L. Smith and Karen Simonyan
+    Published : arXiv preprint arXiv: 2021
 
-        Code references:
-          * Official JAX impl (paper authors): https://github.com/deepmind/deepmind-research/tree/master/nfnets
-          * Phil Wang's PyTorch gist: https://gist.github.com/lucidrains/0d6560077edac419ab5d3aa29e674d5c
+    Code references:
+      * Official JAX impl (paper authors): https://github.com/deepmind/deepmind-research/tree/master/nfnets
+      * Phil Wang's PyTorch gist: https://gist.github.com/lucidrains/0d6560077edac419ab5d3aa29e674d5c
     """
     # If parameter is not a list, make it one so that you play with it in for loop
     if isinstance(parameters, torch.Tensor):

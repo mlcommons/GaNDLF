@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .Interpolate import Interpolate
+from GANDLF.models.seg_modules.Interpolate import Interpolate
 
 
 class FCNUpsamplingModule(nn.Module):
@@ -9,51 +9,27 @@ class FCNUpsamplingModule(nn.Module):
         self,
         input_channels,
         output_channels,
-        Conv,
-        leakiness=1e-2,
-        lrelu_inplace=True,
-        kernel_size=3,
+        conv=nn.Conv2d,
+        conv_kwargs=None,
         scale_factor=2,
-        conv_bias=True,
-        inst_norm_affine=True,
     ):
-        """[summary]
-
-        [description]
-
-        Arguments:
-            input__channels {[type]} -- [description]
-            output_channels {[type]} -- [description]
-
-        Keyword Arguments:
-            leakiness {number} -- [description] (default: {1e-2})
-            lrelu_inplace {bool} -- [description] (default: {True})
-            kernel_size {number} -- [description] (default: {3})
-            scale_factor {number} -- [description] (default: {2})
-            conv_bias {bool} -- [description] (default: {True})
-            inst_norm_affine {bool} -- [description] (default: {True})
-        """
         nn.Module.__init__(self)
-        self.lrelu_inplace = lrelu_inplace
-        self.inst_norm_affine = inst_norm_affine
-        self.conv_bias = conv_bias
-        self.leakiness = leakiness
-        self.scale_factor = scale_factor
-        if Conv == nn.Conv3d:
-            mode = "trilinear"
-        else:
+        if conv_kwargs is None:
+            conv_kwargs = {"kernel_size": 1, "stride": 1, "padding": 0, "bias": True}
+
+        if conv == nn.Conv2d:
             mode = "bilinear"
-        self.interpolate = Interpolate(
-            scale_factor=2 ** (self.scale_factor - 1), mode=mode, align_corners=True
-        )
-        self.conv0 = Conv(
-            input_channels,
-            output_channels,
-            kernel_size=1,
-            stride=1,
-            padding=0,
-            bias=self.conv_bias,
-        )
+        else:
+            mode = "trilinear"
+        self.interp_kwargs = {
+            "size": None,
+            "scale_factor": 2 ** (scale_factor - 1),
+            "mode": mode,
+            "align_corners": True,
+        }
+        self.interpolate = Interpolate(interp_kwargs=self.interp_kwargs)
+
+        self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 
     def forward(self, x):
         """[summary]
@@ -62,7 +38,5 @@ class FCNUpsamplingModule(nn.Module):
 
         Extends:
         """
-        # print("Pre interpolate and conv:", x.shape)
         x = self.interpolate(self.conv0(x))
-        # print("Post interpolate and conv:", x.shape)
         return x
