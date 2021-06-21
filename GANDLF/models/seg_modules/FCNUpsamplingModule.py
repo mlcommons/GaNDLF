@@ -15,7 +15,7 @@ class FCNUpsamplingModule(nn.Module):
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:
-            conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
+            conv_kwargs = {"kernel_size": 1, "stride": 1, "padding": 0, "bias": True}
 
         if conv == nn.Conv2d:
             mode = "bilinear"
@@ -23,7 +23,7 @@ class FCNUpsamplingModule(nn.Module):
             mode = "trilinear"
         self.interp_kwargs = {
             "size": None,
-            "scale_factor": scale_factor,
+            "scale_factor": 2 ** (scale_factor - 1),
             "mode": mode,
             "align_corners": True,
         }

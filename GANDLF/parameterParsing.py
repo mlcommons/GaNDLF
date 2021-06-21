@@ -109,6 +109,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
 
@@ -118,6 +119,7 @@ def get_model(
             num_channels,
             num_classes,
             base_filters,
+            norm_type,
             final_convolution_layer=final_convolution_layer,
         )
         amp = False  # this is not yet implemented for msdnet
