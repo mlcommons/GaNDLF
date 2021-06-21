@@ -40,11 +40,11 @@ class Logger:
             elif mode.lower() == "test":
                 row += "epoch_no,test_loss,"
                 for metric in self.metrics:
-                    row += "test_" + metric + ","
+                    row += "testing_" + metric + ","
             else:
                 row += "epoch_no,valid_loss,"
                 for metric in self.metrics:
-                    row += "valid_" + metric + ","
+                    row += "validation_" + metric + ","
             row = row[:-1]
             row += "\n"
             self.csv.write(row)
