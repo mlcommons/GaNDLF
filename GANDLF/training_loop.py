@@ -309,7 +309,7 @@ def validate_network(
         outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,\n"  # used to write output
     
     mem = psutil.virtual_memory()
-    outputToWrite_mem += str(epoch) + "," + mem[0] + "," + mem[1] + "," + mem[2] + "," + mem[3] + "\n"
+    outputToWrite_mem += str(epoch) + "," + str(mem[0]) + "," + str(mem[1]) + "," + str(mem[2]) + "," + str(mem[3]) + "\n"
     file_mem.write(outputToWrite_mem)
     file_mem.close()
 
