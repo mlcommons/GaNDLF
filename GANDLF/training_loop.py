@@ -611,8 +611,6 @@ def training_loop(
         amp=params["model"]["amp"],
     )
 
-    print(model)
-
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(training_data, params, train=True)
 
