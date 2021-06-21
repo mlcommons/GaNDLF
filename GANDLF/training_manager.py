@@ -144,9 +144,9 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             currentTestingDataPickle = "None"
         else:
             currentTrainingAndValidationDataPickle = os.path.join(
-                currentOutputFolder, "trainAndVal.pkl"
+                currentOutputFolder, "data_trainAndVal.pkl"
             )
-            currentTestingDataPickle = os.path.join(currentOutputFolder, "testing.pkl")
+            currentTestingDataPickle = os.path.join(currentOutputFolder, "data_testing.pkl")
 
             if (not os.path.exists(currentTestingDataPickle)) or reset_prev:
                 testingData.to_pickle(currentTestingDataPickle)
@@ -214,10 +214,10 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             ## pickle/unpickle data
             # pickle the data
             currentTrainingDataPickle = os.path.join(
-                currentValOutputFolder, "train.pkl"
+                currentValOutputFolder, "data_train.pkl"
             )
             currentValidationDataPickle = os.path.join(
-                currentValOutputFolder, "validation.pkl"
+                currentValOutputFolder, "data_validation.pkl"
             )
             if (not os.path.exists(currentTrainingDataPickle)) or reset_prev:
                 trainingData.to_pickle(currentTrainingDataPickle)
