@@ -605,6 +605,7 @@ def training_loop(
         num_channels=params["model"]["num_channels"],
         num_classes=params["model"]["num_classes"],
         base_filters=params["model"]["base_filters"],
+        norm_type=params["model"]["norm_type"],
         final_convolution_layer=params["model"]["final_layer"],
         patch_size=params["patch_size"],
         batch_size=params["batch_size"],

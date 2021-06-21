@@ -25,10 +25,21 @@ class uinc(ModelBase):
     """
 
     def __init__(
-        self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+        self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
     ):
         super(uinc, self).__init__(
-            n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+            n_dimensions,
+            n_channels,
+            n_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer,
         )
         self.conv0_1x1 = IncConv(
             n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm

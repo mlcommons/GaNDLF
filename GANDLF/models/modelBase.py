@@ -30,7 +30,13 @@ class ModelBase(nn.Module):
     """
 
     def __init__(
-        self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+        self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
     ):
         """
         This defines all defaults that the model base uses
@@ -40,6 +46,19 @@ class ModelBase(nn.Module):
         self.n_classes = n_classes
         self.base_filters = base_filters
         self.n_dimensions = n_dimensions
+        self.norm_type = norm_type
+        if self.norm_type.lower() == "batch":
+            if self.n_dimensions == 2:
+                self.Norm = nn.BatchNorm2d
+            else:
+                self.Norm = nn.BatchNorm3d
+        elif self.norm_type.lower() == "instance":
+            if self.n_dimensions == 2:
+                self.Norm = nn.InstanceNorm2d
+            else:
+                self.Norm = nn.InstanceNorm3d
+        else:
+            sys.exit("Currently, only batch or instance datasets are supported.")
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
@@ -54,6 +73,7 @@ class ModelBase(nn.Module):
             self.AvgPool = nn.AvgPool2d
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool2d
+
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
             self.ConvTranspose = nn.ConvTranspose3d
