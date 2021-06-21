@@ -30,12 +30,18 @@ class MSDNet(ModelBase):
         n_channels,
         n_classes,
         base_filters,
+        norm_type,
         final_convolution_layer,
         num_layers=4,
     ):
 
         super(MSDNet, self).__init__(
-            n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+            n_dimensions,
+            n_channels,
+            n_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer,
         )
 
         self.layer_list = add_conv_block(self.Conv, self.BatchNorm, in_ch=n_channels)
