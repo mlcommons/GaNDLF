@@ -28,9 +28,7 @@ class UpsamplingModule(nn.Module):
             "mode": mode,
             "align_corners": True,
         }
-        self.interpolate = Interpolate(
-            interp_kwargs = self.interp_kwargs
-        )
+        self.interpolate = Interpolate(interp_kwargs=self.interp_kwargs)
 
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 

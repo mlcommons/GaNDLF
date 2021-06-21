@@ -11,7 +11,7 @@ class FCNUpsamplingModule(nn.Module):
         output_channels,
         conv=nn.Conv2d,
         conv_kwargs=None,
-        scale_factor=2
+        scale_factor=2,
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:
@@ -27,9 +27,7 @@ class FCNUpsamplingModule(nn.Module):
             "mode": mode,
             "align_corners": True,
         }
-        self.interpolate = Interpolate(
-            interp_kwargs = self.interp_kwargs
-        )
+        self.interpolate = Interpolate(interp_kwargs=self.interp_kwargs)
 
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 
