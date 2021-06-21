@@ -144,9 +144,9 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             currentTestingDataPickle = "None"
         else:
             currentTrainingAndValidationDataPickle = os.path.join(
-                currentOutputFolder, "trainAndVal.pkl"
+                currentOutputFolder, "data_trainAndVal.pkl"
             )
-            currentTestingDataPickle = os.path.join(currentOutputFolder, "testing.pkl")
+            currentTestingDataPickle = os.path.join(currentOutputFolder, "data_testing.pkl")
 
             if (not os.path.exists(currentTestingDataPickle)) or reset_prev:
                 testingData.to_pickle(currentTestingDataPickle)
@@ -214,10 +214,10 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             ## pickle/unpickle data
             # pickle the data
             currentTrainingDataPickle = os.path.join(
-                currentValOutputFolder, "train.pkl"
+                currentValOutputFolder, "data_train.pkl"
             )
             currentValidationDataPickle = os.path.join(
-                currentValOutputFolder, "validation.pkl"
+                currentValOutputFolder, "data_validation.pkl"
             )
             if (not os.path.exists(currentTrainingDataPickle)) or reset_prev:
                 trainingData.to_pickle(currentTrainingDataPickle)
@@ -241,7 +241,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
                 )
 
             else:
-                headersPickle = os.path.join(currentValOutputFolder, "headers.pkl")
+                headersPickle = os.path.join(currentValOutputFolder, "parameters_headers.pkl")
                 if not os.path.exists(headersPickle):
                     with open(headersPickle, "wb") as handle:
                         pickle.dump(
@@ -308,7 +308,7 @@ def TrainingManager_split(
     device = self-explanatory
     reset_prev = whether the previous run in the same output directory is used or not
     """
-    currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
+    currentModelConfigPickle = os.path.join(outputDir, "parameters_full.pkl")
     if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
