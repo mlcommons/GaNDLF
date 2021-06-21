@@ -450,8 +450,6 @@ def test_normtype_train_segmentation_rad_3d(device):
     # loop through selected models and train for single epoch
     for norm in ["batch", "instance"]:
         for model in ["resunet", "unet"]:
-            print("$"*80)
-            print("Executing : ", norm)
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
             shutil.rmtree(outputDir)  # overwrite previous results
