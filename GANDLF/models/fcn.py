@@ -25,79 +25,111 @@ class fcn(ModelBase):
     """
 
     def __init__(
-        self, n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+        self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
     ):
         super(fcn, self).__init__(
-            n_dimensions, n_channels, n_classes, base_filters, final_convolution_layer
+            n_dimensions,
+            n_channels,
+            n_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer,
         )
         self.ins = in_conv(
-            n_channels, base_filters, self.Conv, self.Dropout, self.InstanceNorm
+            input_channels=self.n_channels,
+            output_channels=self.base_filters,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
         )
         self.ds_0 = DownsamplingModule(
-            base_filters, base_filters * 2, self.Conv, self.Dropout, self.InstanceNorm
+            input_channels=self.base_filters,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            norm=self.Norm,
         )
         self.en_1 = EncodingModule(
-            base_filters * 2,
-            base_filters * 2,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
         )
         self.ds_1 = DownsamplingModule(
-            base_filters * 2,
-            base_filters * 4,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters * 4,
+            conv=self.Conv,
+            norm=self.Norm,
         )
         self.en_2 = EncodingModule(
-            base_filters * 4,
-            base_filters * 4,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 4,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
         )
         self.ds_2 = DownsamplingModule(
-            base_filters * 4,
-            base_filters * 8,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 8,
+            conv=self.Conv,
+            norm=self.Norm,
         )
         self.en_3 = EncodingModule(
-            base_filters * 8,
-            base_filters * 8,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 8,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
         )
         self.ds_3 = DownsamplingModule(
-            base_filters * 8,
-            base_filters * 16,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=base_filters * 8,
+            output_channels=base_filters * 16,
+            conv=self.Conv,
+            norm=self.Norm,
         )
         self.en_4 = EncodingModule(
-            base_filters * 16,
-            base_filters * 16,
-            self.Conv,
-            self.Dropout,
-            self.InstanceNorm,
+            input_channels=base_filters * 16,
+            output_channels=base_filters * 16,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
         )
         self.us_4 = FCNUpsamplingModule(
-            base_filters * 16, 1, scale_factor=5, Conv=self.Conv
+            input_channels=base_filters * 16,
+            output_channels=1,
+            conv=self.Conv,
+            scale_factor=5,
         )
         self.us_3 = FCNUpsamplingModule(
-            base_filters * 8, 1, scale_factor=4, Conv=self.Conv
+            input_channels=base_filters * 8,
+            output_channels=1,
+            conv=self.Conv,
+            scale_factor=4,
         )
         self.us_2 = FCNUpsamplingModule(
-            base_filters * 4, 1, scale_factor=3, Conv=self.Conv
+            input_channels=base_filters * 4,
+            output_channels=1,
+            conv=self.Conv,
+            scale_factor=3,
         )
         self.us_1 = FCNUpsamplingModule(
-            base_filters * 2, 1, scale_factor=2, Conv=self.Conv
+            input_channels=base_filters * 2,
+            output_channels=1,
+            conv=self.Conv,
+            scale_factor=2,
         )
-        self.us_0 = FCNUpsamplingModule(base_filters, 1, scale_factor=1, Conv=self.Conv)
+        self.us_0 = FCNUpsamplingModule(
+            input_channels=base_filters,
+            output_channels=1,
+            conv=self.Conv,
+            scale_factor=1,
+        )
         self.conv_0 = self.Conv(
             in_channels=5,
             out_channels=self.n_classes,

@@ -32,25 +32,23 @@ class out_conv(nn.Module):
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
-        self.conv0 = Conv(input_channels, input_channels // 2, **conv_kwargs)
-        self.conv1 = Conv(input_channels // 2, input_channels // 2, **conv_kwargs)
-        self.conv2 = Conv(input_channels // 2, input_channels // 2, **conv_kwargs)
-        self.conv3 = Conv(input_channels // 2, output_channels, **conv_kwargs)
+        self.res = network_kwargs["res"]
+
+        self.conv0 = conv(input_channels, input_channels // 2, **conv_kwargs)
+        self.conv1 = conv(input_channels // 2, input_channels // 2, **conv_kwargs)
+        self.conv2 = conv(input_channels // 2, input_channels // 2, **conv_kwargs)
+        self.conv3 = conv(input_channels // 2, output_channels, **conv_kwargs)
 
         self.in_0 = (
             norm(input_channels, **norm_kwargs) if norm is not None else nn.Identity()
         )
-        self.in_1 = (
-            norm(input_channels//2, **norm_kwargs) if norm is not None else nn.Identity()
-        )
-        self.in_2 = (
-            norm(input_channels//2, **norm_kwargs) if norm is not None else nn.Identity()
-        )
-        self.in_3 = (
-            norm(input_channels//2, **norm_kwargs) if norm is not None else nn.Identity()
-        )
+        self.in_1 = norm(input_channels // 2, **norm_kwargs)
+        self.in_2 = norm(input_channels // 2, **norm_kwargs)
+        self.in_3 = norm(input_channels // 2, **norm_kwargs)
 
-        self.act = self.act(**act_kwargs)
+        self.act = act(**act_kwargs)
+
+        self.final_convolution_layer = final_convolution_layer
 
     def forward(self, x1, x2):
         x = torch.cat([x1, x2], dim=1)
