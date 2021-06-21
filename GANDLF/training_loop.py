@@ -298,20 +298,21 @@ def validate_network(
         file = open(file_to_write, "w")
         outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
 
-    file_to_write_mem = os.path.join(current_output_dir, "memory_usage.csv")
-    if os.path.exists(file_to_write_mem):
-        # append to previously generated file
-        file_mem = open(file_to_write_mem, "a")
-        outputToWrite_mem = ""
-    else:
-        # if file was absent, write header information
-        file_mem = open(file_to_write_mem, "w")
-        outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,\n"  # used to write output
-    
-    mem = psutil.virtual_memory()
-    outputToWrite_mem += str(epoch) + "," + mem[0] + "," + mem[1] + "," + mem[2] + "," + mem[3] + "\n"
-    file_mem.write(outputToWrite_mem)
-    file_mem.close()
+    if params["log_memory"]:
+        file_to_write_mem = os.path.join(current_output_dir, "memory_usage.csv")
+        if os.path.exists(file_to_write_mem):
+            # append to previously generated file
+            file_mem = open(file_to_write_mem, "a")
+            outputToWrite_mem = ""
+        else:
+            # if file was absent, write header information
+            file_mem = open(file_to_write_mem, "w")
+            outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,\n"  # used to write output
+        
+        mem = psutil.virtual_memory()
+        outputToWrite_mem += str(epoch) + "," + mem[0] + "," + mem[1] + "," + mem[2] + "," + mem[3] + "\n"
+        file_mem.write(outputToWrite_mem)
+        file_mem.close()
 
     for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
