@@ -305,6 +305,7 @@ def validate_network(
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
+        label_present = False
         # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
         if "label" in subject:
             if subject["label"] != ["NA"]:
