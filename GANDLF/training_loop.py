@@ -275,7 +275,7 @@ def validate_network(
     if scheduler is None:
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
-        current_output_dir = os.path.join(params["output_dir"], mode + "_output")
+        current_output_dir = os.path.join(params["output_dir"], "outputs_" + mode)
 
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -711,15 +711,15 @@ def training_loop(
 
     # Setup a few loggers for tracking
     train_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "train_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "log_training.csv"),
         metrics=params["metrics"],
     )
     valid_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "valid_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "log_validation.csv"),
         metrics=params["metrics"],
     )
     test_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "test_logs.csv"),
+        logger_csv_filename=os.path.join(output_dir, "log_testing.csv"),
         metrics=params["metrics"],
     )
     train_logger.write_header(mode="train")
