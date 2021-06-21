@@ -21,68 +21,81 @@ class unet(ModelBase):
 
     def __init__(
         self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
         residualConnections=False,
     ):
-        self.network_kwargs["res"] = False
-        super(unet, self).__init__()
+        self.network_kwargs = {"res": False}
+        super(unet, self).__init__(
+            n_dimensions,
+            n_channels,
+            n_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer,
+        )
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_0 = DownsamplingModule(
             input_channels=self.base_filters,
             output_channels=self.base_filters * 2,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.en_1 = EncodingModule(
             input_channels=self.base_filters * 2,
             output_channels=self.base_filters * 2,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_1 = DownsamplingModule(
             input_channels=self.base_filters * 2,
             output_channels=self.base_filters * 4,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.en_2 = EncodingModule(
             input_channels=self.base_filters * 4,
             output_channels=self.base_filters * 4,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_2 = DownsamplingModule(
             input_channels=self.base_filters * 4,
             output_channels=self.base_filters * 8,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.en_3 = EncodingModule(
             input_channels=self.base_filters * 8,
             output_channels=self.base_filters * 8,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_3 = DownsamplingModule(
             input_channels=base_filters * 8,
             output_channels=base_filters * 16,
             conv=self.Conv,
-            dropout=self.norm,
+            norm=self.Norm,
         )
         self.en_4 = EncodingModule(
             input_channels=base_filters * 16,
             output_channels=base_filters * 16,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.us_3 = UpsamplingModule(
             input_channels=base_filters * 16,
@@ -93,7 +106,7 @@ class unet(ModelBase):
             input_channels=base_filters * 16,
             output_channels=base_filters * 8,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.us_2 = UpsamplingModule(
             input_channels=base_filters * 8,
@@ -104,7 +117,7 @@ class unet(ModelBase):
             input_channels=base_filters * 8,
             output_channels=base_filters * 4,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.us_1 = UpsamplingModule(
             input_channels=base_filters * 4,
@@ -115,7 +128,7 @@ class unet(ModelBase):
             input_channels=base_filters * 4,
             output_channels=base_filters * 2,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.us_0 = UpsamplingModule(
             input_channels=base_filters * 2,
@@ -126,7 +139,7 @@ class unet(ModelBase):
             input_channels=base_filters * 2,
             output_channels=n_classes,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
             final_convolution_layer=self.final_convolution_layer,
         )
 
@@ -173,6 +186,12 @@ class light_unet(ModelBase):
 
     def __init__(
         self,
+        n_dimensions,
+        n_channels,
+        n_classes,
+        base_filters,
+        norm_type,
+        final_convolution_layer,
         residualConnections=False,
     ):
         self.network_kwargs["res"] = False
@@ -182,103 +201,95 @@ class light_unet(ModelBase):
             output_channels=self.base_filters,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_0 = DownsamplingModule(
             input_channels=self.base_filters,
-            output_channels=self.base_filters * 2,
+            output_channels=self.base_filters,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.en_1 = EncodingModule(
-            input_channels=self.base_filters * 2,
-            output_channels=self.base_filters * 2,
+            input_channels=self.base_filters,
+            output_channels=self.base_filters,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_1 = DownsamplingModule(
-            input_channels=self.base_filters * 2,
-            output_channels=self.base_filters * 4,
+            input_channels=self.base_filters,
+            output_channels=self.base_filters,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.en_2 = EncodingModule(
-            input_channels=self.base_filters * 4,
-            output_channels=self.base_filters * 4,
+            input_channels=self.base_filters,
+            output_channels=self.base_filters,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_2 = DownsamplingModule(
-            input_channels=self.base_filters * 4,
-            output_channels=self.base_filters * 8,
+            input_channels=self.base_filters,
+            output_channels=self.base_filters,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.en_3 = EncodingModule(
-            input_channels=self.base_filters * 8,
-            output_channels=self.base_filters * 8,
+            input_channels=self.base_filters,
+            output_channels=self.base_filters,
             conv=self.Conv,
             dropout=self.Dropout,
-            norm=self.norm,
+            norm=self.Norm,
         )
         self.ds_3 = DownsamplingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 16,
+            input_channels=base_filters,
+            output_channels=base_filters,
             conv=self.Conv,
             dropout=self.norm,
         )
         self.en_4 = EncodingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 16,
-            conv=self.Conv,
-            dropout=self.Dropout,
-            norm=self.norm,
-        )
-        self.us_3 = UpsamplingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 8,
-            conv=self.Conv,
-        )
-        self.de_3 = DecodingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 8,
-            conv=self.Conv,
-            norm=self.norm,
-        )
-        self.us_2 = UpsamplingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 4,
-            conv=self.Conv,
-        )
-        self.de_2 = DecodingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 4,
-            conv=self.Conv,
-            norm=self.norm,
-        )
-        self.us_1 = UpsamplingModule(
-            input_channels=base_filters * 4,
-            output_channels=base_filters * 2,
-            conv=self.Conv,
-        )
-        self.de_1 = DecodingModule(
-            input_channels=base_filters * 4,
-            output_channels=base_filters * 2,
-            conv=self.Conv,
-            norm=self.norm,
-        )
-        self.us_0 = UpsamplingModule(
-            input_channels=base_filters * 2,
+            input_channels=base_filters,
             output_channels=base_filters,
             conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
+        )
+        self.us_3 = UpsamplingModule(
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+        )
+        self.de_3 = DecodingModule(
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.us_2 = UpsamplingModule(
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+        )
+        self.de_2 = DecodingModule(
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.us_1 = UpsamplingModule(
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
+        )
+        self.de_1 = DecodingModule(
+            input_channels=base_filters,
+            output_channels=base_filters,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.us_0 = UpsamplingModule(
+            input_channels=base_filters, output_channels=base_filters, conv=self.Conv,
         )
         self.out = out_conv(
-            input_channels=base_filters * 2,
+            input_channels=base_filters,
             output_channels=n_classes,
             conv=self.Conv,
-            norm=self.norm,
+            norm=self.Norm,
             final_convolution_layer=self.final_convolution_layer,
         )
 

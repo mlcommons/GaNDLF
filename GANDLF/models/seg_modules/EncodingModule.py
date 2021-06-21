@@ -31,23 +31,21 @@ class EncodingModule(nn.Module):
         if act_kwargs is None:
             act_kwargs = {"negative_slope": 1e-2, "inplace": True}
         if dropout_kwargs is None:
-            dropout_kwargs = {"p": 0.5, "inplace": True}
+            dropout_kwargs = {"p": 0.5, "inplace": False}
         if network_kwargs is None:
             network_kwargs = {"res": False}
+
+        self.res = network_kwargs["res"]
 
         self.conv0 = conv(output_channels, output_channels, **conv_kwargs)
         self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
 
-        self.in_0 = (
-            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
-        self.in_1 = (
-            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
+        self.in_0 = norm(output_channels, **norm_kwargs)
+        self.in_1 = norm(output_channels, **norm_kwargs)
 
-        self.act = self.act(**act_kwargs)
+        self.act = act(**act_kwargs)
 
-        self.dropout = self.dropout(**dropout_kwargs)
+        self.dropout = dropout(**dropout_kwargs)
 
     def forward(self, x):
         """The forward function for initial convolution
@@ -67,7 +65,7 @@ class EncodingModule(nn.Module):
         x = self.act(self.in_0(x))
 
         x = self.conv0(x)
-        if self.dropout_p is not None and self.dropout_p > 0:
+        if self.dropout is not None:
             x = self.dropout(x)
         x = self.act(self.in_1(x))
 

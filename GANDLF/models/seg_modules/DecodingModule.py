@@ -14,8 +14,6 @@ class DecodingModule(nn.Module):
         norm_kwargs=None,
         act=nn.LeakyReLU,
         act_kwargs=None,
-        dropout=nn.Dropout2d,
-        dropout_kwargs=None,
         network_kwargs=None,
     ):
         nn.Module.__init__(self)
@@ -30,26 +28,20 @@ class DecodingModule(nn.Module):
             }
         if act_kwargs is None:
             act_kwargs = {"negative_slope": 1e-2, "inplace": True}
-        if dropout_kwargs is None:
-            dropout_kwargs = {"p": 0.5, "inplace": True}
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
+        self.res = network_kwargs["res"]
+
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
-        self.conv1 = Conv(output_channels, output_channels, **conv_kwargs)
-        self.conv2 = Conv(output_channels, output_channels, **conv_kwargs)
+        self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
+        self.conv2 = conv(output_channels, output_channels, **conv_kwargs)
 
-        self.in_0 = (
-            norm(input_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
-        self.in_1 = (
-            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
-        self.in_2 = (
-            norm(output_channels, **norm_kwargs) if norm is not None else nn.Identity()
-        )
+        self.in_0 = norm(input_channels, **norm_kwargs)
+        self.in_1 = norm(output_channels, **norm_kwargs)
+        self.in_2 = norm(output_channels, **norm_kwargs)
 
-        self.act = self.act(**act_kwargs)
+        self.act = act(**act_kwargs)
 
     def forward(self, x1, x2):
         x = torch.cat([x1, x2], dim=1)
