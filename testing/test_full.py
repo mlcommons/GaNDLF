@@ -449,10 +449,9 @@ def test_normtype_train_segmentation_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     # loop through selected models and train for single epoch
     for norm in ["batch", "instance"]:
-        for model in ["resunet", "unet"]:
+        for model in ["resunet", "unet", "fcn"]:
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
-            shutil.rmtree(outputDir)  # overwrite previous results
             Path(outputDir).mkdir(parents=True, exist_ok=True)
             TrainingManager(
                 dataframe=training_data,
@@ -461,5 +460,5 @@ def test_normtype_train_segmentation_rad_3d(device):
                 device=device,
                 reset_prev=True,
             )
-
+            shutil.rmtree(outputDir)  # overwrite previous results
         print("passed")

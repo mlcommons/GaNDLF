@@ -15,7 +15,7 @@ class UpsamplingModule(nn.Module):
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:
-            conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
+            conv_kwargs = {"kernel_size": 1, "stride": 1, "padding": 0, "bias": True}
 
         if conv == nn.Conv2d:
             mode = "bilinear"
