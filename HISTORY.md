@@ -5,6 +5,7 @@
 - Half-time epoch loss and metric output added for increased information
 - Gradient clipping added
 - Per-epoch details in validation output added
+- Different types of normalization layer options added
 
 ## 0.0.8
 
