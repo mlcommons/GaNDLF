@@ -21,6 +21,7 @@ parameter_defaults = {
     "learning_rate": 0.001,  # default learning rate
     "clip_grad": None,  # clip_gradient value
     "clip_mode": None,  # default clip mode
+    "log_memory": False,  # logging memory usage
 }
 
 ## dictionary to define string defaults for appropriate options
