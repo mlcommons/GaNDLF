@@ -275,7 +275,7 @@ def validate_network(
     if scheduler is None:
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
-        current_output_dir = os.path.join(params["output_dir"], "outputs_" + mode)
+        current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
 
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
