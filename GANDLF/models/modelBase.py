@@ -38,8 +38,15 @@ class ModelBase(nn.Module):
         norm_type,
         final_convolution_layer,
     ):
-        """
-        This defines all defaults that the model base uses
+        """This defines all defaults that the model base uses
+
+        Args:
+            n_dimensions (int): The number of dimensions for the model to use - defines computational dimensions.
+            n_channels (int): The number of channels for the model to use.
+            n_classes (int): The number of output classes (used for segmentation).
+            base_filters (int): The number of filters for the first convolutional layer.
+            norm_type (str): The normalization type; can be 'instance' or 'batch'
+            final_convolution_layer (str): The final layer of the model
         """
         super(ModelBase, self).__init__()
         self.n_channels = n_channels
