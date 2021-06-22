@@ -47,22 +47,9 @@ class ModelBase(nn.Module):
         self.base_filters = base_filters
         self.n_dimensions = n_dimensions
         self.norm_type = norm_type
-        if self.norm_type.lower() == "batch":
-            if self.n_dimensions == 2:
-                self.Norm = nn.BatchNorm2d
-            else:
-                self.Norm = nn.BatchNorm3d
-        elif self.norm_type.lower() == "instance":
-            if self.n_dimensions == 2:
-                self.Norm = nn.InstanceNorm2d
-            else:
-                self.Norm = nn.InstanceNorm3d
-        else:
-            sys.exit("Currently, only batch or instance datasets are supported.")
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
-
         if self.n_dimensions == 2:
             self.Conv = nn.Conv2d
             self.ConvTranspose = nn.ConvTranspose2d
@@ -73,6 +60,12 @@ class ModelBase(nn.Module):
             self.AvgPool = nn.AvgPool2d
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool2d
+            if self.norm_type.lower() == "batch":
+                self.Norm = nn.BatchNorm2d
+            elif self.norm_type.lower() == "instance":
+                self.Norm = nn.InstanceNorm2d
+            else:
+                sys.exit("Currently, 'norm_type' supports only batch or instance.")
 
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
@@ -84,7 +77,11 @@ class ModelBase(nn.Module):
             self.AvgPool = nn.AvgPool3d
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool3d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
-        else:
-            sys.exit("Currently, only 2D or 3D datasets are supported.")
+            if self.norm_type.lower() == "batch":
+                self.Norm = nn.BatchNorm3d
+            elif self.norm_type.lower() == "instance":
+                self.Norm = nn.InstanceNorm3d
+            else:
+                sys.exit("Currently, 'norm_type' supports only batch or instance.")
 
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
