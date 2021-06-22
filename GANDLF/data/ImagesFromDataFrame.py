@@ -260,10 +260,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 skip_subject = True
 
             # assigning the dict key to the channel
-            img = sitk.ReadImage(str(dataframe[channel][patient]))
-            img_tensor = get_tensor_for_dataloader(img)
             subject_dict[str(channel)] = Image(
-                tensor=img_tensor,
                 type=torchio.INTENSITY,
                 path=dataframe[channel][patient],
             )
@@ -289,10 +286,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
                 skip_subject = True
 
-            img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-            img_tensor = get_tensor_for_dataloader(img)
             subject_dict["label"] = Image(
-                tensor=img_tensor,
                 type=torchio.LABEL,
                 path=dataframe[labelHeader][patient],
             )
