@@ -275,7 +275,7 @@ def validate_network(
     if scheduler is None:
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
-        current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
+        current_output_dir = os.path.join(params["output_dir"], "outputs_" + mode)
 
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -297,6 +297,32 @@ def validate_network(
         # if file was absent, write header information
         file = open(file_to_write, "w")
         outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
+
+    file_to_write_mem = os.path.join(current_output_dir, "memory_usage.csv")
+    if os.path.exists(file_to_write_mem):
+        # append to previously generated file
+        file_mem = open(file_to_write_mem, "a")
+        outputToWrite_mem = ""
+    else:
+        # if file was absent, write header information
+        file_mem = open(file_to_write_mem, "w")
+        outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,\n"  # used to write output
+
+    mem = psutil.virtual_memory()
+    outputToWrite_mem += (
+        str(epoch)
+        + ","
+        + str(mem[0])
+        + ","
+        + str(mem[1])
+        + ","
+        + str(mem[2])
+        + ","
+        + str(mem[3])
+        + "\n"
+    )
+    file_mem.write(outputToWrite_mem)
+    file_mem.close()
 
     for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
         if params["verbose"]:
@@ -697,15 +723,15 @@ def training_loop(
 
     # Setup a few loggers for tracking
     train_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "logs_train.csv"),
+        logger_csv_filename=os.path.join(output_dir, "log_training.csv"),
         metrics=params["metrics"],
     )
     valid_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
+        logger_csv_filename=os.path.join(output_dir, "log_validation.csv"),
         metrics=params["metrics"],
     )
     test_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
+        logger_csv_filename=os.path.join(output_dir, "log_testing.csv"),
         metrics=params["metrics"],
     )
     train_logger.write_header(mode="train")
