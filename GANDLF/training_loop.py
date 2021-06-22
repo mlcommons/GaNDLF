@@ -735,15 +735,15 @@ def training_loop(
 
     # Setup a few loggers for tracking
     train_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "log_training.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_training.csv"),
         metrics=params["metrics"],
     )
     valid_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "log_validation.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=params["metrics"],
     )
     test_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "log_testing.csv"),
+        logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
         metrics=params["metrics"],
     )
     train_logger.write_header(mode="train")
