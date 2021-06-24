@@ -208,7 +208,7 @@ def train_network(model, train_dataloader, optimizer, params):
             (batch_idx + 1) < len(train_dataloader)
         ):
             print(
-                "Half-Epoch Average Train loss : ",
+                "\nHalf-Epoch Average Train loss : ",
                 total_epoch_train_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
@@ -580,7 +580,7 @@ def validate_network(
             (batch_idx + 1) < len(valid_dataloader)
         ):
             print(
-                "Half-Epoch Average " + mode + " loss : ",
+                "\nHalf-Epoch Average " + mode + " loss : ",
                 total_epoch_valid_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
