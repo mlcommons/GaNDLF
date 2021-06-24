@@ -265,6 +265,7 @@ def test_train_classification_rad_2d(device):
         testingDir + "/config_classification.yaml", version_check=False
     )
     parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["amp"] = True
