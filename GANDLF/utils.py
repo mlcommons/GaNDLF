@@ -320,6 +320,8 @@ def populate_header_in_parameters(parameters, headers):
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
     else:
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
+    
+    parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])
