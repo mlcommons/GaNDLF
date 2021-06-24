@@ -14,6 +14,9 @@ def dice(inp, target):
         iflat.sum() + tflat.sum() + smooth
     )  # 2 * intersection / union
 
+def CE_loss(out, target, params):
+    cel_loss = CrossEntropyLoss()(out, target)
+    return cel_loss
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
     """
@@ -198,6 +201,8 @@ def fetch_loss_function(loss_name, params):
         loss_function = CE
     elif loss_name == "mse":
         loss_function = MSE_loss
+    elif loss_name == "cel":
+        loss_function = CE_loss
     else:
         print(
             "WARNING: Could not find the requested loss function '"
