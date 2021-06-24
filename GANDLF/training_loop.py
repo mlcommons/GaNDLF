@@ -156,7 +156,12 @@ def train_network(model, train_dataloader, optimizer, params):
         )
         if "value_keys" in params:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            label = label.reshape(len(label), len(params["value_keys"]))
+            label = label.reshape(
+                min(
+                    params["batch_size"], len(label)
+                ),  # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
+                len(params["value_keys"]),
+            )
         else:
             label = subject["label"][torchio.DATA]
             # one-hot encoding of 'label' will probably be needed for segmentation
