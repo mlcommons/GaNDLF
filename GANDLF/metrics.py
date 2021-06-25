@@ -147,36 +147,6 @@ def identity(output, label, params):
     return torch.Tensor(0)
 
 
-def fetch_metric(metric_name):
-    """
-
-    Parameters
-    ----------
-    metric_name : string
-        Should be a name of a metric
-
-    Returns
-    -------
-    metric_function : function
-        The function to compute the metric
-
-    """
-    # if dict, only pick the first value
-    if isinstance(metric_name, dict):
-        metric_name = list(metric_name)[0]
-
-    if (metric_name).lower() == "dice":
-        metric_function = multi_class_dice
-    elif (metric_name).lower() == "accuracy":
-        metric_function = accuracy
-    elif (metric_name).lower() == "mse":
-        metric_function = MSE_loss_agg
-    else:
-        print("Metric was undefined")
-        metric_function = identity
-    return metric_function
-
-
 def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     """
     The distances between the surface voxel of binary objects in result and their
@@ -220,7 +190,7 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     return sds
 
 
-def hd95(result, reference, connectivity=1):
+def hd95(result, reference, connectivity=1):  # inp, target, params
     """
     95th percentile of the Hausdorff Distance.
     Computes the 95th percentile of the (symmetric) Hausdorff Distance (HD) between the binary objects in two
@@ -263,3 +233,37 @@ def hd95(result, reference, connectivity=1):
     hd1 = __surface_distances(result_array, reference_array, voxelspacing, connectivity)
     hd2 = __surface_distances(reference_array, result_array, voxelspacing, connectivity)
     return numpy.percentile(numpy.hstack((hd1, hd2)), 95)
+
+
+def fetch_metric(metric_name):
+    """
+
+    Parameters
+    ----------
+    metric_name : string
+        Should be a name of a metric
+
+    Returns
+    -------
+    metric_function : function
+        The function to compute the metric
+
+    """
+    # if dict, only pick the first value
+    if isinstance(metric_name, dict):
+        metric_name = list(metric_name)[0]
+    
+    metric_lower = metric_name.lower()
+
+    if metric_lower == "dice":
+        metric_function = multi_class_dice
+    elif metric_lower == "accuracy":
+        metric_function = accuracy
+    elif metric_lower == "mse":
+        metric_function = MSE_loss_agg
+    elif (metric_lower == "hd") or (metric_lower == "hausdorff") or (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
+        metric_function = MSE_loss_agg
+    else:
+        print("Metric was undefined")
+        metric_function = identity
+    return metric_function
