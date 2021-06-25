@@ -17,9 +17,7 @@ model:
   }
 # metrics to evaluate the validation performance
 metrics:
-  {
-    dice
-  }
+  - 'dice'
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
 weighted_loss: True
