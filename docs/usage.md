@@ -28,7 +28,7 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
 
 **For Histopathology Only:**
-- Convert WSI/label map to patches with OPM: [See using OPM](./GaNDLF/OPM/README.md)
+- Convert WSI/label map to patches with OPM: [See using OPM](https://github.com/CBICA/OPM/blob/master/README.md)
 
 [Back To Top &uarr;](#table-of-contents)
 
