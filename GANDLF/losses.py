@@ -1,6 +1,6 @@
 import torch
 import sys
-from torch.nn import MSELoss
+from torch.nn import MSELoss, CrossEntropyLoss
 from .utils import one_hot
 
 

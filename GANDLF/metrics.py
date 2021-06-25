@@ -2,7 +2,7 @@
 All the metrics are to be called from here
 """
 import torch
-from .losses import MSE, MSE_loss
+from .losses import MSE, MSE_loss, CE_loss
 from .utils import one_hot
 
 
@@ -164,6 +164,8 @@ def fetch_metric(metric_name):
         metric_function = accuracy
     elif (metric_name).lower() == "mse":
         metric_function = MSE_loss_agg
+    elif (metric_name).lower() == "cel":
+        metric_function = CE_loss
     else:
         print("Metric was undefined")
         metric_function = identity
