@@ -234,11 +234,6 @@ def hd95(result, reference, connectivity=1):
     reference : SimpleITK.Image
         Input data containing objects. Can be any type but will be converted
         into binary: background where 0, object everywhere else.
-    voxelspacing : float or sequence of floats, optional
-        The voxelspacing in a distance unit i.e. spacing of elements
-        along each dimension. If a sequence, must be of length equal to
-        the input rank; if a single number, this is used for all axes. If
-        not specified, a grid spacing of unity is implied.
     connectivity : int
         The neighbourhood/connectivity considered when determining the surface
         of the binary objects. This value is passed to
