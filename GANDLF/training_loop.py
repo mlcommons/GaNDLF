@@ -164,7 +164,7 @@ def train_network(model, train_dataloader, optimizer, params):
             label = subject["label"][torchio.DATA]
             # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
-        
+
         # ensure spacing is always present in params and is always subject-specific
         if "subject_spacing" in subject:
             params["subject_spacing"] = subject["spacing"]
