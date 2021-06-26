@@ -19,6 +19,9 @@ mamba install -c conda-forge gandlf -y
 # Or alternatively you can also use:
 # conda install -c pytorch pytorch torchvision -y
 # conda install -c conda-forge gandlf -y
+
+## verify installation
+python -c "import GANDLF as gf;print(gf.__version__)"
 ```
 
 **Note for Windows users**: Please follow instructions for [developers](./extending).
