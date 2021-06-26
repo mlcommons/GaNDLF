@@ -221,15 +221,21 @@ def hd95(inp, target, params):  # inp, target, params
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    result_array = reverse_one_hot(inp, params["model"]["class_list"])
-    if target.shape[1] == 1:
-        # we squeeze because target is a 5D tensor (for 3D models) and location 1 encodes channel, which for labels *should* always be 1
-        reference_array = target.squeeze(1).cpu().detach().numpy()
-    elif target.shape[1] == 3:
-        # this means it is a 3-channel RGB label, so 2 channels can be safely ignored
-        # to ensure coherence of dimensions, we remove the last and add in dim_0
-        # reference_array = one_hot(target[:,0,...].unsqueeze(0),params["model"]["class_list"]).squeeze(0).cpu().detach().numpy()
-        return torch.tensor(0)
+    # result_array = reverse_one_hot(inp, params["model"]["class_list"])
+    result_array = inp.cpu().detach().numpy()
+    # ensure that we are dealing with a binary array
+    result_array[result_array < 0.5] = 0 
+    result_array[result_array >= 0.5] = 1
+    # if result_array.dtype != int64:
+    reference_array = one_hot(target, params["model"]["class_list"]).squeeze(-1).cpu().detach().numpy()
+    # if target.shape[1] == 1:
+    #     # we squeeze because target is a 5D tensor (for 3D models) and location 1 encodes channel, which for labels *should* always be 1
+    #     reference_array = target.squeeze(1).cpu().detach().numpy()
+    # elif target.shape[1] == 3:
+    #     # this means it is a 3-channel RGB label, so 2 channels can be safely ignored
+    #     # to ensure coherence of dimensions, we remove the last and add in dim_0
+    #     # reference_array = one_hot(target[:,0,...].unsqueeze(0),params["model"]["class_list"]).squeeze(0).cpu().detach().numpy()
+    #     return torch.tensor(0)
 
     hd1 = __surface_distances(result_array, reference_array, params["subject_spacing"])
     hd2 = __surface_distances(reference_array, result_array, params["subject_spacing"])
