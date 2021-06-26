@@ -340,9 +340,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                     psize_pad = list(
                         np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
                     )
-                    padder = Pad(
-                        psize_pad, padding_mode="symmetric"
-                    )  # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                    # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                    padder = Pad(psize_pad, padding_mode="symmetric")
                     subject = padder(subject)
 
             # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
