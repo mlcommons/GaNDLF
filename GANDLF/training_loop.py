@@ -65,7 +65,6 @@ def step(model, image, label, params):
 
     """
     if params["verbose"]:
-        # print('=== Memory (allocated; cached) : ', round(torch.cuda.memory_allocated()/1024**3, 1), '; ', round(torch.cuda.memory_reserved()/1024**3, 1))
         print(torch.cuda.memory_summary())
         print(
             "|===========================================================================|\n|                             CPU Utilization                            |\n|"
@@ -156,10 +155,9 @@ def train_network(model, train_dataloader, optimizer, params):
         )
         if "value_keys" in params:
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+            # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
-                min(
-                    params["batch_size"], len(label)
-                ),  # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
+                min(params["batch_size"], len(label)),
                 len(params["value_keys"]),
             )
         else:
@@ -167,6 +165,8 @@ def train_network(model, train_dataloader, optimizer, params):
             # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
         # print("Train : ", label.shape, image.shape, flush=True)
+        for key in params["channel_keys"]:
+            print(subject[key])
         loss, calculated_metrics, _ = step(model, image, label, params)
         nan_loss = True
         second_order = (
@@ -174,9 +174,8 @@ def train_network(model, train_dataloader, optimizer, params):
         )
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
-                if not torch.isnan(
-                    loss
-                ):  # if loss is nan, don't backprop and don't step optimizer
+                # if loss is nan, don't backprop and don't step optimizer
+                if not torch.isnan(loss):
                     scaler(
                         loss=loss,
                         optimizer=optimizer,
@@ -410,13 +409,10 @@ def validate_network(
                 valuesToPredict, pred_output, params
             )
             # # Non network validing related
-            total_epoch_valid_loss += (
-                final_loss.cpu().data.item()
-            )  # loss.cpu().data.item()
+            total_epoch_valid_loss += final_loss.cpu().data.item()
             for metric in final_metric.keys():
-                total_epoch_valid_metric[metric] += final_metric[
-                    metric
-                ]  # calculated_metrics[metric]
+                # calculated_metrics[metric]
+                total_epoch_valid_metric[metric] += final_metric[metric]
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
@@ -492,9 +488,8 @@ def validate_network(
                     )
                 else:
                     if torch.is_tensor(output):
-                        output_prediction += (
-                            output.detach().cpu()
-                        )  # this probably needs customization for classification (majority voting or median, perhaps?)
+                        # this probably needs customization for classification (majority voting or median, perhaps?)
+                        output_prediction += output.detach().cpu()
                     else:
                         output_prediction += output
 
@@ -515,15 +510,15 @@ def validate_network(
                     )
                     ## special case for 2D
                     if image.shape[-1] > 1:
+                        # ITK expects array as Z,X,Y
                         result_image = sitk.GetImageFromArray(
                             np.swapaxes(pred_mask, 0, 2)
-                        )  # ITK expects array as Z,X,Y
+                        )
                     else:
                         result_image = pred_mask
                     result_image.CopyInformation(inputImage)
-                    result_image = sitk.Cast(
-                        result_image, inputImage.GetPixelID()
-                    )  # cast as the same data type
+                    # cast as the same data type
+                    result_image = sitk.Cast(result_image, inputImage.GetPixelID())
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         result_image = resample_image(
@@ -576,9 +571,8 @@ def validate_network(
                 final_loss.cpu().data.item()
             )  # loss.cpu().data.item()
             for metric in final_metric.keys():
-                total_epoch_valid_metric[metric] += final_metric[
-                    metric
-                ]  # calculated_metrics[metric]
+                # calculated_metrics[metric]
+                total_epoch_valid_metric[metric] += final_metric[metric]
 
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
@@ -800,7 +794,6 @@ def training_loop(
         patience += 1
 
         # Write the losses to a logger
-
         train_logger.write(epoch, epoch_train_loss, epoch_train_metric)
         valid_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
 
