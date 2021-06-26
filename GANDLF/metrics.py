@@ -223,7 +223,7 @@ def hd95(inp, target, params):  # inp, target, params
     """
     result_array = reverse_one_hot(inp, params["model"]["class_list"])
     if target.shape[1] == 1:
-        # we squeeze because target is a 5D tensor (for 3D models)
+        # we squeeze because target is a 5D tensor (for 3D models) and location 1 encodes channel, which for labels *should* always be 1
         reference_array = target.squeeze(1).cpu().detach().numpy()
     elif target.shape[1] == 3:
         # this means it is a 3-channel RGB label, so 2 channels can be safely ignored
