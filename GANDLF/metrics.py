@@ -3,7 +3,7 @@ All the metrics are to be called from here
 """
 import torch, numpy
 from .losses import MSE, MSE_loss
-from .utils import one_hot
+from .utils import one_hot, reverse_one_hot
 import SimpleITK as sitk
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
@@ -190,7 +190,7 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     return sds
 
 
-def hd95(result, reference, connectivity=1):  # inp, target, params
+def hd95(inp, target, params):  # inp, target, params
     """
     95th percentile of the Hausdorff Distance.
     Computes the 95th percentile of the (symmetric) Hausdorff Distance (HD) between the binary objects in two
@@ -198,10 +198,10 @@ def hd95(result, reference, connectivity=1):  # inp, target, params
     commonly used in Biomedical Segmentation challenges.
     Parameters
     ----------
-    result : SimpleITK.Image
+    result : torch.tensor
         Input data containing objects. Can be any type but will be converted
         into binary: background where 0, object everywhere else.
-    reference : SimpleITK.Image
+    reference : torch.tensor
         Input data containing objects. Can be any type but will be converted
         into binary: background where 0, object everywhere else.
     connectivity : int
@@ -222,17 +222,14 @@ def hd95(result, reference, connectivity=1):  # inp, target, params
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    result_array = sitk.GetArrayFromImage(result)
-    reference_array = sitk.GetArrayFromImage(reference)
-    voxelspacing = result.GetSpacing()
-    if result.GetSpacing() != reference.GetSpacing():
-        raise ValueError("The reference and result images should have same resolutions")
-    if result.GetSize() != reference.GetSize():
-        raise ValueError("The reference and result images should have same shape")
-        
-    hd1 = __surface_distances(result_array, reference_array, voxelspacing, connectivity)
-    hd2 = __surface_distances(reference_array, result_array, voxelspacing, connectivity)
-    return numpy.percentile(numpy.hstack((hd1, hd2)), 95)
+    result_array = reverse_one_hot(inp, params["model"]["class_list"])
+    # we squeeze because target is a 5D tensor (for 3D models)
+    reference_array = target.squeeze(1).cpu().detach().numpy()
+
+    hd1 = __surface_distances(result_array, reference_array, params["subject_spacing"])
+    hd2 = __surface_distances(reference_array, result_array, params["subject_spacing"])
+    hd_95 = numpy.percentile(numpy.hstack((hd1, hd2)), 95)
+    return torch.tensor(hd_95)
 
 
 def fetch_metric(metric_name):
@@ -252,7 +249,7 @@ def fetch_metric(metric_name):
     # if dict, only pick the first value
     if isinstance(metric_name, dict):
         metric_name = list(metric_name)[0]
-    
+
     metric_lower = metric_name.lower()
 
     if metric_lower == "dice":
@@ -261,8 +258,13 @@ def fetch_metric(metric_name):
         metric_function = accuracy
     elif metric_lower == "mse":
         metric_function = MSE_loss_agg
-    elif (metric_lower == "hd") or (metric_lower == "hausdorff") or (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
-        metric_function = MSE_loss_agg
+    elif (
+        (metric_lower == "hd")
+        or (metric_lower == "hausdorff")
+        or (metric_lower == "hd95")
+        or (metric_lower == "hausdorff95")
+    ):
+        metric_function = hd95
     else:
         print("Metric was undefined")
         metric_function = identity
