@@ -225,8 +225,9 @@ def hd_generic(inp, target, params, percentile=95):
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    # result_array = reverse_one_hot(inp, params["model"]["class_list"])
     result_array = inp.cpu().detach().numpy()
+    if result_array.shape[-1] == 1:
+        result_array = result_array.squeeze(-1)
     # ensure that we are dealing with a binary array
     result_array[result_array < 0.5] = 0
     result_array[result_array >= 0.5] = 1
