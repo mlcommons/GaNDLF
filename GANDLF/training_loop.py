@@ -295,15 +295,17 @@ def validate_network(
         model.enable_medcam()
         params["medcam_enabled"] = True
 
-    file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
-    if os.path.exists(file_to_write):
-        # append to previously generated file
-        file = open(file_to_write, "a")
-        outputToWrite = ""
-    else:
-        # if file was absent, write header information
-        file = open(file_to_write, "w")
-        outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
+    if params["save_output"]:
+        if "value_keys" in params:
+            file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
+            if os.path.exists(file_to_write):
+                # append to previously generated file
+                file = open(file_to_write, "a")
+                outputToWrite = ""
+            else:
+                # if file was absent, write header information
+                file = open(file_to_write, "w")
+                outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
 
     if params["track_memory_usage"]:
         file_to_write_mem = os.path.join(current_output_dir, "memory_usage.csv")
