@@ -265,17 +265,18 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 path=dataframe[channel][patient],
             )
 
-            # store image spacing information
-            file_reader = sitk.ImageFileReader()
-            file_reader.SetFileName(dataframe[channel][patient])
-            file_reader.ReadImageInformation()
-            subject_dict[str(channel) + "_spacing"] = file_reader.GetSpacing()
+            # store image spacing information if not present
+            if "spacing" not in subject_dict:
+                file_reader = sitk.ImageFileReader()
+                file_reader.SetFileName(dataframe[channel][patient])
+                file_reader.ReadImageInformation()
+                subject_dict["spacing"] = file_reader.GetSpacing()
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = subject_dict[str(channel)].as_sitk()
                 img_resized = apply_resize(img, preprocessing_params=preprocessing)
-                subject_dict[str(channel) + "_spacing"] = img_resized.GetSpacing()
+                subject_dict["spacing"] = img_resized.GetSpacing() # always ensure resized image spacing is used
                 img_tensor = get_tensor_for_dataloader(img_resized)
                 subject_dict[str(channel)] = Image(
                     tensor=img_tensor,
