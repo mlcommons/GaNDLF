@@ -64,9 +64,8 @@ def multi_class_dice(output, label, params):
     num_class = params["model"]["num_classes"]
     # print("Number of classes : ", params["model"]["num_classes"])
     for i in range(0, num_class):  # 0 is background
-        if (
-            num_class != params["model"]["ignore_label_validation"]
-        ):  # this check should only happen during validation
+        # this check should only happen during validation
+        if num_class != params["model"]["ignore_label_validation"]:
             total_dice += dice(output[:, i, ...], label[:, i, ...])
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
     total_dice /= num_class
@@ -223,8 +222,14 @@ def hd95(inp, target, params):  # inp, target, params
     This is a real metric. The binary images can therefore be supplied in any order.
     """
     result_array = reverse_one_hot(inp, params["model"]["class_list"])
-    # we squeeze because target is a 5D tensor (for 3D models)
-    reference_array = target.squeeze(1).cpu().detach().numpy()
+    if target.shape[1] == 1:
+        # we squeeze because target is a 5D tensor (for 3D models)
+        reference_array = target.squeeze(1).cpu().detach().numpy()
+    elif target.shape[1] == 3:
+        # this means it is a 3-channel RGB label, so 2 channels can be safely ignored
+        # to ensure coherence of dimensions, we remove the last and add in dim_0
+        # reference_array = one_hot(target[:,0,...].unsqueeze(0),params["model"]["class_list"]).squeeze(0).cpu().detach().numpy()
+        return torch.tensor(0)
 
     hd1 = __surface_distances(result_array, reference_array, params["subject_spacing"])
     hd2 = __surface_distances(reference_array, result_array, params["subject_spacing"])
