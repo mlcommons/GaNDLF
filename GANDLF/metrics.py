@@ -189,10 +189,10 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     return sds
 
 
-def hd95(inp, target, params):  # inp, target, params
+def hd_generic(inp, target, params, percentile=95):
     """
-    95th percentile of the Hausdorff Distance.
-    Computes the 95th percentile of the (symmetric) Hausdorff Distance (HD) between the binary objects in two
+    Generic Hausdorff Distance calculation
+    Computes the Hausdorff Distance (HD) between the binary objects in two
     images. Compared to the Hausdorff Distance, this metric is slightly more stable to small outliers and is
     commonly used in Biomedical Segmentation challenges.
     Parameters
@@ -236,8 +236,16 @@ def hd95(inp, target, params):  # inp, target, params
 
     hd1 = __surface_distances(result_array, reference_array, params["subject_spacing"])
     hd2 = __surface_distances(reference_array, result_array, params["subject_spacing"])
-    hd_95 = numpy.percentile(numpy.hstack((hd1, hd2)), 95)
-    return torch.tensor(hd_95)
+    hd = numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
+    return torch.tensor(hd)
+
+
+def hd95(inp, target, params):
+    return hd_generic(inp, target, params, 95)
+
+
+def hd100(inp, target, params):
+    return hd_generic(inp, target, params, 100)
 
 
 def fetch_metric(metric_name):
@@ -266,13 +274,10 @@ def fetch_metric(metric_name):
         metric_function = accuracy
     elif metric_lower == "mse":
         metric_function = MSE_loss_agg
-    elif (
-        (metric_lower == "hd")
-        or (metric_lower == "hausdorff")
-        or (metric_lower == "hd95")
-        or (metric_lower == "hausdorff95")
-    ):
+    elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
         metric_function = hd95
+    elif (metric_lower == "hd") or (metric_lower == "hausdorff"):
+        metric_function = hd100
     else:
         print("Metric was undefined")
         metric_function = identity
