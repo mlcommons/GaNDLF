@@ -1,7 +1,7 @@
 """
 All the metrics are to be called from here
 """
-import torch, numpy
+import sys, torch, numpy
 from .losses import MSE, MSE_loss
 from .utils import one_hot, reverse_one_hot
 import SimpleITK as sitk
@@ -166,13 +166,17 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
 
     # test for emptiness
     if 0 == numpy.count_nonzero(result):
-        raise RuntimeError(
-            "The first supplied array does not contain any binary object."
+        print(
+            "The first supplied array does not contain any binary object.",
+            file=sys.stderr,
         )
+        return 0
     if 0 == numpy.count_nonzero(reference):
-        raise RuntimeError(
-            "The second supplied array does not contain any binary object."
+        print(
+            "The second supplied array does not contain any binary object.",
+            file=sys.stderr,
         )
+        return 0
 
     # extract only 1-pixel border line of objects
     result_border = result ^ binary_erosion(result, structure=footprint, iterations=1)
