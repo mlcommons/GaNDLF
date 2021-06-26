@@ -164,9 +164,12 @@ def train_network(model, train_dataloader, optimizer, params):
             label = subject["label"][torchio.DATA]
             # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
-        # print("Train : ", label.shape, image.shape, flush=True)
-        for key in params["channel_keys"]:
-            print(subject[key])
+        
+        # ensure spacing is always present in params and is always subject-specific
+        if "subject_spacing" in subject:
+            params["subject_spacing"] = subject["spacing"]
+        else:
+            params["subject_spacing"] = None
         loss, calculated_metrics, _ = step(model, image, label, params)
         nan_loss = True
         second_order = (
