@@ -172,7 +172,10 @@ def parseConfig(config_file_path, version_check=True):
 
         # initialize metrics dict
         for metric in params["metrics"]:
-            temp_dict[metric] = None
+            if not isinstance(metric, dict):
+                temp_dict[metric] = None
+            elif "accuracy" in metric: # special case where accuracy and its threshold is defined
+                temp_dict["accuracy"] = metric["accuracy"]
 
         # special case for accuracy
         if "accuracy" in params["metrics"]:
