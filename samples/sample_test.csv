@@ -1,6 +1,6 @@
-Channel_0,Channel_1,...,Channel_X,Label
-/full/path/subject_0/0.nii.gz,/full/path/subject_0/1.nii.gz,...,/full/path/subject_0/X.nii.gz,/full/path/subject_0/segmentation.nii.gz
-.,.,.,.,.
-.,.,.,.,.
-.,.,.,.,.
-/full/path/subject_N/0.nii.gz,/full/path/subject_N/1.nii.gz,...,/full/path/subject_N/X.nii.gz,/full/path/subject_N/segmentation.nii.gz
+SubjectID,Channel_0,Channel_1,...,Channel_X,Label
+subject_000,/full/path/subject_0/0.nii.gz,/full/path/subject_0/1.nii.gz,...,/full/path/subject_0/X.nii.gz,/full/path/subject_0/segmentation.nii.gz
+.,.,.,...,.,.
+.,.,.,...,.,.
+.,.,.,...,.,.
+subject_N,/full/path/subject_N/0.nii.gz,/full/path/subject_N/1.nii.gz,...,/full/path/subject_N/X.nii.gz,/full/path/subject_N/segmentation.nii.gz
