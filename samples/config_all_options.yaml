@@ -20,11 +20,11 @@ model:
   }
 # metrics to evaluate the validation performance
 metrics:
-  {
-    dice, # segmentation
-    # accuracy # regression/classification
-    # mse # regression/classification
-  }
+  - dice # segmentation
+  # - hausdorff # hausdorff 100 percentile, segmentation
+  # - hausdorff95 # hausdorff 95 percentile, segmentation
+  # - accuracy # regression/classification
+  # - mse # regression/classification
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
@@ -68,12 +68,6 @@ weighted_loss: True
 #  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
-# this parameter controls the validation information collected during the training process
-# currently implemented: dice, accuracy (this can be a dict containing value for threshold), mse
-metrics:
-{
-    'dice'
-}
 # this parameter controls the nested training process
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method
@@ -96,7 +90,7 @@ nested_training:
 # 'crop_external_zero_planes': crops all non-zero planes from input tensor to reduce image search space
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
-# resize the image(s) and mask (this should be greater than or equal to patch_size); resize is done ONLY when resample is not defined
+# resize the image(s) and mask (this should be greater than or equal to patch_size); resize is done ONLY when resample is not defined -- WARNING: resizing images on the fly ensures that images get loaded in memory, which dramatically increases RAM usage
 data_preprocessing:
   {
     'threshold':{

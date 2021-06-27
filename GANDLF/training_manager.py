@@ -216,7 +216,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             ## pickle/unpickle data
             # pickle the data
             currentTrainingDataPickle = os.path.join(
-                currentValOutputFolder, "data_train.pkl"
+                currentValOutputFolder, "data_training.pkl"
             )
             currentValidationDataPickle = os.path.join(
                 currentValOutputFolder, "data_validation.pkl"

@@ -82,7 +82,7 @@ def test_constructTrainingCSV():
         currentApplicationDir = os.path.join(inputDir, application_data)
 
         if "2d_rad_segmentation" in application_data:
-            channelsID = "_blue.png,_red.png,_green.png"
+            channelsID = "image.png"
             labelID = "mask.png"
         elif "3d_rad_segmentation" in application_data:
             channelsID = "image"
@@ -145,7 +145,7 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = 3
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
@@ -209,7 +209,7 @@ def test_train_regression_rad_2d(device):
         inputDir + "/train_2d_rad_regression.csv"
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     # loop through selected models and train for single epoch
@@ -265,6 +265,7 @@ def test_train_classification_rad_2d(device):
         testingDir + "/config_classification.yaml", version_check=False
     )
     parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["amp"] = True
@@ -273,7 +274,7 @@ def test_train_classification_rad_2d(device):
         inputDir + "/train_2d_rad_classification.csv"
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -375,7 +376,7 @@ def test_scheduler_classification_rad_2d(device):
         inputDir + "/train_2d_rad_classification.csv"
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["model"]["architecture"] = "densenet121"
     # loop through selected models and train for single epoch
@@ -462,3 +463,33 @@ def test_normtype_train_segmentation_rad_3d(device):
             )
             shutil.rmtree(outputDir)  # overwrite previous results
         print("passed")
+
+
+def test_metrics_segmentation_rad_2d(device):
+    print("Starting 2D Rad segmentation tests")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["model"]["architecture"] = "unet"
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    shutil.rmtree(outputDir)  # overwrite previous results
+
+    print("passed")
