@@ -305,7 +305,8 @@ def validate_network(
             else:
                 # if file was absent, write header information
                 file = open(file_to_write, "w")
-                outputToWrite = "Epoch,SubjectID,PredictedValue\n"  # used to write output
+                # used to write output
+                outputToWrite = "Epoch,SubjectID,PredictedValue\n"
 
     if params["track_memory_usage"]:
         file_to_write_mem = os.path.join(current_output_dir, "memory_usage.csv")
