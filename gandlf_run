@@ -10,7 +10,6 @@ fix_paths(os.getcwd())  # add relevant vips path
 import argparse
 import sys
 from pathlib import Path
-import pkg_resources
 from datetime import date
 
 from GANDLF.training_manager import *
@@ -130,8 +129,7 @@ def main():
         )
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=args.train)
-
-    parameters = populate_header_in_parameters(parameters, headers)
+        parameters = populate_header_in_parameters(parameters, headers)
 
     # # start computation - either training or inference
     if args.train:  # training mode
