@@ -402,14 +402,15 @@ def validate_network(
             pred_output /= params["scaling_factor"]
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
-            outputToWrite += (
-                str(epoch)
-                + ","
-                + subject["subject_id"][0]
-                + ","
-                + str(pred_output.cpu().data.item())
-                + "\n"
-            )
+            if params["save_output"]:
+                outputToWrite += (
+                    str(epoch)
+                    + ","
+                    + subject["subject_id"][0]
+                    + ","
+                    + str(pred_output.cpu().data.item())
+                    + "\n"
+                )
             final_loss, final_metric = get_loss_and_metrics(
                 valuesToPredict, pred_output, params
             )
@@ -542,14 +543,15 @@ def validate_network(
                 output_prediction = output_prediction / len(
                     patch_loader
                 )  # final regression output
-                outputToWrite += (
-                    str(epoch)
-                    + ","
-                    + subject["subject_id"][0]
-                    + ","
-                    + str(output_prediction)
-                    + "\n"
-                )
+                if params["save_output"]:
+                    outputToWrite += (
+                        str(epoch)
+                        + ","
+                        + subject["subject_id"][0]
+                        + ","
+                        + str(output_prediction)
+                        + "\n"
+                    )
 
             # get the final attention map and save it
             if params["medcam_enabled"]:
