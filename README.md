@@ -4,9 +4,9 @@
   <a href="https://github.com/CBICA/GaNDLF/actions/workflows/python-test.yml" alt="Build Status"><img src="https://github.com/CBICA/GaNDLF/actions/workflows/python-test.yml/badge.svg" /></a>
   <a href="https://github.com/CBICA/GaNDLF/actions/workflows/codeql-analysis.yml" alt="Code Analysis"><img src="https://github.com/CBICA/GaNDLF/workflows/CodeQL/badge.svg" /></a>
   <a href="https://github.com/CBICA/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-blue" /></a>
-  <a href="https://arxiv.org/abs/2103.01006" alt="Citation"><img src="https://img.shields.io/badge/cite-citation-lightblue" /></a>
+  <a href="https://arxiv.org/abs/2103.01006" alt="Citation"><img src="https://img.shields.io/badge/Cite-citation-lightblue" /></a>
   <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://anaconda.org/conda-forge/gandlf/badges/installer/conda.svg" /></a>
-  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/Code%20Style-black-000000.svg"></a>
 </p>
 
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
