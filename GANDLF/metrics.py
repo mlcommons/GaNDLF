@@ -234,7 +234,6 @@ def hd_generic(inp, target, params, percentile=95):
         one_hot(target, params["model"]["class_list"])
         .squeeze(-1)
         .cpu()
-        .detach()
         .numpy()
     )
 
