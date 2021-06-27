@@ -482,7 +482,6 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ['dice', 'hausdorff', 'hausdorff95']
     parameters["model"]["architecture"] = "unet"
-    shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -491,5 +490,6 @@ def test_metrics_segmentation_rad_2d(device):
         device=device,
         reset_prev=True,
     )
+    shutil.rmtree(outputDir)  # overwrite previous results
 
     print("passed")
