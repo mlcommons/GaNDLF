@@ -207,11 +207,10 @@ def hd_generic(inp, target, params, percentile=95):
     reference : torch.tensor
         Input data containing objects. Can be any type but will be converted
         into binary: background where 0, object everywhere else.
-    connectivity : int
-        The neighbourhood/connectivity considered when determining the surface
-        of the binary objects. This value is passed to
-        `scipy.ndimage.morphology.generate_binary_structure` and should usually be :math:`> 1`.
-        Note that the connectivity influences the result in the case of the Hausdorff distance.
+    params : dict
+        The parameter dictionary containing training and data information.
+    percentile : int
+        The percentile of surface distances to include during Hausdorff calculation.
     Returns
     -------
     hd : float
