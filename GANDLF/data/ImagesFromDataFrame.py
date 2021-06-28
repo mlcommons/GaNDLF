@@ -333,6 +333,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         if not skip_subject:
             # Initializing the subject object using the dict
             subject = Subject(subject_dict)
+            print("Checking consistency of images in subject '" + subject["subject_id"])
             subject.check_consistent_affine()
             subject.check_consistent_space()
             subject.check_consistent_spatial_shape()
