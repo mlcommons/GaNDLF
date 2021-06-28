@@ -316,7 +316,8 @@ def populate_header_in_parameters(parameters, headers):
     # initialize common parameters based on headers
     parameters["headers"] = headers
     # ensure the number of output classes for model prediction is working correctly
-    if len(headers["predictionHeaders"]) > 0:
+
+    if len(headers["predictionHeaders"]) > 1:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
     else:
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
