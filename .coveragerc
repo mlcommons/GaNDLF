@@ -1,2 +1,3 @@
 [run] 
 source = ./GANDLF
+omit = ./GANDLF/OPM

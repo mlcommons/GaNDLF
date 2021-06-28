@@ -177,7 +177,7 @@ def MSE_loss(inp, target, params):
             acc_mse_loss += MSE(
                 inp[:, i, ...],
                 target[:, i, ...],
-                reduction=params["loss_function"]["reduction"],
+                reduction=params["loss_function"]["mse"]["reduction"],
                 scaling_factor=params["scaling_factor"],
             )
     acc_mse_loss /= params["model"]["num_classes"]

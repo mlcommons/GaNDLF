@@ -20,11 +20,11 @@ model:
   }
 # metrics to evaluate the validation performance
 metrics:
-  {
-    dice, # segmentation
-    # accuracy # regression/classification
-    # mse # regression/classification
-  }
+  - dice # segmentation
+  # - hausdorff # hausdorff 100 percentile, segmentation
+  # - hausdorff95 # hausdorff 95 percentile, segmentation
+  # - accuracy # regression/classification
+  # - mse # regression/classification
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
@@ -68,12 +68,6 @@ weighted_loss: True
 #  }
 # Which optimizer do you want to use - adam/sgd
 opt: adam
-# this parameter controls the validation information collected during the training process
-# currently implemented: dice, accuracy (this can be a dict containing value for threshold), mse
-metrics:
-{
-    'dice'
-}
 # this parameter controls the nested training process
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method
