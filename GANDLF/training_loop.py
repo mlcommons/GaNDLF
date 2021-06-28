@@ -86,10 +86,7 @@ def step(model, image, label, params):
     else:
         output = model(image)
     
-    # print(f"Output shape {output.shape}")
-    # print(output)
-    # print(f"Label shape {label.shape}")
-    # print(label)
+    
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
