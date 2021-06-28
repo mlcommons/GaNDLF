@@ -17,9 +17,7 @@ model:
   }
 # metrics to evaluate the validation performance
 metrics:
-  {
-    dice
-  }
+  - 'dice'
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
 weighted_loss: True
@@ -54,10 +52,6 @@ opt: adam
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
-metrics:
-{
-    'dice'
-}
 nested_training:
   {
     testing: 5, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled

@@ -1,11 +1,15 @@
-## 0.0.9
+## 0.0.10
 
-- Refactoring the training and inference code
-- Added offline mechanism to generate padded images to improve training RAM requirements
 - Half-time epoch loss and metric output added for increased information
 - Gradient clipping added
 - Per-epoch details in validation output added
 - Different types of normalization layer options added
+- Hausdorff as a validation metric has been added
+
+## 0.0.9
+
+- Refactoring the training and inference code
+- Added offline mechanism to generate padded images to improve training RAM requirements
 
 ## 0.0.8
 

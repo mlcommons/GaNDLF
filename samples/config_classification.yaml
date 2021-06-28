@@ -17,9 +17,7 @@ model:
   }
 # metrics to evaluate the validation performance
 metrics:
-  {
-    mse # regression/classification
-  }
+  - 'mse'
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
