@@ -25,7 +25,7 @@ python -c "import GANDLF as gf;print(gf.__version__)"
 ```
 
 ## Installation (Windows)
-- Make sure you have Microsoft Visual C++ 14.0 or greater build tools installed
+- Make sure you have [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools) installed.
 
 ```powershell
 git clone https://github.com/CBICA/GaNDLF.git
