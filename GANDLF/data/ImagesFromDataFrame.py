@@ -265,10 +265,19 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 path=dataframe[channel][patient],
             )
 
+            # store image spacing information if not present
+            if "spacing" not in subject_dict:
+                file_reader = sitk.ImageFileReader()
+                file_reader.SetFileName(dataframe[channel][patient])
+                file_reader.ReadImageInformation()
+                subject_dict["spacing"] = file_reader.GetSpacing()
+
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = subject_dict[str(channel)].as_sitk()
                 img_resized = apply_resize(img, preprocessing_params=preprocessing)
+                # always ensure resized image spacing is used
+                subject_dict["spacing"] = img_resized.GetSpacing()
                 img_tensor = get_tensor_for_dataloader(img_resized)
                 subject_dict[str(channel)] = Image(
                     tensor=img_tensor,
@@ -331,9 +340,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                     psize_pad = list(
                         np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
                     )
-                    padder = Pad(
-                        psize_pad, padding_mode="symmetric"
-                    )  # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                    # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                    padder = Pad(psize_pad, padding_mode="symmetric")
                     subject = padder(subject)
 
             # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
