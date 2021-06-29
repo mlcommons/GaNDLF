@@ -24,4 +24,19 @@ mamba install -c conda-forge gandlf -y
 python -c "import GANDLF as gf;print(gf.__version__)"
 ```
 
-**Note for Windows users**: Please follow instructions for [developers](./extending).
+## Installation (Windows)
+- Make sure you have Microsoft Visual C++ 14.0 or greater build tools installed
+
+```powershell
+git clone https://github.com/CBICA/GaNDLF.git
+cd GaNDLF
+conda create -p ./venv python=3.7 -y
+conda activate ./venv
+conda install -c conda-forge mamba -y # allows for faster dependency solving
+conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+conda install -c sdvillal openslide -y
+pip install -e .
+
+## verify installation
+python -c "import GANDLF as gf;print(gf.__version__)"
+```
