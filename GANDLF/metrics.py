@@ -234,10 +234,7 @@ def hd_generic(inp, target, params, percentile=95):
     result_array[result_array < 0.5] = 0
     result_array[result_array >= 0.5] = 1
     reference_array = (
-        one_hot(target, params["model"]["class_list"])
-        .squeeze(-1)
-        .cpu()
-        .numpy()
+        one_hot(target, params["model"]["class_list"]).squeeze(-1).cpu().numpy()
     )
 
     hd1 = __surface_distances(result_array, reference_array, params["subject_spacing"])

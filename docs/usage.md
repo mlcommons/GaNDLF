@@ -141,10 +141,8 @@ After the testing/validation training is finished, GaNDLF makes it possible to c
 ```bash
 # continue from previous shell
 python gandlf_collectStats \
-  -inputDir /path/to/input/data 
-  -channeslID _t1.nii.gz,_t2.nii.gz,_t1ce.nii.gz,_flair.nii.gz # comma-separated strings to compare the filenames from inputDir
-  -labelID _seg.nii.gz # Label/mask identifier string to compare the filenames from inputDir
-  -output ./experiment_0/output_dir_stats/ \ # output directory
+  -inputDir /path/to/trained/models \  # directory which contains testing and validation models
+  -outputDir ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
 
 [Back To Top &uarr;](#table-of-contents)
