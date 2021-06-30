@@ -333,6 +333,12 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         if not skip_subject:
             # Initializing the subject object using the dict
             subject = Subject(subject_dict)
+            # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
+            print("Checking consistency of images in subject '" + subject["subject_id"])
+            subject.check_consistent_affine()
+            subject.check_consistent_space()
+            subject.check_consistent_spatial_shape()
+            subject.check_consistent_orientation()
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
