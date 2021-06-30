@@ -76,7 +76,7 @@ def MCD_log_loss(pm, gt, params):
 def CE(out, target):
     iflat = out.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
-    loss = torch.nn.BCELoss()
+    loss = torch.nn.BCEWithLogitsLoss()
     loss_val = loss(iflat, tflat)
     return loss_val
 
