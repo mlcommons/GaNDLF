@@ -146,7 +146,9 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # Set the model to train
     model.train()
-    for batch_idx, (subject) in enumerate(tqdm(train_dataloader)):
+    for batch_idx, (subject) in enumerate(
+        tqdm(train_dataloader, desc="Looping over training data")
+    ):
         optimizer.zero_grad()
         image = (
             torch.cat(
@@ -348,7 +350,9 @@ def validate_network(
         file_mem.write(outputToWrite_mem)
         file_mem.close()
 
-    for batch_idx, (subject) in enumerate(tqdm(valid_dataloader)):
+    for batch_idx, (subject) in enumerate(
+        tqdm(valid_dataloader, desc="Looping over " + mode + " data")
+    ):
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
 
