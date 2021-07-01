@@ -561,9 +561,9 @@ def validate_network(
             # get the final attention map and save it
             if params["medcam_enabled"]:
                 attention_map = attention_map_aggregator.get_output_tensor()
-                for i in range(len(attention_map)):
+                for i, n in enumerate(attention_map):
                     model.save_attention_map(
-                        attention_map[i].squeeze(), raw_input=image[i].squeeze(-1)
+                        n.squeeze(), raw_input=image[i].squeeze(-1)
                     )
 
             final_loss, final_metric = get_loss_and_metrics(

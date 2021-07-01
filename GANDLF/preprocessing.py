@@ -73,8 +73,8 @@ def resize_image_resolution(input_image, output_size):
     """
     inputSize = input_image.GetSize()
     outputSpacing = np.array(input_image.GetSpacing())
-    for i in range(len(output_size)):
-        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / output_size[i])
+    for i, n in enumerate(output_size):
+        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
     return outputSpacing
 
 
