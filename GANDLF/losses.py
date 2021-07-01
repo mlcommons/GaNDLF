@@ -88,7 +88,8 @@ def CE(out, target):
 
 
 def CCE_Generic(out, target, params, CCE_Type):
-    """Generic function to calculate CCE loss
+    """
+    Generic function to calculate CCE loss
 
     Args:
         out (torch.tensor): The predicted output value for each pixel. dimension: [batch, class, x, y, z].
