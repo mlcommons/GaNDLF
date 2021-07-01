@@ -14,9 +14,11 @@ def dice(inp, target):
         iflat.sum() + tflat.sum() + smooth
     )  # 2 * intersection / union
 
+
 def CE_loss(out, target, params):
     cel_loss = CrossEntropyLoss()(out, target)
     return cel_loss
+
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
     """
@@ -83,12 +85,14 @@ def CE_Logits(out, target):
     loss_val = loss(iflat, tflat)
     return loss_val
 
+
 def CE(out, target):
     iflat = out.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     loss = torch.nn.BCELoss()
     loss_val = loss(iflat, tflat)
     return loss_val
+
 
 def CCE_Logits(out, target, params):
     acc_ce_loss = 0
@@ -101,6 +105,7 @@ def CCE_Logits(out, target, params):
     if params["weights"] is None:
         acc_ce_loss /= len(params["model"]["class_list"])
     return acc_ce_loss
+
 
 # This is wrong, that is not how categorical cross entropy works
 def CCE(out, target, params):
@@ -119,11 +124,11 @@ def CCE(out, target, params):
 def DCCE(pm, gt, params):
     dcce_loss = MCD_loss(pm, gt, params) + CCE(pm, gt, params)
     return dcce_loss
-    
+
+
 def DCCE_Logits(pm, gt, params):
     dcce_loss = MCD_loss(pm, gt, params) + CCE_Logits(pm, gt, params)
     return dcce_loss
-    
 
 
 def tversky(inp, target, alpha):
