@@ -57,7 +57,7 @@ class in_conv(nn.Module):
 
     def forward(self, x):
         """
-        The forward function for initial convolution
+        The forward function for initial convolution.
 
         [input --> conv0 --> | --> in --> lrelu --> conv1 --> dropout --> in -|
                              |                                                |

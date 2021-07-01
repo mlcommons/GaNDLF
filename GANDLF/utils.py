@@ -26,10 +26,13 @@ def resample_image(
         origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
         outsideValue (int, optional): value used to pad are outside image.  Defaults to 0.
 
+    Raises:
+        Exception: Spacing/resolution mismatch.
+        Exception: Size mismatch.
+
     Returns:
         SimpleITK.Image: The resampled input image.
     """
-
     if len(spacing) != img.GetDimension():
         raise Exception("len(spacing) != " + str(img.GetDimension()))
 

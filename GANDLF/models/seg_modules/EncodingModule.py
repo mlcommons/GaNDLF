@@ -47,7 +47,7 @@ class EncodingModule(nn.Module):
 
     def forward(self, x):
         """
-        The forward function for initial convolution
+        The forward function for initial convolution.
 
         [input --> | --> in --> lrelu --> conv0 --> dropout --> in -|
                    |                                                |
