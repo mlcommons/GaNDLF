@@ -110,7 +110,7 @@ def parseConfig(config_file_path, version_check=True):
         dict: The parameter dictionary.
     """
     with open(config_file_path) as f:
-        params = yaml.safe_load(f, Loader=yaml.FullLoader)
+        params = yaml.safe_load(f)
 
     if version_check:  # this is only to be used for testing
         if not ("version" in params):
