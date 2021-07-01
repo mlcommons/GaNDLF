@@ -3,7 +3,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import *
 from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
-from GANDLF.models.unet import unet, light_unet
+from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
 from GANDLF.models import densenet
@@ -67,28 +67,28 @@ def get_model(
         )
         divisibilityCheck_baseFilter = False
 
-    elif modelname == "light_resunet":
-        model = light_unet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-            residualConnections=True,
-        )
-        divisibilityCheck_baseFilter = False
+    # elif modelname == "light_resunet":
+    #     model = light_unet(
+    #         num_dimensions,
+    #         num_channels,
+    #         num_classes,
+    #         base_filters,
+    #         norm_type,
+    #         final_convolution_layer=final_convolution_layer,
+    #         residualConnections=True,
+    #     )
+    #     divisibilityCheck_baseFilter = False
 
-    elif modelname == "light_unet":
-        model = light_unet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-        )
-        divisibilityCheck_baseFilter = False
+    # elif modelname == "light_unet":
+    #     model = light_unet(
+    #         num_dimensions,
+    #         num_channels,
+    #         num_classes,
+    #         base_filters,
+    #         norm_type,
+    #         final_convolution_layer=final_convolution_layer,
+    #     )
+    #     divisibilityCheck_baseFilter = False
 
     elif modelname == "fcn":
         model = fcn(
