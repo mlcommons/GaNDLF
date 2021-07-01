@@ -12,7 +12,9 @@ import torch.nn as nn
 import torchio
 
 
-def resample_image(img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0):
+def resample_image(
+    img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0
+):
     """
     Resample image to certain spacing and size.
 
@@ -392,9 +394,7 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
             allImageFiles = ""
             for channel in channelsID_list:
                 for i, n in enumerate(filesInDir):
-                    currentFile = os.path.abspath(
-                        os.path.join(currentSubjectDir, n)
-                    )
+                    currentFile = os.path.abspath(os.path.join(currentSubjectDir, n))
                     currentFile = currentFile.replace("\\", "/")
                     if channel in n:
                         allImageFiles += currentFile + ","
