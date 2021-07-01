@@ -89,9 +89,6 @@ def step(model, image, label, params):
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
-    print("Output shape : ", output.shape, flush=True)
-    print("label shape : ", label.shape, flush=True)
-
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
 
