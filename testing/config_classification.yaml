@@ -5,18 +5,19 @@ data_preprocessing:
   normalize: null
 in_memory: false
 learning_rate: 0.001
-loss_function: mse
+loss_function: cel
 metrics:
-  - mse
+  - cel
 model:
   amp: false
   architecture: vgg16
   base_filters: 32
   class_list:
   - 0
-  - 255
+  - 1
+  - 2
   dimension: 2
-  final_layer: softmax
+  final_layer: None
 nested_training:
   testing: -2
   validation: -2
