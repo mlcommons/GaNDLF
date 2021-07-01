@@ -508,7 +508,7 @@ def test_losses_segmentation_rad_2d(device):
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
-    # disabling amp because some losses do not support Half, yet 
+    # disabling amp because some losses do not support Half, yet
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "unet"
@@ -526,4 +526,3 @@ def test_losses_segmentation_rad_2d(device):
         )
         shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
-
