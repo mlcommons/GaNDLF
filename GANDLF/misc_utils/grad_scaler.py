@@ -4,6 +4,9 @@ from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
 
 class GradScaler:
     def __init__(self):
+        """
+        The initialization of the GradScaler class.
+        """
         self._scaler = torch.cuda.amp.GradScaler()
 
     def __call__(
