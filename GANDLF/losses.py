@@ -133,7 +133,7 @@ def tversky(inp, target, alpha):
     return (intersection + smooth) / denominator
 
 
-def tversky_loss(inp, target, alpha):
+def tversky_loss(inp, target, alpha=1):
     tversky_val = tversky(inp, target, alpha)
     return 1 - tversky_val
 
