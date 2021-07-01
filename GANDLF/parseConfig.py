@@ -41,7 +41,8 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
         if evaluate:
             if isinstance(params[parameter_to_initialize], str):
                 if params[parameter_to_initialize].lower() == "none":
-                    params[parameter_to_initialize] = eval(
+                    import ast
+                    params[parameter_to_initialize] = ast.literal_eval(
                         params[parameter_to_initialize]
                     )
     else:
@@ -81,7 +82,7 @@ def parseConfig(config_file_path, version_check=True):
     This function parses the configuration file and returns a dictionary of parameters
     """
     with open(config_file_path) as f:
-        params = yaml.load(f, Loader=yaml.FullLoader)
+        params = yaml.safe_load(f, Loader=yaml.FullLoader)
 
     if version_check:  # this is only to be used for testing
         if not ("version" in params):
