@@ -10,8 +10,6 @@ import SimpleITK as sitk
 import torch
 import torch.nn as nn
 import torchio
-from torch.utils.data import DataLoader
-from pathlib import Path
 
 
 def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
