@@ -209,7 +209,6 @@ def fetch_loss_function(loss_name, params):
     if isinstance(loss_name, dict):  # this is currently only happening for mse_torch
         # check for mse_torch
         loss_function = MSE_loss
-        MSE_requested = True
     elif loss_name == "dc":
         loss_function = MCD_loss
     elif loss_name == "dc_log":
