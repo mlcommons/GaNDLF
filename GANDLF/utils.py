@@ -12,7 +12,7 @@ import torch.nn as nn
 import torchio
 
 
-def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
+def resample_image(img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0):
     """
     Resample image to certain spacing and size.
 
@@ -32,7 +32,7 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
         raise Exception("len(spacing) != " + str(img.GetDimension()))
 
     # Set Size
-    if size == []:
+    if size == None:
         inSpacing = img.GetSpacing()
         inSize = img.GetSize()
         size = [
