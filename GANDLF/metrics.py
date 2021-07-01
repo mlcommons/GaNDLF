@@ -96,30 +96,6 @@ def accuracy(output, label, params):
     return correct / len(label)
 
 
-def MSE(output, label, reduction="mean", scaling_factor=1):
-    """
-    Calculate the mean square error between the output variable from the network and the target
-
-    Parameters
-    ----------
-    output : torch.Tensor
-        The output generated usually by the network
-    target : torch.Tensor
-        The label for the corresponding Tensor for which the output was generated
-    reduction : string, optional
-        DESCRIPTION. The default is 'mean'.
-    scaling_factor : integer, optional
-        The scaling factor to multiply the label with
-
-    Returns
-    -------
-    loss : torch.Tensor
-        Computed Mean Squared Error loss for the output and label
-
-    """
-    return MSE(output, label, reduction=reduction, scaling_factor=scaling_factor)
-
-
 def MSE_loss_agg(inp, target, params):
     return MSE_loss(inp, target, params)
 
