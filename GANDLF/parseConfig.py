@@ -459,7 +459,7 @@ def parseConfig(config_file_path, version_check=True):
             params["model"]["class_list"] = ast.literal_eval(
                 params["model"]["class_list"]
             )
-        except:
+        except Warning:
             if ("||" in params["model"]["class_list"]) or (
                 "&&" in params["model"]["class_list"]
             ):
