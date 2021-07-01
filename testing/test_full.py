@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil
+import requests, zipfile, io, os, csv, random, copy, shutil, sys
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
