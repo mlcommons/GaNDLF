@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "GANDLF"
-copyright = "2020, CBICA, UPenn"
+copyright_str = "2020, CBICA, UPenn"
 author = "CBICA, UPenn"
 
 # The full version, including alpha/beta/rc tags
