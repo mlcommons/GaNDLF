@@ -509,7 +509,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     # For regression dice penalty need not be taken account
     # For classification this should be calculated on the basis of predicted labels and mask
     if not ("value_keys" in parameters):  # basically, do this for segmentation tasks
-        for batch_idx, (subject) in enumerate(
+        for _, (subject) in enumerate(
             penalty_loader
         ):  # iterate through full training data
             # accumulate dice weights for each label
