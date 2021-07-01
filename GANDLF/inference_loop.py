@@ -22,7 +22,13 @@ from .parameterParsing import *
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     """
-    This is the main inference loop
+    The main training loop.
+
+    Args:
+        inferenceDataFromPickle (pandas.DataFrame): The data to use for inference.
+        device (str): The device to perform computations on.
+        parameters (dict): The parameters dictionary.
+        outputDir (str): The output directory.
     """
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of dims     : ", parameters["model"]["dimension"])
