@@ -638,7 +638,17 @@ def training_loop(
     output_dir,
     testing_data=None,
 ):
+    """
+    The main training loop.
 
+    Args:
+        training_data (pandas.DataFrame): The data to use for training.
+        validation_data (pandas.DataFrame): The data to use for validation.
+        device (str): The device to perform computations on.
+        params (dict): The parameters dictionary.
+        output_dir (str): The output directory.
+        testing_data (pandas.DataFrame): The data to use for testing.
+    """
     # Some autodetermined factors
     epochs = params["num_epochs"]
     params["device"] = device
