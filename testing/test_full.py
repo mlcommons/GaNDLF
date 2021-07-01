@@ -33,6 +33,7 @@ all_norm_type = ["batch", "instance"]
 
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
+baseConfigDir = os.path.abspath(os.path.normpath("./samples"))
 testingDir = os.path.abspath(os.path.normpath("./testing"))
 inputDir = os.path.abspath(os.path.normpath("./testing/data"))
 outputDir = os.path.abspath(os.path.normpath("./testing/data_output"))
@@ -558,4 +559,15 @@ def test_losses_segmentation_rad_2d(device):
             reset_prev=True,
         )
         shutil.rmtree(outputDir)  # overwrite previous results
+    print("passed")
+
+
+def test_config_read():
+    print("Starting reading configuration")
+    # read and parse csv
+    parameters = parseConfig(
+        os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=True
+    )
+    if not parameters:
+        sys.exit(1)
     print("passed")
