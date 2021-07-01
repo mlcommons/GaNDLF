@@ -36,6 +36,15 @@ parameter_defaults_string = {
 def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=True):
     """
     Initializes the specified parameter with supplied value
+
+    Args:
+        params (dict): The parameter dictionary.
+        parameter_to_initialize (str): The parameter to initialize.
+        value ((Union[str, list, int]), optional): The value to initialize. Defaults to None.
+        evaluate (bool, optional): String evaluate. Defaults to True.
+
+    Returns:
+        [type]: [description]
     """
     if parameter_to_initialize in params:
         if evaluate:
@@ -55,7 +64,13 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
 
 def parse_version(version_string):
     """
-    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison
+    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
+
+    Args:
+        version_string (str): The string to be parsed.
+
+    Returns:
+        int: The version number.
     """
     version_string_split = version_string.split(".")
     if len(version_string_split) > 3:
@@ -65,7 +80,14 @@ def parse_version(version_string):
 
 def initialize_key(parameters, key):
     """
-    This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero
+    This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
+
+    Args:
+        parameters (dict): The parameter dictionary.
+        key (str): The parameter to initialize.
+
+    Returns:
+        dict: The final parameter dictionary.
     """
     if key in parameters:
         if len(parameters[key]) == 0:  # if key is present but not defined
@@ -78,7 +100,14 @@ def initialize_key(parameters, key):
 
 def parseConfig(config_file_path, version_check=True):
     """
-    This function parses the configuration file and returns a dictionary of parameters
+    This function parses the configuration file and returns a dictionary of parameters.
+
+    Args:
+        config_file_path (str): The filename of the configuration file.
+        version_check (bool, optional): Whether to check the version in configuration file. Defaults to True.
+
+    Returns:
+        dict: The parameter dictionary.
     """
     with open(config_file_path) as f:
         params = yaml.safe_load(f, Loader=yaml.FullLoader)
