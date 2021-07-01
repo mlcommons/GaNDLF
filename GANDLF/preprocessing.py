@@ -130,7 +130,9 @@ def tensor_rotate_180(input_image, axis):
 
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
 class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
-    """Subtract mean and divide by standard deviation.
+    """
+    Subtract mean and divide by standard deviation.
+    
     Args:
         masking_method: See
             :class:`~torchio.transforms.preprocessing.intensity.NormalizationTransform`.
