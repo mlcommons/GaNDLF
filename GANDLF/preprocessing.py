@@ -78,13 +78,13 @@ def resize_image_resolution(input_image, output_size):
     return outputSpacing
 
 
-def apply_resize(input, preprocessing_params, interpolator=sitk.sitkLinear):
+def apply_resize(input_image, preprocessing_params, interpolator=sitk.sitkLinear):
     """
     This function resizes the input image based on the output size and interpolator
     """
     return resample_image(
-        input,
-        resize_image_resolution(input, preprocessing_params["resize"]),
+        input_image,
+        resize_image_resolution(input_image, preprocessing_params["resize"]),
         interpolator=interpolator,
     )
 
