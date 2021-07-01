@@ -77,8 +77,8 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
             "The output size dimension is inconsistent with the input dataset, please check parameters."
         )
 
-    for i in range(len(output_size)):
-        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+    for i, n in enumerate(output_size):
+        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / n)
 
     return resample_image(input_image, outputSpacing, interpolator=interpolator)
 
@@ -376,7 +376,7 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     channelsID_list = channelsID.split(",")  # split into list
 
     outputToWrite = "SubjectID,"
-    for i in range(len(channelsID_list)):
+    for i, n in enumerate(channelsID_list):
         outputToWrite = outputToWrite + "Channel_" + str(i) + ","
     outputToWrite = outputToWrite + "Label"
     outputToWrite = outputToWrite + "\n"
@@ -391,14 +391,14 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
             maskFile = ""
             allImageFiles = ""
             for channel in channelsID_list:
-                for i in range(len(filesInDir)):
+                for i, n in enumerate(filesInDir):
                     currentFile = os.path.abspath(
-                        os.path.join(currentSubjectDir, filesInDir[i])
+                        os.path.join(currentSubjectDir, n)
                     )
                     currentFile = currentFile.replace("\\", "/")
-                    if channel in filesInDir[i]:
+                    if channel in n:
                         allImageFiles += currentFile + ","
-                    elif labelID in filesInDir[i]:
+                    elif labelID in n:
                         maskFile = currentFile
             if allImageFiles:
                 outputToWrite += dirs + "," + allImageFiles + maskFile + "\n"
