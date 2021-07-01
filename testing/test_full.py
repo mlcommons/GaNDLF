@@ -495,6 +495,39 @@ def test_metrics_segmentation_rad_2d(device):
     print("passed")
 
 
+def test_metrics_regression_rad_2d(device):
+    print("Starting 2D Rad regression tests for metrics")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_regression.yaml", version_check=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_regression.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = False
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = {}
+    parameters["metrics"]["mse"] = {}
+    parameters["metrics"]["accuracy"] = {}
+    parameters["metrics"]["accuracy"]["threshold"] = 0.5
+    parameters["model"]["architecture"] = "vgg11"
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    shutil.rmtree(outputDir)  # overwrite previous results
+
+    print("passed")
+
+
 def test_losses_segmentation_rad_2d(device):
     print("Starting 2D Rad segmentation tests for losses")
     # read and parse csv
