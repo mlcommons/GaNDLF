@@ -128,12 +128,12 @@ def crop_external_zero_planes(patch_size, p=1):
 
 
 ## lambdas for pre-processing
-def threshold_transform(min, max, p=1):
-    return Lambda(function=partial(threshold_intensities, min=min, max=max), p=p)
+def threshold_transform(min_thresh, max_thresh, p=1):
+    return Lambda(function=partial(threshold_intensities, min=min_thresh, max=max_thresh), p=p)
 
 
-def clip_transform(min, max, p=1):
-    return Lambda(function=partial(clip_intensities, min=min, max=max), p=p)
+def clip_transform(min_thresh, max_thresh, p=1):
+    return Lambda(function=partial(clip_intensities, min=min_thresh, max=max_thresh), p=p)
 
 
 def rotate_90(axis, p=1):
