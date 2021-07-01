@@ -50,21 +50,21 @@ def normalize_div_by_255(input_tensor):
     return normalize_by_val(input_tensor, mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0])
 
 
-def threshold_intensities(input_tensor, min, max):
+def threshold_intensities(input_tensor, min_thresh, max_thresh):
     """
     This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
     """
     C = torch.zeros(input_tensor.size(), dtype=input_tensor.dtype)
-    l1_tensor = torch.where(input_tensor < max, input_tensor, C)
-    l2_tensor = torch.where(l1_tensor > min, l1_tensor, C)
+    l1_tensor = torch.where(input_tensor < max_thresh, input_tensor, C)
+    l2_tensor = torch.where(l1_tensor > min_thresh, l1_tensor, C)
     return l2_tensor
 
 
-def clip_intensities(input_tensor, min, max):
+def clip_intensities(input_tensor, min_thresh, max_thresh):
     """
     This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min' and largest values as 'max'
     """
-    return torch.clamp(input_tensor, min, max)
+    return torch.clamp(input_tensor, min_thresh, max_thresh)
 
 
 def resize_image_resolution(input_image, output_size):
