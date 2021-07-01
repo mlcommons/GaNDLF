@@ -76,6 +76,13 @@ def MCD_log_loss(pm, gt, params):
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 2)
 
 
+def CE_Logits(out, target):
+    iflat = out.contiguous().view(-1)
+    tflat = target.contiguous().view(-1)
+    loss = torch.nn.BCEWithLogitsLoss()
+    loss_val = loss(iflat, tflat)
+    return loss_val
+
 def CE(out, target):
     iflat = out.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
@@ -83,6 +90,17 @@ def CE(out, target):
     loss_val = loss(iflat, tflat)
     return loss_val
 
+def CCE_Logits(out, target, params):
+    acc_ce_loss = 0
+    target = one_hot(target, params["model"]["class_list"]).type(out.dtype)
+    for i in range(0, len(params["model"]["class_list"])):
+        curr_ce_loss = CE_Logits(out[:, i, ...], target[:, i, ...])
+        if params["weights"] is not None:
+            curr_ce_loss = curr_ce_loss * params["weights"][i]
+        acc_ce_loss += curr_ce_loss
+    if params["weights"] is None:
+        acc_ce_loss /= len(params["model"]["class_list"])
+    return acc_ce_loss
 
 # This is wrong, that is not how categorical cross entropy works
 def CCE(out, target, params):
@@ -101,6 +119,11 @@ def CCE(out, target, params):
 def DCCE(pm, gt, params):
     dcce_loss = MCD_loss(pm, gt, params) + CCE(pm, gt, params)
     return dcce_loss
+    
+def DCCE_Logits(pm, gt, params):
+    dcce_loss = MCD_loss(pm, gt, params) + CCE_Logits(pm, gt, params)
+    return dcce_loss
+    
 
 
 def tversky(inp, target, alpha):
@@ -197,6 +220,8 @@ def fetch_loss_function(loss_name, params):
         loss_function = MCD_log_loss
     elif loss_name == "dcce":
         loss_function = DCCE
+    elif loss_name == "dcce_logits":
+        loss_function = DCCE_Logits
     elif loss_name == "ce":
         loss_function = CE
     elif loss_name == "mse":
