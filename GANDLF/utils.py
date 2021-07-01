@@ -15,7 +15,8 @@ from pathlib import Path
 
 
 def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
-    """Resample image to certain spacing and size.
+    """
+    Resample image to certain spacing and size.
 
     Args:
         img (SimpleITK.Image): The input image to resample.
@@ -58,7 +59,8 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
 
 
 def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
-    """This function resizes the input image based on the output size and interpolator
+    """
+    This function resizes the input image based on the output size and interpolator
 
     Args:
         input_image (SimpleITK.Image): The input image to resample.
@@ -84,7 +86,8 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
 
 
 def one_hot(segmask_array, class_list):
-    """This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
+    """
+    This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
         segmask_array (torch.Tensor): The segmentation mask Tensor.
@@ -131,7 +134,8 @@ def one_hot(segmask_array, class_list):
 
 
 def reverse_one_hot(predmask_array, class_list):
-    """This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
+    """
+    This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
     Args:
         predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
@@ -181,7 +185,8 @@ def reverse_one_hot(predmask_array, class_list):
 
 
 def checkPatchDivisibility(patch_size, number=16):
-    """This function checks the divisibility of a numpy array or integer for architectural integrity
+    """
+    This function checks the divisibility of a numpy array or integer for architectural integrity
 
     Args:
         patch_size (numpy.array): The patch size for checking.
@@ -214,7 +219,8 @@ def checkPatchDivisibility(patch_size, number=16):
 
 
 def send_model_to_device(model, amp, device, optimizer):
-    """This function reads the environment variable(s) and send model to correct device
+    """
+    This function reads the environment variable(s) and send model to correct device
 
     Args:
         model (torch.nn.Module): The model that needs to be sent to specified device.
@@ -293,7 +299,8 @@ def send_model_to_device(model, amp, device, optimizer):
 
 
 def fix_paths(cwd):
-    """This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+    """
+    This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
 
     Args:
         cwd (str): The current working directory.
@@ -304,7 +311,8 @@ def fix_paths(cwd):
 
 
 def populate_header_in_parameters(parameters, headers):
-    """This function populates the parameters with information from the header in a common manner
+    """
+    This function populates the parameters with information from the header in a common manner
 
     Args:
         parameters (dict): The parameters passed by the user yaml.
@@ -328,7 +336,8 @@ def populate_header_in_parameters(parameters, headers):
 
 
 def find_problem_type(headersFromCSV, model_final_layer):
-    """This function determines the type of problem at hand - regression, classification or segmentation
+    """
+    This function determines the type of problem at hand - regression, classification or segmentation
 
     Args:
         headersFromCSV (dict): The CSV headers dictionary.
@@ -357,7 +366,8 @@ def find_problem_type(headersFromCSV, model_final_layer):
 
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
-    """This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    """
+    This function writes the CSV file based on the input directory, channelsID + labelsID strings
 
     Args:
         inputDir (str): The input directory.
@@ -401,7 +411,8 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
 
 
 def parseTrainingCSV(inputTrainingCSVFile, train=True):
-    """This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    """
+    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
 
     Args:
         inputTrainingCSVFile (str): The input data CSV file which contains all training data.
@@ -461,7 +472,8 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
 
 
 def get_date_time():
-    """Get a well-parsed date string
+    """
+    Get a well-parsed date string
 
     Returns:
         str: The date in format YYYY/MM/DD::HH:MM:SS
@@ -471,7 +483,8 @@ def get_date_time():
 
 
 def get_class_imbalance_weights(training_data_loader, parameters):
-    """This function calculates the penalty that is used for validation loss in multi-class problems
+    """
+    This function calculates the penalty that is used for validation loss in multi-class problems
 
     Args:
         training_data_loader (torch.utils.data.DataLoader): The training data loader.
@@ -537,7 +550,8 @@ def get_class_imbalance_weights(training_data_loader, parameters):
 
 
 def populate_channel_keys_in_params(data_loader, parameters):
-    """Function to read channel key information from specified data loader
+    """
+    Function to read channel key information from specified data loader
 
     Args:
         data_loader (torch.DataLoader): The data loader to query key information from.
