@@ -10,9 +10,8 @@ def dice(inp, target):
     iflat = inp.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     intersection = (iflat * tflat).sum()
-    return (2.0 * intersection + smooth) / (
-        iflat.sum() + tflat.sum() + smooth
-    )  # 2 * intersection / union
+    # 2 * intersection / union
+    return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
 
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
@@ -35,9 +34,8 @@ def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
             if loss_type == 1:
                 currentDice = 1 - currentDice  # subtract from 1 because this is a loss
             elif loss_type == 2:
-                currentDice = -torch.log(
-                    currentDice + torch.finfo(torch.float32).eps
-                )  # negative because we want positive losses
+                # negative because we want positive losses
+                currentDice = -torch.log(currentDice + torch.finfo(torch.float32).eps)
             if weights is not None:
                 currentDice = currentDice * weights[i]
             acc_dice += currentDice
