@@ -431,7 +431,7 @@ def test_clip_train_classification_rad_3d(device):
 
 def test_normtype_train_segmentation_rad_3d(device):
     # read and initialize parameters for specific data dimension
-    print("Starting 3D Rad segmentation tests")
+    print("Starting 3D Rad segmentation tests for normtype")
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -466,7 +466,7 @@ def test_normtype_train_segmentation_rad_3d(device):
 
 
 def test_metrics_segmentation_rad_2d(device):
-    print("Starting 2D Rad segmentation tests")
+    print("Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check=False
@@ -493,3 +493,37 @@ def test_metrics_segmentation_rad_2d(device):
     shutil.rmtree(outputDir)  # overwrite previous results
 
     print("passed")
+
+
+def test_losses_segmentation_rad_2d(device):
+    print("Starting 2D Rad segmentation tests for losses")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    # disabling amp because some losses do not support Half, yet 
+    parameters["model"]["amp"] = False
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "unet"
+    parameters["metrics"] = ["dice"]
+    # loop through selected models and train for single epoch
+    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits"]:
+        parameters["loss_function"] = loss_type
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            reset_prev=True,
+        )
+        shutil.rmtree(outputDir)  # overwrite previous results
+    print("passed")
+
