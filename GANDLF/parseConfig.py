@@ -1,4 +1,4 @@
-import sys, yaml, pkg_resources
+import sys, yaml, pkg_resources, ast
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -41,7 +41,6 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
         if evaluate:
             if isinstance(params[parameter_to_initialize], str):
                 if params[parameter_to_initialize].lower() == "none":
-                    import ast
                     params[parameter_to_initialize] = ast.literal_eval(
                         params[parameter_to_initialize]
                     )
@@ -428,7 +427,7 @@ def parseConfig(config_file_path, version_check=True):
 
     if isinstance(params["model"]["class_list"], str):
         try:
-            params["model"]["class_list"] = eval(params["model"]["class_list"])
+            params["model"]["class_list"] = ast.literal_eval(params["model"]["class_list"])
         except:
             if ("||" in params["model"]["class_list"]) or (
                 "&&" in params["model"]["class_list"]
