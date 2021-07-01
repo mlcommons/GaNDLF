@@ -347,17 +347,16 @@ def parseConfig(config_file_path, version_check=True):
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing")
     if not (params["data_preprocessing"] == None):
-        if (
-            len(params["data_preprocessing"]) < 0
-        ):  # perform this only when pre-processing is defined
+        # perform this only when pre-processing is defined
+        if len(params["data_preprocessing"]) < 0:
             thresholdOrClip = False
+            # this can be extended, as required
             thresholdOrClipDict = [
                 "threshold",
                 "clip",
-            ]  # this can be extended, as required
-            keysForWarning = [
-                "resize"
-            ]  # properties for which the user will see a warning
+            ]
+            # properties for which the user will see a warning
+            keysForWarning = ["resize"]
 
             # iterate through all keys
             for key in params["data_preprocessing"]:  # iterate through all keys
@@ -365,9 +364,8 @@ def parseConfig(config_file_path, version_check=True):
                 if not thresholdOrClip:
                     if key in thresholdOrClipDict:
                         thresholdOrClip = True  # we only allow one of threshold or clip to occur and not both
-                        if not (
-                            isinstance(params["data_preprocessing"][key], dict)
-                        ):  # initialize if nothing is present
+                        # initialize if nothing is present
+                        if not (isinstance(params["data_preprocessing"][key], dict)):
                             params["data_preprocessing"][key] = {}
 
                         # if one of the required parameters is not present, initialize with lowest/highest possible values
