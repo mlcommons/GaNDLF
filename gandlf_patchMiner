@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
+    cfg = yaml.safe_load(open(args.config), Loader=yaml.FullLoader)
 
     if not os.path.exists(args.output_path):
         print("Output Directory does not exist, we are creating one for you.")
