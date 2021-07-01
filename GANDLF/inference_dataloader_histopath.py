@@ -15,7 +15,7 @@ if os.name != "nt":
     from openslide import OpenSlide
     from skimage.transform import resize
     from skimage.filters import threshold_otsu, median
-    from skimage.morphology import binary_closing, disk, binary_erosion
+    from skimage.morphology import binary_closing, disk
     from scipy.ndimage import binary_fill_holes
 
     def tissue_mask_generation(img_rgb, rgb_min=50):
