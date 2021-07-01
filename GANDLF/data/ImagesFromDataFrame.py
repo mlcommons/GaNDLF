@@ -61,7 +61,7 @@ def elastic(patch_size=None, p=1):
     if patch_size is not None:
         # define the control points and swap axes for augmentation
         num_controls = []
-        for i, n in enumerate(patch_size):
+        for _, n in enumerate(patch_size):
             if n != 1:  # this is a 2D case
                 num_controls.append(max(round(n / 10), 7))  # always at least have 4
         max_displacement = np.divide(num_controls, 10)
