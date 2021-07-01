@@ -36,6 +36,15 @@ class VGG(nn.Module):
         n_outputClasses,
         final_convolution_layer: str = "softmax",
     ):
+        """
+        Initializer function for the VGG model
+
+        Args:
+            n_dimensions (int): The number of dimensions in the input data (2 or 3).
+            features (int): The number of features to extract from the input data.
+            n_outputClasses (int): The number of output classes.
+            final_convolution_layer (str, optional): The final layer of the model. Defaults to "softmax".
+        """
         super(VGG, self).__init__()
         self.features = features
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
@@ -53,9 +62,10 @@ class VGG(nn.Module):
             self.avg_pool,
             nn.ReLU(True),
             nn.Dropout(),
+            # number of input features should be changed later, but works for all vgg right now
             nn.Linear(
                 512, n_outputClasses
-            ),  # number of input features should be changed later, but works for all vgg right now
+            ),
         )
         # Initialize weights
         for m in self.modules():
