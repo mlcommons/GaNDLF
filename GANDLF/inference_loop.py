@@ -205,8 +205,7 @@ if __name__ == "__main__":
     inferenceDataFromPickle = pd.read_pickle(args.inference_loader_pickle)
 
     inference_loop(
-        inference_loader_pickle=inferenceDataFromPickle,
-        headers=headers,
+        inferenceDataFromPickl=inferenceDataFromPickle,
         parameters=parameters,
         outputDir=args.outputDir,
         device=args.device,
