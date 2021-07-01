@@ -317,7 +317,7 @@ def populate_header_in_parameters(parameters, headers):
     parameters["headers"] = headers
     # ensure the number of output classes for model prediction is working correctly
 
-    if len(headers["predictionHeaders"]) > 1:
+    if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
     is_regression, _, _ = find_problem_type(parameters["headers"], parameters["model"]["final_layer"])
     
