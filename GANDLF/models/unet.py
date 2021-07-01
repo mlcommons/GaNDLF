@@ -246,7 +246,7 @@ class light_unet(ModelBase):
             input_channels=base_filters,
             output_channels=base_filters,
             conv=self.Conv,
-            dropout=self.norm,
+            norm=self.norm,
         )
         self.en_4 = EncodingModule(
             input_channels=base_filters,
