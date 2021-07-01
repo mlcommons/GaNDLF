@@ -10,9 +10,8 @@ def dice(inp, target):
     iflat = inp.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     intersection = (iflat * tflat).sum()
-    return (2.0 * intersection + smooth) / (
-        iflat.sum() + tflat.sum() + smooth
-    )  # 2 * intersection / union
+    # 2 * intersection / union
+    return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
 
 
 def CE_loss(out, target, params):
@@ -42,9 +41,8 @@ def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
             if loss_type == 1:
                 currentDice = 1 - currentDice  # subtract from 1 because this is a loss
             elif loss_type == 2:
-                currentDice = -torch.log(
-                    currentDice + torch.finfo(torch.float32).eps
-                )  # negative because we want positive losses
+                # negative because we want positive losses
+                currentDice = -torch.log(currentDice + torch.finfo(torch.float32).eps)
             if weights is not None:
                 currentDice = currentDice * weights[i]
             acc_dice += currentDice
@@ -95,26 +93,23 @@ def CE(out, target):
     loss_val = loss(iflat, tflat)
     return loss_val
 
+def CCE_Generic(out, target, params, CCE_Type):
+    """Generic function to calculate CCE loss
 
-def CCE_Logits(out, target, params):
+    Args:
+        out (torch.tensor): The predicted output value for each pixel. dimension: [batch, class, x, y, z].
+        target (torch.tensor): The ground truth label for each pixel. dimension: [batch, class, x, y, z] factorial_class_list.
+        params (dict): The parameter dictionary.
+        CCE_Type (torch.nn): The CE loss function type.
+
+    Returns:
+        torch.tensor: The final loss value after taking multiple classes into consideration
+    """
+
     acc_ce_loss = 0
     target = one_hot(target, params["model"]["class_list"]).type(out.dtype)
     for i in range(0, len(params["model"]["class_list"])):
-        curr_ce_loss = CE_Logits(out[:, i, ...], target[:, i, ...])
-        if params["weights"] is not None:
-            curr_ce_loss = curr_ce_loss * params["weights"][i]
-        acc_ce_loss += curr_ce_loss
-    if params["weights"] is None:
-        acc_ce_loss /= len(params["model"]["class_list"])
-    return acc_ce_loss
-
-
-# This is wrong, that is not how categorical cross entropy works
-def CCE(out, target, params):
-    acc_ce_loss = 0
-    target = one_hot(target, params["model"]["class_list"]).type(out.dtype)
-    for i in range(0, len(params["model"]["class_list"])):
-        curr_ce_loss = CE(out[:, i, ...], target[:, i, ...])
+        curr_ce_loss = CCE_Type(out[:, i, ...], target[:, i, ...])
         if params["weights"] is not None:
             curr_ce_loss = curr_ce_loss * params["weights"][i]
         acc_ce_loss += curr_ce_loss
@@ -124,12 +119,12 @@ def CCE(out, target, params):
 
 
 def DCCE(pm, gt, params):
-    dcce_loss = MCD_loss(pm, gt, params) + CCE(pm, gt, params)
+    dcce_loss = MCD_loss(pm, gt, params) + CCE_Generic(pm, gt, params, CE)
     return dcce_loss
 
 
 def DCCE_Logits(pm, gt, params):
-    dcce_loss = MCD_loss(pm, gt, params) + CCE_Logits(pm, gt, params)
+    dcce_loss = MCD_loss(pm, gt, params) + CCE_Generic(pm, gt, params, CE_Logits)
     return dcce_loss
 
 
