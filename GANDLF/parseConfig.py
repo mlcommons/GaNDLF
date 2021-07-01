@@ -427,7 +427,9 @@ def parseConfig(config_file_path, version_check=True):
 
     if isinstance(params["model"]["class_list"], str):
         try:
-            params["model"]["class_list"] = ast.literal_eval(params["model"]["class_list"])
+            params["model"]["class_list"] = ast.literal_eval(
+                params["model"]["class_list"]
+            )
         except:
             if ("||" in params["model"]["class_list"]) or (
                 "&&" in params["model"]["class_list"]
