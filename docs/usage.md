@@ -14,6 +14,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Running GaNDLF](#running-gandlf-traininginference)
 - [Plot the final results](#plot-the-final-results)
 - [Multi-GPU systems](#multi-gpu-systems)
+- [Interpretability using M3D-CAM](#m3d-cam-usage)
 
 ## Preparing the Data
 
