@@ -305,7 +305,7 @@ def parseConfig(config_file_path, version_check=True):
                     ]
 
                 initialize_downsampling = False
-                if type(default_downsampling) is list:
+                if isinstance(default_downsampling, list):
                     if len(default_downsampling) != 2:
                         initialize_downsampling = True
                         print(
