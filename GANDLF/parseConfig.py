@@ -146,9 +146,8 @@ def parseConfig(config_file_path, version_check=True):
                             params["loss_function"][key] = {}
                             params["loss_function"][key]["reduction"] = "mean"
                     else:
-                        params[
-                            "loss_function"
-                        ] = key  # use simple string for other functions - can be extended with parameters, if needed
+                        # use simple string for other functions - can be extended with parameters, if needed
+                        params["loss_function"] = key
             else:
                 defineDefaultLoss = True
         else:
