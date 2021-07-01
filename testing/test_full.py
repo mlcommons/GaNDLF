@@ -8,14 +8,14 @@ from GANDLF.inference_manager import InferenceManager
 
 device = "cpu"
 ## global defines
-# all_models_segmentation = ['unet', 'resunet', 'fcn', 'uinc'] # pre-defined segmentation model types for testing
+# pre-defined segmentation model types for testing
 all_models_segmentation = [
     "unet",
     "fcn",
     "uinc",
     "msdnet",
-]  # pre-defined segmentation model types for testing
-# all_models_regression = ['densenet121', 'densenet161', 'densenet169', 'densenet201', 'vgg16'] # populate once it becomes available
+]
+# pre-defined regression/classification model types for testing
 all_models_regression = ["densenet121", "vgg16"]
 all_schedulers = [
     "triangle",
