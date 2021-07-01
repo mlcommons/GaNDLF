@@ -18,6 +18,8 @@ For any new feature, please ensure the corresponding option in the [sample confi
 
 Before starting to work on the code-level on GaNDLF, please get the environment ready:
 
+**NOTE**: Windows users, please ensure sure you have [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools) installed.
+
 ```bash
 git clone https://github.com/CBICA/GaNDLF.git
 cd GaNDLF
