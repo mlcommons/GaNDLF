@@ -353,7 +353,6 @@ def get_optimizer(optimizer_name, model, learning_rate):
             + "' in the implementation, using sgd, instead",
             file=sys.stderr,
         )
-        opt = "sgd"
         optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
 
     return optimizer
