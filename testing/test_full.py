@@ -1,6 +1,7 @@
 from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil
 
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
@@ -568,6 +569,12 @@ def test_config_read():
     parameters = parseConfig(
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=True
     )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
     if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True)
+    if not data_loader:
         sys.exit(1)
     print("passed")
