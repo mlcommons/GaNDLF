@@ -21,6 +21,7 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmen
   - Channels/images/sequences 
   - Prediction classes
   - Domain modalities (i.e., Radiology Scans and Digitized Histopathology Tissue Sections)
+  - Problem types (segmentation, regression, classifcation) 
 - Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/)  
 - Built-in nested cross validation (and related combined statistics), with support for parallel HPC-based computing
 - Handles imbalanced classes (e.g., very small tumor in large organ)
