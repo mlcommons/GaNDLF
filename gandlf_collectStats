@@ -71,14 +71,14 @@ def main():
                             currentValidationDir
                         )  # get all files in each directory
 
-                        for i in range(len(filesInDir)):
-
+                        for i, n in enumerate(filesInDir):
+                            # when the log has been found, collect the final numbers
                             if (
-                                "trainingScores_log" in filesInDir[i]
-                            ):  # when the log has been found, collect the final numbers
+                                "trainingScores_log" in n
+                            ):  
 
                                 log_file = os.path.join(
-                                    currentValidationDir, filesInDir[i]
+                                    currentValidationDir, n
                                 )
                                 with open(log_file) as f:
                                     for line in f:

@@ -61,11 +61,9 @@ def elastic(patch_size=None, p=1):
     if patch_size is not None:
         # define the control points and swap axes for augmentation
         num_controls = []
-        for i in range(len(patch_size)):
-            if patch_size[i] != 1:  # this is a 2D case
-                num_controls.append(
-                    max(round(patch_size[i] / 10), 7)
-                )  # always at least have 4
+        for _, n in enumerate(patch_size):
+            if n != 1:  # this is a 2D case
+                num_controls.append(max(round(n / 10), 7))  # always at least have 4
         max_displacement = np.divide(num_controls, 10)
         if num_controls[-1] == 1:
             max_displacement[
@@ -128,12 +126,22 @@ def crop_external_zero_planes(patch_size, p=1):
 
 
 ## lambdas for pre-processing
-def threshold_transform(min, max, p=1):
-    return Lambda(function=partial(threshold_intensities, min=min, max=max), p=p)
+def threshold_transform(min_thresh, max_thresh, p=1):
+    return Lambda(
+        function=partial(
+            threshold_intensities, min_thresh=min_thresh, max_thresh=max_thresh
+        ),
+        p=p,
+    )
 
 
-def clip_transform(min, max, p=1):
-    return Lambda(function=partial(clip_intensities, min=min, max=max), p=p)
+def clip_transform(min_thresh, max_thresh, p=1):
+    return Lambda(
+        function=partial(
+            clip_intensities, min_thresh=min_thresh, max_thresh=max_thresh
+        ),
+        p=p,
+    )
 
 
 def rotate_90(axis, p=1):
@@ -370,7 +378,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if key in preprocessing:
                 augmentation_list.append(
                     global_preprocessing_dict[key](
-                        min=preprocessing[key]["min"], max=preprocessing[key]["max"]
+                        min_thresh=preprocessing[key]["min"],
+                        max_thresh=preprocessing[key]["max"],
                     )
                 )
 

@@ -205,7 +205,7 @@ def main():
                     print("Writing", image_file)
                 try:
                     sitk.WriteImage(image_to_write, image_file)
-                except:
+                except IOError:
                     print("Could not write:", image_file, file=sys.stderr, flush=True)
 
         # now try to write the label
@@ -218,7 +218,7 @@ def main():
                     print("Writing", image_file)
                 try:
                     sitk.WriteImage(image_to_write, image_file)
-                except:
+                except IOError:
                     print("Could not write:", image_file, file=sys.stderr, flush=True)
 
 

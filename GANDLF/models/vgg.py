@@ -11,18 +11,6 @@ from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling2D,
 )
 
-__all__ = [
-    "VGG",
-    "vgg11",
-    "vgg11_bn",
-    "vgg13",
-    "vgg13_bn",
-    "vgg16",
-    "vgg16_bn",
-    "vgg19_bn",
-    "vgg19",
-]
-
 
 class VGG(nn.Module):
     """
@@ -36,6 +24,15 @@ class VGG(nn.Module):
         n_outputClasses,
         final_convolution_layer: str = "softmax",
     ):
+        """
+        Initializer function for the VGG model
+
+        Args:
+            n_dimensions (int): The number of dimensions in the input data (2 or 3).
+            features (int): The number of features to extract from the input data.
+            n_outputClasses (int): The number of output classes.
+            final_convolution_layer (str, optional): The final layer of the model. Defaults to "softmax".
+        """
         super(VGG, self).__init__()
         self.features = features
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
@@ -53,9 +50,8 @@ class VGG(nn.Module):
             self.avg_pool,
             nn.ReLU(True),
             nn.Dropout(),
-            nn.Linear(
-                512, n_outputClasses
-            ),  # number of input features should be changed later, but works for all vgg right now
+            # number of input features should be changed later, but works for all vgg right now
+            nn.Linear(512, n_outputClasses),
         )
         # Initialize weights
         for m in self.modules():
@@ -143,43 +139,3 @@ cfg = {
         "M",
     ],
 }
-
-
-def vgg11(n_dimensions=3):
-    """VGG 11-layer model (configuration "A")"""
-    return VGG(make_layers(cfg["A"], n_dimensions))
-
-
-def vgg11_bn(n_dimensions=3):
-    """VGG 11-layer model (configuration "A") with batch normalization"""
-    return VGG(make_layers(cfg["A"], n_dimensions, batch_norm=True))
-
-
-def vgg13(n_dimensions=3):
-    """VGG 13-layer model (configuration "B")"""
-    return VGG(make_layers(cfg["B"], n_dimensions=3))
-
-
-def vgg13_bn(n_dimensions=3):
-    """VGG 13-layer model (configuration "B") with batch normalization"""
-    return VGG(make_layers(cfg["B"], n_dimensions, batch_norm=True))
-
-
-def vgg16(n_dimensions=3):
-    """VGG 16-layer model (configuration "D")"""
-    return VGG(make_layers(cfg["D"], n_dimensions))
-
-
-def vgg16_bn(n_dimensions=3):
-    """VGG 16-layer model (configuration "D") with batch normalization"""
-    return VGG(make_layers(cfg["D"], n_dimensions, batch_norm=True))
-
-
-def vgg19(n_dimensions=3):
-    """VGG 19-layer model (configuration "E")"""
-    return VGG(make_layers(cfg["E"], n_dimensions))
-
-
-def vgg19_bn(n_dimensions=3):
-    """VGG 19-layer model (configuration 'E') with batch normalization"""
-    return VGG(make_layers(cfg["E"], n_dimensions, batch_norm=True))

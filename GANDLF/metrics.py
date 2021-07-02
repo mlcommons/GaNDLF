@@ -2,9 +2,8 @@
 All the metrics are to be called from here
 """
 import sys, torch, numpy
-from .losses import MSE, MSE_loss
-from .utils import one_hot, reverse_one_hot
-import SimpleITK as sitk
+from .losses import MSE_loss
+from .utils import one_hot
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
     distance_transform_edt,
@@ -95,30 +94,6 @@ def accuracy(output, label, params):
         output = (output >= params["metrics"]["accuracy"]["threshold"]).float()
     correct = (output == label).float().sum()
     return correct / len(label)
-
-
-def MSE(output, label, reduction="mean", scaling_factor=1):
-    """
-    Calculate the mean square error between the output variable from the network and the target
-
-    Parameters
-    ----------
-    output : torch.Tensor
-        The output generated usually by the network
-    target : torch.Tensor
-        The label for the corresponding Tensor for which the output was generated
-    reduction : string, optional
-        DESCRIPTION. The default is 'mean'.
-    scaling_factor : integer, optional
-        The scaling factor to multiply the label with
-
-    Returns
-    -------
-    loss : torch.Tensor
-        Computed Mean Squared Error loss for the output and label
-
-    """
-    return MSE(output, label, reduction=reduction, scaling_factor=scaling_factor)
 
 
 def MSE_loss_agg(inp, target, params):
