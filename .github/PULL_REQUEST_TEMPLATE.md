@@ -22,5 +22,4 @@ Note that if a box is unchecked, PR merges will take longer than usual.
 - [ ] If adding a submodule, add to list of expections for black styling in [pyproject.toml](https://github.com/CBICA/GaNDLF/blob/master/pyproject.toml) file 
 - [ ] [Usage documentation](https://github.com/CBICA/GaNDLF/blob/master/docs) has been updated, if appropriate
 - [ ] [History](https://github.com/CBICA/GaNDLF/blob/master/HISTORY.md) has been updated, if appropriate
-- [ ] Tests added or modified to cover the changes
-- [ ] Integration tests passed locally by running `pytest`
+- [ ] Tests added or modified to [cover the changes](https://app.codecov.io/gh/CBICA/GaNDLF); if coverage is reduced, please give explanation
