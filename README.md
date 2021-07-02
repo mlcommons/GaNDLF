@@ -3,6 +3,7 @@
 <p align="center">
   <a href="https://github.com/CBICA/GaNDLF/actions/workflows/python-test.yml" alt="Build Status"><img src="https://github.com/CBICA/GaNDLF/actions/workflows/python-test.yml/badge.svg" /></a>
   <a href="https://github.com/CBICA/GaNDLF/actions/workflows/codeql-analysis.yml" alt="Code Analysis"><img src="https://github.com/CBICA/GaNDLF/workflows/CodeQL/badge.svg" /></a>
+  <a href="https://codecov.io/gh/CBICA/GaNDLF" alt="Code Coverage"><img src="https://codecov.io/gh/CBICA/GaNDLF/branch/master/graph/badge.svg?token=4I54XEI3WE" /></a>    
   <a href="https://www.codacy.com/gh/CBICA/GaNDLF/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CBICA/GaNDLF&amp;utm_campaign=Badge_Grade"><img alt="Codacy" src="https://app.codacy.com/project/badge/Grade/8f8b77f62ad843709534e4ed66ad0b5a"></a>
   <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://anaconda.org/conda-forge/gandlf/badges/installer/conda.svg" /></a>
   <a href="https://github.com/CBICA/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-blue" /></a>
