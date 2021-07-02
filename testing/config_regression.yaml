@@ -8,6 +8,7 @@ learning_rate: 0.001
 loss_function: mse
 metrics:
   - mse
+  - accuracy
 model:
   amp: false
   architecture: densenet121

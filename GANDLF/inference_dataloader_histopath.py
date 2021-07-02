@@ -11,13 +11,11 @@ import numpy as np
 from torch.utils.data.dataset import Dataset
 
 if os.name != "nt":
-    """
-    path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
-    """
+    """path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7"""
     from openslide import OpenSlide
     from skimage.transform import resize
     from skimage.filters import threshold_otsu, median
-    from skimage.morphology import binary_closing, disk, binary_dilation, binary_erosion
+    from skimage.morphology import binary_closing, disk
     from scipy.ndimage import binary_fill_holes
 
     def tissue_mask_generation(img_rgb, rgb_min=50):
@@ -25,9 +23,12 @@ if os.name != "nt":
         This function is used to generate tissue masks
         works for patches too i guess
 
-        input :
-            image : type : numpy.array : BGR format usually ex
-            i
+        Args:
+            img_rgb (numpy.array): Input image.
+            rgb_min (int, optional): The minimum threshold. Defaults to 50.
+
+        Returns:
+            numpy.array: The tissue mask.
         """
         img_rgb = np.array(img_rgb)
         background_r = img_rgb[:, :, 0] > threshold_otsu(img_rgb[:, :, 0])
