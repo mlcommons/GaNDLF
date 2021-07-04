@@ -10,7 +10,7 @@ import sys
 
 
 def get_final_layer(final_convolution_layer):
-    none_list = ["none", None, "None", "regression"]
+    none_list = ["none", None, "None", "regression", "classification_but_not_softmax"]
 
     if final_convolution_layer == "sigmoid":
         final_convolution_layer = torch.sigmoid
