@@ -41,6 +41,11 @@ def dice(output, label):
     return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
 
 
+def classification_accuracy(output, label, params):
+    acc = torch.sum(torch.argmax(output, 1) == label) / len(label)
+    return acc
+
+
 def multi_class_dice(output, label, params):
     """
     This function computes a multi-class dice
@@ -279,6 +284,8 @@ def fetch_metric(metric_name):
         metric_function = MSE_loss_agg
     elif (metric_name).lower() == "cel":
         metric_function = CE_loss
+    elif (metric_name).lower() == "classification_accuracy":
+        metric_function = classification_accuracy
     elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
         metric_function = hd95
     elif (metric_lower == "hd") or (metric_lower == "hausdorff"):

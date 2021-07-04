@@ -347,6 +347,8 @@ def validate_network(
         file_mem.write(outputToWrite_mem)
         file_mem.close()
 
+    n_of_val_samples = len(valid_dataloader)
+    
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
