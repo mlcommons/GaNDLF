@@ -11,6 +11,8 @@ from GANDLF.utils import parseTrainingCSV, populate_header_in_parameters
 from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import global_preprocessing_dict
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 import torchio
 
@@ -69,11 +71,25 @@ def main():
 
     data_for_processing = ImagesFromDataFrame(dataframe, parameters, train=False)
 
-    ## to-do
-    # use data_for_processing to loop through all images
-    # if padding is enabled, ensure that it gets applied to the images
-    # save the images to disk    
+    dataloader_for_processing = DataLoader(
+        data_for_processing,
+        batch_size=1,
+        pin_memory=False,
+    )
 
+    ## to-do
+    # use dataloader_for_processing to loop through all images
+    # if padding is enabled, ensure that it gets applied to the images
+    # save the images to disk, but keep a record that these images are preprocessed.
+
+    for batch_idx, (subject) in enumerate(
+        tqdm(dataloader_for_processing, desc="Looping over data")
+    ):
+        print("starting")
+
+        test = 1
+    
+    
     # csv headers
     channelHeaders = headers["channelHeaders"]
     labelHeader = headers["labelHeader"]
