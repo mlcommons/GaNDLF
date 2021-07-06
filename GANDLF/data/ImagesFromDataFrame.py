@@ -26,7 +26,7 @@ from torchio.transforms import (
 from torchio import Image, Subject
 import SimpleITK as sitk
 
-# from GANDLF.utils import resize_image
+from GANDLF.utils import perform_sanity_check_on_subject
 from GANDLF.preprocessing import (
     NonZeroNormalizeOnMaskedRegion,
     CropExternalZeroplanes,
@@ -348,11 +348,9 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # Initializing the subject object using the dict
             subject = Subject(subject_dict)
             # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
-            print("Checking consistency of images in subject '" + subject["subject_id"])
-            subject.check_consistent_affine()
-            subject.check_consistent_space()
-            subject.check_consistent_spatial_shape()
-            subject.check_consistent_orientation()
+            # this is causing memory usage to explode, see https://github.com/CBICA/GaNDLF/issues/128
+            print("Checking consistency of images in subject '" + subject["subject_id"] + "'")
+            perform_sanity_check_on_subject(subject, parameters)
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
