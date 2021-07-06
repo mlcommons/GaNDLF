@@ -241,7 +241,12 @@ def ImagesFromDataFrame(dataframe, parameters, train):
     predictionHeaders = headers["predictionHeaders"]
     subjectIDHeader = headers["subjectIDHeader"]
 
-    sampler = sampler.lower()  # for easier parsing
+    # this basically means that label sampler is selected with padding
+    if isinstance(sampler, dict):
+        sampler_padding = sampler["label"]["padding_type"]
+        sampler = "label"
+    else:
+        sampler = sampler.lower()  # for easier parsing
 
     resize_images = False
     # if resize has been defined but resample is not (or is none)
@@ -355,7 +360,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                         np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
                     )
                     # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-                    padder = Pad(psize_pad, padding_mode="symmetric")
+                    padder = Pad(psize_pad, padding_mode=sampler_padding)
                     subject = padder(subject)
 
             # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
