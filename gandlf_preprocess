@@ -6,6 +6,7 @@ from pathlib import Path
 from datetime import date
 import numpy as np
 import SimpleITK as sitk
+import pandas as pd
 
 from GANDLF.utils import (
     parseTrainingCSV,
@@ -78,6 +79,11 @@ def main():
         batch_size=1,
         pin_memory=False,
     )
+
+    # initialize a new dict for the preprocessed data
+    output_columns_to_write = pd.read_csv(args.data).to_dict()
+    for key in output_columns_to_write.keys():
+        output_columns_to_write[key] = []
 
     ## to-do
     # use dataloader_for_processing to loop through all images
