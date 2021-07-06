@@ -578,3 +578,27 @@ def populate_channel_keys_in_params(data_loader, parameters):
         parameters["value_keys"] = value_keys
 
     return parameters
+
+
+def perform_sanity_check_on_subject(subject):
+    """
+    This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
+
+    Args:
+        subject (torchio.Subject): The input subject.
+
+    Returns:
+        bool: True if everything is okay.
+    """
+    # read the first image and save that for comparison
+    file_reader_base = sitk.ImageFileReader()
+    file_reader_base.SetFileName(subject["0"]["path"])
+    file_reader_base.ReadImageInformation()
+
+    for i in range(1, len(subject)):
+        file_reader_current = sitk.ImageFileReader()
+        file_reader_current.SetFileName(subject[str(i)]["path"])
+        file_reader_current.ReadImageInformation()
+
+        if file_reader_base.GetDimension() != file_reader_current.GetDimension():
+            return False
