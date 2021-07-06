@@ -63,9 +63,7 @@ def main():
 
     # read the csv
     # don't care if the dataframe gets shuffled or not
-    dataframe, headers = parseTrainingCSV(
-        args.data, train=False
-    )  
+    dataframe, headers = parseTrainingCSV(args.data, train=False)
     parameters = parseConfig(args.config)
     parameters = populate_header_in_parameters(parameters, headers)
 
@@ -92,13 +90,12 @@ def main():
             current_image = torchio.ScalarImage(
                 tensor=subject["1"]["data"].squeeze(0),
                 affine=subject["1"]["affine"].squeeze(0),
-                )
-            
+            )
+
             current_image.save("C:/Users/sarth/Downloads/test.nii.gz")
 
             test = 1
-    
-    
+
     # csv headers
     channelHeaders = headers["channelHeaders"]
     labelHeader = headers["labelHeader"]
