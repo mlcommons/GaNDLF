@@ -82,12 +82,21 @@ def main():
     # if padding is enabled, ensure that it gets applied to the images
     # save the images to disk, but keep a record that these images are preprocessed.
 
-    for batch_idx, (subject) in enumerate(
+    for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
-        print("starting")
+        print("Current subject:", subject["subject_id"], flush=True)
 
-        test = 1
+        for key in parameters["headers"]["channelHeaders"]:
+            # current_image = subject[str(key)][torchio.IMAGE]
+            current_image = torchio.ScalarImage(
+                tensor=subject["1"]["data"].squeeze(0),
+                affine=subject["1"]["affine"].squeeze(0),
+                )
+            
+            current_image.save("C:/Users/sarth/Downloads/test.nii.gz")
+
+            test = 1
     
     
     # csv headers
