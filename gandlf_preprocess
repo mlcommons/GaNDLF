@@ -81,6 +81,7 @@ def main():
     # use dataloader_for_processing to loop through all images
     # if padding is enabled, ensure that it gets applied to the images
     # save the images to disk, but keep a record that these images are preprocessed.
+    # create new csv that contains new files.
 
     for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
