@@ -247,6 +247,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         sampler = "label"
     else:
         sampler = sampler.lower()  # for easier parsing
+        sampler_padding = "symmetric"
 
     resize_images = False
     # if resize has been defined but resample is not (or is none)
