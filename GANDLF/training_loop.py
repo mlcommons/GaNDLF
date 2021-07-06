@@ -384,9 +384,7 @@ def validate_network(
             )
 
         # regression/classification problem AND label is present
-        if (
-            "value_keys" in params
-        ) and label_present:  
+        if ("value_keys" in params) and label_present:
             sampler = torchio.data.LabelSampler(params["patch_size"])
             tio_subject = torchio.Subject(subject_dict)
             generator = sampler(tio_subject, num_patches=params["q_samples_per_volume"])
