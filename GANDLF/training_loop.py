@@ -29,6 +29,7 @@ from GANDLF.utils import (
     populate_channel_keys_in_params,
     reverse_one_hot,
     get_class_imbalance_weights,
+    get_filename_extension_sanitized,
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
@@ -511,9 +512,7 @@ def validate_network(
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
-                    _, ext = os.path.splitext(path_to_metadata)
-                    if (ext == ".gz") or (ext == ".nii"):
-                        ext = ".nii.gz"
+                    ext = get_filename_extension_sanitized(path_to_metadata)
                     pred_mask = output_prediction.numpy()
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
