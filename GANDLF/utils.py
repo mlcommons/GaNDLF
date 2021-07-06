@@ -581,7 +581,7 @@ def populate_channel_keys_in_params(data_loader, parameters):
 
 
 def perform_sanity_check_on_subject(subject, parameters):
-    """    
+    """
     This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
 
     Args:
@@ -598,8 +598,9 @@ def perform_sanity_check_on_subject(subject, parameters):
     """
     # read the first image and save that for comparison
     file_reader_base = None
-    
+
     import copy
+
     list_for_comparison = copy.deepcopy(parameters["headers"]["channelHeaders"])
     if "labelHeader" in parameters["headers"]:
         list_for_comparison.append("label")
@@ -616,15 +617,31 @@ def perform_sanity_check_on_subject(subject, parameters):
             file_reader_current.ReadImageInformation()
 
             if file_reader_base.GetDimension() != file_reader_current.GetDimension():
-                raise ValueError("Dimensions for Subject '" + subject["subject_id"] + "' are not consistent.")
-            
+                raise ValueError(
+                    "Dimensions for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
             if file_reader_base.GetOrigin() != file_reader_current.GetOrigin():
-                raise ValueError("Origin for Subject '" + subject["subject_id"] + "' are not consistent.")
-            
+                raise ValueError(
+                    "Origin for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
             if file_reader_base.GetDirection() != file_reader_current.GetDirection():
-                raise ValueError("Orientation for Subject '" + subject["subject_id"] + "' are not consistent.")
-            
+                raise ValueError(
+                    "Orientation for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
             if file_reader_base.GetSpacing() != file_reader_current.GetSpacing():
-                raise ValueError("Spacing for Subject '" + subject["subject_id"] + "' are not consistent.")
-            
+                raise ValueError(
+                    "Spacing for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
     return True

@@ -343,7 +343,11 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             subject = Subject(subject_dict)
             # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
             # this is causing memory usage to explode, see https://github.com/CBICA/GaNDLF/issues/128
-            print("Checking consistency of images in subject '" + subject["subject_id"] + "'")
+            print(
+                "Checking consistency of images in subject '"
+                + subject["subject_id"]
+                + "'"
+            )
             perform_sanity_check_on_subject(subject, parameters)
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
