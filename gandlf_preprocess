@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Preprocess",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Generate training/inference data which are padded to reduce RAM footprint during training.\n\n"
+        description="Generate training/inference data which are preprocessed to reduce resource footprint during computation.\n\n"
         + copyrightMessage,
     )
     parser.add_argument(
