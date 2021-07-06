@@ -581,7 +581,7 @@ def populate_channel_keys_in_params(data_loader, parameters):
 
 
 def perform_sanity_check_on_subject(subject):
-    """
+    """    
     This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
 
     Args:
@@ -589,6 +589,11 @@ def perform_sanity_check_on_subject(subject):
 
     Returns:
         bool: True if everything is okay.
+
+    Raises:
+        ValueError: Dimension mismatch in the images.
+        ValueError: Origin mismatch in the images.
+        ValueError: Orientation mismatch in the images.
     """
     # read the first image and save that for comparison
     file_reader_base = sitk.ImageFileReader()
@@ -601,4 +606,16 @@ def perform_sanity_check_on_subject(subject):
         file_reader_current.ReadImageInformation()
 
         if file_reader_base.GetDimension() != file_reader_current.GetDimension():
-            return False
+            raise ValueError("Dimensions for Subject '" + subject["subject_id"] + "' are not consistent.")
+        
+        if file_reader_base.GetOrigin() != file_reader_current.GetOrigin():
+            raise ValueError("Origin for Subject '" + subject["subject_id"] + "' are not consistent.")
+        
+        if file_reader_base.GetDirection() != file_reader_current.GetDirection():
+            raise ValueError("Orientation for Subject '" + subject["subject_id"] + "' are not consistent.")
+        
+        if file_reader_base.GetSpacing() != file_reader_current.GetSpacing():
+            raise ValueError("Spacing for Subject '" + subject["subject_id"] + "' are not consistent.")
+        
+        test = 1
+    return True
