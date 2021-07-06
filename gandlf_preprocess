@@ -141,6 +141,7 @@ def main():
         for key in parameters["headers"]["channelHeaders"]:
             pth = Path(subject_dict_to_write[str(key)]["path"])
             image_file = os.path.join(current_output_dir, pth.name)
+            output_columns_to_write["channel_" + str(key)].append(image_file)
             image_to_write = subject_dict_to_write[str(key)].as_sitk()
             if not os.path.isfile(image_file):
                 try:
@@ -157,6 +158,7 @@ def main():
         if "label" in subject_dict_to_write:
             pth = Path(subject_dict_to_write["label"]["path"])
             image_file = os.path.join(current_output_dir, pth.name)
+            output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
             if not os.path.isfile(image_file):
                 try:
@@ -168,6 +170,12 @@ def main():
                         )
                     )
                     sys.exit(1)
+        
+        if len(parameters["headers"]["predictionHeaders"]) > 1:
+            for key in parameters["headers"]["predictionHeaders"]:
+                output_columns_to_write["valuetopredict_" + str(key)].append(subject_dict_to_write["value_" + str(key)])
+        elif len(parameters["headers"]["predictionHeaders"]) == 1:
+            output_columns_to_write["valuetopredict"].append(subject_dict_to_write["value_" + str(key))
 
 
 # main function
