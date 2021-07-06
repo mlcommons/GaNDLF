@@ -85,10 +85,6 @@ def main():
     # save the images to disk, but keep a record that these images are preprocessed.
     # create new csv that contains new files.
 
-    # csv headers
-    channelHeaders = headers["channelHeaders"]
-    psize = parameters["psize"]
-
     for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
@@ -102,7 +98,7 @@ def main():
         # 5D tensor considering the batch_size as first dimension.
         for key in parameters["headers"]["channelHeaders"]:
             # apply a different padding mode to image and label (so that label information is not duplicated)
-            psize_pad = list(np.asarray(np.ceil(np.divide(psize, 2)), dtype=int))
+            psize_pad = list(np.asarray(np.ceil(np.divide(parameters["psize"], 2)), dtype=int))
             # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
             padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric")
             subject = padder(subject)
@@ -121,10 +117,10 @@ def main():
             # now combine the label with the original subject dictionary to do sampling
             subject["label"] = subject_label["label"]
 
-            sampler = torchio.data.LabelSampler(psize)
+            sampler = torchio.data.LabelSampler(parameters["psize"])
             generator = sampler(subject, num_patches=1)
             for patch in generator:
-                for channel in channelHeaders:
+                for channel in parameters["headers"]["channelHeaders"]:
                     subject_dict_to_write[str(channel)] = patch[str(channel)]
 
                 subject_dict_to_write["label"] = patch["label"]
@@ -132,7 +128,7 @@ def main():
             subject_dict_to_write = subject
 
         # write new images
-        for key in channelHeaders:
+        for key in parameters["headers"]["channelHeaders"]:
             pth = Path(subject_dict_to_write[str(key)]["path"])
             image_file = os.path.join(current_output_dir, pth.name)
             image_to_write = subject_dict_to_write[str(key)].as_sitk()
