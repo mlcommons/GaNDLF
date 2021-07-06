@@ -81,7 +81,11 @@ def main():
     )
 
     # initialize a new dict for the preprocessed data
-    output_columns_to_write = pd.read_csv(args.data).to_dict()
+    base_df =  pd.read_csv(args.data)
+    # ensure csv only contains lower case columns
+    base_df.columns = base_df.columns.str.lower()
+    # only store the column names
+    output_columns_to_write = base_df.to_dict()
     for key in output_columns_to_write.keys():
         output_columns_to_write[key] = []
 
