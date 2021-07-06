@@ -7,7 +7,11 @@ from datetime import date
 import numpy as np
 import SimpleITK as sitk
 
-from GANDLF.utils import parseTrainingCSV, populate_header_in_parameters
+from GANDLF.utils import (
+    parseTrainingCSV,
+    populate_header_in_parameters,
+    get_filename_extension_sanitized,
+)
 from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import global_preprocessing_dict
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -53,7 +57,7 @@ def main():
         "-labelPad",
         type=str,
         default="constant",
-        help="This specifies the padding strategy when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
+        help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
         required=False,
     )
 
@@ -81,21 +85,6 @@ def main():
     # save the images to disk, but keep a record that these images are preprocessed.
     # create new csv that contains new files.
 
-    for _, (subject) in enumerate(
-        tqdm(dataloader_for_processing, desc="Looping over data")
-    ):
-        # the "squeeze" is needed because the dataloader automatically constructs
-        # 5D tensor considering the batch_size as first dimension.
-        for key in parameters["headers"]["channelHeaders"]:
-            current_image = torchio.ScalarImage(
-                tensor=subject["1"]["data"].squeeze(0),
-                affine=subject["1"]["affine"].squeeze(0),
-            )
-
-            current_image.save("C:/Users/sarth/Downloads/test.nii.gz")
-
-            test = 1
-
     # csv headers
     channelHeaders = headers["channelHeaders"]
     labelHeader = headers["labelHeader"]
@@ -107,85 +96,23 @@ def main():
     else:
         verbose = False
 
-    num_row, num_col = dataframe.shape
-    dataframe.columns = range(0, num_col)
-    dataframe.index = range(0, num_row)
-
-    preprocessing = parameters["data_preprocessing"]
-
-    for patient in range(num_row):
-        # We need this dict for storing the meta data for each subject
-        # such as different image modalities, labels, any other data
-        subject_dict = {}
+    for _, (subject) in enumerate(
+        tqdm(dataloader_for_processing, desc="Looping over data")
+    ):
         subject_dict_to_write = {}
-        subject_dict_label = {}
-        subject_dict["subject_id"] = dataframe[subjectIDHeader][patient]
-        subject_dict_to_write["subject_id"] = subject_dict["subject_id"]
 
-        current_output_dir = os.path.join(args.output, subject_dict["subject_id"])
+        current_output_dir = os.path.join(args.output, str(subject["subject_id"][0]))
         Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
-        skip_subject = False
-        # iterating through the channels/modalities/timepoints of the subject
-        for channel in channelHeaders:
-            # sanity check for malformed csv
-            if not os.path.isfile(str(dataframe[channel][patient])):
-                skip_subject = True
-            # assigning the dict key to the channel
-            subject_dict[str(channel)] = torchio.Image(
-                str(dataframe[channel][patient]), type=torchio.INTENSITY
-            )
-
-        if labelHeader is not None:
-            if not os.path.isfile(str(dataframe[labelHeader][patient])):
-                skip_subject = True
-            subject_dict_label["label"] = torchio.Image(
-                str(dataframe[labelHeader][patient]), type=torchio.LABEL
-            )
-
-        # skip subject the condition was tripped
-        if not skip_subject:
-            if verbose:
-                print(
-                    "Started padding images for '" + subject_dict["subject_id"] + "'",
-                    flush=True,
-                )
-            # Initializing the subject object using the dict
-            subject = torchio.Subject(subject_dict)
-            subject_label = torchio.Subject(subject_dict_label)
-
-            # first, we want to do the resampling, if it is present - required for inference as well
-            resampler = None
-            if "resample" in preprocessing:
-                if "resolution" in preprocessing["resample"]:
-                    # resample_split = str(aug).split(':')
-                    resample_values = tuple(
-                        np.array(preprocessing["resample"]["resolution"]).astype(
-                            np.float
-                        )
-                    )
-                    if len(resample_values) == 2:
-                        resample_values = tuple(np.append(resample_values, 1))
-                    resampler = torchio.transforms.Resample(resample_values)
-
-            # next, we want to do the intensity normalize - required for inference as well
-            normalizer = None
-            if "normalize" in preprocessing:
-                normalizer = global_preprocessing_dict["normalize"]
-            elif "normalize_nonZero" in preprocessing:
-                normalizer = global_preprocessing_dict["normalize_nonZero"]
-            elif "normalize_nonZero_masked" in preprocessing:
-                normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
-
-            # apply normalizer to only image and label
-            if normalizer is not None:
-                subject = normalizer(subject)
-
+        # the "squeeze" is needed because the dataloader automatically constructs
+        # 5D tensor considering the batch_size as first dimension.
+        for key in parameters["headers"]["channelHeaders"]:
             # apply a different padding mode to image and label (so that label information is not duplicated)
             psize_pad = list(np.asarray(np.ceil(np.divide(psize, 2)), dtype=int))
+            # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
             padder = torchio.transforms.Pad(
                 psize_pad, padding_mode="symmetric"
-            )  # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+            )  
             subject = padder(subject)
 
             if labelHeader is not None:
@@ -194,17 +121,14 @@ def main():
                         "Applying specialized padding to label image and then generating crops based on it",
                         flush=True,
                     )
+                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
                 padder_label = torchio.transforms.Pad(
                     psize_pad, padding_mode=args.labelPad
-                )  # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                )  
                 subject_label = padder_label(subject_label)
 
                 # now combine the label with the original subject dictionary to do sampling
                 subject["label"] = subject_label["label"]
-
-                # apply resampling to both image(s) and label
-                if resampler is not None:
-                    subject = resampler(subject)
 
                 sampler = torchio.data.LabelSampler(psize)
                 generator = sampler(subject, num_patches=1)
@@ -216,42 +140,37 @@ def main():
             else:
                 subject_dict_to_write = subject
 
-                # apply resampling to image(s)
-                if resampler is not None:
-                    subject_dict_to_write = resampler(subject_dict_to_write)
-
-        if verbose:
-            print(
-                "Writing padded images for '" + subject_dict["subject_id"] + "'",
-                flush=True,
-            )
         # write new images
         for key in channelHeaders:
             pth = Path(subject_dict_to_write[str(key)]["path"])
-            image_to_write = subject_dict_to_write[str(key)].as_sitk()
             image_file = os.path.join(current_output_dir, pth.name)
-            print("image_file:", image_file)
-            print("image_file.size():", image_to_write.GetSize())
+            image_to_write = subject_dict_to_write[str(key)].as_sitk()
             if not os.path.isfile(image_file):
-                if verbose:
-                    print("Writing", image_file)
                 try:
                     sitk.WriteImage(image_to_write, image_file)
                 except IOError:
-                    print("Could not write:", image_file, file=sys.stderr, flush=True)
+                    IOError(
+                        "Could not write image file: {}. Make sure that the file is not open and try again.".format(
+                            image_file
+                        )
+                    )
+                    sys.exit(1)
 
         # now try to write the label
         if "label" in subject_dict_to_write:
             pth = Path(subject_dict_to_write["label"]["path"])
-            image_to_write = subject_dict_to_write["label"].as_sitk()
             image_file = os.path.join(current_output_dir, pth.name)
+            image_to_write = subject_dict_to_write["label"].as_sitk()
             if not os.path.isfile(image_file):
-                if verbose:
-                    print("Writing", image_file)
                 try:
                     sitk.WriteImage(image_to_write, image_file)
                 except IOError:
-                    print("Could not write:", image_file, file=sys.stderr, flush=True)
+                    IOError(
+                        "Could not write image file: {}. Make sure that the file is not open and try again.".format(
+                            image_file
+                        )
+                    )
+                    sys.exit(1)
 
 
 # main function
