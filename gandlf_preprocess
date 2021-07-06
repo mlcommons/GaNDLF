@@ -110,9 +110,7 @@ def main():
             # apply a different padding mode to image and label (so that label information is not duplicated)
             psize_pad = list(np.asarray(np.ceil(np.divide(psize, 2)), dtype=int))
             # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            padder = torchio.transforms.Pad(
-                psize_pad, padding_mode="symmetric"
-            )  
+            padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric")
             subject = padder(subject)
 
             if labelHeader is not None:
@@ -124,7 +122,7 @@ def main():
                 # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
                 padder_label = torchio.transforms.Pad(
                     psize_pad, padding_mode=args.labelPad
-                )  
+                )
                 subject_label = padder_label(subject_label)
 
                 # now combine the label with the original subject dictionary to do sampling
