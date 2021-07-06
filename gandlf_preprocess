@@ -173,9 +173,10 @@ def main():
         
         if len(parameters["headers"]["predictionHeaders"]) > 1:
             for key in parameters["headers"]["predictionHeaders"]:
-                output_columns_to_write["valuetopredict_" + str(key)].append(subject_dict_to_write["value_" + str(key)])
+                output_columns_to_write["valuetopredict_" + str(key)].append(str(subject_dict_to_write["value_" + str(key)].numpy()[0]))
         elif len(parameters["headers"]["predictionHeaders"]) == 1:
-            output_columns_to_write["valuetopredict"].append(subject_dict_to_write["value_" + str(key))
+            output_columns_to_write["valuetopredict"].append(str(subject_dict_to_write["value_0"].numpy()[0]))
+
 
 
 # main function
