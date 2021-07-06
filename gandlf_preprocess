@@ -50,7 +50,7 @@ def main():
         "-labelPad",
         type=str,
         default="constant",
-        help="Padding type for labels, defaults to 'constant:0' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
+        help="This specifies the padding strategy when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
         required=False,
     )
 
@@ -59,9 +59,10 @@ def main():
     Path(args.output).mkdir(parents=True, exist_ok=True)
 
     # read the csv
+    # don't care if the dataframe gets shuffled or not
     dataframe, headers = parseTrainingCSV(
         args.data, train=False
-    )  # don't care if the dataframe gets shuffled or not
+    )  
     parameters = parseConfig(args.config)
 
     # csv headers
