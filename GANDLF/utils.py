@@ -550,6 +550,21 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     return dice_penalty_dict
 
 
+def get_filename_extension_sanitized(filename):
+    """
+    This function returns the extension of the filename with leading and trailing characters removed.
+    Args:
+        filename (str): The filename to be processed.
+    Returns:
+        str: The filename with extension removed.
+    """
+    _, ext = os.path.splitext(filename)
+    # if .gz or .nii file is detected, always return .nii.gz
+    if (ext == ".gz") or (ext == ".nii"):
+        ext = ".nii.gz"
+    return ext
+
+
 def populate_channel_keys_in_params(data_loader, parameters):
     """
     Function to read channel key information from specified data loader
