@@ -87,19 +87,13 @@ def main():
 
     # csv headers
     channelHeaders = headers["channelHeaders"]
-    labelHeader = headers["labelHeader"]
-    subjectIDHeader = headers["subjectIDHeader"]
     psize = parameters["psize"]
-
-    if "verbose" in parameters:
-        verbose = parameters["verbose"]
-    else:
-        verbose = False
 
     for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
         subject_dict_to_write = {}
+        subject_dict_label = {}
 
         current_output_dir = os.path.join(args.output, str(subject["subject_id"][0]))
         Path(current_output_dir).mkdir(parents=True, exist_ok=True)
@@ -113,30 +107,29 @@ def main():
             padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric")
             subject = padder(subject)
 
-            if labelHeader is not None:
-                if verbose:
-                    print(
-                        "Applying specialized padding to label image and then generating crops based on it",
-                        flush=True,
-                    )
-                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-                padder_label = torchio.transforms.Pad(
-                    psize_pad, padding_mode=args.labelPad
-                )
-                subject_label = padder_label(subject_label)
+        if parameters["headers"["labelHeader"]] is not None:
+            subject_dict_label["label"] = torchio.Image(
+                str(subject["label"]["path"]), type=torchio.LABEL
+            )
+            subject_label = torchio.Subject(subject_dict_label)
+            # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+            padder_label = torchio.transforms.Pad(
+                psize_pad, padding_mode=args.labelPad
+            )
+            subject_label = padder_label(subject_label)
 
-                # now combine the label with the original subject dictionary to do sampling
-                subject["label"] = subject_label["label"]
+            # now combine the label with the original subject dictionary to do sampling
+            subject["label"] = subject_label["label"]
 
-                sampler = torchio.data.LabelSampler(psize)
-                generator = sampler(subject, num_patches=1)
-                for patch in generator:
-                    for channel in channelHeaders:
-                        subject_dict_to_write[str(channel)] = patch[str(channel)]
+            sampler = torchio.data.LabelSampler(psize)
+            generator = sampler(subject, num_patches=1)
+            for patch in generator:
+                for channel in channelHeaders:
+                    subject_dict_to_write[str(channel)] = patch[str(channel)]
 
-                    subject_dict_to_write["label"] = patch["label"]
-            else:
-                subject_dict_to_write = subject
+                subject_dict_to_write["label"] = patch["label"]
+        else:
+            subject_dict_to_write = subject
 
         # write new images
         for key in channelHeaders:
