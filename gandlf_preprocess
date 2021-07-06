@@ -86,10 +86,9 @@ def main():
     for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
-        print("Current subject:", subject["subject_id"], flush=True)
-
+        # the "squeeze" is needed because the dataloader automatically constructs
+        # 5D tensor considering the batch_size as first dimension.
         for key in parameters["headers"]["channelHeaders"]:
-            # current_image = subject[str(key)][torchio.IMAGE]
             current_image = torchio.ScalarImage(
                 tensor=subject["1"]["data"].squeeze(0),
                 affine=subject["1"]["affine"].squeeze(0),
