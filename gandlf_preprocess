@@ -7,9 +7,10 @@ from datetime import date
 import numpy as np
 import SimpleITK as sitk
 
-from GANDLF.utils import parseTrainingCSV
+from GANDLF.utils import parseTrainingCSV, populate_header_in_parameters
 from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import global_preprocessing_dict
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
 import torchio
 
@@ -64,6 +65,14 @@ def main():
         args.data, train=False
     )  
     parameters = parseConfig(args.config)
+    parameters = populate_header_in_parameters(parameters, headers)
+
+    data_for_processing = ImagesFromDataFrame(dataframe, parameters, train=False)
+
+    ## to-do
+    # use data_for_processing to loop through all images
+    # if padding is enabled, ensure that it gets applied to the images
+    # save the images to disk    
 
     # csv headers
     channelHeaders = headers["channelHeaders"]
