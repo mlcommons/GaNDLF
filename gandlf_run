@@ -162,4 +162,6 @@ if __name__ == "__main__":
     else:
         args.train = True
 
-    main_run(args.data, args.config, args.output, args.train, args.device, args.reset_prev)
+    main_run(
+        args.data, args.config, args.output, args.train, args.device, args.reset_prev
+    )

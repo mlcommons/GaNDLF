@@ -47,7 +47,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
     )
 
     # initialize a new dict for the preprocessed data
-    base_df =  pd.read_csv(data_csv)
+    base_df = pd.read_csv(data_csv)
     # ensure csv only contains lower case columns
     base_df.columns = base_df.columns.str.lower()
     # only store the column names
@@ -74,7 +74,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
         # 5D tensor considering the batch_size as first dimension.
         for key in parameters["headers"]["channelHeaders"]:
             # apply a different padding mode to image and label (so that label information is not duplicated)
-            psize_pad = list(np.asarray(np.ceil(np.divide(parameters["psize"], 2)), dtype=int))
+            psize_pad = list(
+                np.asarray(np.ceil(np.divide(parameters["psize"], 2)), dtype=int)
+            )
             # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
             padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric")
             subject = padder(subject)
@@ -136,13 +138,16 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                         )
                     )
                     sys.exit(1)
-        
+
         if len(parameters["headers"]["predictionHeaders"]) > 1:
             for key in parameters["headers"]["predictionHeaders"]:
-                output_columns_to_write["valuetopredict_" + str(key)].append(str(subject_dict_to_write["value_" + str(key)].numpy()[0]))
+                output_columns_to_write["valuetopredict_" + str(key)].append(
+                    str(subject_dict_to_write["value_" + str(key)].numpy()[0])
+                )
         elif len(parameters["headers"]["predictionHeaders"]) == 1:
-            output_columns_to_write["valuetopredict"].append(str(subject_dict_to_write["value_0"].numpy()[0]))
-
+            output_columns_to_write["valuetopredict"].append(
+                str(subject_dict_to_write["value_0"].numpy()[0])
+            )
 
 
 # main function
