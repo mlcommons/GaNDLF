@@ -20,54 +20,13 @@ from tqdm import tqdm
 import torchio
 
 
-def main():
-    copyrightMessage = (
-        "Contact: software@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
-    )
-
-    parser = argparse.ArgumentParser(
-        prog="GANDLF_Preprocess",
-        formatter_class=argparse.RawTextHelpFormatter,
-        description="Generate training/inference data which are preprocessed to reduce resource footprint during computation.\n\n"
-        + copyrightMessage,
-    )
-    parser.add_argument(
-        "-config",
-        type=str,
-        help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
-        required=True,
-    )
-    parser.add_argument(
-        "-data",
-        type=str,
-        help="Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV",
-        required=True,
-    )
-    parser.add_argument(
-        "-output",
-        type=str,
-        help="Output directory to save intermediate files and model weights",
-        required=True,
-    )
-    parser.add_argument(
-        "-labelPad",
-        type=str,
-        default="constant",
-        help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
-        required=False,
-    )
-
-    args = parser.parse_args()
-
-    Path(args.output).mkdir(parents=True, exist_ok=True)
+def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # read the csv
     # don't care if the dataframe gets shuffled or not
-    dataframe, headers = parseTrainingCSV(args.data, train=False)
-    parameters = parseConfig(args.config)
+    dataframe, headers = parseTrainingCSV(data_csv, train=False)
+    parameters = parseConfig(config_file)
     parameters = populate_header_in_parameters(parameters, headers)
 
     data_for_processing = ImagesFromDataFrame(dataframe, parameters, train=False)
@@ -79,7 +38,7 @@ def main():
     )
 
     # initialize a new dict for the preprocessed data
-    base_df =  pd.read_csv(args.data)
+    base_df =  pd.read_csv(data_csv)
     # ensure csv only contains lower case columns
     base_df.columns = base_df.columns.str.lower()
     # only store the column names
@@ -99,7 +58,7 @@ def main():
         subject_dict_to_write = {}
         subject_dict_label = {}
 
-        current_output_dir = os.path.join(args.output, str(subject["subject_id"][0]))
+        current_output_dir = os.path.join(output_dir, str(subject["subject_id"][0]))
         Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
         # the "squeeze" is needed because the dataloader automatically constructs
@@ -118,7 +77,7 @@ def main():
             subject_label = torchio.Subject(subject_dict_label)
             # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
             padder_label = torchio.transforms.Pad(
-                psize_pad, padding_mode=args.labelPad
+                psize_pad, padding_mode=label_pad_mode
             )
             subject_label = padder_label(subject_label)
 
@@ -179,4 +138,45 @@ def main():
 
 # main function
 if __name__ == "__main__":
-    main()
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_Preprocess",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate training/inference data which are preprocessed to reduce resource footprint during computation.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-config",
+        type=str,
+        help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
+        required=True,
+    )
+    parser.add_argument(
+        "-data",
+        type=str,
+        help="Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV",
+        required=True,
+    )
+    parser.add_argument(
+        "-output",
+        type=str,
+        help="Output directory to save intermediate files and model weights",
+        required=True,
+    )
+    parser.add_argument(
+        "-labelPad",
+        type=str,
+        default="constant",
+        help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
+        required=False,
+    )
+
+    args = parser.parse_args()
+
+    preprocess_and_save(args.data, args.config, args.output, args.labelPad)
