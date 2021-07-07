@@ -11,10 +11,8 @@ import pandas as pd
 from GANDLF.utils import (
     parseTrainingCSV,
     populate_header_in_parameters,
-    get_filename_extension_sanitized,
 )
 from GANDLF.parseConfig import parseConfig
-from GANDLF.data.ImagesFromDataFrame import global_preprocessing_dict
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from torch.utils.data import DataLoader
 from tqdm import tqdm
