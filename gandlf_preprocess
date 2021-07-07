@@ -149,6 +149,8 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                 str(subject_dict_to_write["value_0"].numpy()[0])
             )
 
+    print("Finished.")
+
 
 # main function
 if __name__ == "__main__":
