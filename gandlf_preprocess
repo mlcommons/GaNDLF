@@ -55,6 +55,10 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
     for key in output_columns_to_write.keys():
         output_columns_to_write[key] = []
 
+    # keep a record of the keys which contains only images
+    keys_with_images = parameters["headers"]["channelHeaders"]
+    keys_with_images = [str(x) for x in keys_with_images]
+
     ## to-do
     # use dataloader_for_processing to loop through all images
     # if padding is enabled, ensure that it gets applied to the images
@@ -72,14 +76,14 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
 
         # the "squeeze" is needed because the dataloader automatically constructs
         # 5D tensor considering the batch_size as first dimension.
-        for key in parameters["headers"]["channelHeaders"]:
-            # apply a different padding mode to image and label (so that label information is not duplicated)
-            psize_pad = list(
-                np.asarray(np.ceil(np.divide(parameters["psize"], 2)), dtype=int)
-            )
-            # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric")
-            subject = padder(subject)
+        # # for key in parameters["headers"]["channelHeaders"]:
+        # apply a different padding mode to image and label (so that label information is not duplicated)
+        psize_pad = list(
+            np.asarray(np.ceil(np.divide(parameters["patch_size"], 2)), dtype=int)
+        )
+        # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+        padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric", include=keys_with_images)
+        subject = padder(subject)
 
         if parameters["headers"["labelHeader"]] is not None:
             subject_dict_label["label"] = torchio.Image(
@@ -95,7 +99,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
             # now combine the label with the original subject dictionary to do sampling
             subject["label"] = subject_label["label"]
 
-            sampler = torchio.data.LabelSampler(parameters["psize"])
+            sampler = torchio.data.LabelSampler(parameters["patch_size"])
             generator = sampler(subject, num_patches=1)
             for patch in generator:
                 for channel in parameters["headers"]["channelHeaders"]:
