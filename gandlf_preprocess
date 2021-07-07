@@ -21,6 +21,15 @@ import torchio
 
 
 def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
+    """
+    [summary]
+
+    Args:
+        data_csv (str): The CSV file of the training data.
+        config_file (str): The YAML file of the training configuration.
+        output_dir (str): The output directory.
+        label_pad_mode (str): The padding strategy for the label.
+    """
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # read the csv
