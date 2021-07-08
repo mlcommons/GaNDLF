@@ -76,7 +76,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main_run(
-        args.data, args.config, args.output, args.train, args.device, args.reset_prev
+        args.data, args.config, args.output, args.train, args.device, args.reset_prv
     )
 
     print("Finished.")
