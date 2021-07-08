@@ -65,6 +65,17 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
     # save the images to disk, but keep a record that these images are preprocessed.
     # create new csv that contains new files.
 
+    # give warning if label sampler is present but number of patches to extract is > 1
+    if (
+        (parameters["patch_sampler"] == "label")
+        or (isinstance(parameters["patch_sampler"], dict))
+    ) and parameters["q_samples_per_volume"] > 1:
+        print(
+            "[WARNING] Label sampling has been enabled but q_samples_per_volume > 1; this has been known to cause issues, so q_samples_per_volume will be hard-coded to 1 during preprocessing. Please contact GaNDLF developers for more information",
+            file=sys.stderr,
+            flush=True,
+        )
+
     for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
@@ -90,7 +101,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                 type=torchio.LABEL,
                 path=subject["label"]["path"],
             )
-        subject_process = torchio.Subject(subject_process)
+        subject_dict_to_write = torchio.Subject(subject_process)
 
         # apply a different padding mode to image and label (so that label information is not duplicated)
         if (parameters["patch_sampler"] == "label") or (
@@ -100,30 +111,26 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
             psize_pad = list(
                 np.asarray(np.ceil(np.divide(parameters["patch_size"], 2)), dtype=int)
             )
-            # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+            # initialize the padder for images
             padder = torchio.transforms.Pad(
                 psize_pad, padding_mode="symmetric", include=keys_with_images
             )
-            subject = padder(subject)
+            subject_dict_to_write = padder(subject_dict_to_write)
 
             if parameters["headers"]["labelHeader"] is not None:
-                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                # initialize the padder for label
                 padder_label = torchio.transforms.Pad(
                     psize_pad, padding_mode=label_pad_mode, include="label"
                 )
-                subject = padder_label(subject)
+                subject_dict_to_write = padder_label(subject_dict_to_write)
 
                 sampler = torchio.data.LabelSampler(parameters["patch_size"])
-                generator = sampler(subject, num_patches=1)
+                generator = sampler(subject_dict_to_write, num_patches=1)
                 for patch in generator:
                     for channel in parameters["headers"]["channelHeaders"]:
                         subject_dict_to_write[str(channel)] = patch[str(channel)]
 
                     subject_dict_to_write["label"] = patch["label"]
-            else:
-                subject_dict_to_write = subject
-        else:
-            subject_dict_to_write = subject
 
         # write new images
         for key in parameters["headers"]["channelHeaders"]:
