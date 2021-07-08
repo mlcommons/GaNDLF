@@ -102,6 +102,15 @@ if os.name != "nt":
             return len(self._points)
 
         def __getitem__(self, idx):
+            """
+            This function is used to return the patch and its location.
+
+            Args:
+                idx (int): The index of the patch.
+
+            Returns:
+                (string, int, int): The patch, x and y locations.
+            """
             x_loc, y_loc = self._points[idx]
             patch = np.array(
                 self._os_image.read_region(
