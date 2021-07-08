@@ -668,10 +668,20 @@ def test_preprocess_functions():
     input_transformed = normalize_standardize(input_tensor)
     input_transformed = normalize_div_by_255(input_tensor)
     input_transformed = threshold_intensities(input_tensor, 0.25, 0.75)
-    assert torch.count_nonzero(input_transformed[input_transformed<0.25]>0.75) == 0, "Input should be thresholded"
+    assert (
+        torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
+    ), "Input should be thresholded"
 
     input_transformed = clip_intensities(input_tensor, 0.25, 0.75)
-    assert torch.count_nonzero(input_transformed[input_transformed<0.25]>0.75) == 0, "Input should be thresholded"
+    assert (
+        torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
+    ), "Input should be thresholded"
+
+    input_transformed = tensor_rotate_90(input_tensor, (1))
+    input_transformed = tensor_rotate_180(input_tensor, (1))
+
+    non_zero_normalizer = NonZeroNormalizeOnMaskedRegion()
+    input_transformed = non_zero_normalizer(input_tensor)
 
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resample_image(
@@ -681,3 +691,7 @@ def test_preprocess_functions():
     )
     img_tensor = get_tensor_for_dataloader(img_resized)
     assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
+
+    input_tensor = torch.rand(1, 256, 256, 256)
+    cropper = CropExternalZeroplanes(patch_size=[128, 128, 128])
+    input_transformed = cropper(input_tensor)
