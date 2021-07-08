@@ -6,15 +6,18 @@ from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
 
 def main_run(data_csv, config_file, output_dir, train_mode, device, reset_prev):
     """
-    [summary]
 
-    Args:
-        data_csv (str): The CSV file of the training data.
-        config_file (str): The YAML file of the training configuration.
-        output_dir (str): The output directory.
-        train_mode (bool): Whether to train or infer.
-        device (str): The device type.
-        reset_prev (bool): Whether the previous run will be reset or not.
+      [summary]
+
+          data_csv (str): The CSV file of the training data.
+          config_file (str): The YAML file of the training configuration.
+          output_dir (str): The output directory.
+          train_mode (bool): Whether to train or infer.
+          device (str): The device type.
+          reset_prev (bool): Whether the previous run will be reset or not.
+
+    Raises:
+        ValueError: Parameter check from previous run.
     """
     file_data_full = data_csv
     model_parameters = config_file
