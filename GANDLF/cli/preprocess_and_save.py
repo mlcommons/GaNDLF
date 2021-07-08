@@ -27,7 +27,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         config_file (str): The YAML file of the training configuration.
         output_dir (str): The output directory.
         label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
-    
+
     Raises:
         ValueError: Parameter check from previous
     """

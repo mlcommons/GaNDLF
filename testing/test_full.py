@@ -584,8 +584,8 @@ def test_config_read():
 
 def test_cli_function_preprocess():
     print("Starting testing cli function preprocess")
-    file_config = os.path.join(testingDir,"config_segmentation.yaml")
-    file_config_temp = os.path.join(testingDir,"config_segmentation_temp.yaml")
+    file_config = os.path.join(testingDir, "config_segmentation.yaml")
+    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
     # if found in previous run, discard.
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
@@ -608,23 +608,23 @@ def test_cli_function_preprocess():
     parameters["save_output"] = True
 
     # store this separately for preprocess testing
-    with open(file_config_temp, 'w') as outfile:
+    with open(file_config_temp, "w") as outfile:
         yaml.dump(parameters, outfile, default_flow_style=False)
 
-    preprocess_and_save(file_data, file_config_temp, outputDir)    
+    preprocess_and_save(file_data, file_config_temp, outputDir)
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
 
 def test_cli_function_mainrun(device):
     print("Starting testing cli function main_run")
-    file_config_temp = os.path.join(testingDir,"config_segmentation_temp.yaml")
+    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
     # if preprocess wasn't run, this file should not be present
     if not os.path.exists(file_config_temp):
-        file_config_temp = os.path.join(testingDir,"config_segmentation.yaml")
+        file_config_temp = os.path.join(testingDir, "config_segmentation.yaml")
 
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
-    
+
     main_run(file_data, file_config_temp, outputDir, True, device, True)
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")

@@ -455,20 +455,20 @@ def parseConfig(config_file_path, version_check=True):
 
     if isinstance(params["model"]["class_list"], str):
         if ("||" in params["model"]["class_list"]) or (
-                "&&" in params["model"]["class_list"]
-            ):
-                # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
-                print(
-                    "This is a special case for multi-class computation, where different labels are processed together"
-                )
-                temp_classList = params["model"]["class_list"]
-                temp_classList = temp_classList.replace(
-                    "[", ""
-                )  # we don't need the brackets
-                temp_classList = temp_classList.replace(
-                    "]", ""
-                )  # we don't need the brackets
-                params["model"]["class_list"] = temp_classList.split(",")
+            "&&" in params["model"]["class_list"]
+        ):
+            # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
+            print(
+                "This is a special case for multi-class computation, where different labels are processed together"
+            )
+            temp_classList = params["model"]["class_list"]
+            temp_classList = temp_classList.replace(
+                "[", ""
+            )  # we don't need the brackets
+            temp_classList = temp_classList.replace(
+                "]", ""
+            )  # we don't need the brackets
+            params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
                 params["model"]["class_list"] = ast.literal_eval(
