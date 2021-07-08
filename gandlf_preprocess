@@ -68,44 +68,57 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
     for _, (subject) in enumerate(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
-        subject_dict_to_write = {}
-        subject_dict_label = {}
-
+        # initialize the current_output_dir
         current_output_dir = os.path.join(output_dir, str(subject["subject_id"][0]))
         Path(current_output_dir).mkdir(parents=True, exist_ok=True)
+
+        subject_dict_to_write, subject_process = {}, {}
+
+        # start constructing the torchio.Subject object
+        for channel in parameters["headers"]["channelHeaders"]:
+            # we do squeeze because the constructor needs 4D tensor
+            subject_process[str(channel)] = torchio.Image(
+                    tensor=subject[str(channel)]["data"].squeeze(0),
+                    type=torchio.INTENSITY,
+                    path=subject[str(channel)]["path"],
+                )
+        if parameters["headers"]["labelHeader"] is not None:
+            subject_process["label"] = torchio.Image(
+                    tensor=subject["label"]["data"].squeeze(0),
+                    type=torchio.LABEL,
+                    path=subject["label"]["path"],
+                )
+        subject_process = torchio.Subject(subject_process)
 
         # the "squeeze" is needed because the dataloader automatically constructs
         # 5D tensor considering the batch_size as first dimension.
         # # for key in parameters["headers"]["channelHeaders"]:
         # apply a different padding mode to image and label (so that label information is not duplicated)
-        psize_pad = list(
-            np.asarray(np.ceil(np.divide(parameters["patch_size"], 2)), dtype=int)
-        )
-        # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-        padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric", include=keys_with_images)
-        subject = padder(subject)
-
-        if parameters["headers"["labelHeader"]] is not None:
-            subject_dict_label["label"] = torchio.Image(
-                str(subject["label"]["path"]), type=torchio.LABEL
+        if (parameters["patch_sampler"] == "label") or (isinstance(parameters["patch_sampler"], dict)):
+            # get the padding size from the patch_size
+            psize_pad = list(
+                np.asarray(np.ceil(np.divide(parameters["patch_size"], 2)), dtype=int)
             )
-            subject_label = torchio.Subject(subject_dict_label)
             # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            padder_label = torchio.transforms.Pad(
-                psize_pad, padding_mode=label_pad_mode
-            )
-            subject_label = padder_label(subject_label)
+            padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric", include=keys_with_images)
+            subject = padder(subject)
 
-            # now combine the label with the original subject dictionary to do sampling
-            subject["label"] = subject_label["label"]
+            if parameters["headers"]["labelHeader"] is not None:
+                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                padder_label = torchio.transforms.Pad(
+                    psize_pad, padding_mode=label_pad_mode, include="label"
+                )
+                subject = padder_label(subject)
 
-            sampler = torchio.data.LabelSampler(parameters["patch_size"])
-            generator = sampler(subject, num_patches=1)
-            for patch in generator:
-                for channel in parameters["headers"]["channelHeaders"]:
-                    subject_dict_to_write[str(channel)] = patch[str(channel)]
+                sampler = torchio.data.LabelSampler(parameters["patch_size"])
+                generator = sampler(subject, num_patches=1)
+                for patch in generator:
+                    for channel in parameters["headers"]["channelHeaders"]:
+                        subject_dict_to_write[str(channel)] = patch[str(channel)]
 
-                subject_dict_to_write["label"] = patch["label"]
+                    subject_dict_to_write["label"] = patch["label"]
+            else:
+                subject_dict_to_write = subject
         else:
             subject_dict_to_write = subject
 
