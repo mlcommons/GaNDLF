@@ -3,6 +3,7 @@ import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
+from GANDLF.preprocessing import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -658,3 +659,25 @@ def test_cli_function_mainrun(device):
     main_run(file_data, file_config_temp, outputDir, True, device, True)
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
+
+
+def test_preprocess_functions():
+    print("Starting testing preprocessing functions")
+    input_tensor = torch.rand(1, 3, 256, 256)
+    input_transformed = normalize_imagenet(input_tensor)
+    input_transformed = normalize_standardize(input_tensor)
+    input_transformed = normalize_div_by_255(input_tensor)
+    input_transformed = threshold_intensities(input_tensor, 0.25, 0.75)
+    assert torch.count_nonzero(input_transformed[input_transformed<0.25]>0.75) == 0, "Input should be thresholded"
+
+    input_transformed = clip_intensities(input_tensor, 0.25, 0.75)
+    assert torch.count_nonzero(input_transformed[input_transformed<0.25]>0.75) == 0, "Input should be thresholded"
+
+    input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
+    img_resized = resample_image(
+        input_image,
+        resize_image_resolution(input_image, [128, 128]),
+        interpolator=sitk.sitkNearestNeighbor,
+    )
+    img_tensor = get_tensor_for_dataloader(img_resized)
+    assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
