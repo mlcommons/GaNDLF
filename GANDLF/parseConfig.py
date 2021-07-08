@@ -454,12 +454,7 @@ def parseConfig(config_file_path, version_check=True):
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
     if isinstance(params["model"]["class_list"], str):
-        try:
-            params["model"]["class_list"] = ast.literal_eval(
-                params["model"]["class_list"]
-            )
-        except Warning:
-            if ("||" in params["model"]["class_list"]) or (
+        if ("||" in params["model"]["class_list"]) or (
                 "&&" in params["model"]["class_list"]
             ):
                 # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
@@ -474,6 +469,13 @@ def parseConfig(config_file_path, version_check=True):
                     "]", ""
                 )  # we don't need the brackets
                 params["model"]["class_list"] = temp_classList.split(",")
+        else:
+            try:
+                params["model"]["class_list"] = ast.literal_eval(
+                    params["model"]["class_list"]
+                )
+            except AssertionError:
+                AssertionError("Could not evaluate the 'class_list' in 'model'")
 
     if "kcross_validation" in params:
         sys.exit(
