@@ -4,7 +4,7 @@
 import argparse
 from datetime import date
 
-from GANDLF.cli.preprocess import preprocess_and_save
+from GANDLF.cli.preprocess_and_save import preprocess_and_save
 
 # main function
 if __name__ == "__main__":
