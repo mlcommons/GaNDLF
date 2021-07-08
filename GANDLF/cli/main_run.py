@@ -3,6 +3,7 @@ from GANDLF.inference_manager import InferenceManager
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
 
+
 def main_run(data_csv, config_file, output_dir, train_mode, device, reset_prev):
     """
     [summary]
