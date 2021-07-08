@@ -232,6 +232,36 @@ def test_train_regression_rad_2d(device):
     print("passed")
 
 
+def test_train_brainage_rad_2d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_regression.yaml", version_check=False
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = False
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_regression.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["scaling_factor"] = 1
+    parameters["model"]["architecture"] = "brain_age"
+    shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+
+    print("passed")
+
+
 def test_train_regression_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
