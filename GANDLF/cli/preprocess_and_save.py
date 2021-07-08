@@ -1,6 +1,5 @@
-import os, argparse, sys, pickle
+import os, sys, pickle
 from pathlib import Path
-from datetime import date
 import numpy as np
 import SimpleITK as sitk
 import pandas as pd
