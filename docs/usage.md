@@ -31,6 +31,19 @@ Recommended tool for tackling all aforementioned preprocessing tasks: https://gi
 **For Histopathology Only:**
 - Convert WSI/label map to patches with OPM: [See using OPM](https://github.com/CBICA/OPM/blob/master/README.md)
 
+### Running preprocessing before training/inference
+
+This is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements.
+```bash
+# continue from previous shell
+python gandlf_preprocess \
+  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -data ./experiment_0/train.csv \ # data in CSV format 
+  -output ./experiment_0/output_dir/ \ # output directory
+```
+
+This will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration.
+
 [Back To Top &uarr;](#table-of-contents)
 
 
