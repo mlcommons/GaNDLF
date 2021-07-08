@@ -1,5 +1,6 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml
+import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch
+import SimpleITK as sitk
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
