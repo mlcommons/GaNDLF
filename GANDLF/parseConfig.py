@@ -90,8 +90,9 @@ def initialize_key(parameters, key):
         dict: The final parameter dictionary.
     """
     if key in parameters:
-        if len(parameters[key]) == 0:  # if key is present but not defined
-            parameters[key] = None
+        if parameters[key] is not None:
+            if len(parameters[key]) == 0:  # if key is present but not defined
+                parameters[key] = None
     else:
         parameters[key] = None  # if key is absent
 
@@ -453,26 +454,28 @@ def parseConfig(config_file_path, version_check=True):
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
     if isinstance(params["model"]["class_list"], str):
-        try:
-            params["model"]["class_list"] = ast.literal_eval(
-                params["model"]["class_list"]
+        if ("||" in params["model"]["class_list"]) or (
+            "&&" in params["model"]["class_list"]
+        ):
+            # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
+            print(
+                "This is a special case for multi-class computation, where different labels are processed together"
             )
-        except Warning:
-            if ("||" in params["model"]["class_list"]) or (
-                "&&" in params["model"]["class_list"]
-            ):
-                # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
-                print(
-                    "This is a special case for multi-class computation, where different labels are processed together"
+            temp_classList = params["model"]["class_list"]
+            temp_classList = temp_classList.replace(
+                "[", ""
+            )  # we don't need the brackets
+            temp_classList = temp_classList.replace(
+                "]", ""
+            )  # we don't need the brackets
+            params["model"]["class_list"] = temp_classList.split(",")
+        else:
+            try:
+                params["model"]["class_list"] = ast.literal_eval(
+                    params["model"]["class_list"]
                 )
-                temp_classList = params["model"]["class_list"]
-                temp_classList = temp_classList.replace(
-                    "[", ""
-                )  # we don't need the brackets
-                temp_classList = temp_classList.replace(
-                    "]", ""
-                )  # we don't need the brackets
-                params["model"]["class_list"] = temp_classList.split(",")
+            except AssertionError:
+                AssertionError("Could not evaluate the 'class_list' in 'model'")
 
     if "kcross_validation" in params:
         sys.exit(

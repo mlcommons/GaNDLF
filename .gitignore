@@ -1,5 +1,5 @@
 venv/*
-venv*
+*venv*
 __pycache__
 *.egg-info*
 */__pycache__/*
@@ -21,3 +21,4 @@ vips*
 testing/data/*
 testing/data_output/*
 .coverage
+testing/config_segmentation_temp.yaml
