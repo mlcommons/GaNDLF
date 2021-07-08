@@ -48,7 +48,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-train",
-        type=int,
+        type=bool,
         help="1: training and 0: inference; for 0, there needs to be a compatible model saved in '-output'",
         required=True,
     )
@@ -76,11 +76,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    if args.train == 0:
-        args.train = False
-    else:
-        args.train = True
 
     main_run(
         args.data, args.config, args.output, args.train, args.device, args.reset_prev
