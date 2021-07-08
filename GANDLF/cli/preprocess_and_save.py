@@ -18,15 +18,18 @@ from tqdm import tqdm
 import torchio
 
 
-def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
+def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="constant"):
     """
-    [summary]
+    This function performs preprocessing based on parameters provided and saves the output.
 
     Args:
         data_csv (str): The CSV file of the training data.
         config_file (str): The YAML file of the training configuration.
         output_dir (str): The output directory.
-        label_pad_mode (str): The padding strategy for the label.
+        label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
+
+    Raises:
+        ValueError: Parameter check from previous run.
     """
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
