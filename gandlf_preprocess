@@ -9,6 +9,7 @@ import SimpleITK as sitk
 import pandas as pd
 
 from GANDLF.utils import (
+    get_filename_extension_sanitized,
     parseTrainingCSV,
     populate_header_in_parameters,
 )
@@ -94,6 +95,8 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
         current_output_dir = os.path.join(output_dir, str(subject["subject_id"][0]))
         Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
+        output_columns_to_write["subjectid"].append(subject["subject_id"][0])
+
         subject_dict_to_write, subject_process = {}, {}
 
         # start constructing the torchio.Subject object
@@ -144,11 +147,11 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                     subject_dict_to_write["label"] = patch["label"]
 
         # write new images
-        for key in parameters["headers"]["channelHeaders"]:
-            pth = Path(subject_dict_to_write[str(key)]["path"])
-            image_file = os.path.join(current_output_dir, pth.name)
-            output_columns_to_write["channel_" + str(key)].append(image_file)
-            image_to_write = subject_dict_to_write[str(key)].as_sitk()
+        common_ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+        for channel in parameters["headers"]["channelHeaders"]:
+            image_file = os.path.join(current_output_dir, subject["subject_id"][0] + "_" + str(channel) + common_ext)
+            output_columns_to_write["channel_" + str(channel-1)].append(image_file)
+            image_to_write = subject_dict_to_write[str(channel)].as_sitk()
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
@@ -162,8 +165,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
 
         # now try to write the label
         if "label" in subject_dict_to_write:
-            pth = Path(subject_dict_to_write["label"]["path"])
-            image_file = os.path.join(current_output_dir, pth.name)
+            image_file = os.path.join(current_output_dir, subject["subject_id"][0] + "_label" + common_ext)
             output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
             if not os.path.isfile(image_file):
@@ -177,15 +179,18 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                     )
                     sys.exit(1)
 
+        # ensure prediction headers are getting saved, as well
         if len(parameters["headers"]["predictionHeaders"]) > 1:
             for key in parameters["headers"]["predictionHeaders"]:
                 output_columns_to_write["valuetopredict_" + str(key)].append(
-                    str(subject_dict_to_write["value_" + str(key)].numpy()[0])
+                    str(subject["value_" + str(key)].numpy()[0])
                 )
         elif len(parameters["headers"]["predictionHeaders"]) == 1:
             output_columns_to_write["valuetopredict"].append(
-                str(subject_dict_to_write["value_0"].numpy()[0])
+                str(subject["value_0"].numpy()[0])
             )
+
+    (pd.DataFrame.from_dict(data=output_columns_to_write, orient='index').to_csv('dict_file.csv', header=False))
 
     print("Finished.")
 
