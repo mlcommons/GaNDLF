@@ -5,6 +5,7 @@
 - Per-epoch details in validation output added
 - Different types of normalization layer options added
 - Hausdorff as a validation metric has been added
+- New option to save preprocessed data before the training starts
 
 ## 0.0.9
 
