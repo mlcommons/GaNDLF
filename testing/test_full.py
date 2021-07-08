@@ -597,7 +597,7 @@ def test_cli_function_preprocess():
     parameters = parseConfig(file_config)
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["class_list"] = "[0, 255||125]"
     # disabling amp because some losses do not support Half, yet
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
@@ -605,6 +605,7 @@ def test_cli_function_preprocess():
     parameters["metrics"] = ["dice"]
     parameters["patch_sampler"] = "label"
     parameters["weighted_loss"] = True
+    parameters["save_output"] = True
 
     # store this separately for preprocess testing
     with open(file_config_temp, 'w') as outfile:
