@@ -604,6 +604,7 @@ def test_cli_function_preprocess():
     parameters["model"]["architecture"] = "unet"
     parameters["metrics"] = ["dice"]
     parameters["patch_sampler"] = "label"
+    parameters["weighted_loss"] = True
 
     # store this separately for preprocess testing
     with open(file_config_temp, 'w') as outfile:
