@@ -147,7 +147,11 @@ def reverse_one_hot(predmask_array, class_list):
     Returns:
         torch.Tensor: The final mask torch.Tensor.
     """
-    idx_argmax = np.argmax(predmask_array.cpu().numpy(), axis=0)
+    if isinstance(predmask_array, torch.Tensor):
+        array_to_consider = predmask_array.cpu().numpy()
+    else:
+        array_to_consider = predmask_array
+    idx_argmax = np.argmax(array_to_consider, axis=0)
     final_mask = 0
     special_cases_to_check = ["||"]
     special_case_detected = False
