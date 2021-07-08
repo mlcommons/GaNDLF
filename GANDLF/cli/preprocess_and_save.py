@@ -27,9 +27,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         config_file (str): The YAML file of the training configuration.
         output_dir (str): The output directory.
         label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
-
+    
     Raises:
-        ValueError: Parameter check from previous run.
+        ValueError: Parameter check from previous
     """
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -150,6 +150,10 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
 
         # write new images
         common_ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+        # in cases where the original image has a file format that does not support
+        # RGB floats, use the "vtk" format
+        if common_ext in [".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"]:
+            common_ext = ".vtk"
         for channel in parameters["headers"]["channelHeaders"]:
             image_file = Path(
                 os.path.join(
