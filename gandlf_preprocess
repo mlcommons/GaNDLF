@@ -37,13 +37,15 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
     # don't care if the dataframe gets shuffled or not
     dataframe, headers = parseTrainingCSV(data_csv, train=False)
     parameters = parseConfig(config_file)
-    
+
     # save the parameters so that the same compute doesn't happen once again
     parameter_file = os.path.join(output_dir, "parameters.pkl")
     if os.path.exists(parameter_file):
         parameters_prev = pickle.load(open(parameter_file, "rb"))
         if parameters != parameters_prev:
-            raise ValueError("The parameters are not the same as the ones stored in the previous run, please re-check.")
+            raise ValueError(
+                "The parameters are not the same as the ones stored in the previous run, please re-check."
+            )
     else:
         with open(parameter_file, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -149,8 +151,13 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
         # write new images
         common_ext = get_filename_extension_sanitized(subject["1"]["path"][0])
         for channel in parameters["headers"]["channelHeaders"]:
-            image_file = Path(os.path.join(current_output_dir, subject["subject_id"][0] + "_" + str(channel) + common_ext)).as_posix()
-            output_columns_to_write["channel_" + str(channel-1)].append(image_file)
+            image_file = Path(
+                os.path.join(
+                    current_output_dir,
+                    subject["subject_id"][0] + "_" + str(channel) + common_ext,
+                )
+            ).as_posix()
+            output_columns_to_write["channel_" + str(channel - 1)].append(image_file)
             image_to_write = subject_dict_to_write[str(channel)].as_sitk()
             if not os.path.isfile(image_file):
                 try:
@@ -165,7 +172,11 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
 
         # now try to write the label
         if "label" in subject_dict_to_write:
-            image_file = Path(os.path.join(current_output_dir, subject["subject_id"][0] + "_label" + common_ext)).as_posix()
+            image_file = Path(
+                os.path.join(
+                    current_output_dir, subject["subject_id"][0] + "_label" + common_ext
+                )
+            ).as_posix()
             output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
             if not os.path.isfile(image_file):
@@ -190,8 +201,10 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                 str(subject["value_0"].numpy()[0])
             )
 
-    
-    (pd.DataFrame.from_dict(data=output_columns_to_write, orient='index').to_csv(os.path.join(output_dir, "data_processed.csv"), header=False))
+    print("Writing final csv")
+    pd.DataFrame.from_dict(data=output_columns_to_write, orient="index").to_csv(
+        os.path.join(output_dir, "data_processed.csv"), header=False
+    )
 
     print("Finished.")
 
