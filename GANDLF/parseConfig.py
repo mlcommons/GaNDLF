@@ -90,8 +90,9 @@ def initialize_key(parameters, key):
         dict: The final parameter dictionary.
     """
     if key in parameters:
-        if len(parameters[key]) == 0:  # if key is present but not defined
-            parameters[key] = None
+        if parameters[key] is not None:
+            if len(parameters[key]) == 0:  # if key is present but not defined
+                parameters[key] = None
     else:
         parameters[key] = None  # if key is absent
 
