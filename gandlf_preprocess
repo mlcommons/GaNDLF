@@ -76,7 +76,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
 
         # start constructing the torchio.Subject object
         for channel in parameters["headers"]["channelHeaders"]:
-            # we do squeeze because the constructor needs 4D tensor
+            # the "squeeze" is needed because the dataloader automatically 
+            # constructs 5D tensor considering the batch_size as first 
+            # dimension, but the constructor needs 4D tensor.
             subject_process[str(channel)] = torchio.Image(
                     tensor=subject[str(channel)]["data"].squeeze(0),
                     type=torchio.INTENSITY,
@@ -90,9 +92,6 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                 )
         subject_process = torchio.Subject(subject_process)
 
-        # the "squeeze" is needed because the dataloader automatically constructs
-        # 5D tensor considering the batch_size as first dimension.
-        # # for key in parameters["headers"]["channelHeaders"]:
         # apply a different padding mode to image and label (so that label information is not duplicated)
         if (parameters["patch_sampler"] == "label") or (isinstance(parameters["patch_sampler"], dict)):
             # get the padding size from the patch_size
