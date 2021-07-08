@@ -40,7 +40,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
     # save the parameters so that the same compute doesn't happen once again
     parameter_file = os.path.join(output_dir, "parameters.pkl")
     if os.path.exists(parameter_file):
-        parameters_prev = pickle.load(open(args.parameter_pickle, "rb"))
+        parameters_prev = pickle.load(open(parameter_file, "rb"))
         if parameters != parameters_prev:
             raise ValueError("The parameters are not the same as the ones stored in the previous run, please re-check.")
     else:
