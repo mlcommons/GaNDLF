@@ -517,14 +517,13 @@ def validate_network(
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
+                    result_array = np.swapaxes(pred_mask, 0, 2)
                     ## special case for 2D
                     if image.shape[-1] > 1:
                         # ITK expects array as Z,X,Y
-                        result_image = sitk.GetImageFromArray(
-                            np.swapaxes(pred_mask, 0, 2)
-                        )
+                        result_image = sitk.GetImageFromArray(result_array)
                     else:
-                        result_image = pred_mask
+                        result_image = sitk.GetImageFromArray(result_array.squeeze(0))
                     result_image.CopyInformation(inputImage)
                     # cast as the same data type
                     result_image = sitk.Cast(result_image, inputImage.GetPixelID())
