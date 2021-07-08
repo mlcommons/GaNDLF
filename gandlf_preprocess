@@ -76,30 +76,34 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
 
         # start constructing the torchio.Subject object
         for channel in parameters["headers"]["channelHeaders"]:
-            # the "squeeze" is needed because the dataloader automatically 
-            # constructs 5D tensor considering the batch_size as first 
+            # the "squeeze" is needed because the dataloader automatically
+            # constructs 5D tensor considering the batch_size as first
             # dimension, but the constructor needs 4D tensor.
             subject_process[str(channel)] = torchio.Image(
-                    tensor=subject[str(channel)]["data"].squeeze(0),
-                    type=torchio.INTENSITY,
-                    path=subject[str(channel)]["path"],
-                )
+                tensor=subject[str(channel)]["data"].squeeze(0),
+                type=torchio.INTENSITY,
+                path=subject[str(channel)]["path"],
+            )
         if parameters["headers"]["labelHeader"] is not None:
             subject_process["label"] = torchio.Image(
-                    tensor=subject["label"]["data"].squeeze(0),
-                    type=torchio.LABEL,
-                    path=subject["label"]["path"],
-                )
+                tensor=subject["label"]["data"].squeeze(0),
+                type=torchio.LABEL,
+                path=subject["label"]["path"],
+            )
         subject_process = torchio.Subject(subject_process)
 
         # apply a different padding mode to image and label (so that label information is not duplicated)
-        if (parameters["patch_sampler"] == "label") or (isinstance(parameters["patch_sampler"], dict)):
+        if (parameters["patch_sampler"] == "label") or (
+            isinstance(parameters["patch_sampler"], dict)
+        ):
             # get the padding size from the patch_size
             psize_pad = list(
                 np.asarray(np.ceil(np.divide(parameters["patch_size"], 2)), dtype=int)
             )
             # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-            padder = torchio.transforms.Pad(psize_pad, padding_mode="symmetric", include=keys_with_images)
+            padder = torchio.transforms.Pad(
+                psize_pad, padding_mode="symmetric", include=keys_with_images
+            )
             subject = padder(subject)
 
             if parameters["headers"]["labelHeader"] is not None:
