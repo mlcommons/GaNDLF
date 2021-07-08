@@ -39,6 +39,14 @@ modality: rad
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: uniform
+# patch_sampler: label
+# patch_sampler:
+#   {
+#     label:
+#       {
+#         padding_type: constant # how the label gets padded
+#       }
+#   }
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
