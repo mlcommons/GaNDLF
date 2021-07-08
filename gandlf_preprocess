@@ -149,7 +149,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
         # write new images
         common_ext = get_filename_extension_sanitized(subject["1"]["path"][0])
         for channel in parameters["headers"]["channelHeaders"]:
-            image_file = os.path.join(current_output_dir, subject["subject_id"][0] + "_" + str(channel) + common_ext)
+            image_file = Path(os.path.join(current_output_dir, subject["subject_id"][0] + "_" + str(channel) + common_ext)).as_posix()
             output_columns_to_write["channel_" + str(channel-1)].append(image_file)
             image_to_write = subject_dict_to_write[str(channel)].as_sitk()
             if not os.path.isfile(image_file):
@@ -165,7 +165,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
 
         # now try to write the label
         if "label" in subject_dict_to_write:
-            image_file = os.path.join(current_output_dir, subject["subject_id"][0] + "_label" + common_ext)
+            image_file = Path(os.path.join(current_output_dir, subject["subject_id"][0] + "_label" + common_ext)).as_posix()
             output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
             if not os.path.isfile(image_file):
@@ -190,7 +190,8 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode):
                 str(subject["value_0"].numpy()[0])
             )
 
-    (pd.DataFrame.from_dict(data=output_columns_to_write, orient='index').to_csv('dict_file.csv', header=False))
+    
+    (pd.DataFrame.from_dict(data=output_columns_to_write, orient='index').to_csv(os.path.join(output_dir, "data_processed.csv"), header=False))
 
     print("Finished.")
 
