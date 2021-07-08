@@ -1,0 +1,54 @@
+#!usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import argparse
+from datetime import date
+
+from GANDLF.cli.preprocess_and_save import preprocess_and_save
+
+# main function
+if __name__ == "__main__":
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_Preprocess",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate training/inference data which are preprocessed to reduce resource footprint during computation.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-config",
+        type=str,
+        help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
+        required=True,
+    )
+    parser.add_argument(
+        "-data",
+        type=str,
+        help="Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV",
+        required=True,
+    )
+    parser.add_argument(
+        "-output",
+        type=str,
+        help="Output directory to save intermediate files and model weights",
+        required=True,
+    )
+    parser.add_argument(
+        "-labelPad",
+        type=str,
+        default="constant",
+        help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
+        required=False,
+    )
+
+    args = parser.parse_args()
+
+    preprocess_and_save(args.data, args.config, args.output, args.labelPad)
+
+    print("Finished.")

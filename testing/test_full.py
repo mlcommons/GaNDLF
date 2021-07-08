@@ -1,11 +1,13 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys
+import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
+from GANDLF.cli.main_run import main_run
+from GANDLF.cli.preprocess_and_save import preprocess_and_save
 
 device = "cpu"
 ## global defines
@@ -564,7 +566,7 @@ def test_losses_segmentation_rad_2d(device):
 
 
 def test_config_read():
-    print("Starting reading configuration")
+    print("Starting testing reading configuration")
     # read and parse csv
     parameters = parseConfig(
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=True
@@ -577,4 +579,52 @@ def test_config_read():
     data_loader = ImagesFromDataFrame(training_data, parameters, True)
     if not data_loader:
         sys.exit(1)
+    print("passed")
+
+
+def test_cli_function_preprocess():
+    print("Starting testing cli function preprocess")
+    file_config = os.path.join(testingDir, "config_segmentation.yaml")
+    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+        parameter_pickle_file = os.path.join(outputDir, "parameters.pkl")
+        if os.path.exists(parameter_pickle_file):
+            os.remove(parameter_pickle_file)
+    file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
+
+    parameters = parseConfig(file_config)
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = "[0, 255||125]"
+    # disabling amp because some losses do not support Half, yet
+    parameters["model"]["amp"] = False
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "unet"
+    parameters["metrics"] = ["dice"]
+    parameters["patch_sampler"] = "label"
+    parameters["weighted_loss"] = True
+    parameters["save_output"] = True
+
+    # store this separately for preprocess testing
+    with open(file_config_temp, "w") as outfile:
+        yaml.dump(parameters, outfile, default_flow_style=False)
+
+    preprocess_and_save(file_data, file_config_temp, outputDir)
+    shutil.rmtree(outputDir)  # overwrite previous results
+    print("passed")
+
+
+def test_cli_function_mainrun(device):
+    print("Starting testing cli function main_run")
+    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
+    # if preprocess wasn't run, this file should not be present
+    if not os.path.exists(file_config_temp):
+        file_config_temp = os.path.join(testingDir, "config_segmentation.yaml")
+
+    file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
+
+    main_run(file_data, file_config_temp, outputDir, True, device, True)
+    shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")

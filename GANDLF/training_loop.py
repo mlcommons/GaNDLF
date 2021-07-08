@@ -29,6 +29,7 @@ from GANDLF.utils import (
     populate_channel_keys_in_params,
     reverse_one_hot,
     get_class_imbalance_weights,
+    get_filename_extension_sanitized,
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
@@ -383,9 +384,8 @@ def validate_network(
                 tensor=subject[key]["data"].squeeze(0),
             )
 
-        if (
-            "value_keys" in params
-        ) and label_present:  # regression/classification problem AND label is present
+        # regression/classification problem AND label is present
+        if ("value_keys" in params) and label_present:
             sampler = torchio.data.LabelSampler(params["patch_size"])
             tio_subject = torchio.Subject(subject_dict)
             generator = sampler(tio_subject, num_patches=params["q_samples_per_volume"])
@@ -512,21 +512,18 @@ def validate_network(
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
-                    _, ext = os.path.splitext(path_to_metadata)
-                    if (ext == ".gz") or (ext == ".nii"):
-                        ext = ".nii.gz"
+                    ext = get_filename_extension_sanitized(path_to_metadata)
                     pred_mask = output_prediction.numpy()
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
+                    result_array = np.swapaxes(pred_mask, 0, 2)
                     ## special case for 2D
                     if image.shape[-1] > 1:
                         # ITK expects array as Z,X,Y
-                        result_image = sitk.GetImageFromArray(
-                            np.swapaxes(pred_mask, 0, 2)
-                        )
+                        result_image = sitk.GetImageFromArray(result_array)
                     else:
-                        result_image = pred_mask
+                        result_image = sitk.GetImageFromArray(result_array.squeeze(0))
                     result_image.CopyInformation(inputImage)
                     # cast as the same data type
                     result_image = sitk.Cast(result_image, inputImage.GetPixelID())

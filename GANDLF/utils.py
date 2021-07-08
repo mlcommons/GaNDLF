@@ -147,7 +147,11 @@ def reverse_one_hot(predmask_array, class_list):
     Returns:
         torch.Tensor: The final mask torch.Tensor.
     """
-    idx_argmax = np.argmax(predmask_array.cpu().numpy(), axis=0)
+    if isinstance(predmask_array, torch.Tensor):
+        array_to_consider = predmask_array.cpu().numpy()
+    else:
+        array_to_consider = predmask_array
+    idx_argmax = np.argmax(array_to_consider, axis=0)
     final_mask = 0
     special_cases_to_check = ["||"]
     special_case_detected = False
@@ -548,6 +552,21 @@ def get_class_imbalance_weights(training_data_loader, parameters):
             )  # this is to be used to weight the loss function
         # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
     return dice_penalty_dict
+
+
+def get_filename_extension_sanitized(filename):
+    """
+    This function returns the extension of the filename with leading and trailing characters removed.
+    Args:
+        filename (str): The filename to be processed.
+    Returns:
+        str: The filename with extension removed.
+    """
+    _, ext = os.path.splitext(filename)
+    # if .gz or .nii file is detected, always return .nii.gz
+    if (ext == ".gz") or (ext == ".nii"):
+        ext = ".nii.gz"
+    return ext
 
 
 def populate_channel_keys_in_params(data_loader, parameters):
