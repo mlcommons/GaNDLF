@@ -603,6 +603,7 @@ def test_cli_function_preprocess():
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "unet"
     parameters["metrics"] = ["dice"]
+    parameters["patch_sampler"] = "label"
 
     # store this separately for preprocess testing
     with open(file_config_temp, 'w') as outfile:
