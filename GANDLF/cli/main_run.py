@@ -87,5 +87,3 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, reset_prev):
             parameters=parameters,
             device=device,
         )
-
-    print("Finished.")

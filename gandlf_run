@@ -12,7 +12,7 @@ from datetime import date
 
 from GANDLF import version
 
-from GANDLF.cli import main_run
+from GANDLF.cli.main_run import main_run
 
 
 if __name__ == "__main__":
@@ -85,3 +85,5 @@ if __name__ == "__main__":
     main_run(
         args.data, args.config, args.output, args.train, args.device, args.reset_prev
     )
+
+    print("Finished.")
