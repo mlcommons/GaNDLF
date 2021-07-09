@@ -1,6 +1,6 @@
 import torch
 import sys
-from torch.nn import MSELoss
+from torch.nn import MSELoss, CrossEntropyLoss
 from .utils import one_hot
 
 
@@ -12,6 +12,13 @@ def dice(inp, target):
     intersection = (iflat * tflat).sum()
     # 2 * intersection / union
     return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
+
+
+def CE_loss(out, target, params):
+    if len(target.shape) > 1 and target.shape[-1] == 1:
+        target = torch.squeeze(target, -1)
+    cel_loss = CrossEntropyLoss()(out, target)
+    return cel_loss
 
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
@@ -86,7 +93,6 @@ def CE(out, target):
     loss_val = loss(iflat, tflat)
     return loss_val
 
-
 def CCE_Generic(out, target, params, CCE_Type):
     """
     Generic function to calculate CCE loss
@@ -100,6 +106,7 @@ def CCE_Generic(out, target, params, CCE_Type):
     Returns:
         torch.tensor: The final loss value after taking multiple classes into consideration
     """
+
     acc_ce_loss = 0
     target = one_hot(target, params["model"]["class_list"]).type(out.dtype)
     for i in range(0, len(params["model"]["class_list"])):
@@ -221,6 +228,8 @@ def fetch_loss_function(loss_name, params):
         loss_function = CE
     elif loss_name == "mse":
         loss_function = MSE_loss
+    elif loss_name == "cel":
+        loss_function = CE_loss
     else:
         print(
             "WARNING: Could not find the requested loss function '"

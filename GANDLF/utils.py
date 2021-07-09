@@ -331,10 +331,17 @@ def populate_header_in_parameters(parameters, headers):
     # initialize common parameters based on headers
     parameters["headers"] = headers
     # ensure the number of output classes for model prediction is working correctly
+
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
-    else:
+    is_regression, _, _ = find_problem_type(
+        parameters["headers"], parameters["model"]["final_layer"]
+    )
+
+    # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
+    if not is_regression:
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
+
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])

@@ -79,7 +79,8 @@ def step(model, image, label, params):
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
         if "value_keys" in params:  # squeeze label for segmentation only
-            label = torch.squeeze(label, -1)
+            if len(label.shape) > 1:
+                label = torch.squeeze(label, -1)
     if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
@@ -89,7 +90,6 @@ def step(model, image, label, params):
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
-    # print("Output shape : ", output.shape, flush=True)
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(label, output, params)
 
@@ -160,8 +160,7 @@ def train_network(model, train_dataloader, optimizer, params):
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
-                min(params["batch_size"], len(label)),
-                len(params["value_keys"]),
+                min(params["batch_size"], len(label)), len(params["value_keys"]),
             )
         else:
             label = subject["label"][torchio.DATA]
@@ -407,13 +406,14 @@ def validate_network(
             pred_output /= params["scaling_factor"]
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
+            print(f"pred_output.shape: {pred_output.shape}")
             if params["save_output"]:
                 outputToWrite += (
                     str(epoch)
                     + ","
                     + subject["subject_id"][0]
                     + ","
-                    + str(pred_output.cpu().data.item())
+                    + str(pred_output.cpu().max().data.item())
                     + "\n"
                 )
             final_loss, final_metric = get_loss_and_metrics(
@@ -563,6 +563,7 @@ def validate_network(
                         n.squeeze(), raw_input=image[i].squeeze(-1)
                     )
 
+            output_prediction = output_prediction.squeeze(-1)
             final_loss, final_metric = get_loss_and_metrics(
                 label_ground_truth, output_prediction, params
             )
@@ -628,12 +629,7 @@ def validate_network(
 
 
 def training_loop(
-    training_data,
-    validation_data,
-    device,
-    params,
-    output_dir,
-    testing_data=None,
+    training_data, validation_data, device, params, output_dir, testing_data=None,
 ):
     """
     The main training loop.
@@ -711,15 +707,10 @@ def training_loop(
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
+            training_data, parameters=params, train=False,
         )
         penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
+            penalty_data, batch_size=1, shuffle=True, pin_memory=False,
         )
 
         params["weights"] = get_class_imbalance_weights(penalty_loader, params)
