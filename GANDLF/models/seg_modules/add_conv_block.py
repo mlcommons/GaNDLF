@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Add Conv Block for MSDNet
-"""
-import torch.nn as nn
+"""Add Conv Block for MSDNet"""
 
 
 def add_conv_block(
