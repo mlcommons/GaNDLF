@@ -1,8 +1,10 @@
 """
 All the metrics are to be called from here
 """
+import torch
+from .utils import one_hot
 import sys, torch, numpy
-from .losses import MSE_loss
+from .losses import MSE_loss, CE_loss
 from .utils import one_hot
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
@@ -35,6 +37,11 @@ def dice(output, label):
     tflat = label.contiguous().view(-1)
     intersection = (iflat * tflat).sum()
     return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
+
+
+def classification_accuracy(output, label, params):
+    acc = torch.sum(torch.argmax(output, 1) == label) / len(label)
+    return acc
 
 
 def multi_class_dice(output, label, params):
@@ -249,6 +256,10 @@ def fetch_metric(metric_name):
         metric_function = accuracy
     elif metric_lower == "mse":
         metric_function = MSE_loss_agg
+    elif (metric_name).lower() == "cel":
+        metric_function = CE_loss
+    elif (metric_name).lower() == "classification_accuracy":
+        metric_function = classification_accuracy
     elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
         metric_function = hd95
     elif (metric_lower == "hd") or (metric_lower == "hausdorff"):
