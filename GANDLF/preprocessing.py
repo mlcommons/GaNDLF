@@ -1,8 +1,6 @@
 import numpy as np
-import sys
 
 import torch
-import torchio
 from torchio.transforms.spatial_transform import SpatialTransform
 import SimpleITK as sitk
 import nibabel as nib

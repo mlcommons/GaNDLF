@@ -1,4 +1,4 @@
-import os
+import os, sys
 import numpy as np
 from functools import partial
 
@@ -40,8 +40,6 @@ from GANDLF.preprocessing import (
     normalize_div_by_255,
     get_tensor_for_dataloader,
 )
-
-import copy, sys
 
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file

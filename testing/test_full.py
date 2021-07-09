@@ -1,8 +1,10 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml
+import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch
+import SimpleITK as sitk
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
+from GANDLF.preprocessing import *
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -228,6 +230,36 @@ def test_train_regression_rad_2d(device):
             device=device,
             reset_prev=True,
         )
+
+    print("passed")
+
+
+def test_train_brainage_rad_2d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_regression.yaml", version_check=False
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = False
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_regression.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["scaling_factor"] = 1
+    parameters["model"]["architecture"] = "brain_age"
+    shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
 
     print("passed")
 
@@ -628,3 +660,39 @@ def test_cli_function_mainrun(device):
     main_run(file_data, file_config_temp, outputDir, True, device, True)
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
+
+
+def test_preprocess_functions():
+    print("Starting testing preprocessing functions")
+    input_tensor = torch.rand(1, 3, 256, 256)
+    input_transformed = normalize_imagenet(input_tensor)
+    input_transformed = normalize_standardize(input_tensor)
+    input_transformed = normalize_div_by_255(input_tensor)
+    input_transformed = threshold_intensities(input_tensor, 0.25, 0.75)
+    assert (
+        torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
+    ), "Input should be thresholded"
+
+    input_transformed = clip_intensities(input_tensor, 0.25, 0.75)
+    assert (
+        torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
+    ), "Input should be thresholded"
+
+    input_transformed = tensor_rotate_90(input_tensor, (1))
+    input_transformed = tensor_rotate_180(input_tensor, (1))
+
+    non_zero_normalizer = NonZeroNormalizeOnMaskedRegion()
+    input_transformed = non_zero_normalizer(input_tensor)
+
+    input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
+    img_resized = resample_image(
+        input_image,
+        resize_image_resolution(input_image, [128, 128]),
+        interpolator=sitk.sitkNearestNeighbor,
+    )
+    img_tensor = get_tensor_for_dataloader(img_resized)
+    assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
+
+    input_tensor = torch.rand(1, 256, 256, 256)
+    cropper = CropExternalZeroplanes(patch_size=[128, 128, 128])
+    input_transformed = cropper(input_tensor)
