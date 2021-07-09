@@ -2,16 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
-import os, argparse, sys
+import os, argparse
 from GANDLF.utils import fix_paths
 
 fix_paths(os.getcwd())  # add relevant vips path
 
-from pathlib import Path
 from datetime import date
 
 from GANDLF import version
-
 from GANDLF.cli.main_run import main_run
 
 
@@ -60,7 +58,7 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument(
-        "-reset_prev",
+        "-reset_prv",
         default=False,
         type=bool,
         help="Whether the previous run in the output directory will be discarded or not",
@@ -78,7 +76,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main_run(
-        args.data, args.config, args.output, args.train, args.device, args.reset_prev
+        args.data, args.config, args.output, args.train, args.device, args.reset_prv
     )
 
     print("Finished.")

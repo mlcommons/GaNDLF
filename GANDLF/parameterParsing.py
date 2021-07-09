@@ -296,20 +296,10 @@ def get_model(
         divisibilityCheck_baseFilter = False
 
     else:
-        print(
+        raise ValueError(
             "WARNING: Could not find the requested model '"
             + modelname
-            + "' in the implementation, using ResUNet, instead",
-            file=sys.stderr,
-        )
-        modelname = "resunet"
-        model = unet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            final_convolution_layer=final_convolution_layer,
-            residualConnections=True,
+            + "' in the implementation"
         )
 
     # check divisibility
