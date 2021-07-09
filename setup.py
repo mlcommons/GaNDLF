@@ -58,7 +58,7 @@ setup(
         "gandlf_constructCSV",
         "gandlf_collectStats",
         "gandlf_patchMiner",
-        "gandlf_padder",
+        "gandlf_preprocess",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -35,7 +34,8 @@ class DownsamplingModule(nn.Module):
         self.act = act(**act_kwargs)
 
     def forward(self, x):
-        """[This is a forward function for ]
+        """
+        This is a forward function for the current module.
 
         [input -- > in --> lrelu --> ConvDS --> output]
 

@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 import torch
-import numpy as np
 from skimage.morphology import cube
 from scipy.ndimage.morphology import binary_fill_holes
 from scipy.ndimage.morphology import binary_closing

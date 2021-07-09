@@ -10,12 +10,13 @@ import SimpleITK as sitk
 import torch
 import torch.nn as nn
 import torchio
-from torch.utils.data import DataLoader
-from pathlib import Path
 
 
-def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideValue=0):
-    """Resample image to certain spacing and size.
+def resample_image(
+    img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0
+):
+    """
+    Resample image to certain spacing and size.
 
     Args:
         img (SimpleITK.Image): The input image to resample.
@@ -25,15 +26,18 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
         origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
         outsideValue (int, optional): value used to pad are outside image.  Defaults to 0.
 
+    Raises:
+        Exception: Spacing/resolution mismatch.
+        Exception: Size mismatch.
+
     Returns:
         SimpleITK.Image: The resampled input image.
     """
-
     if len(spacing) != img.GetDimension():
         raise Exception("len(spacing) != " + str(img.GetDimension()))
 
     # Set Size
-    if size == []:
+    if size == None:
         inSpacing = img.GetSpacing()
         inSize = img.GetSize()
         size = [
@@ -58,7 +62,8 @@ def resample_image(img, spacing, size=[], interpolator=sitk.sitkLinear, outsideV
 
 
 def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
-    """This function resizes the input image based on the output size and interpolator
+    """
+    This function resizes the input image based on the output size and interpolator
 
     Args:
         input_image (SimpleITK.Image): The input image to resample.
@@ -77,14 +82,15 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
             "The output size dimension is inconsistent with the input dataset, please check parameters."
         )
 
-    for i in range(len(output_size)):
-        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / output_size[i])
+    for i, n in enumerate(output_size):
+        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / n)
 
     return resample_image(input_image, outputSpacing, interpolator=interpolator)
 
 
 def one_hot(segmask_array, class_list):
-    """This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
+    """
+    This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
         segmask_array (torch.Tensor): The segmentation mask Tensor.
@@ -131,7 +137,8 @@ def one_hot(segmask_array, class_list):
 
 
 def reverse_one_hot(predmask_array, class_list):
-    """This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
+    """
+    This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
     Args:
         predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
@@ -140,7 +147,11 @@ def reverse_one_hot(predmask_array, class_list):
     Returns:
         torch.Tensor: The final mask torch.Tensor.
     """
-    idx_argmax = np.argmax(predmask_array.cpu().numpy(), axis=0)
+    if isinstance(predmask_array, torch.Tensor):
+        array_to_consider = predmask_array.cpu().numpy()
+    else:
+        array_to_consider = predmask_array
+    idx_argmax = np.argmax(array_to_consider, axis=0)
     final_mask = 0
     special_cases_to_check = ["||"]
     special_case_detected = False
@@ -181,7 +192,8 @@ def reverse_one_hot(predmask_array, class_list):
 
 
 def checkPatchDivisibility(patch_size, number=16):
-    """This function checks the divisibility of a numpy array or integer for architectural integrity
+    """
+    This function checks the divisibility of a numpy array or integer for architectural integrity
 
     Args:
         patch_size (numpy.array): The patch size for checking.
@@ -214,7 +226,8 @@ def checkPatchDivisibility(patch_size, number=16):
 
 
 def send_model_to_device(model, amp, device, optimizer):
-    """This function reads the environment variable(s) and send model to correct device
+    """
+    This function reads the environment variable(s) and send model to correct device
 
     Args:
         model (torch.nn.Module): The model that needs to be sent to specified device.
@@ -293,7 +306,8 @@ def send_model_to_device(model, amp, device, optimizer):
 
 
 def fix_paths(cwd):
-    """This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
+    """
+    This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
 
     Args:
         cwd (str): The current working directory.
@@ -304,7 +318,8 @@ def fix_paths(cwd):
 
 
 def populate_header_in_parameters(parameters, headers):
-    """This function populates the parameters with information from the header in a common manner
+    """
+    This function populates the parameters with information from the header in a common manner
 
     Args:
         parameters (dict): The parameters passed by the user yaml.
@@ -335,7 +350,8 @@ def populate_header_in_parameters(parameters, headers):
 
 
 def find_problem_type(headersFromCSV, model_final_layer):
-    """This function determines the type of problem at hand - regression, classification or segmentation
+    """
+    This function determines the type of problem at hand - regression, classification or segmentation
 
     Args:
         headersFromCSV (dict): The CSV headers dictionary.
@@ -364,7 +380,8 @@ def find_problem_type(headersFromCSV, model_final_layer):
 
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
-    """This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    """
+    This function writes the CSV file based on the input directory, channelsID + labelsID strings
 
     Args:
         inputDir (str): The input directory.
@@ -375,7 +392,7 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     channelsID_list = channelsID.split(",")  # split into list
 
     outputToWrite = "SubjectID,"
-    for i in range(len(channelsID_list)):
+    for i, n in enumerate(channelsID_list):
         outputToWrite = outputToWrite + "Channel_" + str(i) + ","
     outputToWrite = outputToWrite + "Label"
     outputToWrite = outputToWrite + "\n"
@@ -390,14 +407,12 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
             maskFile = ""
             allImageFiles = ""
             for channel in channelsID_list:
-                for i in range(len(filesInDir)):
-                    currentFile = os.path.abspath(
-                        os.path.join(currentSubjectDir, filesInDir[i])
-                    )
+                for i, n in enumerate(filesInDir):
+                    currentFile = os.path.abspath(os.path.join(currentSubjectDir, n))
                     currentFile = currentFile.replace("\\", "/")
-                    if channel in filesInDir[i]:
+                    if channel in n:
                         allImageFiles += currentFile + ","
-                    elif labelID in filesInDir[i]:
+                    elif labelID in n:
                         maskFile = currentFile
             if allImageFiles:
                 outputToWrite += dirs + "," + allImageFiles + maskFile + "\n"
@@ -408,7 +423,8 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
 
 
 def parseTrainingCSV(inputTrainingCSVFile, train=True):
-    """This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    """
+    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
 
     Args:
         inputTrainingCSVFile (str): The input data CSV file which contains all training data.
@@ -468,7 +484,8 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
 
 
 def get_date_time():
-    """Get a well-parsed date string
+    """
+    Get a well-parsed date string
 
     Returns:
         str: The date in format YYYY/MM/DD::HH:MM:SS
@@ -478,7 +495,8 @@ def get_date_time():
 
 
 def get_class_imbalance_weights(training_data_loader, parameters):
-    """This function calculates the penalty that is used for validation loss in multi-class problems
+    """
+    This function calculates the penalty that is used for validation loss in multi-class problems
 
     Args:
         training_data_loader (torch.utils.data.DataLoader): The training data loader.
@@ -505,7 +523,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     # For regression dice penalty need not be taken account
     # For classification this should be calculated on the basis of predicted labels and mask
     if not ("value_keys" in parameters):  # basically, do this for segmentation tasks
-        for batch_idx, (subject) in enumerate(
+        for _, (subject) in enumerate(
             penalty_loader
         ):  # iterate through full training data
             # accumulate dice weights for each label
@@ -543,8 +561,24 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     return dice_penalty_dict
 
 
+def get_filename_extension_sanitized(filename):
+    """
+    This function returns the extension of the filename with leading and trailing characters removed.
+    Args:
+        filename (str): The filename to be processed.
+    Returns:
+        str: The filename with extension removed.
+    """
+    _, ext = os.path.splitext(filename)
+    # if .gz or .nii file is detected, always return .nii.gz
+    if (ext == ".gz") or (ext == ".nii"):
+        ext = ".nii.gz"
+    return ext
+
+
 def populate_channel_keys_in_params(data_loader, parameters):
-    """Function to read channel key information from specified data loader
+    """
+    Function to read channel key information from specified data loader
 
     Args:
         data_loader (torch.DataLoader): The data loader to query key information from.
@@ -570,3 +604,70 @@ def populate_channel_keys_in_params(data_loader, parameters):
         parameters["value_keys"] = value_keys
 
     return parameters
+
+
+def perform_sanity_check_on_subject(subject, parameters):
+    """
+    This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
+
+    Args:
+        subject (torchio.Subject): The input subject.
+        parameters (dict): The parameters passed by the user yaml.
+
+    Returns:
+        bool: True if everything is okay.
+
+    Raises:
+        ValueError: Dimension mismatch in the images.
+        ValueError: Origin mismatch in the images.
+        ValueError: Orientation mismatch in the images.
+    """
+    # read the first image and save that for comparison
+    file_reader_base = None
+
+    import copy
+
+    list_for_comparison = copy.deepcopy(parameters["headers"]["channelHeaders"])
+    if "labelHeader" in parameters["headers"]:
+        list_for_comparison.append("label")
+
+    for key in list_for_comparison:
+        if file_reader_base is None:
+            file_reader_base = sitk.ImageFileReader()
+            file_reader_base.SetFileName(subject[str(key)]["path"])
+            file_reader_base.ReadImageInformation()
+        else:
+            # in this case, file_reader_base is ready
+            file_reader_current = sitk.ImageFileReader()
+            file_reader_current.SetFileName(subject[str(key)]["path"])
+            file_reader_current.ReadImageInformation()
+
+            if file_reader_base.GetDimension() != file_reader_current.GetDimension():
+                raise ValueError(
+                    "Dimensions for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+            if file_reader_base.GetOrigin() != file_reader_current.GetOrigin():
+                raise ValueError(
+                    "Origin for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+            if file_reader_base.GetDirection() != file_reader_current.GetDirection():
+                raise ValueError(
+                    "Orientation for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+            if file_reader_base.GetSpacing() != file_reader_current.GetSpacing():
+                raise ValueError(
+                    "Spacing for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+    return True

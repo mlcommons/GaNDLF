@@ -1,6 +1,4 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class EncodingModule(nn.Module):
@@ -48,7 +46,8 @@ class EncodingModule(nn.Module):
         self.dropout = dropout(**dropout_kwargs)
 
     def forward(self, x):
-        """The forward function for initial convolution
+        """
+        The forward function for initial convolution.
 
         [input --> | --> in --> lrelu --> conv0 --> dropout --> in -|
                    |                                                |

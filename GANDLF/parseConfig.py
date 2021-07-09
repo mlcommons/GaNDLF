@@ -1,4 +1,4 @@
-import sys, yaml, pkg_resources
+import sys, yaml, pkg_resources, ast
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -36,12 +36,21 @@ parameter_defaults_string = {
 def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=True):
     """
     Initializes the specified parameter with supplied value
+
+    Args:
+        params (dict): The parameter dictionary.
+        parameter_to_initialize (str): The parameter to initialize.
+        value ((Union[str, list, int]), optional): The value to initialize. Defaults to None.
+        evaluate (bool, optional): String evaluate. Defaults to True.
+
+    Returns:
+        [type]: [description]
     """
     if parameter_to_initialize in params:
         if evaluate:
             if isinstance(params[parameter_to_initialize], str):
                 if params[parameter_to_initialize].lower() == "none":
-                    params[parameter_to_initialize] = eval(
+                    params[parameter_to_initialize] = ast.literal_eval(
                         params[parameter_to_initialize]
                     )
     else:
@@ -55,7 +64,13 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
 
 def parse_version(version_string):
     """
-    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison
+    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
+
+    Args:
+        version_string (str): The string to be parsed.
+
+    Returns:
+        int: The version number.
     """
     version_string_split = version_string.split(".")
     if len(version_string_split) > 3:
@@ -65,11 +80,19 @@ def parse_version(version_string):
 
 def initialize_key(parameters, key):
     """
-    This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero
+    This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
+
+    Args:
+        parameters (dict): The parameter dictionary.
+        key (str): The parameter to initialize.
+
+    Returns:
+        dict: The final parameter dictionary.
     """
     if key in parameters:
-        if len(parameters[key]) == 0:  # if key is present but not defined
-            parameters[key] = None
+        if parameters[key] is not None:
+            if len(parameters[key]) == 0:  # if key is present but not defined
+                parameters[key] = None
     else:
         parameters[key] = None  # if key is absent
 
@@ -78,10 +101,17 @@ def initialize_key(parameters, key):
 
 def parseConfig(config_file_path, version_check=True):
     """
-    This function parses the configuration file and returns a dictionary of parameters
+    This function parses the configuration file and returns a dictionary of parameters.
+
+    Args:
+        config_file_path (str): The filename of the configuration file.
+        version_check (bool, optional): Whether to check the version in configuration file. Defaults to True.
+
+    Returns:
+        dict: The parameter dictionary.
     """
     with open(config_file_path) as f:
-        params = yaml.load(f, Loader=yaml.FullLoader)
+        params = yaml.safe_load(f)
 
     if version_check:  # this is only to be used for testing
         if not ("version" in params):
@@ -91,9 +121,9 @@ def parseConfig(config_file_path, version_check=True):
         else:
             gandlf_version = pkg_resources.require("GANDLF")[0].version
             gandlf_version_int = parse_version(gandlf_version)
-            min = parse_version(params["version"]["minimum"])
-            max = parse_version(params["version"]["maximum"])
-            if (min > gandlf_version_int) or (max < gandlf_version_int):
+            min_ver = parse_version(params["version"]["minimum"])
+            max_ver = parse_version(params["version"]["maximum"])
+            if (min_ver > gandlf_version_int) or (max_ver < gandlf_version_int):
                 sys.exit(
                     "Incompatible version of GANDLF detected (" + gandlf_version + ")"
                 )
@@ -276,7 +306,7 @@ def parseConfig(config_file_path, version_check=True):
                     ]
 
                 initialize_downsampling = False
-                if type(default_downsampling) is list:
+                if isinstance(default_downsampling, list):
                     if len(default_downsampling) != 2:
                         initialize_downsampling = True
                         print(
@@ -318,17 +348,16 @@ def parseConfig(config_file_path, version_check=True):
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing")
     if not (params["data_preprocessing"] == None):
-        if (
-            len(params["data_preprocessing"]) < 0
-        ):  # perform this only when pre-processing is defined
+        # perform this only when pre-processing is defined
+        if len(params["data_preprocessing"]) < 0:
             thresholdOrClip = False
+            # this can be extended, as required
             thresholdOrClipDict = [
                 "threshold",
                 "clip",
-            ]  # this can be extended, as required
-            keysForWarning = [
-                "resize"
-            ]  # properties for which the user will see a warning
+            ]
+            # properties for which the user will see a warning
+            keysForWarning = ["resize"]
 
             # iterate through all keys
             for key in params["data_preprocessing"]:  # iterate through all keys
@@ -336,9 +365,8 @@ def parseConfig(config_file_path, version_check=True):
                 if not thresholdOrClip:
                     if key in thresholdOrClipDict:
                         thresholdOrClip = True  # we only allow one of threshold or clip to occur and not both
-                        if not (
-                            isinstance(params["data_preprocessing"][key], dict)
-                        ):  # initialize if nothing is present
+                        # initialize if nothing is present
+                        if not (isinstance(params["data_preprocessing"][key], dict)):
                             params["data_preprocessing"][key] = {}
 
                         # if one of the required parameters is not present, initialize with lowest/highest possible values
@@ -426,24 +454,28 @@ def parseConfig(config_file_path, version_check=True):
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
     if isinstance(params["model"]["class_list"], str):
-        try:
-            params["model"]["class_list"] = eval(params["model"]["class_list"])
-        except:
-            if ("||" in params["model"]["class_list"]) or (
-                "&&" in params["model"]["class_list"]
-            ):
-                # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
-                print(
-                    "This is a special case for multi-class computation, where different labels are processed together"
+        if ("||" in params["model"]["class_list"]) or (
+            "&&" in params["model"]["class_list"]
+        ):
+            # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
+            print(
+                "This is a special case for multi-class computation, where different labels are processed together"
+            )
+            temp_classList = params["model"]["class_list"]
+            temp_classList = temp_classList.replace(
+                "[", ""
+            )  # we don't need the brackets
+            temp_classList = temp_classList.replace(
+                "]", ""
+            )  # we don't need the brackets
+            params["model"]["class_list"] = temp_classList.split(",")
+        else:
+            try:
+                params["model"]["class_list"] = ast.literal_eval(
+                    params["model"]["class_list"]
                 )
-                temp_classList = params["model"]["class_list"]
-                temp_classList = temp_classList.replace(
-                    "[", ""
-                )  # we don't need the brackets
-                temp_classList = temp_classList.replace(
-                    "]", ""
-                )  # we don't need the brackets
-                params["model"]["class_list"] = temp_classList.split(",")
+            except AssertionError:
+                AssertionError("Could not evaluate the 'class_list' in 'model'")
 
     if "kcross_validation" in params:
         sys.exit(
