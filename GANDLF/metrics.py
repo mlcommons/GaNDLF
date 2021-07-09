@@ -2,10 +2,9 @@
 All the metrics are to be called from here
 """
 import torch
-from .losses import MSE, MSE_loss, CE_loss
 from .utils import one_hot
 import sys, torch, numpy
-from .losses import MSE_loss
+from .losses import MSE_loss, CE_loss
 from .utils import one_hot
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
