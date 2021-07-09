@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.9,
-    maximum: 0.0.9 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.10,
+    maximum: 0.0.10 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
 model:
@@ -39,6 +39,14 @@ modality: rad
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: uniform
+# patch_sampler: label
+# patch_sampler:
+#   {
+#     label:
+#       {
+#         padding_type: constant # how the label gets padded
+#       }
+#   }
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
@@ -129,13 +137,13 @@ data_augmentation:
       'std': [0, 1] # default std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomBlur
     },
     'noise': { # for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomNoise
-      'mean': 0 # default mean
+      'mean': 0, # default mean
       'std': [0, 1] # default std-dev range
     },
     'gamma',
     'swap':{
       'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
-    }
+    },
     'flip':{
       'axis': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
     },

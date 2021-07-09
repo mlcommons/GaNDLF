@@ -61,7 +61,6 @@ class InceptionModule(nn.Module):
         )
 
     def forward(self, x):
-        output_channels = self.output_channels
         if self.res == True:
             skip = x
         x1 = F.leaky_relu(

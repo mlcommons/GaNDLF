@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-All Models in GANDLF are to be derived from this base class code
-"""
+"""All Models in GANDLF are to be derived from this base class code."""
 
 import torch
 import torch.nn as nn
@@ -38,7 +36,8 @@ class ModelBase(nn.Module):
         norm_type,
         final_convolution_layer,
     ):
-        """This defines all defaults that the model base uses
+        """
+        This defines all defaults that the model base uses
 
         Args:
             n_dimensions (int): The number of dimensions for the model to use - defines computational dimensions.

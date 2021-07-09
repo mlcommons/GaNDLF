@@ -26,7 +26,14 @@ jobs:
         $CONDA/bin/conda install -c conda-forge openslide
         $CONDA/bin/conda install -c conda-forge libvips
         pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+        pip install pytest-cov
         pip install -e .
     - name: Test with pytest
       run: |
-        pytest
+        pytest --cov=. --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests

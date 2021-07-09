@@ -94,7 +94,8 @@ def CE(out, target):
     return loss_val
 
 def CCE_Generic(out, target, params, CCE_Type):
-    """Generic function to calculate CCE loss
+    """
+    Generic function to calculate CCE loss
 
     Args:
         out (torch.tensor): The predicted output value for each pixel. dimension: [batch, class, x, y, z].
@@ -139,7 +140,7 @@ def tversky(inp, target, alpha):
     return (intersection + smooth) / denominator
 
 
-def tversky_loss(inp, target, alpha):
+def tversky_loss(inp, target, alpha=1):
     tversky_val = tversky(inp, target, alpha)
     return 1 - tversky_val
 
@@ -215,7 +216,6 @@ def fetch_loss_function(loss_name, params):
     if isinstance(loss_name, dict):  # this is currently only happening for mse_torch
         # check for mse_torch
         loss_function = MSE_loss
-        MSE_requested = True
     elif loss_name == "dc":
         loss_function = MCD_loss
     elif loss_name == "dc_log":
