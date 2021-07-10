@@ -684,6 +684,8 @@ def test_preprocess_functions():
     non_zero_normalizer = NonZeroNormalizeOnMaskedRegion()
     input_transformed = non_zero_normalizer(input_tensor)
 
+    elestic_generator = elastic(patch_size=[32, 32, 1])
+    input_transformed = elestic_generator(input_tensor)
     elestic_generator = elastic()
     input_transformed = elestic_generator(input_tensor)
     mri_artefact_generator = mri_artifact()
