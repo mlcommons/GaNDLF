@@ -63,7 +63,7 @@ def elastic(patch_size=None, p=1):
             num_controls.append(max(round(n / 10), 5))  # always at least have 5
         max_displacement = np.divide(num_controls, 10)
         if num_controls[-1] == 1:
-            # ensure maximum displacement is never grater than patch size
+            # ensure maximum displacement is never greater than patch size
             max_displacement[-1] = 0.1
         max_displacement = max_displacement.tolist()
     else:
