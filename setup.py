@@ -68,6 +68,7 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     description=(
         "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
