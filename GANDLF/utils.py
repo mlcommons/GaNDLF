@@ -156,7 +156,7 @@ def reverse_one_hot(predmask_array, class_list):
     final_mask = 0
     special_cases_to_check = ["||"]
     special_case_detected = False
-    max = 0
+    max_current = 0
 
     for _class in class_list:
         for case in special_cases_to_check:
@@ -167,8 +167,8 @@ def reverse_one_hot(predmask_array, class_list):
                         case
                     )  # if present, then split the sub-class
                     for i in class_split:  # find the max for computation later on
-                        if int(i) > max:
-                            max = int(i)
+                        if int(i) > max_current:
+                            max_current = int(i)
 
     if special_case_detected:
         start_idx = 0
@@ -184,7 +184,7 @@ def reverse_one_hot(predmask_array, class_list):
                 predmask_array[0, :, :, :], dtype=int
             )  # predmask_array[i,:,:,:].long()
             # temp_sum = torch.sum(output)
-        # output_2 = (max - torch.sum(output)) % max
+        # output_2 = (max_current - torch.sum(output)) % max_current
         # test_2 = 1
     else:
         for idx, _class in enumerate(class_list):
