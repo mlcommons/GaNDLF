@@ -12,6 +12,7 @@ import torch.nn as nn
 import torchio
 from GANDLF.models.modelBase import get_final_layer
 
+
 def resample_image(
     img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0
 ):
