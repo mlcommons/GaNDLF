@@ -17,7 +17,7 @@ model:
   - 1
   - 2
   dimension: 2
-  final_layer: None
+  final_layer: softmax
 nested_training:
   testing: -2
   validation: -2
