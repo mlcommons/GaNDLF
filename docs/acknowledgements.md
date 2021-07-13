@@ -22,3 +22,18 @@ This file records the following pieces of information:
 |  Pathologic Myopia  | 2019 | [ISBI](https://biomedicalimaging.org/2019/) |         https://palm.grand-challenge.org/        |
 |      DigestPath     | 2019 |    [MICCAI](https://www.miccai2019.org/)    | https://digestpath2019.grand-challenge.org/Home/ |
 | Diabetic Foot Ulcer | 2021 |     [MICCAI](https://miccai2021.org/en/)    |       https://dfu-2021.grand-challenge.org/      |
+
+
+## People
+
+- [All coders and developers of GaNDLF](https://github.com/CBICA/GaNDLF/graphs/contributors)
+
+- Supervisors:
+  - [Aimilia Gastounioti](https://www.med.upenn.edu/cbica/sbia/aimiliag.html)
+  - [Mark Bergman](https://www.med.upenn.edu/sbia/mbergman.html)
+  - [Anirban Mukhopadhyay](https://sites.google.com/site/geometricanirban/)
+  - [Bjoern Menze](https://www.dqbm.uzh.ch/en/research/groups/menze.html)
+  - [Despina Kontos](https://www.med.upenn.edu/cbica/cbig/despinak.html)
+  - [Christos Davatzikos](https://www.med.upenn.edu/cbica/christos/)
+  - [Spyridon (Spyros) Bakas](https://www.med.upenn.edu/cbica/sbakas/)
+  
