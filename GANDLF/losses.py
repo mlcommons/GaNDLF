@@ -93,6 +93,7 @@ def CE(out, target):
     loss_val = loss(iflat, tflat)
     return loss_val
 
+
 def CCE_Generic(out, target, params, CCE_Type):
     """
     Generic function to calculate CCE loss

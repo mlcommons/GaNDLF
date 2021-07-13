@@ -2,7 +2,7 @@ from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch
 import SimpleITK as sitk
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame, elastic, mri_artifact
 from GANDLF.utils import *
 from GANDLF.preprocessing import *
 from GANDLF.parseConfig import parseConfig
@@ -683,6 +683,13 @@ def test_preprocess_functions():
 
     non_zero_normalizer = NonZeroNormalizeOnMaskedRegion()
     input_transformed = non_zero_normalizer(input_tensor)
+
+    elastic_generator = elastic(patch_size=[32, 32, 1])
+    input_transformed = elastic_generator(input_tensor)
+    elastic_generator = elastic()
+    input_transformed = elastic_generator(input_tensor)
+    mri_artefact_generator = mri_artifact()
+    input_transformed = mri_artefact_generator(input_tensor)
 
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resample_image(
