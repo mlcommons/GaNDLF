@@ -1,3 +1,7 @@
+## 0.0.11
+
+- 
+
 ## 0.0.10
 
 - Half-time epoch loss and metric output added for increased information
