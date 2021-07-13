@@ -77,43 +77,6 @@ nested_training:
 # resize the image(s) and mask (this should be greater than or equal to patch_size); resize is done ONLY when resample is not defined
 
 
-# data_augmentation:
-#   {
-#   # 'spatial':{
-#   #   'probability': 0.5
-#   # },
-#   # 'kspace':{
-#   #   'probability': 0.5
-#   # },
-#   'bias':{
-#     'probability': 0.5
-#   },
-#   'blur':{
-#     'probability': 0.5
-#   },
-#   'noise':{
-#     'probability': 0.5
-#   },
-#   'swap':{
-#     'probability': 0.5
-#   }
-#   }
-# data_preprocessing:
-#   {
-#     # 'threshold':{
-#     #   'min': 10, 
-#     #   'max': 75
-#     # },
-#     # 'clip':{
-#     #   'min': 10, 
-#     #   'max': 75
-#     # }, 
-#     'normalize',
-#     # 'resample':{
-#     #   'resolution': [1,2,3]
-#     # },
-#     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
-#   }
 data_preprocessing:
   {
     # 'normalize',
