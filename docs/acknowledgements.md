@@ -9,7 +9,7 @@ This file records the following pieces of information:
 
 ## Papers
 
-|        Application       |   Lead Author   |                       Link                       |
+|        **Application**       |   **Lead Author**   |                       **Link**                       |
 |:------------------------:|:---------------:|:------------------------------------------------:|
 |     Brain Extraction     | Siddhesh Thakur | https://doi.org/10.1016/j.neuroimage.2020.117081 |
 | Brain Tumor Segmentation |  Megh Bhalerao  |   https://doi.org/10.1007/978-3-030-46643-5_21   |
@@ -17,7 +17,7 @@ This file records the following pieces of information:
 
 ## Challenges
 
-|    Challenge Name   | Year |               Host Conference               |                       Link                       |
+|    **Challenge Name**   | **Year** |               **Host Conference**               |                       **Link**                       |
 |:-------------------:|:----:|:-------------------------------------------:|:------------------------------------------------:|
 |  Pathologic Myopia  | 2019 | [ISBI](https://biomedicalimaging.org/2019/) |         https://palm.grand-challenge.org/        |
 |      DigestPath     | 2019 |    [MICCAI](https://www.miccai2019.org/)    | https://digestpath2019.grand-challenge.org/Home/ |
@@ -36,4 +36,3 @@ This file records the following pieces of information:
   - [Despina Kontos](https://www.med.upenn.edu/cbica/cbig/despinak.html)
   - [Christos Davatzikos](https://www.med.upenn.edu/cbica/christos/)
   - [Spyridon (Spyros) Bakas](https://www.med.upenn.edu/cbica/sbakas/)
-  
