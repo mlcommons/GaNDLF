@@ -51,6 +51,7 @@ Start at https://cbica.github.io/GaNDLF/. Includes the following:
 - [Installation](https://cbica.github.io/GaNDLF/setup)
 - [Usage](https://cbica.github.io/GaNDLF/usage)
 - [Extension](https://cbica.github.io/GaNDLF/extending)
+- [Acknowledgements](https://cbica.github.io/GaNDLF/acknowledgements)
 
 ## Disclaimer
 - The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.
