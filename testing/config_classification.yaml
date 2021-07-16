@@ -39,5 +39,5 @@ scheduler: triangle
 version:
   maximum: 0.0.11
   minimum: 0.0.7
-weighted_loss: false
+weighted_loss: True
 which_model: resunet
