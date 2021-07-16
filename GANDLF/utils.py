@@ -562,10 +562,13 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         for j in range(0, len(parameters["model"]["class_list"])):
             if i != j:  # for differing classes, subtract the current weight
                 penalty -= weights_dict[j]
-        
+
         # finally, the "penalty" variable contains the total number of voxels/activations that are not part of the current class
         # this is to be used to weight the loss function
-        penalty_dict[i] = penalty / total_counter
+        # adding epsilon to avoid division by zero
+        penalty_dict[i] = (penalty + sys.float_info.epsilon) / (
+            total_counter + sys.float_info.epsilon
+        )
 
     return penalty_dict
 
