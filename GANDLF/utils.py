@@ -335,7 +335,7 @@ def populate_header_in_parameters(parameters, headers):
 
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
-    is_regression, _, _ = find_problem_type(
+    is_regression, is_classification, is_segmentation = find_problem_type(
         parameters["headers"], get_final_layer(parameters["model"]["final_layer"])
     )
 
@@ -346,6 +346,13 @@ def populate_header_in_parameters(parameters, headers):
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])
+
+    if is_regression:
+        parameters["problem_type"] = "regression"
+    elif is_classification:
+        parameters["problem_type"] = "classification"
+    elif is_segmentation:
+        parameters["problem_type"] = "segmentation"
 
     return parameters
 
@@ -506,15 +513,14 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     Returns:
         dict: The penalty weights for different classes under consideration.
     """
-    dice_weights_dict = {}  # average for "weighted averaging"
-    dice_penalty_dict = None  # penalty for misclassification
-    if not (
-        "value_keys" in parameters
-    ):  # basically, do this for segmentation tasks, need to extend for classification
-        dice_penalty_dict = {}
+    weights_dict = {}  # average for "weighted averaging"
+    penalty_dict = None  # penalty for misclassification
+    # basically, do this for segmentation/classification tasks
+    if parameters["problem_type"] is not "regression":
+        penalty_dict = {}
         for i in range(0, len(parameters["model"]["class_list"])):
-            dice_weights_dict[i] = 0
-            dice_penalty_dict[i] = 0
+            weights_dict[i] = 0
+            penalty_dict[i] = 0
 
     penalty_loader = training_data_loader
 
@@ -524,9 +530,8 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     # For regression dice penalty need not be taken account
     # For classification this should be calculated on the basis of predicted labels and mask
     if not ("value_keys" in parameters):  # basically, do this for segmentation tasks
-        for _, (subject) in enumerate(
-            penalty_loader
-        ):  # iterate through full training data
+        # iterate through full training data
+        for _, (subject) in enumerate(penalty_loader):
             # accumulate dice weights for each label
             mask = subject["label"][torchio.DATA]
             if parameters["verbose"]:
@@ -543,23 +548,26 @@ def get_class_imbalance_weights(training_data_loader, parameters):
                 currentNumber = torch.nonzero(
                     one_hot_mask[:, i, :, :, :], as_tuple=False
                 ).size(0)
-                dice_weights_dict[i] += currentNumber  # class-specific non-zero voxels
-                total_nonZeroVoxels += (
-                    currentNumber  # total number of non-zero voxels to be considered
-                )
+                # class-specific non-zero voxels
+                weights_dict[i] += currentNumber
+                # total number of non-zero voxels to be considered
+                total_nonZeroVoxels += currentNumber
 
-            # get the penalty values - dice_weights contains the overall number for each class in the training data
+        # get the penalty values - dice_weights contains the overall number for each class in the training data
         for i in range(0, len(parameters["model"]["class_list"])):
             penalty = total_nonZeroVoxels  # start with the assumption that all the non-zero voxels make up the penalty
             for j in range(0, len(parameters["model"]["class_list"])):
                 if i != j:  # for differing classes, subtract the number
-                    penalty -= dice_weights_dict[j]
+                    penalty -= weights_dict[j]
 
-            dice_penalty_dict[i] = (
-                penalty / total_nonZeroVoxels
-            )  # this is to be used to weight the loss function
-        # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-    return dice_penalty_dict
+            # this is to be used to weight the loss function
+            penalty_dict[i] = penalty / total_nonZeroVoxels
+    elif parameters["problem_type"] == "classification":
+        # iterate through penalty data
+        # calculate penalty_dict appropriately
+        test = 1
+
+    return penalty_dict
 
 
 def get_filename_extension_sanitized(filename):
