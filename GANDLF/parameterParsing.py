@@ -124,9 +124,8 @@ def get_model(
         )
         amp = False  # this is not yet implemented for msdnet
 
-    elif (
-        "imagenet" in modelname
-    ):  # these are generic imagenet-trained models and should be customized
+    # these are generic imagenet-trained models and should be customized
+    elif "imagenet" in modelname:
 
         if num_dimensions != 2:
             sys.exit("ImageNet-trained models only work on 2D data")
