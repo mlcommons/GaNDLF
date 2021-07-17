@@ -335,24 +335,17 @@ def populate_header_in_parameters(parameters, headers):
 
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
-    is_regression, is_classification, is_segmentation = find_problem_type(
+    parameters["problem_type"] = find_problem_type(
         parameters["headers"], get_final_layer(parameters["model"]["final_layer"])
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
-    if not is_regression:
+    if parameters["problem_type"] != "regression":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
 
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])
-
-    if is_regression:
-        parameters["problem_type"] = "regression"
-    elif is_classification:
-        parameters["problem_type"] = "classification"
-    elif is_segmentation:
-        parameters["problem_type"] = "segmentation"
 
     return parameters
 
@@ -366,25 +359,16 @@ def find_problem_type(headersFromCSV, model_final_layer):
         model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
 
     Returns:
-        bool: If problem is regression.
-        bool: If problem is classification.
-        bool: If problem is segmentation.
+        str: The problem type (regression/classification/segmentation).
     """
-    # initialize problem type
-    is_regression = False
-    is_classification = False
-    is_segmentation = False
-
     # check if regression/classification has been requested
     if len(headersFromCSV["predictionHeaders"]) > 0:
         if model_final_layer is None:
-            is_regression = True
+            return "regression"
         else:
-            is_classification = True
+            return "classification"
     else:
-        is_segmentation = True
-
-    return is_regression, is_classification, is_segmentation
+        return "segmentation"
 
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
