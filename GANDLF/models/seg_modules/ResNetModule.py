@@ -23,7 +23,7 @@ class ResNetModule(nn.Module):
         self.leakiness = leakiness
         self.conv_bias = conv_bias
         self.inst_norm_affine = inst_norm_affine
-        self.res = res
+        self.residual = res
         self.lrelu_inplace = lrelu_inplace
         self.dropout = Dropout(dropout_p)
         self.inst_norm = InstanceNorm(
@@ -39,7 +39,7 @@ class ResNetModule(nn.Module):
         )
 
     def forward(self, x):
-        if self.res == True:
+        if self.residual == True:
             skip = x
         x = F.leaky_relu(
             self.inst_norm(self.conv(x)),
