@@ -575,7 +575,7 @@ def test_losses_segmentation_rad_2d(device):
     # disabling amp because some losses do not support Half, yet
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["architecture"] = "unet"
+    parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits"]:

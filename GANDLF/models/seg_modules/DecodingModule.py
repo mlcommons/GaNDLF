@@ -30,7 +30,7 @@ class DecodingModule(nn.Module):
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
-        self.res = network_kwargs["res"]
+        self.residual = network_kwargs["res"]
 
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
         self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
@@ -47,14 +47,14 @@ class DecodingModule(nn.Module):
 
         x = self.act(self.in_0(x))
         x = self.conv0(x)
-        if self.res == True:
+        if self.residual == True:
             skip = x
 
         x = self.act(self.in_1(x))
 
         x = self.act(self.in_2(self.conv1(x)))
         x = self.conv2(x)
-        if self.res == True:
+        if self.residual == True:
             x = x + skip
 
         return x
