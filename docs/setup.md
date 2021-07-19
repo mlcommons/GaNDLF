@@ -7,7 +7,7 @@
 
 ## Installation
 
-```powershell
+```bash
 git clone https://github.com/CBICA/GaNDLF.git
 cd GaNDLF
 conda create -n venv_gandlf python=3.7 -y
