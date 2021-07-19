@@ -24,7 +24,7 @@ class IncDropout(nn.Module):
         self.leakiness = leakiness
         self.conv_bias = conv_bias
         self.inst_norm_affine = inst_norm_affine
-        self.res = res
+        self.residual = res
         self.lrelu_inplace = lrelu_inplace
         self.dropout = Dropout(dropout_p)
         self.conv = Conv(

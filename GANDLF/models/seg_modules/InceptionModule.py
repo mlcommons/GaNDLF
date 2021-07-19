@@ -19,7 +19,7 @@ class InceptionModule(nn.Module):
         lrelu_inplace=True,
     ):
         nn.Module.__init__(self)
-        self.res = res
+        self.residual = res
         self.output_channels = output_channels
         self.dropout_p = dropout_p
         self.conv_bias = conv_bias
@@ -61,7 +61,7 @@ class InceptionModule(nn.Module):
         )
 
     def forward(self, x):
-        if self.res == True:
+        if self.residual == True:
             skip = x
         x1 = F.leaky_relu(
             self.inst_norm(self.conv_1x1(x)),
