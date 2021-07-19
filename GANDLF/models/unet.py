@@ -29,7 +29,7 @@ class unet(ModelBase):
         final_convolution_layer,
         residualConnections=False,
     ):
-        self.network_kwargs = {"res": False}
+        self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(
             n_dimensions,
             n_channels,
@@ -44,6 +44,7 @@ class unet(ModelBase):
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.ds_0 = DownsamplingModule(
             input_channels=self.base_filters,
@@ -57,6 +58,7 @@ class unet(ModelBase):
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.ds_1 = DownsamplingModule(
             input_channels=self.base_filters * 2,
@@ -70,6 +72,7 @@ class unet(ModelBase):
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.ds_2 = DownsamplingModule(
             input_channels=self.base_filters * 4,
@@ -83,6 +86,7 @@ class unet(ModelBase):
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.ds_3 = DownsamplingModule(
             input_channels=base_filters * 8,
@@ -96,6 +100,7 @@ class unet(ModelBase):
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.us_3 = UpsamplingModule(
             input_channels=base_filters * 16,
@@ -107,6 +112,7 @@ class unet(ModelBase):
             output_channels=base_filters * 8,
             conv=self.Conv,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.us_2 = UpsamplingModule(
             input_channels=base_filters * 8,
@@ -118,6 +124,7 @@ class unet(ModelBase):
             output_channels=base_filters * 4,
             conv=self.Conv,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.us_1 = UpsamplingModule(
             input_channels=base_filters * 4,
@@ -129,6 +136,7 @@ class unet(ModelBase):
             output_channels=base_filters * 2,
             conv=self.Conv,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.us_0 = UpsamplingModule(
             input_channels=base_filters * 2,
@@ -140,6 +148,7 @@ class unet(ModelBase):
             output_channels=n_classes,
             conv=self.Conv,
             norm=self.Norm,
+            network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
         )
 
@@ -222,6 +231,7 @@ class unet(ModelBase):
 #             conv=self.Conv,
 #             dropout=self.Dropout,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.ds_1 = DownsamplingModule(
 #             input_channels=self.base_filters,
@@ -235,6 +245,7 @@ class unet(ModelBase):
 #             conv=self.Conv,
 #             dropout=self.Dropout,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.ds_2 = DownsamplingModule(
 #             input_channels=self.base_filters,
@@ -248,6 +259,7 @@ class unet(ModelBase):
 #             conv=self.Conv,
 #             dropout=self.Dropout,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.ds_3 = DownsamplingModule(
 #             input_channels=base_filters,
@@ -261,6 +273,7 @@ class unet(ModelBase):
 #             conv=self.Conv,
 #             dropout=self.Dropout,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_3 = UpsamplingModule(
 #             input_channels=base_filters,
@@ -272,6 +285,7 @@ class unet(ModelBase):
 #             output_channels=base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_2 = UpsamplingModule(
 #             input_channels=base_filters,
@@ -283,6 +297,7 @@ class unet(ModelBase):
 #             output_channels=base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_1 = UpsamplingModule(
 #             input_channels=base_filters,
@@ -294,6 +309,7 @@ class unet(ModelBase):
 #             output_channels=base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
+#             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_0 = UpsamplingModule(
 #             input_channels=base_filters,

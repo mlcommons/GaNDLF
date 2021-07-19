@@ -32,7 +32,7 @@ class out_conv(nn.Module):
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
-        self.res = network_kwargs["res"]
+        self.residual = network_kwargs["res"]
 
         self.conv0 = conv(input_channels, input_channels // 2, **conv_kwargs)
         self.conv1 = conv(input_channels // 2, input_channels // 2, **conv_kwargs)
@@ -55,13 +55,13 @@ class out_conv(nn.Module):
         x = self.act(self.in_0(x))
 
         x = self.conv0(x)
-        if self.res == True:
+        if self.residual == True:
             skip = x
         x = self.act(self.in_1(x))
 
         x = self.act(self.in_2(self.conv1(x)))
         x = self.conv2(x)
-        if self.res == True:
+        if self.residual == True:
             x = x + skip
 
         x = self.act(self.in_3(x))
