@@ -25,7 +25,7 @@ class IncUpsamplingModule(nn.Module):
         self.leakiness = leakiness
         self.conv_bias = conv_bias
         self.inst_norm_affine = inst_norm_affine
-        self.res = res
+        self.residual = res
         self.lrelu_inplace = lrelu_inplace
         self.inst_norm = InstanceNorm(
             output_channels, affine=self.inst_norm_affine, track_running_stats=True
