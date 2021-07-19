@@ -33,7 +33,7 @@ class EncodingModule(nn.Module):
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
-        self.res = network_kwargs["res"]
+        self.residual = network_kwargs["res"]
 
         self.conv0 = conv(output_channels, output_channels, **conv_kwargs)
         self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
@@ -59,7 +59,7 @@ class EncodingModule(nn.Module):
         Returns:
             [Tensor] -- [Returns a torch Tensor]
         """
-        if self.res == True:
+        if self.residual == True:
             skip = x
         x = self.act(self.in_0(x))
 
@@ -69,7 +69,7 @@ class EncodingModule(nn.Module):
         x = self.act(self.in_1(x))
 
         x = self.conv1(x)
-        if self.res == True:
+        if self.residual == True:
             x = x + skip
 
         return x
