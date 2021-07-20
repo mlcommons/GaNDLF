@@ -32,7 +32,8 @@ cd GaNDLF
 conda create -p ./venv python=3.7 -y
 conda activate ./venv
 conda install -c conda-forge mamba -y # [OPTIONAL] allows for faster dependency solving
-conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch # 1.8.0 installs cuda 10.2 by default, personalize based on your cuda/driver availability via https://pytorch.org/get-started/locally/
+mamba install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch # 1.8.0 installs cuda 10.2 by default, personalize based on your cuda/driver availability via https://pytorch.org/get-started/locally/
+mamba install -c sdvillal openslide
 pip install -e .
 
 ## verify installation
