@@ -644,7 +644,10 @@ def perform_sanity_check_on_subject(subject, parameters):
                 file_reader_current.SetFileName(subject[str(key)]["path"])
                 file_reader_current.ReadImageInformation()
 
-                if file_reader_base.GetDimension() != file_reader_current.GetDimension():
+                if (
+                    file_reader_base.GetDimension()
+                    != file_reader_current.GetDimension()
+                ):
                     raise ValueError(
                         "Dimensions for Subject '"
                         + subject["subject_id"]
@@ -658,7 +661,10 @@ def perform_sanity_check_on_subject(subject, parameters):
                         + "' are not consistent."
                     )
 
-                if file_reader_base.GetDirection() != file_reader_current.GetDirection():
+                if (
+                    file_reader_base.GetDirection()
+                    != file_reader_current.GetDirection()
+                ):
                     raise ValueError(
                         "Orientation for Subject '"
                         + subject["subject_id"]
