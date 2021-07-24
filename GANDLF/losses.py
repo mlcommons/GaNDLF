@@ -32,10 +32,10 @@ def weighted_cel(out, target, params):
     class_weights = 1.0 / class_weights
 
     if out.is_cuda:
-        class_weights.cuda()
+        class_weights = class_weights.cuda()
     else:
-        class_weights.cpu()
-
+        class_weights = class_weights.cpu()
+    
     weighted_cel = CrossEntropyLoss(weight=class_weights)
     return weighted_cel(out, target)
 
