@@ -497,13 +497,14 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     Returns:
         dict: The penalty weights for different classes under consideration.
     """
+    abs_dict = {} # absolute counts for each class
     weights_dict = {}  # average for "weighted averaging"
     penalty_dict = None  # penalty for misclassification
     # basically, do this for segmentation/classification tasks
     if parameters["problem_type"] is not "regression":
         penalty_dict = {}
         for i in range(0, len(parameters["model"]["class_list"])):
-            weights_dict[i] = 0
+            abs_dict[i] = 0
             penalty_dict[i] = 0
 
     penalty_loader = training_data_loader
@@ -526,7 +527,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
                     one_hot_mask[:, i, :, :, :], as_tuple=False
                 ).size(0)
                 # class-specific non-zero voxels
-                weights_dict[i] += currentNumber
+                abs_dict[i] += currentNumber
                 # total number of non-zero voxels to be considered
                 total_counter += currentNumber
 
@@ -536,16 +537,20 @@ def get_class_imbalance_weights(training_data_loader, parameters):
             value_to_predict = subject["value_0"][0]
             for i in range(0, len(parameters["model"]["class_list"])):
                 if value_to_predict == i:
-                    weights_dict[i] += 1
+                    abs_dict[i] += 1
                     # we only want to increase the counter for those subjects that are defined in the class_list
                     total_counter += 1
 
-    # get the penalty values - weights_dict contains the overall number for each class in the penalty data
+    # Normalize class weights
+    normalizer = sum(abs_dict.values())
+    weights_dict = {key: val / normalizer for key, val in abs_dict.items()}
+
+    # get the penalty values - abs_dict contains the overall number for each class in the penalty data
     for i in range(0, len(parameters["model"]["class_list"])):
         penalty = total_counter  # start with the assumption that all the non-zero voxels (segmentation) or activate labels (classification) make up the penalty
         for j in range(0, len(parameters["model"]["class_list"])):
             if i != j:  # for differing classes, subtract the current weight
-                penalty -= weights_dict[j]
+                penalty -= abs_dict[j]
 
         # finally, the "penalty" variable contains the total number of voxels/activations that are not part of the current class
         # this is to be used to weight the loss function
@@ -554,7 +559,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
             total_counter + sys.float_info.epsilon
         )
 
-    return penalty_dict
+    return penalty_dict, weights_dict
 
 
 def get_filename_extension_sanitized(filename):
