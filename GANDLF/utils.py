@@ -624,46 +624,53 @@ def perform_sanity_check_on_subject(subject, parameters):
     import copy
 
     list_for_comparison = copy.deepcopy(parameters["headers"]["channelHeaders"])
-    if "labelHeader" in parameters["headers"]:
+    if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
 
-    for key in list_for_comparison:
-        if file_reader_base is None:
-            file_reader_base = sitk.ImageFileReader()
-            file_reader_base.SetFileName(subject[str(key)]["path"])
-            file_reader_base.ReadImageInformation()
-        else:
-            # in this case, file_reader_base is ready
-            file_reader_current = sitk.ImageFileReader()
-            file_reader_current.SetFileName(subject[str(key)]["path"])
-            file_reader_current.ReadImageInformation()
+    if len(list_for_comparison) > 1:
+        for key in list_for_comparison:
+            if file_reader_base is None:
+                file_reader_base = sitk.ImageFileReader()
+                file_reader_base.SetFileName(subject[str(key)]["path"])
+                file_reader_base.ReadImageInformation()
+            else:
+                # in this case, file_reader_base is ready
+                file_reader_current = sitk.ImageFileReader()
+                file_reader_current.SetFileName(subject[str(key)]["path"])
+                file_reader_current.ReadImageInformation()
 
-            if file_reader_base.GetDimension() != file_reader_current.GetDimension():
-                raise ValueError(
-                    "Dimensions for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
+                if (
+                    file_reader_base.GetDimension()
+                    != file_reader_current.GetDimension()
+                ):
+                    raise ValueError(
+                        "Dimensions for Subject '"
+                        + subject["subject_id"]
+                        + "' are not consistent."
+                    )
 
-            if file_reader_base.GetOrigin() != file_reader_current.GetOrigin():
-                raise ValueError(
-                    "Origin for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
+                if file_reader_base.GetOrigin() != file_reader_current.GetOrigin():
+                    raise ValueError(
+                        "Origin for Subject '"
+                        + subject["subject_id"]
+                        + "' are not consistent."
+                    )
 
-            if file_reader_base.GetDirection() != file_reader_current.GetDirection():
-                raise ValueError(
-                    "Orientation for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
+                if (
+                    file_reader_base.GetDirection()
+                    != file_reader_current.GetDirection()
+                ):
+                    raise ValueError(
+                        "Orientation for Subject '"
+                        + subject["subject_id"]
+                        + "' are not consistent."
+                    )
 
-            if file_reader_base.GetSpacing() != file_reader_current.GetSpacing():
-                raise ValueError(
-                    "Spacing for Subject '"
-                    + subject["subject_id"]
-                    + "' are not consistent."
-                )
+                if file_reader_base.GetSpacing() != file_reader_current.GetSpacing():
+                    raise ValueError(
+                        "Spacing for Subject '"
+                        + subject["subject_id"]
+                        + "' are not consistent."
+                    )
 
     return True
