@@ -311,7 +311,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 path=dataframe[labelHeader][patient],
             )
 
-            # if resize is requested, the perform per-image resize with appropriate interpolator; explore using sitkLabelGaussian
+            # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
                 img_resized = apply_resize(
