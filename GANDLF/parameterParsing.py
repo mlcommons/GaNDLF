@@ -238,6 +238,9 @@ def get_model(
             )
 
         amp = False  # this is not yet implemented for densenet
+        # these checks are not needed
+        divisibilityCheck_patch = False
+        divisibilityCheck_baseFilter = False
 
     elif "vgg" in modelname:  # common parsing for vgg
         if modelname == "vgg11":
@@ -252,13 +255,14 @@ def get_model(
             sys.exit("Requested VGG type '" + modelname + "' has not been implemented")
 
         amp = False  # this is not yet implemented for vgg
+        # these checks are not needed
+        divisibilityCheck_patch = False
+        divisibilityCheck_baseFilter = False
 
         if "batch_norm" in kwargs:
             batch_norm = kwargs.get("batch_norm")
         else:
             batch_norm = True
-        divisibilityCheck_patch = False
-        divisibilityCheck_baseFilter = False
         layers = make_layers(
             vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
         )
@@ -291,6 +295,8 @@ def get_model(
             ]
         )
         model.classifier = nn.Sequential(*features)  # Replace the model classifier
+        amp = False  # this is not yet implemented for vgg
+        # these checks are not needed
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
 
