@@ -24,10 +24,7 @@ def cel(out, target, params):
         # more examples you have in the training data, the smaller the weight you have in the loss
         class_weights = 1.0 / class_weights
 
-        if out.is_cuda:
-            class_weights = class_weights.cuda()
-        else:
-            class_weights = class_weights.cpu()
+        class_weights .float().to(params["device"])
     
     cel = CrossEntropyLoss(weight=class_weights)
     return cel(out, target)
