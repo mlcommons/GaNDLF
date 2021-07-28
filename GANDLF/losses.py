@@ -18,27 +18,19 @@ def cel(out, target, params):
     if len(target.shape) > 1 and target.shape[-1] == 1:
         target = torch.squeeze(target, -1)
 
-    cel = CrossEntropyLoss()
-    return cel(out, target)
+    if not params["class_weights"]:
+        class_weights = torch.FloatTensor(list(params["class_weights"].values()))
 
+        # more examples you have in the training data, the smaller the weight you have in the loss
+        class_weights = 1.0 / class_weights
 
-def weighted_cel(out, target, params):
-    if len(target.shape) > 1 and target.shape[-1] == 1:
-        target = torch.squeeze(target, -1)
-
-    class_weights = torch.FloatTensor(list(params["class_weights"].values()))
-
-    # more examples you have in the training data, the smaller the weight you have in the loss
-    class_weights = 1.0 / class_weights
-
-    if out.is_cuda:
-        class_weights = class_weights.cuda()
-    else:
-        class_weights = class_weights.cpu()
+        if out.is_cuda:
+            class_weights = class_weights.cuda()
+        else:
+            class_weights = class_weights.cpu()
     
-    weighted_cel = CrossEntropyLoss(weight=class_weights)
-    return weighted_cel(out, target)
-
+    cel = CrossEntropyLoss(weight=class_weights)
+    return cel(out, target)
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
     """
@@ -250,8 +242,6 @@ def fetch_loss_function(loss_name, params):
         loss_function = MSE_loss
     elif loss_name == "cel":
         loss_function = cel
-    elif loss_name == "weighted_cel":
-        loss_function = weighted_cel
     else:
         print(
             "WARNING: Could not find the requested loss function '"
