@@ -6,6 +6,7 @@ from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
 from GANDLF.models.MSDNet import MSDNet
+from GANDLF.models.sdnet import SDNet
 from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import *
@@ -43,7 +44,6 @@ def get_model(
         amp = kwargs.get("amp")
     else:
         amp = False
-
     if modelname == "resunet":
         model = unet(
             num_dimensions,
@@ -123,6 +123,17 @@ def get_model(
             final_convolution_layer=final_convolution_layer,
         )
         amp = False  # this is not yet implemented for msdnet
+
+    elif modelname == "sdnet":
+        model = SDNet(
+            num_dimensions,
+            num_channels,
+            num_classes,
+            base_filters,
+            norm_type,
+            final_convolution_layer=final_convolution_layer,
+        )
+        amp = False  # this is not yet implemented for sdnet
 
     elif (
         "imagenet" in modelname
@@ -451,8 +462,10 @@ def get_scheduler(
     return scheduler_lr
 
 
-def get_loss_and_metrics(ground_truth, predicted, params):
+def get_loss_and_metrics(image, ground_truth, predicted, params):
     """
+    image: torch.Tensor
+        The input image stack according to requirements
     ground_truth : torch.Tensor
         The input ground truth for the corresponding image label
     predicted : torch.Tensor
@@ -468,12 +481,27 @@ def get_loss_and_metrics(ground_truth, predicted, params):
         The computed metric from the label and the output
     """
     loss_function = fetch_loss_function(params["loss_function"], params)
-    loss = loss_function(predicted, ground_truth, params)
+    if len(predicted) > 1:
+        loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params) 
+        loss_function = fetch_loss_function('l1', None)
+        loss_reco = loss_function(predicted[1], image[:,:1, ...], None)
+        loss_function = fetch_loss_function('kld', params)
+        loss_kld = loss_function(predicted[2], predicted[3])
+        loss_function = fetch_loss_function('mse', None)
+        loss_cycle = loss_function(predicted[2], predicted[4], None)
+        loss = 0.01*loss_kld + loss_reco + 10*loss_seg + loss_cycle
+    else: 
+        loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_function = fetch_metric(metric)  # Write a fetch_metric
-        metric_output[metric] = (
-            metric_function(predicted, ground_truth, params).cpu().data.item()
-        )
+        if len(predicted) > 1:
+            metric_output[metric] = (
+                metric_function(predicted[0], ground_truth.squeeze(-1), params).cpu().data.item()
+            )
+        else:
+            metric_output[metric] = (
+                metric_function(predicted, ground_truth, params).cpu().data.item()
+            )
     return loss, metric_output
