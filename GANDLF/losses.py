@@ -1,6 +1,6 @@
 import torch
 import sys
-from torch.nn import MSELoss, CrossEntropyLoss
+from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
 from .utils import one_hot
 
 
@@ -154,6 +154,85 @@ def MCT_loss(inp, target, num_class, weights):
     return acc_tv_loss
 
 
+def KullbackLeiblerDivergence(mu, logvar):
+    loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
+    return loss.mean()
+
+
+def L1(output, label, reduction="mean", scaling_factor=1):
+    """
+    Calculate the mean square error between the output variable from the network and the target
+
+    Parameters
+    ----------
+    output : torch.Tensor
+        The output generated usually by the network
+    target : torch.Tensor
+        The label for the corresponding Tensor for which the output was generated
+    reduction : string, optional
+        DESCRIPTION. The default is 'mean'.
+    scaling_factor : integer, optional
+        The scaling factor to multiply the label with
+
+    Returns
+    -------
+    loss : torch.Tensor
+        Computed Mean Squared Error loss for the output and label
+
+    """
+    scaling_factor = torch.as_tensor(scaling_factor)
+    label = label.float()
+    label = label * scaling_factor
+    loss_fn = L1Loss(reduction=reduction)
+    iflat = output.contiguous().view(-1)
+    tflat = label.contiguous().view(-1)
+    loss = loss_fn(iflat, tflat)
+    return loss
+
+
+def L1_loss(inp, target, params):
+    acc_mse_loss = 0
+    # if inp.shape != target.shape:
+    #     sys.exit('Input and target shapes are inconsistent')
+
+    if inp.shape[0] == 1:
+        if params is not None:
+            acc_mse_loss += L1(
+                inp,
+                target,
+                reduction=params["loss_function"]["l1"]["reduction"],
+                scaling_factor=params["scaling_factor"],
+            )
+        else:
+            acc_mse_loss += L1(
+                inp,
+                target
+            )
+        # for i in range(0, params["model"]["num_classes"]):
+        #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
+    else:
+        if params is not None:
+            for i in range(0, params["model"]["num_classes"]):
+                acc_mse_loss += L1(
+                    inp[:, i, ...],
+                    target[:, i, ...],
+                    reduction=params["loss_function"]["mse"]["reduction"],
+                    scaling_factor=params["scaling_factor"],
+                )
+        else:
+            for i in range(0, inp.shape[1]):
+                acc_mse_loss += L1(
+                    inp[:, i, ...],
+                    target[:, i, ...]
+                )
+    if params is not None:
+        acc_mse_loss /= params["model"]["num_classes"]
+    else:
+        acc_mse_loss /= inp.shape[1]
+
+    return acc_mse_loss
+
+
 def MSE(output, label, reduction="mean", scaling_factor=1):
     """
     Calculate the mean square error between the output variable from the network and the target
@@ -191,23 +270,39 @@ def MSE_loss(inp, target, params):
     #     sys.exit('Input and target shapes are inconsistent')
 
     if inp.shape[0] == 1:
-        acc_mse_loss += MSE(
-            inp,
-            target,
-            reduction=params["loss_function"]["mse"]["reduction"],
-            scaling_factor=params["scaling_factor"],
-        )
-        # for i in range(0, params["model"]["num_classes"]):
-        #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
-    else:
-        for i in range(0, params["model"]["num_classes"]):
+        if params is not None:
             acc_mse_loss += MSE(
-                inp[:, i, ...],
-                target[:, i, ...],
+                inp,
+                target,
                 reduction=params["loss_function"]["mse"]["reduction"],
                 scaling_factor=params["scaling_factor"],
             )
-    acc_mse_loss /= params["model"]["num_classes"]
+        else:
+            acc_mse_loss += MSE(
+                inp,
+                target
+            )
+        # for i in range(0, params["model"]["num_classes"]):
+        #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
+    else:
+        if params is not None:
+            for i in range(0, params["model"]["num_classes"]):
+                acc_mse_loss += MSE(
+                    inp[:, i, ...],
+                    target[:, i, ...],
+                    reduction=params["loss_function"]["mse"]["reduction"],
+                    scaling_factor=params["scaling_factor"],
+                )
+        else:
+            for i in range(0, inp.shape[1]):
+                acc_mse_loss += MSE(
+                    inp[:, i, ...],
+                    target[:, i, ...]
+                )
+    if params is not None:
+        acc_mse_loss /= params["model"]["num_classes"]
+    else:
+        acc_mse_loss /= inp.shape[1]
 
     return acc_mse_loss
 
@@ -231,6 +326,10 @@ def fetch_loss_function(loss_name, params):
         loss_function = MSE_loss
     elif loss_name == "cel":
         loss_function = CE_loss
+    elif loss_name == "kld":
+        loss_function = KullbackLeiblerDivergence
+    elif loss_name == "l1":
+        loss_function = L1_loss
     else:
         print(
             "WARNING: Could not find the requested loss function '"
