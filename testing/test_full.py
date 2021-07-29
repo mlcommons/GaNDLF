@@ -311,7 +311,6 @@ def test_train_classification_rad_2d(device):
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -343,7 +342,6 @@ def test_train_classification_rad_3d(device):
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -375,7 +373,6 @@ def test_inference_classification_rad_3d(device):
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -413,7 +410,6 @@ def test_scheduler_classification_rad_2d(device):
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["model"]["architecture"] = "densenet121"
     # loop through selected models and train for single epoch
     for scheduler in all_schedulers:
@@ -447,7 +443,6 @@ def test_clip_train_classification_rad_3d(device):
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["model"]["architecture"] = "vgg16"
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:

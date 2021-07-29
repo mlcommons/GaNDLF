@@ -4,7 +4,7 @@ All the metrics are to be called from here
 import torch
 from .utils import one_hot
 import sys, torch, numpy
-from .losses import MSE_loss, CE_loss
+from .losses import MSE_loss, cel
 from .utils import one_hot
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
@@ -257,7 +257,7 @@ def fetch_metric(metric_name):
     elif metric_lower == "mse":
         metric_function = MSE_loss_agg
     elif (metric_name).lower() == "cel":
-        metric_function = CE_loss
+        metric_function = cel
     elif (metric_name).lower() == "classification_accuracy":
         metric_function = classification_accuracy
     elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
