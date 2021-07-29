@@ -35,7 +35,7 @@ class Decoder(ModelBase):
         self.layer_list = add_conv_block(
             self.Conv, self.BatchNorm, in_ch=anatomy_factors, out_ch=base_filters
         )
-        for i in range(self.num_layers - 2):
+        for _ in range(self.num_layers - 2):
             self.layer_list += add_conv_block(
                 self.Conv, self.BatchNorm, in_ch=base_filters, out_ch=base_filters
             )
@@ -50,7 +50,6 @@ class Decoder(ModelBase):
     @staticmethod
     def CalcVectorMeanStd(feat, eps=1e-5):
         # eps is a small value added to the variance to avoid divide-by-zero.
-        size = feat.size()
         feat_var = feat.var(dim=1) + eps
         feat_std = feat_var.sqrt()
         feat_mean = feat.mean(dim=1)
@@ -175,7 +174,7 @@ class ModalityEncoder(ModelBase):
         self.layer_list = add_downsample_conv_block(
             self.Conv, self.BatchNorm, in_ch=anatomy_factors + 1, out_ch=16
         )
-        for i in range(self.num_layers - 1):
+        for _ in range(self.num_layers - 1):
             self.layer_list += add_downsample_conv_block(
                 self.Conv, self.BatchNorm, in_ch=16, out_ch=16
             )
