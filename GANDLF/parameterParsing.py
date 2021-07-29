@@ -491,7 +491,8 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         The computed metric from the label and the output
     """
     loss_function = fetch_loss_function(params["loss_function"], params)
-    if (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet"):
+    sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
+    if sdnet_check:
         # this is specific for sdnet-style archs
         loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
         loss_function = fetch_loss_function("l1", None)
@@ -507,7 +508,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_function = fetch_metric(metric)  # Write a fetch_metric
-        if len(predicted) > 1:
+        if sdnet_check:
             metric_output[metric] = (
                 metric_function(predicted[0], ground_truth.squeeze(-1), params)
                 .cpu()
