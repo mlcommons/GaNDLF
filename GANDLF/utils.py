@@ -497,11 +497,11 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     Returns:
         dict: The penalty weights for different classes under consideration.
     """
-    abs_dict = {} # absolute counts for each class
+    abs_dict = {}  # absolute counts for each class
     weights_dict = {}  # average for "weighted averaging"
     penalty_dict = None  # penalty for misclassification
     # basically, do this for segmentation/classification tasks
-    
+
     if parameters["problem_type"] != "regression":
         penalty_dict = {}
         for i in range(0, len(parameters["model"]["class_list"])):
