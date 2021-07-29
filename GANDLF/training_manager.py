@@ -17,7 +17,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     device = self-explanatory
     reset_prev = whether the previous run in the same output directory is used or not
     """
-
     if reset_prev:
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -26,7 +25,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     singleFoldValidation = False
     singleFoldTesting = False
     noTestingData = False
-
     if (
         parameters["nested_training"]["testing"] < 0
     ):  # if the user wants a single fold training
