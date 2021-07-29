@@ -183,7 +183,6 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["batch_size"] = 2
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
-    parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 1
     parameters["model"]["architecture"] = "sdnet"
     shutil.rmtree(outputDir)  # overwrite previous results
