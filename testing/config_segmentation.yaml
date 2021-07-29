@@ -32,6 +32,7 @@ scheduler: triangle
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), ce (), dcce (sume of dice and ce), mse (), ...
 loss_function: dc
+weighted_loss: True
 # Which optimizer do you want to use - adam/sgd
 opt: adam
 # the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
