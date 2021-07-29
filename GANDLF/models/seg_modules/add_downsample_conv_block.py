@@ -9,7 +9,9 @@ def add_downsample_conv_block(
     Helper function
     """
     pad = dilate if not last else 0
-    conv_1 = Conv(in_ch, out_ch, kernel_size, stride=stride, padding=pad, dilation=dilate)
+    conv_1 = Conv(
+        in_ch, out_ch, kernel_size, stride=stride, padding=pad, dilation=dilate
+    )
     bn_1 = BatchNorm(out_ch)
 
     return [conv_1, bn_1]

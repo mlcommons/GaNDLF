@@ -26,9 +26,10 @@ def cel(out, target, params):
         class_weights = 1.0 / class_weights
 
         class_weights = class_weights.float().to(params["device"])
-    
+
     cel = CrossEntropyLoss(weight=class_weights)
     return cel(out, target)
+
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
     """
@@ -213,10 +214,7 @@ def L1_loss(inp, target, params):
                 scaling_factor=params["scaling_factor"],
             )
         else:
-            acc_mse_loss += L1(
-                inp,
-                target
-            )
+            acc_mse_loss += L1(inp, target)
         # for i in range(0, params["model"]["num_classes"]):
         #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
     else:
@@ -230,10 +228,7 @@ def L1_loss(inp, target, params):
                 )
         else:
             for i in range(0, inp.shape[1]):
-                acc_mse_loss += L1(
-                    inp[:, i, ...],
-                    target[:, i, ...]
-                )
+                acc_mse_loss += L1(inp[:, i, ...], target[:, i, ...])
     if params is not None:
         acc_mse_loss /= params["model"]["num_classes"]
     else:
@@ -287,10 +282,7 @@ def MSE_loss(inp, target, params):
                 scaling_factor=params["scaling_factor"],
             )
         else:
-            acc_mse_loss += MSE(
-                inp,
-                target
-            )
+            acc_mse_loss += MSE(inp, target)
         # for i in range(0, params["model"]["num_classes"]):
         #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
     else:
@@ -304,10 +296,7 @@ def MSE_loss(inp, target, params):
                 )
         else:
             for i in range(0, inp.shape[1]):
-                acc_mse_loss += MSE(
-                    inp[:, i, ...],
-                    target[:, i, ...]
-                )
+                acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...])
     if params is not None:
         acc_mse_loss /= params["model"]["num_classes"]
     else:
