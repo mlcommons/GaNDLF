@@ -168,6 +168,36 @@ def test_train_segmentation_rad_2d(device):
     print("passed")
 
 
+def test_train_segmentation_sdnet_rad_2d(device):
+    print("Starting 2D Rad segmentation tests")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # patch_size is custom for sdnet
+    parameters["patch_size"] = [224, 224, 1]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 1
+    parameters["model"]["architecture"] = "sdnet"
+    shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+
+    print("passed")
+
+
 def test_train_segmentation_rad_3d(device):
     print("Starting 3D Rad segmentation tests")
     # read and parse csv
