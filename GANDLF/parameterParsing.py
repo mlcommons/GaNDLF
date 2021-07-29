@@ -125,6 +125,17 @@ def get_model(
         amp = False  # this is not yet implemented for msdnet
 
     elif modelname == "sdnet":
+
+        if patch_size != [224, 224, 1]:
+            print(
+                "WARNING: The patch size is not 224x224, which is required for sdnet. Using default patch size instead",
+                file=sys.stderr,
+            )
+            patch_size = [224, 224, 1]
+
+        if batch_size == 1:
+            raise ValueError("'batch_size' needs to be greater than 1 for 'sdnet'")
+
         model = SDNet(
             num_dimensions,
             num_channels,
@@ -481,15 +492,16 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     """
     loss_function = fetch_loss_function(params["loss_function"], params)
     if len(predicted) > 1:
-        loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params) 
-        loss_function = fetch_loss_function('l1', None)
-        loss_reco = loss_function(predicted[1], image[:,:1, ...], None)
-        loss_function = fetch_loss_function('kld', params)
+        # this is specific for sdnet-style archs
+        loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
+        loss_function = fetch_loss_function("l1", None)
+        loss_reco = loss_function(predicted[1], image[:, :1, ...], None)
+        loss_function = fetch_loss_function("kld", params)
         loss_kld = loss_function(predicted[2], predicted[3])
-        loss_function = fetch_loss_function('mse', None)
+        loss_function = fetch_loss_function("mse", None)
         loss_cycle = loss_function(predicted[2], predicted[4], None)
-        loss = 0.01*loss_kld + loss_reco + 10*loss_seg + loss_cycle
-    else: 
+        loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
+    else:
         loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
     # Metrics should be a list
@@ -497,7 +509,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         metric_function = fetch_metric(metric)  # Write a fetch_metric
         if len(predicted) > 1:
             metric_output[metric] = (
-                metric_function(predicted[0], ground_truth.squeeze(-1), params).cpu().data.item()
+                metric_function(predicted[0], ground_truth.squeeze(-1), params)
+                .cpu()
+                .data.item()
             )
         else:
             metric_output[metric] = (
