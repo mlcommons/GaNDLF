@@ -335,12 +335,12 @@ def populate_header_in_parameters(parameters, headers):
 
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
-    is_regression, _, _ = find_problem_type(
+    parameters["problem_type"] = find_problem_type(
         parameters["headers"], get_final_layer(parameters["model"]["final_layer"])
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
-    if not is_regression:
+    if parameters["problem_type"] != "regression":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
 
     # initialize number of channels for processing
@@ -359,25 +359,16 @@ def find_problem_type(headersFromCSV, model_final_layer):
         model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
 
     Returns:
-        bool: If problem is regression.
-        bool: If problem is classification.
-        bool: If problem is segmentation.
+        str: The problem type (regression/classification/segmentation).
     """
-    # initialize problem type
-    is_regression = False
-    is_classification = False
-    is_segmentation = False
-
     # check if regression/classification has been requested
     if len(headersFromCSV["predictionHeaders"]) > 0:
         if model_final_layer is None:
-            is_regression = True
+            return "regression"
         else:
-            is_classification = True
+            return "classification"
     else:
-        is_segmentation = True
-
-    return is_regression, is_classification, is_segmentation
+        return "segmentation"
 
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
@@ -506,60 +497,69 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     Returns:
         dict: The penalty weights for different classes under consideration.
     """
-    dice_weights_dict = {}  # average for "weighted averaging"
-    dice_penalty_dict = None  # penalty for misclassification
-    if not (
-        "value_keys" in parameters
-    ):  # basically, do this for segmentation tasks, need to extend for classification
-        dice_penalty_dict = {}
+    abs_dict = {} # absolute counts for each class
+    weights_dict = {}  # average for "weighted averaging"
+    penalty_dict = None  # penalty for misclassification
+    # basically, do this for segmentation/classification tasks
+    
+    if parameters["problem_type"] != "regression":
+        penalty_dict = {}
         for i in range(0, len(parameters["model"]["class_list"])):
-            dice_weights_dict[i] = 0
-            dice_penalty_dict[i] = 0
+            abs_dict[i] = 0
+            penalty_dict[i] = 0
 
     penalty_loader = training_data_loader
 
     # get the weights for use for dice loss
-    total_nonZeroVoxels = 0
+    total_counter = 0
 
     # For regression dice penalty need not be taken account
     # For classification this should be calculated on the basis of predicted labels and mask
-    if not ("value_keys" in parameters):  # basically, do this for segmentation tasks
-        for _, (subject) in enumerate(
-            penalty_loader
-        ):  # iterate through full training data
+    # iterate through full penalty data
+    for _, (subject) in enumerate(penalty_loader):
+
+        # segmentation needs masks to be one-hot encoded
+        if parameters["problem_type"] == "segmentation":
             # accumulate dice weights for each label
             mask = subject["label"][torchio.DATA]
-            if parameters["verbose"]:
-                image = torch.cat(
-                    [subject[key][torchio.DATA] for key in parameters["channel_keys"]],
-                    dim=1,
-                )
-                print("===\nSubject:", subject["subject_id"])
-                print("image.shape:", image.shape)
-                print("mask.shape:", mask.shape)
-
             one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
             for i in range(0, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(
                     one_hot_mask[:, i, :, :, :], as_tuple=False
                 ).size(0)
-                dice_weights_dict[i] += currentNumber  # class-specific non-zero voxels
-                total_nonZeroVoxels += (
-                    currentNumber  # total number of non-zero voxels to be considered
-                )
+                # class-specific non-zero voxels
+                abs_dict[i] += currentNumber
+                # total number of non-zero voxels to be considered
+                total_counter += currentNumber
 
-            # get the penalty values - dice_weights contains the overall number for each class in the training data
-        for i in range(0, len(parameters["model"]["class_list"])):
-            penalty = total_nonZeroVoxels  # start with the assumption that all the non-zero voxels make up the penalty
-            for j in range(0, len(parameters["model"]["class_list"])):
-                if i != j:  # for differing classes, subtract the number
-                    penalty -= dice_weights_dict[j]
+        # for classification, the value needs to be used directly
+        elif parameters["problem_type"] == "classification":
+            # accumulate weights for each label
+            value_to_predict = subject["value_0"][0]
+            for i in range(0, len(parameters["model"]["class_list"])):
+                if value_to_predict == i:
+                    abs_dict[i] += 1
+                    # we only want to increase the counter for those subjects that are defined in the class_list
+                    total_counter += 1
 
-            dice_penalty_dict[i] = (
-                penalty / total_nonZeroVoxels
-            )  # this is to be used to weight the loss function
-        # dice_weights_dict[i] = 1 - dice_weights_dict[i]# this can be used for weighted averaging
-    return dice_penalty_dict
+    # Normalize class weights
+    weights_dict = {key: val / total_counter for key, val in abs_dict.items()}
+
+    # get the penalty values - abs_dict contains the overall number for each class in the penalty data
+    for i in range(0, len(parameters["model"]["class_list"])):
+        penalty = total_counter  # start with the assumption that all the non-zero voxels (segmentation) or activate labels (classification) make up the penalty
+        for j in range(0, len(parameters["model"]["class_list"])):
+            if i != j:  # for differing classes, subtract the current weight
+                penalty -= abs_dict[j]
+
+        # finally, the "penalty" variable contains the total number of voxels/activations that are not part of the current class
+        # this is to be used to weight the loss function
+        # adding epsilon to avoid division by zero
+        penalty_dict[i] = (penalty + sys.float_info.epsilon) / (
+            total_counter + sys.float_info.epsilon
+        )
+
+    return penalty_dict, weights_dict
 
 
 def get_filename_extension_sanitized(filename):

@@ -724,9 +724,9 @@ def training_loop(
             pin_memory=False,
         )
 
-        params["weights"] = get_class_imbalance_weights(penalty_loader, params)
+        params["weights"], params["class_weights"] = get_class_imbalance_weights(penalty_loader, params)
     else:
-        params["weights"] = None
+        params["weights"], params["class_weights"] = None, None
 
     # Fetch the optimizers
     optimizer = get_optimizer(
