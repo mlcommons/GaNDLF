@@ -125,6 +125,17 @@ def get_model(
         amp = False  # this is not yet implemented for msdnet
 
     elif modelname == "sdnet":
+
+        if patch_size != [224, 224, 1]:
+            print(
+                "WARNING: The patch size is not 224x224, which is required for sdnet. Using default patch size instead",
+                file=sys.stderr,
+            )
+            patch_size = [224, 224, 1]
+        
+        if batch_size == 1:
+            raise ValueError("'batch_size' needs to be greater than 1 for 'sdnet'")
+        
         model = SDNet(
             num_dimensions,
             num_channels,
