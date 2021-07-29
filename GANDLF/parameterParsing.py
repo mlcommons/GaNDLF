@@ -9,7 +9,7 @@ from GANDLF.models.MSDNet import MSDNet
 from GANDLF.models.sdnet import SDNet
 from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
-from GANDLF.losses import *
+from GANDLF.losses import fetch_loss_function
 from GANDLF.utils import *
 from GANDLF.metrics import fetch_metric
 import torchvision
