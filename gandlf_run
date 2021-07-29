@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
-import os, argparse
+import os, argparse, ast
 from GANDLF.utils import fix_paths
 
 fix_paths(os.getcwd())  # add relevant vips path
@@ -46,8 +46,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-train",
-        type=bool,
-        help="1: training and 0: inference; for 0, there needs to be a compatible model saved in '-output'",
+        type=ast.literal_eval,
+        help="True: training and False: inference; for 0, there needs to be a compatible model saved in '-output'",
         required=True,
     )
     parser.add_argument(
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-reset_prv",
         default=False,
-        type=bool,
+        type=ast.literal_eval,
         help="Whether the previous run in the output directory will be discarded or not",
         required=False,
     )
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
+    
     main_run(
         args.data, args.config, args.output, args.train, args.device, args.reset_prv
     )
