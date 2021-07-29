@@ -91,7 +91,10 @@ def step(model, image, label, params):
         output, attention_map = output
 
     # one-hot encoding of 'output' will probably be needed for segmentation
-    loss, metric_output = get_loss_and_metrics(label, output, params)
+    loss, metric_output = get_loss_and_metrics(image, label, output, params)
+
+    if len(output) > 1:
+        output = output[0]
 
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)
@@ -418,7 +421,7 @@ def validate_network(
                     + "\n"
                 )
             final_loss, final_metric = get_loss_and_metrics(
-                valuesToPredict, pred_output, params
+                image, valuesToPredict, pred_output, params
             )
             # # Non network validing related
             total_epoch_valid_loss += final_loss.cpu().data.item()
@@ -566,7 +569,7 @@ def validate_network(
 
             output_prediction = output_prediction.squeeze(-1)
             final_loss, final_metric = get_loss_and_metrics(
-                label_ground_truth, output_prediction, params
+                image, label_ground_truth, output_prediction, params
             )
             if params["verbose"]:
                 print(
@@ -724,7 +727,9 @@ def training_loop(
             pin_memory=False,
         )
 
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(penalty_loader, params)
+        params["weights"], params["class_weights"] = get_class_imbalance_weights(
+            penalty_loader, params
+        )
     else:
         params["weights"], params["class_weights"] = None, None
 

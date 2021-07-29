@@ -1,6 +1,8 @@
 ## 0.0.11
 
-- 
+- Misc bugfixes for segmentation and classification
+- DFU 2021 parameter file added
+- Added SDNet - https://doi.org/10.1016/j.media.2019.101535
 
 ## 0.0.10
 
