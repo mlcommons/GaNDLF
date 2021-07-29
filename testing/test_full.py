@@ -180,6 +180,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # patch_size is custom for sdnet
     parameters["patch_size"] = [224, 224, 1]
+    parameters["batch_size"] = 2
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
