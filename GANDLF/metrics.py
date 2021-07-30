@@ -6,6 +6,7 @@ from .utils import one_hot
 import sys, torch, numpy
 from .losses import MSE_loss, cel
 from .utils import one_hot
+from torchmetrics import F1
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
     distance_transform_edt,
@@ -37,6 +38,16 @@ def dice(output, label):
     tflat = label.contiguous().view(-1)
     intersection = (iflat * tflat).sum()
     return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
+
+
+def F1_score(output, label, params):
+
+    num_classes = params["model"]["num_classes"]
+    predicted_classes = torch.argmax(output, 1)
+    f1 = F1(num_classes=num_classes)
+    f1_score = f1(predicted_classes.cpu(), label.cpu())
+
+    return f1_score
 
 
 def classification_accuracy(output, label, params):
@@ -256,9 +267,11 @@ def fetch_metric(metric_name):
         metric_function = accuracy
     elif metric_lower == "mse":
         metric_function = MSE_loss_agg
-    elif (metric_name).lower() == "cel":
+    elif metric_lower == "cel":
         metric_function = cel
-    elif (metric_name).lower() == "classification_accuracy":
+    elif metric_lower == "f1_score":
+        metric_function = F1_score
+    elif metric_lower == "classification_accuracy":
         metric_function = classification_accuracy
     elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
         metric_function = hd95
