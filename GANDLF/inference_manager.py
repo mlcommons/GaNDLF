@@ -11,6 +11,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     # # initialize parameters for inference
     if not ("weights" in parameters):
         parameters["weights"] = None  # no need for loss weights for inference
+    if not ("class_weights" in parameters):
+        parameters["class_weights"] = None  # no need for class weights for inference
 
     inference_loop(
         inferenceDataFromPickle=inferenceData_full,
