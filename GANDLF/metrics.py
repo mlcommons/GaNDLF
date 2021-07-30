@@ -271,7 +271,7 @@ def fetch_metric(metric_name):
         metric_function = cel
     elif (metric_name).lower() == "f1_score":
         metric_function = F1_score
-    elif (metric_name).lower() == "classification_accuracy":
+    elif metric_lower == "classification_accuracy":
         metric_function = classification_accuracy
     elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
         metric_function = hd95
