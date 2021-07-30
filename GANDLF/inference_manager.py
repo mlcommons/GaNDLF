@@ -1,4 +1,6 @@
+from skimage.exposure.exposure import _output_dtype
 from GANDLF.inference_loop import inference_loop
+import os
 
 
 def InferenceManager(dataframe, outputDir, parameters, device):
@@ -14,9 +16,21 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     if not ("class_weights" in parameters):
         parameters["class_weights"] = None  # no need for class weights for inference
 
-    inference_loop(
-        inferenceDataFromPickle=inferenceData_full,
-        outputDir=outputDir,
-        device=device,
-        parameters=parameters,
-    )
+    n_folds = parameters["nested_training"]["validation"]
+
+    fold_dirs = []
+    if n_folds > 1:
+        for dir in sorted(os.listdir(outputDir)):
+            if dir.isdigit():
+                fold_dirs.append(os.path.join(outputDir, dir, ""))
+    else:
+        fold_dirs = [outputDir]
+
+    for fold_dir in fold_dirs:
+
+        inference_loop(
+            inferenceDataFromPickle=inferenceData_full,
+            outputDir=fold_dir,
+            device=device,
+            parameters=parameters,
+        )
