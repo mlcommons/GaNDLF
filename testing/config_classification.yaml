@@ -8,6 +8,8 @@ learning_rate: 0.001
 loss_function: cel
 metrics:
   - cel
+  - classification_accuracy
+  - f1_score
 model:
   amp: false
   architecture: vgg16
