@@ -26,7 +26,7 @@ def cel(out, target, params):
         class_weights = 1.0 / class_weights
 
         class_weights = class_weights.float().to(target.device)
-        
+
     cel = CrossEntropyLoss(weight=class_weights)
     return cel(out, target)
 
