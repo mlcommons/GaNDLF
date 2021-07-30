@@ -267,9 +267,9 @@ def fetch_metric(metric_name):
         metric_function = accuracy
     elif metric_lower == "mse":
         metric_function = MSE_loss_agg
-    elif (metric_name).lower() == "cel":
+    elif metric_lower == "cel":
         metric_function = cel
-    elif (metric_name).lower() == "f1_score":
+    elif metric_lower == "f1_score":
         metric_function = F1_score
     elif metric_lower == "classification_accuracy":
         metric_function = classification_accuracy
