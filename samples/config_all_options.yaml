@@ -26,6 +26,8 @@ metrics:
   # - hausdorff95 # hausdorff 95 percentile, segmentation
   # - accuracy # regression/classification
   # - mse # regression/classification
+  # - classification_accuracy # regression/classification
+  # - f1_score # regression/classification
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
