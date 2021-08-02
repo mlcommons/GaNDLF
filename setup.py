@@ -43,7 +43,7 @@ requirements = [
     "coverage",
     "psutil",
     "medcam",
-    "torchmetrics"
+    "torchmetrics",
 ]
 
 setup(
