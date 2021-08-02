@@ -31,6 +31,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
     probs_list = []
 
+    is_classification = parameters["problem_type"] == "classification"
+
     for fold_dir in fold_dirs:
         parameters["current_fold_dir"] = fold_dir
         inference_loop(
@@ -39,12 +41,13 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             device=device,
             parameters=parameters,
         )
-        fold_logits = np.genfromtxt(os.path.join(fold_dir, "logits.csv"), delimiter=",")
-        fold_logits = torch.from_numpy(fold_logits)
-        fold_probs = F.softmax(fold_logits, dim=1)
-        probs_list.append(fold_probs)
+        if is_classification:
+            fold_logits = np.genfromtxt(os.path.join(fold_dir, "logits.csv"), delimiter=",")
+            fold_logits = torch.from_numpy(fold_logits)
+            fold_probs = F.softmax(fold_logits, dim=1)
+            probs_list.append(fold_probs)
 
-    if probs_list:
+    if probs_list and is_classification:
         probs_list = torch.stack(probs_list)
         averaged_probs = torch.mean(probs_list, 0).numpy()
         np.savetxt(
