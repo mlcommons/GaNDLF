@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+
 def InferenceManager(dataframe, outputDir, parameters, device):
     """
     This function takes in a dataframe, with some other parameters and performs the inference
@@ -28,7 +29,6 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     else:
         fold_dirs = [outputDir]
 
-    
     probs_list = []
 
     for fold_dir in fold_dirs:
@@ -39,11 +39,17 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             device=device,
             parameters=parameters,
         )
-        fold_logits = np.genfromtxt(os.path.join(fold_dir, "logits.csv"), delimiter=',')
+        fold_logits = np.genfromtxt(os.path.join(fold_dir, "logits.csv"), delimiter=",")
         fold_logits = torch.from_numpy(fold_logits)
-        fold_probs =  F.softmax(fold_logits, dim=1)
+        fold_probs = F.softmax(fold_logits, dim=1)
         probs_list.append(fold_probs)
-    
-    probs_list = torch.stack(probs_list)
-    averaged_probs = torch.mean(probs_list, 0).numpy()
-    np.savetxt(os.path.join(outputDir, "averaged_probabilities.csv"), averaged_probs, delimiter=",")    
+
+    if probs_list:
+        probs_list = torch.stack(probs_list)
+        averaged_probs = torch.mean(probs_list, 0).numpy()
+        np.savetxt(
+            os.path.join(outputDir, "averaged_probabilities.csv"),
+            averaged_probs,
+            delimiter=",",
+        )
+
