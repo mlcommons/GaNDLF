@@ -362,10 +362,10 @@ def find_problem_type(parameters, model_final_layer):
         str: The problem type (regression/classification/segmentation).
     """
     # check if regression/classification has been requested
-
+    classification_phrases = ["classification_but_not_softmax", "logits", "classification_without_softmax"]
     headersFromCSV = parameters["headers"]
     class_list_exist = "class_list" in parameters["model"]
-    if class_list_exist:
+    if class_list_exist and model_final_layer.lower() in classification_phrases:
         return "classification"
 
     if len(headersFromCSV["predictionHeaders"]) > 0:
