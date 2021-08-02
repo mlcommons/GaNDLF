@@ -336,7 +336,7 @@ def populate_header_in_parameters(parameters, headers):
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
     parameters["problem_type"] = find_problem_type(
-        parameters["headers"], get_final_layer(parameters["model"]["final_layer"])
+        parameters, get_final_layer(parameters["model"]["final_layer"])
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
@@ -350,7 +350,7 @@ def populate_header_in_parameters(parameters, headers):
     return parameters
 
 
-def find_problem_type(headersFromCSV, model_final_layer):
+def find_problem_type(parameters, model_final_layer):
     """
     This function determines the type of problem at hand - regression, classification or segmentation
 
@@ -362,6 +362,12 @@ def find_problem_type(headersFromCSV, model_final_layer):
         str: The problem type (regression/classification/segmentation).
     """
     # check if regression/classification has been requested
+
+    headersFromCSV = parameters["headers"]
+    class_list_exist = "class_list" in parameters["model"]
+    if class_list_exist:
+        return "classification"
+
     if len(headersFromCSV["predictionHeaders"]) > 0:
         if model_final_layer is None:
             return "regression"
