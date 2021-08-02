@@ -378,7 +378,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
     if not (preprocessing is None):
         if "to_canonical" in preprocessing:
             augmentation_list.append(ToCanonical())
-        
+
         if train:  # we want the crop to only happen during training
             if "crop_external_zero_planes" in preprocessing:
                 augmentation_list.append(
