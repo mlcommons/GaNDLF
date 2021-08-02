@@ -91,6 +91,7 @@ nested_training:
 ## pre-processing
 # this constructs an order of transformations, which is applied to all images in the data loader
 # order: resize --> threshold/clip --> resample --> normalize
+# 'to_canonical': change the image to canonical orientation, see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=canonical#torchio.transforms.ToCanonical
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
