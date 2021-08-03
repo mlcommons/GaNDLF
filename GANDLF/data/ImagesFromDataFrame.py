@@ -22,6 +22,7 @@ from torchio.transforms import (
     RandomFlip,
     RandomGamma,
     Pad,
+    ToCanonical,
 )
 from torchio import Image, Subject
 import SimpleITK as sitk
@@ -375,6 +376,9 @@ def ImagesFromDataFrame(dataframe, parameters, train):
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not (preprocessing is None):
+        if "to_canonical" in preprocessing:
+            augmentation_list.append(ToCanonical())
+
         if train:  # we want the crop to only happen during training
             if "crop_external_zero_planes" in preprocessing:
                 augmentation_list.append(
