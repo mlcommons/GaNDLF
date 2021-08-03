@@ -172,7 +172,7 @@ def train_network(model, train_dataloader, optimizer, params):
         label = label.to(params["device"])
 
         # ensure spacing is always present in params and is always subject-specific
-        if "subject_spacing" in subject:
+        if "spacing" in subject:
             params["subject_spacing"] = subject["spacing"]
         else:
             params["subject_spacing"] = None
@@ -358,6 +358,12 @@ def validate_network(
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
 
+        # ensure spacing is always present in params and is always subject-specific
+        if "spacing" in subject:
+            params["subject_spacing"] = subject["spacing"]
+        else:
+            params["subject_spacing"] = None
+            
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
