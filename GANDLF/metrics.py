@@ -82,7 +82,7 @@ def multi_class_dice(output, label, params):
     # print("Number of classes : ", params["model"]["num_classes"])
     for i in range(0, num_class):  # 0 is background
         # this check should only happen during validation
-        if num_class != params["model"]["ignore_label_validation"]:
+        if i != params["model"]["ignore_label_validation"]:
             total_dice += dice(output[:, i, ...], label[:, i, ...])
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
     total_dice /= num_class
@@ -227,10 +227,13 @@ def hd_generic(inp, target, params, percentile=95):
         one_hot(target, params["model"]["class_list"]).squeeze(-1).cpu().numpy()
     )
 
-    hd1 = __surface_distances(result_array, reference_array, params["subject_spacing"])
-    hd2 = __surface_distances(reference_array, result_array, params["subject_spacing"])
-    hd = numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
-    return torch.tensor(hd)
+    hd = 0
+    for i in range(0, params["model"]["num_classes"]):
+        if i != params["model"]["ignore_label_validation"]:
+            hd1 = __surface_distances(result_array[:, i, ...].squeeze(0), reference_array[:, i, ...].squeeze(0))
+            hd2 = __surface_distances(reference_array[:,i,...].squeeze(0), result_array[:,i,...].squeeze(0), params["subject_spacing"])
+            hd += numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
+    return torch.tensor(hd/params["model"]["num_classes"])
 
 
 def hd95(inp, target, params):
