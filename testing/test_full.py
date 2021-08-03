@@ -663,6 +663,7 @@ def test_cli_function_preprocess():
     parameters["patch_sampler"] = "label"
     parameters["weighted_loss"] = True
     parameters["save_output"] = True
+    parameters["data_preprocessing"]["to_canonical"] = None
 
     # store this separately for preprocess testing
     with open(file_config_temp, "w") as outfile:
