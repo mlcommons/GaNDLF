@@ -637,7 +637,7 @@ def validate_network(
 
     # write the predictions, if appropriate
     if params["save_output"]:
-        if is_inference and is_classification:
+        if is_inference and is_classification and logits_list:
             logit_tensor = torch.cat(logits_list)
             current_fold_dir = params["current_fold_dir"]
             np.savetxt(
