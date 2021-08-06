@@ -42,7 +42,9 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             parameters=parameters,
         )
         if is_classification:
-            fold_logits = np.genfromtxt(os.path.join(fold_dir, "logits.csv"), delimiter=",")
+            fold_logits = np.genfromtxt(
+                os.path.join(fold_dir, "logits.csv"), delimiter=","
+            )
             fold_logits = torch.from_numpy(fold_logits)
             fold_probs = F.softmax(fold_logits, dim=1)
             probs_list.append(fold_probs)
