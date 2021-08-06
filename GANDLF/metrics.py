@@ -159,16 +159,16 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
 
     # test for emptiness
     if 0 == numpy.count_nonzero(result):
-        print(
-            "The first supplied array does not contain any binary object.",
-            file=sys.stderr,
-        )
+        # print(
+        #     "The first supplied array does not contain any binary object.",
+        #     file=sys.stderr,
+        # )
         return 0
     if 0 == numpy.count_nonzero(reference):
-        print(
-            "The second supplied array does not contain any binary object.",
-            file=sys.stderr,
-        )
+        # print(
+        #     "The second supplied array does not contain any binary object.",
+        #     file=sys.stderr,
+        # )
         return 0
 
     # extract only 1-pixel border line of objects
