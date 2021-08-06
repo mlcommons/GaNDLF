@@ -1,4 +1,3 @@
-from skimage.exposure.exposure import _output_dtype
 from GANDLF.inference_loop import inference_loop
 import os
 import numpy as np
@@ -23,7 +22,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
     fold_dirs = []
     if n_folds > 1:
-        for dir in sorted(os.listdir(outputDir)):
+        directories = sorted(os.listdir(outputDir))
+        for dir in directories:
             if dir.isdigit():
                 fold_dirs.append(os.path.join(outputDir, dir, ""))
     else:
