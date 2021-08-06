@@ -43,7 +43,7 @@ requirements = [
     "coverage",
     "psutil",
     "medcam",
-    "torchmetrics"
+    "torchmetrics",
 ]
 
 setup(
@@ -69,6 +69,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Topic :: Scientific/Engineering :: Medical Science Apps",
     ],
     description=(
         "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
@@ -78,7 +79,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     include_package_data=True,
-    keywords="semantic, segmentation, regression, classification, brain, breast, liver, lung, augmentation, medical-imaging",
+    keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging",
     zip_safe=False,
 )
 
