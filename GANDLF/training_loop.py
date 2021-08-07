@@ -420,6 +420,10 @@ def validate_network(
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
             print(f"pred_output.shape: {pred_output.shape}")
+
+            if is_inference and is_classification:
+                logits_list.append(pred_output)
+
             if params["save_output"]:
                 outputToWrite += (
                     str(epoch)
@@ -642,7 +646,7 @@ def validate_network(
             current_fold_dir = params["current_fold_dir"]
             np.savetxt(
                 os.path.join(current_fold_dir, "logits.csv"),
-                logit_tensor.numpy(),
+                logit_tensor.detach().numpy(),
                 delimiter=",",
             )
 
