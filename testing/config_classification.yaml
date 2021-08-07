@@ -22,7 +22,7 @@ model:
   final_layer: softmax
 nested_training:
   testing: -2
-  validation: 3
+  validation: 2
 num_epochs: 1
 opt: adam
 parallel_compute_command: ''
