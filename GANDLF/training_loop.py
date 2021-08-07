@@ -366,7 +366,7 @@ def validate_network(
             params["subject_spacing"] = subject["spacing"]
         else:
             params["subject_spacing"] = None
-            
+
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
