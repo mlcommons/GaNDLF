@@ -424,8 +424,7 @@ def test_inference_classification_rad_3d(device):
 
     print("passed")
 
-
-def test_inference_classification_with_logits_rad_3d(device):
+def test_inference_classification_with_logits_single_fold_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check=False
@@ -435,7 +434,45 @@ def test_inference_classification_with_logits_rad_3d(device):
     parameters["model"]["dimension"] = 3
     parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
-    parameters["nested_training"]["validation"] = 2
+        
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    InferenceManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+    )
+
+    print("passed")
+
+def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["amp"] = True
+    parameters["model"]["final_layer"] = "logits"
+    parameters["nested_training"]["validation"] = 2 # necessarry for n-fold cross-validation inference
     
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
