@@ -78,14 +78,15 @@ def multi_class_dice(output, label, params):
     """
     label = one_hot(label, params["model"]["class_list"])
     total_dice = 0
-    num_class = params["model"]["num_classes"]
+    avg_counter = 0
     # print("Number of classes : ", params["model"]["num_classes"])
-    for i in range(0, num_class):  # 0 is background
+    for i in range(0, params["model"]["num_classes"]):  # 0 is background
         # this check should only happen during validation
         if i != params["model"]["ignore_label_validation"]:
             total_dice += dice(output[:, i, ...], label[:, i, ...])
+            avg_counter += 1
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
-    total_dice /= num_class
+    total_dice /= avg_counter
     return total_dice
 
 
@@ -159,16 +160,16 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
 
     # test for emptiness
     if 0 == numpy.count_nonzero(result):
-        print(
-            "The first supplied array does not contain any binary object.",
-            file=sys.stderr,
-        )
+        # print(
+        #     "The first supplied array does not contain any binary object.",
+        #     file=sys.stderr,
+        # )
         return 0
     if 0 == numpy.count_nonzero(reference):
-        print(
-            "The second supplied array does not contain any binary object.",
-            file=sys.stderr,
-        )
+        # print(
+        #     "The second supplied array does not contain any binary object.",
+        #     file=sys.stderr,
+        # )
         return 0
 
     # extract only 1-pixel border line of objects
@@ -228,12 +229,21 @@ def hd_generic(inp, target, params, percentile=95):
     )
 
     hd = 0
+    avg_counter = 0
     for i in range(0, params["model"]["num_classes"]):
         if i != params["model"]["ignore_label_validation"]:
-            hd1 = __surface_distances(result_array[:, i, ...].squeeze(0), reference_array[:, i, ...].squeeze(0))
-            hd2 = __surface_distances(reference_array[:,i,...].squeeze(0), result_array[:,i,...].squeeze(0), params["subject_spacing"])
+            hd1 = __surface_distances(
+                result_array[:, i, ...].squeeze(0),
+                reference_array[:, i, ...].squeeze(0),
+            )
+            hd2 = __surface_distances(
+                reference_array[:, i, ...].squeeze(0),
+                result_array[:, i, ...].squeeze(0),
+                params["subject_spacing"],
+            )
             hd += numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
-    return torch.tensor(hd/params["model"]["num_classes"])
+            avg_counter += 1
+    return torch.tensor(hd / avg_counter)
 
 
 def hd95(inp, target, params):
