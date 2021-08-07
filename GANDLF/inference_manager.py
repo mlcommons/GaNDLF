@@ -23,9 +23,9 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     fold_dirs = []
     if n_folds > 1:
         directories = sorted(os.listdir(outputDir))
-        for dir in directories:
-            if dir.isdigit():
-                fold_dirs.append(os.path.join(outputDir, dir, ""))
+        for d in directories:
+            if d.isdigit():
+                fold_dirs.append(os.path.join(outputDir, d, ""))
     else:
         fold_dirs = [outputDir]
 
