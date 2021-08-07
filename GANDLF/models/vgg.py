@@ -6,6 +6,7 @@ Modified from https://github.com/pytorch/vision.git
 import sys, math
 import torch.nn as nn
 from .modelBase import get_final_layer
+import torch.nn.functional as F
 from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling3D,
     GlobalAveragePooling2D,
@@ -65,8 +66,14 @@ class VGG(nn.Module):
                 pass
 
     def forward(self, x):
-        x = self.features(x)
-        return self.classifier(x)
+        out = self.features(x)
+        out = self.classifier(out)
+        if not self.final_convolution_layer is None:
+            if self.final_convolution_layer == F.softmax:
+                out = self.final_convolution_layer(out, dim=1)
+            else:
+                out = self.final_convolution_layer(out)
+        return out
 
 
 def make_layers(cfg, n_dimensions, in_channels, batch_norm=False):
