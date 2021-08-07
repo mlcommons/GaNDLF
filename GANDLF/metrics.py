@@ -230,10 +230,17 @@ def hd_generic(inp, target, params, percentile=95):
     hd = 0
     for i in range(0, params["model"]["num_classes"]):
         if i != params["model"]["ignore_label_validation"]:
-            hd1 = __surface_distances(result_array[:, i, ...].squeeze(0), reference_array[:, i, ...].squeeze(0))
-            hd2 = __surface_distances(reference_array[:,i,...].squeeze(0), result_array[:,i,...].squeeze(0), params["subject_spacing"])
+            hd1 = __surface_distances(
+                result_array[:, i, ...].squeeze(0),
+                reference_array[:, i, ...].squeeze(0),
+            )
+            hd2 = __surface_distances(
+                reference_array[:, i, ...].squeeze(0),
+                result_array[:, i, ...].squeeze(0),
+                params["subject_spacing"],
+            )
             hd += numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
-    return torch.tensor(hd/params["model"]["num_classes"])
+    return torch.tensor(hd / params["model"]["num_classes"])
 
 
 def hd95(inp, target, params):
