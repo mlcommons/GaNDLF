@@ -43,7 +43,7 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         )
 
         logits_dir = os.path.join(fold_dir, "logits.csv")
-        is_logits_dir_exist = os.path.isdir(logits_dir)
+        is_logits_dir_exist = os.path.isfile(logits_dir)
 
         if is_classification and is_logits_dir_exist:
             fold_logits = np.genfromtxt(logits_dir, delimiter=",")
