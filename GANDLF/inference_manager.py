@@ -59,4 +59,3 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             averaged_probs,
             delimiter=",",
         )
-

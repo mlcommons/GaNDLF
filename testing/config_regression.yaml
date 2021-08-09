@@ -18,6 +18,7 @@ model:
   - 255
   dimension: 2
   final_layer: None
+  norm_type: batch
 nested_training:
   testing: -2
   validation: -2
