@@ -649,6 +649,7 @@ def test_metrics_regression_rad_2d(device):
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["norm_type"] = "instance"
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = {}
