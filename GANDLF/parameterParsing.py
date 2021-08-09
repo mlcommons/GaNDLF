@@ -281,10 +281,10 @@ def get_model(
         divisibilityCheck_patch = False
         divisibilityCheck_baseFilter = False
 
-        if "batch_norm" in kwargs:
-            batch_norm = kwargs.get("batch_norm")
-        else:
+        if "batch" in norm_type:
             batch_norm = True
+        else:
+            batch_norm = False
         layers = make_layers(
             vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
         )
