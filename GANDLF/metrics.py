@@ -61,14 +61,14 @@ def multi_class_dice(output, label, params):
 
     Parameters
     ----------
-    output : TYPE
-        DESCRIPTION.
-    label : TYPE
-        DESCRIPTION.
-    num_class : TYPE
-        DESCRIPTION.
-    weights : TYPE, optional
-        DESCRIPTION. The default is None.
+    output : torch.Tensor
+        Input data containing objects. Can be any type but will be converted
+        into binary: background where 0, object everywhere else.
+    label : torch.Tensor
+        Input data containing objects. Can be any type but will be converted
+        into binary: background where 0, object everywhere else.
+    params : dict
+        The parameter dictionary containing training and data information.
 
     Returns
     -------
@@ -96,12 +96,14 @@ def accuracy(output, label, params):
 
     Parameters
     ----------
-    output : TYPE
-        DESCRIPTION.
-    label : TYPE
-        DESCRIPTION.
-    thresh : TYPE, optional
-        DESCRIPTION. The default is 0.5.
+    output : torch.Tensor
+        Input data containing objects. Can be any type but will be converted
+        into binary: background where 0, object everywhere else.
+    label : torch.Tensor
+        Input data containing objects. Can be any type but will be converted
+        into binary: background where 0, object everywhere else.
+    params : dict
+        The parameter dictionary containing training and data information.
 
     Returns
     -------
