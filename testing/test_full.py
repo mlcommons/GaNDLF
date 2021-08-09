@@ -424,6 +424,7 @@ def test_inference_classification_rad_3d(device):
 
     print("passed")
 
+
 def test_inference_classification_with_logits_single_fold_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -434,7 +435,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["model"]["dimension"] = 3
     parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
-        
+
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -461,6 +462,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     )
 
     print("passed")
+
 
 def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     # read and initialize parameters for specific data dimension
@@ -472,8 +474,9 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     parameters["model"]["dimension"] = 3
     parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
-    parameters["nested_training"]["validation"] = 2 # necessarry for n-fold cross-validation inference
-    
+    # necessary for n-fold cross-validation inference
+    parameters["nested_training"]["validation"] = 2
+
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -500,6 +503,7 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     )
 
     print("passed")
+
 
 def test_scheduler_classification_rad_2d(device):
     # read and initialize parameters for specific data dimension
@@ -645,6 +649,7 @@ def test_metrics_regression_rad_2d(device):
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["norm_type"] = "instance"
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = {}

@@ -163,7 +163,8 @@ def train_network(model, train_dataloader, optimizer, params):
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
-                min(params["batch_size"], len(label)), len(params["value_keys"]),
+                min(params["batch_size"], len(label)),
+                len(params["value_keys"]),
             )
         else:
             label = subject["label"][torchio.DATA]
@@ -658,7 +659,12 @@ def validate_network(
 
 
 def training_loop(
-    training_data, validation_data, device, params, output_dir, testing_data=None,
+    training_data,
+    validation_data,
+    device,
+    params,
+    output_dir,
+    testing_data=None,
 ):
     """
     The main training loop.
@@ -736,10 +742,15 @@ def training_loop(
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
-            training_data, parameters=params, train=False,
+            training_data,
+            parameters=params,
+            train=False,
         )
         penalty_loader = DataLoader(
-            penalty_data, batch_size=1, shuffle=True, pin_memory=False,
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
         )
 
         params["weights"], params["class_weights"] = get_class_imbalance_weights(
