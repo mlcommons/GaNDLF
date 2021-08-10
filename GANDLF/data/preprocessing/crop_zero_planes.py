@@ -115,3 +115,13 @@ class CropExternalZeroplanes(SpatialTransform):
 
     def is_invertible(self):
         return False
+
+
+
+def crop_external_zero_planes_transform(patch_size, p=1):
+    # p is only accepted as a parameter to capture when values other than one are attempted
+    if p != 1:
+        raise ValueError(
+            "crop_external_zero_planes cannot be performed with non-1 probability."
+        )
+    return CropExternalZeroplanes(patch_size=patch_size)
