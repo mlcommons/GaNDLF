@@ -802,13 +802,15 @@ def test_preprocess_functions():
         patch_size=[128, 128, 128]
     )
     input_transformed = cropper(input_tensor)
+    print("passed")
 
 
 def test_augmentation_functions():
-    print("Starting testing preprocessing functions")
-    input_tensor = torch.rand(1, 3, 128, 128, 128)
+    print("Starting testing augmentation functions")
+    input_tensor = torch.rand(3, 128, 128, 128)
 
     for aug in global_augs_dict:
         output_tensor = None
-        output_tensor = aug(input_tensor)
+        output_tensor = global_augs_dict[aug]()(input_tensor)
         assert output_tensor != None, "Augmentation should work"
+    print("passed")
