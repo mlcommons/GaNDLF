@@ -808,5 +808,17 @@ def test_preprocess_functions():
     assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
 
     input_tensor = torch.rand(1, 256, 256, 256)
-    cropper = global_preprocessing_dict["crop_external_zero_planes"](patch_size=[128, 128, 128])
+    cropper = global_preprocessing_dict["crop_external_zero_planes"](
+        patch_size=[128, 128, 128]
+    )
     input_transformed = cropper(input_tensor)
+
+
+def test_augmentation_functions():
+    print("Starting testing preprocessing functions")
+    input_tensor = torch.rand(1, 3, 128, 128, 128)
+
+    for aug in global_augs_dict:
+        output_tensor = None
+        output_tensor = aug(input_tensor)
+        assert output_tensor != None, "Augmentation should work"
