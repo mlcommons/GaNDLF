@@ -19,11 +19,10 @@ from .normalize_rgb import (
     normalize_div_by_255,
 )
 
-from torchio.transforms import (    
+from torchio.transforms import (
     ZNormalization,
     Lambda,
 )
-
 
 
 def positive_voxel_mask(image):
@@ -83,7 +82,6 @@ def get_tensor_for_dataloader(input_sitk_image):
     if len(input_image_tensor.shape) == 3:  # this is for 2D images
         input_image_tensor = input_image_tensor.unsqueeze(0)
     return input_image_tensor
-
 
 
 # defining dict for pre-processing - key is the string and the value is the transform object

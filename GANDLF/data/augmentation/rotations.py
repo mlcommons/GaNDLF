@@ -1,5 +1,6 @@
 import torch
 
+
 def tensor_rotate_90(input_image, axis):
     """
     This function rotates an image by 90 degrees around the specified axis.
@@ -18,7 +19,9 @@ def tensor_rotate_90(input_image, axis):
     # tensor image is expected to be of shape (1, a, b, c)
     # if 0 is in axis, ensure it is not considered, since that is the batch dimension
     if 0 in axis:
-        print("WARNING: '0' was found in axis, adding all by '1' since '0' is batch dimension.")
+        print(
+            "WARNING: '0' was found in axis, adding all by '1' since '0' is batch dimension."
+        )
         for count, _ in enumerate(axis):
             axis[count] += 1
     if axis not in [1, 2, 3]:

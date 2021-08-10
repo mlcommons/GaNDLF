@@ -1,5 +1,6 @@
 from torchvision.transforms import Normalize
 
+
 def normalize_by_val(input_tensor, mean, std):
     """
     This function returns the tensor normalized by these particular values
