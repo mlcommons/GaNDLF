@@ -15,20 +15,9 @@ from .normalize_rgb import (
     normalize_div_by_255,
 )
 
-from torchio.data.subject import Subject
 from torchio.transforms import (    
     ZNormalization,
-    Resample,
-    Compose,
     Lambda,
-    RandomFlip,
-    RandomGamma,
-    Pad,
-    ToCanonical,
-)
-from torchio.transforms.preprocessing.intensity.normalization_transform import (
-    NormalizationTransform,
-    TypeMaskingMethod,
 )
 
 
@@ -67,20 +56,6 @@ def clip_transform(min_thresh, max_thresh, p=1):
         ),
         p=p,
     )
-
-# defining dict for pre-processing - key is the string and the value is the transform object
-global_preprocessing_dict = {
-    "threshold": threshold_transform,
-    "clip": clip_transform,
-    "normalize": ZNormalization(),
-    "normalize_positive": ZNormalization(masking_method=positive_voxel_mask),
-    "normalize_nonZero": ZNormalization(masking_method=nonzero_voxel_mask),
-    "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
-    "crop_external_zero_planes": crop_external_zero_planes,
-    "normalize_imagenet": normalize_imagenet,
-    "normalize_standardize": normalize_standardize,
-    "normalize_div_by_255": normalize_div_by_255,
-}
 
 
 def threshold_intensities(input_tensor, min_thresh, max_thresh):
@@ -138,3 +113,19 @@ def get_tensor_for_dataloader(input_sitk_image):
         input_image_tensor = input_image_tensor.unsqueeze(0)
     return input_image_tensor
 
+
+
+# defining dict for pre-processing - key is the string and the value is the transform object
+global_preprocessing_dict = {
+    "threshold": threshold_transform,
+    "clip": clip_transform,
+    "normalize": ZNormalization(),
+    "normalize_positive": ZNormalization(masking_method=positive_voxel_mask),
+    "normalize_nonZero": ZNormalization(masking_method=nonzero_voxel_mask),
+    "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
+    "crop_external_zero_planes": crop_external_zero_planes,
+    "normalize_imagenet": normalize_imagenet,
+    "normalize_standardize": normalize_standardize,
+    "normalize_div_by_255": normalize_div_by_255,
+    "normalize_by_val": normalize_by_val,
+}
