@@ -1,5 +1,6 @@
 import torch
 
+from torchio.transforms import Lambda
 
 def tensor_rotate_90(input_image, axis):
     """
@@ -54,3 +55,11 @@ def tensor_rotate_180(input_image, axis):
     relevant_axes = set([1, 2, 3])
     affected_axes = list(relevant_axes - set([axis]))
     return input_image.flip(affected_axes[0]).flip(affected_axes[1])
+
+
+def rotate_90(axis, p=1):
+    return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
+
+
+def rotate_180(axis, p=1):
+    return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
