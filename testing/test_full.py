@@ -774,14 +774,22 @@ def test_preprocess_functions():
     print("Starting testing preprocessing functions")
     input_tensor = torch.rand(1, 3, 256, 256)
     input_transformed = global_preprocessing_dict["normalize_imagenet"]()(input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_standardize"]()(input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(input_tensor)
-    input_transformed = global_preprocessing_dict["threshold"](min_thresh=0.25, max_thresh=0.75)(input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_standardize"]()(
+        input_tensor
+    )
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(
+        input_tensor
+    )
+    input_transformed = global_preprocessing_dict["threshold"](
+        min_thresh=0.25, max_thresh=0.75
+    )(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
     ), "Input should be thresholded"
 
-    input_transformed = global_preprocessing_dict["clip"](min_thresh=0.25, max_thresh=0.75)(input_tensor)
+    input_transformed = global_preprocessing_dict["clip"](
+        min_thresh=0.25, max_thresh=0.75
+    )(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
     ), "Input should be clipped"
