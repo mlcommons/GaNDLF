@@ -64,29 +64,41 @@ def resample_image(
 
 def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     """
-    This function resizes the input image based on the output size and interpolator
+
+    This function resizes the input image based on the output size and interpolator.
 
     Args:
-        input_image (SimpleITK.Image): The input image to resample.
-        output_size (numpy.array): The output size to resample input_image to.
-        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
+        input_image (SimpleITK.Image): The input image to be resized.
+        output_size (numpy.array | list): The output size to resample input_image to.
+        interpolator (SimpleITK.sitkInterpolator): The desired interpolator.
 
     Returns:
-        SimpleITK.Image: The resized input image.
+        SimpleITK.Image: The output image after resizing.
     """
+    output_size_parsed = None
     inputSize = input_image.GetSize()
     inputSpacing = np.array(input_image.GetSpacing())
     outputSpacing = np.array(inputSpacing)
 
-    if len(output_size) != len(inputSpacing):
+    if isinstance(output_size, dict):
+        if "resize" in output_size:
+            output_size_parsed = output_size["resize"]
+    elif isinstance(output_size, list) or isinstance(output_size, np.array):
+        output_size_parsed = output_size
+
+    if len(output_size_parsed) != len(inputSpacing):
         sys.exit(
             "The output size dimension is inconsistent with the input dataset, please check parameters."
         )
 
-    for i, n in enumerate(output_size):
-        outputSpacing[i] = inputSpacing[i] * (inputSize[i] / n)
+    for i, n in enumerate(output_size_parsed):
+        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
 
-    return resample_image(input_image, outputSpacing, interpolator=interpolator)
+    return resample_image(
+        input_image,
+        outputSpacing,
+        interpolator=interpolator,
+    )
 
 
 def one_hot(segmask_array, class_list):
@@ -692,28 +704,6 @@ def perform_sanity_check_on_subject(subject, parameters):
                     )
 
     return True
-
-
-def resize_image_resolution(input_image, output_size):
-    """
-    This function gets the output image spacing based on the input image and output size
-    """
-    inputSize = input_image.GetSize()
-    outputSpacing = np.array(input_image.GetSpacing())
-    for i, n in enumerate(output_size):
-        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
-    return outputSpacing
-
-
-def apply_resize(input_image, preprocessing_params, interpolator=sitk.sitkLinear):
-    """
-    This function resizes the input image based on the output size and interpolator
-    """
-    return resample_image(
-        input_image,
-        resize_image_resolution(input_image, preprocessing_params["resize"]),
-        interpolator=interpolator,
-    )
 
 
 def get_tensor_for_dataloader(input_sitk_image):
