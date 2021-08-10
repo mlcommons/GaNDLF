@@ -799,10 +799,9 @@ def test_preprocess_functions():
     input_transformed = mri_artefact_generator(input_tensor)
 
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
-    img_resized = resample_image(
+    img_resized = resize_image(
         input_image,
-        resize_image_resolution(input_image, [128, 128]),
-        interpolator=sitk.sitkNearestNeighbor,
+        [128, 128],
     )
     img_tensor = get_tensor_for_dataloader(img_resized)
     assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
