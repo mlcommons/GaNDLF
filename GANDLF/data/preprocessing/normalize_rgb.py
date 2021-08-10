@@ -1,8 +1,8 @@
 from functools import partial
 from torchio.transforms import (
-    Normalize,
     Lambda,
 )
+from torchvision.transforms import Normalize
 
 
 ## define the functions that need to wrapped into lambdas
