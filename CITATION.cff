@@ -72,7 +72,6 @@ authors:
   orcid: "https://orcid.org/0000-0001-8734-6482"
 title: "GaNDLF"
 version: 0.0.10
+arXiv: 2103.01006
 date-released: 2021-07-12
 url: "https://github.com/CBICA/GaNDLF"
-preferred-citation:
-  - reference : "https://arxiv.org/abs/2103.01006"
