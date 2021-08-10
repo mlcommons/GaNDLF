@@ -692,3 +692,42 @@ def perform_sanity_check_on_subject(subject, parameters):
                     )
 
     return True
+
+
+def resize_image_resolution(input_image, output_size):
+    """
+    This function gets the output image spacing based on the input image and output size
+    """
+    inputSize = input_image.GetSize()
+    outputSpacing = np.array(input_image.GetSpacing())
+    for i, n in enumerate(output_size):
+        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
+    return outputSpacing
+
+
+def apply_resize(input_image, preprocessing_params, interpolator=sitk.sitkLinear):
+    """
+    This function resizes the input image based on the output size and interpolator
+    """
+    return resample_image(
+        input_image,
+        resize_image_resolution(input_image, preprocessing_params["resize"]),
+        interpolator=interpolator,
+    )
+
+
+def get_tensor_for_dataloader(input_sitk_image):
+    """
+    This function obtains the tensor to load into the data loader
+    """
+    temp_array = sitk.GetArrayFromImage(input_sitk_image)
+    if (
+        temp_array.dtype == np.uint16
+    ):  # this is a contingency, because torch cannot convert this
+        temp_array = temp_array.astype(np.int32)
+    input_image_tensor = torch.from_numpy(temp_array).unsqueeze(
+        0
+    )  # single unsqueeze is always needed
+    if len(input_image_tensor.shape) == 3:  # this is for 2D images
+        input_image_tensor = input_image_tensor.unsqueeze(0)
+    return input_image_tensor
