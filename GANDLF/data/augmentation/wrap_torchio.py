@@ -1,4 +1,4 @@
-from functools import partial
+import numpy as np
 
 from torchio.transforms import (
     OneOf,
@@ -12,14 +12,8 @@ from torchio.transforms import (
     RandomNoise,
     RandomSwap,
     RandomAnisotropy,
-    Lambda,
     RandomFlip,
     RandomGamma,
-)
-
-from .rotations import (
-    tensor_rotate_90,
-    tensor_rotate_180,
 )
 
 ## define helper functions to create transforms
@@ -85,11 +79,3 @@ def anisotropy(axes=0, downsampling=1, p=1):
     return RandomAnisotropy(
         axes=axes, downsampling=downsampling, scalars_only=True, p=p
     )
-
-
-def rotate_90(axis, p=1):
-    return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
-
-
-def rotate_180(axis, p=1):
-    return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
