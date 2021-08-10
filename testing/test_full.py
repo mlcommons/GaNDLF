@@ -776,18 +776,15 @@ def test_preprocess_functions():
     input_transformed = global_preprocessing_dict["normalize_imagenet"]()(input_tensor)
     input_transformed = global_preprocessing_dict["normalize_standardize"]()(input_tensor)
     input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(input_tensor)
-    input_transformed = global_preprocessing_dict["threshold"](input_tensor, 0.25, 0.75)
+    input_transformed = global_preprocessing_dict["threshold"](min_thresh=0.25, max_thresh=0.75)(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
     ), "Input should be thresholded"
 
-    input_transformed = global_preprocessing_dict["clip"](input_tensor, 0.25, 0.75)
+    input_transformed = global_preprocessing_dict["clip"](min_thresh=0.25, max_thresh=0.75)(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
     ), "Input should be thresholded"
-
-    input_transformed = global_augs_dict["rotate_90"](input_tensor, (1))
-    input_transformed = global_augs_dict["rotate_180"](input_tensor, (1))
 
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
     input_transformed = non_zero_normalizer(input_tensor)
@@ -795,7 +792,7 @@ def test_preprocess_functions():
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resize_image(
         input_image,
-        [128, 128],
+        [128, 128, 3],
     )
     img_tensor = get_tensor_for_dataloader(img_resized)
     assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
