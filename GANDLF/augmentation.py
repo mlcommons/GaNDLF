@@ -64,14 +64,15 @@ def crop_image_outside_zeros(array, patch_size):
     This function rotates an image by 90 degrees around the specified axis.
 
     Args:
-        input_image (torch.Tensor): The input tensor.
-        axis (list): The axes of rotation.
+        array (numpy.array): The input array.
+        patch_size (list): The patch size.
 
     Raises:
-        ValueError: If axis is not in [1, 2, 3].
+        ValueError: Array needs to be 4D.
 
     Returns:
-        torch.Tensor: The rotated tensor.
+        numpy.array: The new corner indeces.
+        numpy.array: The new cropped array.
     """
     dimensions = len(array.shape)
     if dimensions != 4:
