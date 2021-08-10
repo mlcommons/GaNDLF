@@ -773,9 +773,9 @@ def test_cli_function_mainrun(device):
 def test_preprocess_functions():
     print("Starting testing preprocessing functions")
     input_tensor = torch.rand(1, 3, 256, 256)
-    input_transformed = global_preprocessing_dict["normalize_imagenet"](input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_standardize"](input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_imagenet"]()(input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_standardize"]()(input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(input_tensor)
     input_transformed = global_preprocessing_dict["threshold"](input_tensor, 0.25, 0.75)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
@@ -791,13 +791,6 @@ def test_preprocess_functions():
 
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
     input_transformed = non_zero_normalizer(input_tensor)
-
-    elastic_generator = elastic(patch_size=[32, 32, 1])
-    input_transformed = elastic_generator(input_tensor)
-    elastic_generator = elastic()
-    input_transformed = elastic_generator(input_tensor)
-    mri_artefact_generator = mri_artifact()
-    input_transformed = mri_artefact_generator(input_tensor)
 
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resize_image(
