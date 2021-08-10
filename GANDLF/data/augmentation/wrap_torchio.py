@@ -59,11 +59,11 @@ def bias(p=1):
     return RandomBiasField(coefficients=0.5, order=3, p=p)
 
 
-def blur(std, p=1):
+def blur(std=1, p=1):
     return RandomBlur(std=std, p=p)
 
 
-def noise(mean, std, p=1):
+def noise(mean=0, std=1, p=1):
     return RandomNoise(mean=mean, std=std, p=p)
 
 
