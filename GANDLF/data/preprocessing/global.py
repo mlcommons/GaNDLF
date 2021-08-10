@@ -13,15 +13,14 @@ from .threshold_and_clip import (
     clip_transform,
 )
 from .normalize_rgb import (
-    normalize_by_val,
-    normalize_imagenet,
-    normalize_standardize,
-    normalize_div_by_255,
+    normalize_by_val_transform,
+    normalize_imagenet_transform,
+    normalize_standardize_transform,
+    normalize_div_by_255_transform,
 )
 
 from torchio.transforms import (
     ZNormalization,
-    Lambda,
 )
 
 
@@ -93,8 +92,8 @@ global_preprocessing_dict = {
     "normalize_nonZero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
     "crop_external_zero_planes": crop_external_zero_planes,
-    "normalize_imagenet": normalize_imagenet,
-    "normalize_standardize": normalize_standardize,
-    "normalize_div_by_255": normalize_div_by_255,
-    "normalize_by_val": normalize_by_val,
+    "normalize_by_val": normalize_by_val_transform,
+    "normalize_imagenet": normalize_imagenet_transform,
+    "normalize_standardize": normalize_standardize_transform,
+    "normalize_div_by_255": normalize_div_by_255_transform,
 }
