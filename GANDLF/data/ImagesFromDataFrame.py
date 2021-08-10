@@ -12,8 +12,8 @@ from torchio import Image, Subject
 import SimpleITK as sitk
 
 from GANDLF.utils import perform_sanity_check_on_subject
-from GANDLF.preprocessing import global_preprocessing_dict
-from GANDLF.augmentation import global_augs_dict
+from .preprocessing import global_preprocessing_dict
+from .augmentation import global_augs_dict
 
 global_sampler_dict = {
     "uniform": torchio.data.UniformSampler,
