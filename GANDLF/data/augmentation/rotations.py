@@ -3,6 +3,7 @@ import torch
 
 from torchio.transforms import Lambda
 
+
 def axis_check(axis):
     """
     Check the input axis.
@@ -16,7 +17,7 @@ def axis_check(axis):
     Returns:
         list: Output axis.
     """
-    
+
     if isinstance(axis, int):
         if axis == 0:
             axis = [1]
@@ -32,6 +33,7 @@ def axis_check(axis):
         if sub_ax not in [1, 2, 3]:
             raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", sub_ax)
     return axis
+
 
 def tensor_rotate_90(input_image, axis):
     """
