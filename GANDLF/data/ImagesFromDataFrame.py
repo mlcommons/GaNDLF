@@ -13,13 +13,10 @@ import SimpleITK as sitk
 
 from GANDLF.utils import (
     perform_sanity_check_on_subject,
-    apply_resize,
-    get_tensor_for_dataloader
+    get_tensor_for_dataloader,
+    resize_image,
 )
-from .preprocessing.all_defines import (
-    global_preprocessing_dict,
-    apply_resize
-)
+from .preprocessing.all_defines import global_preprocessing_dict
 from .augmentation.all_defines import global_augs_dict
 
 global_sampler_dict = {
@@ -129,7 +126,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = subject_dict[str(channel)].as_sitk()
-                img_resized = apply_resize(img, preprocessing_params=preprocessing)
+                img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = img_resized.GetSpacing()
                 img_tensor = get_tensor_for_dataloader(img_resized)
@@ -157,11 +154,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                img_resized = apply_resize(
-                    img,
-                    preprocessing_params=preprocessing,
-                    interpolator=sitk.sitkNearestNeighbor,
-                )
+                img_resized = resize_image(img, preprocessing["resize"])
                 img_tensor = get_tensor_for_dataloader(img_resized)
                 subject_dict["label"] = Image(
                     tensor=img_tensor,
