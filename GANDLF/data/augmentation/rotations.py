@@ -1,3 +1,4 @@
+from functools import partial
 import torch
 
 from torchio.transforms import Lambda
