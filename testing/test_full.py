@@ -2,7 +2,7 @@ from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch
 import SimpleITK as sitk
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame, elastic, mri_artifact
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.data.preprocessing.all_defines import global_preprocessing_dict
 from GANDLF.data.augmentation.all_defines import global_augs_dict
