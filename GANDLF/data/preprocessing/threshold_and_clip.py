@@ -23,6 +23,7 @@ def clip_intensities(input_tensor, min_thresh, max_thresh):
     """
     return torch.clamp(input_tensor, min_thresh, max_thresh)
 
+
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def threshold_transform(min_thresh, max_thresh, p=1):
     return Lambda(
