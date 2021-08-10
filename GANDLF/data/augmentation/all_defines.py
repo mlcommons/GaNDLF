@@ -9,6 +9,8 @@ from .wrap_torchio import (
     gamma,
     flip,
     anisotropy,
+)
+from .rotations import (
     rotate_90,
     rotate_180,
 )
