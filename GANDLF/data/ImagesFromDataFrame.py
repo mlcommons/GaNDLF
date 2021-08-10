@@ -11,7 +11,11 @@ from torchio.transforms import (
 from torchio import Image, Subject
 import SimpleITK as sitk
 
-from GANDLF.utils import perform_sanity_check_on_subject
+from GANDLF.utils import (
+    perform_sanity_check_on_subject,
+    apply_resize,
+    get_tensor_for_dataloader
+)
 from .preprocessing.all_defines import (
     global_preprocessing_dict,
     apply_resize
