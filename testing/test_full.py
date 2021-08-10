@@ -784,7 +784,7 @@ def test_preprocess_functions():
     input_transformed = global_preprocessing_dict["clip"](min_thresh=0.25, max_thresh=0.75)(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
-    ), "Input should be thresholded"
+    ), "Input should be clipped"
 
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
     input_transformed = non_zero_normalizer(input_tensor)
