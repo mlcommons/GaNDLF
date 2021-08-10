@@ -5,6 +5,7 @@ import SimpleITK as sitk
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame, elastic, mri_artifact
 from GANDLF.utils import *
 from GANDLF.data.preprocessing.all_defines import global_preprocessing_dict
+from GANDLF.data.augmentation.all_defines import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -785,10 +786,10 @@ def test_preprocess_functions():
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
     ), "Input should be thresholded"
 
-    input_transformed = tensor_rotate_90(input_tensor, (1))
-    input_transformed = tensor_rotate_180(input_tensor, (1))
+    input_transformed = global_augs_dict["rotate_90"](input_tensor, (1))
+    input_transformed = global_augs_dict["rotate_180"](input_tensor, (1))
 
-    non_zero_normalizer = NonZeroNormalizeOnMaskedRegion()
+    non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
     input_transformed = non_zero_normalizer(input_tensor)
 
     elastic_generator = elastic(patch_size=[32, 32, 1])
@@ -807,5 +808,5 @@ def test_preprocess_functions():
     assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
 
     input_tensor = torch.rand(1, 256, 256, 256)
-    cropper = CropExternalZeroplanes(patch_size=[128, 128, 128])
+    cropper = global_preprocessing_dict["crop_external_zero_planes"](patch_size=[128, 128, 128])
     input_transformed = cropper(input_tensor)
