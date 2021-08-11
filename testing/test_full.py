@@ -803,7 +803,6 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "unet"
     # loop through selected models and train for single epoch
-    shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -812,6 +811,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
         device=device,
         reset_prev=True,
     )
+    shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
 
