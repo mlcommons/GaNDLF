@@ -775,15 +775,14 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check=False
     )
-    params_all_preprocessing_and_augs = parseConfig(testingDir + "/../samples/config_all_options.yaml")
-    
+    params_all_preprocessing_and_augs = parseConfig(
+        testingDir + "/../samples/config_all_options.yaml"
+    )
+
     # take preprocessing and augmentations from all options
-    for key in [
-        "data_preprocessing",
-        "data_augmentation"
-    ]:
+    for key in ["data_preprocessing", "data_augmentation"]:
         parameters[key] = params_all_preprocessing_and_augs[key]
-    
+
     # customize parameters to maximize test coverage
     parameters["data_preprocessing"].pop("normalize", None)
     parameters["data_preprocessing"]["normalize_nonZero"] = None
