@@ -67,7 +67,7 @@ pip install -e .
 - Update [TorchIO](https://github.com/fepegar/torchio) version in [setup](https://github.com/CBICA/GaNDLF/blob/master/setup.py), if appropriate.
 - Add transformation in [ImagesFromDataFrame Function](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/ImagesFromDataFrame.py), under `global_augs_dict`
 - Ensure probability is used as input (not used for normalize or resample)
-- For details, please see https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/augmentation/README.md
+- For details, please see [README for GANDLF.augmentation submodule](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/augmentation/README.md).
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -75,7 +75,7 @@ pip install -e .
 
 - All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [./GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
-- For details, please see https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/preprocessing/README.md
+- For details, please see [README for GANDLF.preprocessing submodule](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/preprocessing/README.md).
 
 [Back To Top &uarr;](#table-of-contents)
 
