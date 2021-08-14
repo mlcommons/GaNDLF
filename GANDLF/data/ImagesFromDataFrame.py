@@ -1,184 +1,23 @@
 import os, sys
 import numpy as np
-from functools import partial
 
 import torchio
 from torchio.transforms import (
-    OneOf,
-    RandomMotion,
-    RandomGhosting,
-    RandomSpike,
-    RandomAffine,
-    RandomElasticDeformation,
-    RandomBiasField,
-    RandomBlur,
-    RandomNoise,
-    RandomSwap,
-    RandomAnisotropy,
-    ZNormalization,
     Resample,
     Compose,
-    Lambda,
-    RandomFlip,
-    RandomGamma,
     Pad,
     ToCanonical,
 )
 from torchio import Image, Subject
 import SimpleITK as sitk
 
-from GANDLF.utils import perform_sanity_check_on_subject
-from GANDLF.preprocessing import (
-    NonZeroNormalizeOnMaskedRegion,
-    CropExternalZeroplanes,
-    apply_resize,
-    threshold_intensities,
-    tensor_rotate_180,
-    tensor_rotate_90,
-    clip_intensities,
-    normalize_imagenet,
-    normalize_standardize,
-    normalize_div_by_255,
+from GANDLF.utils import (
+    perform_sanity_check_on_subject,
     get_tensor_for_dataloader,
+    resize_image,
 )
-
-## todo: ability to change interpolation type from config file
-## todo: ability to change the dimensionality according to the config file
-# define individual functions/lambdas for augmentations to handle properties
-def mri_artifact(p=1):
-    return OneOf(
-        {RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=p
-    )
-
-
-def affine(p=1):
-    return RandomAffine(p=p)
-
-
-def elastic(patch_size=None, p=1):
-
-    if patch_size is not None:
-        # define the control points and swap axes for augmentation
-        num_controls = []
-        for _, n in enumerate(patch_size):
-            num_controls.append(max(round(n / 10), 5))  # always at least have 5
-        max_displacement = np.divide(num_controls, 10)
-        if num_controls[-1] == 1:
-            # ensure maximum displacement is never greater than patch size
-            max_displacement[-1] = 0.1
-        max_displacement = max_displacement.tolist()
-    else:
-        # use defaults defined in torchio
-        num_controls = 7
-        max_displacement = 7.5
-    return RandomElasticDeformation(
-        num_control_points=num_controls, max_displacement=max_displacement, p=p
-    )
-
-
-def swap(patch_size=15, p=1):
-    return RandomSwap(patch_size=patch_size, num_iterations=100, p=p)
-
-
-def bias(p=1):
-    return RandomBiasField(coefficients=0.5, order=3, p=p)
-
-
-def blur(std, p=1):
-    return RandomBlur(std=std, p=p)
-
-
-def noise(mean, std, p=1):
-    return RandomNoise(mean=mean, std=std, p=p)
-
-
-def gamma(p=1):
-    return RandomGamma(p=p)
-
-
-def flip(axes=0, p=1):
-    return RandomFlip(axes=axes, p=p)
-
-
-def anisotropy(axes=0, downsampling=1, p=1):
-    return RandomAnisotropy(
-        axes=axes, downsampling=downsampling, scalars_only=True, p=p
-    )
-
-
-def positive_voxel_mask(image):
-    return image > 0
-
-
-def nonzero_voxel_mask(image):
-    return image != 0
-
-
-def crop_external_zero_planes(patch_size, p=1):
-    # p is only accepted as a parameter to capture when values other than one are attempted
-    if p != 1:
-        raise ValueError(
-            "crop_external_zero_planes cannot be performed with non-1 probability."
-        )
-    return CropExternalZeroplanes(patch_size=patch_size)
-
-
-## lambdas for pre-processing
-def threshold_transform(min_thresh, max_thresh, p=1):
-    return Lambda(
-        function=partial(
-            threshold_intensities, min_thresh=min_thresh, max_thresh=max_thresh
-        ),
-        p=p,
-    )
-
-
-def clip_transform(min_thresh, max_thresh, p=1):
-    return Lambda(
-        function=partial(
-            clip_intensities, min_thresh=min_thresh, max_thresh=max_thresh
-        ),
-        p=p,
-    )
-
-
-def rotate_90(axis, p=1):
-    return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
-
-
-def rotate_180(axis, p=1):
-    return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
-
-
-# defining dict for pre-processing - key is the string and the value is the transform object
-global_preprocessing_dict = {
-    "threshold": threshold_transform,
-    "clip": clip_transform,
-    "normalize": ZNormalization(),
-    "normalize_positive": ZNormalization(masking_method=positive_voxel_mask),
-    "normalize_nonZero": ZNormalization(masking_method=nonzero_voxel_mask),
-    "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
-    "crop_external_zero_planes": crop_external_zero_planes,
-    "normalize_imagenet": normalize_imagenet,
-    "normalize_standardize": normalize_standardize,
-    "normalize_div_by_255": normalize_div_by_255,
-}
-
-# Defining a dictionary for augmentations - key is the string and the value is the augmentation object
-global_augs_dict = {
-    "affine": affine,
-    "elastic": elastic,
-    "kspace": mri_artifact,
-    "bias": bias,
-    "blur": blur,
-    "noise": noise,
-    "gamma": gamma,
-    "swap": swap,
-    "flip": flip,
-    "rotate_90": rotate_90,
-    "rotate_180": rotate_180,
-    "anisotropic": anisotropy,
-}
+from .preprocessing.all_defines import global_preprocessing_dict
+from .augmentation.all_defines import global_augs_dict
 
 global_sampler_dict = {
     "uniform": torchio.data.UniformSampler,
@@ -287,7 +126,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = subject_dict[str(channel)].as_sitk()
-                img_resized = apply_resize(img, preprocessing_params=preprocessing)
+                img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = img_resized.GetSpacing()
                 img_tensor = get_tensor_for_dataloader(img_resized)
@@ -315,11 +154,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                img_resized = apply_resize(
-                    img,
-                    preprocessing_params=preprocessing,
-                    interpolator=sitk.sitkNearestNeighbor,
-                )
+                img_resized = resize_image(img, preprocessing["resize"])
                 img_tensor = get_tensor_for_dataloader(img_resized)
                 subject_dict["label"] = Image(
                     tensor=img_tensor,

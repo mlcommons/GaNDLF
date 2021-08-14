@@ -2,9 +2,10 @@ from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch
 import SimpleITK as sitk
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame, elastic, mri_artifact
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from GANDLF.preprocessing import *
+from GANDLF.data.preprocessing.all_defines import global_preprocessing_dict
+from GANDLF.data.augmentation.all_defines import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -208,7 +209,6 @@ def test_train_segmentation_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
@@ -582,7 +582,6 @@ def test_normtype_train_segmentation_rad_3d(device):
         inputDir + "/train_3d_rad_segmentation.csv"
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
@@ -769,44 +768,102 @@ def test_cli_function_mainrun(device):
     print("passed")
 
 
+def test_dataloader_construction_train_segmentation_3d(device):
+    print("Starting 3D Rad segmentation tests")
+    # read and parse csv
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check=False
+    )
+    params_all_preprocessing_and_augs = parseConfig(
+        testingDir + "/../samples/config_all_options.yaml"
+    )
+
+    # take preprocessing and augmentations from all options
+    for key in ["data_preprocessing", "data_augmentation"]:
+        parameters[key] = params_all_preprocessing_and_augs[key]
+
+    # customize parameters to maximize test coverage
+    parameters["data_preprocessing"].pop("normalize", None)
+    parameters["data_preprocessing"]["normalize_nonZero"] = None
+    parameters["data_preprocessing"]["default_probability"] = 1
+    parameters.pop("nested_training", None)
+    parameters["nested_training"] = {}
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -5
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["architecture"] = "unet"
+    # loop through selected models and train for single epoch
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    shutil.rmtree(outputDir)  # overwrite previous results
+    print("passed")
+
+
 def test_preprocess_functions():
     print("Starting testing preprocessing functions")
     input_tensor = torch.rand(1, 3, 256, 256)
-    input_transformed = normalize_imagenet(input_tensor)
-    input_transformed = normalize_standardize(input_tensor)
-    input_transformed = normalize_div_by_255(input_tensor)
-    input_transformed = threshold_intensities(input_tensor, 0.25, 0.75)
+    input_transformed = global_preprocessing_dict["normalize_imagenet"]()(input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_standardize"]()(
+        input_tensor
+    )
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(
+        input_tensor
+    )
+    input_transformed = global_preprocessing_dict["threshold"](
+        min_thresh=0.25, max_thresh=0.75
+    )(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
     ), "Input should be thresholded"
 
-    input_transformed = clip_intensities(input_tensor, 0.25, 0.75)
+    input_transformed = global_preprocessing_dict["clip"](
+        min_thresh=0.25, max_thresh=0.75
+    )(input_tensor)
     assert (
         torch.count_nonzero(input_transformed[input_transformed < 0.25] > 0.75) == 0
-    ), "Input should be thresholded"
+    ), "Input should be clipped"
 
-    input_transformed = tensor_rotate_90(input_tensor, (1))
-    input_transformed = tensor_rotate_180(input_tensor, (1))
-
-    non_zero_normalizer = NonZeroNormalizeOnMaskedRegion()
+    non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
     input_transformed = non_zero_normalizer(input_tensor)
 
-    elastic_generator = elastic(patch_size=[32, 32, 1])
-    input_transformed = elastic_generator(input_tensor)
-    elastic_generator = elastic()
-    input_transformed = elastic_generator(input_tensor)
-    mri_artefact_generator = mri_artifact()
-    input_transformed = mri_artefact_generator(input_tensor)
-
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
-    img_resized = resample_image(
+    img_resized = resize_image(
         input_image,
-        resize_image_resolution(input_image, [128, 128]),
-        interpolator=sitk.sitkNearestNeighbor,
+        [128, 128, 3],
     )
     img_tensor = get_tensor_for_dataloader(img_resized)
     assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
 
     input_tensor = torch.rand(1, 256, 256, 256)
-    cropper = CropExternalZeroplanes(patch_size=[128, 128, 128])
+    cropper = global_preprocessing_dict["crop_external_zero_planes"](
+        patch_size=[128, 128, 128]
+    )
     input_transformed = cropper(input_tensor)
+    print("passed")
+
+
+def test_augmentation_functions():
+    print("Starting testing augmentation functions")
+    input_tensor = torch.rand(3, 128, 128, 128)
+
+    for aug in global_augs_dict:
+        output_tensor = None
+        output_tensor = global_augs_dict[aug]()(input_tensor)
+        assert output_tensor != None, "Augmentation should work"
+    print("passed")
