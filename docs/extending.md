@@ -6,8 +6,8 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - [Environment](#environment)
 - [Architecture](#architecture)
 - [Adding Models](#adding-models)
-- [Adding Transformations](#adding-transformations)
-- [Adding Pre-processing functionality](#adding-pre-processing-functionality)
+- [Adding Transformations](#adding-augmentation-transformations)
+- [Adding Preprocessing functionality](#adding-pre-processing-functionality)
 - [Adding Training functionality](#adding-training-functionality)
 - [Adding Inference functionality](#adding-inference-functionality)
 - [Update Tests](#update-tests)
@@ -71,7 +71,7 @@ pip install -e .
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Adding Pre-processing functionality
+## Adding Pre-processing functionality
 
 - All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [./GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
@@ -79,14 +79,14 @@ pip install -e .
 
 [Back To Top &uarr;](#table-of-contents)
 
-## Add Training Functionality
+## Adding Training Functionality
 
 - Update [Training Function](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/training_loop.py)
 - Update [Training Manager](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/training_manager.py), if any training API has changed
 
 [Back To Top &uarr;](#table-of-contents)
 
-## Add Inference Functionality
+## Adding Inference Functionality
 
 - Update [Inference Function](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/inference_loop.py)
 - Update [Inference Manager](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/inference_manager.py), if any inference API has changed
