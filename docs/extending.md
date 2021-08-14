@@ -7,7 +7,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - [Architecture](#architecture)
 - [Adding Models](#adding-models)
 - [Adding Transformations](#adding-augmentation-transformations)
-- [Adding Preprocessing functionality](#adding-pre-processing-functionality)
+- [Adding Preprocessing functionality](#adding-preprocessing-functionality)
 - [Adding Training functionality](#adding-training-functionality)
 - [Adding Inference functionality](#adding-inference-functionality)
 - [Update Tests](#update-tests)
@@ -71,7 +71,7 @@ pip install -e .
 
 [Back To Top &uarr;](#table-of-contents)
 
-## Adding Pre-processing functionality
+## Adding Preprocessing functionality
 
 - All transforms should be defined as [TorchIO Lambdas](https://torchio.readthedocs.io/transforms/others.html#lambda). For example, please see the threshold/clip functionality in the [./GANDLF/preprocessing.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/preprocessing.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
