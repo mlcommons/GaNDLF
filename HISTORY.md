@@ -1,3 +1,6 @@
+## 0.0.12
+- 
+
 ## 0.0.11
 
 - Misc bugfixes for segmentation and classification
