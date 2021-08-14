@@ -6,7 +6,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - [Environment](#environment)
 - [Architecture](#architecture)
 - [Adding Models](#adding-models)
-- [Adding Transformations](#adding-augmentation-transformations)
+- [Adding Augmentation functionality](#adding-augmentation-transformations)
 - [Adding Preprocessing functionality](#adding-preprocessing-functionality)
 - [Adding Training functionality](#adding-training-functionality)
 - [Adding Inference functionality](#adding-inference-functionality)
