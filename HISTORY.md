@@ -4,6 +4,7 @@
 - DFU 2021 parameter file added
 - Added SDNet for supervised learning - https://doi.org/10.1016/j.media.2019.101535
 - Added option to re-orient all images to canonical
+- Preprocessing and augmentation made into separate submodules
 
 ## 0.0.10
 
