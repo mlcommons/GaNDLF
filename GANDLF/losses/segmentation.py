@@ -1,6 +1,4 @@
 import torch
-import sys
-from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
 from GANDLF.utils import one_hot
 
 
