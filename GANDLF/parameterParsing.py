@@ -11,7 +11,7 @@ from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import fetch_loss_function
 from GANDLF.utils import *
-from GANDLF.metrics import fetch_metric
+from GANDLF.metrics import global_metrics_dict
 import torchvision
 import torch.nn as nn
 
@@ -507,15 +507,23 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     metric_output = {}
     # Metrics should be a list
     for metric in params["metrics"]:
-        metric_function = fetch_metric(metric)  # Write a fetch_metric
-        if sdnet_check:
-            metric_output[metric] = (
-                metric_function(predicted[0], ground_truth.squeeze(-1), params)
-                .cpu()
-                .data.item()
-            )
+        metric_lower = metric.lower()
+        if metric_lower in global_metrics_dict:
+            metric_function = global_metrics_dict[metric_lower](metric)
+            if sdnet_check:
+                metric_output[metric] = (
+                    metric_function(predicted[0], ground_truth.squeeze(-1), params)
+                    .cpu()
+                    .data.item()
+                )
+            else:
+                metric_output[metric] = (
+                    metric_function(predicted, ground_truth, params).cpu().data.item()
+                )
         else:
-            metric_output[metric] = (
-                metric_function(predicted, ground_truth, params).cpu().data.item()
+            print(
+                "WARNING: Could not find the requested metric '"
+                + metric,
+                file=sys.stderr,
             )
     return loss, metric_output
