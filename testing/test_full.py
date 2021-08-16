@@ -841,6 +841,10 @@ def test_preprocess_functions():
 
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
     input_transformed = non_zero_normalizer(input_tensor)
+    non_zero_normalizer = global_preprocessing_dict["normalize_positive"]
+    input_transformed = non_zero_normalizer(input_tensor)
+    non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
+    input_transformed = non_zero_normalizer(input_tensor)
 
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resize_image(
