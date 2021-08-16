@@ -4,8 +4,8 @@ import SimpleITK as sitk
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from GANDLF.data.preprocessing.all_defines import global_preprocessing_dict
-from GANDLF.data.augmentation.all_defines import global_augs_dict
+from GANDLF.data.preprocessing import global_preprocessing_dict
+from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
