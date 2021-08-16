@@ -2,7 +2,9 @@
 All the metrics are to be called from here
 """
 import torch
-from .segmentation import 
+from GANDLF.losses import MSE_loss, cel
+from .segmentation import multi_class_dice, hd100, hd95
+from .regression import accuracy, F1_score, classification_accuracy
 
 
 def identity(output, label, params):
@@ -29,7 +31,7 @@ def identity(output, label, params):
 global_metrics_dict = {
     "dice": multi_class_dice,
     "accuracy": accuracy,
-    "mse": MSE_loss_agg,
+    "mse": MSE_loss,
     "hd95": hd95,
     "hausdorff95": hd100,
     "hd100": hd100,
