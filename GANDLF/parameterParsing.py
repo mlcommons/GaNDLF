@@ -490,8 +490,10 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     metric_output : torch.Tensor
         The computed metric from the label and the output
     """
-    if isinstance(params["loss_function"], dict):  # this is currently only happening for mse_torch
-    # check for mse_torch
+    if isinstance(
+        params["loss_function"], dict
+    ):  # this is currently only happening for mse_torch
+        # check for mse_torch
         loss_function = global_losses_dict["mse"]
     else:
         loss_str_lower = params["loss_function"].lower()
@@ -503,7 +505,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 + params["loss_function"],
                 file=sys.stderr,
             )
-    
+
     # specialized loss function for sdnet
     sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
     if sdnet_check:
@@ -516,7 +518,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     else:
         loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
-    
+
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_lower = metric.lower()
@@ -534,8 +536,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 )
         else:
             print(
-                "WARNING: Could not find the requested metric '"
-                + metric,
+                "WARNING: Could not find the requested metric '" + metric,
                 file=sys.stderr,
             )
     return loss, metric_output
