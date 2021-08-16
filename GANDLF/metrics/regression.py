@@ -2,7 +2,6 @@
 All the metrics are to be called from here
 """
 import torch
-import torch
 from torchmetrics import F1
 
 
