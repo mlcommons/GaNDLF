@@ -256,6 +256,19 @@ def hd100(inp, target, params):
     return hd_generic(inp, target, params, 100)
 
 
+global_metrics_dict = {
+    "dice": multi_class_dice,
+    "accuracy": accuracy,
+    "mse": MSE_loss_agg,
+    "hd95": hd95,
+    "hd100": hd100,
+    "hausdorff": hd100,
+    "cel": cel,
+    "f1_score": F1_score,
+    "f1": F1_score,
+    "classification_accuracy": classification_accuracy,
+}
+
 def fetch_metric(metric_name):
     """
 
