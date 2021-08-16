@@ -523,7 +523,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     for metric in params["metrics"]:
         metric_lower = metric.lower()
         if metric_lower in global_metrics_dict:
-            metric_function = global_metrics_dict[metric_lower](metric)
+            metric_function = global_metrics_dict[metric_lower]
             if sdnet_check:
                 metric_output[metric] = (
                     metric_function(predicted[0], ground_truth.squeeze(-1), params)
