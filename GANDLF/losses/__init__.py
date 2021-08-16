@@ -6,7 +6,7 @@ from .regression import CE, CEL, MSE_loss, L1_loss
 from .hybrid import DCCE, DCCE_Logits
 
 
-# global defines for the metrics
+# global defines for the losses
 global_losses_dict = {
     "dc": MCD_loss,
     "dice": MCD_loss,
