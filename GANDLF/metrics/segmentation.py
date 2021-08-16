@@ -4,7 +4,7 @@ All the segmentation metrics are to be called from here
 import torch
 from GANDLF.utils import one_hot
 import torch, numpy
-from GANDLF.losses import dice
+from GANDLF.losses.segmentation import dice
 from GANDLF.utils import one_hot
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
