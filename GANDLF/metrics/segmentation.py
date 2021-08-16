@@ -162,4 +162,3 @@ def hd95(inp, target, params):
 
 def hd100(inp, target, params):
     return hd_generic(inp, target, params, 100)
-
