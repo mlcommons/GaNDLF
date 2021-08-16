@@ -11,7 +11,7 @@ from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
 from GANDLF.losses import fetch_loss_function
 from GANDLF.utils import *
-from GANDLF.metrics import global_metrics_dict
+from GANDLF.metrics import global_metrics_dict, identity
 import torchvision
 import torch.nn as nn
 
@@ -523,7 +523,8 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         else:
             print(
                 "WARNING: Could not find the requested metric '"
-                + metric,
+                + metric + "Using identity",
                 file=sys.stderr,
             )
+            metric = identity
     return loss, metric_output
