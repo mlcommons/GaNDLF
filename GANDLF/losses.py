@@ -5,30 +5,28 @@ from .utils import one_hot
 
 
 # Dice scores and dice losses
-def dice(inp, target):
+def dice(output, label):
+    """
+    This function computes a dice score between two tensors
+
+    Parameters
+    ----------
+    output : Tensor
+        Output predicted generally by the network
+    label : Tensor
+        Required target label to match the output with
+
+    Returns
+    -------
+    Tensor
+        Computed Dice Score
+
+    """
     smooth = 1e-7
-    iflat = inp.contiguous().view(-1)
-    tflat = target.contiguous().view(-1)
+    iflat = output.contiguous().view(-1)
+    tflat = label.contiguous().view(-1)
     intersection = (iflat * tflat).sum()
-    # 2 * intersection / union
     return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
-
-
-def cel(out, target, params):
-    if len(target.shape) > 1 and target.shape[-1] == 1:
-        target = torch.squeeze(target, -1)
-
-    class_weights = None
-    if params["class_weights"]:
-        class_weights = torch.FloatTensor(list(params["class_weights"].values()))
-
-        # more examples you have in the training data, the smaller the weight you have in the loss
-        class_weights = 1.0 / class_weights
-
-        class_weights = class_weights.float().to(target.device)
-
-    cel = CrossEntropyLoss(weight=class_weights)
-    return cel(out, target)
 
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
@@ -59,6 +57,23 @@ def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
     if weights is None:
         acc_dice /= num_class  # we should not be considering 0
     return acc_dice
+
+
+def cel(out, target, params):
+    if len(target.shape) > 1 and target.shape[-1] == 1:
+        target = torch.squeeze(target, -1)
+
+    class_weights = None
+    if params["class_weights"]:
+        class_weights = torch.FloatTensor(list(params["class_weights"].values()))
+
+        # more examples you have in the training data, the smaller the weight you have in the loss
+        class_weights = 1.0 / class_weights
+
+        class_weights = class_weights.float().to(target.device)
+
+    cel = CrossEntropyLoss(weight=class_weights)
+    return cel(out, target)
 
 
 def MCD_loss(pm, gt, params):
