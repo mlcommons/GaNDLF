@@ -95,6 +95,6 @@ def MCT_loss(inp, target, params):
     return acc_tv_loss
 
 
-# def KullbackLeiblerDivergence(mu, logvar, params=None):
-#     loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
-#     return loss.mean()
+def KullbackLeiblerDivergence(mu, logvar, params=None):
+    loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
+    return loss.mean()
