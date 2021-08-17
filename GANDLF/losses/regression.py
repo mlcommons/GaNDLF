@@ -32,7 +32,7 @@ def CE(out, target):
     iflat = out.contiguous().view(-1)
     tflat = target.contiguous().view(-1)
     loss = torch.nn.BCELoss()
-    loss_val = loss(iflat, tflat)
+    loss_val = loss(iflat.float(), tflat.float())
     return loss_val
 
 
@@ -166,12 +166,17 @@ def MSE_loss(inp, target, params):
     # if inp.shape != target.shape:
     #     sys.exit('Input and target shapes are inconsistent')
 
+    reduction = "mean"
+    if "mse" in params["loss_function"]:
+        if isinstance(params["loss_function"]["mse"], dict):
+            reduction = params["loss_function"]["mse"]["reduction"]
+
     if inp.shape[0] == 1:
         if params is not None:
             acc_mse_loss += MSE(
                 inp,
                 target,
-                reduction=params["loss_function"]["mse"]["reduction"],
+                reduction=reduction,
                 scaling_factor=params["scaling_factor"],
             )
         else:
@@ -184,7 +189,7 @@ def MSE_loss(inp, target, params):
                 acc_mse_loss += MSE(
                     inp[:, i, ...],
                     target[:, i, ...],
-                    reduction=params["loss_function"]["mse"]["reduction"],
+                    reduction=reduction,
                     scaling_factor=params["scaling_factor"],
                 )
         else:
