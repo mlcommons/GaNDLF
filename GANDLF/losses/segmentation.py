@@ -37,21 +37,15 @@ def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
     """
     acc_dice = 0
     for i in range(0, num_class):  # 0 is background
-        calculate_dice_for_label = True
-        if ignore_class is not None:
-            if i == ignore_class:
-                calculate_dice_for_label = False
-
-        if calculate_dice_for_label:
-            currentDice = dice(gt[:, i, ...], pm[:, i, ...])
-            if loss_type == 1:
-                currentDice = 1 - currentDice  # subtract from 1 because this is a loss
-            elif loss_type == 2:
-                # negative because we want positive losses
-                currentDice = -torch.log(currentDice + torch.finfo(torch.float32).eps)
-            if weights is not None:
-                currentDice = currentDice * weights[i]
-            acc_dice += currentDice
+        currentDice = dice(gt[:, i, ...], pm[:, i, ...])
+        if loss_type == 1:
+            currentDice = 1 - currentDice  # subtract from 1 because this is a loss
+        elif loss_type == 2:
+            # negative because we want positive losses
+            currentDice = -torch.log(currentDice + torch.finfo(torch.float32).eps)
+        if weights is not None:
+            currentDice = currentDice * weights[i]
+        acc_dice += currentDice
     if weights is None:
         acc_dice /= num_class  # we should not be considering 0
     return acc_dice
@@ -63,17 +57,6 @@ def MCD_loss(pm, gt, params):
     """
     gt = one_hot(gt, params["model"]["class_list"])
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 1)
-
-
-def MCD_loss_new(pm, gt, num_class, weights=None):  # compute the actual dice score
-    dims = (1, 2, 3)
-    eps = torch.finfo(torch.float32).eps
-    intersection = torch.sum(pm * gt, dims)
-    cardinality = torch.sum(pm + gt, dims)
-
-    dice_score = (2.0 * intersection + eps) / (cardinality + eps)
-
-    return torch.mean(-dice_score + 1.0)
 
 
 def MCD_log_loss(pm, gt, params):
@@ -100,14 +83,18 @@ def tversky_loss(inp, target, alpha=1):
     return 1 - tversky_val
 
 
-def MCT_loss(inp, target, num_class, weights):
+def MCT_loss(inp, target, params):
     acc_tv_loss = 0
-    for i in range(0, num_class):
-        acc_tv_loss += tversky_loss(inp[:, i, ...], target[:, i, ...]) * weights[i]
-    acc_tv_loss /= num_class - 1
+    for i in range(0, len(params["model"]["class_list"])):
+        curr_loss = tversky_loss(inp[:, i, ...], target[:, i, ...])
+        if params["weights"] is not None:
+                curr_loss = curr_loss * params["weights"][i]
+        acc_tv_loss += curr_loss
+    if params["weights"] is None:
+        acc_tv_loss /= len(params["model"]["class_list"])  # we should not be considering 0
     return acc_tv_loss
 
 
-def KullbackLeiblerDivergence(mu, logvar, params=None):
-    loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
-    return loss.mean()
+# def KullbackLeiblerDivergence(mu, logvar, params=None):
+#     loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
+#     return loss.mean()
