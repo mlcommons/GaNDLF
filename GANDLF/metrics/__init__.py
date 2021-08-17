@@ -1,7 +1,7 @@
 """
 All the metrics are to be called from here
 """
-from GANDLF.losses import MSE_loss, CEL
+from GANDLF.losses.regression import MSE_loss, CEL
 from .segmentation import multi_class_dice, hd100, hd95
 from .regression import accuracy, F1_score, classification_accuracy
 
