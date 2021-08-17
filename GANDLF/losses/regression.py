@@ -167,9 +167,10 @@ def MSE_loss(inp, target, params):
     #     sys.exit('Input and target shapes are inconsistent')
 
     reduction = "mean"
-    if "mse" in params["loss_function"]:
-        if isinstance(params["loss_function"]["mse"], dict):
-            reduction = params["loss_function"]["mse"]["reduction"]
+    if params is not None:
+        if "mse" in params["loss_function"]:
+            if isinstance(params["loss_function"]["mse"], dict):
+                reduction = params["loss_function"]["mse"]["reduction"]
 
     if inp.shape[0] == 1:
         if params is not None:
