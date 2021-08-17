@@ -688,7 +688,7 @@ def test_losses_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
     # loop through selected models and train for single epoch
-    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits"]:
+    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
         parameters["loss_function"] = loss_type
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -802,6 +802,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "unet"
+    parameters["weighted_loss"] = False
     # loop through selected models and train for single epoch
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
