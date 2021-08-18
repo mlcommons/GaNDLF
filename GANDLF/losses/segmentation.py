@@ -88,10 +88,10 @@ def MCT_loss(inp, target, params):
     for i in range(0, len(params["model"]["class_list"])):
         curr_loss = tversky_loss(inp[:, i, ...], target[:, i, ...])
         if params["weights"] is not None:
-                curr_loss = curr_loss * params["weights"][i]
+            curr_loss = curr_loss * params["weights"][i]
         acc_tv_loss += curr_loss
     if params["weights"] is None:
-        acc_tv_loss /= len(params["model"]["class_list"])  # we should not be considering 0
+        acc_tv_loss /= len(params["model"]["class_list"])
     return acc_tv_loss
 
 
