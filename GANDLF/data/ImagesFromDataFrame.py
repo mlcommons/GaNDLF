@@ -16,8 +16,8 @@ from GANDLF.utils import (
     get_tensor_for_dataloader,
     resize_image,
 )
-from .preprocessing.all_defines import global_preprocessing_dict
-from .augmentation.all_defines import global_augs_dict
+from .preprocessing import global_preprocessing_dict
+from .augmentation import global_augs_dict
 
 global_sampler_dict = {
     "uniform": torchio.data.UniformSampler,

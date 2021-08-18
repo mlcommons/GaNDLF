@@ -9,9 +9,9 @@ from GANDLF.models.MSDNet import MSDNet
 from GANDLF.models.sdnet import SDNet
 from GANDLF.models import densenet
 from GANDLF.models.vgg import VGG, make_layers, cfg
-from GANDLF.losses import fetch_loss_function
+from GANDLF.losses import global_losses_dict
 from GANDLF.utils import *
-from GANDLF.metrics import fetch_metric
+from GANDLF.metrics import global_metrics_dict
 import torchvision
 import torch.nn as nn
 
@@ -490,32 +490,53 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     metric_output : torch.Tensor
         The computed metric from the label and the output
     """
-    loss_function = fetch_loss_function(params["loss_function"], params)
+    if isinstance(
+        params["loss_function"], dict
+    ):  # this is currently only happening for mse_torch
+        # check for mse_torch
+        loss_function = global_losses_dict["mse"]
+    else:
+        loss_str_lower = params["loss_function"].lower()
+        if loss_str_lower in global_losses_dict:
+            loss_function = global_losses_dict[loss_str_lower]
+        else:
+            sys.exit(
+                "WARNING: Could not find the requested loss function '"
+                + params["loss_function"],
+                file=sys.stderr,
+            )
+
+    # specialized loss function for sdnet
     sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
     if sdnet_check:
         # this is specific for sdnet-style archs
         loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
-        loss_function = fetch_loss_function("l1", None)
-        loss_reco = loss_function(predicted[1], image[:, :1, ...], None)
-        loss_function = fetch_loss_function("kld", params)
-        loss_kld = loss_function(predicted[2], predicted[3])
-        loss_function = fetch_loss_function("mse", None)
-        loss_cycle = loss_function(predicted[2], predicted[4], None)
+        loss_reco = global_losses_dict["l1"](predicted[1], image[:, :1, ...], None)
+        loss_kld = global_losses_dict["kld"](predicted[2], predicted[3])
+        loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
         loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
+
     # Metrics should be a list
     for metric in params["metrics"]:
-        metric_function = fetch_metric(metric)  # Write a fetch_metric
-        if sdnet_check:
-            metric_output[metric] = (
-                metric_function(predicted[0], ground_truth.squeeze(-1), params)
-                .cpu()
-                .data.item()
-            )
+        metric_lower = metric.lower()
+        if metric_lower in global_metrics_dict:
+            metric_function = global_metrics_dict[metric_lower]
+            if sdnet_check:
+                metric_output[metric] = (
+                    metric_function(predicted[0], ground_truth.squeeze(-1), params)
+                    .cpu()
+                    .data.item()
+                )
+            else:
+                metric_output[metric] = (
+                    metric_function(predicted, ground_truth, params).cpu().data.item()
+                )
         else:
-            metric_output[metric] = (
-                metric_function(predicted, ground_truth, params).cpu().data.item()
+            print(
+                "WARNING: Could not find the requested metric '" + metric,
+                file=sys.stderr,
             )
     return loss, metric_output
