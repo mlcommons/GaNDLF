@@ -4,8 +4,8 @@ import SimpleITK as sitk
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from GANDLF.data.preprocessing.all_defines import global_preprocessing_dict
-from GANDLF.data.augmentation.all_defines import global_augs_dict
+from GANDLF.data.preprocessing import global_preprocessing_dict
+from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -688,7 +688,7 @@ def test_losses_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
     # loop through selected models and train for single epoch
-    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits"]:
+    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
         parameters["loss_function"] = loss_type
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -802,6 +802,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "unet"
+    parameters["weighted_loss"] = False
     # loop through selected models and train for single epoch
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -840,6 +841,10 @@ def test_preprocess_functions():
     ), "Input should be clipped"
 
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]
+    input_transformed = non_zero_normalizer(input_tensor)
+    non_zero_normalizer = global_preprocessing_dict["normalize_positive"]
+    input_transformed = non_zero_normalizer(input_tensor)
+    non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
 
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())

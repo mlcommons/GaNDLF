@@ -1,58 +1,15 @@
 """
-All the metrics are to be called from here
+All the segmentation metrics are to be called from here
 """
-import torch
-from .utils import one_hot
-import sys, torch, numpy
-from .losses import MSE_loss, cel
-from .utils import one_hot
-from torchmetrics import F1
+import torch, numpy
+from GANDLF.utils import one_hot
+from GANDLF.losses.segmentation import dice
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
     distance_transform_edt,
     binary_erosion,
     generate_binary_structure,
 )
-
-
-# Dice scores and dice losses
-def dice(output, label):
-    """
-    This function computes a dice score between two tensors
-
-    Parameters
-    ----------
-    output : Tensor
-        Output predicted generally by the network
-    label : Tensor
-        Required target label to match the output with
-
-    Returns
-    -------
-    Tensor
-        Computed Dice Score
-
-    """
-    smooth = 1e-7
-    iflat = output.contiguous().view(-1)
-    tflat = label.contiguous().view(-1)
-    intersection = (iflat * tflat).sum()
-    return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
-
-
-def F1_score(output, label, params):
-
-    num_classes = params["model"]["num_classes"]
-    predicted_classes = torch.argmax(output, 1)
-    f1 = F1(num_classes=num_classes)
-    f1_score = f1(predicted_classes.cpu(), label.cpu())
-
-    return f1_score
-
-
-def classification_accuracy(output, label, params):
-    acc = torch.sum(torch.argmax(output, 1) == label) / len(label)
-    return acc
 
 
 def multi_class_dice(output, label, params):
@@ -80,7 +37,7 @@ def multi_class_dice(output, label, params):
     total_dice = 0
     avg_counter = 0
     # print("Number of classes : ", params["model"]["num_classes"])
-    for i in range(0, params["model"]["num_classes"]):  # 0 is background
+    for i in range(0, params["model"]["num_classes"]):
         # this check should only happen during validation
         if i != params["model"]["ignore_label_validation"]:
             total_dice += dice(output[:, i, ...], label[:, i, ...])
@@ -88,58 +45,6 @@ def multi_class_dice(output, label, params):
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
     total_dice /= avg_counter
     return total_dice
-
-
-def accuracy(output, label, params):
-    """
-    Calculates the accuracy between output and a label
-
-    Parameters
-    ----------
-    output : torch.Tensor
-        Input data containing objects. Can be any type but will be converted
-        into binary: background where 0, object everywhere else.
-    label : torch.Tensor
-        Input data containing objects. Can be any type but will be converted
-        into binary: background where 0, object everywhere else.
-    params : dict
-        The parameter dictionary containing training and data information.
-
-    Returns
-    -------
-    TYPE
-        DESCRIPTION.
-
-    """
-    if params["metrics"]["accuracy"]["threshold"] is not None:
-        output = (output >= params["metrics"]["accuracy"]["threshold"]).float()
-    correct = (output == label).float().sum()
-    return correct / len(label)
-
-
-def MSE_loss_agg(inp, target, params):
-    return MSE_loss(inp, target, params)
-
-
-def identity(output, label, params):
-    """
-    Always returns 0
-
-    Parameters
-    ----------
-    output : Tensor
-        Output predicted generally by the network
-    label : Tensor
-        Required target label to match the output with
-
-    Returns
-    -------
-    TYPE
-        DESCRIPTION.
-
-    """
-    _, _, _ = output, label, params
-    return torch.Tensor(0)
 
 
 def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
@@ -254,45 +159,3 @@ def hd95(inp, target, params):
 
 def hd100(inp, target, params):
     return hd_generic(inp, target, params, 100)
-
-
-def fetch_metric(metric_name):
-    """
-
-    Parameters
-    ----------
-    metric_name : string
-        Should be a name of a metric
-
-    Returns
-    -------
-    metric_function : function
-        The function to compute the metric
-
-    """
-    # if dict, only pick the first value
-    if isinstance(metric_name, dict):
-        metric_name = list(metric_name)[0]
-
-    metric_lower = metric_name.lower()
-
-    if metric_lower == "dice":
-        metric_function = multi_class_dice
-    elif metric_lower == "accuracy":
-        metric_function = accuracy
-    elif metric_lower == "mse":
-        metric_function = MSE_loss_agg
-    elif metric_lower == "cel":
-        metric_function = cel
-    elif metric_lower == "f1_score":
-        metric_function = F1_score
-    elif metric_lower == "classification_accuracy":
-        metric_function = classification_accuracy
-    elif (metric_lower == "hd95") or (metric_lower == "hausdorff95"):
-        metric_function = hd95
-    elif (metric_lower == "hd") or (metric_lower == "hausdorff"):
-        metric_function = hd100
-    else:
-        print("Metric was undefined")
-        metric_function = identity
-    return metric_function
