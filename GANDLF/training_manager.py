@@ -21,6 +21,19 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
 
+    # save the current model configuration as a sanity check
+    currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
+    if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
+        with open(currentModelConfigPickle, "wb") as handle:
+            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        print(
+            "Using previously saved parameter file",
+            currentModelConfigPickle,
+            flush=True,
+        )
+        parameters = pickle.load(open(currentModelConfigPickle, "rb"))
+
     # check for single fold training
     singleFoldValidation = False
     singleFoldTesting = False
@@ -112,19 +125,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
                 outputDir, "testing_" + str(currentTestingFold)
             )
             Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
-
-        # save the current model configuration as a sanity check
-        currentModelConfigPickle = os.path.join(currentOutputFolder, "parameters.pkl")
-        if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
-            with open(currentModelConfigPickle, "wb") as handle:
-                pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print(
-                "Using previously saved parameter file",
-                currentModelConfigPickle,
-                flush=True,
-            )
-            parameters = pickle.load(open(currentModelConfigPickle, "rb"))
 
         # save the current training+validation and testing datasets
         if noTestingData:
