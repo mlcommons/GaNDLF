@@ -821,14 +821,29 @@ def training_loop(
 
     # Setup a few variables for tracking
     best_loss = 1e7
-    patience = 0
+    patience, start_epoch = 0, 0
+    first_model_saved = False
+    best_model_path = os.path.join(
+        output_dir, params["model"]["architecture"] + "_best.pth.tar"
+    )
+
+    # if previous model file is present, load it up
+    if os.path.exists(best_model_path):
+        print("Previous model found. Loading it up.")
+        try:
+            main_dict = torch.load(best_model_path)
+            model.load_state_dict(main_dict["model_state_dict"])
+            start_epoch = main_dict["epoch"]
+            optimizer.load_state_dict(main_dict["optimizer_state_dict"])
+            best_loss = main_dict["best_loss"]
+            print("Previous model loaded successfully.")
+        except Exception as e:
+            print("Previous model could not be loaded, error: ", e)
 
     print("Using device:", device, flush=True)
 
-    first_model_saved = False
-
     # Iterate for number of epochs
-    for epoch in range(epochs):
+    for epoch in range(start_epoch, epochs):
 
         # Printing times
         epoch_start_time = time.time()
@@ -876,9 +891,7 @@ def training_loop(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "best_loss": best_loss,
                 },
-                os.path.join(
-                    output_dir, params["model"]["architecture"] + "_best.pth.tar"
-                ),
+                best_model_path,
             )
             first_model_saved = True
 
