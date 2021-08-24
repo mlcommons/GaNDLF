@@ -21,21 +21,32 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
 
+    # save the current model configuration as a sanity check
+    currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
+    if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
+        with open(currentModelConfigPickle, "wb") as handle:
+            pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        print(
+            "Using previously saved parameter file",
+            currentModelConfigPickle,
+            flush=True,
+        )
+        parameters = pickle.load(open(currentModelConfigPickle, "rb"))
+
     # check for single fold training
     singleFoldValidation = False
     singleFoldTesting = False
     noTestingData = False
-    if (
-        parameters["nested_training"]["testing"] < 0
-    ):  # if the user wants a single fold training
+    # if the user wants a single fold training
+    if parameters["nested_training"]["testing"] < 0:
         parameters["nested_training"]["testing"] = abs(
             parameters["nested_training"]["testing"]
         )
         singleFoldTesting = True
 
-    if (
-        parameters["nested_training"]["validation"] < 0
-    ):  # if the user wants a single fold training
+    # if the user wants a single fold training
+    if parameters["nested_training"]["validation"] < 0:
         parameters["nested_training"]["validation"] = abs(
             parameters["nested_training"]["validation"]
         )
@@ -45,9 +56,8 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     if parameters["nested_training"]["testing"] == 1:
         noTestingData = True
         singleFoldTesting = True
-        parameters["nested_training"][
-            "testing"
-        ] = 2  # put 2 just so that the first for-loop does not fail
+        # put 2 just so that the first for-loop does not fail
+        parameters["nested_training"]["testing"] = 2
 
     # initialize the kfold structures
     kf_testing = KFold(n_splits=parameters["nested_training"]["testing"])
@@ -66,9 +76,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     trainingData_full = dataframe
 
     # start the kFold train for testing
-    for trainAndVal_index, testing_index in kf_testing.split(
-        subjectIDs_full
-    ):  # perform testing split
+    for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
 
         currentValidationFold = (
             0  # ensure the validation fold is initialized per-testing split
@@ -117,19 +125,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
                 outputDir, "testing_" + str(currentTestingFold)
             )
             Path(currentOutputFolder).mkdir(parents=True, exist_ok=True)
-
-        # save the current model configuration as a sanity check
-        currentModelConfigPickle = os.path.join(currentOutputFolder, "parameters.pkl")
-        if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
-            with open(currentModelConfigPickle, "wb") as handle:
-                pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print(
-                "Using previously saved parameter file",
-                currentModelConfigPickle,
-                flush=True,
-            )
-            parameters = pickle.load(open(currentModelConfigPickle, "rb"))
 
         # save the current training+validation and testing datasets
         if noTestingData:

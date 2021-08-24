@@ -1,5 +1,5 @@
 ## 0.0.12
-- 
+- Automatic check-pointing of the model has been added.
 
 ## 0.0.11
 
