@@ -25,17 +25,15 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     singleFoldValidation = False
     singleFoldTesting = False
     noTestingData = False
-    if (
-        parameters["nested_training"]["testing"] < 0
-    ):  # if the user wants a single fold training
+    # if the user wants a single fold training
+    if parameters["nested_training"]["testing"] < 0:
         parameters["nested_training"]["testing"] = abs(
             parameters["nested_training"]["testing"]
         )
         singleFoldTesting = True
 
-    if (
-        parameters["nested_training"]["validation"] < 0
-    ):  # if the user wants a single fold training
+    # if the user wants a single fold training
+    if parameters["nested_training"]["validation"] < 0:
         parameters["nested_training"]["validation"] = abs(
             parameters["nested_training"]["validation"]
         )
@@ -45,9 +43,8 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     if parameters["nested_training"]["testing"] == 1:
         noTestingData = True
         singleFoldTesting = True
-        parameters["nested_training"][
-            "testing"
-        ] = 2  # put 2 just so that the first for-loop does not fail
+        # put 2 just so that the first for-loop does not fail
+        parameters["nested_training"]["testing"] = 2
 
     # initialize the kfold structures
     kf_testing = KFold(n_splits=parameters["nested_training"]["testing"])
@@ -66,9 +63,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     trainingData_full = dataframe
 
     # start the kFold train for testing
-    for trainAndVal_index, testing_index in kf_testing.split(
-        subjectIDs_full
-    ):  # perform testing split
+    for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
 
         currentValidationFold = (
             0  # ensure the validation fold is initialized per-testing split
