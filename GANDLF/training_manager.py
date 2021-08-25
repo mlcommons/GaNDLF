@@ -272,11 +272,11 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
 
             if singleFoldValidation:
                 break
-            currentValidationFold = currentValidationFold + 1  # increment the fold
+            currentValidationFold += 1  # go to next fold
 
         if singleFoldTesting:
             break
-        currentTestingFold = currentTestingFold + 1  # increment the fold
+        currentTestingFold += 1  # go to next fold
 
 
 def TrainingManager_split(
