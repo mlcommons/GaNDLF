@@ -18,36 +18,36 @@ if __name__ == "__main__":
         "Contact: gandlf@cbica.upenn.edu\n\n"
         + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
         + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
+        + " University of Pennsylvania. All rights reserved.\n\nCitation: https://arxiv.org/abs/2103.01006"
     )
     parser = argparse.ArgumentParser(
         prog="GANDLF",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Image Semantic Segmentation and Regression using Deep Learning.\n\n"
+        description="Semantic segmentation, regression, and classification for medical images using Deep Learning.\n\n"
         + copyrightMessage,
     )
     parser.add_argument(
         "-config",
         type=str,
-        help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
+        help="The configuration file (contains all the information related to the training/inference session)",
         required=True,
     )
     parser.add_argument(
         "-data",
         type=str,
-        help="Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV",
-        required=True,
-    )
-    parser.add_argument(
-        "-output",
-        type=str,
-        help="Output directory to save intermediate files and model weights",
+        help="Data CSV file that is used for training/inference; can also take comma-separated training-validatation pre-split CSVs",
         required=True,
     )
     parser.add_argument(
         "-train",
         type=ast.literal_eval,
-        help="True: training and False: inference; for 0, there needs to be a compatible model saved in '-output'",
+        help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-output'",
+        required=True,
+    )
+    parser.add_argument(
+        "-output",
+        type=str,
+        help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
         required=True,
     )
     parser.add_argument(
