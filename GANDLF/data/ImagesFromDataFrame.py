@@ -207,21 +207,21 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
 
-    augmentation_list = []
+    transformations_list = []
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     if not (preprocessing is None):
         if "to_canonical" in preprocessing:
-            augmentation_list.append(ToCanonical())
+            transformations_list.append(ToCanonical())
 
         if train:  # we want the crop to only happen during training
             if "crop_external_zero_planes" in preprocessing:
-                augmentation_list.append(
+                transformations_list.append(
                     global_preprocessing_dict["crop_external_zero_planes"](patch_size)
                 )
         for key in ["threshold", "clip"]:
             if key in preprocessing:
-                augmentation_list.append(
+                transformations_list.append(
                     global_preprocessing_dict[key](
                         min_thresh=preprocessing[key]["min"],
                         max_thresh=preprocessing[key]["max"],
@@ -237,15 +237,15 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 )
                 if len(resample_values) == 2:
                     resample_values = tuple(np.append(resample_values, 1))
-                augmentation_list.append(Resample(resample_values))
+                transformations_list.append(Resample(resample_values))
 
         # next, we want to do the intensity normalize - required for inference as well
         if "normalize" in preprocessing:
-            augmentation_list.append(global_preprocessing_dict["normalize"])
+            transformations_list.append(global_preprocessing_dict["normalize"])
         elif "normalize_nonZero" in preprocessing:
-            augmentation_list.append(global_preprocessing_dict["normalize_nonZero"])
+            transformations_list.append(global_preprocessing_dict["normalize_nonZero"])
         elif "normalize_nonZero_masked" in preprocessing:
-            augmentation_list.append(
+            transformations_list.append(
                 global_preprocessing_dict["normalize_nonZero_masked"]
             )
 
@@ -269,7 +269,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                     )
                 elif aug in ["rotate_90", "rotate_180"]:
                     for axis in augmentations[aug]["axis"]:
-                        augmentation_list.append(
+                        transformations_list.append(
                             global_augs_dict[aug](
                                 axis=axis, p=augmentations[aug]["probability"]
                             )
@@ -300,10 +300,11 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                         p=augmentations[aug]["probability"]
                     )
                 if actual_function is not None:
-                    augmentation_list.append(actual_function)
+                    transformations_list.append(actual_function)
 
-    if augmentation_list:
-        transform = Compose(augmentation_list)
+    # compose the transformations
+    if transformations_list:
+        transform = Compose(transformations_list)
     else:
         transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
