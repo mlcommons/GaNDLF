@@ -262,44 +262,61 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                     transformations_list.append(actual_function)
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
+    current_idx = 0
+    normalize_to_apply = None
     if not (preprocessing is None):
-        if "to_canonical" in preprocessing:
-            transformations_list.append(ToCanonical())
-
-        if train:  # we want the crop to only happen during training
-            if "crop_external_zero_planes" in preprocessing:
-                transformations_list.append(
-                    global_preprocessing_dict["crop_external_zero_planes"](patch_size)
-                )
-        for key in ["threshold", "clip"]:
-            if key in preprocessing:
-                transformations_list.append(
-                    global_preprocessing_dict[key](
-                        min_thresh=preprocessing[key]["min"],
-                        max_thresh=preprocessing[key]["max"],
+        # go through preprocessing in the order they are specified
+        for preprocess in preprocessing:
+            preprocess_lower = preprocess.lower()
+            # special check for resample
+            if preprocess_lower == "resample":
+                if "resolution" in preprocessing[preprocess_lower]:
+                    # resample_split = str(aug).split(':')
+                    resample_values = tuple(
+                        np.array(preprocessing["resample"]["resolution"]).astype(
+                            np.float
+                        )
                     )
-                )
+                    if len(resample_values) == 2:
+                        resample_values = tuple(np.append(resample_values, 1))
+                    transformations_list.append(Resample(resample_values))
 
-        # first, we want to do the resampling, if it is present - required for inference as well
-        if "resample" in preprocessing:
-            if "resolution" in preprocessing["resample"]:
-                # resample_split = str(aug).split(':')
-                resample_values = tuple(
-                    np.array(preprocessing["resample"]["resolution"]).astype(np.float)
-                )
-                if len(resample_values) == 2:
-                    resample_values = tuple(np.append(resample_values, 1))
-                transformations_list.append(Resample(resample_values))
+            # special check for to_canonical
+            if preprocess_lower == "to_canonical":
+                transformations_list.append(ToCanonical())
 
-        # next, we want to do the intensity normalize - required for inference as well
-        if "normalize" in preprocessing:
-            transformations_list.append(global_preprocessing_dict["normalize"])
-        elif "normalize_nonZero" in preprocessing:
-            transformations_list.append(global_preprocessing_dict["normalize_nonZero"])
-        elif "normalize_nonZero_masked" in preprocessing:
-            transformations_list.append(
-                global_preprocessing_dict["normalize_nonZero_masked"]
-            )
+            for key in ["threshold", "clip"]:
+                if preprocess_lower == key:
+                    transformations_list.append(
+                        global_preprocessing_dict[key](
+                            min_thresh=preprocessing[key]["min"],
+                            max_thresh=preprocessing[key]["max"],
+                        )
+                    )
+
+            # intensity normalization is always applied last
+            if preprocess_lower == "normalize":
+                normalize_to_apply = global_preprocessing_dict["normalize"]
+            elif preprocess_lower == "normalize_nonZero":
+                normalize_to_apply = global_preprocessing_dict["normalize_nonZero"]
+            elif preprocess_lower == "normalize_nonZero_masked":
+                normalize_to_apply = global_preprocessing_dict[
+                    "normalize_nonZero_masked"
+                ]
+
+            # preprocessing routines that we only want for training
+            if train:
+                if preprocess_lower == "crop_external_zero_planes":
+                    transformations_list.append(
+                        global_preprocessing_dict["crop_external_zero_planes"](
+                            patch_size
+                        )
+                    )
+            current_idx += 1
+
+    # normalization type is applied at the end
+    if normalize_to_apply is not None:
+        transformations_list.append(normalize_to_apply)
 
     # compose the transformations
     if transformations_list:
