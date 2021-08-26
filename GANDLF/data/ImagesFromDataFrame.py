@@ -174,7 +174,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             subject_dict["value_" + str(valueCounter)] = np.array(
                 dataframe[values][patient]
             )
-            valueCounter = valueCounter + 1
+            valueCounter += 1
 
         # skip subject the condition was tripped
         if not skip_subject:
