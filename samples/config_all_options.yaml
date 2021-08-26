@@ -90,7 +90,7 @@ nested_training:
   }
 ## pre-processing
 # this constructs an order of transformations, which is applied to all images in the data loader
-# order: resize --> threshold/clip --> resample --> normalize
+# order: all_methods_as_specified_in_dict --> normalize [normalization methods always applied at the end]
 # 'to_canonical': change the image to canonical orientation, see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=canonical#torchio.transforms.ToCanonical
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
@@ -114,7 +114,9 @@ data_preprocessing:
       'max': 75
     }, 
     'normalize',
+    # 'normalize_positive', # this performs z-score normalization only on pixels > 0 
     # 'normalize_nonZero', # this performs z-score normalization only on non-zero pixels
+    # 'normalize_nonZero_masked', # this performs z-score normalization only on masked region
     'resample':{
       'resolution': [1,2,3]
     },
