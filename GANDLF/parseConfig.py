@@ -336,9 +336,10 @@ def parseConfig(config_file_path, version_check=True):
                 )
             for key in params["data_augmentation"]:
                 if key != "default_probability":
+                    # when probability is not present for an augmentation, default to '1'
                     if (params["data_augmentation"][key] == None) or not (
                         "probability" in params["data_augmentation"][key]
-                    ):  # when probability is not present for an augmentation, default to '1'
+                    ):
                         if not isinstance(params["data_augmentation"][key], dict):
                             params["data_augmentation"][key] = {}
                         params["data_augmentation"][key][
