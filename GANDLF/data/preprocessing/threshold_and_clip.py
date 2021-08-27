@@ -25,19 +25,19 @@ def clip_intensities(input_tensor, min_thresh, max_thresh):
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
-def threshold_transform(min_thresh, max_thresh, p=1):
+def threshold_transform(parameters):
     return Lambda(
         function=partial(
-            threshold_intensities, min_thresh=min_thresh, max_thresh=max_thresh
+            threshold_intensities, min_thresh=parameters["min"], max_thresh=parameters["max"]
         ),
-        p=p,
+        p=1,
     )
 
 
-def clip_transform(min_thresh, max_thresh, p=1):
+def clip_transform(parameters):
     return Lambda(
         function=partial(
-            clip_intensities, min_thresh=min_thresh, max_thresh=max_thresh
+            clip_intensities, min_thresh=parameters["min"], max_thresh=parameters["max"]
         ),
-        p=p,
+        p=1,
     )
