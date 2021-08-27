@@ -79,24 +79,29 @@ def parse_version(version_string):
     return int("".join(version_string_split))
 
 
-def initialize_key(parameters, key):
+def initialize_key(parameters, key, value=None):
     """
     This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
 
     Args:
         parameters (dict): The parameter dictionary.
         key (str): The parameter to initialize.
+        value (n.a.): The value to initialize.
 
     Returns:
         dict: The final parameter dictionary.
     """
+    if parameters is None:
+        parameters = {}
     if key in parameters:
         if parameters[key] is not None:
-            if len(parameters[key]) == 0:  # if key is present but not defined
-                parameters[key] = None
+            if isinstance(parameters[key], dict):
+                # if key is present but not defined
+                if len(parameters[key]) == 0:
+                    parameters[key] = value
     else:
-        parameters[key] = None  # if key is absent
-
+        parameters[key] = value  # if key is absent
+    
     return parameters
 
 
@@ -253,25 +258,19 @@ def parseConfig(config_file_path, version_check=True):
             # special case for random swapping and elastic transformations - which takes a patch size for computation
             for key in ["swap", "elastic"]:
                 if key in params["data_augmentation"]:
-                    if not (isinstance(params["data_augmentation"][key], dict)):
-                        params["data_augmentation"][key] = {}
-                    if not ("patch_size" in params["data_augmentation"][key]):
-                        params["data_augmentation"][key]["patch_size"] = np.round(np.array(params["patch_size"]) / 10).tolist()  # default
+                    params["data_augmentation"][key] = initialize_key(params["data_augmentation"][key], "patch_size", np.round(np.array(params["patch_size"]) / 10).tolist())
+            
+            if "swap" in params["data_augmentation"]:
+                params["data_augmentation"]["swap"] = initialize_key(params["data_augmentation"]["swap"], "num_iterations", 100)
 
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:
                 if std_aug in params["data_augmentation"]:
-                    if not (isinstance(params["data_augmentation"][std_aug], dict)):
-                        params["data_augmentation"][std_aug] = {}
-                    if not ("std" in params["data_augmentation"][std_aug]):
-                        params["data_augmentation"][std_aug]["std"] = [0, 1]  # default
+                    params["data_augmentation"][std_aug] = initialize_key(params["data_augmentation"][std_aug], "std", [0, 1])
 
             # special case for random noise - which takes a mean range
             if "noise" in params["data_augmentation"]:
-                if not (isinstance(params["data_augmentation"]["noise"], dict)):
-                    params["data_augmentation"]["noise"] = {}
-                if not ("mean" in params["data_augmentation"]["noise"]):
-                    params["data_augmentation"]["noise"]["mean"] = 0  # default
+                params["data_augmentation"]["noise"] = initialize_key(params["data_augmentation"]["noise"], "mean", 0)
 
             # special case for augmentations that need axis defined
             for axis_aug in ["flip", "anisotropic"]:
