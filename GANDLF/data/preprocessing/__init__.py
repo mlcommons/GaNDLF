@@ -25,9 +25,12 @@ def nonzero_voxel_mask(image):
     return image != 0
 
 
+def to_canonical_transform(parameters):
+    return ToCanonical()
+
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
-    "to_canonical": ToCanonical(),
+    "to_canonical": to_canonical_transform,
     "threshold": threshold_transform,
     "clip": clip_transform,
     "crop_external_zero_planes": CropExternalZeroplanes,
