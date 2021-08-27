@@ -6,7 +6,6 @@ from torchio.transforms import (
     Resample,
     Compose,
     Pad,
-    ToCanonical,
 )
 from torchio import Image, Subject
 import SimpleITK as sitk
@@ -211,11 +210,10 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             aug_lower = aug.lower()
             if aug_lower in global_augs_dict:
                 transformations_list.append(
-                    global_augs_dict[aug_lower](augmentations[aug_lower])
+                    global_augs_dict[aug_lower](augmentations[aug])
                 )
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
-    current_idx = 0
     normalize_to_apply = None
     if not (preprocessing is None):
         # go through preprocessing in the order they are specified
@@ -233,39 +231,18 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                     if len(resample_values) == 2:
                         resample_values = tuple(np.append(resample_values, 1))
                     transformations_list.append(Resample(resample_values))
-
-            # special check for to_canonical
-            if preprocess_lower == "to_canonical":
-                transformations_list.append(ToCanonical())
-
-            for key in ["threshold", "clip"]:
-                if preprocess_lower == key:
-                    transformations_list.append(
-                        global_preprocessing_dict[key](
-                            min_thresh=preprocessing[key]["min"],
-                            max_thresh=preprocessing[key]["max"],
-                        )
-                    )
-
-            # intensity normalization is always applied last
-            if preprocess_lower == "normalize":
-                normalize_to_apply = global_preprocessing_dict["normalize"]
-            elif preprocess_lower == "normalize_nonZero":
-                normalize_to_apply = global_preprocessing_dict["normalize_nonZero"]
-            elif preprocess_lower == "normalize_nonZero_masked":
-                normalize_to_apply = global_preprocessing_dict[
-                    "normalize_nonZero_masked"
-                ]
-
+            # normalize should be applied at the end
+            elif preprocess_lower in ["normalize", "normalize_nonZero", "normalize_nonZero_masked"]:
+                normalize_to_apply = global_preprocessing_dict[preprocess_lower]
             # preprocessing routines that we only want for training
-            if train:
-                if preprocess_lower == "crop_external_zero_planes":
+            elif preprocess_lower in ["crop_external_zero_planes"]:
+                if train:
                     transformations_list.append(
-                        global_preprocessing_dict["crop_external_zero_planes"](
-                            patch_size
-                        )
+                        global_preprocessing_dict["crop_external_zero_planes"](patch_size=patch_size)
                     )
-            current_idx += 1
+            # everything else is taken in the order passed by user
+            elif preprocess_lower in global_preprocessing_dict:
+                    transformations_list.append(global_preprocessing_dict[preprocess_lower](preprocessing[preprocess]))
 
     # normalization type is applied at the end
     if normalize_to_apply is not None:
