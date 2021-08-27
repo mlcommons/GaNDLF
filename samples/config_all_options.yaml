@@ -109,10 +109,10 @@ data_preprocessing:
       'min': 10, 
       'max': 75
     },
-    'clip':{
-      'min': 10, 
-      'max': 75
-    }, 
+    # 'clip':{
+    #   'min': 10, 
+    #   'max': 75
+    # }, 
     'normalize',
     # 'normalize_positive', # this performs z-score normalization only on pixels > 0 
     # 'normalize_nonZero', # this performs z-score normalization only on non-zero pixels
