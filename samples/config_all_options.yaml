@@ -158,7 +158,7 @@ data_augmentation:
       'downsampling': [2,2.5]
     },
     'rotate_90':{ # explicitly rotate image by 90
-      'axis': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
+      'axis': [0,2] # one or more axes can be put here. if this isn't defined, all axes are considered
     },
     'rotate_180', # explicitly rotate image by 180; if 'axis' isn't defined, default is [1,2,3]
   }
