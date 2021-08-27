@@ -705,9 +705,21 @@ def test_losses_segmentation_rad_2d(device):
 def test_config_read():
     print("Starting testing reading configuration")
     # read and parse csv
+    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+    
     parameters = parseConfig(
-        os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=True
+        os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=False
     )
+    parameters["data_preprocessing"]["resize"] = [128,128]
+
+    with open(file_config_temp, 'w') as file:
+        yaml.dump(parameters, file)
+    
+    parameters = parseConfig(file_config_temp, version_check=True)
+
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
