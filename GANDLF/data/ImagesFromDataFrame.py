@@ -6,7 +6,6 @@ from torchio.transforms import (
     Resample,
     Compose,
     Pad,
-    ToCanonical,
 )
 from torchio import Image, Subject
 import SimpleITK as sitk
@@ -92,11 +91,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         if preprocessing["resize"] is not None:
             if not ("resample" in preprocessing):
                 resize_images = True
-            else:
-                print(
-                    "WARNING: 'resize' is ignored as 'resample' is defined under 'data_processing', this will be skipped",
-                    file=sys.stderr,
-                )
+    
     # iterating through the dataframe
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
@@ -174,7 +169,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             subject_dict["value_" + str(valueCounter)] = np.array(
                 dataframe[values][patient]
             )
-            valueCounter = valueCounter + 1
+            valueCounter += 1
 
         # skip subject the condition was tripped
         if not skip_subject:
@@ -207,103 +202,55 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
 
-    augmentation_list = []
+    transformations_list = []
 
-    # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
-    if not (preprocessing is None):
-        if "to_canonical" in preprocessing:
-            augmentation_list.append(ToCanonical())
-
-        if train:  # we want the crop to only happen during training
-            if "crop_external_zero_planes" in preprocessing:
-                augmentation_list.append(
-                    global_preprocessing_dict["crop_external_zero_planes"](patch_size)
-                )
-        for key in ["threshold", "clip"]:
-            if key in preprocessing:
-                augmentation_list.append(
-                    global_preprocessing_dict[key](
-                        min_thresh=preprocessing[key]["min"],
-                        max_thresh=preprocessing[key]["max"],
-                    )
-                )
-
-        # first, we want to do the resampling, if it is present - required for inference as well
-        if "resample" in preprocessing:
-            if "resolution" in preprocessing["resample"]:
-                # resample_split = str(aug).split(':')
-                resample_values = tuple(
-                    np.array(preprocessing["resample"]["resolution"]).astype(np.float)
-                )
-                if len(resample_values) == 2:
-                    resample_values = tuple(np.append(resample_values, 1))
-                augmentation_list.append(Resample(resample_values))
-
-        # next, we want to do the intensity normalize - required for inference as well
-        if "normalize" in preprocessing:
-            augmentation_list.append(global_preprocessing_dict["normalize"])
-        elif "normalize_nonZero" in preprocessing:
-            augmentation_list.append(global_preprocessing_dict["normalize_nonZero"])
-        elif "normalize_nonZero_masked" in preprocessing:
-            augmentation_list.append(
-                global_preprocessing_dict["normalize_nonZero_masked"]
-            )
-
-    # other augmentations should only happen for training - and also setting the probabilities
-    # for the augmentations
+    # augmentations are applied to the training set only
     if train and not (augmentations == None):
         for aug in augmentations:
-            if aug != "default_probability":
-                actual_function = None
+            aug_lower = aug.lower()
+            if aug_lower in global_augs_dict:
+                transformations_list.append(
+                    global_augs_dict[aug_lower](augmentations[aug])
+                )
 
-                if aug == "flip":
-                    if "axes_to_flip" in augmentations[aug]:
-                        print(
-                            "WARNING: 'flip' augmentation needs the key 'axis' instead of 'axes_to_flip'",
-                            file=sys.stderr,
+    # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
+    normalize_to_apply = None
+    if not (preprocessing is None):
+        # go through preprocessing in the order they are specified
+        for preprocess in preprocessing:
+            preprocess_lower = preprocess.lower()
+            # special check for resample
+            if preprocess_lower == "resample":
+                if "resolution" in preprocessing[preprocess_lower]:
+                    # resample_split = str(aug).split(':')
+                    resample_values = tuple(
+                        np.array(preprocessing["resample"]["resolution"]).astype(
+                            np.float
                         )
-                        augmentations[aug]["axis"] = augmentations[aug]["axes_to_flip"]
-                    actual_function = global_augs_dict[aug](
-                        axes=augmentations[aug]["axis"],
-                        p=augmentations[aug]["probability"],
                     )
-                elif aug in ["rotate_90", "rotate_180"]:
-                    for axis in augmentations[aug]["axis"]:
-                        augmentation_list.append(
-                            global_augs_dict[aug](
-                                axis=axis, p=augmentations[aug]["probability"]
-                            )
-                        )
-                elif aug in ["swap", "elastic"]:
-                    actual_function = global_augs_dict[aug](
-                        patch_size=patch_size, p=augmentations[aug]["probability"]
+                    if len(resample_values) == 2:
+                        resample_values = tuple(np.append(resample_values, 1))
+                    transformations_list.append(Resample(resample_values))
+            # normalize should be applied at the end
+            elif preprocess_lower in ["normalize", "normalize_nonZero", "normalize_nonZero_masked"]:
+                normalize_to_apply = global_preprocessing_dict[preprocess_lower]
+            # preprocessing routines that we only want for training
+            elif preprocess_lower in ["crop_external_zero_planes"]:
+                if train:
+                    transformations_list.append(
+                        global_preprocessing_dict["crop_external_zero_planes"](patch_size=patch_size)
                     )
-                elif aug == "blur":
-                    actual_function = global_augs_dict[aug](
-                        std=augmentations[aug]["std"],
-                        p=augmentations[aug]["probability"],
-                    )
-                elif aug == "noise":
-                    actual_function = global_augs_dict[aug](
-                        mean=augmentations[aug]["mean"],
-                        std=augmentations[aug]["std"],
-                        p=augmentations[aug]["probability"],
-                    )
-                elif aug == "anisotropic":
-                    actual_function = global_augs_dict[aug](
-                        axes=augmentations[aug]["axis"],
-                        downsampling=augmentations[aug]["downsampling"],
-                        p=augmentations[aug]["probability"],
-                    )
-                else:
-                    actual_function = global_augs_dict[aug](
-                        p=augmentations[aug]["probability"]
-                    )
-                if actual_function is not None:
-                    augmentation_list.append(actual_function)
+            # everything else is taken in the order passed by user
+            elif preprocess_lower in global_preprocessing_dict:
+                    transformations_list.append(global_preprocessing_dict[preprocess_lower](preprocessing[preprocess]))
 
-    if augmentation_list:
-        transform = Compose(augmentation_list)
+    # normalization type is applied at the end
+    if normalize_to_apply is not None:
+        transformations_list.append(normalize_to_apply)
+
+    # compose the transformations
+    if transformations_list:
+        transform = Compose(transformations_list)
     else:
         transform = None
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)

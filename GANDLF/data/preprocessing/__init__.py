@@ -1,4 +1,4 @@
-from .crop_zero_planes import crop_external_zero_planes_transform
+from .crop_zero_planes import CropExternalZeroplanes
 from .non_zero_normalize import NonZeroNormalizeOnMaskedRegion
 from .threshold_and_clip import (
     threshold_transform,
@@ -13,6 +13,7 @@ from .normalize_rgb import (
 
 from torchio.transforms import (
     ZNormalization,
+    ToCanonical,
 )
 
 
@@ -24,11 +25,15 @@ def nonzero_voxel_mask(image):
     return image != 0
 
 
+def to_canonical_transform(parameters):
+    return ToCanonical()
+
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
+    "to_canonical": to_canonical_transform,
     "threshold": threshold_transform,
     "clip": clip_transform,
-    "crop_external_zero_planes": crop_external_zero_planes_transform,
+    "crop_external_zero_planes": CropExternalZeroplanes,
     "normalize_by_val": normalize_by_val_transform,
     "normalize_imagenet": normalize_imagenet_transform,
     "normalize_standardize": normalize_standardize_transform,
