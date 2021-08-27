@@ -92,11 +92,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         if preprocessing["resize"] is not None:
             if not ("resample" in preprocessing):
                 resize_images = True
-            else:
-                print(
-                    "WARNING: 'resize' is ignored as 'resample' is defined under 'data_processing', this will be skipped",
-                    file=sys.stderr,
-                )
+    
     # iterating through the dataframe
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
