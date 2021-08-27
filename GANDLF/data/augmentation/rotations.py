@@ -15,7 +15,7 @@ def axis_check(axis):
         ValueError: If axis is not in [1, 2, 3].
 
     Returns:
-        list: Output axis.
+        list: Output affected axes.
     """
 
     if isinstance(axis, int):
@@ -32,7 +32,16 @@ def axis_check(axis):
     for sub_ax in axis:
         if sub_ax not in [1, 2, 3]:
             raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", sub_ax)
-    return axis
+    
+    relevant_axes = set([1, 2, 3])
+    if relevant_axes == set(axis):
+        affected_axes = list(relevant_axes)
+    else:
+        affected_axes = list(relevant_axes - set(axis))
+    
+    if len(affected_axes) == 1:
+        affected_axes.append(affected_axes[0])
+    return affected_axes
 
 
 def tensor_rotate_90(input_image, axis):
@@ -52,9 +61,7 @@ def tensor_rotate_90(input_image, axis):
     # with 'axis' axis of rotation, rotate 90 degrees
     # tensor image is expected to be of shape (1, a, b, c)
     # if 0 is in axis, ensure it is not considered, since that is the batch dimension
-    axis = axis_check(axis)
-    relevant_axes = set([1, 2, 3])
-    affected_axes = list(relevant_axes - set(axis))
+    affected_axes = axis_check(axis)
     return torch.transpose(input_image, affected_axes[0], affected_axes[1]).flip(
         affected_axes[1]
     )
@@ -76,9 +83,7 @@ def tensor_rotate_180(input_image, axis):
     """
     # with 'axis' axis of rotation, rotate 180 degrees
     # tensor image is expected to be of shape (1, a, b, c)
-    axis = axis_check(axis)
-    relevant_axes = set([1, 2, 3])
-    affected_axes = list(relevant_axes - set(axis))
+    affected_axes = axis_check(axis)
     return input_image.flip(affected_axes[0]).flip(affected_axes[1])
 
 
