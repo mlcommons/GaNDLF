@@ -101,7 +101,7 @@ def initialize_key(parameters, key, value=None):
                     parameters[key] = value
     else:
         parameters[key] = value  # if key is absent
-    
+
     return parameters
 
 
@@ -258,29 +258,39 @@ def parseConfig(config_file_path, version_check=True):
             # special case for random swapping and elastic transformations - which takes a patch size for computation
             for key in ["swap", "elastic"]:
                 if key in params["data_augmentation"]:
-                    params["data_augmentation"][key] = initialize_key(params["data_augmentation"][key], "patch_size", np.round(np.array(params["patch_size"]) / 10).tolist())
-            
+                    params["data_augmentation"][key] = initialize_key(
+                        params["data_augmentation"][key],
+                        "patch_size",
+                        np.round(np.array(params["patch_size"]) / 10).tolist(),
+                    )
+
             if "swap" in params["data_augmentation"]:
-                params["data_augmentation"]["swap"] = initialize_key(params["data_augmentation"]["swap"], "num_iterations", 100)
+                params["data_augmentation"]["swap"] = initialize_key(
+                    params["data_augmentation"]["swap"], "num_iterations", 100
+                )
 
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:
                 if std_aug in params["data_augmentation"]:
-                    params["data_augmentation"][std_aug] = initialize_key(params["data_augmentation"][std_aug], "std", [0, 1])
+                    params["data_augmentation"][std_aug] = initialize_key(
+                        params["data_augmentation"][std_aug], "std", [0, 1]
+                    )
 
             # special case for random noise - which takes a mean range
             if "noise" in params["data_augmentation"]:
-                params["data_augmentation"]["noise"] = initialize_key(params["data_augmentation"]["noise"], "mean", 0)
+                params["data_augmentation"]["noise"] = initialize_key(
+                    params["data_augmentation"]["noise"], "mean", 0
+                )
 
             # special case for augmentations that need axis defined
             for axis_aug in ["flip", "anisotropic", "rotate_90", "rotate_180"]:
                 if axis_aug in params["data_augmentation"]:
-                    params["data_augmentation"][axis_aug] = initialize_key(params["data_augmentation"][axis_aug], "axis", [0, 1, 2])
-            
+                    params["data_augmentation"][axis_aug] = initialize_key(
+                        params["data_augmentation"][axis_aug], "axis", [0, 1, 2]
+                    )
+
             # special case for anisotropic
-            if (
-                "anisotropic" in params["data_augmentation"]
-            ): 
+            if "anisotropic" in params["data_augmentation"]:
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
                     default_downsampling = 1.5
                 else:
@@ -306,18 +316,20 @@ def parseConfig(config_file_path, version_check=True):
                             "WARNING: 'anisotropic' augmentation needs the 'downsampling' parameter to be greater than 1, defaulting to 1.5.",
                             file=sys.stderr,
                         )
-                        default_downsampling = 1.5
-                    params["data_augmentation"]["anisotropic"][
-                        "downsampling"
-                    ] = default_downsampling  # default
+                        # default
+                    params["data_augmentation"]["anisotropic"]["downsampling"] = 1.5
 
             # for all others, ensure probability is present
             if "default_probability" not in params["data_augmentation"]:
                 params["data_augmentation"]["default_probability"] = 0.5
-            
+
             for key in params["data_augmentation"]:
                 if key != "default_probability":
-                    params["data_augmentation"][key] = initialize_key(params["data_augmentation"][key], "probability", params["data_augmentation"]["default_probability"])
+                    params["data_augmentation"][key] = initialize_key(
+                        params["data_augmentation"][key],
+                        "probability",
+                        params["data_augmentation"]["default_probability"],
+                    )
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing")
