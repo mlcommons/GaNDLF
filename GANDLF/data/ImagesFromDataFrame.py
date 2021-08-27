@@ -212,54 +212,13 @@ def ImagesFromDataFrame(dataframe, parameters, train):
     # augmentations are applied to the training set only
     if train and not (augmentations == None):
         for aug in augmentations:
-            if aug != "default_probability":
-                actual_function = None
+            aug_lower = aug.lower()
+            if aug_lower != "default_probability":
 
-                if aug == "flip":
-                    if "axes_to_flip" in augmentations[aug]:
-                        print(
-                            "WARNING: 'flip' augmentation needs the key 'axis' instead of 'axes_to_flip'",
-                            file=sys.stderr,
-                        )
-                        augmentations[aug]["axis"] = augmentations[aug]["axes_to_flip"]
-                    actual_function = global_augs_dict[aug](
-                        axes=augmentations[aug]["axis"],
-                        p=augmentations[aug]["probability"],
+                if aug_lower in global_augs_dict:
+                    transformations_list.append(
+                        global_augs_dict[aug_lower](augmentations[aug_lower])
                     )
-                elif aug in ["rotate_90", "rotate_180"]:
-                    for axis in augmentations[aug]["axis"]:
-                        transformations_list.append(
-                            global_augs_dict[aug](
-                                axis=axis, p=augmentations[aug]["probability"]
-                            )
-                        )
-                elif aug in ["swap", "elastic"]:
-                    actual_function = global_augs_dict[aug](
-                        patch_size=patch_size, p=augmentations[aug]["probability"]
-                    )
-                elif aug == "blur":
-                    actual_function = global_augs_dict[aug](
-                        std=augmentations[aug]["std"],
-                        p=augmentations[aug]["probability"],
-                    )
-                elif aug == "noise":
-                    actual_function = global_augs_dict[aug](
-                        mean=augmentations[aug]["mean"],
-                        std=augmentations[aug]["std"],
-                        p=augmentations[aug]["probability"],
-                    )
-                elif aug == "anisotropic":
-                    actual_function = global_augs_dict[aug](
-                        axes=augmentations[aug]["axis"],
-                        downsampling=augmentations[aug]["downsampling"],
-                        p=augmentations[aug]["probability"],
-                    )
-                else:
-                    actual_function = global_augs_dict[aug](
-                        p=augmentations[aug]["probability"]
-                    )
-                if actual_function is not None:
-                    transformations_list.append(actual_function)
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     current_idx = 0
