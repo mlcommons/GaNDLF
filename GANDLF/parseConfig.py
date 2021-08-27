@@ -1,4 +1,5 @@
 import sys, yaml, pkg_resources, ast
+import numpy as np
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -249,12 +250,13 @@ def parseConfig(config_file_path, version_check=True):
                     params["data_augmentation"]["elastic"] = {}
                     del params["data_augmentation"]["spatial"]
 
-            # special case for random swapping - which takes a patch size to swap pixels around
-            if "swap" in params["data_augmentation"]:
-                if not (isinstance(params["data_augmentation"]["swap"], dict)):
-                    params["data_augmentation"]["swap"] = {}
-                if not ("patch_size" in params["data_augmentation"]["swap"]):
-                    params["data_augmentation"]["swap"]["patch_size"] = 15  # default
+            # special case for random swapping and elastic transformations - which takes a patch size for computation
+            for key in ["swap", "elastic"]:
+                if key in params["data_augmentation"]:
+                    if not (isinstance(params["data_augmentation"][key], dict)):
+                        params["data_augmentation"][key] = {}
+                    if not ("patch_size" in params["data_augmentation"][key]):
+                        params["data_augmentation"][key]["patch_size"] = np.round(np.array(params["patch_size"]) / 10).tolist()  # default
 
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:
