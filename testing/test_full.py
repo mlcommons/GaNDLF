@@ -866,11 +866,18 @@ def test_preprocess_functions():
 def test_augmentation_functions():
     print("Starting testing augmentation functions")
     input_tensor = torch.rand(3, 128, 128, 128)
+    params_all_preprocessing_and_augs = parseConfig(
+        testingDir + "/../samples/config_all_options.yaml"
+    )
 
-    for aug in global_augs_dict:
+    for aug in params_all_preprocessing_and_augs["data_augmentation"]:
+        aug_lower = aug.lower()
         output_tensor = None
-        output_tensor = global_augs_dict[aug]()(input_tensor)
-        assert output_tensor != None, "Augmentation should work"
+        if aug_lower in global_augs_dict:
+            print(aug_lower)
+            output_tensor = global_augs_dict[aug](params_all_preprocessing_and_augs["data_augmentation"][aug_lower])(input_tensor)
+            assert output_tensor != None, "Augmentation should work"
+    
     print("passed")
 
 
