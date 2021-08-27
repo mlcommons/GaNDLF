@@ -213,12 +213,10 @@ def ImagesFromDataFrame(dataframe, parameters, train):
     if train and not (augmentations == None):
         for aug in augmentations:
             aug_lower = aug.lower()
-            if aug_lower != "default_probability":
-
-                if aug_lower in global_augs_dict:
-                    transformations_list.append(
-                        global_augs_dict[aug_lower](augmentations[aug_lower])
-                    )
+            if aug_lower in global_augs_dict:
+                transformations_list.append(
+                    global_augs_dict[aug_lower](augmentations[aug_lower])
+                )
 
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     current_idx = 0
