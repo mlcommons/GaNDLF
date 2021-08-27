@@ -22,7 +22,8 @@ from torchio.transforms import (
 # define individual functions/lambdas for augmentations to handle properties
 def mri_artifact(parameters):
     return OneOf(
-        {RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33}, p=parameters["probability"]
+        {RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33},
+        p=parameters["probability"],
     )
 
 
@@ -32,6 +33,9 @@ def affine(parameters):
 
 def elastic(parameters):
 
+    # define defaults
+    num_controls = 7
+    max_displacement = 7.5
     if parameters["patch_size"] is not None:
         # define the control points and swap axes for augmentation
         num_controls = []
@@ -42,40 +46,48 @@ def elastic(parameters):
             # ensure maximum displacement is never greater than patch size
             max_displacement[-1] = 0.1
         max_displacement = max_displacement.tolist()
-    else:
-        # use defaults defined in torchio
-        num_controls = 7
-        max_displacement = 7.5
+
     return RandomElasticDeformation(
-        num_control_points=num_controls, max_displacement=max_displacement, p=parameters["probability"]
+        num_control_points=num_controls,
+        max_displacement=max_displacement,
+        p=parameters["probability"],
     )
 
 
 def swap(parameters):
-    return RandomSwap(patch_size=parameters["patch_size"], num_iterations=100, p=parameters["probability"])
+    return RandomSwap(
+        patch_size=parameters["patch_size"],
+        num_iterations=100,
+        p=parameters["probability"],
+    )
 
 
 def bias(parameters):
     return RandomBiasField(coefficients=0.5, order=3, p=parameters["probability"])
 
 
-def blur(parameters, std=1):
-    return RandomBlur(std=std, p=parameters["probability"])
+def blur(parameters):
+    return RandomBlur(std=parameters["std"], p=parameters["probability"])
 
 
-def noise(parameters, mean=0, std=1):
-    return RandomNoise(mean=mean, std=std, p=parameters["probability"])
+def noise(parameters):
+    return RandomNoise(
+        mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
+    )
 
 
 def gamma(parameters):
     return RandomGamma(p=parameters["probability"])
 
 
-def flip(parameters, axes=0):
-    return RandomFlip(axes=axes, p=parameters["probability"])
+def flip(parameters):
+    return RandomFlip(axes=parameters["axis"], p=parameters["probability"])
 
 
-def anisotropy(parameters, axes=0, downsampling=1):
+def anisotropy(parameters):
     return RandomAnisotropy(
-        axes=axes, downsampling=downsampling, scalars_only=True, p=parameters["probability"]
-        )
+        axes=parameters["axis"],
+        downsampling=parameters["downsampling"],
+        scalars_only=True,
+        p=parameters["probability"],
+    )
