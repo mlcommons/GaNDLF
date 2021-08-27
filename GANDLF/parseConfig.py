@@ -204,6 +204,8 @@ def parseConfig(config_file_path, version_check=True):
     if "metrics" in params:
         if not isinstance(params["metrics"], dict):
             temp_dict = {}
+        else:
+            temp_dict = params["metrics"]
 
         # initialize metrics dict
         for metric in params["metrics"]:
@@ -337,15 +339,19 @@ def parseConfig(config_file_path, version_check=True):
     params = initialize_key(params, "data_preprocessing")
     if not (params["data_preprocessing"] == None):
         # perform this only when pre-processing is defined
-        if len(params["data_preprocessing"]) < 0:
+        if len(params["data_preprocessing"]) > 0:
             thresholdOrClip = False
             # this can be extended, as required
             thresholdOrClipDict = [
                 "threshold",
                 "clip",
             ]
-            # properties for which the user will see a warning
-            keysForWarning = ["resize"]
+            
+            if "resize" in params["data_preprocessing"] and "resample" in params["data_preprocessing"]:
+                print(
+                    "WARNING: 'resize' is ignored as 'resample' is defined under 'data_processing'",
+                    file=sys.stderr,
+                )
 
             # iterate through all keys
             for key in params["data_preprocessing"]:  # iterate through all keys
@@ -369,15 +375,6 @@ def parseConfig(config_file_path, version_check=True):
                             ] = sys.float_info.max
                 else:
                     sys.exit("Use only 'threshold' or 'clip', not both")
-
-                # give a warning for resize
-                if key in keysForWarning:
-                    print(
-                        "WARNING: '"
-                        + key
-                        + "' is generally not recommended, as it changes image properties in unexpected ways.",
-                        file=sys.stderr,
-                    )
 
     if "modelName" in params:
         defineDefaultModel = False
