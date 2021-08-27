@@ -147,7 +147,8 @@ data_augmentation:
     },
     'gamma',
     'swap':{
-      'patch_size': 15 # patch size for swapping; if a single number if provided, the same number is used for all axes
+      'patch_size': 15, # patch size for swapping; if a single number if provided, the same number is used for all axes
+      'num_iterations': 50, # number of times that two patches will be swapped, defaults to 100
     },
     'flip':{
       'axis': [0,1,2] # one or more axes can be put here. if this isn't defined, all axes are considered
