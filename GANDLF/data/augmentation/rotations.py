@@ -32,13 +32,13 @@ def axis_check(axis):
     for sub_ax in axis:
         if sub_ax not in [1, 2, 3]:
             raise ValueError("Axes must be in [1, 2, 3], but was provided as: ", sub_ax)
-    
+
     relevant_axes = set([1, 2, 3])
     if relevant_axes == set(axis):
         affected_axes = list(relevant_axes)
     else:
         affected_axes = list(relevant_axes - set(axis))
-    
+
     if len(affected_axes) == 1:
         affected_axes.append(affected_axes[0])
     return affected_axes

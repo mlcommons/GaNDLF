@@ -875,9 +875,11 @@ def test_augmentation_functions():
         output_tensor = None
         if aug_lower in global_augs_dict:
             print(aug_lower)
-            output_tensor = global_augs_dict[aug](params_all_preprocessing_and_augs["data_augmentation"][aug_lower])(input_tensor)
+            output_tensor = global_augs_dict[aug](
+                params_all_preprocessing_and_augs["data_augmentation"][aug_lower]
+            )(input_tensor)
             assert output_tensor != None, "Augmentation should work"
-    
+
     print("passed")
 
 
