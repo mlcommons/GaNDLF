@@ -82,9 +82,15 @@ def tensor_rotate_180(input_image, axis):
     return input_image.flip(affected_axes[0]).flip(affected_axes[1])
 
 
-def rotate_90(axis=0, p=1):
-    return Lambda(function=partial(tensor_rotate_90, axis=axis), p=p)
+def rotate_90(parameters):
+    return Lambda(
+        function=partial(tensor_rotate_90, axis=parameters["axis"]),
+        p=parameters["probability"],
+    )
 
 
-def rotate_180(axis=0, p=1):
-    return Lambda(function=partial(tensor_rotate_180, axis=axis), p=p)
+def rotate_180(parameters):
+    return Lambda(
+        function=partial(tensor_rotate_180, axis=parameters["axis"]),
+        p=parameters["probability"],
+    )
