@@ -312,12 +312,9 @@ def parseConfig(config_file_path, version_check=True):
                     ] = default_downsampling  # default
 
             # for all others, ensure probability is present
-            if "default_probability" in params["data_augmentation"]:
-                default_probability = float(
-                    params["data_augmentation"]["default_probability"]
-                )
-            else:
+            if "default_probability" not in params["data_augmentation"]:
                 params["data_augmentation"]["default_probability"] = 0.5
+            
             for key in params["data_augmentation"]:
                 if key != "default_probability":
                     params["data_augmentation"][key] = initialize_key(params["data_augmentation"][key], "probability", params["data_augmentation"]["default_probability"])
