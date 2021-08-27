@@ -261,7 +261,9 @@ def parseConfig(config_file_path, version_check=True):
                     params["data_augmentation"][key] = initialize_key(
                         params["data_augmentation"][key],
                         "patch_size",
-                        np.round(np.array(params["patch_size"]) / 10).astype("int").tolist(),
+                        np.round(np.array(params["patch_size"]) / 10)
+                        .astype("int")
+                        .tolist(),
                     )
 
             if "swap" in params["data_augmentation"]:
