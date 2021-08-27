@@ -273,32 +273,14 @@ def parseConfig(config_file_path, version_check=True):
                 params["data_augmentation"]["noise"] = initialize_key(params["data_augmentation"]["noise"], "mean", 0)
 
             # special case for augmentations that need axis defined
-            for axis_aug in ["flip", "anisotropic"]:
+            for axis_aug in ["flip", "anisotropic", "rotate_90", "rotate_180"]:
                 if axis_aug in params["data_augmentation"]:
-                    if not (isinstance(params["data_augmentation"][axis_aug], dict)):
-                        params["data_augmentation"][axis_aug] = {}
-                    if not ("axis" in params["data_augmentation"][axis_aug]):
-                        params["data_augmentation"][axis_aug]["axis"] = [
-                            0,
-                            1,
-                            2,
-                        ]  # default
-
-            # special case for augmentations that need axis defined in 1,2,3
-            for axis_aug in ["rotate_90", "rotate_180"]:
-                if axis_aug in params["data_augmentation"]:
-                    if not (isinstance(params["data_augmentation"][axis_aug], dict)):
-                        params["data_augmentation"][axis_aug] = {}
-                    if not ("axis" in params["data_augmentation"][axis_aug]):
-                        params["data_augmentation"][axis_aug]["axis"] = [
-                            1,
-                            2,
-                            3,
-                        ]  # default
-
+                    params["data_augmentation"][axis_aug] = initialize_key(params["data_augmentation"][axis_aug], "axis", [0, 1, 2])
+            
+            # special case for anisotropic
             if (
                 "anisotropic" in params["data_augmentation"]
-            ):  # special case for anisotropic
+            ): 
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
                     default_downsampling = 1.5
                 else:
@@ -330,22 +312,15 @@ def parseConfig(config_file_path, version_check=True):
                     ] = default_downsampling  # default
 
             # for all others, ensure probability is present
-            default_probability = 0.5
             if "default_probability" in params["data_augmentation"]:
                 default_probability = float(
                     params["data_augmentation"]["default_probability"]
                 )
+            else:
+                params["data_augmentation"]["default_probability"] = 0.5
             for key in params["data_augmentation"]:
                 if key != "default_probability":
-                    # when probability is not present for an augmentation, default to '1'
-                    if (params["data_augmentation"][key] == None) or not (
-                        "probability" in params["data_augmentation"][key]
-                    ):
-                        if not isinstance(params["data_augmentation"][key], dict):
-                            params["data_augmentation"][key] = {}
-                        params["data_augmentation"][key][
-                            "probability"
-                        ] = default_probability
+                    params["data_augmentation"][key] = initialize_key(params["data_augmentation"][key], "probability", params["data_augmentation"]["default_probability"])
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing")
