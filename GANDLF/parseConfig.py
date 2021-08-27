@@ -373,7 +373,7 @@ def parseConfig(config_file_path, version_check=True):
                             params["data_preprocessing"][key][
                                 "max"
                             ] = sys.float_info.max
-                else:
+                elif key in thresholdOrClipDict:
                     sys.exit("Use only 'threshold' or 'clip', not both")
 
     if "modelName" in params:
