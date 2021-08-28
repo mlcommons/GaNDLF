@@ -28,7 +28,9 @@ def clip_intensities(input_tensor, min_thresh, max_thresh):
 def threshold_transform(parameters):
     return Lambda(
         function=partial(
-            threshold_intensities, min_thresh=parameters["min"], max_thresh=parameters["max"]
+            threshold_intensities,
+            min_thresh=parameters["min"],
+            max_thresh=parameters["max"],
         ),
         p=1,
     )
