@@ -134,14 +134,6 @@ def parseConfig(config_file_path, version_check=True):
                     "Incompatible version of GANDLF detected (" + gandlf_version + ")"
                 )
 
-    if "psize" in params:
-        print(
-            "WARNING: 'psize' has been deprecated in favor of 'patch_size'",
-            file=sys.stderr,
-        )
-        if not ("patch_size" in params):
-            params["patch_size"] = params["psize"]
-
     if "patch_size" in params:
         if len(params["patch_size"]) == 2:  # 2d check
             params["patch_size"].append(
@@ -243,19 +235,6 @@ def parseConfig(config_file_path, version_check=True):
     params = initialize_key(params, "data_augmentation")
     if not (params["data_augmentation"] == None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
-
-            # special case for spatial augmentation, which is now deprecated
-            if "spatial" in params["data_augmentation"]:
-                if not ("affine" in params["data_augmentation"]) or not (
-                    "elastic" in params["data_augmentation"]
-                ):
-                    print(
-                        "WARNING: 'spatial' is now deprecated in favor of split 'affine' and/or 'elastic'",
-                        file=sys.stderr,
-                    )
-                    params["data_augmentation"]["affine"] = {}
-                    params["data_augmentation"]["elastic"] = {}
-                    del params["data_augmentation"]["spatial"]
 
             # special case for random swapping and elastic transformations - which takes a patch size for computation
             for key in ["swap", "elastic"]:
