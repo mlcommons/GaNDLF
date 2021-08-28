@@ -379,21 +379,6 @@ def parseConfig(config_file_path, version_check=True):
                 elif key in thresholdOrClipDict:
                     sys.exit("Use only 'threshold' or 'clip', not both")
 
-    if "modelName" in params:
-        defineDefaultModel = False
-        print("This option has been superceded by 'model'", file=sys.stderr)
-        which_model = str(params["modelName"])
-    elif "which_model" in params:
-        defineDefaultModel = False
-        print("This option has been superceded by 'model'", file=sys.stderr)
-        which_model = str(params["which_model"])
-    else:  # default case
-        defineDefaultModel = True
-    if defineDefaultModel == True:
-        which_model = "resunet"
-        # print('Using default model: ', which_model)
-    params["which_model"] = which_model
-
     if "model" in params:
 
         if not (isinstance(params["model"], dict)):
