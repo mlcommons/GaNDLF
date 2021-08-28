@@ -30,6 +30,21 @@ def get_final_layer(final_convolution_layer):
     return final_convolution_layer
 
 
+def get_norm_type(norm_type, dimensions):
+    if dimensions == 3:
+        if norm_type == "batch_norm":
+            norm_type = nn.BatchNorm3d
+        elif norm_type == "instance_norm":
+            norm_type = nn.InstanceNorm3d
+    elif dimensions == 2:
+        if norm_type == "batch_norm":
+            norm_type = nn.BatchNorm2d
+        elif norm_type == "instance_norm":
+            norm_type = nn.InstanceNorm2d
+
+    return norm_type
+
+
 class ModelBase(nn.Module):
     """
     This is the base model class that all other architectures will need to derive from
@@ -68,12 +83,7 @@ class ModelBase(nn.Module):
             self.AvgPool = nn.AvgPool2d
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool2d
-            if self.norm_type.lower() == "batch":
-                self.Norm = nn.BatchNorm2d
-            elif self.norm_type.lower() == "instance":
-                self.Norm = nn.InstanceNorm2d
-            else:
-                sys.exit("Currently, 'norm_type' supports only batch or instance.")
+            self.Norm = get_norm_type(self.norm_type.lower(), self.n_dimensions)
 
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
@@ -85,9 +95,4 @@ class ModelBase(nn.Module):
             self.AvgPool = nn.AvgPool3d
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool3d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
-            if self.norm_type.lower() == "batch":
-                self.Norm = nn.BatchNorm3d
-            elif self.norm_type.lower() == "instance":
-                self.Norm = nn.InstanceNorm3d
-            else:
-                sys.exit("Currently, 'norm_type' supports only batch or instance.")
+            self.Norm = get_norm_type(self.norm_type.lower(), self.n_dimensions)
