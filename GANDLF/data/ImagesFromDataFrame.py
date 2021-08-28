@@ -91,7 +91,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         if preprocessing["resize"] is not None:
             if not ("resample" in preprocessing):
                 resize_images = True
-    
+
     # iterating through the dataframe
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
@@ -232,17 +232,27 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                         resample_values = tuple(np.append(resample_values, 1))
                     transformations_list.append(Resample(resample_values))
             # normalize should be applied at the end
-            elif preprocess_lower in ["normalize", "normalize_nonZero", "normalize_nonZero_masked"]:
+            elif preprocess_lower in [
+                "normalize",
+                "normalize_nonZero",
+                "normalize_nonZero_masked",
+            ]:
                 normalize_to_apply = global_preprocessing_dict[preprocess_lower]
             # preprocessing routines that we only want for training
             elif preprocess_lower in ["crop_external_zero_planes"]:
                 if train:
                     transformations_list.append(
-                        global_preprocessing_dict["crop_external_zero_planes"](patch_size=patch_size)
+                        global_preprocessing_dict["crop_external_zero_planes"](
+                            patch_size=patch_size
+                        )
                     )
             # everything else is taken in the order passed by user
             elif preprocess_lower in global_preprocessing_dict:
-                    transformations_list.append(global_preprocessing_dict[preprocess_lower](preprocessing[preprocess]))
+                transformations_list.append(
+                    global_preprocessing_dict[preprocess_lower](
+                        preprocessing[preprocess]
+                    )
+                )
 
     # normalization type is applied at the end
     if normalize_to_apply is not None:
