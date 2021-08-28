@@ -35,32 +35,26 @@ class ModelBase(nn.Module):
     This is the base model class that all other architectures will need to derive from
     """
 
-    def __init__(
-        self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution_layer,
-    ):
+    def __init__(self, parameters):
         """
         This defines all defaults that the model base uses
 
         Args:
-            n_dimensions (int): The number of dimensions for the model to use - defines computational dimensions.
-            n_channels (int): The number of channels for the model to use.
-            n_classes (int): The number of output classes (used for segmentation).
-            base_filters (int): The number of filters for the first convolutional layer.
-            norm_type (str): The normalization type; can be 'instance' or 'batch'
-            final_convolution_layer (str): The final layer of the model
+            parameters (dict): This is a dictionary of all parameters that are needed for the model.
         """
         super(ModelBase, self).__init__()
-        self.n_channels = n_channels
-        self.n_classes = n_classes
-        self.base_filters = base_filters
-        self.n_dimensions = n_dimensions
-        self.norm_type = norm_type
+        self.model_name = parameters["model"]["architecture"]
+        self.n_dimensions = parameters["model"]["dimension"]
+        self.n_channels = parameters["model"]["num_channels"]
+        self.n_classes = parameters["model"]["num_classes"]
+        self.base_filters = parameters["model"]["base_filters"]
+        self.norm_type = parameters["model"]["norm_type"]
+        self.patch_size = parameters["patch_size"]
+        self.batch_size = parameters["batch_size"]
+        self.amp = parameters["model"]["amp"]
+        self.final_convolution_layer = get_final_layer(
+            parameters["model"]["final_layer"]
+        )
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
@@ -97,5 +91,3 @@ class ModelBase(nn.Module):
                 self.Norm = nn.InstanceNorm3d
             else:
                 sys.exit("Currently, 'norm_type' supports only batch or instance.")
-
-        self.final_convolution_layer = get_final_layer(final_convolution_layer)
