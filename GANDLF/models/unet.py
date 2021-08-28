@@ -21,23 +21,11 @@ class unet(ModelBase):
 
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution_layer,
+        parameters: dict,
         residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
-        super(unet, self).__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
-        )
+        super(unet, self).__init__(parameters)
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
@@ -89,63 +77,63 @@ class unet(ModelBase):
             network_kwargs=self.network_kwargs,
         )
         self.ds_3 = DownsamplingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 16,
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 16,
             conv=self.Conv,
             norm=self.Norm,
         )
         self.en_4 = EncodingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 16,
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 16,
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_3 = UpsamplingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 8,
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 8,
             conv=self.Conv,
         )
         self.de_3 = DecodingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 8,
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 8,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_2 = UpsamplingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 4,
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 4,
             conv=self.Conv,
         )
         self.de_2 = DecodingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 4,
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 4,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_1 = UpsamplingModule(
-            input_channels=base_filters * 4,
-            output_channels=base_filters * 2,
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 2,
             conv=self.Conv,
         )
         self.de_1 = DecodingModule(
-            input_channels=base_filters * 4,
-            output_channels=base_filters * 2,
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 2,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_0 = UpsamplingModule(
-            input_channels=base_filters * 2,
-            output_channels=base_filters,
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters,
             conv=self.Conv,
         )
         self.out = out_conv(
-            input_channels=base_filters * 2,
-            output_channels=n_classes,
+            input_channels=self.base_filters * 2,
+            output_channels=self.n_classes,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
@@ -184,6 +172,20 @@ class unet(ModelBase):
         x = self.us_0(x)
         x = self.out(x, x1)
         return x
+
+
+class resunet(unet):
+    """
+    This is the standard U-Net architecture with residual connections : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
+    are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
+    and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+    """
+
+    def __init__(
+        self,
+        parameters: dict
+    ):
+        super(unet, self).__init__(parameters, residualConnections=True)
 
 
 # class light_unet(ModelBase):
@@ -262,62 +264,62 @@ class unet(ModelBase):
 #             network_kwargs=self.network_kwargs,
 #         )
 #         self.ds_3 = DownsamplingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
 #         )
 #         self.en_4 = EncodingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #             dropout=self.Dropout,
 #             norm=self.Norm,
 #             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_3 = UpsamplingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #         )
 #         self.de_3 = DecodingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
 #             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_2 = UpsamplingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #         )
 #         self.de_2 = DecodingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
 #             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_1 = UpsamplingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #         )
 #         self.de_1 = DecodingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #             norm=self.Norm,
 #             network_kwargs=self.network_kwargs,
 #         )
 #         self.us_0 = UpsamplingModule(
-#             input_channels=base_filters,
-#             output_channels=base_filters,
+#             input_channels=self.base_filters,
+#             output_channels=self.base_filters,
 #             conv=self.Conv,
 #         )
 #         self.out = out_conv(
-#             input_channels=base_filters,
+#             input_channels=self.base_filters,
 #             output_channels=n_classes,
 #             conv=self.Conv,
 #             norm=self.Norm,
