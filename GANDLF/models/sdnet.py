@@ -219,58 +219,46 @@ class ModalityEncoder(ModelBase):
 class SDNet(ModelBase):
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution_layer,
+        parameters: dict,
     ):
-        super().__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
-        )
+        super(unet, self).__init__(parameters)
         self.anatomy_factors = 8
         self.modality_factors = 8
 
         self.cencoder = unet(
-            n_dimensions,
-            n_channels,
+            self.n_dimensions,
+            self.n_channels,
             self.anatomy_factors,
-            base_filters,
+            self.base_filters,
             "instance",
             None,
         )
         self.mencoder = ModalityEncoder(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
+            self.n_dimensions,
+            self.n_channels,
+            self.n_classes,
+            self.base_filters,
+            self.norm_type,
+            self.final_convolution_layer,
             self.anatomy_factors,
             self.modality_factors,
         )
         self.decoder = Decoder(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
+            self.n_dimensions,
+            self.n_channels,
+            self.n_classes,
+            self.base_filters,
+            self.norm_type,
+            self.final_convolution_layer,
             self.anatomy_factors,
         )
         self.segmentor = Segmentor(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
+            self.n_dimensions,
+            self.n_channels,
+            self.n_classes,
+            self.base_filters,
+            self.norm_type,
+            self.final_convolution_layer,
             self.anatomy_factors,
         )
 
