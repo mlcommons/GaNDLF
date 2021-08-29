@@ -26,21 +26,9 @@ class fcn(ModelBase):
 
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution_layer,
+        parameters: dict,
     ):
-        super(fcn, self).__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
-        )
+        super(fcn, self).__init__(parameters)
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
@@ -88,44 +76,44 @@ class fcn(ModelBase):
             norm=self.Norm,
         )
         self.ds_3 = DownsamplingModule(
-            input_channels=base_filters * 8,
-            output_channels=base_filters * 16,
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 16,
             conv=self.Conv,
             norm=self.Norm,
         )
         self.en_4 = EncodingModule(
-            input_channels=base_filters * 16,
-            output_channels=base_filters * 16,
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 16,
             conv=self.Conv,
             dropout=self.Dropout,
             norm=self.Norm,
         )
         self.us_4 = FCNUpsamplingModule(
-            input_channels=base_filters * 16,
+            input_channels=self.base_filters * 16,
             output_channels=1,
             conv=self.Conv,
             scale_factor=5,
         )
         self.us_3 = FCNUpsamplingModule(
-            input_channels=base_filters * 8,
+            input_channels=self.base_filters * 8,
             output_channels=1,
             conv=self.Conv,
             scale_factor=4,
         )
         self.us_2 = FCNUpsamplingModule(
-            input_channels=base_filters * 4,
+            input_channels=self.base_filters * 4,
             output_channels=1,
             conv=self.Conv,
             scale_factor=3,
         )
         self.us_1 = FCNUpsamplingModule(
-            input_channels=base_filters * 2,
+            input_channels=self.base_filters * 2,
             output_channels=1,
             conv=self.Conv,
             scale_factor=2,
         )
         self.us_0 = FCNUpsamplingModule(
-            input_channels=base_filters,
+            input_channels=self.base_filters,
             output_channels=1,
             conv=self.Conv,
             scale_factor=1,
