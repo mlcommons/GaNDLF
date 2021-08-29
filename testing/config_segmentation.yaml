@@ -11,6 +11,7 @@ model:
     base_filters: 32, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
+    norm_type: instance, # can be either batch or instance
     class_list: [0,255], # Set the list of labels the model should train on and predict
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
