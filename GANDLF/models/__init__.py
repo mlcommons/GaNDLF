@@ -17,12 +17,3 @@ global_models_dict = {
     "vgg16": vgg16,
     "vgg19": vgg19,
 }
-
-def get_model(parameters):
-    model = global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
-
-    # special case for unet variants
-    if ("residual" in parameters["model"]["architecture"]) or ("resunet" in parameters["model"]["architecture"]):
-        model = global_models_dict["unet"](parameters=parameters, residualConnections=True)
-
-    return model
