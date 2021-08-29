@@ -37,13 +37,18 @@ class VGG(nn.Module):
         n_dimensions = parameters["model"]["dimension"]
         final_convolution_layer = parameters["model"]["final_layer"]
         n_outputClasses = len(parameters["model"]["class_list"])
-        
+
         if "batch" in parameters["model"]["norm_type"].lower():
             batch_norm = True
         else:
             batch_norm = False
-        self.features = make_layers(configuration, n_dimensions, parameters["model"]["num_channels"], batch_norm=batch_norm)
-        
+        self.features = make_layers(
+            configuration,
+            n_dimensions,
+            parameters["model"]["num_channels"],
+            batch_norm=batch_norm,
+        )
+
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
@@ -202,6 +207,3 @@ class vgg19(VGG):
         parameters,
     ):
         super(vgg11, self).__init__(parameters=parameters, configuration=cfg["E"])
-
-
-

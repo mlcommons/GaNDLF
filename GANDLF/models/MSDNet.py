@@ -31,7 +31,9 @@ class MSDNet(ModelBase):
     ):
         super(MSDNet, self).__init__(parameters)
 
-        self.layer_list = add_conv_block(self.Conv, self.BatchNorm, in_ch=self.n_channels)
+        self.layer_list = add_conv_block(
+            self.Conv, self.BatchNorm, in_ch=self.n_channels
+        )
 
         current_in_channels = 1
         # Add N layers

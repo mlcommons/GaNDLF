@@ -30,7 +30,11 @@ class uinc(ModelBase):
     ):
         super(uinc, self).__init__(parameters)
         self.conv0_1x1 = IncConv(
-            self.n_channels, self.base_filters, self.Conv, self.Dropout, self.InstanceNorm
+            self.n_channels,
+            self.base_filters,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
         )
         self.rn_0 = ResNetModule(
             self.base_filters,
@@ -49,7 +53,11 @@ class uinc(ModelBase):
             res=True,
         )
         self.ds_0 = IncDownsamplingModule(
-            self.base_filters, self.base_filters * 2, self.Conv, self.Dropout, self.InstanceNorm
+            self.base_filters,
+            self.base_filters * 2,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
         )
         self.ri_1 = InceptionModule(
             self.base_filters * 2,
@@ -165,7 +173,11 @@ class uinc(ModelBase):
             res=True,
         )
         self.conv9_1x1 = IncConv(
-            self.base_filters * 2, self.base_filters, self.Conv, self.Dropout, self.InstanceNorm
+            self.base_filters * 2,
+            self.base_filters,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
         )
         self.rn_10 = ResNetModule(
             self.base_filters * 2,
@@ -176,7 +188,11 @@ class uinc(ModelBase):
             res=True,
         )
         self.dropout = IncDropout(
-            self.base_filters * 2, self.n_classes, self.Conv, self.Dropout, self.InstanceNorm
+            self.base_filters * 2,
+            self.n_classes,
+            self.Conv,
+            self.Dropout,
+            self.InstanceNorm,
         )
 
     def forward(self, x):
