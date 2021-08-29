@@ -49,6 +49,9 @@ class VGG(nn.Module):
             batch_norm=batch_norm,
         )
 
+        # amp is not supported for vgg
+        parameters["model"]["amp"] = False
+
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
