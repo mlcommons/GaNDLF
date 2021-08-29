@@ -181,10 +181,7 @@ class resunet(unet):
     and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
     """
 
-    def __init__(
-        self,
-        parameters: dict
-    ):
+    def __init__(self, parameters: dict):
         super(resunet, self).__init__(parameters, residualConnections=True)
 
 
