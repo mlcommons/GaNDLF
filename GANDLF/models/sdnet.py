@@ -1,4 +1,4 @@
-import typing
+import typing, sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -224,6 +224,19 @@ class SDNet(ModelBase):
         super(unet, self).__init__(parameters)
         self.anatomy_factors = 8
         self.modality_factors = 8
+
+        if parameters["patch_size"] != [224, 224, 1]:
+            print(
+                "WARNING: The patch size is not 224x224, which is required for sdnet. Using default patch size instead",
+                file=sys.stderr,
+            )
+            parameters["patch_size"] = [224, 224, 1]
+
+        if parameters["batch_size"] == 1:
+            raise ValueError("'batch_size' needs to be greater than 1 for 'sdnet'")
+
+        # amp is not supported for sdnet
+        parameters["model"]["amp"] = False
 
         self.cencoder = unet(
             self.n_dimensions,
