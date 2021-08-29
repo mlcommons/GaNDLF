@@ -185,7 +185,7 @@ class resunet(unet):
         self,
         parameters: dict
     ):
-        super(unet, self).__init__(parameters, residualConnections=True)
+        super(resunet, self).__init__(parameters, residualConnections=True)
 
 
 # class light_unet(ModelBase):
