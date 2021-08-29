@@ -16,8 +16,8 @@ import SimpleITK as sitk
 import numpy as np
 from medcam import medcam
 from GANDLF.logger import Logger
+from GANDLF.models import global_models_dict
 from GANDLF.parameterParsing import (
-    get_model,
     get_optimizer,
     get_scheduler,
     get_loss_and_metrics,
@@ -686,18 +686,7 @@ def training_loop(
     print("Number of channels : ", params["model"]["num_channels"])
 
     # Fetch the model according to params mentioned in the configuration file
-    model, params["model"]["amp"] = get_model(
-        modelname=params["model"]["architecture"],
-        num_dimensions=params["model"]["dimension"],
-        num_channels=params["model"]["num_channels"],
-        num_classes=params["model"]["num_classes"],
-        base_filters=params["model"]["base_filters"],
-        norm_type=params["model"]["norm_type"],
-        final_convolution_layer=params["model"]["final_layer"],
-        patch_size=params["patch_size"],
-        batch_size=params["batch_size"],
-        amp=params["model"]["amp"],
-    )
+    model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(training_data, params, train=True)
