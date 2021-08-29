@@ -32,14 +32,14 @@ def get_final_layer(final_convolution_layer):
 
 def get_norm_type(norm_type, dimensions):
     if dimensions == 3:
-        if norm_type == "batch_norm":
+        if norm_type == "batch":
             norm_type = nn.BatchNorm3d
-        elif norm_type == "instance_norm":
+        elif norm_type == "instance":
             norm_type = nn.InstanceNorm3d
     elif dimensions == 2:
-        if norm_type == "batch_norm":
+        if norm_type == "batch":
             norm_type = nn.BatchNorm2d
-        elif norm_type == "instance_norm":
+        elif norm_type == "instance":
             norm_type = nn.InstanceNorm2d
 
     return norm_type
