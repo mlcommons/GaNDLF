@@ -3,6 +3,7 @@ from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
 from .sdnet import SDNet
+from .MSDNet import MSDNet
 
 global_models_dict = {
     "unet": unet,
@@ -16,4 +17,5 @@ global_models_dict = {
     "vgg13": vgg13,
     "vgg16": vgg16,
     "vgg19": vgg19,
+    "msdnet": MSDNet,
 }
