@@ -115,5 +115,3 @@ class CropExternalZeroplanes(SpatialTransform):
 
     def is_invertible(self):
         return False
-
-

@@ -709,15 +709,15 @@ def test_config_read():
     # if found in previous run, discard.
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
-    
+
     parameters = parseConfig(
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=False
     )
-    parameters["data_preprocessing"]["resize"] = [128,128]
+    parameters["data_preprocessing"]["resize"] = [128, 128]
 
-    with open(file_config_temp, 'w') as file:
+    with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
-    
+
     parameters = parseConfig(file_config_temp, version_check=True)
 
     training_data, parameters["headers"] = parseTrainingCSV(
@@ -838,21 +838,27 @@ def test_preprocess_functions():
     input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(
         input_tensor
     )
-    parameters_dict ={}
+    parameters_dict = {}
     parameters_dict["min"] = 0.25
     parameters_dict["max"] = 0.75
-    input_transformed = global_preprocessing_dict["threshold"](
-        parameters_dict
-    )(input_tensor)
+    input_transformed = global_preprocessing_dict["threshold"](parameters_dict)(
+        input_tensor
+    )
     assert (
-        torch.count_nonzero(input_transformed[input_transformed < parameters_dict["min"]] > parameters_dict["max"]) == 0
+        torch.count_nonzero(
+            input_transformed[input_transformed < parameters_dict["min"]]
+            > parameters_dict["max"]
+        )
+        == 0
     ), "Input should be thresholded"
 
-    input_transformed = global_preprocessing_dict["clip"](
-        parameters_dict
-    )(input_tensor)
+    input_transformed = global_preprocessing_dict["clip"](parameters_dict)(input_tensor)
     assert (
-        torch.count_nonzero(input_transformed[input_transformed < parameters_dict["min"]] > parameters_dict["max"]) == 0
+        torch.count_nonzero(
+            input_transformed[input_transformed < parameters_dict["min"]]
+            > parameters_dict["max"]
+        )
+        == 0
     ), "Input should be clipped"
 
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero_masked"]

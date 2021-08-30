@@ -346,8 +346,11 @@ def parseConfig(config_file_path, version_check=True):
                 "threshold",
                 "clip",
             ]
-            
-            if "resize" in params["data_preprocessing"] and "resample" in params["data_preprocessing"]:
+
+            if (
+                "resize" in params["data_preprocessing"]
+                and "resample" in params["data_preprocessing"]
+            ):
                 print(
                     "WARNING: 'resize' is ignored as 'resample' is defined under 'data_processing'",
                     file=sys.stderr,
