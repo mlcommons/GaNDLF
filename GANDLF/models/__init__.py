@@ -5,7 +5,7 @@ from .vgg import vgg11, vgg13, vgg16, vgg19
 from .densenet import densenet121, densenet169, densenet201, densenet264
 from .sdnet import SDNet
 from .MSDNet import MSDNet
-from .brain_age import get_model
+from .brain_age import brainage
 
 global_models_dict = {
     "unet": unet,
@@ -13,7 +13,6 @@ global_models_dict = {
     "residualunet": unet,
     "fcn": fcn,
     "uinc": uinc,
-    "sdnet": SDNet,
     "vgg": vgg19,
     "vgg11": vgg11,
     "vgg13": vgg13,
@@ -25,5 +24,6 @@ global_models_dict = {
     "densenet201": densenet201,
     "densenet264": densenet264,
     "msdnet": MSDNet,
-    "brain_age": get_model,
+    "brain_age": brainage,
+    "sdnet": SDNet,
 }
