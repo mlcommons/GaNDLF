@@ -2,7 +2,7 @@ import torch.nn as nn
 import sys
 import torchvision
 
-def get_model(parameters):
+def brainage(parameters):
     if parameters["model"]["dimension"] != 2:
         sys.exit("Brain Age predictions only works on 2D data")
     model = torchvision.models.vgg16(pretrained=True)
