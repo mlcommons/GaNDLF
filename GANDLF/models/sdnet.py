@@ -14,32 +14,20 @@ from .modelBase import ModelBase
 class Decoder(ModelBase):
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution,
+        parameters,
         anatomy_factors,
         num_layers=5,
     ):
-        super(Decoder, self).__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution,
-        )
+        super(Decoder, self).__init__(parameters)
         self.num_layers = num_layers
         self.layer_list = add_conv_block(
-            self.Conv, self.BatchNorm, in_ch=anatomy_factors, out_ch=base_filters
+            self.Conv, self.BatchNorm, in_ch=anatomy_factors, out_ch=self.base_filters
         )
         for _ in range(self.num_layers - 2):
             self.layer_list += add_conv_block(
-                self.Conv, self.BatchNorm, in_ch=base_filters, out_ch=base_filters
+                self.Conv, self.BatchNorm, in_ch=self.base_filters, out_ch=self.base_filters
             )
-        self.conv = self.Conv(base_filters, 1, 3, 1, 1)
+        self.conv = self.Conv(self.base_filters, 1, 3, 1, 1)
         # Add layers to Module List
         self.layers = nn.ModuleList(self.layer_list)
         self.apply(self.weight_init)
@@ -101,29 +89,17 @@ class Decoder(ModelBase):
 class Segmentor(ModelBase):
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution,
+        parameters,
         anatomy_factors,
     ):
-        super(Segmentor, self).__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution,
-        )
+        super(Segmentor, self).__init__(parameters)
         self.layer_list = add_conv_block(
-            self.Conv, self.BatchNorm, in_ch=anatomy_factors, out_ch=base_filters * 4
+            self.Conv, self.BatchNorm, in_ch=anatomy_factors, out_ch=self.base_filters * 4
         )
         self.layer_list += add_conv_block(
-            self.Conv, self.BatchNorm, in_ch=base_filters * 4, out_ch=base_filters * 4
+            self.Conv, self.BatchNorm, in_ch=self.base_filters * 4, out_ch=self.base_filters * 4
         )
-        self.conv = self.Conv(base_filters * 4, n_classes, 1, 1, 0)
+        self.conv = self.Conv(self.base_filters * 4, self.n_classes, 1, 1, 0)
         # Add layers to Module List
         self.layers = nn.ModuleList(self.layer_list)
         self.apply(self.weight_init)
@@ -152,24 +128,12 @@ class Segmentor(ModelBase):
 class ModalityEncoder(ModelBase):
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution,
+        parameters,
         anatomy_factors,
         modality_factors,
         num_layers=4,
     ):
-        super(ModalityEncoder, self).__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution,
-        )
+        super(ModalityEncoder, self).__init__(parameters)
         self.num_layers = num_layers
         self.layer_list = add_downsample_conv_block(
             self.Conv, self.BatchNorm, in_ch=anatomy_factors + 1, out_ch=16
@@ -221,7 +185,7 @@ class SDNet(ModelBase):
         self,
         parameters: dict,
     ):
-        super(unet, self).__init__(parameters)
+        super(SDNet, self).__init__(parameters)
         self.anatomy_factors = 8
         self.modality_factors = 8
 
@@ -237,41 +201,22 @@ class SDNet(ModelBase):
 
         # amp is not supported for sdnet
         parameters["model"]["amp"] = False
+        parameters["model"]["norm_type"] = "instance"
 
         self.cencoder = unet(
-            self.n_dimensions,
-            self.n_channels,
-            self.anatomy_factors,
-            self.base_filters,
-            "instance",
-            None,
+            parameters
         )
         self.mencoder = ModalityEncoder(
-            self.n_dimensions,
-            self.n_channels,
-            self.n_classes,
-            self.base_filters,
-            self.norm_type,
-            self.final_convolution_layer,
+            parameters,
             self.anatomy_factors,
             self.modality_factors,
         )
         self.decoder = Decoder(
-            self.n_dimensions,
-            self.n_channels,
-            self.n_classes,
-            self.base_filters,
-            self.norm_type,
-            self.final_convolution_layer,
+            parameters,
             self.anatomy_factors,
         )
         self.segmentor = Segmentor(
-            self.n_dimensions,
-            self.n_channels,
-            self.n_classes,
-            self.base_filters,
-            self.norm_type,
-            self.final_convolution_layer,
+            parameters,
             self.anatomy_factors,
         )
 
