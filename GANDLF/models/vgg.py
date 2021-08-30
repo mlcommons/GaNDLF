@@ -185,7 +185,7 @@ class vgg13(VGG):
         self,
         parameters,
     ):
-        super(vgg11, self).__init__(parameters=parameters, configuration=cfg["B"])
+        super(vgg13, self).__init__(parameters=parameters, configuration=cfg["B"])
 
 
 class vgg16(VGG):
@@ -197,7 +197,7 @@ class vgg16(VGG):
         self,
         parameters,
     ):
-        super(vgg11, self).__init__(parameters=parameters, configuration=cfg["D"])
+        super(vgg16, self).__init__(parameters=parameters, configuration=cfg["D"])
 
 
 class vgg19(VGG):
@@ -209,4 +209,4 @@ class vgg19(VGG):
         self,
         parameters,
     ):
-        super(vgg11, self).__init__(parameters=parameters, configuration=cfg["E"])
+        super(vgg19, self).__init__(parameters=parameters, configuration=cfg["E"])
