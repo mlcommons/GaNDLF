@@ -252,3 +252,31 @@ def generate_model(model_depth, **kwargs):
         )
 
     return model
+
+def densenet121(parameters):
+    return generate_model(121, 
+                num_classes=len(parameters["model"]["class_list"]),
+                num_dimensions=parameters["model"]["dimension"],
+                num_channels=parameters["model"]["num_channels"],
+                final_convolution_layer=parameters["model"]["final_layer"])
+
+def densenet169(parameters):
+    return generate_model(169, 
+                num_classes=len(parameters["model"]["class_list"]),
+                num_dimensions=parameters["model"]["dimension"],
+                num_channels=parameters["model"]["num_channels"],
+                final_convolution_layer=["model"]["final_layer"])
+
+def densenet201(parameters):
+    return generate_model(201, 
+                num_classes=len(parameters["model"]["class_list"]),
+                num_dimensions=parameters["model"]["dimension"],
+                num_channels=parameters["model"]["num_channels"],
+                final_convolution_layer=["model"]["final_layer"])
+
+def densenet264(parameters):
+    return generate_model(264, 
+                num_classes=len(parameters["model"]["class_list"]),
+                num_dimensions=parameters["model"]["dimension"],
+                num_channels=parameters["model"]["num_channels"],
+                final_convolution_layer=["model"]["final_layer"])
