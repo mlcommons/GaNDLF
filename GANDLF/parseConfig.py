@@ -373,6 +373,12 @@ def parseConfig(config_file_path, version_check=True):
             print("NOT using Mixed Precision Training")
             params["model"]["amp"] = False
 
+        if "norm_type" in params["model"]:
+            pass
+        else:
+            print("WARNING: Initializing 'norm_type' as 'batch'")
+            params["model"]["norm_type"] = "batch"
+
         if not ("architecture" in params["model"]):
             sys.exit("The 'model' parameter needs 'architecture' key to be defined")
         if not ("final_layer" in params["model"]):
