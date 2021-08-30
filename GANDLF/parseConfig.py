@@ -387,10 +387,6 @@ def parseConfig(config_file_path, version_check=True):
             sys.exit(
                 "The 'model' parameter needs 'dimension' key to be defined, which should either 2 or 3"
             )
-        if not ("norm_type" in params["model"]):
-            sys.exit(
-                "The 'model' parameter needs 'norm_type' key to be defined, which should either 'batch' or 'instance'"
-            )
         if not ("base_filters" in params["model"]):
             base_filters = 32
             params["model"]["base_filters"] = base_filters
