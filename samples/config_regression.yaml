@@ -10,7 +10,7 @@ model:
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 30, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
     architecture: vgg16, # options: unet, resunet, fcn, uinc, vgg, densenet
-    batch_norm: True, # this is only used for vgg
+    norm_type: 'batch', # options: batch, instance, none
     final_layer: None, # can be either sigmoid, softmax or none (none == regression)
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
