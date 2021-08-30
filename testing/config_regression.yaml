@@ -12,7 +12,6 @@ metrics:
 model:
   amp: false
   architecture: densenet121
-  norm_type: batch
   base_filters: 32
   class_list:
   - 0
