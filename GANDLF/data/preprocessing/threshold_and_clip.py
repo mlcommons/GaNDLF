@@ -20,21 +20,20 @@ class ThresholdOrClipTransform(IntensityTransform):
 
     def apply_transform(self, subject: Subject) -> Subject:
         for image_name, _ in self.get_images_dict(subject).items():
-            self.apply_threshold(subject, image_name, self.method)
+            self.apply_threshold(subject, image_name)
         return subject
 
     def apply_threshold(
         self,
         subject: Subject,
         image_name: str,
-        method: str,
     ) -> None:
         image = subject[image_name].data
-        if method == "threshold":
+        if self.method == "threshold":
             C = torch.zeros(image.shape, dtype=image.dtype)
             l1_tensor = torch.where(image < self.max_thresh, image, C)
             output = torch.where(l1_tensor > self.min_thresh, l1_tensor, C)
-        elif method == "clip":
+        elif self.method == "clip":
             output = torch.clamp(image, self.min_thresh, self.max_thresh)
 
         if output is None:
