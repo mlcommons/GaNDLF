@@ -22,11 +22,11 @@ except Exception as error:
 requirements = [
     "numpy==1.19.2",
     "scipy",
-    "SimpleITK==1.2.4",
+    "SimpleITK==2.1.0",
     "torch>=1.7",
     "torchvision",
     "tqdm",
-    "torchio==0.18.29",
+    "torchio==0.18.51",
     "pandas",
     "pylint",
     "scikit-learn==0.23.1",
