@@ -1,59 +1,74 @@
 import torch
 
+import torchio
 from torchio.data.subject import Subject
+from torchio.data.image import ScalarImage
 from torchio.transforms.intensity_transform import IntensityTransform
+from torchio.transforms.preprocessing.intensity.clamp import Clamp
 
-# adapted from GANDLF's NonZeroNormalizeOnMaskedRegion class
-class ThresholdOrClipTransform(IntensityTransform):
+
+class Threshold(IntensityTransform):
+    """Threshold intensity values into a range :math:`[a, b]`.
+
+    Args:
+        out_min: Minimum value :math:`a` of the output image. If ``None``, the
+            minimum of the image is used.
+        out_max: Maximum value :math:`b` of the output image. If ``None``, the
+            maximum of the image is used.
+
+    Example:
+        >>> import torchio as tio
+        >>> ct = tio.datasets.Slicer('CTChest').CT_chest
+        >>> HOUNSFIELD_AIR, HOUNSFIELD_BONE = -1000, 1000
+        >>> threshold = tio.Threshold(out_min=HOUNSFIELD_AIR, out_max=HOUNSFIELD_BONE)
+        >>> ct_thresholded = threshold(ct)
+
+    .. plot::
+
+        import torchio as tio
+        subject = tio.datasets.Slicer('CTChest')
+        ct = subject.CT_chest
+        HOUNSFIELD_AIR, HOUNSFIELD_BONE = -1000, 1000
+        threshold = tio.Threshold(out_min=HOUNSFIELD_AIR, out_max=HOUNSFIELD_BONE)
+        ct_thresholded = threshold(ct)
+        subject.add_image(ct_thresholded, 'Thresholded')
+        subject.plot()
+
     """
-    Threshold or clip/clamp the intensities of the images in the subject.
-
-        **kwargs: See :class:`~torchio.transforms.Transform` for additional keyword arguments.
-    """
-
-    def __init__(self, min_threshold=None, max_threshold=None, method=None, **kwargs):
-        super().__init__(min_threshold, max_threshold, **kwargs)
-        self.min_thresh = min_threshold
-        self.max_thresh = max_threshold
-        self.method = method
-        self.probability = 1
+    def __init__(
+            self,
+            out_min: float = None,
+            out_max: float = None,
+            **kwargs
+            ):
+        super().__init__(**kwargs)
+        self.out_min, self.out_max = out_min, out_max
+        self.args_names = 'out_min', 'out_max'
 
     def apply_transform(self, subject: Subject) -> Subject:
-        for image_name, _ in self.get_images_dict(subject).items():
-            self.apply_threshold(subject, image_name)
+        for image in self.get_images(subject):
+            self.apply_threshold(image)
         return subject
 
-    def apply_threshold(
-        self,
-        subject: Subject,
-        image_name: str,
-    ) -> None:
-        image = subject[image_name].data
-        if self.method == "threshold":
-            C = torch.zeros(image.shape, dtype=image.dtype)
-            l1_tensor = torch.where(image < self.max_thresh, image, C)
-            output = torch.where(l1_tensor > self.min_thresh, l1_tensor, C)
-        elif self.method == "clip":
-            output = torch.clamp(image, self.min_thresh, self.max_thresh)
+    def apply_threshold(self, image: ScalarImage) -> None:
+        image.set_data(self.threshold(image.data))
 
-        if output is None:
-            message = (
-                "Resultantant image is 0" f' in image "{image_name}" ({image.path})'
-            )
-            raise RuntimeError(message)
-        subject.get_images_dict(intensity_only=True)[image_name]["data"] = output
+    def threshold(self, tensor: torch.Tensor) -> torch.Tensor:
+        C = torch.zeros(tensor.shape, dtype=tensor.dtype)
+        l1_tensor = torch.where(tensor < self.out_max, tensor, C)
+        output = torch.where(l1_tensor > self.out_min, l1_tensor, C)
+        return output
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def threshold_transform(parameters):
-    return ThresholdOrClipTransform(
-        min_threshold=parameters["min"],
-        max_threshold=parameters["max"],
-        method="threshold",
+    return Threshold(
+        out_min=parameters["min"],
+        out_max=parameters["max"]
     )
 
 
 def clip_transform(parameters):
-    return ThresholdOrClipTransform(
-        min_threshold=parameters["min"], max_threshold=parameters["max"], method="clip"
+    return Clamp(
+        out_min=parameters["min"], out_max=parameters["max"]
     )
