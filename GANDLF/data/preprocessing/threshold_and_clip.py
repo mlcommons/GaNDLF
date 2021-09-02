@@ -1,6 +1,5 @@
 import torch
 
-import torchio
 from torchio.data.subject import Subject
 from torchio.data.image import ScalarImage
 from torchio.transforms.intensity_transform import IntensityTransform
@@ -35,15 +34,11 @@ class Threshold(IntensityTransform):
         subject.plot()
 
     """
-    def __init__(
-            self,
-            out_min: float = None,
-            out_max: float = None,
-            **kwargs
-            ):
+
+    def __init__(self, out_min: float = None, out_max: float = None, **kwargs):
         super().__init__(**kwargs)
         self.out_min, self.out_max = out_min, out_max
-        self.args_names = 'out_min', 'out_max'
+        self.args_names = "out_min", "out_max"
 
     def apply_transform(self, subject: Subject) -> Subject:
         for image in self.get_images(subject):
@@ -62,13 +57,8 @@ class Threshold(IntensityTransform):
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def threshold_transform(parameters):
-    return Threshold(
-        out_min=parameters["min"],
-        out_max=parameters["max"]
-    )
+    return Threshold(out_min=parameters["min"], out_max=parameters["max"])
 
 
 def clip_transform(parameters):
-    return Clamp(
-        out_min=parameters["min"], out_max=parameters["max"]
-    )
+    return Clamp(out_min=parameters["min"], out_max=parameters["max"])
