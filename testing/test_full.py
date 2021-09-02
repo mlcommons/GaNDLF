@@ -830,7 +830,8 @@ def test_dataloader_construction_train_segmentation_3d(device):
 
 def test_preprocess_functions():
     print("Starting testing preprocessing functions")
-    input_tensor = torch.rand(1, 3, 256, 256)
+    # initialize an input which has values between [-1,1]
+    input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
     input_transformed = global_preprocessing_dict["normalize_imagenet"]()(input_tensor)
     input_transformed = global_preprocessing_dict["normalize_standardize"]()(
         input_tensor
