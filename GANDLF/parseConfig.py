@@ -345,6 +345,7 @@ def parseConfig(config_file_path, version_check=True):
             thresholdOrClipDict = [
                 "threshold",
                 "clip",
+                "clamp",
             ]
 
             if (
