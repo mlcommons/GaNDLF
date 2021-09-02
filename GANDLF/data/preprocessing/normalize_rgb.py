@@ -3,54 +3,50 @@ import torch
 from torchio.transforms.intensity_transform import IntensityTransform
 from torchio.data.subject import Subject
 from torchvision.transforms import Normalize
+from torchio.data.image import ScalarImage
 
-# adapted from GANDLF's ThresholdOrClipTransform class
-class ThresholdRGBTransform(IntensityTransform):
+
+
+class NormalizeRGB(IntensityTransform):
+    """Threshold the intensities of the RGB images in the subject into a range.
+
+    Args:
+        mean: Expended means :math:`[a, b, c]` of the output image.
+        std: Expected std-deviation :math:`[a', b', c']` of the output image. 
+
     """
-    Threshold the intensities of the RGB images in the subject.
 
-        **kwargs: See :class:`~torchio.transforms.Transform` for additional keyword arguments.
-    """
-
-    def __init__(self, mean=None, std=None, p=1, **kwargs):
-        super().__init__(p, mean, std, **kwargs)
-        self.mean = mean
-        self.std = std
-        self.probability = p
+    def __init__(self, mean: list = None, std: list = None, **kwargs):
+        super().__init__(**kwargs)
+        self.mean, self.std = mean, std
+        self.args_names = "mean", "std"
 
     def apply_transform(self, subject: Subject) -> Subject:
-        for image_name, _ in self.get_images_dict(subject).items():
-            self.apply_normalize(subject, image_name)
+        for image in self.get_images(subject):
+            self.apply_normalize(image)
         return subject
 
-    def apply_normalize(
-        self,
-        subject: Subject,
-        image_name: str,
-    ) -> None:
-        image = subject[image_name].data
+    def apply_normalize(self, image: ScalarImage) -> None:
+        image.set_data(self.normalize(image.data))
+
+    def normalize(self, tensor: torch.Tensor) -> torch.Tensor:
         normalizer = Normalize(self.mean, self.std)
-        output = normalizer(image)
-        if output is None:
-            message = (
-                "Resultantant image is 0" f' in image "{image_name}" ({image.path})'
-            )
-            raise RuntimeError(message)
-        subject.get_images_dict(intensity_only=True)[image_name]["data"] = output
+        return normalizer(tensor)
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def normalize_by_val_transform(mean, std):
-    return ThresholdRGBTransform(p=1, mean=mean, std=std)
+    return NormalizeRGB(mean=mean, std=std)
 
 
 def normalize_imagenet_transform():
-    return ThresholdRGBTransform(p=1, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    return NormalizeRGB(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+    )
 
 
 def normalize_standardize_transform():
-    return ThresholdRGBTransform(p=1, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    return NormalizeRGB(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 
 
 def normalize_div_by_255_transform():
-    return ThresholdRGBTransform(p=1, mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0])
+    return NormalizeRGB(mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0])
