@@ -1,14 +1,12 @@
-from functools import partial
 import torch
 
-from torchio.transforms import Lambda
 from torchio.data.subject import Subject
 from torchio.transforms.intensity_transform import IntensityTransform
 
 # adapted from GANDLF's NonZeroNormalizeOnMaskedRegion class
 class ThresholdOrClipTransform(IntensityTransform):
     """
-    Threshold the intensities of the images in the subject.
+    Threshold or clip/clamp the intensities of the images in the subject.
 
         **kwargs: See :class:`~torchio.transforms.Transform` for additional keyword arguments.
     """
