@@ -1,20 +1,9 @@
 from functools import partial
 import torch
 
-from torchio.transforms import (
-    Lambda,
-)
-
-
-## define the functions that need to wrapped into lambdas
-def threshold_intensities(input_tensor, min_thresh, max_thresh):
-    """
-    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
-    """
-    C = torch.zeros(input_tensor.size(), dtype=input_tensor.dtype)
-    l1_tensor = torch.where(input_tensor < max_thresh, input_tensor, C)
-    l2_tensor = torch.where(l1_tensor > min_thresh, l1_tensor, C)
-    return l2_tensor
+from torchio.transforms import Lambda
+from torchio.data.subject import Subject
+from torchio.transforms.intensity_transform import IntensityTransform
 
 
 def clip_intensities(input_tensor, min_thresh, max_thresh):
@@ -27,14 +16,6 @@ def clip_intensities(input_tensor, min_thresh, max_thresh):
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def threshold_transform(parameters):
     return ThresholdTransform(min_threshold=parameters["min"], max_threshold=parameters["max"])
-    # return Lambda(
-    #     function=partial(
-    #         threshold_intensities,
-    #         min_thresh=parameters["min"],
-    #         max_thresh=parameters["max"],
-    #     ),
-    #     p=1,
-    # )
 
 
 def clip_transform(parameters):
@@ -45,13 +26,7 @@ def clip_transform(parameters):
         p=1,
     )
 
-
-import torch
-
-from torchio.data.subject import Subject
-from torchio.transforms.intensity_transform import IntensityTransform
-
-# adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
+# adapted from GANDLF's NonZeroNormalizeOnMaskedRegion class
 class ThresholdTransform(IntensityTransform):
     """
     Threshold the intensities of the images in the subject.
