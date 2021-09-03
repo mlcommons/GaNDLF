@@ -270,7 +270,7 @@ def densenet169(parameters):
         num_classes=len(parameters["model"]["class_list"]),
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
-        final_convolution_layer=["model"]["final_layer"],
+        final_convolution_layer=parameters["model"]["final_layer"],
     )
 
 
@@ -280,7 +280,7 @@ def densenet201(parameters):
         num_classes=len(parameters["model"]["class_list"]),
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
-        final_convolution_layer=["model"]["final_layer"],
+        final_convolution_layer=parameters["model"]["final_layer"],
     )
 
 
@@ -290,5 +290,5 @@ def densenet264(parameters):
         num_classes=len(parameters["model"]["class_list"]),
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
-        final_convolution_layer=["model"]["final_layer"],
+        final_convolution_layer=parameters["model"]["final_layer"],
     )
