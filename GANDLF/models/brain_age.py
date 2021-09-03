@@ -2,6 +2,7 @@ import torch.nn as nn
 import sys
 import torchvision
 
+
 def brainage(parameters):
     if parameters["model"]["dimension"] != 2:
         sys.exit("Brain Age predictions only works on 2D data")
