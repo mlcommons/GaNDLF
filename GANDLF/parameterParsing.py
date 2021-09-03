@@ -16,340 +16,340 @@ import torchvision
 import torch.nn as nn
 
 
-def get_model(
-    modelname,
-    num_dimensions,
-    num_channels,
-    num_classes,
-    base_filters,
-    norm_type,
-    final_convolution_layer,
-    patch_size,
-    batch_size,
-    **kwargs
-):
-    """
-    This function takes the default constructor and returns the model
+# def get_model(
+#     modelname,
+#     num_dimensions,
+#     num_channels,
+#     num_classes,
+#     base_filters,
+#     norm_type,
+#     final_convolution_layer,
+#     patch_size,
+#     batch_size,
+#     **kwargs
+# ):
+#     """
+#     This function takes the default constructor and returns the model
 
-    kwargs can be used to pass key word arguments and use arguments that are not explicitly defined.
-    """
+#     kwargs can be used to pass key word arguments and use arguments that are not explicitly defined.
+#     """
 
-    divisibilityCheck_patch = True
-    divisibilityCheck_baseFilter = True
+#     divisibilityCheck_patch = True
+#     divisibilityCheck_baseFilter = True
 
-    divisibilityCheck_denom_patch = 16  # for unet/resunet/uinc
-    divisibilityCheck_denom_baseFilter = 4  # for uinc
+#     divisibilityCheck_denom_patch = 16  # for unet/resunet/uinc
+#     divisibilityCheck_denom_baseFilter = 4  # for uinc
 
-    if "amp" in kwargs:
-        amp = kwargs.get("amp")
-    else:
-        amp = False
-    if modelname == "resunet":
-        model = unet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-            residualConnections=True,
-        )
-        divisibilityCheck_baseFilter = False
+#     if "amp" in kwargs:
+#         amp = kwargs.get("amp")
+#     else:
+#         amp = False
+#     if modelname == "resunet":
+#         model = unet(
+#             num_dimensions,
+#             num_channels,
+#             num_classes,
+#             base_filters,
+#             norm_type,
+#             final_convolution_layer=final_convolution_layer,
+#             residualConnections=True,
+#         )
+#         divisibilityCheck_baseFilter = False
 
-    elif modelname == "unet":
-        model = unet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-        )
-        divisibilityCheck_baseFilter = False
+#     elif modelname == "unet":
+#         model = unet(
+#             num_dimensions,
+#             num_channels,
+#             num_classes,
+#             base_filters,
+#             norm_type,
+#             final_convolution_layer=final_convolution_layer,
+#         )
+#         divisibilityCheck_baseFilter = False
 
-    # elif modelname == "light_resunet":
-    #     model = light_unet(
-    #         num_dimensions,
-    #         num_channels,
-    #         num_classes,
-    #         base_filters,
-    #         norm_type,
-    #         final_convolution_layer=final_convolution_layer,
-    #         residualConnections=True,
-    #     )
-    #     divisibilityCheck_baseFilter = False
+#     # elif modelname == "light_resunet":
+#     #     model = light_unet(
+#     #         num_dimensions,
+#     #         num_channels,
+#     #         num_classes,
+#     #         base_filters,
+#     #         norm_type,
+#     #         final_convolution_layer=final_convolution_layer,
+#     #         residualConnections=True,
+#     #     )
+#     #     divisibilityCheck_baseFilter = False
 
-    # elif modelname == "light_unet":
-    #     model = light_unet(
-    #         num_dimensions,
-    #         num_channels,
-    #         num_classes,
-    #         base_filters,
-    #         norm_type,
-    #         final_convolution_layer=final_convolution_layer,
-    #     )
-    #     divisibilityCheck_baseFilter = False
+#     # elif modelname == "light_unet":
+#     #     model = light_unet(
+#     #         num_dimensions,
+#     #         num_channels,
+#     #         num_classes,
+#     #         base_filters,
+#     #         norm_type,
+#     #         final_convolution_layer=final_convolution_layer,
+#     #     )
+#     #     divisibilityCheck_baseFilter = False
 
-    elif modelname == "fcn":
-        model = fcn(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-        )
-        # not enough information to perform checking for this, yet
-        divisibilityCheck_patch = False
-        divisibilityCheck_baseFilter = False
+#     elif modelname == "fcn":
+#         model = fcn(
+#             num_dimensions,
+#             num_channels,
+#             num_classes,
+#             base_filters,
+#             norm_type,
+#             final_convolution_layer=final_convolution_layer,
+#         )
+#         # not enough information to perform checking for this, yet
+#         divisibilityCheck_patch = False
+#         divisibilityCheck_baseFilter = False
 
-    elif modelname == "uinc":
-        model = uinc(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-        )
+#     elif modelname == "uinc":
+#         model = uinc(
+#             num_dimensions,
+#             num_channels,
+#             num_classes,
+#             base_filters,
+#             norm_type,
+#             final_convolution_layer=final_convolution_layer,
+#         )
 
-    elif modelname == "msdnet":
-        model = MSDNet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-        )
-        amp = False  # this is not yet implemented for msdnet
+#     elif modelname == "msdnet":
+#         model = MSDNet(
+#             num_dimensions,
+#             num_channels,
+#             num_classes,
+#             base_filters,
+#             norm_type,
+#             final_convolution_layer=final_convolution_layer,
+#         )
+#         amp = False  # this is not yet implemented for msdnet
 
-    elif modelname == "sdnet":
+#     elif modelname == "sdnet":
 
-        if patch_size != [224, 224, 1]:
-            print(
-                "WARNING: The patch size is not 224x224, which is required for sdnet. Using default patch size instead",
-                file=sys.stderr,
-            )
-            patch_size = [224, 224, 1]
+#         if patch_size != [224, 224, 1]:
+#             print(
+#                 "WARNING: The patch size is not 224x224, which is required for sdnet. Using default patch size instead",
+#                 file=sys.stderr,
+#             )
+#             patch_size = [224, 224, 1]
 
-        if batch_size == 1:
-            raise ValueError("'batch_size' needs to be greater than 1 for 'sdnet'")
+#         if batch_size == 1:
+#             raise ValueError("'batch_size' needs to be greater than 1 for 'sdnet'")
 
-        model = SDNet(
-            num_dimensions,
-            num_channels,
-            num_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer=final_convolution_layer,
-        )
-        amp = False  # this is not yet implemented for sdnet
+#         model = SDNet(
+#             num_dimensions,
+#             num_channels,
+#             num_classes,
+#             base_filters,
+#             norm_type,
+#             final_convolution_layer=final_convolution_layer,
+#         )
+#         amp = False  # this is not yet implemented for sdnet
 
-    # these are generic imagenet-trained models and should be customized
-    elif "imagenet" in modelname:
+#     # these are generic imagenet-trained models and should be customized
+#     elif "imagenet" in modelname:
 
-        if num_dimensions != 2:
-            sys.exit("ImageNet-trained models only work on 2D data")
+#         if num_dimensions != 2:
+#             sys.exit("ImageNet-trained models only work on 2D data")
 
-        divisibilityCheck_patch = False
-        divisibilityCheck_baseFilter = False
+#         divisibilityCheck_patch = False
+#         divisibilityCheck_baseFilter = False
 
-        if "batch_norm" in kwargs:
-            batch_norm = kwargs.get("batch_norm")
-        else:
-            batch_norm = True
+#         if "batch_norm" in kwargs:
+#             batch_norm = kwargs.get("batch_norm")
+#         else:
+#             batch_norm = True
 
-        if "vgg11" in modelname:
-            if batch_norm:
-                model = torchvision.models.vgg11_bn(pretrained=True)
-            else:
-                model = torchvision.models.vgg11(pretrained=True)
-        elif "vgg13" in modelname:
-            if batch_norm:
-                model = torchvision.models.vgg13_bn(pretrained=True)
-            else:
-                model = torchvision.models.vgg13(pretrained=True)
-        elif "vgg16" in modelname:
-            if batch_norm:
-                model = torchvision.models.vgg16_bn(pretrained=True)
-            else:
-                model = torchvision.models.vgg16(pretrained=True)
-        elif "vgg19" in modelname:
-            if batch_norm:
-                model = torchvision.models.vgg19_bn(pretrained=True)
-            else:
-                model = torchvision.models.vgg19(pretrained=True)
-        elif "squeezenet1_0" in modelname:
-            model = torchvision.models.squeezenet1_0(pretrained=True)
-        elif "squeezenet1_1" in modelname:
-            model = torchvision.models.squeezenet1_1(pretrained=True)
-        elif "inceptionv3" in modelname:
-            model = torchvision.models.inception_v3(pretrained=True)
-        elif "densenet121" in modelname:
-            model = torchvision.models.densenet121(pretrained=True)
-        elif "densenet161" in modelname:
-            model = torchvision.models.densenet161(pretrained=True)
-        elif "densenet169" in modelname:
-            model = torchvision.models.densenet169(pretrained=True)
-        elif "densenet201" in modelname:
-            model = torchvision.models.densenet201(pretrained=True)
-        elif "densenet264" in modelname:
-            model = torchvision.models.densenet264(pretrained=True)
-        elif "resnet18" in modelname:
-            model = torchvision.models.resnet18(pretrained=True)
-        elif "resnet34" in modelname:
-            model = torchvision.models.resnet34(pretrained=True)
-        elif "resnet50" in modelname:
-            model = torchvision.models.resnet50(pretrained=True)
-        elif "resnet101" in modelname:
-            model = torchvision.models.resnet101(pretrained=True)
-        elif "resnet152" in modelname:
-            model = torchvision.models.resnet152(pretrained=True)
-        else:
-            sys.exit(
-                "Could not find the requested model '"
-                + modelname
-                + "' in the implementation"
-            )
+#         if "vgg11" in modelname:
+#             if batch_norm:
+#                 model = torchvision.models.vgg11_bn(pretrained=True)
+#             else:
+#                 model = torchvision.models.vgg11(pretrained=True)
+#         elif "vgg13" in modelname:
+#             if batch_norm:
+#                 model = torchvision.models.vgg13_bn(pretrained=True)
+#             else:
+#                 model = torchvision.models.vgg13(pretrained=True)
+#         elif "vgg16" in modelname:
+#             if batch_norm:
+#                 model = torchvision.models.vgg16_bn(pretrained=True)
+#             else:
+#                 model = torchvision.models.vgg16(pretrained=True)
+#         elif "vgg19" in modelname:
+#             if batch_norm:
+#                 model = torchvision.models.vgg19_bn(pretrained=True)
+#             else:
+#                 model = torchvision.models.vgg19(pretrained=True)
+#         elif "squeezenet1_0" in modelname:
+#             model = torchvision.models.squeezenet1_0(pretrained=True)
+#         elif "squeezenet1_1" in modelname:
+#             model = torchvision.models.squeezenet1_1(pretrained=True)
+#         elif "inceptionv3" in modelname:
+#             model = torchvision.models.inception_v3(pretrained=True)
+#         elif "densenet121" in modelname:
+#             model = torchvision.models.densenet121(pretrained=True)
+#         elif "densenet161" in modelname:
+#             model = torchvision.models.densenet161(pretrained=True)
+#         elif "densenet169" in modelname:
+#             model = torchvision.models.densenet169(pretrained=True)
+#         elif "densenet201" in modelname:
+#             model = torchvision.models.densenet201(pretrained=True)
+#         elif "densenet264" in modelname:
+#             model = torchvision.models.densenet264(pretrained=True)
+#         elif "resnet18" in modelname:
+#             model = torchvision.models.resnet18(pretrained=True)
+#         elif "resnet34" in modelname:
+#             model = torchvision.models.resnet34(pretrained=True)
+#         elif "resnet50" in modelname:
+#             model = torchvision.models.resnet50(pretrained=True)
+#         elif "resnet101" in modelname:
+#             model = torchvision.models.resnet101(pretrained=True)
+#         elif "resnet152" in modelname:
+#             model = torchvision.models.resnet152(pretrained=True)
+#         else:
+#             sys.exit(
+#                 "Could not find the requested model '"
+#                 + modelname
+#                 + "' in the implementation"
+#             )
 
-    elif "densenet" in modelname:
-        if modelname == "densenet121":  # regressor/classifier network
-            model = densenet.generate_model(
-                model_depth=121,
-                num_classes=num_classes,
-                num_dimensions=num_dimensions,
-                num_channels=num_channels,
-                final_convolution_layer=final_convolution_layer,
-            )
-        elif modelname == "densenet161":  # regressor/classifier network
-            model = densenet.generate_model(
-                model_depth=161,
-                num_classes=num_classes,
-                num_dimensions=num_dimensions,
-                num_channels=num_channels,
-                final_convolution_layer=final_convolution_layer,
-            )
-        elif modelname == "densenet169":  # regressor/classifier network
-            model = densenet.generate_model(
-                model_depth=169,
-                num_classes=num_classes,
-                num_dimensions=num_dimensions,
-                num_channels=num_channels,
-                final_convolution_layer=final_convolution_layer,
-            )
-        elif modelname == "densenet201":  # regressor/classifier network
-            model = densenet.generate_model(
-                model_depth=201,
-                num_classes=num_classes,
-                num_dimensions=num_dimensions,
-                num_channels=num_channels,
-                final_convolution_layer=final_convolution_layer,
-            )
-        elif modelname == "densenet264":  # regressor/classifier network
-            model = densenet.generate_model(
-                model_depth=264,
-                num_classes=num_classes,
-                num_dimensions=num_dimensions,
-                num_channels=num_channels,
-                final_convolution_layer=final_convolution_layer,
-            )
-        else:
-            sys.exit(
-                "Requested DENSENET type '" + modelname + "' has not been implemented"
-            )
+#     elif "densenet" in modelname:
+#         if modelname == "densenet121":  # regressor/classifier network
+#             model = densenet.generate_model(
+#                 model_depth=121,
+#                 num_classes=num_classes,
+#                 num_dimensions=num_dimensions,
+#                 num_channels=num_channels,
+#                 final_convolution_layer=final_convolution_layer,
+#             )
+#         elif modelname == "densenet161":  # regressor/classifier network
+#             model = densenet.generate_model(
+#                 model_depth=161,
+#                 num_classes=num_classes,
+#                 num_dimensions=num_dimensions,
+#                 num_channels=num_channels,
+#                 final_convolution_layer=final_convolution_layer,
+#             )
+#         elif modelname == "densenet169":  # regressor/classifier network
+#             model = densenet.generate_model(
+#                 model_depth=169,
+#                 num_classes=num_classes,
+#                 num_dimensions=num_dimensions,
+#                 num_channels=num_channels,
+#                 final_convolution_layer=final_convolution_layer,
+#             )
+#         elif modelname == "densenet201":  # regressor/classifier network
+#             model = densenet.generate_model(
+#                 model_depth=201,
+#                 num_classes=num_classes,
+#                 num_dimensions=num_dimensions,
+#                 num_channels=num_channels,
+#                 final_convolution_layer=final_convolution_layer,
+#             )
+#         elif modelname == "densenet264":  # regressor/classifier network
+#             model = densenet.generate_model(
+#                 model_depth=264,
+#                 num_classes=num_classes,
+#                 num_dimensions=num_dimensions,
+#                 num_channels=num_channels,
+#                 final_convolution_layer=final_convolution_layer,
+#             )
+#         else:
+#             sys.exit(
+#                 "Requested DENSENET type '" + modelname + "' has not been implemented"
+#             )
 
-        amp = False  # this is not yet implemented for densenet
-        # these checks are not needed
-        divisibilityCheck_patch = False
-        divisibilityCheck_baseFilter = False
+#         amp = False  # this is not yet implemented for densenet
+#         # these checks are not needed
+#         divisibilityCheck_patch = False
+#         divisibilityCheck_baseFilter = False
 
-    elif "vgg" in modelname:  # common parsing for vgg
-        if modelname == "vgg11":
-            vgg_config = cfg["A"]
-        elif modelname == "vgg13":
-            vgg_config = cfg["B"]
-        elif modelname == "vgg16":
-            vgg_config = cfg["D"]
-        elif modelname == "vgg19":
-            vgg_config = cfg["E"]
-        else:
-            sys.exit("Requested VGG type '" + modelname + "' has not been implemented")
+#     elif "vgg" in modelname:  # common parsing for vgg
+#         if modelname == "vgg11":
+#             vgg_config = cfg["A"]
+#         elif modelname == "vgg13":
+#             vgg_config = cfg["B"]
+#         elif modelname == "vgg16":
+#             vgg_config = cfg["D"]
+#         elif modelname == "vgg19":
+#             vgg_config = cfg["E"]
+#         else:
+#             sys.exit("Requested VGG type '" + modelname + "' has not been implemented")
 
-        amp = False  # this is not yet implemented for vgg
-        # these checks are not needed
-        divisibilityCheck_patch = False
-        divisibilityCheck_baseFilter = False
+#         amp = False  # this is not yet implemented for vgg
+#         # these checks are not needed
+#         divisibilityCheck_patch = False
+#         divisibilityCheck_baseFilter = False
 
-        if "batch" in norm_type:
-            batch_norm = True
-        else:
-            batch_norm = False
-        layers = make_layers(
-            vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
-        )
-        # num_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
-        model = VGG(
-            num_dimensions,
-            layers,
-            num_classes,
-            final_convolution_layer=final_convolution_layer,
-        )
+#         if "batch" in norm_type:
+#             batch_norm = True
+#         else:
+#             batch_norm = False
+#         layers = make_layers(
+#             vgg_config, num_dimensions, num_channels, batch_norm=batch_norm
+#         )
+#         # num_classes is coming from 'class_list' in config, which needs to be changed to use a different variable for regression
+#         model = VGG(
+#             num_dimensions,
+#             layers,
+#             num_classes,
+#             final_convolution_layer=final_convolution_layer,
+#         )
 
-    elif modelname == "brain_age":
-        if num_dimensions != 2:
-            sys.exit("Brain Age predictions only works on 2D data")
-        model = torchvision.models.vgg16(pretrained=True)
-        model.final_convolution_layer = None
-        # Freeze training for all layers
-        for param in model.features.parameters():
-            param.require_grad = False
-        # Newly created modules have require_grad=True by default
-        num_features = model.classifier[6].in_features
-        features = list(model.classifier.children())[:-1]  # Remove last layer
-        # features.extend([nn.AvgPool2d(1024), nn.Linear(num_features,1024),nn.ReLU(True), nn.Dropout2d(0.8), nn.Linear(1024,1)]) # RuntimeError: non-empty 2D or 3D (batch mode) tensor expected for input
-        features.extend(
-            [
-                nn.Linear(num_features, 1024),
-                nn.ReLU(True),
-                nn.Dropout2d(0.8),
-                nn.Linear(1024, 1),
-            ]
-        )
-        model.classifier = nn.Sequential(*features)  # Replace the model classifier
-        amp = False  # this is not yet implemented for vgg
-        # these checks are not needed
-        divisibilityCheck_patch = False
-        divisibilityCheck_baseFilter = False
+#     elif modelname == "brain_age":
+#         if num_dimensions != 2:
+#             sys.exit("Brain Age predictions only works on 2D data")
+#         model = torchvision.models.vgg16(pretrained=True)
+#         model.final_convolution_layer = None
+#         # Freeze training for all layers
+#         for param in model.features.parameters():
+#             param.require_grad = False
+#         # Newly created modules have require_grad=True by default
+#         num_features = model.classifier[6].in_features
+#         features = list(model.classifier.children())[:-1]  # Remove last layer
+#         # features.extend([nn.AvgPool2d(1024), nn.Linear(num_features,1024),nn.ReLU(True), nn.Dropout2d(0.8), nn.Linear(1024,1)]) # RuntimeError: non-empty 2D or 3D (batch mode) tensor expected for input
+#         features.extend(
+#             [
+#                 nn.Linear(num_features, 1024),
+#                 nn.ReLU(True),
+#                 nn.Dropout2d(0.8),
+#                 nn.Linear(1024, 1),
+#             ]
+#         )
+#         model.classifier = nn.Sequential(*features)  # Replace the model classifier
+#         amp = False  # this is not yet implemented for vgg
+#         # these checks are not needed
+#         divisibilityCheck_patch = False
+#         divisibilityCheck_baseFilter = False
 
-    else:
-        raise ValueError(
-            "WARNING: Could not find the requested model '"
-            + modelname
-            + "' in the implementation"
-        )
+#     else:
+#         raise ValueError(
+#             "WARNING: Could not find the requested model '"
+#             + modelname
+#             + "' in the implementation"
+#         )
 
-    # check divisibility
-    if divisibilityCheck_patch:
-        if not checkPatchDivisibility(patch_size, divisibilityCheck_denom_patch):
-            sys.exit(
-                "The 'patch_size' should be divisible by '"
-                + str(divisibilityCheck_denom_patch)
-                + "' for the '"
-                + modelname
-                + "' architecture"
-            )
-    if divisibilityCheck_baseFilter:
-        if base_filters % divisibilityCheck_denom_baseFilter != 0:
-            sys.exit(
-                "The 'base_filters' should be divisible by '"
-                + str(divisibilityCheck_denom_baseFilter)
-                + "' for the '"
-                + modelname
-                + "' architecture"
-            )
+#     # check divisibility
+#     if divisibilityCheck_patch:
+#         if not checkPatchDivisibility(patch_size, divisibilityCheck_denom_patch):
+#             sys.exit(
+#                 "The 'patch_size' should be divisible by '"
+#                 + str(divisibilityCheck_denom_patch)
+#                 + "' for the '"
+#                 + modelname
+#                 + "' architecture"
+#             )
+#     if divisibilityCheck_baseFilter:
+#         if base_filters % divisibilityCheck_denom_baseFilter != 0:
+#             sys.exit(
+#                 "The 'base_filters' should be divisible by '"
+#                 + str(divisibilityCheck_denom_baseFilter)
+#                 + "' for the '"
+#                 + modelname
+#                 + "' architecture"
+#             )
 
-    return model, amp
+#     return model, amp
 
 
 def get_optimizer(optimizer_name, model, learning_rate):
