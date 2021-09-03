@@ -9,6 +9,7 @@ from GANDLF.models.seg_modules.add_downsample_conv_block import (
 )
 from GANDLF.models.unet import unet
 from .modelBase import ModelBase
+from copy import deepcopy
 
 
 class Decoder(ModelBase):
@@ -212,7 +213,12 @@ class SDNet(ModelBase):
         parameters["model"]["amp"] = False
         parameters["model"]["norm_type"] = "instance"
 
-        self.cencoder = unet(parameters)
+        parameters_unet = deepcopy(parameters)
+        parameters_unet["model"]["num_classes"] = self.anatomy_factors
+        parameters_unet["model"]["norm_type"] = "instance"
+        parameters_unet["model"]["final_layer"] = None
+
+        self.cencoder = unet(parameters_unet)
         self.mencoder = ModalityEncoder(
             parameters,
             self.anatomy_factors,
@@ -242,10 +248,11 @@ class SDNet(ModelBase):
         sm = self.segmentor(anatomy_factors)
         reco = self.decoder(anatomy_factors, modality_factors)
         modality_factors_reencoded, _ = self.mencoder(reco, anatomy_factors)
+        # sm, anatomy_factors, mu, logvar, modality_factors_reencoded
         return (
             sm,
             reco,
             mu,
             logvar,
             modality_factors_reencoded,
-        )  # sm, anatomy_factors, mu, logvar, modality_factors_reencoded
+        )  
