@@ -25,7 +25,10 @@ class Decoder(ModelBase):
         )
         for _ in range(self.num_layers - 2):
             self.layer_list += add_conv_block(
-                self.Conv, self.BatchNorm, in_ch=self.base_filters, out_ch=self.base_filters
+                self.Conv,
+                self.BatchNorm,
+                in_ch=self.base_filters,
+                out_ch=self.base_filters,
             )
         self.conv = self.Conv(self.base_filters, 1, 3, 1, 1)
         # Add layers to Module List
@@ -94,10 +97,16 @@ class Segmentor(ModelBase):
     ):
         super(Segmentor, self).__init__(parameters)
         self.layer_list = add_conv_block(
-            self.Conv, self.BatchNorm, in_ch=anatomy_factors, out_ch=self.base_filters * 4
+            self.Conv,
+            self.BatchNorm,
+            in_ch=anatomy_factors,
+            out_ch=self.base_filters * 4,
         )
         self.layer_list += add_conv_block(
-            self.Conv, self.BatchNorm, in_ch=self.base_filters * 4, out_ch=self.base_filters * 4
+            self.Conv,
+            self.BatchNorm,
+            in_ch=self.base_filters * 4,
+            out_ch=self.base_filters * 4,
         )
         self.conv = self.Conv(self.base_filters * 4, self.n_classes, 1, 1, 0)
         # Add layers to Module List
@@ -203,9 +212,7 @@ class SDNet(ModelBase):
         parameters["model"]["amp"] = False
         parameters["model"]["norm_type"] = "instance"
 
-        self.cencoder = unet(
-            parameters
-        )
+        self.cencoder = unet(parameters)
         self.mencoder = ModalityEncoder(
             parameters,
             self.anatomy_factors,
