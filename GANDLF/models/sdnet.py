@@ -255,4 +255,4 @@ class SDNet(ModelBase):
             mu,
             logvar,
             modality_factors_reencoded,
-        )  
+        )
