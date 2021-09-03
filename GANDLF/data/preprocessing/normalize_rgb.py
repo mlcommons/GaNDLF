@@ -6,13 +6,12 @@ from torchvision.transforms import Normalize
 from torchio.data.image import ScalarImage
 
 
-
 class NormalizeRGB(IntensityTransform):
     """Threshold the intensities of the RGB images in the subject into a range.
 
     Args:
         mean: Expended means :math:`[a, b, c]` of the output image.
-        std: Expected std-deviation :math:`[a', b', c']` of the output image. 
+        std: Expected std-deviation :math:`[a', b', c']` of the output image.
 
     """
 
@@ -40,8 +39,7 @@ def normalize_by_val_transform(mean, std):
 
 
 def normalize_imagenet_transform():
-    return NormalizeRGB(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-    )
+    return NormalizeRGB(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 
 def normalize_standardize_transform():
