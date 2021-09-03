@@ -1,45 +1,64 @@
-from functools import partial
 import torch
 
-from torchio.transforms import (
-    Lambda,
-)
+from torchio.data.subject import Subject
+from torchio.data.image import ScalarImage
+from torchio.transforms.intensity_transform import IntensityTransform
+from torchio.transforms.preprocessing.intensity.clamp import Clamp
 
 
-## define the functions that need to wrapped into lambdas
-def threshold_intensities(input_tensor, min_thresh, max_thresh):
-    """
-    This function takes an input tensor and 2 thresholds, lower & upper and thresholds between them, basically making intensity values outside this range '0'
-    """
-    C = torch.zeros(input_tensor.size(), dtype=input_tensor.dtype)
-    l1_tensor = torch.where(input_tensor < max_thresh, input_tensor, C)
-    l2_tensor = torch.where(l1_tensor > min_thresh, l1_tensor, C)
-    return l2_tensor
+class Threshold(IntensityTransform):
+    """Threshold intensity values into a range :math:`[a, b]`.
 
+    Args:
+        out_min: Minimum value :math:`a` of the output image. If ``None``, the
+            minimum of the image is used.
+        out_max: Maximum value :math:`b` of the output image. If ``None``, the
+            maximum of the image is used.
 
-def clip_intensities(input_tensor, min_thresh, max_thresh):
+    Example:
+        >>> import torchio as tio
+        >>> ct = tio.datasets.Slicer('CTChest').CT_chest
+        >>> HOUNSFIELD_AIR, HOUNSFIELD_BONE = -1000, 1000
+        >>> threshold = tio.Threshold(out_min=HOUNSFIELD_AIR, out_max=HOUNSFIELD_BONE)
+        >>> ct_thresholded = threshold(ct)
+
+    .. plot::
+
+        import torchio as tio
+        subject = tio.datasets.Slicer('CTChest')
+        ct = subject.CT_chest
+        HOUNSFIELD_AIR, HOUNSFIELD_BONE = -1000, 1000
+        threshold = tio.Threshold(out_min=HOUNSFIELD_AIR, out_max=HOUNSFIELD_BONE)
+        ct_thresholded = threshold(ct)
+        subject.add_image(ct_thresholded, 'Thresholded')
+        subject.plot()
+
     """
-    This function takes an input tensor and 2 thresholds, lower and upper and clips between them, basically making the lowest value as 'min' and largest values as 'max'
-    """
-    return torch.clamp(input_tensor, min_thresh, max_thresh)
+
+    def __init__(self, out_min: float = None, out_max: float = None, **kwargs):
+        super().__init__(**kwargs)
+        self.out_min, self.out_max = out_min, out_max
+        self.args_names = "out_min", "out_max"
+
+    def apply_transform(self, subject: Subject) -> Subject:
+        for image in self.get_images(subject):
+            self.apply_threshold(image)
+        return subject
+
+    def apply_threshold(self, image: ScalarImage) -> None:
+        image.set_data(self.threshold(image.data))
+
+    def threshold(self, tensor: torch.Tensor) -> torch.Tensor:
+        C = torch.zeros(tensor.shape, dtype=tensor.dtype)
+        l1_tensor = torch.where(tensor < self.out_max, tensor, C)
+        output = torch.where(l1_tensor > self.out_min, l1_tensor, C)
+        return output
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def threshold_transform(parameters):
-    return Lambda(
-        function=partial(
-            threshold_intensities,
-            min_thresh=parameters["min"],
-            max_thresh=parameters["max"],
-        ),
-        p=1,
-    )
+    return Threshold(out_min=parameters["min"], out_max=parameters["max"])
 
 
 def clip_transform(parameters):
-    return Lambda(
-        function=partial(
-            clip_intensities, min_thresh=parameters["min"], max_thresh=parameters["max"]
-        ),
-        p=1,
-    )
+    return Clamp(out_min=parameters["min"], out_max=parameters["max"])

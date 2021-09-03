@@ -34,6 +34,7 @@ global_preprocessing_dict = {
     "to_canonical": to_canonical_transform,
     "threshold": threshold_transform,
     "clip": clip_transform,
+    "clamp": clip_transform,
     "crop_external_zero_planes": CropExternalZeroplanes,
     "normalize_by_val": normalize_by_val_transform,
     "normalize_imagenet": normalize_imagenet_transform,
