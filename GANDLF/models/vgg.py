@@ -20,22 +20,38 @@ class VGG(nn.Module):
 
     def __init__(
         self,
-        n_dimensions,
-        features,
-        n_outputClasses,
-        final_convolution_layer: str = "softmax",
+        parameters,
+        configuration,
     ):
         """
         Initializer function for the VGG model
 
         Args:
             n_dimensions (int): The number of dimensions in the input data (2 or 3).
+            configuration (dict): A dictionary of configuration parameters for the model.
             features (int): The number of features to extract from the input data.
             n_outputClasses (int): The number of output classes.
             final_convolution_layer (str, optional): The final layer of the model. Defaults to "softmax".
         """
         super(VGG, self).__init__()
-        self.features = features
+        n_dimensions = parameters["model"]["dimension"]
+        final_convolution_layer = parameters["model"]["final_layer"]
+        n_outputClasses = len(parameters["model"]["class_list"])
+
+        if "batch" in parameters["model"]["norm_type"].lower():
+            batch_norm = True
+        else:
+            batch_norm = False
+        self.features = make_layers(
+            configuration,
+            n_dimensions,
+            parameters["model"]["num_channels"],
+            batch_norm=batch_norm,
+        )
+
+        # amp is not supported for vgg
+        parameters["model"]["amp"] = False
+
         self.final_convolution_layer = get_final_layer(final_convolution_layer)
         if n_dimensions == 2:
             self.Conv = nn.Conv2d
@@ -146,3 +162,51 @@ cfg = {
         "M",
     ],
 }
+
+
+class vgg11(VGG):
+    """
+    VGG model
+    """
+
+    def __init__(
+        self,
+        parameters,
+    ):
+        super(vgg11, self).__init__(parameters=parameters, configuration=cfg["A"])
+
+
+class vgg13(VGG):
+    """
+    VGG model
+    """
+
+    def __init__(
+        self,
+        parameters,
+    ):
+        super(vgg13, self).__init__(parameters=parameters, configuration=cfg["B"])
+
+
+class vgg16(VGG):
+    """
+    VGG model
+    """
+
+    def __init__(
+        self,
+        parameters,
+    ):
+        super(vgg16, self).__init__(parameters=parameters, configuration=cfg["D"])
+
+
+class vgg19(VGG):
+    """
+    VGG model
+    """
+
+    def __init__(
+        self,
+        parameters,
+    ):
+        super(vgg19, self).__init__(parameters=parameters, configuration=cfg["E"])

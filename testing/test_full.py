@@ -621,7 +621,7 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
-    parameters["model"]["architecture"] = "unet"
+    parameters["model"]["architecture"] = "resunet"
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
