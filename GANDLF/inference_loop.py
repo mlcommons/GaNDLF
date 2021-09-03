@@ -37,7 +37,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
 
     # Fetch the model according to params mentioned in the configuration file
-    model = global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+    model = global_models_dict[parameters["model"]["architecture"]](
+        parameters=parameters
+    )
 
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(
