@@ -17,6 +17,7 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.schd import *
 from GANDLF.utils import *
 from .parameterParsing import *
+from GANDLF.models import global_models_dict
 
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
@@ -35,18 +36,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         print("Number of channels : ", parameters["model"]["num_channels"])
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
 
-    model, parameters["model"]["amp"] = get_model(
-        modelname=parameters["model"]["architecture"],
-        num_dimensions=parameters["model"]["dimension"],
-        num_channels=parameters["model"]["num_channels"],
-        num_classes=parameters["model"]["num_classes"],
-        base_filters=parameters["model"]["base_filters"],
-        norm_type=parameters["model"]["norm_type"],
-        final_convolution_layer=parameters["model"]["final_layer"],
-        patch_size=parameters["patch_size"],
-        batch_size=1,
-        amp=parameters["model"]["amp"],
-    )
+    # Fetch the model according to params mentioned in the configuration file
+    model = global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(
