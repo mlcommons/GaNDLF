@@ -753,6 +753,7 @@ def training_loop(
     # Fetch the optimizers
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](params, model.parameters())
     params["optimizer"] = optimizer
+    
     if not ("step_size" in params["scheduler"]):
         params["scheduler"]["step_size"] = params["training_samples_size"] / params["learning_rate"]
 
