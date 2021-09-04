@@ -125,7 +125,9 @@ def cyclic_lr_exp_range(parameters):
 def exp(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
-    return ExponentialLR(parameters["optimizer_object"], parameters["scheduler"]["gamma"])
+    return ExponentialLR(
+        parameters["optimizer_object"], parameters["scheduler"]["gamma"]
+    )
 
 
 def step(parameters):
