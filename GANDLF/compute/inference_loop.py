@@ -1,9 +1,8 @@
-from GANDLF.training_loop import validate_network
+from .forward_pass import validate_network
 import os
 
-os.environ[
-    "TORCHIO_HIDE_CITATION_PROMPT"
-] = "1"  # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+# hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 import pickle, argparse, torch
 import numpy as np
@@ -15,7 +14,6 @@ from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from .parameterParsing import *
 from GANDLF.models import global_models_dict
 
 
@@ -83,7 +81,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             """
             path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
             """
-            from GANDLF.inference_dataloader_histopath import InferTumorSegDataset
+            from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
             from openslide import OpenSlide
 
             # actual computation
