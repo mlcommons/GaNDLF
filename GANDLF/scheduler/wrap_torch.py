@@ -1,4 +1,4 @@
-from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR
+from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR, StepLR
 import math
 
 
@@ -80,7 +80,7 @@ def cyclic_lr_base(parameters, mode="triangular"):
     if not ("max_lr" in parameters["scheduler"]):
         parameters["scheduler"]["max_lr"] = parameters["learning_rate"]
     if not ("gamma" in parameters["scheduler"]):
-        parameters["scheduler"]["gamma"] = 1.0
+        parameters["scheduler"]["gamma"] = 0.1
     if not ("scale_mode" in parameters["scheduler"]):
         parameters["scheduler"]["scale_mode"] = "cycle"
     if not ("cycle_momentum" in parameters["scheduler"]):
@@ -113,5 +113,10 @@ def cyclic_lr_exp_range(parameters):
 
 def exp(parameters):
     if not ("gamma" in parameters["scheduler"]):
-        parameters["scheduler"]["gamma"] = parameters["learning_rate"]
+        parameters["scheduler"]["gamma"] = 0.1
     return ExponentialLR(parameters["optimizer"], parameters["scheduler"]["gamma"])
+
+def step(parameters):
+    if not ("gamma" in parameters["scheduler"]):
+        parameters["scheduler"]["gamma"] = 0.1
+    return StepLR(parameters["optimizer"], parameters["step_size"], gamma=parameters["learning_rate"])

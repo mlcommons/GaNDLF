@@ -1,4 +1,4 @@
-from .wrap_torch import base_triangle, triangle_modified, cyclic_lr_base, cyclic_lr_triangular2, cyclic_lr_exp_range, exp
+from .wrap_torch import base_triangle, triangle_modified, cyclic_lr_base, cyclic_lr_triangular2, cyclic_lr_exp_range, exp, step
 
 
 # defining dict for schedulers - key is the string and the value is the transform object
@@ -9,4 +9,5 @@ global_schedulers_dict = {
     "triangular2": cyclic_lr_triangular2,
     "exp_range": cyclic_lr_exp_range,
     "exp": exp,
+    "step": step,
 }
