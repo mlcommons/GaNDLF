@@ -709,6 +709,7 @@ def training_loop(
         shuffle=True,
         pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
+    parameters["training_samples_size"] = len(train_dataloader.dataset)
 
     val_dataloader = DataLoader(
         validation_data_for_torch,
@@ -754,6 +755,7 @@ def training_loop(
         model=model,
         learning_rate=params["learning_rate"],
     )
+    parameters["optimizer"] = optimizer
 
     scheduler = get_scheduler(
         which_scheduler=params["scheduler"],
