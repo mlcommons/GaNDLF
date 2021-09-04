@@ -17,8 +17,8 @@ import numpy as np
 from medcam import medcam
 from GANDLF.logger import Logger
 from GANDLF.models import global_models_dict
-from GANDLF.scheduler import global_schedulers_dict
-from GANDLF.optimizer import global_optimizer_dict
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.parameterParsing import (
     # get_optimizer,
     get_loss_and_metrics,
