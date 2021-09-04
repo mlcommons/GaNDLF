@@ -59,7 +59,7 @@ def base_triangle(parameters):
         min_lr=parameters["scheduler"]["min_lr"],
         max_lr=parameters["scheduler"]["max_lr"],
     )
-    return LambdaLR(parameters["optimizer"], [clr])
+    return LambdaLR(parameters["optimizer_object"], [clr])
 
 
 def triangle_modified(parameters):
@@ -78,7 +78,7 @@ def triangle_modified(parameters):
         parameters["scheduler"]["max_lr"],
         parameters["scheduler"]["max_lr_multiplier"],
     )
-    return LambdaLR(parameters["optimizer"], [clr])
+    return LambdaLR(parameters["optimizer_object"], [clr])
 
 
 def cyclic_lr_base(parameters, mode="triangular"):
@@ -99,7 +99,7 @@ def cyclic_lr_base(parameters, mode="triangular"):
         parameters["scheduler"]["max_momentum"] = 0.9
 
     return CyclicLR(
-        parameters["optimizer"],
+        parameters["optimizer_object"],
         parameters["learning_rate"] * 0.001,
         parameters["learning_rate"],
         step_size_up=parameters["scheduler"]["step_size"],
@@ -125,14 +125,14 @@ def cyclic_lr_exp_range(parameters):
 def exp(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
-    return ExponentialLR(parameters["optimizer"], parameters["scheduler"]["gamma"])
+    return ExponentialLR(parameters["optimizer_object"], parameters["scheduler"]["gamma"])
 
 
 def step(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
     return StepLR(
-        parameters["optimizer"],
+        parameters["optimizer_object"],
         parameters["scheduler"]["step_size"],
         gamma=parameters["learning_rate"],
     )
@@ -157,7 +157,7 @@ def reduce_on_plateau(parameters):
         parameters["scheduler"]["cooldown"] = 0
 
     return ReduceLROnPlateau(
-        parameters["optimizer"],
+        parameters["optimizer_object"],
         mode=parameters["scheduler"]["mde"],
         factor=parameters["scheduler"]["factor"],
         patience=parameters["scheduler"]["patience"],
@@ -177,7 +177,7 @@ def cosineannealing(parameters):
         parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
 
     return CosineAnnealingWarmRestarts(
-        parameters["optimizer"],
+        parameters["optimizer_object"],
         T_0=parameters["scheduler"]["T_0"],
         T_mult=parameters["scheduler"]["T_mult"],
         eta_min=parameters["scheduler"]["min_lr"],
