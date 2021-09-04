@@ -756,6 +756,8 @@ def training_loop(
         learning_rate=params["learning_rate"],
     )
     parameters["optimizer"] = optimizer
+    if not ("step_size" in parameters["scheduler"]):
+        parameters["scheduler"]["step_size"] = parameters["training_samples_size"] / parameters["learning_rate"]
 
     scheduler = get_scheduler(
         which_scheduler=params["scheduler"],
