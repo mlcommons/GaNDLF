@@ -119,7 +119,7 @@ def exp(parameters):
 def step(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
-    return StepLR(parameters["optimizer"], parameters["step_size"], gamma=parameters["learning_rate"])
+    return StepLR(parameters["optimizer"], parameters["scheduler"]["step_size"], gamma=parameters["learning_rate"])
 
 def reduce_on_plateau(parameters):
     if not ("min_lr" in parameters["scheduler"]):
