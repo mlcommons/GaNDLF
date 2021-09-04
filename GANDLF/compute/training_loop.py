@@ -1,7 +1,165 @@
-import os
+import os, math, time
 import torch
+from torch.utils.data import DataLoader
+import torchio
+from medcam import medcam
+
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
+from GANDLF.models import global_models_dict
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.optimizers import global_optimizer_dict
+from GANDLF.utils import (
+    get_date_time,
+    send_model_to_device,
+    populate_channel_keys_in_params,
+    get_class_imbalance_weights,
+)
+from GANDLF.logger import Logger
+from .step import step
+from .forward_pass import validate_network
 
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"  # hides torchio citation request
+
+
+def train_network(model, train_dataloader, optimizer, params):
+    """
+    Function to train a network for a single epoch
+
+    Parameters
+    ----------
+    model : torch.model
+        The model to process the input image with, it should support appropriate dimensions.
+    train_dataloader : torch.DataLoader
+        The dataloader for the training epoch
+    optimizer : torch.optim
+        Optimizer for optimizing network
+    params : dict
+        the parameters passed by the user yaml
+
+    Returns
+    -------
+    average_epoch_train_loss : float
+        Train loss for the current epoch
+    average_epoch_train_metric : dict
+        Train metrics for the current epoch
+
+    """
+    print("*" * 20)
+    print("Starting Training : ")
+    print("*" * 20)
+    # Initialize a few things
+    total_epoch_train_loss = 0
+    total_epoch_train_metric = {}
+    average_epoch_train_metric = {}
+
+    for metric in params["metrics"]:
+        total_epoch_train_metric[metric] = 0
+
+    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+    if params["model"]["amp"]:
+        print("Using Automatic mixed precision", flush=True)
+        scaler = GradScaler()
+
+    # Set the model to train
+    model.train()
+    for batch_idx, (subject) in enumerate(
+        tqdm(train_dataloader, desc="Looping over training data")
+    ):
+        optimizer.zero_grad()
+        image = (
+            torch.cat(
+                [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+            )
+            .float()
+            .to(params["device"])
+        )
+        if "value_keys" in params:
+            label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+            # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
+            label = label.reshape(
+                min(params["batch_size"], len(label)),
+                len(params["value_keys"]),
+            )
+        else:
+            label = subject["label"][torchio.DATA]
+            # one-hot encoding of 'label' will probably be needed for segmentation
+        label = label.to(params["device"])
+
+        # ensure spacing is always present in params and is always subject-specific
+        if "spacing" in subject:
+            params["subject_spacing"] = subject["spacing"]
+        else:
+            params["subject_spacing"] = None
+        loss, calculated_metrics, _ = step(model, image, label, params)
+        nan_loss = True
+        second_order = (
+            hasattr(optimizer, "is_second_order") and optimizer.is_second_order
+        )
+        if params["model"]["amp"]:
+            with torch.cuda.amp.autocast():
+                # if loss is nan, don't backprop and don't step optimizer
+                if not torch.isnan(loss):
+                    scaler(
+                        loss=loss,
+                        optimizer=optimizer,
+                        clip_grad=params["clip_grad"],
+                        clip_mode=params["clip_mode"],
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
+                        ),
+                        create_graph=second_order,
+                    )
+                    nan_loss = False
+        else:
+            if not math.isnan(loss):
+                loss.backward(create_graph=second_order)
+                if params["clip_grad"] is not None:
+                    dispatch_clip_grad_(
+                        parameters=model_parameters_exclude_head(
+                            model, clip_mode=params["clip_mode"]
+                        ),
+                        value=params["clip_grad"],
+                        mode=params["clip_mode"],
+                    )
+                optimizer.step()
+                nan_loss = False
+
+        # Non network training related
+        if not nan_loss:
+            total_epoch_train_loss += loss.cpu().data.item()
+        for metric in calculated_metrics.keys():
+            total_epoch_train_metric[metric] += calculated_metrics[metric]
+
+        # For printing information at halftime during an epoch
+        if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
+            (batch_idx + 1) < len(train_dataloader)
+        ):
+            print(
+                "\nHalf-Epoch Average Train loss : ",
+                total_epoch_train_loss / (batch_idx + 1),
+            )
+            for metric in params["metrics"]:
+                print(
+                    "Half-Epoch Average Train " + metric + " : ",
+                    total_epoch_train_metric[metric] / (batch_idx + 1),
+                )
+
+    average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
+    print("     Epoch Final   Train loss : ", average_epoch_train_loss)
+    for metric in params["metrics"]:
+        average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
+            train_dataloader
+        )
+        print(
+            "     Epoch Final   Train " + metric + " : ",
+            average_epoch_train_metric[metric],
+        )
+
+    return average_epoch_train_loss, average_epoch_train_metric
+
+
 
 
 def training_loop(
