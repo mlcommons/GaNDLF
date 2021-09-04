@@ -83,6 +83,7 @@ weighted_loss: True
 #    }
 #  }
 # Which optimizer do you want to use - sgd, asgd, adam, adamw, adamax, sparseadam, rprop, adadelta, adagrad, rmsprop,
+# each has their own options and functionalities, which are initialized with defaults, see GANDLF.optimizers.wrap_torch for details
 optimizer: adam
 # this parameter controls the nested training process
 # performs randomized k-fold cross-validation
