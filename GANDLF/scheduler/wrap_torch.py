@@ -1,4 +1,4 @@
-from torch.optim.lr_scheduler import LambdaLR, CyclicLR
+from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR
 import math
 
 
@@ -73,57 +73,6 @@ def triangle_modified(parameters):
     )
     return LambdaLR(parameters["optimizer"], [clr])
 
-"""
-elif which_scheduler == "triangular":
-    scheduler_lr = CyclicLR(
-        optimizer,
-        learning_rate * 0.001,
-        learning_rate,
-        step_size_up=step_size,
-        step_size_down=None,
-        mode="triangular",
-        gamma=1.0,
-        scale_fn=None,
-        scale_mode="cycle",
-        cycle_momentum=False,
-        base_momentum=0.8,
-        max_momentum=0.9,
-        last_epoch=-1,
-    )
-elif which_scheduler == "triangular2":
-    scheduler_lr = CyclicLR(
-        optimizer,
-        learning_rate * 0.001,
-        learning_rate,
-        step_size_up=step_size,
-        step_size_down=None,
-        mode="triangular2",
-        gamma=1.0,
-        scale_fn=None,
-        scale_mode="cycle",
-        cycle_momentum=False,
-        base_momentum=0.8,
-        max_momentum=0.9,
-        last_epoch=-1,
-    )
-elif which_scheduler == "exp_range":
-    scheduler_lr = CyclicLR(
-        optimizer,
-        learning_rate * 0.001,
-        learning_rate,
-        step_size_up=step_size,
-        step_size_down=None,
-        mode="exp_range",
-        gamma=1.0,
-        scale_fn=None,
-        scale_mode="cycle",
-        cycle_momentum=False,
-        base_momentum=0.8,
-        max_momentum=0.9,
-        last_epoch=-1,
-    )
-"""
-
 def cyclic_lr_base(parameters, mode="triangular"):
     # pick defaults for "min_lr", "max_lr", "max_lr_multiplier" if not present in parameters
     if not ("min_lr" in parameters["scheduler"]):
@@ -161,3 +110,8 @@ def cyclic_lr_triangular2(parameters):
 
 def cyclic_lr_exp_range(parameters):
     return cyclic_lr_base(parameters, mode="exp_range")
+
+def exp(parameters):
+    if not ("gamma" in parameters["scheduler"]):
+        parameters["scheduler"]["gamma"] = parameters["learning_rate"]
+    return ExponentialLR(parameters["optimizer"], parameters["scheduler"]["gamma"])
