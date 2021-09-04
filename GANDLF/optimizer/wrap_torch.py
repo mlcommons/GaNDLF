@@ -94,3 +94,18 @@ def adagrad(parameters, model_parameters):
         parameters["optimizer"]["weight_decay"] = 0
     
     return Adagrad(model_parameters, lr=parameters["learning_rate"], lr_decay=parameters["optimizer"]["lr_decay"], eps=parameters["optimizer"]["eps"], weight_decay=parameters["optimizer"]["weight_decay"])
+
+def rmsprop(parameters, model_parameters):
+    # pick defaults
+    if not ("momentum" in parameters["optimizer"]):
+        parameters["optimizer"]["momentum"] = 0
+    if not ("weight_decay" in parameters["optimizer"]):
+        parameters["optimizer"]["weight_decay"] = 0
+    if not ("alpha" in parameters["optimizer"]):
+        parameters["optimizer"]["alpha"] = 0.99
+    if not ("eps" in parameters["optimizer"]):
+        parameters["optimizer"]["eps"] = 1e-8
+    if not ("centered" in parameters["optimizer"]):
+        parameters["optimizer"]["centered"] = False
+
+    return RMSprop(model_parameters, lr=parameters["learning_rate"], alpha=parameters["optimizer"]["alpha"], eps=parameters["optimizer"]["eps"], centered=parameters["optimizer"]["centered"], momentum=parameters["optimizer"]["momentum"], weight_decay=parameters["optimizer"]["weight_decay"])
