@@ -22,7 +22,7 @@ from .step import step
 from .forward_pass import validate_network
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
-os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1" 
+os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 
 def train_network(model, train_dataloader, optimizer, params):
@@ -160,8 +160,6 @@ def train_network(model, train_dataloader, optimizer, params):
         )
 
     return average_epoch_train_loss, average_epoch_train_metric
-
-
 
 
 def training_loop(

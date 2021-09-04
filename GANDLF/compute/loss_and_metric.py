@@ -2,6 +2,7 @@ import sys
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 
+
 def get_loss_and_metrics(image, ground_truth, predicted, params):
     """
     image: torch.Tensor
