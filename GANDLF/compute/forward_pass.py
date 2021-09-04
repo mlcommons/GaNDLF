@@ -1,5 +1,6 @@
 import os, pathlib, psutil
-import torch, tqdm
+import torch
+from tqdm import tqdm
 import SimpleITK as sitk
 import numpy as np
 import torchio
