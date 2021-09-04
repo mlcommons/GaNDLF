@@ -469,7 +469,7 @@ def parseConfig(config_file_path, version_check=True):
     if "opt" in params:
         DeprecationWarning("'opt' has been superceded by 'optimizer'")
         params["optimizer"] = params["opt"]
-    
+
     # define defaults
     for current_parameter in parameter_defaults:
         params = initialize_parameter(
@@ -489,7 +489,7 @@ def parseConfig(config_file_path, version_check=True):
         temp_dict = {}
         temp_dict["type"] = params["scheduler"]
         params["scheduler"] = temp_dict
-        
+
     if isinstance(params["optimizer"], str):
         temp_dict = {}
         temp_dict["type"] = params["optimizer"]

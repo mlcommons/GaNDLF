@@ -636,7 +636,12 @@ def validate_network(
         )
 
     if scheduler is not None:
-        if params["scheduler"]["type"] in ["reduce_on_plateau", "reduce-on-plateau", "plateau", "reduceonplateau"]:
+        if params["scheduler"]["type"] in [
+            "reduce_on_plateau",
+            "reduce-on-plateau",
+            "plateau",
+            "reduceonplateau",
+        ]:
             scheduler.step(average_epoch_valid_loss)
         else:
             scheduler.step()
@@ -751,11 +756,15 @@ def training_loop(
         params["weights"], params["class_weights"] = None, None
 
     # Fetch the optimizers
-    optimizer = global_optimizer_dict[params["optimizer"]["type"]](params, model.parameters())
+    optimizer = global_optimizer_dict[params["optimizer"]["type"]](
+        params, model.parameters()
+    )
     params["optimizer"] = optimizer
-    
+
     if not ("step_size" in params["scheduler"]):
-        params["scheduler"]["step_size"] = params["training_samples_size"] / params["learning_rate"]
+        params["scheduler"]["step_size"] = (
+            params["training_samples_size"] / params["learning_rate"]
+        )
 
     scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
 

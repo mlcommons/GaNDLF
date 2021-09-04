@@ -1,4 +1,14 @@
-from .wrap_torch import base_triangle, triangle_modified, cyclic_lr_base, cyclic_lr_triangular2, cyclic_lr_exp_range, exp, step, reduce_on_plateau, cosineannealing
+from .wrap_torch import (
+    base_triangle,
+    triangle_modified,
+    cyclic_lr_base,
+    cyclic_lr_triangular2,
+    cyclic_lr_exp_range,
+    exp,
+    step,
+    reduce_on_plateau,
+    cosineannealing,
+)
 
 
 # defining dict for schedulers - key is the string and the value is the transform object
