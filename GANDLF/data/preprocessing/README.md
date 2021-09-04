@@ -11,4 +11,4 @@
     - Add function in the new submodule.
     - The `_transform` function is the algorithm's identifier for GaNDLF.
 - Add the algorithm's identifier to `GANDLF.data.preprocessing.__init__.global_preprocessing_dict` as appropriate.
-- Call the new identified from the config using the `data_preprocessing` key.
+- Call the new algorithm from the config using the `data_preprocessing` key.
