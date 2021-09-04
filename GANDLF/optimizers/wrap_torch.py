@@ -12,7 +12,7 @@ from torch.optim import (
 )
 
 
-def sgd(parameters, model_parameters):
+def sgd(parameters):
     # pick defaults
     if not ("momentum" in parameters["optimizer"]):
         parameters["optimizer"]["momentum"] = 0.9
@@ -23,7 +23,7 @@ def sgd(parameters, model_parameters):
     if not ("nesterov" in parameters["optimizer"]):
         parameters["optimizer"]["nesterov"] = False
     return SGD(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         momentum=parameters["optimizer"]["momentum"],
         weight_decay=parameters["optimizer"]["weight_decay"],
@@ -32,7 +32,7 @@ def sgd(parameters, model_parameters):
     )
 
 
-def asgd(parameters, model_parameters):
+def asgd(parameters):
     # pick defaults
     if not ("lambd" in parameters["optimizer"]):
         parameters["optimizer"]["lambd"] = 1e-4
@@ -43,7 +43,7 @@ def asgd(parameters, model_parameters):
     if not ("weight_decay" in parameters["optimizer"]):
         parameters["optimizer"]["weight_decay"] = 0
     return ASGD(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         alpha=parameters["optimizer"]["alpha"],
         t0=parameters["optimizer"]["t0"],
@@ -52,7 +52,7 @@ def asgd(parameters, model_parameters):
     )
 
 
-def adam(parameters, model_parameters, type="normal"):
+def adam(parameters, type="normal"):
     # pick defaults
     if not ("betas" in parameters["optimizer"]):
         parameters["optimizer"]["betas"] = (0.9, 0.999)
@@ -68,7 +68,7 @@ def adam(parameters, model_parameters, type="normal"):
     else:
         function = AdamW
     return function(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         betas=parameters["optimizer"]["betas"],
         weight_decay=parameters["optimizer"]["weight_decay"],
@@ -77,11 +77,11 @@ def adam(parameters, model_parameters, type="normal"):
     )
 
 
-def adamw(parameters, model_parameters):
-    return adam(parameters, model_parameters, type="adamw")
+def adamw(parameters):
+    return adam(parameters, type="adamw")
 
 
-def adamax(parameters, model_parameters):
+def adamax(parameters):
     # pick defaults
     if not ("betas" in parameters["optimizer"]):
         parameters["optimizer"]["betas"] = (0.9, 0.999)
@@ -91,7 +91,7 @@ def adamax(parameters, model_parameters):
         parameters["optimizer"]["eps"] = 1e-8
 
     return Adamax(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         betas=parameters["optimizer"]["betas"],
         weight_decay=parameters["optimizer"]["weight_decay"],
@@ -99,35 +99,35 @@ def adamax(parameters, model_parameters):
     )
 
 
-def sparseadam(parameters, model_parameters):
-    # pick defaults
-    if not ("betas" in parameters["optimizer"]):
-        parameters["optimizer"]["betas"] = (0.9, 0.999)
-    if not ("eps" in parameters["optimizer"]):
-        parameters["optimizer"]["eps"] = 1e-8
+# def sparseadam(parameters):
+#     # pick defaults
+#     if not ("betas" in parameters["optimizer"]):
+#         parameters["optimizer"]["betas"] = (0.9, 0.999)
+#     if not ("eps" in parameters["optimizer"]):
+#         parameters["optimizer"]["eps"] = 1e-8
 
-    return SparseAdam(
-        model_parameters,
-        lr=parameters["learning_rate"],
-        betas=parameters["optimizer"]["betas"],
-        eps=parameters["optimizer"]["eps"],
-    )
+#     return SparseAdam(
+#         parameters["model_parameters"],
+#         lr=parameters["learning_rate"],
+#         betas=parameters["optimizer"]["betas"],
+#         eps=parameters["optimizer"]["eps"],
+#     )
 
 
-def rprop(parameters, model_parameters):
+def rprop(parameters):
     if not ("etas" in parameters["optimizer"]):
         parameters["optimizer"]["etas"] = (0.5, 1.2)
     if not ("step_sizes" in parameters["optimizer"]):
         parameters["optimizer"]["step_sizes"] = (1e-7, 50)
     return Rprop(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         etas=parameters["optimizer"]["etas"],
         step_sizes=parameters["optimizer"]["step_sizes"],
     )
 
 
-def adadelta(parameters, model_parameters):
+def adadelta(parameters):
     # pick defaults
     if not ("rho" in parameters["optimizer"]):
         parameters["optimizer"]["rho"] = 0.9
@@ -136,7 +136,7 @@ def adadelta(parameters, model_parameters):
     if not ("weight_decay" in parameters["optimizer"]):
         parameters["optimizer"]["weight_decay"] = 0
     return Adadelta(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         rho=parameters["optimizer"]["rho"],
         eps=parameters["optimizer"]["eps"],
@@ -144,7 +144,7 @@ def adadelta(parameters, model_parameters):
     )
 
 
-def adagrad(parameters, model_parameters):
+def adagrad(parameters):
     # pick defaults
     if not ("lr_decay" in parameters["optimizer"]):
         parameters["optimizer"]["lr_decay"] = 0
@@ -154,7 +154,7 @@ def adagrad(parameters, model_parameters):
         parameters["optimizer"]["weight_decay"] = 0
 
     return Adagrad(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         lr_decay=parameters["optimizer"]["lr_decay"],
         eps=parameters["optimizer"]["eps"],
@@ -162,7 +162,7 @@ def adagrad(parameters, model_parameters):
     )
 
 
-def rmsprop(parameters, model_parameters):
+def rmsprop(parameters):
     # pick defaults
     if not ("momentum" in parameters["optimizer"]):
         parameters["optimizer"]["momentum"] = 0
@@ -176,7 +176,7 @@ def rmsprop(parameters, model_parameters):
         parameters["optimizer"]["centered"] = False
 
     return RMSprop(
-        model_parameters,
+        parameters["model_parameters"],
         lr=parameters["learning_rate"],
         alpha=parameters["optimizer"]["alpha"],
         eps=parameters["optimizer"]["eps"],
