@@ -759,7 +759,7 @@ def training_loop(
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](
         params, model.parameters()
     )
-    params["optimizer"] = optimizer
+    params["optimizer_object"] = optimizer
 
     if not ("step_size" in params["scheduler"]):
         params["scheduler"]["step_size"] = (
