@@ -47,6 +47,16 @@ def base_triangle(parameters):
     if not("max_lr" in parameters["scheduler"]):
         parameters["scheduler"]["max_lr"] = 1
     clr = cyclical_lr(step_size, min_lr=parameters["scheduler"]["min_lr"], max_lr=parameters["scheduler"]["max_lr"])
-    scheduler_lr = LambdaLR(parameters["optimizer"], [clr])
+    return LambdaLR(parameters["optimizer"], [clr])
 
-    return scheduler_lr
+
+def triangle_modified(parameters):
+    step_size = parameters["training_samples_size"] / parameters["learning_rate"]
+    # pick defaults for "min_lr", "max_lr" if not present in parameters
+    # this should probably happen in parseConfig
+    if not("min_lr" in parameters["scheduler"]):
+        parameters["scheduler"]["min_lr"] = 0.000001
+    if not("max_lr" in parameters["scheduler"]):
+        parameters["scheduler"]["max_lr"] = 0.001
+    clr = cyclical_lr_modified(step_size)
+    return LambdaLR(parameters["optimizer"], [clr])
