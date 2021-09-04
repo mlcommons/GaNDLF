@@ -17,6 +17,7 @@ import numpy as np
 from medcam import medcam
 from GANDLF.logger import Logger
 from GANDLF.models import global_models_dict
+from GANDLF.scheduler import global_schedulers_dict
 from GANDLF.parameterParsing import (
     get_optimizer,
     get_scheduler,
@@ -759,13 +760,7 @@ def training_loop(
     if not ("step_size" in parameters["scheduler"]):
         parameters["scheduler"]["step_size"] = parameters["training_samples_size"] / parameters["learning_rate"]
 
-    scheduler = get_scheduler(
-        which_scheduler=params["scheduler"],
-        optimizer=optimizer,
-        batch_size=params["batch_size"],
-        training_samples_size=len(train_dataloader.dataset),
-        learning_rate=params["learning_rate"],
-    )
+    scheduler = global_schedulers_dict[params["scheduler"]](params)
 
     # Start training time here
     start_time = time.time()
