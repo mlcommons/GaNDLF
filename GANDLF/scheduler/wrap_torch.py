@@ -1,4 +1,4 @@
-from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR, StepLR, ReduceLROnPlateau
+from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR, StepLR, ReduceLROnPlateau, CosineAnnealingWarmRestarts
 import math
 
 
@@ -148,4 +148,17 @@ def reduce_on_plateau(parameters):
             threshold_mode=parameters["scheduler"]["threshold_mode"],
             cooldown=parameters["scheduler"]["cooldown"],
             min_lr=parameters["scheduler"]["min_lr"],
+        )
+
+def cosineannealing(parameters):
+    if not ("T_0" in parameters["scheduler"]):
+        parameters["scheduler"]["T_0"] = 5
+    if not ("T_mult" in parameters["scheduler"]):
+        parameters["scheduler"]["T_mult"] = 1
+    if not ("min_lr" in parameters["scheduler"]):
+        parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
+    
+    return CosineAnnealingWarmRestarts(
+            parameters["optimizer"],
+            T_0=parameters["scheduler"]["T_0"], T_mult=parameters["scheduler"]["T_mult"], eta_min=parameters["scheduler"]["min_lr"],
         )
