@@ -36,3 +36,10 @@ def adam(parameters, model_parameters):
         parameters["optimizer"]["amsgrad"] = False
     return Adam(
             model_parameters, lr=parameters["learning_rate"], betas=parameters["optimizer"]["betas"], weight_decay=parameters["optimizer"]["weight_decay"], eps=parameters["optimizer"]["eps"], amsgrad=parameters["optimizer"]["amsgrad"])
+
+def rprop(parameters, model_parameters):
+    if not ("etas" in parameters["optimizer"]):
+        parameters["optimizer"]["etas"] = (0.5, 1.2)
+    if not ("step_sizes" in parameters["optimizer"]):
+        parameters["optimizer"]["step_sizes"] = (1e-7, 50)
+    return Rprop(model_parameters, lr=parameters["learning_rate"], etas=parameters["optimizer"]["etas"], step_sizes=parameters["optimizer"]["step_sizes"])
