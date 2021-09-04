@@ -18,8 +18,9 @@ from medcam import medcam
 from GANDLF.logger import Logger
 from GANDLF.models import global_models_dict
 from GANDLF.scheduler import global_schedulers_dict
+from GANDLF.optimizer import global_optimizer_dict
 from GANDLF.parameterParsing import (
-    get_optimizer,
+    # get_optimizer,
     get_loss_and_metrics,
 )
 from GANDLF.utils import (
@@ -750,11 +751,7 @@ def training_loop(
         params["weights"], params["class_weights"] = None, None
 
     # Fetch the optimizers
-    optimizer = get_optimizer(
-        optimizer_name=params["opt"],
-        model=model,
-        learning_rate=params["learning_rate"],
-    )
+    optimizer = global_optimizer_dict[params["optimizer"]["type"]](params, model.parameters())
     params["optimizer"] = optimizer
     if not ("step_size" in params["scheduler"]):
         params["scheduler"]["step_size"] = params["training_samples_size"] / params["learning_rate"]
