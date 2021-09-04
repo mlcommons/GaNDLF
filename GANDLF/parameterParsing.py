@@ -351,27 +351,27 @@ import torch.nn as nn
 #     return model, amp
 
 
-def get_optimizer(optimizer_name, model, learning_rate):
-    """
-    This function parses the optimizer from the config file and returns the appropriate object
-    """
-    model_parameters = model.parameters()
-    if optimizer_name == "sgd":
-        optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
-    elif optimizer_name == "adam":
-        optimizer = optim.Adam(
-            model_parameters, lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.00005
-        )
-    else:
-        print(
-            "WARNING: Could not find the requested optimizer '"
-            + optimizer_name
-            + "' in the implementation, using sgd, instead",
-            file=sys.stderr,
-        )
-        optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
+# def get_optimizer(optimizer_name, model, learning_rate):
+#     """
+#     This function parses the optimizer from the config file and returns the appropriate object
+#     """
+#     model_parameters = model.parameters()
+#     if optimizer_name == "sgd":
+#         optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
+#     elif optimizer_name == "adam":
+#         optimizer = optim.Adam(
+#             model_parameters, lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.00005
+#         )
+#     else:
+#         print(
+#             "WARNING: Could not find the requested optimizer '"
+#             + optimizer_name
+#             + "' in the implementation, using sgd, instead",
+#             file=sys.stderr,
+#         )
+#         optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
 
-    return optimizer
+#     return optimizer
 
 
 # def get_scheduler(
