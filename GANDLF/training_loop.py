@@ -20,7 +20,6 @@ from GANDLF.models import global_models_dict
 from GANDLF.scheduler import global_schedulers_dict
 from GANDLF.parameterParsing import (
     get_optimizer,
-    get_scheduler,
     get_loss_and_metrics,
 )
 from GANDLF.utils import (
@@ -710,7 +709,7 @@ def training_loop(
         shuffle=True,
         pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
-    parameters["training_samples_size"] = len(train_dataloader.dataset)
+    params["training_samples_size"] = len(train_dataloader.dataset)
 
     val_dataloader = DataLoader(
         validation_data_for_torch,
@@ -756,11 +755,11 @@ def training_loop(
         model=model,
         learning_rate=params["learning_rate"],
     )
-    parameters["optimizer"] = optimizer
-    if not ("step_size" in parameters["scheduler"]):
-        parameters["scheduler"]["step_size"] = parameters["training_samples_size"] / parameters["learning_rate"]
+    params["optimizer"] = optimizer
+    if not ("step_size" in params["scheduler"]):
+        params["scheduler"]["step_size"] = params["training_samples_size"] / params["learning_rate"]
 
-    scheduler = global_schedulers_dict[params["scheduler"]](params)
+    scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
 
     # Start training time here
     start_time = time.time()

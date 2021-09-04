@@ -1,7 +1,6 @@
 import sys
 import torch.optim as optim
 from torch.optim.lr_scheduler import *
-from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
