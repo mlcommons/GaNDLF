@@ -57,9 +57,29 @@ def adamax(parameters, model_parameters):
     return Adamax(
             model_parameters, lr=parameters["learning_rate"], betas=parameters["optimizer"]["betas"], weight_decay=parameters["optimizer"]["weight_decay"], eps=parameters["optimizer"]["eps"])
 
+def sparseadam(parameters, model_parameters):
+    # pick defaults
+    if not ("betas" in parameters["optimizer"]):
+        parameters["optimizer"]["betas"] = (0.9, 0.999)
+    if not ("eps" in parameters["optimizer"]):
+        parameters["optimizer"]["eps"] = 1e-8
+    
+    return SparseAdam(
+            model_parameters, lr=parameters["learning_rate"], betas=parameters["optimizer"]["betas"], eps=parameters["optimizer"]["eps"])
+
 def rprop(parameters, model_parameters):
     if not ("etas" in parameters["optimizer"]):
         parameters["optimizer"]["etas"] = (0.5, 1.2)
     if not ("step_sizes" in parameters["optimizer"]):
         parameters["optimizer"]["step_sizes"] = (1e-7, 50)
     return Rprop(model_parameters, lr=parameters["learning_rate"], etas=parameters["optimizer"]["etas"], step_sizes=parameters["optimizer"]["step_sizes"])
+
+def adadelta(parameters, model_parameters):
+    # pick defaults
+    if not ("rho" in parameters["optimizer"]):
+        parameters["optimizer"]["rho"] = 0.9
+    if not ("eps" in parameters["optimizer"]):
+        parameters["optimizer"]["eps"] = 1e-6
+    if not ("weight_decay" in parameters["optimizer"]):
+        parameters["optimizer"]["weight_decay"] = 0
+    return Adadelta(model_parameters, lr=parameters["learning_rate"], rho=parameters["optimizer"]["rho"], eps=parameters["optimizer"]["eps"], weight_decay=parameters["optimizer"]["weight_decay"])
