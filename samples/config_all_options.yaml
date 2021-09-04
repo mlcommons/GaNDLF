@@ -82,7 +82,7 @@ weighted_loss: True
 #      'reduction': 'mean' # see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss for all options
 #    }
 #  }
-# Which optimizer do you want to use - adam/sgd
+# Which optimizer do you want to use - sgd, asgd, adam, adamw, adamax, sparseadam, rprop, adadelta, adagrad, rmsprop,
 optimizer: adam
 # this parameter controls the nested training process
 # performs randomized k-fold cross-validation
