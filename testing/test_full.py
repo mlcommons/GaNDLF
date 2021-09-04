@@ -11,8 +11,8 @@ from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.cli.main_run import main_run
 from GANDLF.cli.preprocess_and_save import preprocess_and_save
-from GANDLF.scheduler import global_schedulers_dict
-from GANDLF.optimizer import global_optimizer_dict
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.optimizers import global_optimizer_dict
 
 device = "cpu"
 ## global defines
