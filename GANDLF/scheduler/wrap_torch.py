@@ -1,4 +1,11 @@
-from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR, StepLR, ReduceLROnPlateau, CosineAnnealingWarmRestarts
+from torch.optim.lr_scheduler import (
+    LambdaLR,
+    CyclicLR,
+    ExponentialLR,
+    StepLR,
+    ReduceLROnPlateau,
+    CosineAnnealingWarmRestarts,
+)
 import math
 
 
@@ -73,6 +80,7 @@ def triangle_modified(parameters):
     )
     return LambdaLR(parameters["optimizer"], [clr])
 
+
 def cyclic_lr_base(parameters, mode="triangular"):
     # pick defaults for "min_lr", "max_lr", "max_lr_multiplier" if not present in parameters
     if not ("min_lr" in parameters["scheduler"]):
@@ -89,7 +97,7 @@ def cyclic_lr_base(parameters, mode="triangular"):
         parameters["scheduler"]["base_momentum"] = 0.8
     if not ("max_momentum" in parameters["scheduler"]):
         parameters["scheduler"]["max_momentum"] = 0.9
-    
+
     return CyclicLR(
         parameters["optimizer"],
         parameters["learning_rate"] * 0.001,
@@ -105,21 +113,30 @@ def cyclic_lr_base(parameters, mode="triangular"):
         max_momentum=parameters["scheduler"]["max_momentum"],
     )
 
+
 def cyclic_lr_triangular2(parameters):
     return cyclic_lr_base(parameters, mode="triangular2")
 
+
 def cyclic_lr_exp_range(parameters):
     return cyclic_lr_base(parameters, mode="exp_range")
+
 
 def exp(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
     return ExponentialLR(parameters["optimizer"], parameters["scheduler"]["gamma"])
 
+
 def step(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
-    return StepLR(parameters["optimizer"], parameters["scheduler"]["step_size"], gamma=parameters["learning_rate"])
+    return StepLR(
+        parameters["optimizer"],
+        parameters["scheduler"]["step_size"],
+        gamma=parameters["learning_rate"],
+    )
+
 
 def reduce_on_plateau(parameters):
     if not ("min_lr" in parameters["scheduler"]):
@@ -138,17 +155,18 @@ def reduce_on_plateau(parameters):
         parameters["scheduler"]["threshold"] = 0.0001
     if not ("cooldown" in parameters["scheduler"]):
         parameters["scheduler"]["cooldown"] = 0
-    
+
     return ReduceLROnPlateau(
-            parameters["optimizer"],
-            mode=parameters["scheduler"]["mde"],
-            factor=parameters["scheduler"]["factor"],
-            patience=parameters["scheduler"]["patience"],
-            threshold=parameters["scheduler"]["threshold"],
-            threshold_mode=parameters["scheduler"]["threshold_mode"],
-            cooldown=parameters["scheduler"]["cooldown"],
-            min_lr=parameters["scheduler"]["min_lr"],
-        )
+        parameters["optimizer"],
+        mode=parameters["scheduler"]["mde"],
+        factor=parameters["scheduler"]["factor"],
+        patience=parameters["scheduler"]["patience"],
+        threshold=parameters["scheduler"]["threshold"],
+        threshold_mode=parameters["scheduler"]["threshold_mode"],
+        cooldown=parameters["scheduler"]["cooldown"],
+        min_lr=parameters["scheduler"]["min_lr"],
+    )
+
 
 def cosineannealing(parameters):
     if not ("T_0" in parameters["scheduler"]):
@@ -157,8 +175,10 @@ def cosineannealing(parameters):
         parameters["scheduler"]["T_mult"] = 1
     if not ("min_lr" in parameters["scheduler"]):
         parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
-    
+
     return CosineAnnealingWarmRestarts(
-            parameters["optimizer"],
-            T_0=parameters["scheduler"]["T_0"], T_mult=parameters["scheduler"]["T_mult"], eta_min=parameters["scheduler"]["min_lr"],
-        )
+        parameters["optimizer"],
+        T_0=parameters["scheduler"]["T_0"],
+        T_mult=parameters["scheduler"]["T_mult"],
+        eta_min=parameters["scheduler"]["min_lr"],
+    )
