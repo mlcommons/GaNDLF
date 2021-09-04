@@ -2,7 +2,8 @@
 
 - Misc bugfixes
 - Automatic check-pointing of the model has been added
-- Model initialization has been simplified
+- Model, scheduler, optimizer initialization has been simplified
+- New optimizers added
 
 ## 0.0.11
 

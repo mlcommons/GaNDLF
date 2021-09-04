@@ -1,7 +1,6 @@
 import sys
 import torch.optim as optim
 from torch.optim.lr_scheduler import *
-from GANDLF.schd import *
 from GANDLF.models.fcn import fcn
 from GANDLF.models.unet import unet
 from GANDLF.models.uinc import uinc
@@ -352,124 +351,124 @@ import torch.nn as nn
 #     return model, amp
 
 
-def get_optimizer(optimizer_name, model, learning_rate):
-    """
-    This function parses the optimizer from the config file and returns the appropriate object
-    """
-    model_parameters = model.parameters()
-    if optimizer_name == "sgd":
-        optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
-    elif optimizer_name == "adam":
-        optimizer = optim.Adam(
-            model_parameters, lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.00005
-        )
-    else:
-        print(
-            "WARNING: Could not find the requested optimizer '"
-            + optimizer_name
-            + "' in the implementation, using sgd, instead",
-            file=sys.stderr,
-        )
-        optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
+# def get_optimizer(optimizer_name, model, learning_rate):
+#     """
+#     This function parses the optimizer from the config file and returns the appropriate object
+#     """
+#     model_parameters = model.parameters()
+#     if optimizer_name == "sgd":
+#         optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
+#     elif optimizer_name == "adam":
+#         optimizer = optim.Adam(
+#             model_parameters, lr=learning_rate, betas=(0.9, 0.999), weight_decay=0.00005
+#         )
+#     else:
+#         print(
+#             "WARNING: Could not find the requested optimizer '"
+#             + optimizer_name
+#             + "' in the implementation, using sgd, instead",
+#             file=sys.stderr,
+#         )
+#         optimizer = optim.SGD(model_parameters, lr=learning_rate, momentum=0.9)
 
-    return optimizer
+#     return optimizer
 
 
-def get_scheduler(
-    which_scheduler, optimizer, batch_size, training_samples_size, learning_rate
-):
-    """
-    This function parses the optimizer from the config file and returns the appropriate object
-    """
-    step_size = 4 * batch_size * training_samples_size
-    if which_scheduler == "triangle":
-        clr = cyclical_lr(step_size, min_lr=10 ** -3, max_lr=1)
-        scheduler_lr = LambdaLR(optimizer, [clr])
-        print("Initial Learning Rate: ", learning_rate)
-    elif which_scheduler == "triangle_modified":
-        step_size = training_samples_size / learning_rate
-        clr = cyclical_lr_modified(step_size)
-        scheduler_lr = LambdaLR(optimizer, [clr])
-        print("Initial Learning Rate: ", learning_rate)
-    elif which_scheduler == "exp":
-        scheduler_lr = ExponentialLR(optimizer, learning_rate, last_epoch=-1)
-    elif which_scheduler == "step":
-        scheduler_lr = StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
-    elif which_scheduler == "reduce-on-plateau":
-        scheduler_lr = ReduceLROnPlateau(
-            optimizer,
-            mode="min",
-            factor=0.1,
-            patience=10,
-            threshold=0.0001,
-            threshold_mode="rel",
-            cooldown=0,
-            min_lr=0,
-            eps=1e-08,
-            verbose=False,
-        )
-    elif which_scheduler == "triangular":
-        scheduler_lr = CyclicLR(
-            optimizer,
-            learning_rate * 0.001,
-            learning_rate,
-            step_size_up=step_size,
-            step_size_down=None,
-            mode="triangular",
-            gamma=1.0,
-            scale_fn=None,
-            scale_mode="cycle",
-            cycle_momentum=False,
-            base_momentum=0.8,
-            max_momentum=0.9,
-            last_epoch=-1,
-        )
-    elif which_scheduler == "triangular2":
-        scheduler_lr = CyclicLR(
-            optimizer,
-            learning_rate * 0.001,
-            learning_rate,
-            step_size_up=step_size,
-            step_size_down=None,
-            mode="triangular2",
-            gamma=1.0,
-            scale_fn=None,
-            scale_mode="cycle",
-            cycle_momentum=False,
-            base_momentum=0.8,
-            max_momentum=0.9,
-            last_epoch=-1,
-        )
-    elif which_scheduler == "exp_range":
-        scheduler_lr = CyclicLR(
-            optimizer,
-            learning_rate * 0.001,
-            learning_rate,
-            step_size_up=step_size,
-            step_size_down=None,
-            mode="exp_range",
-            gamma=1.0,
-            scale_fn=None,
-            scale_mode="cycle",
-            cycle_momentum=False,
-            base_momentum=0.8,
-            max_momentum=0.9,
-            last_epoch=-1,
-        )
-    elif which_scheduler == "cosineannealing":
-        scheduler_lr = CosineAnnealingWarmRestarts(
-            optimizer, T_0=5, T_mult=1, eta_min=1e-6, last_epoch=-1
-        )
-    else:
-        print(
-            "WARNING: Could not find the requested Learning Rate scheduler '"
-            + which_scheduler
-            + "' in the implementation, using exp, instead",
-            file=sys.stderr,
-        )
-        scheduler_lr = ExponentialLR(optimizer, 0.1, last_epoch=-1)
+# def get_scheduler(
+#     which_scheduler, optimizer, batch_size, training_samples_size, learning_rate
+# ):
+#     """
+#     This function parses the optimizer from the config file and returns the appropriate object
+#     """
+#     step_size = 4 * batch_size * training_samples_size
+#     if which_scheduler == "triangle":
+#         clr = cyclical_lr(step_size, min_lr=10 ** -3, max_lr=1)
+#         scheduler_lr = LambdaLR(optimizer, [clr])
+#         print("Initial Learning Rate: ", learning_rate)
+#     elif which_scheduler == "triangle_modified":
+#         step_size = training_samples_size / learning_rate
+#         clr = cyclical_lr_modified(step_size)
+#         scheduler_lr = LambdaLR(optimizer, [clr])
+#         print("Initial Learning Rate: ", learning_rate)
+#     elif which_scheduler == "exp":
+#         scheduler_lr = ExponentialLR(optimizer, learning_rate, last_epoch=-1)
+#     elif which_scheduler == "step":
+#         scheduler_lr = StepLR(optimizer, step_size, gamma=0.1, last_epoch=-1)
+#     elif which_scheduler == "reduce-on-plateau":
+#         scheduler_lr = ReduceLROnPlateau(
+#             optimizer,
+#             mode="min",
+#             factor=0.1,
+#             patience=10,
+#             threshold=0.0001,
+#             threshold_mode="rel",
+#             cooldown=0,
+#             min_lr=0,
+#             eps=1e-08,
+#             verbose=False,
+#         )
+#     elif which_scheduler == "triangular":
+#         scheduler_lr = CyclicLR(
+#             optimizer,
+#             learning_rate * 0.001,
+#             learning_rate,
+#             step_size_up=step_size,
+#             step_size_down=None,
+#             mode="triangular",
+#             gamma=1.0,
+#             scale_fn=None,
+#             scale_mode="cycle",
+#             cycle_momentum=False,
+#             base_momentum=0.8,
+#             max_momentum=0.9,
+#             last_epoch=-1,
+#         )
+#     elif which_scheduler == "triangular2":
+#         scheduler_lr = CyclicLR(
+#             optimizer,
+#             learning_rate * 0.001,
+#             learning_rate,
+#             step_size_up=step_size,
+#             step_size_down=None,
+#             mode="triangular2",
+#             gamma=1.0,
+#             scale_fn=None,
+#             scale_mode="cycle",
+#             cycle_momentum=False,
+#             base_momentum=0.8,
+#             max_momentum=0.9,
+#             last_epoch=-1,
+#         )
+#     elif which_scheduler == "exp_range":
+#         scheduler_lr = CyclicLR(
+#             optimizer,
+#             learning_rate * 0.001,
+#             learning_rate,
+#             step_size_up=step_size,
+#             step_size_down=None,
+#             mode="exp_range",
+#             gamma=1.0,
+#             scale_fn=None,
+#             scale_mode="cycle",
+#             cycle_momentum=False,
+#             base_momentum=0.8,
+#             max_momentum=0.9,
+#             last_epoch=-1,
+#         )
+#     elif which_scheduler == "cosineannealing":
+#         scheduler_lr = CosineAnnealingWarmRestarts(
+#             optimizer, T_0=5, T_mult=1, eta_min=1e-6, last_epoch=-1
+#         )
+#     else:
+#         print(
+#             "WARNING: Could not find the requested Learning Rate scheduler '"
+#             + which_scheduler
+#             + "' in the implementation, using exp, instead",
+#             file=sys.stderr,
+#         )
+#         scheduler_lr = ExponentialLR(optimizer, 0.1, last_epoch=-1)
 
-    return scheduler_lr
+#     return scheduler_lr
 
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):

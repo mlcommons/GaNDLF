@@ -11,6 +11,8 @@ from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.cli.main_run import main_run
 from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.optimizers import global_optimizer_dict
 
 device = "cpu"
 ## global defines
@@ -23,17 +25,6 @@ all_models_segmentation = [
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = ["densenet121", "vgg16"]
-all_schedulers = [
-    "triangle",
-    "triangle_modified",
-    "exp",
-    "step",
-    "reduce-on-plateau",
-    "cosineannealing",
-    "triangular",
-    "triangular2",
-    "exp_range",
-]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -522,9 +513,46 @@ def test_scheduler_classification_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
     # loop through selected models and train for single epoch
-    for scheduler in all_schedulers:
-        parameters["scheduler"] = scheduler
-        shutil.rmtree(outputDir)  # overwrite previous results
+    for scheduler in global_schedulers_dict:
+        parameters["scheduler"] = {}
+        parameters["scheduler"]["type"] = scheduler
+        if os.path.exists(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            reset_prev=True,
+        )
+
+    shutil.rmtree(outputDir)
+    print("passed")
+
+
+def test_optimizer_classification_rad_2d(device):
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = True
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "densenet121"
+    # loop through selected models and train for single epoch
+    for optimizer in global_optimizer_dict:
+        parameters["optimizer"] = {}
+        parameters["optimizer"]["type"] = optimizer
+        if os.path.exists(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
             dataframe=training_data,
