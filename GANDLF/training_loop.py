@@ -635,7 +635,7 @@ def validate_network(
         )
 
     if scheduler is not None:
-        if params["scheduler"] == "reduce-on-plateau":
+        if params["scheduler"]["type"] in ["reduce_on_plateau", "reduce-on-plateau", "plateau", "reduceonplateau"]:
             scheduler.step(average_epoch_valid_loss)
         else:
             scheduler.step()
