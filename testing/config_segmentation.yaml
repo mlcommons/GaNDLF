@@ -35,7 +35,7 @@ scheduler: triangle
 loss_function: dc
 weighted_loss: True
 # Which optimizer do you want to use - adam/sgd
-opt: adam
+optimizer: adam
 # the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
 # randomized split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
