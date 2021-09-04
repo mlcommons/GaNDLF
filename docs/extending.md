@@ -56,9 +56,7 @@ pip install -e .
 
 ## Adding Models
 
-- Add model code in [./GANDLF/models/](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/models/)
-- Update initialization in [./GANDLF/parameterParsing](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/parameterParsing.py)
-- Ensure both 2D and 3D datasets are supported (an easy way to do this is to inherit from [./GANDLF/models/modelBase](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/models/modelBase.py))
+- For details, please see [README for `GANDLF.models` submodule](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/models/README.md).
 
 [Back To Top &uarr;](#table-of-contents)
 
