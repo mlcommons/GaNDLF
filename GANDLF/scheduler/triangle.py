@@ -16,7 +16,7 @@ def cyclical_lr(stepsize, min_lr, max_lr):
     return lr_lambda
 
 
-def cyclical_lr_modified(cycle_length, min_lr=0.000001, max_lr=0.001):
+def cyclical_lr_modified(cycle_length, min_lr, max_lr, max_lr_multiplier):
     min_lr_multiplier = min_lr / max_lr
     max_lr_multiplier = 1.0
     # Lambda function to calculate what to multiply the initial learning rate by
@@ -40,15 +40,14 @@ def base_triangle(parameters):
     """
     This function parses the parameters from the config file and returns the appropriate object
     """
-    step_size = (
-        4 * parameters["batch_size"] * parameters["training_samples_size"]
-    )  # the latter needs to be added to the parameters in the training_loop, along with the optimizer
+    step_size = 4 * parameters["batch_size"] * parameters["training_samples_size"]
+
     # pick defaults for "min_lr", "max_lr" if not present in parameters
-    # this should probably happen in parseConfig
     if not ("min_lr" in parameters["scheduler"]):
         parameters["scheduler"]["min_lr"] = 10 ** -3
     if not ("max_lr" in parameters["scheduler"]):
         parameters["scheduler"]["max_lr"] = 1
+
     clr = cyclical_lr(
         step_size,
         min_lr=parameters["scheduler"]["min_lr"],
@@ -59,11 +58,19 @@ def base_triangle(parameters):
 
 def triangle_modified(parameters):
     step_size = parameters["training_samples_size"] / parameters["learning_rate"]
-    # pick defaults for "min_lr", "max_lr" if not present in parameters
-    # this should probably happen in parseConfig
+
+    # pick defaults for "min_lr", "max_lr", "max_lr_multiplier" if not present in parameters
     if not ("min_lr" in parameters["scheduler"]):
         parameters["scheduler"]["min_lr"] = 0.000001
     if not ("max_lr" in parameters["scheduler"]):
         parameters["scheduler"]["max_lr"] = 0.001
-    clr = cyclical_lr_modified(step_size)
+    if not ("max_lr_multiplier" in parameters["scheduler"]):
+        parameters["scheduler"]["max_lr_multiplier"] = 1.0
+
+    clr = cyclical_lr_modified(
+        step_size,
+        parameters["scheduler"]["min_lr"],
+        parameters["scheduler"]["max_lr"],
+        parameters["scheduler"]["max_lr_multiplier"],
+    )
     return LambdaLR(parameters["optimizer"], [clr])
