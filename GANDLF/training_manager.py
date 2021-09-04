@@ -4,7 +4,7 @@ from sklearn.model_selection import KFold
 from pathlib import Path
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.training_loop import training_loop
+from GANDLF.compute import training_loop
 
 
 def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
