@@ -4,7 +4,7 @@ Implementation of functions to clip gradients
 """
 
 import torch
-from GANDLF.misc_utils.adaptive_gradient_clipping import adaptive_gradient_clip_
+from GANDLF.grad_clipping.adaptive_gradient_clipping import adaptive_gradient_clip_
 
 
 def dispatch_clip_grad_(
