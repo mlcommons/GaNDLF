@@ -83,3 +83,14 @@ def adadelta(parameters, model_parameters):
     if not ("weight_decay" in parameters["optimizer"]):
         parameters["optimizer"]["weight_decay"] = 0
     return Adadelta(model_parameters, lr=parameters["learning_rate"], rho=parameters["optimizer"]["rho"], eps=parameters["optimizer"]["eps"], weight_decay=parameters["optimizer"]["weight_decay"])
+
+def adagrad(parameters, model_parameters):
+    # pick defaults
+    if not ("lr_decay" in parameters["optimizer"]):
+        parameters["optimizer"]["lr_decay"] = 0
+    if not ("eps" in parameters["optimizer"]):
+        parameters["optimizer"]["eps"] = 1e-6
+    if not ("weight_decay" in parameters["optimizer"]):
+        parameters["optimizer"]["weight_decay"] = 0
+    
+    return Adagrad(model_parameters, lr=parameters["learning_rate"], lr_decay=parameters["optimizer"]["lr_decay"], eps=parameters["optimizer"]["eps"], weight_decay=parameters["optimizer"]["weight_decay"])
