@@ -1,4 +1,4 @@
-from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR, StepLR
+from torch.optim.lr_scheduler import LambdaLR, CyclicLR, ExponentialLR, StepLR, ReduceLROnPlateau
 import math
 
 
@@ -120,3 +120,32 @@ def step(parameters):
     if not ("gamma" in parameters["scheduler"]):
         parameters["scheduler"]["gamma"] = 0.1
     return StepLR(parameters["optimizer"], parameters["step_size"], gamma=parameters["learning_rate"])
+
+def reduce_on_plateau(parameters):
+    if not ("min_lr" in parameters["scheduler"]):
+        parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
+    if not ("gamma" in parameters["scheduler"]):
+        parameters["scheduler"]["gamma"] = 0.1
+    if not ("mode" in parameters["scheduler"]):
+        parameters["scheduler"]["mde"] = "min"
+    if not ("threshold_mode" in parameters["scheduler"]):
+        parameters["scheduler"]["threshold_mode"] = "rel"
+    if not ("factor" in parameters["scheduler"]):
+        parameters["scheduler"]["factor"] = 0.1
+    if not ("patience" in parameters["scheduler"]):
+        parameters["scheduler"]["patience"] = 10
+    if not ("threshold" in parameters["scheduler"]):
+        parameters["scheduler"]["threshold"] = 0.0001
+    if not ("cooldown" in parameters["scheduler"]):
+        parameters["scheduler"]["cooldown"] = 0
+    
+    return ReduceLROnPlateau(
+            parameters["optimizer"],
+            mode=parameters["scheduler"]["mde"],
+            factor=parameters["scheduler"]["factor"],
+            patience=parameters["scheduler"]["patience"],
+            threshold=parameters["scheduler"]["threshold"],
+            threshold_mode=parameters["scheduler"]["threshold_mode"],
+            cooldown=parameters["scheduler"]["cooldown"],
+            min_lr=parameters["scheduler"]["min_lr"],
+        )
