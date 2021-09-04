@@ -756,8 +756,9 @@ def training_loop(
         params["weights"], params["class_weights"] = None, None
 
     # Fetch the optimizers
+    params["model_parameters"] = model.parameters()
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](
-        params, model.parameters()
+        params
     )
     params["optimizer_object"] = optimizer
 
@@ -767,6 +768,11 @@ def training_loop(
         )
 
     scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
+
+    # these keys contain generators, and are not needed beyond this point in params
+    generator_keys_to_remove = ["optimizer_object", "model_parameters"]
+    for key in generator_keys_to_remove:
+        params.pop(key, None)
 
     # Start training time here
     start_time = time.time()
