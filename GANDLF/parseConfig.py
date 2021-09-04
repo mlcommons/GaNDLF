@@ -466,6 +466,7 @@ def parseConfig(config_file_path, version_check=True):
         parallel_compute_command = parallel_compute_command.replace('"', "")
     params["parallel_compute_command"] = parallel_compute_command
 
+    # define defaults
     for current_parameter in parameter_defaults:
         params = initialize_parameter(
             params, current_parameter, parameter_defaults[current_parameter], True
@@ -478,5 +479,11 @@ def parseConfig(config_file_path, version_check=True):
             parameter_defaults_string[current_parameter],
             False,
         )
+
+    # ensure that the scheduler is a dict
+    if isinstance(params["scheduler"], str):
+        temp_dict = {}
+        temp_dict["type"] = params["scheduler"]
+        params["scheduler"] = temp_dict
 
     return params
