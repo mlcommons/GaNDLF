@@ -26,7 +26,7 @@ parameter_defaults = {
 
 ## dictionary to define string defaults for appropriate options
 parameter_defaults_string = {
-    "opt": "adam",  # the optimizer
+    "optimizer": "adam",  # the optimizer
     "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "loss_function": "dc",  # default loss
@@ -466,6 +466,10 @@ def parseConfig(config_file_path, version_check=True):
         parallel_compute_command = parallel_compute_command.replace('"', "")
     params["parallel_compute_command"] = parallel_compute_command
 
+    if "opt" in params:
+        DeprecationWarning("'opt' has been superceded by 'optimizer'")
+        params["optimizer"] = params["opt"]
+    
     # define defaults
     for current_parameter in parameter_defaults:
         params = initialize_parameter(
@@ -480,10 +484,15 @@ def parseConfig(config_file_path, version_check=True):
             False,
         )
 
-    # ensure that the scheduler is a dict
+    # ensure that the scheduler and optimizer are dicts
     if isinstance(params["scheduler"], str):
         temp_dict = {}
         temp_dict["type"] = params["scheduler"]
         params["scheduler"] = temp_dict
+        
+    if isinstance(params["optimizer"], str):
+        temp_dict = {}
+        temp_dict["type"] = params["optimizer"]
+        params["optimizer"] = temp_dict
 
     return params
