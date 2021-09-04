@@ -1,4 +1,4 @@
-from torch.optim import  SGD, ASGD, Rprop, Adam, AdamW, SparseAdam, Adamax, Adadelta, Adagrad, RMSprop, LBFGS
+from torch.optim import  SGD, ASGD, Rprop, Adam, AdamW, SparseAdam, Adamax, Adadelta, Adagrad, RMSprop
 
 def sgd(parameters, model_parameters):
     # pick defaults
