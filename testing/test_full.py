@@ -516,7 +516,8 @@ def test_scheduler_classification_rad_2d(device):
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
         parameters["scheduler"]["type"] = scheduler
-        shutil.rmtree(outputDir)  # overwrite previous results
+        if os.path.exists(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
             dataframe=training_data,
@@ -550,7 +551,8 @@ def test_optimizer_classification_rad_2d(device):
     for optimizer in global_optimizer_dict:
         parameters["optimizer"] = {}
         parameters["optimizer"]["type"] = optimizer
-        shutil.rmtree(outputDir)  # overwrite previous results
+        if os.path.exists(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
             dataframe=training_data,
