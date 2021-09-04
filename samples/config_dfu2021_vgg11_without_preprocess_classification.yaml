@@ -52,7 +52,7 @@ weighted_loss: True
 #    }
 #  }
 # Which optimizer do you want to use - adam/sgd
-opt: adam
+optimizer: adam
 # this parameter controls the nested training process
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method

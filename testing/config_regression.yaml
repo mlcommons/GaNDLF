@@ -23,7 +23,7 @@ nested_training:
   testing: -2
   validation: -2
 num_epochs: 1
-opt: adam
+optimizer: adam
 parallel_compute_command: ''
 patch_sampler: uniform
 patch_size: 

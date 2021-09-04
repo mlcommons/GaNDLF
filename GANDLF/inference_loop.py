@@ -14,7 +14,6 @@ from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.schd import *
 from GANDLF.utils import *
 from .parameterParsing import *
 from GANDLF.models import global_models_dict
