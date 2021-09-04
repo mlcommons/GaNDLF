@@ -11,6 +11,7 @@ from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.cli.main_run import main_run
 from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.scheduler import global_schedulers_dict
 
 device = "cpu"
 ## global defines
@@ -23,17 +24,6 @@ all_models_segmentation = [
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = ["densenet121", "vgg16"]
-all_schedulers = [
-    "triangle",
-    "triangle_modified",
-    "exp",
-    "step",
-    "reduce-on-plateau",
-    "cosineannealing",
-    "triangular",
-    "triangular2",
-    "exp_range",
-]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -522,8 +512,9 @@ def test_scheduler_classification_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
     # loop through selected models and train for single epoch
-    for scheduler in all_schedulers:
-        parameters["scheduler"] = scheduler
+    for scheduler in global_schedulers_dict:
+        parameters["scheduler"] = {}
+        parameters["scheduler"]["type"] = scheduler
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
