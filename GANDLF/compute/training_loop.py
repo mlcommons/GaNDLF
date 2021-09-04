@@ -5,8 +5,8 @@ import torchio
 from medcam import medcam
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.misc_utils.grad_scaler import GradScaler, model_parameters_exclude_head
-from GANDLF.misc_utils.clip_gradients import dispatch_clip_grad_
+from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.models import global_models_dict
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
