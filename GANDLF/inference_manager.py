@@ -1,4 +1,4 @@
-from GANDLF.inference_loop import inference_loop
+from GANDLF.compute import inference_loop
 import os
 import numpy as np
 import torch
