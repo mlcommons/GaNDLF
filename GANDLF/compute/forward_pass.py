@@ -7,7 +7,7 @@ import torchio
 
 from GANDLF.utils import get_date_time, get_filename_extension_sanitized, reverse_one_hot, resample_image
 from .step import step
-
+from .loss_and_metric import get_loss_and_metrics
 
 def validate_network(
     model, valid_dataloader, scheduler, params, epoch=0, mode="validation"
@@ -363,9 +363,10 @@ def validate_network(
                 )
 
             # # Non network validing related
+            # loss.cpu().data.item()
             total_epoch_valid_loss += (
                 final_loss.cpu().data.item()
-            )  # loss.cpu().data.item()
+            )  
             for metric in final_metric.keys():
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]
