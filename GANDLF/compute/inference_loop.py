@@ -2,9 +2,7 @@ from .forward_pass import validate_network
 import os
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
-os.environ[
-    "TORCHIO_HIDE_CITATION_PROMPT"
-] = "1"  
+os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 import pickle, argparse, torch
 import numpy as np
