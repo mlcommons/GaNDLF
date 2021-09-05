@@ -219,13 +219,11 @@ def checkPatchDivisibility(patch_size, number=16):
         patch_size_to_check = np.array(patch_size)
     else:
         patch_size_to_check = patch_size
-    if (
-        patch_size_to_check[-1] == 1
-    ):  # for 2D, don't check divisibility of last dimension
+    # for 2D, don't check divisibility of last dimension
+    if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
-    elif (
-        patch_size_to_check[0] == 1
-    ):  # for 2D, don't check divisibility of first dimension
+    # for 2D, don't check divisibility of first dimension
+    elif patch_size_to_check[0] == 1:
         patch_size_to_check = patch_size_to_check[1:]
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
         return False
@@ -711,13 +709,11 @@ def get_tensor_for_dataloader(input_sitk_image):
     This function obtains the tensor to load into the data loader
     """
     temp_array = sitk.GetArrayFromImage(input_sitk_image)
-    if (
-        temp_array.dtype == np.uint16
-    ):  # this is a contingency, because torch cannot convert this
+    # this is a contingency, because torch cannot convert this
+    if temp_array.dtype == np.uint16:
         temp_array = temp_array.astype(np.int32)
-    input_image_tensor = torch.from_numpy(temp_array).unsqueeze(
-        0
-    )  # single unsqueeze is always needed
+    # single unsqueeze is always needed
+    input_image_tensor = torch.from_numpy(temp_array).unsqueeze(0)
     if len(input_image_tensor.shape) == 3:  # this is for 2D images
         input_image_tensor = input_image_tensor.unsqueeze(0)
     return input_image_tensor
