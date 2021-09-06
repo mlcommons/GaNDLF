@@ -1,4 +1,5 @@
 import os, sys
+import pandas as pd
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     """
