@@ -12,7 +12,6 @@ import SimpleITK as sitk
 
 from GANDLF.utils import (
     perform_sanity_check_on_subject,
-    get_tensor_for_dataloader,
     resize_image,
 )
 from .preprocessing import global_preprocessing_dict
@@ -124,12 +123,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = img_resized.GetSpacing()
-                img_tensor = get_tensor_for_dataloader(img_resized)
-                subject_dict[str(channel)] = Image(
-                    tensor=img_tensor,
-                    type=torchio.INTENSITY,
-                    path=dataframe[channel][patient],
-                )
+                torchio.Image.from_sitk(img_resized)
+                subject_dict[str(channel)] = torchio.Image.from_sitk(img_resized)
 
         # # for regression
         # if predictionHeaders:
@@ -150,12 +145,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if resize_images:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
                 img_resized = resize_image(img, preprocessing["resize"])
-                img_tensor = get_tensor_for_dataloader(img_resized)
-                subject_dict["label"] = Image(
-                    tensor=img_tensor,
-                    type=torchio.LABEL,
-                    path=dataframe[channel][patient],
-                )
+                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
 
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
         else:

@@ -902,8 +902,8 @@ def test_preprocess_functions():
         input_image,
         [128, 128, 3],
     )
-    img_tensor = get_tensor_for_dataloader(img_resized)
-    assert img_tensor.shape == (1, 3, 128, 128), "Resampling should work"
+    temp_array = sitk.GetArrayFromImage(img_resized)
+    assert temp_array.shape == (3, 128, 128), "Resampling should work"
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
