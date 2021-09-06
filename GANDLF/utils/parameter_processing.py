@@ -1,5 +1,5 @@
-
 from GANDLF.models.modelBase import get_final_layer
+
 
 def populate_header_in_parameters(parameters, headers):
     """
@@ -67,7 +67,6 @@ def find_problem_type(parameters, model_final_layer):
         return "segmentation"
 
 
-
 def populate_channel_keys_in_params(data_loader, parameters):
     """
     Function to read channel key information from specified data loader
@@ -96,4 +95,3 @@ def populate_channel_keys_in_params(data_loader, parameters):
         parameters["value_keys"] = value_keys
 
     return parameters
-

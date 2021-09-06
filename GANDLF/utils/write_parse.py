@@ -1,6 +1,7 @@
 import os, sys
 import pandas as pd
 
+
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     """
     This function writes the CSV file based on the input directory, channelsID + labelsID strings
