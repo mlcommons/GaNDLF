@@ -8,7 +8,6 @@ import pickle, argparse, torch
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
-from torchio.transforms import *
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
