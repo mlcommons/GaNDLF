@@ -13,7 +13,10 @@ from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import *
+from GANDLF.utils import (
+    populate_channel_keys_in_params,
+    send_model_to_device
+)
 from GANDLF.models import global_models_dict
 
 
@@ -111,7 +114,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 patient_dataset_obj = InferTumorSegDataset(
                     row[parameters["headers"]["channelHeaders"]].values[0],
                     patch_size=patch_size,
-                    stride_size=stride,
+                    stride_size=parameters['stride_size'],
                     selected_level=parameters["slide_level"],
                     mask_level=4,
                 )
