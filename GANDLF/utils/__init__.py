@@ -1,3 +1,7 @@
+import os
+# hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
+
 from .sitk import (
     resample_image,
     resize_image,
