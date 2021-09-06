@@ -15,3 +15,9 @@ from .io import (
     writeTrainingCSV,
     parseTrainingCSV,
 )
+
+from .parameter_processing import (
+    populate_header_in_parameters,
+    find_problem_type,
+    populate_channel_keys_in_params,
+)
