@@ -75,15 +75,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    from testing.test_full import test_config_read, test_augmentation_functions, test_cli_function_preprocess, test_cli_function_mainrun, test_preprocess_functions, test_metrics_segmentation_rad_2d, test_train_segmentation_rad_2d
-    # test_config_read()
-    # test_cli_function_preprocess()
-    # test_cli_function_mainrun("cuda")
-    # test_preprocess_functions()
-    # test_augmentation_functions()
-    # test_metrics_segmentation_rad_2d("cuda")
-    test_train_segmentation_rad_2d("cuda")
-
     main_run(
         args.data, args.config, args.output, args.train, args.device, args.reset_prv
     )
