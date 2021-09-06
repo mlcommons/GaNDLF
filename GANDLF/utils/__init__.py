@@ -3,13 +3,13 @@ import os
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
-from .sitk import (
+from .imaging import (
     resample_image,
     resize_image,
     perform_sanity_check_on_subject,
 )
 
-from .torch import (
+from .tensor import (
     one_hot,
     reverse_one_hot,
     send_model_to_device,
