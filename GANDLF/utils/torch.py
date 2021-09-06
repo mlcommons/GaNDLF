@@ -2,6 +2,7 @@ import os, sys
 import numpy as np
 import torch
 import torch.nn as nn
+import torchio
 
 def one_hot(segmask_array, class_list):
     """
