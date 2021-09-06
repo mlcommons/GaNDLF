@@ -2,6 +2,7 @@ import sys, math
 import SimpleITK as sitk
 import numpy as np
 
+
 def resample_image(
     img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0
 ):

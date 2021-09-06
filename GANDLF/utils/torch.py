@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torchio
 
+
 def one_hot(segmask_array, class_list):
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
@@ -186,6 +187,7 @@ def send_model_to_device(model, amp, device, optimizer):
 
     return model, amp, device
 
+
 def get_class_imbalance_weights(training_data_loader, parameters):
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
@@ -260,4 +262,3 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         )
 
     return penalty_dict, weights_dict
-

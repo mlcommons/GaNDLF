@@ -1,6 +1,7 @@
 import os, datetime
 import numpy as np
 
+
 def checkPatchDivisibility(patch_size, number=16):
     """
     This function checks the divisibility of a numpy array or integer for architectural integrity
@@ -33,7 +34,6 @@ def checkPatchDivisibility(patch_size, number=16):
     return True
 
 
-
 def fix_paths(cwd):
     """
     This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
@@ -44,6 +44,7 @@ def fix_paths(cwd):
     if os.name == "nt":  # proceed for windows
         vipshome = os.path.join(cwd, "vips/vips-dev-8.10/bin")
         os.environ["PATH"] = vipshome + ";" + os.environ["PATH"]
+
 
 def get_date_time():
     """
