@@ -295,7 +295,7 @@ def training_loop(
     )
     train_logger.write_header(mode="train")
     valid_logger.write_header(mode="valid")
-    test_logger.write_header(mode="valid")
+    test_logger.write_header(mode="test")
 
     model, params["model"]["amp"], device = send_model_to_device(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer

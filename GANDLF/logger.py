@@ -32,19 +32,10 @@ class Logger:
     def write_header(self, mode="train"):
         self.csv = open(self.filename, "a")
         if os.stat(self.filename).st_size == 0:
-            row = ""
-            if mode.lower() == "train":
-                row += "epoch_no,train_loss,"
-                for metric in self.metrics:
-                    row += "train_" + metric + ","
-            elif mode.lower() == "test":
-                row += "epoch_no,test_loss,"
-                for metric in self.metrics:
-                    row += "testing_" + metric + ","
-            else:
-                row += "epoch_no,valid_loss,"
-                for metric in self.metrics:
-                    row += "validation_" + metric + ","
+            mode_lower = mode.lower()
+            row = "epoch_no," + mode_lower + "_loss,"
+            for metric in self.metrics:
+                row += mode_lower + "_" + metric + ","
             row = row[:-1]
             row += "\n"
             self.csv.write(row)
