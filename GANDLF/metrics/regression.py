@@ -2,7 +2,7 @@
 All the metrics are to be called from here
 """
 import torch
-from torchmetrics import F1
+from torchmetrics import F1, Precision, Recall
 
 
 def F1_score(output, label, params):
@@ -44,3 +44,11 @@ def accuracy(output, label, params):
         output = (output >= params["metrics"]["accuracy"]["threshold"]).float()
     correct = (output == label).float().sum()
     return correct / len(label)
+
+def Precision(output, label, params):
+    num_classes = params["model"]["num_classes"]
+    predicted_classes = torch.argmax(output, 1)
+    precision = Precision(average=params["metrics"]["precision"]["average"], num_classes=num_classes)
+
+    return precision(predicted_classes.cpu(), label.cpu())
+
