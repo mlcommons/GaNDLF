@@ -9,7 +9,10 @@ import numpy as np
 
 def F1_score(output, label, params):
     num_classes = params["model"]["num_classes"]
-    predicted_classes = torch.argmax(output, 1)
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
     f1 = F1(num_classes=num_classes)
     f1_score = f1(predicted_classes.cpu(), label.cpu())
 
@@ -17,7 +20,11 @@ def F1_score(output, label, params):
 
 
 def classification_accuracy(output, label, params):
-    acc = torch.sum(torch.argmax(output, 1) == label) / len(label)
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
+    acc = torch.sum(predicted_classes == label) / len(label)
     return acc
 
 
@@ -49,27 +56,29 @@ def accuracy(output, label, params):
 
 def precision_score(output, label, params):
     num_classes = params["model"]["num_classes"]
-    predicted_classes = torch.argmax(output, 1)
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
     precision = Precision(average=params["metrics"]["precision"]["average"], num_classes=num_classes)
 
     return precision(predicted_classes.cpu(), label.cpu())
 
-def recall_score(output, label, params):
-    num_classes = params["model"]["num_classes"]
-    predicted_classes = torch.argmax(output, 1)
-    recall = Recall(average=params["metrics"]["recall"]["average"], num_classes=num_classes)
-
-    return recall(predicted_classes.cpu(), label.cpu())
-
 def iou_score(output, label, params):
     num_classes = params["model"]["num_classes"]
-    predicted_classes = torch.argmax(output, 1)
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
     recall = IoU(reduction=params["metrics"]["iou"]["reduction"], num_classes=num_classes, threshold=params["metrics"]["iou"]["threshold"])
 
     return recall(predicted_classes.cpu(), label.cpu())
 
 def balanced_acc_score(output, label, params):
-    predicted_classes = torch.argmax(output, 1)
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
 
     return torch.from_numpy(np.array(balanced_accuracy_score(predicted_classes.cpu(), label.cpu())))
 
