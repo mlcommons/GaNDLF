@@ -3,7 +3,7 @@ All the metrics are to be called from here
 """
 from GANDLF.losses.regression import MSE_loss, CEL
 from .segmentation import multi_class_dice, hd100, hd95
-from .regression import accuracy, F1_score, classification_accuracy, precision_score, recall_score, iou_score
+from .regression import accuracy, F1_score, classification_accuracy, precision_score, recall_score, iou_score, balanced_acc_score
 
 
 # global defines for the metrics
@@ -23,4 +23,5 @@ global_metrics_dict = {
     "precision": precision_score,
     "recall": recall_score,
     "iou": iou_score,
+    "balanced_accuracy": balanced_acc_score,
 }

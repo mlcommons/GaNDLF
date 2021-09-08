@@ -3,6 +3,8 @@ All the metrics are to be called from here
 """
 import torch
 from torchmetrics import F1, Precision, Recall, IoU
+from sklearn.metrics import balanced_accuracy_score
+import numpy as np
 
 
 def F1_score(output, label, params):
@@ -65,4 +67,9 @@ def iou_score(output, label, params):
     recall = IoU(reduction=params["metrics"]["iou"]["reduction"], num_classes=num_classes, threshold=params["metrics"]["iou"]["threshold"])
 
     return recall(predicted_classes.cpu(), label.cpu())
+
+def balanced_acc_score(output, label, params):
+    predicted_classes = torch.argmax(output, 1)
+
+    return torch.from_numpy(np.array(balanced_accuracy_score(predicted_classes.cpu(), label.cpu())))
 
