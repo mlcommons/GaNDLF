@@ -208,6 +208,12 @@ def parseConfig(config_file_path, version_check=True):
             elif "accuracy" in metric:
                 temp_dict["accuracy"] = metric["accuracy"]
                 temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "threshold", 0.5)
+            elif "f1" in metric:
+                temp_dict["f1"] = metric["f1"]
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "mdmc_average", "samplewise")
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
             elif "precision" in metric:
                 temp_dict["precision"] = metric["precision"]
                 temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "weighted")
@@ -236,6 +242,13 @@ def parseConfig(config_file_path, version_check=True):
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "multi_class", True)
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "mdmc_average", "samplewise")
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "threshold", 0.5)
+            
+        # special case for f1
+        if "f1" in params["metrics"]:
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "mdmc_average", "samplewise")
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
             
         # special case for recall
         if "recall" in params["metrics"]:
