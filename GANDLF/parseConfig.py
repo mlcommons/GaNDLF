@@ -208,14 +208,20 @@ def parseConfig(config_file_path, version_check=True):
                 temp_dict["accuracy"] = metric["accuracy"]
             elif "precision" in metric:
                 temp_dict["precision"] = metric["precision"]
+            elif "recall" in metric:
+                temp_dict["recall"] = metric["recall"]
 
         # special case for accuracy
         if "accuracy" in params["metrics"]:
             temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "threshold", 0.5)
 
-        # special case for accuracy
+        # special case for precision
         if "precision" in params["metrics"]:
             temp_dict = initialize_key(temp_dict["precision"], "average", "micro")
+            
+        # special case for recall
+        if "recall" in params["metrics"]:
+            temp_dict = initialize_key(temp_dict["recall"], "average", "micro")
             
         params["metrics"] = temp_dict
 
