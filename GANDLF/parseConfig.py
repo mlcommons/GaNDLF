@@ -217,11 +217,11 @@ def parseConfig(config_file_path, version_check=True):
 
         # special case for precision
         if "precision" in params["metrics"]:
-            temp_dict = initialize_key(temp_dict["precision"], "average", "micro")
+            temp_dict = initialize_key(temp_dict["precision"], "average", "weighted")
             
         # special case for recall
         if "recall" in params["metrics"]:
-            temp_dict = initialize_key(temp_dict["recall"], "average", "micro")
+            temp_dict = initialize_key(temp_dict["recall"], "average", "weighted")
             
         params["metrics"] = temp_dict
 
