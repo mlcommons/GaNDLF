@@ -20,6 +20,7 @@ metrics:
   - dice
   - precision
   - iou
+  - f1
   - recall: {
       average: macro,
     }
