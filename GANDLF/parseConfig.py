@@ -211,6 +211,8 @@ def parseConfig(config_file_path, version_check=True):
                 temp_dict["precision"] = metric["precision"]
             elif "recall" in metric:
                 temp_dict["recall"] = metric["recall"]
+            elif "iou" in metric:
+                temp_dict["iou"] = metric["iou"]
 
         ## need to find a better way to do this
         # special case for accuracy
@@ -224,6 +226,11 @@ def parseConfig(config_file_path, version_check=True):
         # special case for recall
         if "recall" in params["metrics"]:
             temp_dict = initialize_key(temp_dict["recall"], "average", "weighted")
+        
+        # special case for iou
+        if "iou" in params["metrics"]:
+            temp_dict = initialize_key(temp_dict["iou"], "reduction", "elementwise_mean")
+            temp_dict = initialize_key(temp_dict["iou"], "threshold", 0.5)
             
         params["metrics"] = temp_dict
 
