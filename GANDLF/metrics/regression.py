@@ -54,16 +54,6 @@ def accuracy(output, label, params):
     correct = (output == label).float().sum()
     return correct / len(label)
 
-def precision_score(output, label, params):
-    num_classes = params["model"]["num_classes"]
-    if params["problem_type"] == "classification":
-        predicted_classes = torch.argmax(output, 1)
-    else:
-        predicted_classes = output
-    precision = Precision(average=params["metrics"]["precision"]["average"], num_classes=num_classes)
-
-    return precision(predicted_classes.cpu(), label.cpu())
-
 def iou_score(output, label, params):
     num_classes = params["model"]["num_classes"]
     if params["problem_type"] == "classification":

@@ -211,6 +211,8 @@ def parseConfig(config_file_path, version_check=True):
             elif "precision" in metric:
                 temp_dict["precision"] = metric["precision"]
                 temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "weighted")
+                temp_dict["precision"] = initialize_key(temp_dict["precision"], "multi_class", True)
+                temp_dict["precision"] = initialize_key(temp_dict["precision"], "mdmc_average", "samplewise")
             elif "recall" in metric:
                 temp_dict["recall"] = metric["recall"]
                 temp_dict["recall"] = initialize_key(temp_dict["recall"], "average", "weighted")
@@ -229,6 +231,8 @@ def parseConfig(config_file_path, version_check=True):
         # special case for precision
         if "precision" in params["metrics"]:
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "weighted")
+            temp_dict["precision"] = initialize_key(temp_dict["precision"], "multi_class", True)
+            temp_dict["precision"] = initialize_key(temp_dict["precision"], "mdmc_average", "samplewise")
             
         # special case for recall
         if "recall" in params["metrics"]:
