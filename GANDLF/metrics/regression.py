@@ -7,18 +7,6 @@ from sklearn.metrics import balanced_accuracy_score
 import numpy as np
 
 
-def F1_score(output, label, params):
-    num_classes = params["model"]["num_classes"]
-    if params["problem_type"] == "classification":
-        predicted_classes = torch.argmax(output, 1)
-    else:
-        predicted_classes = output
-    f1 = F1(num_classes=num_classes)
-    f1_score = f1(predicted_classes.cpu(), label.cpu())
-
-    return f1_score
-
-
 def classification_accuracy(output, label, params):
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(output, 1)

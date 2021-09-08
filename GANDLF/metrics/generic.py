@@ -25,6 +25,10 @@ def precision_score(output, label, params):
     return generic_torchmetrics_score(output, label, Precision, "precision", params)
 
 
+def f1_score(output, label, params):
+    return generic_torchmetrics_score(output, label, F1, "f1", params)
+
+
 def iou_score(output, label, params):
     num_classes = params["model"]["num_classes"]
     predicted_classes = output
