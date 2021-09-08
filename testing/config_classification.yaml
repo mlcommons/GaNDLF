@@ -17,6 +17,9 @@ metrics:
   - recall: {
       average: macro,
     }
+  - iou: {
+      reduction: sum,
+    }
     
 model:
   amp: false
