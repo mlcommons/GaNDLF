@@ -10,6 +10,9 @@ metrics:
   - cel
   - classification_accuracy
   - f1_score
+  - accuracy
+  - precision:
+    - average: weighted
 model:
   amp: false
   architecture: vgg16
