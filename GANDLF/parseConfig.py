@@ -1,4 +1,3 @@
-from GANDLF.metrics.regression import accuracy
 import sys, yaml, pkg_resources, ast
 import numpy as np
 
@@ -206,9 +205,9 @@ def parseConfig(config_file_path, version_check=True):
                 temp_dict[metric] = None
             # special case for accuracy and precision, which could be dicts
             elif "accuracy" in metric:
-                temp_dict["accuracy"] = metric
+                temp_dict["accuracy"] = metric["accuracy"]
             elif "precision" in metric:
-                temp_dict["precision"] = metric
+                temp_dict["precision"] = metric["precision"]
 
         # special case for accuracy
         if "accuracy" in params["metrics"]:
@@ -216,7 +215,7 @@ def parseConfig(config_file_path, version_check=True):
 
         # special case for accuracy
         if "precision" in params["metrics"]:
-            temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "micro")
+            temp_dict = initialize_key(temp_dict["precision"], "average", "micro")
             
         params["metrics"] = temp_dict
 
