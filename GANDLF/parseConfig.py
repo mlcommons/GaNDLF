@@ -1,3 +1,4 @@
+from GANDLF.metrics.regression import accuracy
 import sys, yaml, pkg_resources, ast
 import numpy as np
 
@@ -203,29 +204,20 @@ def parseConfig(config_file_path, version_check=True):
         for metric in params["metrics"]:
             if not isinstance(metric, dict):
                 temp_dict[metric] = None
-            # special case where accuracy and its threshold is defined
+            # special case for accuracy and precision, which could be dicts
             elif "accuracy" in metric:
-                temp_dict["accuracy"] = metric["accuracy"]
+                temp_dict["accuracy"] = metric
+            elif "precision" in metric:
+                temp_dict["precision"] = metric
 
         # special case for accuracy
         if "accuracy" in params["metrics"]:
-            if isinstance(params["metrics"], list):
-                temp_dict["accuracy"] = {}
-            else:
-                temp_dict["accuracy"] = params["metrics"]["accuracy"]
+            temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "threshold", 0.5)
 
-            # accuracy needs an associated threshold, if not defined, default to '0.5'
-            initialize_threshold = False
-            if isinstance(temp_dict["accuracy"], dict):
-                if "threshold" in temp_dict["accuracy"]:
-                    pass
-                else:
-                    initialize_threshold = True
-            else:
-                initialize_threshold = True
-
-            if initialize_threshold:
-                temp_dict["accuracy"]["threshold"] = 0.5
+        # special case for accuracy
+        if "precision" in params["metrics"]:
+            temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "micro")
+            
         params["metrics"] = temp_dict
 
     else:
