@@ -45,10 +45,17 @@ def accuracy(output, label, params):
     correct = (output == label).float().sum()
     return correct / len(label)
 
-def Precision(output, label, params):
+def precision_score(output, label, params):
     num_classes = params["model"]["num_classes"]
     predicted_classes = torch.argmax(output, 1)
     precision = Precision(average=params["metrics"]["precision"]["average"], num_classes=num_classes)
 
     return precision(predicted_classes.cpu(), label.cpu())
+
+def recall_score(output, label, params):
+    num_classes = params["model"]["num_classes"]
+    predicted_classes = torch.argmax(output, 1)
+    recall = Recall(average=params["metrics"]["recall"]["average"], num_classes=num_classes)
+
+    return recall(predicted_classes.cpu(), label.cpu())
 
