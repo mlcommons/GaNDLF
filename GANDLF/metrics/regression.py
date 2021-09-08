@@ -2,7 +2,6 @@
 All the metrics are to be called from here
 """
 import torch
-from torchmetrics import F1, Precision, Recall, IoU
 from sklearn.metrics import balanced_accuracy_score
 import numpy as np
 
