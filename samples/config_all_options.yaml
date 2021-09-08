@@ -28,6 +28,7 @@ metrics:
   # - mse # regression/classification
   # - classification_accuracy # regression/classification
   # - f1_score # regression/classification
+  # - precision # regression/classification ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
