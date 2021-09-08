@@ -18,6 +18,11 @@ model:
   }
 metrics:
   - dice
+  - precision
+  - iou
+  - recall: {
+      average: macro,
+    }
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128]
 # Number of epochs
