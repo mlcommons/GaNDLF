@@ -2,7 +2,7 @@
 All the metrics are to be called from here
 """
 import torch
-from torchmetrics import F1, Precision, Recall
+from torchmetrics import F1, Precision, Recall, IoU
 
 
 def F1_score(output, label, params):
@@ -56,6 +56,13 @@ def recall_score(output, label, params):
     num_classes = params["model"]["num_classes"]
     predicted_classes = torch.argmax(output, 1)
     recall = Recall(average=params["metrics"]["recall"]["average"], num_classes=num_classes)
+
+    return recall(predicted_classes.cpu(), label.cpu())
+
+def iou_score(output, label, params):
+    num_classes = params["model"]["num_classes"]
+    predicted_classes = torch.argmax(output, 1)
+    recall = IoU(reduction=params["metrics"]["iou"]["reduction"], num_classes=num_classes, threshold=params["metrics"]["iou"]["threshold"])
 
     return recall(predicted_classes.cpu(), label.cpu())
 
