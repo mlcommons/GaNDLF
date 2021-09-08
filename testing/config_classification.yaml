@@ -11,6 +11,7 @@ metrics:
   - classification_accuracy
   - f1_score
   - accuracy
+  - balanced_accuracy
   - precision: {
       average: weighted,
     }
