@@ -42,11 +42,13 @@ def accuracy(output, label, params):
     correct = (output == label).float().sum()
     return correct / len(label)
 
+
 def balanced_acc_score(output, label, params):
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(output, 1)
     else:
         predicted_classes = output
 
-    return torch.from_numpy(np.array(balanced_accuracy_score(predicted_classes.cpu(), label.cpu())))
-
+    return torch.from_numpy(
+        np.array(balanced_accuracy_score(predicted_classes.cpu(), label.cpu()))
+    )
