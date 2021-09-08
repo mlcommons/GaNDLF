@@ -204,6 +204,7 @@ def parseConfig(config_file_path, version_check=True):
             if not isinstance(metric, dict):
                 temp_dict[metric] = None
             # special case for accuracy, precision, and recall; which could be dicts
+            ## need to find a better way to do this
             elif "accuracy" in metric:
                 temp_dict["accuracy"] = metric["accuracy"]
             elif "precision" in metric:
@@ -211,6 +212,7 @@ def parseConfig(config_file_path, version_check=True):
             elif "recall" in metric:
                 temp_dict["recall"] = metric["recall"]
 
+        ## need to find a better way to do this
         # special case for accuracy
         if "accuracy" in params["metrics"]:
             temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "threshold", 0.5)
