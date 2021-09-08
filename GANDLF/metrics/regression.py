@@ -54,16 +54,6 @@ def accuracy(output, label, params):
     correct = (output == label).float().sum()
     return correct / len(label)
 
-def iou_score(output, label, params):
-    num_classes = params["model"]["num_classes"]
-    if params["problem_type"] == "classification":
-        predicted_classes = torch.argmax(output, 1)
-    else:
-        predicted_classes = output
-    recall = IoU(reduction=params["metrics"]["iou"]["reduction"], num_classes=num_classes, threshold=params["metrics"]["iou"]["threshold"])
-
-    return recall(predicted_classes.cpu(), label.cpu())
-
 def balanced_acc_score(output, label, params):
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(output, 1)

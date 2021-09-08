@@ -213,11 +213,13 @@ def parseConfig(config_file_path, version_check=True):
                 temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "weighted")
                 temp_dict["precision"] = initialize_key(temp_dict["precision"], "multi_class", True)
                 temp_dict["precision"] = initialize_key(temp_dict["precision"], "mdmc_average", "samplewise")
+                temp_dict["precision"] = initialize_key(temp_dict["precision"], "threshold", 0.5)
             elif "recall" in metric:
                 temp_dict["recall"] = metric["recall"]
                 temp_dict["recall"] = initialize_key(temp_dict["recall"], "average", "weighted")
                 temp_dict["recall"] = initialize_key(temp_dict["recall"], "multi_class", True)
                 temp_dict["recall"] = initialize_key(temp_dict["recall"], "mdmc_average", "samplewise")
+                temp_dict["recall"] = initialize_key(temp_dict["recall"], "threshold", 0.5)
             elif "iou" in metric:
                 temp_dict["iou"] = metric["iou"]
                 temp_dict["iou"] = initialize_key(temp_dict["iou"], "reduction", "elementwise_mean")
@@ -233,12 +235,14 @@ def parseConfig(config_file_path, version_check=True):
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "average", "weighted")
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "multi_class", True)
             temp_dict["precision"] = initialize_key(temp_dict["precision"], "mdmc_average", "samplewise")
+            temp_dict["precision"] = initialize_key(temp_dict["precision"], "threshold", 0.5)
             
         # special case for recall
         if "recall" in params["metrics"]:
             temp_dict["recall"] = initialize_key(temp_dict["recall"], "average", "weighted")
             temp_dict["recall"] = initialize_key(temp_dict["recall"], "multi_class", True)
             temp_dict["recall"] = initialize_key(temp_dict["recall"], "mdmc_average", "samplewise")
+            temp_dict["recall"] = initialize_key(temp_dict["recall"], "threshold", 0.5)
         
         # special case for iou
         if "iou" in params["metrics"]:
