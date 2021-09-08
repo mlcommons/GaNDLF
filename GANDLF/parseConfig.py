@@ -214,6 +214,8 @@ def parseConfig(config_file_path, version_check=True):
             elif "recall" in metric:
                 temp_dict["recall"] = metric["recall"]
                 temp_dict["recall"] = initialize_key(temp_dict["recall"], "average", "weighted")
+                temp_dict["recall"] = initialize_key(temp_dict["recall"], "multi_class", True)
+                temp_dict["recall"] = initialize_key(temp_dict["recall"], "mdmc_average", "samplewise")
             elif "iou" in metric:
                 temp_dict["iou"] = metric["iou"]
                 temp_dict["iou"] = initialize_key(temp_dict["iou"], "reduction", "elementwise_mean")
@@ -231,6 +233,8 @@ def parseConfig(config_file_path, version_check=True):
         # special case for recall
         if "recall" in params["metrics"]:
             temp_dict["recall"] = initialize_key(temp_dict["recall"], "average", "weighted")
+            temp_dict["recall"] = initialize_key(temp_dict["recall"], "multi_class", True)
+            temp_dict["recall"] = initialize_key(temp_dict["recall"], "mdmc_average", "samplewise")
         
         # special case for iou
         if "iou" in params["metrics"]:
