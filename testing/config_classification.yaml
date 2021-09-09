@@ -9,15 +9,15 @@ loss_function: cel
 metrics:
   - cel
   - classification_accuracy
-  - f1
+  - f1: {
+      average: weighted,
+    }
   - accuracy
   - balanced_accuracy
   - precision: {
       average: weighted,
     }
-  - recall: {
-      average: macro,
-    }
+  - recall
   - iou: {
       reduction: sum,
     }
