@@ -26,8 +26,12 @@ metrics:
   # - hausdorff95 # hausdorff 95 percentile, segmentation
   # - accuracy # regression/classification
   # - mse # regression/classification
-  # - classification_accuracy # regression/classification
-  # - f1_score # regression/classification
+  # - classification_accuracy # classification
+  # - balanced_accuracy # classification ## more details https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html
+  # - f1 # classification/segmentation
+  # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
+  # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4
+  # - iou # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#iou
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False

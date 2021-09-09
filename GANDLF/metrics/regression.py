@@ -2,20 +2,16 @@
 All the metrics are to be called from here
 """
 import torch
-from torchmetrics import F1
-
-
-def F1_score(output, label, params):
-    num_classes = params["model"]["num_classes"]
-    predicted_classes = torch.argmax(output, 1)
-    f1 = F1(num_classes=num_classes)
-    f1_score = f1(predicted_classes.cpu(), label.cpu())
-
-    return f1_score
+from sklearn.metrics import balanced_accuracy_score
+import numpy as np
 
 
 def classification_accuracy(output, label, params):
-    acc = torch.sum(torch.argmax(output, 1) == label) / len(label)
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
+    acc = torch.sum(predicted_classes == label) / len(label)
     return acc
 
 
@@ -44,3 +40,14 @@ def accuracy(output, label, params):
         output = (output >= params["metrics"]["accuracy"]["threshold"]).float()
     correct = (output == label).float().sum()
     return correct / len(label)
+
+
+def balanced_acc_score(output, label, params):
+    if params["problem_type"] == "classification":
+        predicted_classes = torch.argmax(output, 1)
+    else:
+        predicted_classes = output
+
+    return torch.from_numpy(
+        np.array(balanced_accuracy_score(predicted_classes.cpu(), label.cpu()))
+    )
