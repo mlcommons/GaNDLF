@@ -324,11 +324,25 @@ def parseConfig(config_file_path, version_check=True):
                         .astype("int")
                         .tolist(),
                     )
-
+            
+            # special case for swap default initialization
             if "swap" in params["data_augmentation"]:
                 params["data_augmentation"]["swap"] = initialize_key(
                     params["data_augmentation"]["swap"], "num_iterations", 100
                 )
+
+            # special case for affine default initialization
+            if "affine" in params["data_augmentation"]:
+                params["data_augmentation"]["affine"] = initialize_key(
+                    params["data_augmentation"]["affine"], "scale", 0.1
+                )
+                params["data_augmentation"]["affine"] = initialize_key(
+                    params["data_augmentation"]["affine"], "degrees", 15
+                )
+                params["data_augmentation"]["affine"] = initialize_key(
+                    params["data_augmentation"]["affine"], "translation", 2
+                )
+
 
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:
