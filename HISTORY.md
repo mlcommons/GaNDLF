@@ -4,6 +4,7 @@
 - Automatic check-pointing of the model has been added
 - Extending the codebase has been simplified
 - New optimizers added
+- New metrics added
 
 ## 0.0.11
 

@@ -230,7 +230,7 @@ def test_train_regression_rad_2d(device):
     )
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
+    parameters["model"]["amp"] = False
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"

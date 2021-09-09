@@ -9,7 +9,19 @@ loss_function: cel
 metrics:
   - cel
   - classification_accuracy
-  - f1_score
+  - f1: {
+      average: weighted,
+    }
+  - accuracy
+  - balanced_accuracy
+  - precision: {
+      average: weighted,
+    }
+  - recall
+  - iou: {
+      reduction: sum,
+    }
+    
 model:
   amp: false
   architecture: vgg16

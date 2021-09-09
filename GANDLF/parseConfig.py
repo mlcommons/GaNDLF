@@ -203,29 +203,107 @@ def parseConfig(config_file_path, version_check=True):
         for metric in params["metrics"]:
             if not isinstance(metric, dict):
                 temp_dict[metric] = None
-            # special case where accuracy and its threshold is defined
+            # special case for accuracy, precision, and recall; which could be dicts
+            ## need to find a better way to do this
             elif "accuracy" in metric:
                 temp_dict["accuracy"] = metric["accuracy"]
+                temp_dict["accuracy"] = initialize_key(
+                    temp_dict["accuracy"], "threshold", 0.5
+                )
+            elif "f1" in metric:
+                temp_dict["f1"] = metric["f1"]
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
+                temp_dict["f1"] = initialize_key(
+                    temp_dict["f1"], "mdmc_average", "samplewise"
+                )
+                temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
+            elif "precision" in metric:
+                temp_dict["precision"] = metric["precision"]
+                temp_dict["precision"] = initialize_key(
+                    temp_dict["precision"], "average", "weighted"
+                )
+                temp_dict["precision"] = initialize_key(
+                    temp_dict["precision"], "multi_class", True
+                )
+                temp_dict["precision"] = initialize_key(
+                    temp_dict["precision"], "mdmc_average", "samplewise"
+                )
+                temp_dict["precision"] = initialize_key(
+                    temp_dict["precision"], "threshold", 0.5
+                )
+            elif "recall" in metric:
+                temp_dict["recall"] = metric["recall"]
+                temp_dict["recall"] = initialize_key(
+                    temp_dict["recall"], "average", "weighted"
+                )
+                temp_dict["recall"] = initialize_key(
+                    temp_dict["recall"], "multi_class", True
+                )
+                temp_dict["recall"] = initialize_key(
+                    temp_dict["recall"], "mdmc_average", "samplewise"
+                )
+                temp_dict["recall"] = initialize_key(
+                    temp_dict["recall"], "threshold", 0.5
+                )
+            elif "iou" in metric:
+                temp_dict["iou"] = metric["iou"]
+                temp_dict["iou"] = initialize_key(
+                    temp_dict["iou"], "reduction", "elementwise_mean"
+                )
+                temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
 
+        ## need to find a better way to do this
         # special case for accuracy
         if "accuracy" in params["metrics"]:
-            if isinstance(params["metrics"], list):
-                temp_dict["accuracy"] = {}
-            else:
-                temp_dict["accuracy"] = params["metrics"]["accuracy"]
+            temp_dict["accuracy"] = initialize_key(
+                temp_dict["accuracy"], "threshold", 0.5
+            )
 
-            # accuracy needs an associated threshold, if not defined, default to '0.5'
-            initialize_threshold = False
-            if isinstance(temp_dict["accuracy"], dict):
-                if "threshold" in temp_dict["accuracy"]:
-                    pass
-                else:
-                    initialize_threshold = True
-            else:
-                initialize_threshold = True
+        # special case for precision
+        if "precision" in params["metrics"]:
+            temp_dict["precision"] = initialize_key(
+                temp_dict["precision"], "average", "weighted"
+            )
+            temp_dict["precision"] = initialize_key(
+                temp_dict["precision"], "multi_class", True
+            )
+            temp_dict["precision"] = initialize_key(
+                temp_dict["precision"], "mdmc_average", "samplewise"
+            )
+            temp_dict["precision"] = initialize_key(
+                temp_dict["precision"], "threshold", 0.5
+            )
 
-            if initialize_threshold:
-                temp_dict["accuracy"]["threshold"] = 0.5
+        # special case for f1
+        if "f1" in params["metrics"]:
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
+            temp_dict["f1"] = initialize_key(
+                temp_dict["f1"], "mdmc_average", "samplewise"
+            )
+            temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
+
+        # special case for recall
+        if "recall" in params["metrics"]:
+            temp_dict["recall"] = initialize_key(
+                temp_dict["recall"], "average", "weighted"
+            )
+            temp_dict["recall"] = initialize_key(
+                temp_dict["recall"], "multi_class", True
+            )
+            temp_dict["recall"] = initialize_key(
+                temp_dict["recall"], "mdmc_average", "samplewise"
+            )
+            temp_dict["recall"] = initialize_key(temp_dict["recall"], "threshold", 0.5)
+
+        # special case for iou
+        if "iou" in params["metrics"]:
+            temp_dict["iou"] = initialize_key(
+                temp_dict["iou"], "reduction", "elementwise_mean"
+            )
+            temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
+
         params["metrics"] = temp_dict
 
     else:
