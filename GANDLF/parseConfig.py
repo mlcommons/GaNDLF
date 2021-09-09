@@ -334,7 +334,7 @@ def parseConfig(config_file_path, version_check=True):
             # special case for affine default initialization
             if "affine" in params["data_augmentation"]:
                 params["data_augmentation"]["affine"] = initialize_key(
-                    params["data_augmentation"]["affine"], "scale", 0.1
+                    params["data_augmentation"]["affine"], "scales", 0.1
                 )
                 params["data_augmentation"]["affine"] = initialize_key(
                     params["data_augmentation"]["affine"], "degrees", 15
