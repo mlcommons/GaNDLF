@@ -324,7 +324,7 @@ def parseConfig(config_file_path, version_check=True):
                         .astype("int")
                         .tolist(),
                     )
-            
+
             # special case for swap default initialization
             if "swap" in params["data_augmentation"]:
                 params["data_augmentation"]["swap"] = initialize_key(
@@ -342,7 +342,6 @@ def parseConfig(config_file_path, version_check=True):
                 params["data_augmentation"]["affine"] = initialize_key(
                     params["data_augmentation"]["affine"], "translation", 2
                 )
-
 
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:

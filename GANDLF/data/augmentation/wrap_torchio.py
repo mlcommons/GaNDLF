@@ -28,7 +28,12 @@ def mri_artifact(parameters):
 
 
 def affine(parameters):
-    return RandomAffine(scales=parameters["scales"], degrees=parameters["degrees"], translation=parameters["translation"],p=parameters["probability"])
+    return RandomAffine(
+        scales=parameters["scales"],
+        degrees=parameters["degrees"],
+        translation=parameters["translation"],
+        p=parameters["probability"],
+    )
 
 
 def elastic(parameters):
