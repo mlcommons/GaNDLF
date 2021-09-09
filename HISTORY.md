@@ -5,6 +5,7 @@
 - Extending the codebase has been simplified
 - New optimizers added
 - New metrics added
+- Affine augmentation can now be significantly fine-tuned
 
 ## 0.0.11
 
