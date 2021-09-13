@@ -142,7 +142,11 @@ data_preprocessing:
 data_augmentation: 
   {
     default_probability: 0.5,
-    'affine',
+    'affine':{ # for options, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomaffine#randomaffine
+      'scales': [0.5, 1.5],
+      'degrees': 25,
+      'translation': 2,
+    },
     'elastic',
     'kspace':{
       'probability': 1
