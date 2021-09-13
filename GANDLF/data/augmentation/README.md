@@ -5,6 +5,7 @@
 - Define a new submodule under `GANDLF.data.augmentation`.
 - If new algorithm is a class, follow principle of adding torchio transforms. 
 - If new algorithm can be wrapped in a function:
+    - Keep in mind that unless otherwise specified, the functional transforms work on images **AND** segmentations (similar to `torchio.transforms.SpatialTransform`), thus, if an algorithm is meant to work only on images, add it as a class by inheriting from `torchio.transforms.IntensityTransform`.
     - Add function in new submodule.
     - Ensure it returns a `torch.Tensor`.
     - If the new function is from a pre-defined package, put it under `GANDLF.data.augmentation.wrap_${package_name}.py`.
