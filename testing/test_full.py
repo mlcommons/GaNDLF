@@ -790,6 +790,13 @@ def test_cli_function_preprocess():
         yaml.dump(parameters, outfile, default_flow_style=False)
 
     preprocess_and_save(file_data, file_config_temp, outputDir)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        outputDir + "/data_processed.csv"
+    )
+
+    # check that the length of training data is what we expect
+    assert len(training_data) == 10, "Number of rows in dataframe is not 10"
+
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
