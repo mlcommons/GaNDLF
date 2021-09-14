@@ -206,6 +206,6 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
 
     path_for_csv = Path(os.path.join(output_dir, "data_processed.csv")).as_posix()
     print("Writing final csv for subsequent training: ", path_for_csv)
-    pd.DataFrame.from_dict(data=output_columns_to_write, orient="index").to_csv(
-        path_for_csv, header=False
+    pd.DataFrame.from_dict(data=output_columns_to_write).to_csv(
+        path_for_csv, header=True, index=False
     )
