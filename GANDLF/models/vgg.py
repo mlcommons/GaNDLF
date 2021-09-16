@@ -8,7 +8,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .modelBase import get_final_layer
-from .seg_modules.get_num_classes import get_number_of_outputs
 from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling3D,
     GlobalAveragePooling2D,
@@ -38,7 +37,7 @@ class VGG(nn.Module):
         super(VGG, self).__init__()
         n_dimensions = parameters["model"]["dimension"]
         final_convolution_layer = parameters["model"]["final_layer"]
-        n_outputClasses = get_number_of_outputs(parameters)
+        n_outputClasses = parameters["model"]["num_classes"]
 
         if "batch" in parameters["model"]["norm_type"].lower():
             batch_norm = True
