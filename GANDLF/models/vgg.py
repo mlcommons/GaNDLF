@@ -5,8 +5,10 @@ Modified from https://github.com/pytorch/vision.git
 
 import sys, math
 import torch.nn as nn
-from .modelBase import get_final_layer
 import torch.nn.functional as F
+
+from .modelBase import get_final_layer
+from .seg_modules.get_num_classes import get_number_of_outputs
 from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling3D,
     GlobalAveragePooling2D,
@@ -36,7 +38,7 @@ class VGG(nn.Module):
         super(VGG, self).__init__()
         n_dimensions = parameters["model"]["dimension"]
         final_convolution_layer = parameters["model"]["final_layer"]
-        n_outputClasses = len(parameters["model"]["class_list"])
+        n_outputClasses = get_number_of_outputs(parameters)
 
         if "batch" in parameters["model"]["norm_type"].lower():
             batch_norm = True
