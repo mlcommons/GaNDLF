@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .modelBase import get_final_layer
-from .seg_modules.get_output_classes import get_number_of_outputs
+from .seg_modules.get_num_classes import get_number_of_outputs
 from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling3D,
     GlobalAveragePooling2D,

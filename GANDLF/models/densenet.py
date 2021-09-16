@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from collections import OrderedDict
 
 from GANDLF.models.modelBase import get_final_layer
-from .seg_modules.get_output_classes import get_number_of_outputs
+from .seg_modules.get_num_classes import get_number_of_outputs
 
 class _DenseLayer(nn.Sequential):
     def __init__(
