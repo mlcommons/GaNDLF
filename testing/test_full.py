@@ -984,7 +984,7 @@ def test_checkpointing_segmentation_rad_2d(device):
 
 
 def test_model_patch_divisibility():
-    
+
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check=False
     )
@@ -992,7 +992,7 @@ def test_model_patch_divisibility():
         inputDir + "/train_2d_rad_segmentation.csv"
     )
     parameters["model"]["architecture"] = "unet"
-    parameters["patch_size"] = [127,127,1]
+    parameters["patch_size"] = [127, 127, 1]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["num_epochs"] = 1
     parameters["nested_training"]["testing"] = 1
@@ -1001,7 +1001,7 @@ def test_model_patch_divisibility():
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
-    
+
     # this assertion should fail
     with pytest.raises(Exception) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)

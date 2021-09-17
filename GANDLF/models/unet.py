@@ -13,6 +13,7 @@ from .modelBase import ModelBase
 import sys
 from GANDLF.utils.generic import checkPatchDivisibility
 
+
 class unet(ModelBase):
     """
     This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
@@ -28,9 +29,12 @@ class unet(ModelBase):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
 
-        if not(checkPatchDivisibility(parameters["patch_size"])):
-            sys.exit("The patch size is not divisible by 16, which is required for", parameters["model"]["architecture"])
-        
+        if not (checkPatchDivisibility(parameters["patch_size"])):
+            sys.exit(
+                "The patch size is not divisible by 16, which is required for",
+                parameters["model"]["architecture"],
+            )
+
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
