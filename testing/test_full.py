@@ -1007,7 +1007,7 @@ def test_model_patch_divisibility():
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
-    parameters["model"]["base_filters"] = "11"
+    parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
     with pytest.raises(Exception) as e_info:
