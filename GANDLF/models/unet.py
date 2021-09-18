@@ -10,6 +10,8 @@ from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
+import sys
+from GANDLF.utils.generic import checkPatchDivisibility
 
 
 class unet(ModelBase):
@@ -26,6 +28,13 @@ class unet(ModelBase):
     ):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
+
+        if not (checkPatchDivisibility(parameters["patch_size"])):
+            sys.exit(
+                "The patch size is not divisible by 16, which is required for",
+                parameters["model"]["architecture"],
+            )
+
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
