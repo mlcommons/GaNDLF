@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 from GANDLF.models.modelBase import get_final_layer
 
+
 class _DenseLayer(nn.Sequential):
     def __init__(
         self, num_input_features, growth_rate, bn_size, drop_rate, BatchNorm, Conv
