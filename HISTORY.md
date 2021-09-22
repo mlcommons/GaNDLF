@@ -6,6 +6,7 @@
 - New optimizers added
 - New metrics added
 - Affine augmentation can now be significantly fine-tuned
+- Update logic for penalty calculation
 
 ## 0.0.11
 
