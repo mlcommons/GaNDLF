@@ -246,7 +246,9 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         for key, val in abs_dict.items()
     }
 
-    penalty = {key: total_counter / (len(abs_dict) * val) for key, val in abs_dict.items()}
+    penalty = {
+        key: total_counter / (len(abs_dict) * val) for key, val in abs_dict.items()
+    }
     # get the raw penalty values
     penalty_sum = np.fromiter(penalty.values(), dtype=np.float64).sum()
     # normalize penalty to sum of 1
