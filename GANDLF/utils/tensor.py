@@ -245,6 +245,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     
     # get the penalty values - abs_dict contains the overall number for each class in the penalty data
     for i in range(0, len(parameters["model"]["class_list"])):
+        # we should not assign any penalty when a specific class is absent in the data
         if abs_dict[i] == 0:
             penalty = 0
         else:
