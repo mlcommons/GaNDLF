@@ -242,6 +242,16 @@ def get_class_imbalance_weights(training_data_loader, parameters):
 
     # Normalize class weights
     weights_dict = {key: (val + sys.float_info.epsilon) / total_counter for key, val in abs_dict.items()}
-    penalty_dict = {key: 1-val + sys.float_info.epsilon for key, val in weights_dict.items()}
+    
+    # get the penalty values - abs_dict contains the overall number for each class in the penalty data
+    for i in range(0, len(parameters["model"]["class_list"])):
+        penalty = total_counter - abs_dict[i]  
+        
+        # finally, the "penalty" variable contains the total number of voxels/activations that are not part of the current class
+        # this is to be used to weight the loss function
+        # adding epsilon to avoid division by zero
+        penalty_dict[i] = (penalty + sys.float_info.epsilon) / (
+            total_counter + sys.float_info.epsilon
+        )
 
     return penalty_dict, weights_dict
