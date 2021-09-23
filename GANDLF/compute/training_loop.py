@@ -95,14 +95,14 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             params["subject_spacing"] = None
         loss, calculated_metrics, _ = step(model, image, label, params)
-        nan_loss = True
+        nan_loss = torch.isnan(loss)
         second_order = (
             hasattr(optimizer, "is_second_order") and optimizer.is_second_order
         )
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 # if loss is nan, don't backprop and don't step optimizer
-                if not torch.isnan(loss):
+                if not nan_loss:
                     scaler(
                         loss=loss,
                         optimizer=optimizer,
@@ -113,9 +113,8 @@ def train_network(model, train_dataloader, optimizer, params):
                         ),
                         create_graph=second_order,
                     )
-                    nan_loss = False
         else:
-            if not math.isnan(loss):
+            if not nan_loss:
                 loss.backward(create_graph=second_order)
                 if params["clip_grad"] is not None:
                     dispatch_clip_grad_(
