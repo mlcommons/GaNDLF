@@ -85,6 +85,7 @@ def tversky_loss(inp, target, alpha=1):
 
 def MCT_loss(inp, target, params):
     acc_tv_loss = 0
+    target = one_hot(target, params["model"]["class_list"])
     for i in range(0, len(params["model"]["class_list"])):
         curr_loss = tversky_loss(inp[:, i, ...], target[:, i, ...])
         if params["weights"] is not None:

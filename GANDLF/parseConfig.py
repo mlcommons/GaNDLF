@@ -21,6 +21,7 @@ parameter_defaults = {
     "learning_rate": 0.001,  # default learning rate
     "clip_grad": None,  # clip_gradient value
     "track_memory_usage": False,  # default memory tracking
+    "print_rgb_label_warning": True,  # default memory tracking
 }
 
 ## dictionary to define string defaults for appropriate options
