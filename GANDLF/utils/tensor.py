@@ -92,6 +92,11 @@ def reverse_one_hot(predmask_array, class_list):
         final_mask = np.asarray(predmask_array[start_idx, ...], dtype=int)
         start_idx += 1
         for i in range(start_idx, len(class_list)):
+            # TODO: this should be replaced with information coming from the config that defines what the specific union of labels should be defined as
+            # for example:
+            # class_list = "[0,1||2]"
+            # output_classes = [0,1]
+            # this would make "1||2" be mapped to "1", and this mechanism can be extended for N possible combinations
             final_mask += np.asarray(
                 predmask_array[i, ...], dtype=int
             )
