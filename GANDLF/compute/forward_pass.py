@@ -65,6 +65,9 @@ def validate_network(
     else:  # this is useful for inference
         current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
 
+    if not (is_inference):
+        current_output_dir = os.path.join(current_output_dir, str(epoch))
+
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set the model to valid

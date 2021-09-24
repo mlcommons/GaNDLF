@@ -18,7 +18,6 @@ parameter_defaults = {
     "num_epochs": 100,  # total number of epochs to train
     "patience": 100,  # number of epochs to wait for performance improvement
     "batch_size": 1,  # default batch size of training
-    "amp": False,  # automatic mixed precision
     "learning_rate": 0.001,  # default learning rate
     "clip_grad": None,  # clip_gradient value
     "track_memory_usage": False,  # default memory tracking
