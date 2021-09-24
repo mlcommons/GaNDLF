@@ -360,7 +360,7 @@ def validate_network(
             if is_inference and is_classification:
                 logits_list.append(output_prediction)
 
-            # we case to float32 because float16 was causing nan
+            # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
                 image, label_ground_truth.to(torch.float32), output_prediction.to(torch.float32), params
             )
