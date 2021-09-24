@@ -22,9 +22,8 @@ def one_hot(segmask_array, class_list):
         one_hot_stack = []
         segmask_array_iter = segmask_array[b, 0]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
-        for (
-            _class
-        ) in class_list:  # this implementation allows users to combine logical operands
+        # this implementation allows users to combine logical operands
+        for _class in class_list:
             if isinstance(_class, str):
                 if "||" in _class:  # special case
                     class_split = _class.split("||")
@@ -79,9 +78,8 @@ def reverse_one_hot(predmask_array, class_list):
             if isinstance(_class, str):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
-                    class_split = _class.split(
-                        case
-                    )  # if present, then split the sub-class
+                    # if present, then split the sub-class
+                    class_split = _class.split(case)
                     for i in class_split:  # find the max for computation later on
                         if int(i) > max_current:
                             max_current = int(i)
@@ -91,9 +89,7 @@ def reverse_one_hot(predmask_array, class_list):
         if (class_list[0] == 0) or (class_list[0] == "0"):
             start_idx = 1
 
-        final_mask = np.asarray(
-            predmask_array[start_idx, :, :, :], dtype=int
-        )  # predmask_array[0,:,:,:].long()
+        final_mask = np.asarray(predmask_array[start_idx, :, :, :], dtype=int)
         start_idx += 1
         for i in range(start_idx, len(class_list)):
             final_mask += np.asarray(
@@ -245,20 +241,21 @@ def get_class_imbalance_weights(training_data_loader, parameters):
                     total_counter += 1
 
     # Normalize class weights
-    weights_dict = {key: val / total_counter for key, val in abs_dict.items()}
+    weights_dict = {
+        key: (val + sys.float_info.epsilon) / total_counter
+        for key, val in abs_dict.items()
+    }
 
-    # get the penalty values - abs_dict contains the overall number for each class in the penalty data
-    for i in range(0, len(parameters["model"]["class_list"])):
-        penalty = total_counter  # start with the assumption that all the non-zero voxels (segmentation) or activate labels (classification) make up the penalty
-        for j in range(0, len(parameters["model"]["class_list"])):
-            if i != j:  # for differing classes, subtract the current weight
-                penalty -= abs_dict[j]
-
-        # finally, the "penalty" variable contains the total number of voxels/activations that are not part of the current class
-        # this is to be used to weight the loss function
-        # adding epsilon to avoid division by zero
-        penalty_dict[i] = (penalty + sys.float_info.epsilon) / (
-            total_counter + sys.float_info.epsilon
-        )
+    # get the raw penalty values
+    penalty = {
+        key: total_counter / (len(abs_dict) * (val + sys.float_info.epsilon))
+        for key, val in abs_dict.items()
+    }
+    # normalize penalty to sum of 1
+    penalty_sum = np.fromiter(penalty.values(), dtype=np.float64).sum()
+    penalty_dict = {
+        key: (val + sys.float_info.epsilon) / penalty_sum
+        for key, val in penalty.items()
+    }
 
     return penalty_dict, weights_dict

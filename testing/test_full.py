@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch
+import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
 import SimpleITK as sitk
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -13,6 +13,7 @@ from GANDLF.cli.main_run import main_run
 from GANDLF.cli.preprocess_and_save import preprocess_and_save
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
+from GANDLF.models import global_models_dict
 
 device = "cpu"
 ## global defines
@@ -790,6 +791,13 @@ def test_cli_function_preprocess():
         yaml.dump(parameters, outfile, default_flow_style=False)
 
     preprocess_and_save(file_data, file_config_temp, outputDir)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        outputDir + "/data_processed.csv"
+    )
+
+    # check that the length of training data is what we expect
+    assert len(training_data) == 10, "Number of rows in dataframe is not 10"
+
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
@@ -971,5 +979,38 @@ def test_checkpointing_segmentation_rad_2d(device):
         reset_prev=False,
     )
     shutil.rmtree(outputDir)  # overwrite previous results
+
+    print("passed")
+
+
+def test_model_patch_divisibility():
+
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["model"]["architecture"] = "unet"
+    parameters["patch_size"] = [127, 127, 1]
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = 1
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+
+    # this assertion should fail
+    with pytest.raises(Exception) as e_info:
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["architecture"] = "uinc"
+    parameters["model"]["base_filters"] = 11
+
+    # this assertion should fail
+    with pytest.raises(Exception) as e_info:
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     print("passed")

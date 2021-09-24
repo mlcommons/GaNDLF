@@ -12,6 +12,8 @@ from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
 from GANDLF.models.seg_modules.IncConv import IncConv
 from GANDLF.models.seg_modules.IncDropout import IncDropout
 from .modelBase import ModelBase
+import sys
+from GANDLF.utils.generic import checkPatchDivisibility
 
 
 class uinc(ModelBase):
@@ -29,6 +31,21 @@ class uinc(ModelBase):
         parameters: dict,
     ):
         super(uinc, self).__init__(parameters)
+
+        if not (checkPatchDivisibility(parameters["patch_size"])):
+            sys.exit(
+                "The patch size is not divisible by 16, which is required for",
+                parameters["model"]["architecture"],
+            )
+
+        if parameters["model"]["base_filters"] % 4 != 0:
+            sys.exit(
+                "The 'base_filters' should be divisible by '4'"
+                + "' for the '"
+                + parameters["model"]["architecture"]
+                + "' architecture"
+            )
+
         self.conv0_1x1 = IncConv(
             self.n_channels,
             self.base_filters,

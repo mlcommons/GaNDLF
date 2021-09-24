@@ -78,17 +78,15 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     # start the kFold train for testing
     for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
 
-        currentValidationFold = (
-            0  # ensure the validation fold is initialized per-testing split
-        )
+        # ensure the validation fold is initialized per-testing split
+        currentValidationFold = 0
 
         trainingAndValidationData = pd.DataFrame()  # initialize the variable
         testingData = pd.DataFrame()  # initialize the variable
         # get the current training and testing data
         if noTestingData:
-            trainingAndValidationData = (
-                trainingData_full  # don't consider the split indeces for this case
-            )
+            # don't consider the split indeces for this case
+            trainingAndValidationData = trainingData_full
             testingData = None
         else:
             # loop over all trainAndVal_index and construct new dataframe
@@ -223,9 +221,8 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             else:
                 validationData = pd.read_pickle(currentValidationDataPickle)
 
-            if (not parameters["parallel_compute_command"]) or (
-                singleFoldValidation
-            ):  # parallel_compute_command is an empty string, thus no parallel computing requested
+            # parallel_compute_command is an empty string, thus no parallel computing requested
+            if (not parameters["parallel_compute_command"]) or (singleFoldValidation):
                 training_loop(
                     training_data=trainingData,
                     validation_data=validationData,
