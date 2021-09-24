@@ -361,7 +361,7 @@ def validate_network(
                 logits_list.append(output_prediction)
 
             final_loss, final_metric = get_loss_and_metrics(
-                image, label_ground_truth, output_prediction, params
+                image, label_ground_truth.to(torch.float32), output_prediction.to(torch.float32), params
             )
             if params["verbose"]:
                 print(
