@@ -61,7 +61,7 @@ def reverse_one_hot(predmask_array, class_list):
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
-        torch.Tensor: The final mask torch.Tensor.
+        numpy.array: The final mask as numpy array.
     """
     if isinstance(predmask_array, torch.Tensor):
         array_to_consider = predmask_array.cpu().numpy()
@@ -89,15 +89,12 @@ def reverse_one_hot(predmask_array, class_list):
         if (class_list[0] == 0) or (class_list[0] == "0"):
             start_idx = 1
 
-        final_mask = np.asarray(predmask_array[start_idx, :, :, :], dtype=int)
+        final_mask = np.asarray(predmask_array[start_idx, ...], dtype=int)
         start_idx += 1
         for i in range(start_idx, len(class_list)):
             final_mask += np.asarray(
-                predmask_array[0, :, :, :], dtype=int
-            )  # predmask_array[i,:,:,:].long()
-            # temp_sum = torch.sum(output)
-        # output_2 = (max_current - torch.sum(output)) % max_current
-        # test_2 = 1
+                predmask_array[i, ...], dtype=int
+            )
     else:
         for idx, _class in enumerate(class_list):
             final_mask = final_mask + (idx_argmax == idx) * _class
