@@ -306,6 +306,7 @@ def validate_network(
                     inputImage = sitk.ReadImage(path_to_metadata)
                     ext = get_filename_extension_sanitized(path_to_metadata)
                     pred_mask = output_prediction.numpy()
+                    # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
