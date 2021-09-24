@@ -20,7 +20,7 @@ def one_hot(segmask_array, class_list):
     batch_stack = []
     for b in range(batch_size):
         one_hot_stack = []
-        segmask_array_iter = segmask_array[b, 0]
+        segmask_array_iter = segmask_array[b, ...]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
         # this implementation allows users to combine logical operands
         for _class in class_list:
