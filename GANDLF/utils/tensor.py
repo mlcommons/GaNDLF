@@ -20,7 +20,8 @@ def one_hot(segmask_array, class_list):
     batch_stack = []
     for b in range(batch_size):
         one_hot_stack = []
-        segmask_array_iter = segmask_array[b, ...]
+        # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
+        segmask_array_iter = segmask_array[b, 0, ...]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
         # this implementation allows users to combine logical operands
         for _class in class_list:
@@ -49,6 +50,8 @@ def one_hot(segmask_array, class_list):
         one_hot_stack = torch.stack(one_hot_stack)
         batch_stack.append(one_hot_stack)
     batch_stack = torch.stack(batch_stack)
+    if batch_stack.shape[-1] == 1:
+        batch_stack = batch_stack.squeeze(-1)
     return batch_stack
 
 
@@ -220,7 +223,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
             one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
             for i in range(0, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(
-                    one_hot_mask[:, i, :, :, :], as_tuple=False
+                    one_hot_mask[:, i, ...], as_tuple=False
                 ).size(0)
                 # class-specific non-zero voxels
                 abs_dict[i] += currentNumber
