@@ -188,12 +188,15 @@ def training_loop(
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
 
+    print("Fetching model", flush=True)
     # Fetch the model according to params mentioned in the configuration file
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
+    print("Constructing queue for training", flush=True)
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(training_data, params, train=True)
 
+    print("Constructing queue for validation", flush=True)
     validation_data_for_torch = ImagesFromDataFrame(
         validation_data, params, train=False
     )
