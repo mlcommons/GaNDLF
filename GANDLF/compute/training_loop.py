@@ -206,6 +206,7 @@ def training_loop(
     if testingDataDefined:
         test_data_for_torch = ImagesFromDataFrame(testing_data, params, train=False)
 
+    print("Starting training loader construction", flush=True)
     train_dataloader = DataLoader(
         training_data_for_torch,
         batch_size=params["batch_size"],
@@ -214,6 +215,7 @@ def training_loop(
     )
     params["training_samples_size"] = len(train_dataloader.dataset)
 
+    print("Starting validation loader construction", flush=True)
     val_dataloader = DataLoader(
         validation_data_for_torch,
         batch_size=1,
@@ -231,6 +233,7 @@ def training_loop(
     # Getting the channels for training and removing all the non numeric entries from the channels
     params = populate_channel_keys_in_params(validation_data_for_torch, params)
 
+    print("Calculating weights for loss", flush=True)
     # Calculate the weights here
     if params["weighted_loss"]:
         # Set up the dataloader for penalty calculation
@@ -252,6 +255,7 @@ def training_loop(
     else:
         params["weights"], params["class_weights"] = None, None
 
+    print("Setting up optimizer and scheduler", flush=True)
     # Fetch the optimizers
     params["model_parameters"] = model.parameters()
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
@@ -274,7 +278,7 @@ def training_loop(
     print("\n\n")
 
     if not (os.environ.get("HOSTNAME") is None):
-        print("Hostname :", os.environ.get("HOSTNAME"))
+        print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
 
     # datetime object containing current date and time
     print("Initializing training at :", get_date_time(), flush=True)
