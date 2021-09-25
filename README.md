@@ -56,6 +56,11 @@ Start at https://cbica.github.io/GaNDLF/. Includes the following:
 - [Extension](https://cbica.github.io/GaNDLF/extending)
 - [Acknowledgements](https://cbica.github.io/GaNDLF/acknowledgements)
 
+
+## Contributing
+
+Please see the [contributing guide](./CONTRIBUTING.md) for more information.
+
 ## Disclaimer
 - The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.
 - This code (excluding dependent libraries) is governed by the license provided in https://www.med.upenn.edu/cbica/software-agreement.html unless otherwise specified.
