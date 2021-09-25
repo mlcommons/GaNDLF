@@ -20,7 +20,8 @@ def one_hot(segmask_array, class_list):
     batch_stack = []
     for b in range(batch_size):
         one_hot_stack = []
-        segmask_array_iter = segmask_array[b, 0]
+        # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
+        segmask_array_iter = segmask_array[b, 0, ...]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
         # this implementation allows users to combine logical operands
         for _class in class_list:
@@ -49,6 +50,8 @@ def one_hot(segmask_array, class_list):
         one_hot_stack = torch.stack(one_hot_stack)
         batch_stack.append(one_hot_stack)
     batch_stack = torch.stack(batch_stack)
+    if batch_stack.shape[-1] == 1:
+        batch_stack = batch_stack.squeeze(-1)
     return batch_stack
 
 
@@ -61,7 +64,7 @@ def reverse_one_hot(predmask_array, class_list):
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
-        torch.Tensor: The final mask torch.Tensor.
+        numpy.array: The final mask as numpy array.
     """
     if isinstance(predmask_array, torch.Tensor):
         array_to_consider = predmask_array.cpu().numpy()
@@ -89,15 +92,17 @@ def reverse_one_hot(predmask_array, class_list):
         if (class_list[0] == 0) or (class_list[0] == "0"):
             start_idx = 1
 
-        final_mask = np.asarray(predmask_array[start_idx, :, :, :], dtype=int)
+        final_mask = np.asarray(predmask_array[start_idx, ...], dtype=int)
         start_idx += 1
         for i in range(start_idx, len(class_list)):
+            # TODO: this should be replaced with information coming from the config that defines what the specific union of labels should be defined as
+            # for example:
+            # class_list = "[0,1||2]"
+            # output_classes = [0,1]
+            # this would make "1||2" be mapped to "1", and this mechanism can be extended for N possible combinations
             final_mask += np.asarray(
-                predmask_array[0, :, :, :], dtype=int
-            )  # predmask_array[i,:,:,:].long()
-            # temp_sum = torch.sum(output)
-        # output_2 = (max_current - torch.sum(output)) % max_current
-        # test_2 = 1
+                predmask_array[i, ...], dtype=int
+            )
     else:
         for idx, _class in enumerate(class_list):
             final_mask = final_mask + (idx_argmax == idx) * _class
@@ -223,7 +228,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
             one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
             for i in range(0, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(
-                    one_hot_mask[:, i, :, :, :], as_tuple=False
+                    one_hot_mask[:, i, ...], as_tuple=False
                 ).size(0)
                 # class-specific non-zero voxels
                 abs_dict[i] += currentNumber
