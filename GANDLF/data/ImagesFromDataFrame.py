@@ -141,6 +141,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 path=dataframe[labelHeader][patient],
             )
 
+            print("Label shape:", subject_dict["label"]["data"].shape, flush=True)
             # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
             if subject_dict["label"]["data"].shape[0] == 3:
                 subject_dict["label"]["data"] = subject_dict["label"]["data"][0].unsqueeze(0)
