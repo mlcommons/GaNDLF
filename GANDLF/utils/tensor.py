@@ -100,9 +100,7 @@ def reverse_one_hot(predmask_array, class_list):
             # class_list = "[0,1||2]"
             # output_classes = [0,1]
             # this would make "1||2" be mapped to "1", and this mechanism can be extended for N possible combinations
-            final_mask += np.asarray(
-                predmask_array[i, ...], dtype=int
-            )
+            final_mask += np.asarray(predmask_array[i, ...], dtype=int)
     else:
         for idx, _class in enumerate(class_list):
             final_mask = final_mask + (idx_argmax == idx) * _class

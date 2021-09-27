@@ -143,10 +143,15 @@ def ImagesFromDataFrame(dataframe, parameters, train):
 
             # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
             if subject_dict["label"]["data"].shape[0] == 3:
-                subject_dict["label"]["data"] = subject_dict["label"]["data"][0].unsqueeze(0)
+                subject_dict["label"]["data"] = subject_dict["label"]["data"][
+                    0
+                ].unsqueeze(0)
                 # this warning should only come up once
                 if parameters["print_rgb_label_warning"]:
-                    print("WARNING: The label image is an RGB image, only the first channel will be used.", flush=True)
+                    print(
+                        "WARNING: The label image is an RGB image, only the first channel will be used.",
+                        flush=True,
+                    )
                     parameters["print_rgb_label_warning"] = False
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
