@@ -8,6 +8,7 @@ import torchio
 from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
+    one_hot,
     reverse_one_hot,
     resample_image,
 )
@@ -220,6 +221,7 @@ def validate_network(
                 if "value_keys" in params:
                     is_segmentation = False
                     label = label_ground_truth  # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
+                    label = one_hot(subject["label"][torchio.DATA], params["model"]["class_list"])
                     # label = torch.reshape(
                     #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
                     # )
