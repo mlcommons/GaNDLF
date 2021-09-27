@@ -8,6 +8,7 @@ import torchio
 from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
+    one_hot,
     reverse_one_hot,
     resample_image,
 )
@@ -259,6 +260,7 @@ def validate_network(
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
+                label_ground_truth = one_hot(label_ground_truth, params["model"]["class_list"])
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)

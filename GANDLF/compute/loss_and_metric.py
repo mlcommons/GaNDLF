@@ -2,8 +2,6 @@ import sys
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 
-from GANDLF.utils import one_hot
-
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
     """
@@ -49,8 +47,6 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
-        if params["problem_type"] == "segmentation":
-            ground_truth = one_hot(ground_truth, params["model"]["class_list"])
         loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
 
