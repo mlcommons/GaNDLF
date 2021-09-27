@@ -1,4 +1,4 @@
-import os, math, time
+import os, time, psutil
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -339,6 +339,45 @@ def training_loop(
 
     # Iterate for number of epochs
     for epoch in range(start_epoch, epochs):
+
+        if params["track_memory_usage"]:
+            
+            file_to_write_mem = os.path.join(output_dir, "memory_usage.csv")
+            if os.path.exists(file_to_write_mem):
+                # append to previously generated file
+                file_mem = open(file_to_write_mem, "a")
+                outputToWrite_mem = ""
+            else:
+                # if file was absent, write header information
+                file_mem = open(file_to_write_mem, "w")
+                outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,"  # used to write output
+                if params["device"] == "cuda":
+                    outputToWrite_mem += "CUDA_active.all.current,CUDA_active.all.peak,"
+                outputToWrite_mem += "\n"
+
+            mem = psutil.virtual_memory()
+            outputToWrite_mem += (
+                str(epoch)
+                + ","
+                + str(mem[0])
+                + ","
+                + str(mem[1])
+                + ","
+                + str(mem[2])
+                + ","
+                + str(mem[3])
+            )
+            if params["device"] == "cuda":
+                mem_cuda = torch.cuda.memory_stats()
+                outputToWrite_mem += (
+                    ","
+                    + str(mem_cuda["active.all.current"])
+                    + ","
+                    + str(mem_cuda["active.all.peak"])
+                )
+            outputToWrite_mem += ",\n"
+            file_mem.write(outputToWrite_mem)
+            file_mem.close()
 
         # Printing times
         epoch_start_time = time.time()
