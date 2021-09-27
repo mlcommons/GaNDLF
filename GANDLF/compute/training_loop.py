@@ -351,7 +351,7 @@ def training_loop(
                 file_mem = open(file_to_write_mem, "w")
                 outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,"  # used to write output
                 if params["device"] == "cuda":
-                    outputToWrite_mem += ",CUDA_active.all.peak,CUDA_active.all.current,CUDA_active.all.allocated"
+                    outputToWrite_mem += "CUDA_active.all.peak,CUDA_active.all.current,CUDA_active.all.allocated"
                 outputToWrite_mem += "\n"
 
             mem = psutil.virtual_memory()
