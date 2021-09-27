@@ -85,7 +85,7 @@ def train_network(model, train_dataloader, optimizer, params):
                 len(params["value_keys"]),
             )
         else:
-            label = subject["label"][torchio.DATA] 
+            label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
 
         # ensure spacing is always present in params and is always subject-specific
