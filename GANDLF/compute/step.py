@@ -4,6 +4,7 @@ from .loss_and_metric import get_loss_and_metrics
 
 from GANDLF.utils import one_hot
 
+
 def step(model, image, label, params):
     """
     Function that steps the model for a single batch
