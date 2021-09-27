@@ -16,7 +16,6 @@ from GANDLF.utils import (
     send_model_to_device,
     populate_channel_keys_in_params,
     get_class_imbalance_weights,
-    one_hot,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -86,8 +85,7 @@ def train_network(model, train_dataloader, optimizer, params):
                 len(params["value_keys"]),
             )
         else:
-            label = one_hot(subject["label"][torchio.DATA], params["model"]["class_list"])
-            # one-hot encoding of 'label' will probably be needed for segmentation
+            label = subject["label"][torchio.DATA] 
         label = label.to(params["device"])
 
         # ensure spacing is always present in params and is always subject-specific
