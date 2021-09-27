@@ -138,7 +138,9 @@ def hd_generic(inp, target, params, percentile=95):
     hd = 0
     avg_counter = 0
     for j in range(reference_array.shape[0]):
-        subject_spacing = [params["subject_spacing"][k][j] for k in range(3)] # 3 for x, y, z
+        subject_spacing = [
+            params["subject_spacing"][k][j] for k in range(3)
+        ]  # 3 for x, y, z
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
                 hd1 = __surface_distances(
