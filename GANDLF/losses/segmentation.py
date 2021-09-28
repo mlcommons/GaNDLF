@@ -55,7 +55,7 @@ def MCD_loss(pm, gt, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    # gt = one_hot(gt, params["model"]["class_list"])
+    gt = one_hot(gt, params["model"]["class_list"])
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 1)
 
 
@@ -63,7 +63,7 @@ def MCD_log_loss(pm, gt, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    # gt = one_hot(gt, params["model"]["class_list"])
+    gt = one_hot(gt, params["model"]["class_list"])
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 2)
 
 
@@ -85,7 +85,7 @@ def tversky_loss(inp, target, alpha=1):
 
 def MCT_loss(inp, target, params):
     acc_tv_loss = 0
-    # target = one_hot(target, params["model"]["class_list"])
+    target = one_hot(target, params["model"]["class_list"])
     for i in range(0, len(params["model"]["class_list"])):
         curr_loss = tversky_loss(inp[:, i, ...], target[:, i, ...])
         if params["weights"] is not None:
