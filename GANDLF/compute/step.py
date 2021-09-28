@@ -41,8 +41,8 @@ def step(model, image, label, params):
             "|===========================================================================|\n|"
         )
 
-    if params["problem_type"] == "segmentation":
-        label = one_hot(label, params["model"]["class_list"])
+    # if params["problem_type"] == "segmentation":
+    #     label = one_hot(label, params["model"]["class_list"])
 
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
