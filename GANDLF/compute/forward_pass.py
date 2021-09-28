@@ -295,11 +295,11 @@ def validate_network(
                             current_output_dir, subject["subject_id"][0] + "_seg" + ext
                         ),
                     )
-                # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
             else:
+                # final regression output
                 output_prediction = output_prediction / len(
                     patch_loader
-                )  # final regression output
+                )  
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
