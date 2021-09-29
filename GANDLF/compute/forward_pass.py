@@ -325,7 +325,9 @@ def validate_network(
             # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
                 image,
-                label_ground_truth.to(torch.float32),
+                # label_ground_truth,
+                # output_prediction,
+                label_ground_truth.to(torch.int32),
                 output_prediction.to(torch.float32),
                 params,
             )
