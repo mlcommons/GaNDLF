@@ -128,7 +128,7 @@ def train_network(model, train_dataloader, optimizer, params):
 
         # Non network training related
         if not nan_loss:
-            total_epoch_train_loss += loss.cpu().data.item()
+            total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
