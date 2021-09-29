@@ -175,7 +175,7 @@ def validate_network(
                 image, valuesToPredict, pred_output, params
             )
             # # Non network validing related
-            total_epoch_valid_loss += final_loss.cpu().data.item()
+            total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]
