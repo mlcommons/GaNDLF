@@ -306,7 +306,6 @@ def validate_network(
                     inputImage = sitk.ReadImage(path_to_metadata)
                     ext = get_filename_extension_sanitized(path_to_metadata)
                     pred_mask = output_prediction.numpy()
-                    # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
@@ -360,9 +359,8 @@ def validate_network(
             if is_inference and is_classification:
                 logits_list.append(output_prediction)
 
-            # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
-                image, label_ground_truth.to(torch.float32), output_prediction.to(torch.float32), params
+                image, label_ground_truth, output_prediction, params
             )
             if params["verbose"]:
                 print(
