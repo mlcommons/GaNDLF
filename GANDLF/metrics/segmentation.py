@@ -125,7 +125,7 @@ def hd_generic(inp, target, params, percentile=95):
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    result_array = inp.cpu().detach().numpy()
+    result_array = inp.detach().cpu().numpy()
     if result_array.shape[-1] == 1:
         result_array = result_array.squeeze(-1)
     # ensure that we are dealing with a binary array
