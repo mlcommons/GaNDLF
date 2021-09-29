@@ -395,7 +395,7 @@ def validate_network(
             current_fold_dir = params["current_fold_dir"]
             np.savetxt(
                 os.path.join(current_fold_dir, "logits.csv"),
-                logit_tensor.detach().numpy(),
+                logit_tensor.detach().cpu().numpy(),
                 delimiter=",",
             )
 
