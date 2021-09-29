@@ -260,6 +260,7 @@ def validate_network(
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
+                label_ground_truth = label_ground_truth.to(torch.int32)
                 # label_ground_truth = one_hot(
                 #     label_ground_truth, params["model"]["class_list"]
                 # )
@@ -327,7 +328,7 @@ def validate_network(
                 image,
                 # label_ground_truth,
                 # output_prediction,
-                label_ground_truth.to(torch.int32),
+                label_ground_truth,
                 output_prediction.to(torch.float32),
                 params,
             )
