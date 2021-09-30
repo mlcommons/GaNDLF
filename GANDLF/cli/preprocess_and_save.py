@@ -157,6 +157,10 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         
         image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
         correct_spacing_for_info_copy = subject["spacing"][0].tolist()
+        print("===Debug===")
+        print("Origin:", image_for_info_copy.GetOrigin())
+        print("Spacing:", image_for_info_copy.GetSpacing())
+        print("Spacing_correct:", correct_spacing_for_info_copy)
         for channel in parameters["headers"]["channelHeaders"]:
             image_file = Path(
                 os.path.join(
