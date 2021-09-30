@@ -153,8 +153,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         # RGB floats, use the "vtk" format
         if common_ext in [".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"]:
             common_ext = ".vtk"
-        
-        
+
         if subject["1"]["path"][0] != "":
             image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
         else:
