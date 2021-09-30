@@ -195,8 +195,6 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
             image_to_write.SetDirection(image_for_info_copy.GetDirection())
             image_to_write.SetSpacing(correct_spacing_for_info_copy)
-            print("Origin:", image_to_write.GetOrigin(), flush=True)
-            print("Spacing:", image_to_write.GetSpacing(), flush=True)
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
