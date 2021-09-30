@@ -155,7 +155,10 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             common_ext = ".vtk"
         
         
-        image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
+        if subject["1"]["path"][0] is not "":
+            image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
+        else:
+            image_for_info_copy = subject_dict_to_write["1"].as_sitk()
         correct_spacing_for_info_copy = subject["spacing"][0].tolist()
         for channel in parameters["headers"]["channelHeaders"]:
             image_file = Path(
@@ -166,9 +169,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             ).as_posix()
             output_columns_to_write["channel_" + str(channel - 1)].append(image_file)
             image_to_write = subject_dict_to_write[str(channel)].as_sitk()
-            image_for_info_copy.SetOrigin(image_to_write.GetOrigin())
-            image_for_info_copy.SetDirection(image_to_write.GetDirection())
-            image_for_info_copy.SetSpacing(correct_spacing_for_info_copy)
+            image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
+            image_to_write.SetDirection(image_for_info_copy.GetDirection())
+            image_to_write.SetSpacing(correct_spacing_for_info_copy)
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
@@ -189,9 +192,11 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             ).as_posix()
             output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
-            image_for_info_copy.SetOrigin(image_to_write.GetOrigin())
-            image_for_info_copy.SetDirection(image_to_write.GetDirection())
-            image_for_info_copy.SetSpacing(correct_spacing_for_info_copy)
+            image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
+            image_to_write.SetDirection(image_for_info_copy.GetDirection())
+            image_to_write.SetSpacing(correct_spacing_for_info_copy)
+            print("Origin:", image_to_write.GetOrigin(), flush=True)
+            print("Spacing:", image_to_write.GetSpacing(), flush=True)
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
