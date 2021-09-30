@@ -742,7 +742,7 @@ def test_config_read():
     parameters = parseConfig(
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=False
     )
-    parameters["data_preprocessing"]["resize"] = [128, 128]
+    parameters["data_preprocessing"]["resize"] = [256,256]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -758,12 +758,7 @@ def test_config_read():
 
     if not data_loader:
         sys.exit(1)
-
-    preprocess_and_save(
-        inputDir + "/train_2d_rad_segmentation.csv", file_config_temp, outputDir
-    )
-    shutil.rmtree(outputDir)  # overwrite previous results
-
+    
     print("passed")
 
 
