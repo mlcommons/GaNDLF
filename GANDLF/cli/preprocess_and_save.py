@@ -155,7 +155,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             common_ext = ".vtk"
         
         
-        if subject["1"]["path"][0] is not "":
+        if subject["1"]["path"][0] != "":
             image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
         else:
             image_for_info_copy = subject_dict_to_write["1"].as_sitk()
