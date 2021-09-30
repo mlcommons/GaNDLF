@@ -189,6 +189,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             ).as_posix()
             output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
+            image_for_info_copy.SetOrigin(image_to_write.GetOrigin())
+            image_for_info_copy.SetDirection(image_to_write.GetDirection())
+            image_for_info_copy.SetSpacing(correct_spacing_for_info_copy)
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
