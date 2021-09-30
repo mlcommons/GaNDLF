@@ -75,50 +75,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-
-    ### one_hot testing
-    # import SimpleITK as sitk
-    # import torch
-    # from GANDLF.utils import one_hot, reverse_one_hot
-
-    # file="C:/Users/sarth/Downloads/vinny_debug/75669731_PROC_RMLO_RC_mask.nii.gz"
-    # img = sitk.ReadImage(file)
-    # img_tensor = torch.from_numpy(sitk.GetArrayFromImage(img)).to(torch.float16)
-    # img_tensor = img_tensor.unsqueeze(0)
-    # img_tensor = img_tensor.unsqueeze(0)
-    # img_tensor_oh = one_hot(img_tensor, [0,128,255])
-    # img_tensor_oh_rev = reverse_one_hot(img_tensor_oh[0], [0,128,255])
-    # # for i in range(img_tensor_oh.shape[1]):
-    # #     curr_img = sitk.GetImageFromArray(img_tensor_oh[0,i,...].numpy())
-    # #     curr_img = sitk.Cast(curr_img, sitk.sitkInt16)
-    # #     curr_img.CopyInformation(img)
-    # #     sitk.WriteImage(curr_img, "C:/Users/sarth/Downloads/vinny_debug/seg_oh_"+str(i)+".nii.gz")
-    # curr_img = sitk.GetImageFromArray(img_tensor_oh_rev)
-    # curr_img = sitk.Cast(curr_img, sitk.sitkInt16)
-    # curr_img.CopyInformation(img)
-    # sitk.WriteImage(curr_img, "C:/Users/sarth/Downloads/vinny_debug/seg_oh_rev.nii.gz")
-    ### one_hot testing
-
-    ### unit testing
-    from testing.test_full import test_config_read, test_augmentation_functions, test_cli_function_preprocess, test_cli_function_mainrun, test_preprocess_functions, test_metrics_segmentation_rad_2d, test_inference_classification_rad_3d, test_train_segmentation_rad_3d, test_train_segmentation_rad_2d, test_train_classification_rad_2d, test_train_regression_rad_2d, test_dataloader_construction_train_segmentation_3d, test_model_patch_divisibility, test_checkpointing_segmentation_rad_2d, test_losses_segmentation_rad_2d
-    
-    # test_model_patch_divisibility()
-    # test_config_read()
-    # test_cli_function_preprocess()
-    # test_cli_function_mainrun("cuda")
-    # test_preprocess_functions()
-    # test_augmentation_functions()
-    # test_metrics_segmentation_rad_2d("cuda")
-    # test_inference_classification_rad_3d("cuda")
-    # test_train_classification_rad_2d("cuda")
-    # test_train_regression_rad_2d("cuda")
-    # test_dataloader_construction_train_segmentation_3d("cuda")
-    # test_train_segmentation_rad_3d("cuda")
-    # test_train_segmentation_rad_2d("cuda")
-    # test_checkpointing_segmentation_rad_2d("cuda")
-    # test_losses_segmentation_rad_2d("cuda")
-    ### unit testing
-
     main_run(
         args.data, args.config, args.output, args.train, args.device, args.reset_prv
     )
