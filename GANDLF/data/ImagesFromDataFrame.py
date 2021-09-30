@@ -116,6 +116,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 file_reader.SetFileName(dataframe[channel][patient])
                 file_reader.ReadImageInformation()
                 import torch
+
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
             # if resize is requested, the perform per-image resize with appropriate interpolator

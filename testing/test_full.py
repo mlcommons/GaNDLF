@@ -755,11 +755,13 @@ def test_config_read():
     if not parameters:
         sys.exit(1)
     data_loader = ImagesFromDataFrame(training_data, parameters, True)
-    
+
     if not data_loader:
         sys.exit(1)
-    
-    preprocess_and_save(inputDir + "/train_2d_rad_segmentation.csv", file_config_temp, outputDir)
+
+    preprocess_and_save(
+        inputDir + "/train_2d_rad_segmentation.csv", file_config_temp, outputDir
+    )
     shutil.rmtree(outputDir)  # overwrite previous results
 
     print("passed")
