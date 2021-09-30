@@ -53,6 +53,9 @@ def step(model, image, label, params):
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
+    if params["problem_type"] == "classification":
+        if len(label.shape) > 1:
+                label = torch.squeeze(label, -1)
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(image, label, output, params)
 
