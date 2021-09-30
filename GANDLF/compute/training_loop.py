@@ -145,6 +145,8 @@ def train_network(model, train_dataloader, optimizer, params):
                     "Half-Epoch Average Train " + metric + " : ",
                     total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
+        
+        torch.cuda.empty_cache()
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
