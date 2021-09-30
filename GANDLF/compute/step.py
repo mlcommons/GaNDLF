@@ -2,8 +2,6 @@ import torch
 import psutil
 from .loss_and_metric import get_loss_and_metrics
 
-from GANDLF.utils import one_hot
-
 
 def step(model, image, label, params):
     """
@@ -40,9 +38,6 @@ def step(model, image, label, params):
         print(
             "|===========================================================================|\n|"
         )
-
-    # if params["problem_type"] == "segmentation":
-    #     label = one_hot(label, params["model"]["class_list"])
 
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
