@@ -742,7 +742,7 @@ def test_config_read():
     parameters = parseConfig(
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=False
     )
-    parameters["data_preprocessing"]["resize"] = [256,256]
+    parameters["data_preprocessing"]["resize"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -755,10 +755,8 @@ def test_config_read():
     if not parameters:
         sys.exit(1)
     data_loader = ImagesFromDataFrame(training_data, parameters, True)
-
     if not data_loader:
         sys.exit(1)
-    
     print("passed")
 
 
