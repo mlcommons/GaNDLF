@@ -1,4 +1,4 @@
-import os, pathlib, psutil
+import os, pathlib
 import torch
 from tqdm import tqdm
 import SimpleITK as sitk
@@ -8,6 +8,7 @@ import torchio
 from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
+    one_hot,
     reverse_one_hot,
     resample_image,
 )
@@ -92,44 +93,6 @@ def validate_network(
                 # used to write output
                 outputToWrite = "Epoch,SubjectID,PredictedValue\n"
 
-    if params["track_memory_usage"]:
-        file_to_write_mem = os.path.join(current_output_dir, "memory_usage.csv")
-        if os.path.exists(file_to_write_mem):
-            # append to previously generated file
-            file_mem = open(file_to_write_mem, "a")
-            outputToWrite_mem = ""
-        else:
-            # if file was absent, write header information
-            file_mem = open(file_to_write_mem, "w")
-            outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,"  # used to write output
-            if params["device"] == "cuda":
-                outputToWrite_mem += "CUDA_active.all.current,CUDA_active.all.peak,"
-            outputToWrite_mem += "\n"
-
-        mem = psutil.virtual_memory()
-        outputToWrite_mem += (
-            str(epoch)
-            + ","
-            + str(mem[0])
-            + ","
-            + str(mem[1])
-            + ","
-            + str(mem[2])
-            + ","
-            + str(mem[3])
-        )
-        if params["device"] == "cuda":
-            mem_cuda = torch.cuda.memory_stats()
-            outputToWrite_mem += (
-                ","
-                + str(mem_cuda["active.all.current"])
-                + ","
-                + str(mem_cuda["active.all.peak"])
-            )
-        outputToWrite_mem += ",\n"
-        file_mem.write(outputToWrite_mem)
-        file_mem.close()
-
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
@@ -212,7 +175,7 @@ def validate_network(
                 image, valuesToPredict, pred_output, params
             )
             # # Non network validing related
-            total_epoch_valid_loss += final_loss.cpu().data.item()
+            total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]
@@ -257,11 +220,7 @@ def validate_network(
                 )
                 if "value_keys" in params:
                     is_segmentation = False
-                    label = label_ground_truth  # torch.cat([patches_batch[key] for key in params["value_keys"]], dim=0)
-                    # label = torch.reshape(
-                    #     patches_batch[params["value_keys"][0]], (params["batch_size"], 1)
-                    # )
-                    # one-hot encoding of 'label' will probably be needed for segmentation
+                    label = label_ground_truth
                 else:
                     label = patches_batch["label"][torchio.DATA]
                 label = label.to(params["device"])
@@ -301,6 +260,10 @@ def validate_network(
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
+                label_ground_truth = label_ground_truth.to(torch.float32)
+                # label_ground_truth = one_hot(
+                #     label_ground_truth, params["model"]["class_list"]
+                # )
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
@@ -333,11 +296,9 @@ def validate_network(
                             current_output_dir, subject["subject_id"][0] + "_seg" + ext
                         ),
                     )
-                # reverse one-hot encoding of 'output_prediction' will probably be needed for segmentation
             else:
-                output_prediction = output_prediction / len(
-                    patch_loader
-                )  # final regression output
+                # final regression output
+                output_prediction = output_prediction / len(patch_loader)
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
@@ -362,7 +323,10 @@ def validate_network(
 
             # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
-                image, label_ground_truth.to(torch.float32), output_prediction.to(torch.float32), params
+                image,
+                label_ground_truth,
+                output_prediction.to(torch.float32),
+                params,
             )
             if params["verbose"]:
                 print(
@@ -427,7 +391,7 @@ def validate_network(
             current_fold_dir = params["current_fold_dir"]
             np.savetxt(
                 os.path.join(current_fold_dir, "logits.csv"),
-                logit_tensor.detach().numpy(),
+                logit_tensor.detach().cpu().numpy(),
                 delimiter=",",
             )
 

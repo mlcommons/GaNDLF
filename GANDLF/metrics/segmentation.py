@@ -125,7 +125,7 @@ def hd_generic(inp, target, params, percentile=95):
     -----
     This is a real metric. The binary images can therefore be supplied in any order.
     """
-    result_array = inp.cpu().detach().numpy()
+    result_array = inp.detach().cpu().numpy()
     if result_array.shape[-1] == 1:
         result_array = result_array.squeeze(-1)
     # ensure that we are dealing with a binary array
@@ -137,19 +137,20 @@ def hd_generic(inp, target, params, percentile=95):
 
     hd = 0
     avg_counter = 0
-    for i in range(0, params["model"]["num_classes"]):
-        if i != params["model"]["ignore_label_validation"]:
-            hd1 = __surface_distances(
-                result_array[:, i, ...].squeeze(0),
-                reference_array[:, i, ...].squeeze(0),
-            )
-            hd2 = __surface_distances(
-                reference_array[:, i, ...].squeeze(0),
-                result_array[:, i, ...].squeeze(0),
-                params["subject_spacing"],
-            )
-            hd += numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
-            avg_counter += 1
+    for b in range(0, result_array.shape[0]):
+        for i in range(0, params["model"]["num_classes"]):
+            if i != params["model"]["ignore_label_validation"]:
+                hd1 = __surface_distances(
+                    result_array[b, i, ...],
+                    reference_array[b, i, ...],
+                )
+                hd2 = __surface_distances(
+                    reference_array[b, i, ...],
+                    result_array[b, i, ...],
+                    params["subject_spacing"][b],
+                )
+                hd += numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
+                avg_counter += 1
     return torch.tensor(hd / avg_counter)
 
 
