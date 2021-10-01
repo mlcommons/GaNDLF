@@ -186,7 +186,7 @@ def training_loop(
     params["device"] = device
     params["output_dir"] = output_dir
 
-    ## test for
+    ## test for 'num_workers'
     if params["q_num_workers"] > 0:
         print(
             "\n\n********\nWARNING: Setting 'num_workers' > 0 will causes unexpected memory issues; see https://github.com/CBICA/GaNDLF/issues/218 \n********\n\n"
