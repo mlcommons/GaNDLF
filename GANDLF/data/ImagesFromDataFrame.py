@@ -123,8 +123,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = img_resized.GetSpacing()
-                torchio.Image.from_sitk(img_resized)
-                subject_dict[str(channel)] = torchio.Image.from_sitk(img_resized)
+                resized_image = torchio.Image.from_sitk(img_resized)
+                subject_dict[str(channel)]["data"] = resized_image["data"]
 
         # # for regression
         # if predictionHeaders:
