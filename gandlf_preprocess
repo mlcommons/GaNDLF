@@ -30,7 +30,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-data",
         type=str,
-        help="Data csv file that is used for training/inference; can also take a comma-separate training-validatation pre-split CSV",
+        help="Data csv file that is used for training/inference",
         required=True,
     )
     parser.add_argument(

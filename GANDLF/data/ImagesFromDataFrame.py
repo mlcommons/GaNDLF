@@ -115,14 +115,16 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 file_reader = sitk.ImageFileReader()
                 file_reader.SetFileName(dataframe[channel][patient])
                 file_reader.ReadImageInformation()
-                subject_dict["spacing"] = file_reader.GetSpacing()
+                import torch
+
+                subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
                 img = subject_dict[str(channel)].as_sitk()
                 img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
-                subject_dict["spacing"] = img_resized.GetSpacing()
+                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
                 torchio.Image.from_sitk(img_resized)
                 subject_dict[str(channel)] = torchio.Image.from_sitk(img_resized)
 
@@ -143,10 +145,15 @@ def ImagesFromDataFrame(dataframe, parameters, train):
 
             # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
             if subject_dict["label"]["data"].shape[0] == 3:
-                subject_dict["label"]["data"] = subject_dict["label"]["data"][0].unsqueeze(0)
+                subject_dict["label"]["data"] = subject_dict["label"]["data"][
+                    0
+                ].unsqueeze(0)
                 # this warning should only come up once
                 if parameters["print_rgb_label_warning"]:
-                    print("WARNING: The label image is an RGB image, only the first channel will be used.", flush=True)
+                    print(
+                        "WARNING: The label image is an RGB image, only the first channel will be used.",
+                        flush=True,
+                    )
                     parameters["print_rgb_label_warning"] = False
 
             # if resize is requested, the perform per-image resize with appropriate interpolator

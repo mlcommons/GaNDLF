@@ -153,6 +153,12 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         # RGB floats, use the "vtk" format
         if common_ext in [".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"]:
             common_ext = ".vtk"
+
+        if subject["1"]["path"][0] != "":
+            image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
+        else:
+            image_for_info_copy = subject_dict_to_write["1"].as_sitk()
+        correct_spacing_for_info_copy = subject["spacing"][0].tolist()
         for channel in parameters["headers"]["channelHeaders"]:
             image_file = Path(
                 os.path.join(
@@ -162,6 +168,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             ).as_posix()
             output_columns_to_write["channel_" + str(channel - 1)].append(image_file)
             image_to_write = subject_dict_to_write[str(channel)].as_sitk()
+            image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
+            image_to_write.SetDirection(image_for_info_copy.GetDirection())
+            image_to_write.SetSpacing(correct_spacing_for_info_copy)
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
@@ -182,6 +191,9 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
             ).as_posix()
             output_columns_to_write["label"].append(image_file)
             image_to_write = subject_dict_to_write["label"].as_sitk()
+            image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
+            image_to_write.SetDirection(image_for_info_copy.GetDirection())
+            image_to_write.SetSpacing(correct_spacing_for_info_copy)
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)

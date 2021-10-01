@@ -1,4 +1,4 @@
-import os, math, time
+import os, time, psutil
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -86,7 +86,6 @@ def train_network(model, train_dataloader, optimizer, params):
             )
         else:
             label = subject["label"][torchio.DATA]
-            # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
 
         # ensure spacing is always present in params and is always subject-specific
@@ -129,7 +128,7 @@ def train_network(model, train_dataloader, optimizer, params):
 
         # Non network training related
         if not nan_loss:
-            total_epoch_train_loss += loss.cpu().data.item()
+            total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
@@ -146,6 +145,8 @@ def train_network(model, train_dataloader, optimizer, params):
                     "Half-Epoch Average Train " + metric + " : ",
                     total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
+
+        torch.cuda.empty_cache()
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
@@ -184,6 +185,12 @@ def training_loop(
     epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
+
+    ## test for
+    if params["q_num_workers"] > 0:
+        print(
+            "\n\n********\nWARNING: Setting 'num_workers' > 0 will causes unexpected memory issues; see https://github.com/CBICA/GaNDLF/issues/218 \n********\n\n"
+        )
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
@@ -339,6 +346,47 @@ def training_loop(
 
     # Iterate for number of epochs
     for epoch in range(start_epoch, epochs):
+
+        if params["track_memory_usage"]:
+
+            file_to_write_mem = os.path.join(output_dir, "memory_usage.csv")
+            if os.path.exists(file_to_write_mem):
+                # append to previously generated file
+                file_mem = open(file_to_write_mem, "a")
+                outputToWrite_mem = ""
+            else:
+                # if file was absent, write header information
+                file_mem = open(file_to_write_mem, "w")
+                outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,"  # used to write output
+                if params["device"] == "cuda":
+                    outputToWrite_mem += "CUDA_active.all.peak,CUDA_active.all.current,CUDA_active.all.allocated"
+                outputToWrite_mem += "\n"
+
+            mem = psutil.virtual_memory()
+            outputToWrite_mem += (
+                str(epoch)
+                + ","
+                + str(mem[0])
+                + ","
+                + str(mem[1])
+                + ","
+                + str(mem[2])
+                + ","
+                + str(mem[3])
+            )
+            if params["device"] == "cuda":
+                mem_cuda = torch.cuda.memory_stats()
+                outputToWrite_mem += (
+                    ","
+                    + str(mem_cuda["active.all.peak"])
+                    + ","
+                    + str(mem_cuda["active.all.current"])
+                    + ","
+                    + str(mem_cuda["active.all.allocated"])
+                )
+            outputToWrite_mem += ",\n"
+            file_mem.write(outputToWrite_mem)
+            file_mem.close()
 
         # Printing times
         epoch_start_time = time.time()

@@ -119,14 +119,22 @@ def perform_sanity_check_on_subject(subject, parameters):
     if len(list_for_comparison) > 1:
         for key in list_for_comparison:
             if file_reader_base is None:
-                file_reader_base = sitk.ImageFileReader()
-                file_reader_base.SetFileName(subject[str(key)]["path"])
-                file_reader_base.ReadImageInformation()
+                if subject[str(key)]["path"] != "":
+                    file_reader_base = sitk.ImageFileReader()
+                    file_reader_base.SetFileName(subject[str(key)]["path"])
+                    file_reader_base.ReadImageInformation()
+                else:
+                    # this case is required if any tensor/imaging operation has been applied in dataloader
+                    file_reader_base = subject[str(key)].as_sitk()
             else:
-                # in this case, file_reader_base is ready
-                file_reader_current = sitk.ImageFileReader()
-                file_reader_current.SetFileName(subject[str(key)]["path"])
-                file_reader_current.ReadImageInformation()
+                if subject[str(key)]["path"] != "":
+                    # in this case, file_reader_base is ready
+                    file_reader_current = sitk.ImageFileReader()
+                    file_reader_current.SetFileName(subject[str(key)]["path"])
+                    file_reader_current.ReadImageInformation()
+                else:
+                    # this case is required if any tensor/imaging operation has been applied in dataloader
+                    file_reader_current = subject[str(key)].as_sitk()
 
                 if (
                     file_reader_base.GetDimension()
