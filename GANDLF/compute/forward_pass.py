@@ -4,11 +4,11 @@ from tqdm import tqdm
 import SimpleITK as sitk
 import numpy as np
 import torchio
+import gc
 
 from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
-    one_hot,
     reverse_one_hot,
     resample_image,
 )
@@ -261,9 +261,6 @@ def validate_network(
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
                 label_ground_truth = label_ground_truth.to(torch.float32)
-                # label_ground_truth = one_hot(
-                #     label_ground_truth, params["model"]["class_list"]
-                # )
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
@@ -344,6 +341,8 @@ def validate_network(
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]
 
+        gc.collect()
+        
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
             (batch_idx + 1) < len(valid_dataloader)
