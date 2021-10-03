@@ -19,9 +19,10 @@ class GradScaler:
         self._scaler.scale(loss).backward(create_graph=create_graph)
         if clip_grad is not None:
             assert parameters is not None
+            # unscale the gradients of optimizer's assigned params in-place
             self._scaler.unscale_(
                 optimizer
-            )  # unscale the gradients of optimizer's assigned params in-place
+            )  
             if (clip_mode is None) or (str(clip_mode).lower() == "none"):
                 clip_mode == "norm"  # default, in case none gets passed
             dispatch_clip_grad_(parameters, clip_grad, mode=clip_mode)
