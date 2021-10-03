@@ -266,6 +266,7 @@ def training_loop(
         params["weights"], params["class_weights"] = get_class_imbalance_weights(
             penalty_loader, params
         )
+        del penalty_data, penalty_loader
     else:
         params["weights"], params["class_weights"] = None, None
 
