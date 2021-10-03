@@ -270,13 +270,13 @@ def validate_network(
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
-                    result_array = np.swapaxes(pred_mask, 0, 2)
+                    pred_mask = np.swapaxes(pred_mask, 0, 2)
                     ## special case for 2D
                     if image.shape[-1] > 1:
                         # ITK expects array as Z,X,Y
-                        result_image = sitk.GetImageFromArray(result_array)
+                        result_image = sitk.GetImageFromArray(pred_mask)
                     else:
-                        result_image = sitk.GetImageFromArray(result_array.squeeze(0))
+                        result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(inputImage)
                     # cast as the same data type
                     result_image = sitk.Cast(result_image, inputImage.GetPixelID())
@@ -342,7 +342,7 @@ def validate_network(
                 total_epoch_valid_metric[metric] += final_metric[metric]
 
         gc.collect()
-        
+
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
             (batch_idx + 1) < len(valid_dataloader)
