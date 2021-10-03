@@ -126,7 +126,6 @@ def train_network(model, train_dataloader, optimizer, params):
                         mode=params["clip_mode"],
                     )
                 optimizer.step()
-                nan_loss = False
 
         # Non network training related
         if not nan_loss:
