@@ -1029,12 +1029,3 @@ def test_one_hot_logic():
     comparison = img_array == img_tensor_oh_rev
     assert comparison.all(), "Arrays are not equal"
     print("passed")
-    for i in range(img_tensor_oh.shape[1]):
-        curr_img = sitk.GetImageFromArray(img_tensor_oh[0,i,...].numpy())
-        curr_img = sitk.Cast(curr_img, sitk.sitkInt16)
-        curr_img.CopyInformation(img)
-        sitk.WriteImage(curr_img, "C:/Users/sarth/Downloads/vinny_debug/seg_oh_"+str(i)+".nii.gz")
-    curr_img = sitk.GetImageFromArray(img_tensor_oh_rev)
-    curr_img = sitk.Cast(curr_img, sitk.sitkInt16)
-    curr_img.CopyInformation(img)
-    sitk.WriteImage(curr_img, "C:/Users/sarth/Downloads/vinny_debug/seg_oh_rev.nii.gz")
