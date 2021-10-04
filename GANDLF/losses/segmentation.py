@@ -55,7 +55,7 @@ def MCD_loss(pm, gt, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    gt = one_hot(gt, params)
+    gt = one_hot(gt, params["model"]["class_list"])
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 1)
 
 
@@ -63,7 +63,7 @@ def MCD_log_loss(pm, gt, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    gt = one_hot(gt, params)
+    gt = one_hot(gt, params["model"]["class_list"])
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 2)
 
 
