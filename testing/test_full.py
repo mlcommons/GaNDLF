@@ -1019,17 +1019,12 @@ def test_model_patch_divisibility():
 def test_one_hot_logic():
     file = os.path.join(inputDir, "3d_rad_segmentation", "001", "mask.nii.gz")
     class_list = [0,1]
-    parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
-    )
-    parameters["model"]["class_list"] = class_list
-    parameters["device"] = torch.device("cpu")
     img = sitk.ReadImage(file)
     img_array = sitk.GetArrayFromImage(img)
     img_tensor = torch.from_numpy(img_array).to(torch.float16)
     img_tensor = img_tensor.unsqueeze(0)
     img_tensor = img_tensor.unsqueeze(0)
-    img_tensor_oh = one_hot(img_tensor, parameters)
+    img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev = reverse_one_hot(img_tensor_oh[0], class_list)
     comparison = img_array == img_tensor_oh_rev
     assert comparison.all(), "Arrays are not equal"
