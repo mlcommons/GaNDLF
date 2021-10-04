@@ -147,16 +147,16 @@ def train_network(model, train_dataloader, optimizer, params):
                     total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
 
-        torch.cuda.empty_cache()
-        mem = psutil.virtual_memory()
-        print("***** Debug BEFORE del")
-        print(mem, flush=True)
-        print("*****")
-        del loss, image, label
-        gc.collect()
-        print("***** Debug AFTER del")
-        print(mem, flush=True)
-        print("*****")
+        # torch.cuda.empty_cache()
+        # mem = psutil.virtual_memory()
+        # print("***** Debug BEFORE del")
+        # print(mem, flush=True)
+        # print("*****")
+        # del loss, image, label
+        # gc.collect()
+        # print("***** Debug AFTER del")
+        # print(mem, flush=True)
+        # print("*****")
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
