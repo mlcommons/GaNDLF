@@ -17,9 +17,9 @@ def one_hot(segmask_array, class_list):
         torch.Tensor: The one-hot encoded torch.Tensor
     """
     batch_size = segmask_array.shape[0]
-    batch_stack = []
+    batch_stack = None
     for b in range(batch_size):
-        one_hot_stack = []
+        one_hot_stack = None
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
         segmask_array_iter = segmask_array[b, 0, ...]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
@@ -46,12 +46,21 @@ def one_hot(segmask_array, class_list):
             else:
                 bin_mask = segmask_array_iter == int(_class)
                 bin_mask = bin_mask.long()
-            one_hot_stack.append(bin_mask)
-        one_hot_stack = torch.stack(one_hot_stack)
-        batch_stack.append(one_hot_stack)
-    batch_stack = torch.stack(batch_stack)
-    if batch_stack.shape[-1] == 1:
-        batch_stack = batch_stack.squeeze(-1)
+                # we always ensure the append happens in dim 0, which is blank
+                bin_mask = bin_mask.unsqueeze(0)
+                
+            if one_hot_stack is None:
+                one_hot_stack = bin_mask
+            else:
+                one_hot_stack = torch.cat((one_hot_stack, bin_mask))
+                
+        if batch_stack is None:
+            batch_stack = one_hot_stack
+        else:
+            batch_stack = torch.stack([batch_stack, one_hot_stack])
+    # always ensure we are returning a tensor with batch_size encoded
+    if len(batch_stack.shape) != 5:
+        batch_stack = batch_stack.unsqueeze(0)
     return batch_stack
 
 
