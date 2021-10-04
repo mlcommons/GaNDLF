@@ -56,11 +56,11 @@ def one_hot(segmask_array, class_list):
                 
         if batch_stack is None:
             batch_stack = one_hot_stack
+            # always ensure we are returning a tensor with batch_size encoded
+            batch_stack = batch_stack.unsqueeze(0)
         else:
-            batch_stack = torch.stack([batch_stack, one_hot_stack])
-    # always ensure we are returning a tensor with batch_size encoded
-    if len(batch_stack.shape) != 5:
-        batch_stack = batch_stack.unsqueeze(0)
+            batch_stack = torch.cat((batch_stack, one_hot_stack))
+            
     return batch_stack
 
 
