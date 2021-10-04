@@ -21,7 +21,9 @@ def generic_torchmetrics_score(output, label, metric_class, metric_key, params):
         threshold=params["metrics"][metric_key]["threshold"],
     )
 
-    return metric_function(predicted_classes.cpu(), label.cpu())
+
+
+    return metric_function(predicted_classes.cpu().int(), label.cpu().int())
 
 
 def recall_score(output, label, params):
@@ -50,4 +52,4 @@ def iou_score(output, label, params):
         threshold=params["metrics"]["iou"]["threshold"],
     )
 
-    return recall(predicted_classes.cpu(), label.cpu())
+    return recall(predicted_classes.cpu().int(), label.cpu().int())
