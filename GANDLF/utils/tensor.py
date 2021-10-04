@@ -5,21 +5,22 @@ import torch.nn as nn
 import torchio
 
 
-def one_hot(segmask_array, class_list):
+def one_hot(segmask_array, parameters):
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
         segmask_array (torch.Tensor): The segmentation mask Tensor.
-        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+        parameters (dict): The parameters passed by the user yaml.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
     """
+    class_list = parameters["model"]["class_list"]
     batch_size = segmask_array.shape[0]
     # batch_stack = None
     def_shape = segmask_array.shape
-    batch_stack = torch.zeros(def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4], dtype=torch.float32)
+    batch_stack = torch.zeros(def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4], dtype=torch.float32, device=parameters["device"])
     for b in range(batch_size):
         # one_hot_stack = np.zeros([len(class_list), def_shape[2], def_shape[3], def_shape[4]])
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
@@ -242,7 +243,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         if parameters["problem_type"] == "segmentation":
             # accumulate dice weights for each label
             mask = subject["label"][torchio.DATA]
-            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+            one_hot_mask = one_hot(mask, parameters)
             for i in range(0, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(
                     one_hot_mask[:, i, ...], as_tuple=False
