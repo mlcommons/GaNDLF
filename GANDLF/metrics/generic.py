@@ -9,7 +9,7 @@ def generic_torchmetrics_score(output, label, metric_class, metric_key, params):
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(output, 1)
     elif params["problem_type"] == "segmentation":
-        label = one_hot(label, params["model"]["class_list"])
+        label = one_hot(label, params)
     else:
         params["metrics"][metric_key]["multi_class"] = False
         params["metrics"][metric_key]["mdmc_average"] = None
@@ -42,7 +42,7 @@ def iou_score(output, label, params):
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(output, 1)
     elif params["problem_type"] == "segmentation":
-        label = one_hot(label, params["model"]["class_list"])
+        label = one_hot(label, params)
 
     recall = IoU(
         reduction=params["metrics"]["iou"]["reduction"],

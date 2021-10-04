@@ -51,7 +51,7 @@ def CCE_Generic(out, target, params, CCE_Type):
     """
 
     acc_ce_loss = 0
-    target = one_hot(target, params["model"]["class_list"]).type(out.dtype)
+    target = one_hot(target, params).type(out.dtype)
     for i in range(0, len(params["model"]["class_list"])):
         curr_ce_loss = CCE_Type(out[:, i, ...], target[:, i, ...])
         if params["weights"] is not None:
