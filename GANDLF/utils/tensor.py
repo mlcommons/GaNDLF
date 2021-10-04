@@ -19,12 +19,12 @@ def one_hot(segmask_array, class_list):
     batch_size = segmask_array.shape[0]
     # batch_stack = None
     def_shape = segmask_array.shape
-    batch_stack = np.zeros([def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4]], dtype=np.float32)
+    batch_stack = torch.zeros(def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4], dtype=torch.float32)
     for b in range(batch_size):
         # one_hot_stack = np.zeros([len(class_list), def_shape[2], def_shape[3], def_shape[4]])
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
         segmask_array_iter = segmask_array[b, 0, ...]
-        bin_mask = (segmask_array_iter == 0).numpy()  # initialize bin_mask
+        bin_mask = (segmask_array_iter == 0)  # initialize bin_mask
         # this implementation allows users to combine logical operands
 
         class_idx = 0
@@ -70,7 +70,8 @@ def one_hot(segmask_array, class_list):
         #         one_hot_stack = one_hot_stack.unsqueeze(0)
         #     batch_stack = torch.cat((batch_stack, one_hot_stack))
     
-    return torch.from_numpy(batch_stack)
+    return batch_stack
+    # return torch.from_numpy(batch_stack)
 
 
 def reverse_one_hot(predmask_array, class_list):
