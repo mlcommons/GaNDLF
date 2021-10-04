@@ -20,7 +20,7 @@ def one_hot(segmask_array, parameters):
     batch_size = segmask_array.shape[0]
     # batch_stack = None
     def_shape = segmask_array.shape
-    batch_stack = torch.zeros(def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4], dtype=torch.float32, device=parameters["device"])
+    batch_stack = torch.zeros(def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4], dtype=torch.float32, device=segmask_array.device)
     for b in range(batch_size):
         # one_hot_stack = np.zeros([len(class_list), def_shape[2], def_shape[3], def_shape[4]])
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
