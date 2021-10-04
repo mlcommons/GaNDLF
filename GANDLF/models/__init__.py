@@ -1,4 +1,4 @@
-from .unet import unet, resunet
+from .unet import light_unet, unet, resunet
 from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
@@ -10,6 +10,7 @@ from .brain_age import brainage
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {
     "unet": unet,
+    "lightunet": light_unet,
     "resunet": resunet,
     "residualunet": unet,
     "fcn": fcn,

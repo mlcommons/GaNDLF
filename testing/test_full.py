@@ -19,6 +19,7 @@ device = "cpu"
 ## global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
+    "lightunet",
     "unet",
     "fcn",
     "uinc",
