@@ -1014,3 +1014,27 @@ def test_model_patch_divisibility():
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     print("passed")
+
+
+def test_one_hot_logic():
+    file = os.path.join(inputDir, "3d_rad_segmentation", "001", "mask.nii.gz")
+    class_list = [0,1]
+    img = sitk.ReadImage(file)
+    img_array = sitk.GetArrayFromImage(img)
+    img_tensor = torch.from_numpy(img_array).to(torch.float16)
+    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor_oh = one_hot(img_tensor, class_list)
+    img_tensor_oh_rev = reverse_one_hot(img_tensor_oh[0], class_list)
+    comparison = img_array == img_tensor_oh_rev
+    assert comparison.all(), "Arrays are not equal"
+    print("passed")
+    for i in range(img_tensor_oh.shape[1]):
+        curr_img = sitk.GetImageFromArray(img_tensor_oh[0,i,...].numpy())
+        curr_img = sitk.Cast(curr_img, sitk.sitkInt16)
+        curr_img.CopyInformation(img)
+        sitk.WriteImage(curr_img, "C:/Users/sarth/Downloads/vinny_debug/seg_oh_"+str(i)+".nii.gz")
+    curr_img = sitk.GetImageFromArray(img_tensor_oh_rev)
+    curr_img = sitk.Cast(curr_img, sitk.sitkInt16)
+    curr_img.CopyInformation(img)
+    sitk.WriteImage(curr_img, "C:/Users/sarth/Downloads/vinny_debug/seg_oh_rev.nii.gz")
