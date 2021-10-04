@@ -33,7 +33,7 @@ def multi_class_dice(output, label, params):
         DESCRIPTION.
 
     """
-    label = one_hot(label, params["model"]["class_list"])
+    label = one_hot(label, params)
     total_dice = 0
     avg_counter = 0
     # print("Number of classes : ", params["model"]["num_classes"])
@@ -132,7 +132,7 @@ def hd_generic(inp, target, params, percentile=95):
     result_array[result_array < 0.5] = 0
     result_array[result_array >= 0.5] = 1
     reference_array = (
-        one_hot(target, params["model"]["class_list"]).squeeze(-1).cpu().numpy()
+        one_hot(target, params).squeeze(-1).cpu().numpy()
     )
 
     hd = 0
