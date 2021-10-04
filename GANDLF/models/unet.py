@@ -203,23 +203,14 @@ class light_unet(ModelBase):
 
     def __init__(
         self,
-        n_dimensions,
-        n_channels,
-        n_classes,
-        base_filters,
-        norm_type,
-        final_convolution_layer,
+        parameters: dict,
         residualConnections=False,
     ):
+        self.network_kwargs = {"res": residualConnections}
+        super(light_unet, self).__init__(parameters)
+
         self.network_kwargs = {"res": False}
-        super(light_unet, self).__init__(
-            n_dimensions,
-            n_channels,
-            n_classes,
-            base_filters,
-            norm_type,
-            final_convolution_layer,
-        )
+        
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
@@ -320,13 +311,13 @@ class light_unet(ModelBase):
             network_kwargs=self.network_kwargs,
         )
         self.us_0 = UpsamplingModule(
-            input_channels=self.base_filters,
+            input_channels=self.base_filters * 2,
             output_channels=self.base_filters,
             conv=self.Conv,
         )
         self.out = out_conv(
             input_channels=self.base_filters * 2,
-            output_channels=n_classes,
+            output_channels=self.n_classes,
             conv=self.Conv,
             norm=self.Norm,
             final_convolution_layer=self.final_convolution_layer,
