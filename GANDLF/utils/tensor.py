@@ -5,18 +5,17 @@ import torch.nn as nn
 import torchio
 
 
-def one_hot(segmask_array, parameters):
+def one_hot(segmask_array, class_list):
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
         segmask_array (torch.Tensor): The segmentation mask Tensor.
-        parameters (dict): The parameters passed by the user yaml.
+        class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
     """
-    class_list = parameters["model"]["class_list"]
     batch_size = segmask_array.shape[0]
     # batch_stack = None
     def_shape = segmask_array.shape
@@ -243,7 +242,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         if parameters["problem_type"] == "segmentation":
             # accumulate dice weights for each label
             mask = subject["label"][torchio.DATA]
-            one_hot_mask = one_hot(mask, parameters)
+            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
             for i in range(0, len(parameters["model"]["class_list"])):
                 currentNumber = torch.nonzero(
                     one_hot_mask[:, i, ...], as_tuple=False
