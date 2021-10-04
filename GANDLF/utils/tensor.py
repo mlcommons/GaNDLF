@@ -45,9 +45,9 @@ def one_hot(segmask_array, class_list):
                     bin_mask = segmask_array_iter == int(_class)
             else:
                 bin_mask = segmask_array_iter == int(_class)
-                bin_mask = bin_mask.long()
-                # we always ensure the append happens in dim 0, which is blank
-                bin_mask = bin_mask.unsqueeze(0)
+            bin_mask = bin_mask.long()
+            # we always ensure the append happens in dim 0, which is blank
+            bin_mask = bin_mask.unsqueeze(0)
                 
             if one_hot_stack is None:
                 one_hot_stack = bin_mask
@@ -59,6 +59,8 @@ def one_hot(segmask_array, class_list):
             # always ensure we are returning a tensor with batch_size encoded
             batch_stack = batch_stack.unsqueeze(0)
         else:
+            if one_hot_stack.shape != batch_stack.shape:
+                one_hot_stack = one_hot_stack.unsqueeze(0)
             batch_stack = torch.cat((batch_stack, one_hot_stack))
             
     return batch_stack
