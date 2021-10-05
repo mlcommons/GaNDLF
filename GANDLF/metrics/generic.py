@@ -21,9 +21,11 @@ def generic_torchmetrics_score(output, label, metric_class, metric_key, params):
         threshold=params["metrics"][metric_key]["threshold"],
     )
 
-
-
-    return metric_function(predicted_classes.cpu().int(), label.cpu().int())
+    if torch.min(predicted_classes) < 0:
+        print("WARNING: Negative values detected in prediction, cannot compute torchmetrics calculations.")
+        return 0
+    else:
+        return metric_function(predicted_classes.cpu().int(), label.cpu().int())
 
 
 def recall_score(output, label, params):
