@@ -275,43 +275,43 @@ class light_unet(ModelBase):
             network_kwargs=self.network_kwargs,
         )
         self.us_3 = UpsamplingModule(
-            input_channels=self.base_filters * 2,
+            input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
         )
         self.de_3 = DecodingModule(
-            input_channels=self.base_filters,
+            input_channels=self.base_filters * 2,
             output_channels=self.base_filters,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_2 = UpsamplingModule(
-            input_channels=self.base_filters * 2,
+            input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
         )
         self.de_2 = DecodingModule(
-            input_channels=self.base_filters,
+            input_channels=self.base_filters * 2,
             output_channels=self.base_filters,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_1 = UpsamplingModule(
-            input_channels=self.base_filters * 2,
+            input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
         )
         self.de_1 = DecodingModule(
-            input_channels=self.base_filters,
+            input_channels=self.base_filters * 2,
             output_channels=self.base_filters,
             conv=self.Conv,
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
         self.us_0 = UpsamplingModule(
-            input_channels=self.base_filters * 2,
+            input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
         )
