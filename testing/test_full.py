@@ -1019,8 +1019,8 @@ def test_model_patch_divisibility():
 
 def test_one_hot_logic():
 
-    random_array = np.random.random_integers(0, 5, size=(20,20,20))
-    class_list = [*range(0,np.max(random_array) + 1)]
+    random_array = np.random.random_integers(0, 5, size=(20, 20, 20))
+    class_list = [*range(0, np.max(random_array) + 1)]
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
     img_tensor = torch.from_numpy(img_array).to(torch.float16)

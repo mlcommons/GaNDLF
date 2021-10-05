@@ -104,7 +104,9 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[channel][patient])):
                 skip_subject = True
 
-            subject_dict[str(channel)] = torchio.ScalarImage(dataframe[channel][patient])
+            subject_dict[str(channel)] = torchio.ScalarImage(
+                dataframe[channel][patient]
+            )
 
             # store image spacing information if not present
             if "spacing" not in subject_dict:
