@@ -21,6 +21,7 @@ device = "cpu"
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
     "lightunet",
+    "lightresunet",
     "unet",
     "fcn",
     "uinc",
