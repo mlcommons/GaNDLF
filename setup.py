@@ -26,7 +26,7 @@ requirements = [
     "torch>=1.7",
     "torchvision",
     "tqdm",
-    "torchio==0.18.51",
+    "torchio==0.18.57",
     "pandas",
     "pylint",
     "scikit-learn==0.23.1",

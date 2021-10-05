@@ -24,8 +24,6 @@ from .forward_pass import validate_network
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
-import gc
-
 
 def train_network(model, train_dataloader, optimizer, params):
     """
@@ -147,17 +145,6 @@ def train_network(model, train_dataloader, optimizer, params):
                     total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
 
-        # torch.cuda.empty_cache()
-        # mem = psutil.virtual_memory()
-        # print("***** Debug BEFORE del")
-        # print(mem, flush=True)
-        # print("*****")
-        # del loss, image, label
-        # gc.collect()
-        # print("***** Debug AFTER del")
-        # print(mem, flush=True)
-        # print("*****")
-
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
@@ -195,12 +182,6 @@ def training_loop(
     epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
-
-    ## test for 'num_workers'
-    if params["q_num_workers"] > 0:
-        print(
-            "\n\n********\nWARNING: Setting 'num_workers' > 0 will causes unexpected memory issues; see https://github.com/CBICA/GaNDLF/issues/218 \n********\n\n"
-        )
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
