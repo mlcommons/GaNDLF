@@ -105,12 +105,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[channel][patient])):
                 skip_subject = True
 
-            # assigning the dict key to the channel
-            # subject_dict[str(channel)] = Image(
-            #     type=torchio.INTENSITY,
-            #     path=dataframe[channel][patient],
-            # )
-
             subject_dict[str(channel)] = torchio.ScalarImage(dataframe[channel][patient])
 
             # store image spacing information if not present
@@ -139,10 +133,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
                 skip_subject = True
 
-            # subject_dict["label"] = Image(
-            #     type=torchio.LABEL,
-            #     path=dataframe[labelHeader][patient],
-            # )
             subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
