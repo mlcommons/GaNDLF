@@ -9,7 +9,8 @@ def generic_function_output_with_check(predicted_classes, label, metric_function
         print("WARNING: Negative values detected in prediction, cannot compute torchmetrics calculations.")
         return torch.zeros((1), device=predicted_classes.device)
     else:
-        return metric_function(predicted_classes.cpu().int(), label.cpu().int())
+        predicted_new = torch.clamp(predicted_classes.cpu().int(), max = metric_function.num_classes - 1)
+        return metric_function(predicted_new, label.cpu().int())
 
 
 def generic_torchmetrics_score(output, label, metric_class, metric_key, params):
