@@ -17,13 +17,17 @@ def one_hot(segmask_array, class_list):
         torch.Tensor: The one-hot encoded torch.Tensor
     """
     batch_size = segmask_array.shape[0]
-    batch_stack = None
+    # batch_stack = None
+    def_shape = segmask_array.shape
+    batch_stack = torch.zeros(def_shape[0], len(class_list), def_shape[2], def_shape[3], def_shape[4], dtype=torch.float32, device=segmask_array.device)
     for b in range(batch_size):
-        one_hot_stack = None
+        # one_hot_stack = np.zeros([len(class_list), def_shape[2], def_shape[3], def_shape[4]])
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
         segmask_array_iter = segmask_array[b, 0, ...]
-        bin_mask = segmask_array_iter == 0  # initialize bin_mask
+        bin_mask = (segmask_array_iter == 0)  # initialize bin_mask
         # this implementation allows users to combine logical operands
+
+        class_idx = 0
         for _class in class_list:
             if isinstance(_class, str):
                 if "||" in _class:  # special case
@@ -48,22 +52,26 @@ def one_hot(segmask_array, class_list):
             bin_mask = bin_mask.long()
             # we always ensure the append happens in dim 0, which is blank
             bin_mask = bin_mask.unsqueeze(0)
+
+            batch_stack[b, class_idx, ...] = bin_mask
+            class_idx += 1
                 
-            if one_hot_stack is None:
-                one_hot_stack = bin_mask
-            else:
-                one_hot_stack = torch.cat((one_hot_stack, bin_mask))
+        #     if one_hot_stack is None:
+        #         one_hot_stack = bin_mask
+        #     else:
+        #         one_hot_stack = torch.cat((one_hot_stack, bin_mask))
                 
-        if batch_stack is None:
-            batch_stack = one_hot_stack
-            # always ensure we are returning a tensor with batch_size encoded
-            batch_stack = batch_stack.unsqueeze(0)
-        else:
-            if one_hot_stack.shape != batch_stack.shape:
-                one_hot_stack = one_hot_stack.unsqueeze(0)
-            batch_stack = torch.cat((batch_stack, one_hot_stack))
-            
+        # if batch_stack is None:
+        #     batch_stack = one_hot_stack
+        #     # always ensure we are returning a tensor with batch_size encoded
+        #     batch_stack = batch_stack.unsqueeze(0)
+        # else:
+        #     if one_hot_stack.shape != batch_stack.shape:
+        #         one_hot_stack = one_hot_stack.unsqueeze(0)
+        #     batch_stack = torch.cat((batch_stack, one_hot_stack))
+    
     return batch_stack
+    # return torch.from_numpy(batch_stack)
 
 
 def reverse_one_hot(predmask_array, class_list):
