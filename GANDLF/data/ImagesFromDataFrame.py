@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np
 
+import torch
 import torchio
 from torchio.transforms import (
     Resample,
@@ -115,7 +116,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 file_reader = sitk.ImageFileReader()
                 file_reader.SetFileName(dataframe[channel][patient])
                 file_reader.ReadImageInformation()
-                import torch
 
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
