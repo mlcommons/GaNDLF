@@ -64,14 +64,14 @@ class Logger:
         row = ""
         row += str(epoch_number) + ","
         if torch.is_tensor(loss):
-            row += str(loss.cpu().data.item())
+            row += str(loss.cpu().item())
         else:
             row += str(loss)
         row += ","
 
         for metric in epoch_metrics:
             if torch.is_tensor(epoch_metrics[metric]):
-                row += str(epoch_metrics[metric].cpu().data.item())
+                row += str(epoch_metrics[metric].cpu().item())
             else:
                 row += str(epoch_metrics[metric])
             row += ","
