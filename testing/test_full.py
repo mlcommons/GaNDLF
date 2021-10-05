@@ -1,6 +1,7 @@
 from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
 import SimpleITK as sitk
+import numpy as np
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
@@ -1014,4 +1015,20 @@ def test_model_patch_divisibility():
     with pytest.raises(Exception) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
+    print("passed")
+
+
+def test_one_hot_logic():
+
+    random_array = np.random.random_integers(0, 5, size=(20,20,20))
+    class_list = [*range(0,np.max(random_array) + 1)]
+    img = sitk.GetImageFromArray(random_array)
+    img_array = sitk.GetArrayFromImage(img)
+    img_tensor = torch.from_numpy(img_array).to(torch.float16)
+    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor_oh = one_hot(img_tensor, class_list)
+    img_tensor_oh_rev = reverse_one_hot(img_tensor_oh[0], class_list)
+    comparison = random_array == img_tensor_oh_rev
+    assert comparison.all(), "Arrays are not equal"
     print("passed")

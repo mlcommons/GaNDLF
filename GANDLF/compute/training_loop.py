@@ -250,6 +250,7 @@ def training_loop(
 
     # Calculate the weights here
     if params["weighted_loss"]:
+        print("Calculating weights for loss")
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
             training_data,
