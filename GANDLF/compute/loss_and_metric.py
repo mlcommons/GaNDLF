@@ -64,7 +64,10 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 )
             else:
                 metric_output[metric] = (
-                    metric_function(predicted, ground_truth, params).detach().cpu().item()
+                    metric_function(predicted, ground_truth, params)
+                    .detach()
+                    .cpu()
+                    .item()
                 )
         else:
             print(
