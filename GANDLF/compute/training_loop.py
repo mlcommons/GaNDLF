@@ -24,8 +24,6 @@ from .forward_pass import validate_network
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
-import gc
-
 
 def train_network(model, train_dataloader, optimizer, params):
     """
@@ -146,17 +144,6 @@ def train_network(model, train_dataloader, optimizer, params):
                     "Half-Epoch Average Train " + metric + " : ",
                     total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
-
-        # torch.cuda.empty_cache()
-        # mem = psutil.virtual_memory()
-        # print("***** Debug BEFORE del")
-        # print(mem, flush=True)
-        # print("*****")
-        # del loss, image, label
-        # gc.collect()
-        # print("***** Debug AFTER del")
-        # print(mem, flush=True)
-        # print("*****")
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)

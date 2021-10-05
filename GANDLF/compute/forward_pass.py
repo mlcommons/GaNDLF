@@ -4,7 +4,6 @@ from tqdm import tqdm
 import SimpleITK as sitk
 import numpy as np
 import torchio
-import gc
 
 from GANDLF.utils import (
     get_date_time,
@@ -340,8 +339,6 @@ def validate_network(
             for metric in final_metric.keys():
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]
-
-        gc.collect()
 
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
