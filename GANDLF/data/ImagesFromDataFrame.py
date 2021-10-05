@@ -8,7 +8,7 @@ from torchio.transforms import (
     Compose,
     Pad,
 )
-from torchio import Image, Subject
+from torchio import Image, Subject, ScalarImage, LabelMap
 import SimpleITK as sitk
 
 from GANDLF.utils import (
@@ -106,10 +106,12 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 skip_subject = True
 
             # assigning the dict key to the channel
-            subject_dict[str(channel)] = Image(
-                type=torchio.INTENSITY,
-                path=dataframe[channel][patient],
-            )
+            # subject_dict[str(channel)] = Image(
+            #     type=torchio.INTENSITY,
+            #     path=dataframe[channel][patient],
+            # )
+
+            subject_dict[str(channel)] = torchio.ScalarImage(dataframe[channel][patient])
 
             # store image spacing information if not present
             if "spacing" not in subject_dict:
@@ -137,10 +139,11 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
                 skip_subject = True
 
-            subject_dict["label"] = Image(
-                type=torchio.LABEL,
-                path=dataframe[labelHeader][patient],
-            )
+            # subject_dict["label"] = Image(
+            #     type=torchio.LABEL,
+            #     path=dataframe[labelHeader][patient],
+            # )
+            subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
 
             # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
             if subject_dict["label"]["data"].shape[0] == 3:
