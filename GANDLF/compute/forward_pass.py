@@ -168,7 +168,7 @@ def validate_network(
                     + ","
                     + subject["subject_id"][0]
                     + ","
-                    + str(pred_output.cpu().max().data.item())
+                    + str(pred_output.cpu().max().item())
                     + "\n"
                 )
             final_loss, final_metric = get_loss_and_metrics(
@@ -336,7 +336,7 @@ def validate_network(
 
             # # Non network validing related
             # loss.cpu().data.item()
-            total_epoch_valid_loss += final_loss.cpu().data.item()
+            total_epoch_valid_loss += final_loss.cpu().item()
             for metric in final_metric.keys():
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]
