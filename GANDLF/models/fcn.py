@@ -4,7 +4,6 @@ Implementation of Fully Convolutional Network - FCN
 """
 
 import torch.nn.functional as F
-import torch.nn as nn
 import torch
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule

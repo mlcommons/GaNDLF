@@ -4,7 +4,7 @@ from torch.optim import (
     Rprop,
     Adam,
     AdamW,
-    SparseAdam,
+    # SparseAdam,
     Adamax,
     Adadelta,
     Adagrad,
@@ -52,7 +52,7 @@ def asgd(parameters):
     )
 
 
-def adam(parameters, type="normal"):
+def adam(parameters, opt_type="normal"):
     # pick defaults
     if not ("betas" in parameters["optimizer"]):
         parameters["optimizer"]["betas"] = (0.9, 0.999)
@@ -63,7 +63,7 @@ def adam(parameters, type="normal"):
     if not ("amsgrad" in parameters["optimizer"]):
         parameters["optimizer"]["amsgrad"] = False
 
-    if type == "normal":
+    if opt_type == "normal":
         function = Adam
     else:
         function = AdamW
@@ -78,7 +78,7 @@ def adam(parameters, type="normal"):
 
 
 def adamw(parameters):
-    return adam(parameters, type="adamw")
+    return adam(parameters, opt_type="adamw")
 
 
 def adamax(parameters):
