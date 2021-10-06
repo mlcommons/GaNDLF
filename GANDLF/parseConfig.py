@@ -365,30 +365,16 @@ def parseConfig(config_file_path, version_check=True):
 
             # special case for colorjitter
             if "colorjitter" in params["data_augmentation"]:
+                if not(isinstance(params["data_augmentation"]["colorjitter"], dict)):
+                    params["data_augmentation"]["colorjitter"] = {}
                 if not ("brightness" in params["data_augmentation"]["colorjitter"]):
-                    default_brightness = 0.1
-                else:
-                    default_brightness = params["data_augmentation"]["colorjitter"][
-                        "brightness"
-                    ]
+                    params["data_augmentation"]["colorjitter"]["brightness"] = 0.1
                 if not ("contrast" in params["data_augmentation"]["colorjitter"]):
-                    default_contrast = 0
-                else:
-                    default_contrast = params["data_augmentation"]["colorjitter"][
-                        "contrast"
-                    ]
+                    params["data_augmentation"]["colorjitter"]["contrast"] = 0
                 if not ("saturation" in params["data_augmentation"]["colorjitter"]):
-                    default_saturation = 0
-                else:
-                    default_saturation = params["data_augmentation"]["colorjitter"][
-                        "saturation"
-                    ]
+                    params["data_augmentation"]["colorjitter"]["saturation"] = 0
                 if not ("hue" in params["data_augmentation"]["colorjitter"]):
-                    default_hue = 0.2
-                else:
-                    default_hue = params["data_augmentation"]["colorjitter"][
-                        "hue"
-                    ]
+                    params["data_augmentation"]["colorjitter"]["hue"] = 0.2
 
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
