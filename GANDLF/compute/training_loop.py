@@ -166,6 +166,7 @@ def training_loop(
     params,
     output_dir,
     testing_data=None,
+    epochs = None,
 ):
     """
     The main training loop.
@@ -177,9 +178,11 @@ def training_loop(
         params (dict): The parameters dictionary.
         output_dir (str): The output directory.
         testing_data (pandas.DataFrame): The data to use for testing.
+        epochs (int): The number of epochs to train; if None, take from params.
     """
     # Some autodetermined factors
-    epochs = params["num_epochs"]
+    if epochs is None:
+        epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
 
