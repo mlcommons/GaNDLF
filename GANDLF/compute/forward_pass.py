@@ -8,7 +8,6 @@ import torchio
 from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
-    one_hot,
     reverse_one_hot,
     resample_image,
 )
@@ -168,7 +167,7 @@ def validate_network(
                     + ","
                     + subject["subject_id"][0]
                     + ","
-                    + str(pred_output.cpu().max().data.item())
+                    + str(pred_output.cpu().max().item())
                     + "\n"
                 )
             final_loss, final_metric = get_loss_and_metrics(
@@ -261,9 +260,6 @@ def validate_network(
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0)
                 label_ground_truth = label_ground_truth.to(torch.float32)
-                # label_ground_truth = one_hot(
-                #     label_ground_truth, params["model"]["class_list"]
-                # )
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
@@ -273,13 +269,13 @@ def validate_network(
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
-                    result_array = np.swapaxes(pred_mask, 0, 2)
+                    pred_mask = np.swapaxes(pred_mask, 0, 2)
                     ## special case for 2D
                     if image.shape[-1] > 1:
                         # ITK expects array as Z,X,Y
-                        result_image = sitk.GetImageFromArray(result_array)
+                        result_image = sitk.GetImageFromArray(pred_mask)
                     else:
-                        result_image = sitk.GetImageFromArray(result_array.squeeze(0))
+                        result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(inputImage)
                     # cast as the same data type
                     result_image = sitk.Cast(result_image, inputImage.GetPixelID())
@@ -339,7 +335,7 @@ def validate_network(
 
             # # Non network validing related
             # loss.cpu().data.item()
-            total_epoch_valid_loss += final_loss.cpu().data.item()
+            total_epoch_valid_loss += final_loss.cpu().item()
             for metric in final_metric.keys():
                 # calculated_metrics[metric]
                 total_epoch_valid_metric[metric] += final_metric[metric]

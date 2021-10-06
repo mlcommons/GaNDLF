@@ -126,11 +126,9 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
 
         # save the current training+validation and testing datasets
         if noTestingData:
-            print("!!! WARNING !!!")
             print(
-                "!!! Testing data is empty, which will result in scientifically incorrect results; use at your own risk !!!"
+                "WARNING: Testing data is empty, which will result in scientifically incorrect results; use at your own risk."
             )
-            print("!!! WARNING !!!")
             current_training_subject_indeces_full = subjectIDs_full
             currentTestingDataPickle = "None"
         else:
