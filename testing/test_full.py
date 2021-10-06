@@ -151,6 +151,8 @@ def test_train_segmentation_rad_2d(device):
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -214,6 +216,8 @@ def test_train_segmentation_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -246,6 +250,8 @@ def test_train_regression_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -307,6 +313,8 @@ def test_train_regression_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -339,6 +347,8 @@ def test_train_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -370,6 +380,8 @@ def test_train_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -520,6 +532,8 @@ def test_scheduler_classification_rad_2d(device):
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
         parameters["scheduler"]["type"] = scheduler
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         if os.path.exists(outputDir):
             shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -555,6 +569,8 @@ def test_optimizer_classification_rad_2d(device):
     for optimizer in global_optimizer_dict:
         parameters["optimizer"] = {}
         parameters["optimizer"]["type"] = optimizer
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         if os.path.exists(outputDir):
             shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -589,6 +605,8 @@ def test_clip_train_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
         parameters["clip_mode"] = clip_mode
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         # shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -625,6 +643,8 @@ def test_normtype_train_segmentation_rad_3d(device):
         for model in ["resunet", "unet", "fcn"]:
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
+            parameters["nested_training"]["testing"] = -5
+            parameters["nested_training"]["validation"] = -5
             Path(outputDir).mkdir(parents=True, exist_ok=True)
             TrainingManager(
                 dataframe=training_data,
@@ -722,6 +742,8 @@ def test_losses_segmentation_rad_2d(device):
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
         parameters["loss_function"] = loss_type
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
             dataframe=training_data,

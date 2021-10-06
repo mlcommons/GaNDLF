@@ -229,29 +229,6 @@ def training_loop(
     # Getting the channels for training and removing all the non numeric entries from the channels
     params = populate_channel_keys_in_params(validation_data_for_torch, params)
 
-    # Calculate the weights here
-    if params["weighted_loss"]:
-        print("Calculating weights for loss")
-        # Set up the dataloader for penalty calculation
-        penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
-        )
-        penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
-        )
-
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, params
-        )
-        del penalty_data, penalty_loader
-    else:
-        params["weights"], params["class_weights"] = None, None
-
     # Fetch the optimizers
     params["model_parameters"] = model.parameters()
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
@@ -299,6 +276,29 @@ def training_loop(
     model, params["model"]["amp"], device = send_model_to_device(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
+
+    # Calculate the weights here
+    if params["weighted_loss"]:
+        print("Calculating weights for loss")
+        # Set up the dataloader for penalty calculation
+        penalty_data = ImagesFromDataFrame(
+            training_data,
+            parameters=params,
+            train=False,
+        )
+        penalty_loader = DataLoader(
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
+        )
+
+        params["weights"], params["class_weights"] = get_class_imbalance_weights(
+            penalty_loader, params
+        )
+        del penalty_data, penalty_loader
+    else:
+        params["weights"], params["class_weights"] = None, None
 
     if "medcam" in params:
         model = medcam.inject(
