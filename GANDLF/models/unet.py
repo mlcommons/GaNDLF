@@ -192,4 +192,3 @@ class resunet(unet):
 
     def __init__(self, parameters: dict):
         super(resunet, self).__init__(parameters, residualConnections=True)
-
