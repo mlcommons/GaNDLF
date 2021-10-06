@@ -58,12 +58,16 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             if sdnet_check:
                 metric_output[metric] = (
                     metric_function(predicted[0], ground_truth.squeeze(-1), params)
+                    .detach()
                     .cpu()
                     .data.item()
                 )
             else:
                 metric_output[metric] = (
-                    metric_function(predicted, ground_truth, params).cpu().data.item()
+                    metric_function(predicted, ground_truth, params)
+                    .detach()
+                    .cpu()
+                    .item()
                 )
         else:
             print(

@@ -124,7 +124,6 @@ def train_network(model, train_dataloader, optimizer, params):
                         mode=params["clip_mode"],
                     )
                 optimizer.step()
-                nan_loss = False
 
         # Non network training related
         if not nan_loss:
@@ -145,8 +144,6 @@ def train_network(model, train_dataloader, optimizer, params):
                     "Half-Epoch Average Train " + metric + " : ",
                     total_epoch_train_metric[metric] / (batch_idx + 1),
                 )
-
-        torch.cuda.empty_cache()
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
@@ -185,12 +182,6 @@ def training_loop(
     epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
-
-    ## test for 'num_workers'
-    if params["q_num_workers"] > 0:
-        print(
-            "\n\n********\nWARNING: Setting 'num_workers' > 0 will causes unexpected memory issues; see https://github.com/CBICA/GaNDLF/issues/218 \n********\n\n"
-        )
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
@@ -240,6 +231,7 @@ def training_loop(
 
     # Calculate the weights here
     if params["weighted_loss"]:
+        print("Calculating weights for loss")
         # Set up the dataloader for penalty calculation
         penalty_data = ImagesFromDataFrame(
             training_data,
@@ -256,6 +248,7 @@ def training_loop(
         params["weights"], params["class_weights"] = get_class_imbalance_weights(
             penalty_loader, params
         )
+        del penalty_data, penalty_loader
     else:
         params["weights"], params["class_weights"] = None, None
 
