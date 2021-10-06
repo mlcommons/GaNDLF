@@ -84,7 +84,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             from openslide import OpenSlide
 
             # actual computation
-            for index, row in inferenceDataForTorch.iterrows():
+            for _, row in inferenceDataForTorch.iterrows():
                 subject_name = row[parameters["headers"]["subjectIDHeader"]]
                 print(
                     "Patient Slide       : ",
