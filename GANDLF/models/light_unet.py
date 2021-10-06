@@ -28,7 +28,7 @@ class light_unet(ModelBase):
         super(light_unet, self).__init__(parameters)
 
         self.network_kwargs = {"res": False}
-        
+
         if not (checkPatchDivisibility(parameters["patch_size"])):
             sys.exit(
                 "The patch size is not divisible by 16, which is required for",
@@ -188,5 +188,3 @@ class light_resunet(light_unet):
 
     def __init__(self, parameters: dict):
         super(light_resunet, self).__init__(parameters, residualConnections=True)
-
-
