@@ -14,9 +14,7 @@ from .rotations import (
     rotate_90,
     rotate_180,
 )
-from .rgb_augs import (
-    colorjitter_transform
-)
+from .rgb_augs import colorjitter_transform
 
 # Defining a dictionary for augmentations - key is the string and the value is the augmentation object
 global_augs_dict = {

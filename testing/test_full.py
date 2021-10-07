@@ -954,9 +954,11 @@ def test_augmentation_functions():
 
     # this is for rgb augmentation
     input_tensor = torch.rand(3, 128, 128, 1)
-    temp = global_augs_dict["colorjitter"](params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"])
+    temp = global_augs_dict["colorjitter"](
+        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"]
+    )
     test = temp(input_tensor)
-    
+
     # this is for all other augmentations
     input_tensor = torch.rand(3, 128, 128, 128)
     for aug in params_all_preprocessing_and_augs["data_augmentation"]:

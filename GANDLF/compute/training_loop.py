@@ -166,7 +166,7 @@ def training_loop(
     params,
     output_dir,
     testing_data=None,
-    epochs = None,
+    epochs=None,
 ):
     """
     The main training loop.
