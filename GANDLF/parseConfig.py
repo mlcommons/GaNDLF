@@ -365,7 +365,7 @@ def parseConfig(config_file_path, version_check=True):
 
             # special case for colorjitter
             if "colorjitter" in params["data_augmentation"]:
-                if not(isinstance(params["data_augmentation"]["colorjitter"], dict)):
+                if not (isinstance(params["data_augmentation"]["colorjitter"], dict)):
                     params["data_augmentation"]["colorjitter"] = {}
                 if not ("brightness" in params["data_augmentation"]["colorjitter"]):
                     params["data_augmentation"]["colorjitter"]["brightness"] = 0.1
