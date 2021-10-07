@@ -370,10 +370,10 @@ def parseConfig(config_file_path, version_check=True):
                 )
                 for key in ["brightness", "contrast", "saturation"]:
                     params["data_augmentation"]["colorjitter"] = initialize_key(
-                        params["data_augmentation"]["colorjitter"], key, [0,1]
+                        params["data_augmentation"]["colorjitter"], key, [0, 1]
                     )
                 params["data_augmentation"]["colorjitter"] = initialize_key(
-                    params["data_augmentation"]["colorjitter"], "hue", [-0.5,0.5]
+                    params["data_augmentation"]["colorjitter"], "hue", [-0.5, 0.5]
                 )
 
             # special case for anisotropic
