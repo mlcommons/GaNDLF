@@ -957,7 +957,9 @@ def test_augmentation_functions():
     temp = global_augs_dict["colorjitter"](
         params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"]
     )
-    test = temp(input_tensor)
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "RGB Augmentation should work"
 
     # this is for all other augmentations
     input_tensor = torch.rand(3, 128, 128, 128)
