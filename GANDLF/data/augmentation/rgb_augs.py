@@ -52,7 +52,9 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
         self.brightness_range = self._parse_range(
             brightness, "brightness", min_constraint=0, max_constraint=1
         )
-        self.contrast_range = self._parse_range(contrast, "contrast", min_constraint=0, max_constraint=1)
+        self.contrast_range = self._parse_range(
+            contrast, "contrast", min_constraint=0, max_constraint=1
+        )
         self.saturation_range = self._parse_range(
             saturation, "saturation", min_constraint=0, max_constraint=1
         )
@@ -69,7 +71,7 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
         if min(self.contrast_range) == max(self.contrast_range):
             contrast = min(self.contrast_range)
         else:
-            contrast = self.contrast_range        
+            contrast = self.contrast_range
         if min(self.saturation_range) == max(self.saturation_range):
             saturation = min(self.saturation_range)
         else:

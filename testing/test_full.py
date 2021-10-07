@@ -963,7 +963,9 @@ def test_augmentation_functions():
 
     # ensuring all code paths are covered
     for key in ["brightness", "contrast", "saturation", "hue"]:
-        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"][key] = 0.25
+        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"][
+            key
+        ] = 0.25
     temp = global_augs_dict["colorjitter"](
         params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"]
     )
