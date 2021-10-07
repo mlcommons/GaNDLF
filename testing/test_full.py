@@ -948,7 +948,7 @@ def test_preprocess_functions():
     input_transformed = cropper(input_tensor)
     assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
 
-    cropper = global_preprocessing_dict["croporpad"]([128, 128, 128])
+    cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
     input_transformed = cropper(input_tensor)
     assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
 
@@ -1074,7 +1074,7 @@ def test_model_patch_divisibility():
 
 def test_one_hot_logic():
 
-    random_array = np.random.random_integers(0, 5, size=(20, 20, 20))
+    random_array = np.random.randint(5,size=(20,20,20))
     class_list = [*range(0, np.max(random_array) + 1)]
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
