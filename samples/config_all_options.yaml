@@ -132,8 +132,8 @@ data_preprocessing:
     },
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
-    'crop': [64,64,64], # this will crop the image by removing specified number of pixels see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
-    'centercrop': [64,64,64], # this will crop the image to the specified size see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
+    'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
+    'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
