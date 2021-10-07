@@ -943,7 +943,7 @@ def test_preprocess_functions():
         patch_size=[128, 128, 128]
     )
     input_transformed = cropper(input_tensor)
-    
+
     cropper = global_preprocessing_dict["crop"]([64, 64, 64])
     input_transformed = cropper(input_tensor)
     assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"

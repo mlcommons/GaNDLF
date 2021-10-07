@@ -39,7 +39,6 @@ def centercrop_transform(patch_size):
     return CropOrPad(target_shape=patch_size)
 
 
-
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
     "to_canonical": to_canonical_transform,
