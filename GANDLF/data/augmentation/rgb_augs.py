@@ -8,6 +8,14 @@ from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
 from torchio import Subject
 
+
+def colorjitter_transform(parameters):
+    return RandomColorJitter(
+        brightness = parameters["brightness"],
+        contrast = parameters["contrast"],
+        saturation = parameters["saturation"],
+        hue = parameters["hue"]
+        )
 class RandomColorJitter(RandomTransform, IntensityTransform):
     r"""Add color jitter noise with random parameters.
 
@@ -50,7 +58,21 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
         hue = self.sample_uniform(*self.hue_range).item()
         transform = ColorJitter(brightness=brightness, contrast=contrast, saturation=saturation, hue=hue)
         for _, image in self.get_images_dict(subject).items():
-            image.set_data(transform(image.data))
+
+            # proceed with processing only if the image is RGB
+            if image.data.shape[-1] == 1:
+                temp = image.data
+                # remove last dimension
+                temp = temp.squeeze(-1)
+                # add a shell batch dimension
+                temp = temp.unsqueeze(0)
+                # apply transform
+                temp = transform(temp)
+                # remove shell batch dimension
+                temp = temp.squeeze(0)
+                # add last dimension to bring image back to original shape
+                temp = temp.unsqueeze(-1)
+                image.set_data(temp)
         
         return subject
 
