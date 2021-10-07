@@ -50,22 +50,39 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
     ):
         super().__init__(**kwargs)
         self.brightness_range = self._parse_range(
-            brightness, "brightness", min_constraint=0
+            brightness, "brightness", min_constraint=0, max_constraint=1
         )
-        self.contrast_range = self._parse_range(contrast, "contrast", min_constraint=0)
+        self.contrast_range = self._parse_range(contrast, "contrast", min_constraint=0, max_constraint=1)
         self.saturation_range = self._parse_range(
-            saturation, "saturation", min_constraint=0
+            saturation, "saturation", min_constraint=0, max_constraint=1
         )
         self.hue_range = self._parse_range(
             hue, "hue", min_constraint=-0.5, max_constraint=0.5
         )
 
     def apply_transform(self, subject: Subject) -> Subject:
+        # if a range is not specified, use the single value to let torch handle stochastic process
+        if min(self.brightness_range) == max(self.brightness_range):
+            brightness = min(self.brightness_range)
+        else:
+            brightness = self.brightness_range
+        if min(self.contrast_range) == max(self.contrast_range):
+            contrast = min(self.contrast_range)
+        else:
+            contrast = self.contrast_range        
+        if min(self.saturation_range) == max(self.saturation_range):
+            saturation = min(self.saturation_range)
+        else:
+            saturation = self.saturation_range
+        if min(self.hue_range) == max(self.hue_range):
+            hue = min(self.hue_range)
+        else:
+            hue = self.hue_range
         transform = ColorJitter(
-            brightness=self.brightness_range,
-            contrast=self.contrast_range,
-            saturation=self.saturation_range,
-            hue=self.hue_range,
+            brightness=brightness,
+            contrast=contrast,
+            saturation=saturation,
+            hue=hue,
         )
         for _, image in self.get_images_dict(subject).items():
 
