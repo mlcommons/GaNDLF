@@ -363,6 +363,19 @@ def parseConfig(config_file_path, version_check=True):
                         params["data_augmentation"][axis_aug], "axis", [0, 1, 2]
                     )
 
+            # special case for colorjitter
+            if "colorjitter" in params["data_augmentation"]:
+                if not (isinstance(params["data_augmentation"]["colorjitter"], dict)):
+                    params["data_augmentation"]["colorjitter"] = {}
+                if not ("brightness" in params["data_augmentation"]["colorjitter"]):
+                    params["data_augmentation"]["colorjitter"]["brightness"] = 0.1
+                if not ("contrast" in params["data_augmentation"]["colorjitter"]):
+                    params["data_augmentation"]["colorjitter"]["contrast"] = 0
+                if not ("saturation" in params["data_augmentation"]["colorjitter"]):
+                    params["data_augmentation"]["colorjitter"]["saturation"] = 0
+                if not ("hue" in params["data_augmentation"]["colorjitter"]):
+                    params["data_augmentation"]["colorjitter"]["hue"] = 0.2
+
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
