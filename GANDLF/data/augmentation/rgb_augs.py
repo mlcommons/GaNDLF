@@ -62,7 +62,10 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
 
     def apply_transform(self, subject: Subject) -> Subject:
         transform = ColorJitter(
-            brightness=self.brightness_range, contrast=self.contrast_range, saturation=self.saturation_range, hue=self.hue_range
+            brightness=self.brightness_range,
+            contrast=self.contrast_range,
+            saturation=self.saturation_range,
+            hue=self.hue_range,
         )
         for _, image in self.get_images_dict(subject).items():
 
