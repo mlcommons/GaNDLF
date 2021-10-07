@@ -948,11 +948,21 @@ def test_preprocess_functions():
 
 def test_augmentation_functions():
     print("Starting testing augmentation functions")
-    input_tensor = torch.rand(3, 128, 128, 128)
     params_all_preprocessing_and_augs = parseConfig(
         testingDir + "/../samples/config_all_options.yaml"
     )
 
+    # this is for rgb augmentation
+    input_tensor = torch.rand(3, 128, 128, 1)
+    temp = global_augs_dict["colorjitter"](
+        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "RGB Augmentation should work"
+
+    # this is for all other augmentations
+    input_tensor = torch.rand(3, 128, 128, 128)
     for aug in params_all_preprocessing_and_augs["data_augmentation"]:
         aug_lower = aug.lower()
         output_tensor = None

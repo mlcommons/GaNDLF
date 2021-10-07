@@ -175,6 +175,7 @@ data_augmentation:
       'axis': [0,2] # one or more axes can be put here. if this isn't defined, all axes are considered
     },
     'rotate_180', # explicitly rotate image by 180; if 'axis' isn't defined, default is [1,2,3]
+    'colorjitter', # this is used to apply the ColorJitter transform form torch - only used for rgb images
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
