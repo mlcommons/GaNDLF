@@ -8,6 +8,7 @@
 - Affine augmentation can now be significantly fine-tuned
 - Update logic for penalty calculation
 - RGB-specific augmentation added
+- Cropping added
 
 ## 0.0.11
 
