@@ -1,7 +1,7 @@
 import os
+from GANDLF.utils import fix_paths
 
-# hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
-os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
+fix_paths(os.getcwd())  # add relevant vips path
 
 from .imaging import (
     resample_image,
