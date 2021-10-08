@@ -45,6 +45,9 @@ def fix_paths(cwd):
         vipshome = os.path.join(cwd, "vips/vips-dev-8.10/bin")
         os.environ["PATH"] = vipshome + ";" + os.environ["PATH"]
 
+    # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
+    os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
+
 
 def get_date_time():
     """

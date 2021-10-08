@@ -20,9 +20,9 @@ from GANDLF.utils import (
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
+from GANDLF.utils import fix_paths
 
-# hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
-os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
+fix_paths(os.getcwd())  # add relevant vips path
 
 
 def train_network(model, train_dataloader, optimizer, params):
