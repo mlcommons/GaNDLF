@@ -1,4 +1,4 @@
-import os, math, time
+import os, time, psutil
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -86,7 +86,6 @@ def train_network(model, train_dataloader, optimizer, params):
             )
         else:
             label = subject["label"][torchio.DATA]
-            # one-hot encoding of 'label' will probably be needed for segmentation
         label = label.to(params["device"])
 
         # ensure spacing is always present in params and is always subject-specific
@@ -125,11 +124,10 @@ def train_network(model, train_dataloader, optimizer, params):
                         mode=params["clip_mode"],
                     )
                 optimizer.step()
-                nan_loss = False
 
         # Non network training related
         if not nan_loss:
-            total_epoch_train_loss += loss.cpu().data.item()
+            total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
             total_epoch_train_metric[metric] += calculated_metrics[metric]
 
@@ -168,6 +166,7 @@ def training_loop(
     params,
     output_dir,
     testing_data=None,
+    epochs=None,
 ):
     """
     The main training loop.
@@ -179,9 +178,11 @@ def training_loop(
         params (dict): The parameters dictionary.
         output_dir (str): The output directory.
         testing_data (pandas.DataFrame): The data to use for testing.
+        epochs (int): The number of epochs to train; if None, take from params.
     """
     # Some autodetermined factors
-    epochs = params["num_epochs"]
+    if epochs is None:
+        epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
 
@@ -231,27 +232,6 @@ def training_loop(
     # Getting the channels for training and removing all the non numeric entries from the channels
     params = populate_channel_keys_in_params(validation_data_for_torch, params)
 
-    # Calculate the weights here
-    if params["weighted_loss"]:
-        # Set up the dataloader for penalty calculation
-        penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
-        )
-        penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
-        )
-
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, params
-        )
-    else:
-        params["weights"], params["class_weights"] = None, None
-
     # Fetch the optimizers
     params["model_parameters"] = model.parameters()
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
@@ -300,6 +280,29 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
+    # Calculate the weights here
+    if params["weighted_loss"]:
+        print("Calculating weights for loss")
+        # Set up the dataloader for penalty calculation
+        penalty_data = ImagesFromDataFrame(
+            training_data,
+            parameters=params,
+            train=False,
+        )
+        penalty_loader = DataLoader(
+            penalty_data,
+            batch_size=1,
+            shuffle=True,
+            pin_memory=False,
+        )
+
+        params["weights"], params["class_weights"] = get_class_imbalance_weights(
+            penalty_loader, params
+        )
+        del penalty_data, penalty_loader
+    else:
+        params["weights"], params["class_weights"] = None, None
+
     if "medcam" in params:
         model = medcam.inject(
             model,
@@ -339,6 +342,47 @@ def training_loop(
 
     # Iterate for number of epochs
     for epoch in range(start_epoch, epochs):
+
+        if params["track_memory_usage"]:
+
+            file_to_write_mem = os.path.join(output_dir, "memory_usage.csv")
+            if os.path.exists(file_to_write_mem):
+                # append to previously generated file
+                file_mem = open(file_to_write_mem, "a")
+                outputToWrite_mem = ""
+            else:
+                # if file was absent, write header information
+                file_mem = open(file_to_write_mem, "w")
+                outputToWrite_mem = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,"  # used to write output
+                if params["device"] == "cuda":
+                    outputToWrite_mem += "CUDA_active.all.peak,CUDA_active.all.current,CUDA_active.all.allocated"
+                outputToWrite_mem += "\n"
+
+            mem = psutil.virtual_memory()
+            outputToWrite_mem += (
+                str(epoch)
+                + ","
+                + str(mem[0])
+                + ","
+                + str(mem[1])
+                + ","
+                + str(mem[2])
+                + ","
+                + str(mem[3])
+            )
+            if params["device"] == "cuda":
+                mem_cuda = torch.cuda.memory_stats()
+                outputToWrite_mem += (
+                    ","
+                    + str(mem_cuda["active.all.peak"])
+                    + ","
+                    + str(mem_cuda["active.all.current"])
+                    + ","
+                    + str(mem_cuda["active.all.allocated"])
+                )
+            outputToWrite_mem += ",\n"
+            file_mem.write(outputToWrite_mem)
+            file_mem.close()
 
         # Printing times
         epoch_start_time = time.time()

@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.12,
-    maximum: 0.0.12 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.13,
+    maximum: 0.0.13 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
 model:
@@ -132,6 +132,8 @@ data_preprocessing:
     },
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
+    'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
+    'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
@@ -175,6 +177,12 @@ data_augmentation:
       'axis': [0,2] # one or more axes can be put here. if this isn't defined, all axes are considered
     },
     'rotate_180', # explicitly rotate image by 180; if 'axis' isn't defined, default is [1,2,3]
+    'colorjitter':{ # this is used to apply the ColorJitter transform form torch - only used for rgb images
+      'brightness': [0,1], # optional: needs to be between [0,1]
+      'contrast': [0,0.75], # optional: needs to be between [0,1]
+      'saturation': [0,0.5], # optional: needs to be between [0,1]
+      'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
+    }, 
   }
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training

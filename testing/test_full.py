@@ -1,6 +1,7 @@
 from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
 import SimpleITK as sitk
+import numpy as np
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
@@ -19,6 +20,8 @@ device = "cpu"
 ## global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
+    "lightunet",
+    "lightresunet",
     "unet",
     "fcn",
     "uinc",
@@ -148,6 +151,8 @@ def test_train_segmentation_rad_2d(device):
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -211,6 +216,8 @@ def test_train_segmentation_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -243,6 +250,8 @@ def test_train_regression_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -304,6 +313,8 @@ def test_train_regression_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -336,6 +347,8 @@ def test_train_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -367,6 +380,8 @@ def test_train_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -517,6 +532,8 @@ def test_scheduler_classification_rad_2d(device):
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
         parameters["scheduler"]["type"] = scheduler
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         if os.path.exists(outputDir):
             shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -552,6 +569,8 @@ def test_optimizer_classification_rad_2d(device):
     for optimizer in global_optimizer_dict:
         parameters["optimizer"] = {}
         parameters["optimizer"]["type"] = optimizer
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         if os.path.exists(outputDir):
             shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -586,6 +605,8 @@ def test_clip_train_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
         parameters["clip_mode"] = clip_mode
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         # shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
@@ -622,6 +643,8 @@ def test_normtype_train_segmentation_rad_3d(device):
         for model in ["resunet", "unet", "fcn"]:
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
+            parameters["nested_training"]["testing"] = -5
+            parameters["nested_training"]["validation"] = -5
             Path(outputDir).mkdir(parents=True, exist_ok=True)
             TrainingManager(
                 dataframe=training_data,
@@ -719,6 +742,8 @@ def test_losses_segmentation_rad_2d(device):
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
         parameters["loss_function"] = loss_type
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
             dataframe=training_data,
@@ -918,16 +943,47 @@ def test_preprocess_functions():
         patch_size=[128, 128, 128]
     )
     input_transformed = cropper(input_tensor)
+
+    cropper = global_preprocessing_dict["crop"]([64, 64, 64])
+    input_transformed = cropper(input_tensor)
+    assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
+
+    cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
+    input_transformed = cropper(input_tensor)
+    assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
+
     print("passed")
 
 
 def test_augmentation_functions():
     print("Starting testing augmentation functions")
-    input_tensor = torch.rand(3, 128, 128, 128)
     params_all_preprocessing_and_augs = parseConfig(
         testingDir + "/../samples/config_all_options.yaml"
     )
 
+    # this is for rgb augmentation
+    input_tensor = torch.rand(3, 128, 128, 1)
+    temp = global_augs_dict["colorjitter"](
+        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "RGB Augmentation should work"
+
+    # ensuring all code paths are covered
+    for key in ["brightness", "contrast", "saturation", "hue"]:
+        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"][
+            key
+        ] = 0.25
+    temp = global_augs_dict["colorjitter"](
+        params_all_preprocessing_and_augs["data_augmentation"]["colorjitter"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "RGB Augmentation should work"
+
+    # this is for all other augmentations
+    input_tensor = torch.rand(3, 128, 128, 128)
     for aug in params_all_preprocessing_and_augs["data_augmentation"]:
         aug_lower = aug.lower()
         output_tensor = None
@@ -1013,4 +1069,20 @@ def test_model_patch_divisibility():
     with pytest.raises(Exception) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
+    print("passed")
+
+
+def test_one_hot_logic():
+
+    random_array = np.random.randint(5, size=(20, 20, 20))
+    class_list = [*range(0, np.max(random_array) + 1)]
+    img = sitk.GetImageFromArray(random_array)
+    img_array = sitk.GetArrayFromImage(img)
+    img_tensor = torch.from_numpy(img_array).to(torch.float16)
+    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor_oh = one_hot(img_tensor, class_list)
+    img_tensor_oh_rev = reverse_one_hot(img_tensor_oh[0], class_list)
+    comparison = random_array == img_tensor_oh_rev
+    assert comparison.all(), "Arrays are not equal"
     print("passed")

@@ -1,4 +1,5 @@
 from .unet import unet, resunet
+from .light_unet import light_unet, light_resunet
 from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
@@ -12,6 +13,10 @@ global_models_dict = {
     "unet": unet,
     "resunet": resunet,
     "residualunet": unet,
+    "lightunet": light_unet,
+    "light_unet": light_unet,
+    "lightresunet": light_resunet,
+    "light_resunet": light_resunet,
     "fcn": fcn,
     "uinc": uinc,
     "vgg": vgg19,

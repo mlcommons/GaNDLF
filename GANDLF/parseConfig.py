@@ -21,6 +21,7 @@ parameter_defaults = {
     "learning_rate": 0.001,  # default learning rate
     "clip_grad": None,  # clip_gradient value
     "track_memory_usage": False,  # default memory tracking
+    "print_rgb_label_warning": True,  # default memory tracking
 }
 
 ## dictionary to define string defaults for appropriate options
@@ -362,6 +363,19 @@ def parseConfig(config_file_path, version_check=True):
                         params["data_augmentation"][axis_aug], "axis", [0, 1, 2]
                     )
 
+            # special case for colorjitter
+            if "colorjitter" in params["data_augmentation"]:
+                params["data_augmentation"] = initialize_key(
+                    params["data_augmentation"], "colorjitter"
+                )
+                for key in ["brightness", "contrast", "saturation"]:
+                    params["data_augmentation"]["colorjitter"] = initialize_key(
+                        params["data_augmentation"]["colorjitter"], key, [0, 1]
+                    )
+                params["data_augmentation"]["colorjitter"] = initialize_key(
+                    params["data_augmentation"]["colorjitter"], "hue", [-0.5, 0.5]
+                )
+
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
@@ -508,7 +522,7 @@ def parseConfig(config_file_path, version_check=True):
         ):
             # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
             print(
-                "This is a special case for multi-class computation, where different labels are processed together"
+                "WARNING: This is a special case for multi-class computation, where different labels are processed together, `reverse_one_hot` will need mapping information to work correctly"
             )
             temp_classList = params["model"]["class_list"]
             temp_classList = temp_classList.replace(
