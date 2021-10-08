@@ -1,13 +1,13 @@
-import os, sys
+import os
 import numpy as np
 
+import torch
 import torchio
 from torchio.transforms import (
     Resample,
     Compose,
     Pad,
 )
-from torchio import Image, Subject
 import SimpleITK as sitk
 
 from GANDLF.utils import (
@@ -104,10 +104,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[channel][patient])):
                 skip_subject = True
 
-            # assigning the dict key to the channel
-            subject_dict[str(channel)] = Image(
-                type=torchio.INTENSITY,
-                path=dataframe[channel][patient],
+            subject_dict[str(channel)] = torchio.ScalarImage(
+                dataframe[channel][patient]
             )
 
             # store image spacing information if not present
@@ -115,7 +113,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 file_reader = sitk.ImageFileReader()
                 file_reader.SetFileName(dataframe[channel][patient])
                 file_reader.ReadImageInformation()
-                subject_dict["spacing"] = file_reader.GetSpacing()
+
+                subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
@@ -123,8 +122,11 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = img_resized.GetSpacing()
-                resized_image = torchio.Image.from_sitk(img_resized)
+                resized_image = torchio.ScalarImage.from_sitk(img_resized)
+                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
                 subject_dict[str(channel)]["data"] = resized_image["data"]
+
+                
 
         # # for regression
         # if predictionHeaders:
@@ -136,10 +138,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
                 skip_subject = True
 
-            subject_dict["label"] = Image(
-                type=torchio.LABEL,
-                path=dataframe[labelHeader][patient],
-            )
+            subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
 
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images:
@@ -164,7 +163,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         # skip subject the condition was tripped
         if not skip_subject:
             # Initializing the subject object using the dict
-            subject = Subject(subject_dict)
+            subject = torchio.Subject(subject_dict)
             # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
             # this is causing memory usage to explode, see https://github.com/CBICA/GaNDLF/issues/128
             if parameters["verbose"]:

@@ -24,9 +24,6 @@ def axis_check(axis):
         else:
             axis = [axis]
     if 0 in axis:
-        print(
-            "WARNING: '0' was found in axis, adding all by '1' since '0' is batch dimension."
-        )
         for count, _ in enumerate(axis):
             axis[count] += 1
     for sub_ax in axis:

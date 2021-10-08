@@ -39,6 +39,18 @@ def step(model, image, label, params):
             "|===========================================================================|\n|"
         )
 
+    # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
+    if params["problem_type"] == "segmentation":
+        if label.shape[0] == 3:
+            label = label[0].unsqueeze(0)
+            # this warning should only come up once
+            if params["print_rgb_label_warning"]:
+                print(
+                    "WARNING: The label image is an RGB image, only the first channel will be used.",
+                    flush=True,
+                )
+                params["print_rgb_label_warning"] = False
+
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
         if "value_keys" in params:  # squeeze label for segmentation only

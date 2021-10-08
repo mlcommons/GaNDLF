@@ -4,7 +4,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import sys
 
 
 def get_final_layer(final_convolution_layer):

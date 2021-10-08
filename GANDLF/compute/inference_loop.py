@@ -84,7 +84,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             from openslide import OpenSlide
 
             # actual computation
-            for index, row in inferenceDataForTorch.iterrows():
+            for _, row in inferenceDataForTorch.iterrows():
                 subject_name = row[parameters["headers"]["subjectIDHeader"]]
                 print(
                     "Patient Slide       : ",
@@ -130,7 +130,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             )
                     else:
                         output = model(image_patches.float().to(parameters["device"]))
-                    output = output.cpu().detach().numpy()
+                    output = output.detach().cpu().numpy()
                     for i in range(int(output.shape[0])):
                         count_map[
                             x_coords[i] : x_coords[i] + patch_size[0],

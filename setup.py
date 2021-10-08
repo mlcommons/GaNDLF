@@ -26,7 +26,7 @@ requirements = [
     "torch>=1.7",
     "torchvision",
     "tqdm",
-    "torchio==0.18.51",
+    "torchio==0.18.57",
     "pandas",
     "pylint",
     "scikit-learn==0.23.1",
@@ -92,9 +92,8 @@ os.system("git submodule update --init --recursive")
 if os.name == "nt":  # proceed for windows
     from pathlib import Path
 
-    if not Path(
-        "./vips/vips-dev-8.10/bin/libvips-42.dll"
-    ).exists():  # download and extract if main dll is absent
+    # download and extract if main dll is absent
+    if not Path("./vips/vips-dev-8.10/bin/libvips-42.dll").exists():
         print("Downloading and extracting VIPS for Windows")
         url = "https://github.com/libvips/libvips/releases/download/v8.10.2/vips-dev-w64-all-8.10.2.zip"
         zip_to_extract = "./vips.zip"
