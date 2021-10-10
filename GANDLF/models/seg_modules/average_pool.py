@@ -12,10 +12,10 @@ class GlobalAveragePooling2D(nn.Module):
 
         # This is a temporary fix to make sure the size is an integer, not a tensor
         if isinstance(B, int):
-           return F.avg_pool2d(x, (W, H)).view(B, C)
+            return F.avg_pool2d(x, (W, H)).view(B, C)
         else:
-           return F.avg_pool2d(x, (W.item(), H.item())).view(B.item(), C.item())
-        
+            return F.avg_pool2d(x, (W.item(), H.item())).view(B.item(), C.item())
+
 
 class GlobalAveragePooling3D(nn.Module):
     def __init__(self):
@@ -27,7 +27,8 @@ class GlobalAveragePooling3D(nn.Module):
 
         # This is a temporary fix to make sure the size is an integer, not a tensor
         if isinstance(B, int):
-           return F.avg_pool3d(x, (W, H, D)).view(B, C)
+            return F.avg_pool3d(x, (W, H, D)).view(B, C)
         else:
-           return F.avg_pool2d(x, (W.item(), H.item(), D.item())).view(B.item(), C.item())
-
+            return F.avg_pool2d(x, (W.item(), H.item(), D.item())).view(
+                B.item(), C.item()
+            )
