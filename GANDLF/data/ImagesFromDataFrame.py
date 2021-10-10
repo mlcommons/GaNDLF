@@ -121,12 +121,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 img = subject_dict[str(channel)].as_sitk()
                 img_resized = resize_image(img, preprocessing["resize"])
                 # always ensure resized image spacing is used
-                subject_dict["spacing"] = img_resized.GetSpacing()
-                resized_image = torchio.ScalarImage.from_sitk(img_resized)
                 subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
-                subject_dict[str(channel)]["data"] = resized_image["data"]
-
-                
+                subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
 
         # # for regression
         # if predictionHeaders:
