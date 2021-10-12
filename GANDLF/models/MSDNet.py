@@ -25,9 +25,7 @@ class MSDNet(ModelBase):
             nn.init.kaiming_normal_(m, m.weight.data)
 
     def __init__(
-        self,
-        parameters: dict,
-        num_layers=4,
+        self, parameters: dict, num_layers=4,
     ):
         super(MSDNet, self).__init__(parameters)
 
