@@ -245,6 +245,9 @@ def validate_network(
 
                 if is_segmentation:
                     temp = output.detach().cpu()
+                    temp = reverse_one_hot(
+                        temp, params["model"]["class_list"]
+                    )
                     aggregator.add_batch(
                         temp, patches_batch[torchio.LOCATION]
                     )
