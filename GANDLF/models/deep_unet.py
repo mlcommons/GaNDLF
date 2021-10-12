@@ -217,6 +217,8 @@ class deep_unet(ModelBase):
         xl1 = self.de_0(x, x1)
         out_1 = self.out_1(xl1)
 
+        # Currently four outputs from the deep network
+
         return [out_4, out_3, out_2, out_1]
 
 
