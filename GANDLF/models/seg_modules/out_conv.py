@@ -34,38 +34,18 @@ class out_conv(nn.Module):
 
         self.residual = network_kwargs["res"]
 
-        self.conv0 = conv(input_channels, input_channels // 2, **conv_kwargs)
-        self.conv1 = conv(input_channels // 2, input_channels // 2, **conv_kwargs)
-        self.conv2 = conv(input_channels // 2, input_channels // 2, **conv_kwargs)
-        self.conv3 = conv(input_channels // 2, output_channels, **conv_kwargs)
+        self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 
         self.in_0 = (
             norm(input_channels, **norm_kwargs) if norm is not None else nn.Identity()
         )
-        self.in_1 = norm(input_channels // 2, **norm_kwargs)
-        self.in_2 = norm(input_channels // 2, **norm_kwargs)
-        self.in_3 = norm(input_channels // 2, **norm_kwargs)
 
         self.act = act(**act_kwargs)
 
         self.final_convolution_layer = final_convolution_layer
 
-    def forward(self, x1, x2):
-        x = torch.cat([x1, x2], dim=1)
-        x = self.act(self.in_0(x))
-
-        x = self.conv0(x)
-        if self.residual == True:
-            skip = x
-        x = self.act(self.in_1(x))
-
-        x = self.act(self.in_2(self.conv1(x)))
-        x = self.conv2(x)
-        if self.residual == True:
-            x = x + skip
-
-        x = self.act(self.in_3(x))
-        x = self.conv3(x)
+    def forward(self, x):
+        x = self.conv0(self.act(self.in_0(x)))
 
         if not (self.final_convolution_layer == None):
             if self.final_convolution_layer == F.softmax:
