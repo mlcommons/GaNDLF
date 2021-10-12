@@ -244,8 +244,9 @@ def validate_network(
                     _, _, output = result
 
                 if is_segmentation:
+                    temp = output.detach().cpu()
                     aggregator.add_batch(
-                        output.detach().cpu(), patches_batch[torchio.LOCATION]
+                        temp, patches_batch[torchio.LOCATION]
                     )
                 else:
                     if torch.is_tensor(output):
