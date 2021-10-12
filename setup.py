@@ -49,7 +49,7 @@ requirements = [
 setup(
     name="GANDLF",
     version=__version__,
-    author="Jose Agraz, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Sarthak Pati, Micah Sheller, Siddhesh Thakur",  # alphabetical order
+    author="Jose Agraz, Vinayak Ahluwalia, Bhakti Baheti, Spyridon Bakas, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Orhun Güley, Sarthak Pati, Micah Sheller, Juliia Skobleva, Siddhesh Thakur, Spiros Thermos",  # alphabetical order
     author_email="software@cbica.upenn.edu",
     python_requires=">=3.6",
     packages=find_packages(),
@@ -69,6 +69,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering :: Medical Science Apps",
     ],
     description=(
