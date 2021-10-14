@@ -2,7 +2,6 @@
 All the segmentation metrics are to be called from here
 """
 import torch, numpy
-from GANDLF.utils import one_hot
 from GANDLF.losses.segmentation import dice
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
@@ -33,7 +32,6 @@ def multi_class_dice(output, label, params):
         DESCRIPTION.
 
     """
-    label = one_hot(label, params["model"]["class_list"])
     total_dice = 0
     avg_counter = 0
     # print("Number of classes : ", params["model"]["num_classes"])
@@ -131,9 +129,6 @@ def hd_generic(inp, target, params, percentile=95):
     # ensure that we are dealing with a binary array
     result_array[result_array < 0.5] = 0
     result_array[result_array >= 0.5] = 1
-    reference_array = (
-        one_hot(target, params["model"]["class_list"]).squeeze(-1).cpu().numpy()
-    )
 
     hd = 0
     avg_counter = 0
@@ -142,10 +137,10 @@ def hd_generic(inp, target, params, percentile=95):
             if i != params["model"]["ignore_label_validation"]:
                 hd1 = __surface_distances(
                     result_array[b, i, ...],
-                    reference_array[b, i, ...],
+                    target[b, i, ...],
                 )
                 hd2 = __surface_distances(
-                    reference_array[b, i, ...],
+                    target[b, i, ...],
                     result_array[b, i, ...],
                     params["subject_spacing"][b],
                 )
