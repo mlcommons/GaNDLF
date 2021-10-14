@@ -4,7 +4,7 @@ from GANDLF.metrics import global_metrics_dict
 import torch.nn.functional as nnf
 import numpy as np
 
-from GANDLF.utils.tensor import reverse_one_hot
+from GANDLF.utils.tensor import one_hot, reverse_one_hot
 
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
@@ -25,9 +25,10 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     metric_output : torch.Tensor
         The computed metric from the label and the output
     """
+    # this is currently only happening for mse_torch
     if isinstance(
         params["loss_function"], dict
-    ):  # this is currently only happening for mse_torch
+    ):  
         # check for mse_torch
         loss_function = global_losses_dict["mse"]
     else:
@@ -51,24 +52,19 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         and (params["problem_type"] == "segmentation")
     ):
         ground_truth_resampled = []
-        ground_truth_prev = ground_truth
+        # this needs to be one_hot encoded
+        ground_truth_prev = one_hot(ground_truth, params["model"]["class_list"])
         for i, _ in enumerate(predicted):
-            prediction_current_rev_one_hot = np.expand_dims(
-                reverse_one_hot(
-                    predicted[i][0].detach(), params["model"]["class_list"]
-                ),
-                axis=0,
-            )
-            if ground_truth_prev[0].shape != prediction_current_rev_one_hot.shape:
+            if ground_truth_prev[0].shape != predicted[i][0].shape:
                 expected_shape = (
                     ground_truth_prev.shape[0],
-                ) + prediction_current_rev_one_hot.shape
+                ) + predicted[i][0].shape
                 actual_shape = []
                 for dim in expected_shape:
                     if dim != 1:
                         actual_shape.append(dim)
                 ground_truth_prev = nnf.interpolate(
-                    ground_truth_prev, size=actual_shape, mode="nearest"
+                    ground_truth_prev, size=actual_shape, mode="linear"
                 )
             ground_truth_resampled.append(ground_truth_prev)
 
@@ -82,6 +78,8 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     else:
         if len(predicted) > 1:
             for i, _ in enumerate(predicted):
+                # loss = (0.5 * loss1) + (0.25 * loss2) + (0.175 * loss3) + (0.075 * loss4)
+                # 1 * len(x)
                 loss += loss_function(predicted[i], ground_truth_resampled[i], params)
         else:
             loss = loss_function(predicted, ground_truth, params)
