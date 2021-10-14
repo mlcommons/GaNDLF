@@ -41,8 +41,8 @@ def step(model, image, label, params):
 
     # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
     if params["problem_type"] == "segmentation":
-        if label.shape[0] == 3:
-            label = label[0].unsqueeze(0)
+        if label.shape[1] == 3:
+            label = label[:,0,...].unsqueeze(0)
             # this warning should only come up once
             if params["print_rgb_label_warning"]:
                 print(
@@ -53,6 +53,7 @@ def step(model, image, label, params):
 
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
+        label = torch.squeeze(label, -1)
         if "value_keys" in params:  # squeeze label for segmentation only
             if len(label.shape) > 1:
                 label = torch.squeeze(label, -1)
@@ -68,8 +69,8 @@ def step(model, image, label, params):
     # one-hot encoding of 'label' will be needed for segmentation
     loss, metric_output = get_loss_and_metrics(image, label, output, params)
 
-    if len(output) > 1:
-        output = output[0]
+    # if len(output) > 1:
+    #     output = output[0]
 
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)
