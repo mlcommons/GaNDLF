@@ -111,7 +111,6 @@ def reverse_one_hot(predmask_array, class_list):
     final_mask = None
     if special_case_detected:
         for i, _ in enumerate(class_list):
-            # for i in range(0, len(class_list)):
             initialize_mask = False
             if isinstance(class_list[i], str):
                 for case in special_cases_to_check:
@@ -137,7 +136,6 @@ def reverse_one_hot(predmask_array, class_list):
                     final_mask += np.asarray(array_to_consider[i, ...], dtype=int)
     else:
         for i, _ in enumerate(class_list):
-            # for i in range(0, len(class_list)):
             if final_mask is None:
                 final_mask = np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
             else:
