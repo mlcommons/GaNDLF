@@ -1,9 +1,6 @@
 import sys
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
-import torch.nn.functional as nnf
-
-from GANDLF.utils.tensor import reverse_one_hot
 
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
@@ -40,19 +37,8 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 file=sys.stderr,
             )
 
-    loss = 0
     # specialized loss function for sdnet
     sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
-    
-    if (len(predicted) > 1) and not(sdnet_check) and (params["problem_type"] == "segmentation"):
-        ground_truth_resampled = []
-        ground_truth_prev = ground_truth
-        for i in range(len(predicted)):
-            prediction_current_rev_one_hot = reverse_one_hot(predicted[i][0].detach(), params["model"]["class_list"])
-            if ground_truth_prev.shape != prediction_current_rev_one_hot.shape:
-                ground_truth_prev = nnf.interpolate(ground_truth_prev, size=prediction_current_rev_one_hot.shape, mode="nearest")
-            ground_truth_resampled.append(ground_truth)
-    
     if sdnet_check:
         # this is specific for sdnet-style archs
         loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
@@ -61,11 +47,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
-        if len(predicted) > 1:
-            for i in range(len(predicted)):
-                loss += loss_function(predicted[i], ground_truth_resampled[i], params)
-        else:
-            loss = loss_function(predicted, ground_truth, params)
+        loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
 
     # Metrics should be a list
