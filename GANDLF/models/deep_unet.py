@@ -147,7 +147,7 @@ class deep_unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
-        self.out_4 = out_conv(
+        self.out_3 = out_conv(
             input_channels=self.base_filters * 8,
             output_channels=self.n_classes,
             conv=self.Conv,
@@ -155,7 +155,7 @@ class deep_unet(ModelBase):
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
         )
-        self.out_3 = out_conv(
+        self.out_2 = out_conv(
             input_channels=self.base_filters * 4,
             output_channels=self.n_classes,
             conv=self.Conv,
@@ -163,7 +163,7 @@ class deep_unet(ModelBase):
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
         )
-        self.out_2 = out_conv(
+        self.out_1 = out_conv(
             input_channels=self.base_filters * 2,
             output_channels=self.n_classes,
             conv=self.Conv,
@@ -171,7 +171,7 @@ class deep_unet(ModelBase):
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
         )
-        self.out_1 = out_conv(
+        self.out_0 = out_conv(
             input_channels=self.base_filters,
             output_channels=self.n_classes,
             conv=self.Conv,
@@ -205,23 +205,23 @@ class deep_unet(ModelBase):
 
         x = self.us_3(x5)
         xl4 = self.de_3(x, x4)
-        out_4 = self.out_4(xl4)
+        out_3 = self.out_3(xl4)
 
         x = self.us_2(xl4)
         xl3 = self.de_2(x, x3)
-        out_3 = self.out_3(xl3)
+        out_2 = self.out_2(xl3)
 
         x = self.us_1(xl3)
         xl2 = self.de_1(x, x2)
-        out_2 = self.out_2(xl2)
+        out_1 = self.out_1(xl2)
 
         x = self.us_0(xl2)
         xl1 = self.de_0(x, x1)
-        out_1 = self.out_1(xl1)
+        out_0 = self.out_0(xl1)
 
         # Currently four outputs from the deep network
 
-        return [out_4, out_3, out_2, out_1]
+        return [out_3, out_2, out_1, out_0]
 
 
 class deep_resunet(deep_unet):
