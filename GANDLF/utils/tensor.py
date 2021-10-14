@@ -75,22 +75,7 @@ def one_hot(segmask_array, class_list):
             batch_stack[b, class_idx, ...] = bin_mask
             class_idx += 1
 
-        #     if one_hot_stack is None:
-        #         one_hot_stack = bin_mask
-        #     else:
-        #         one_hot_stack = torch.cat((one_hot_stack, bin_mask))
-
-        # if batch_stack is None:
-        #     batch_stack = one_hot_stack
-        #     # always ensure we are returning a tensor with batch_size encoded
-        #     batch_stack = batch_stack.unsqueeze(0)
-        # else:
-        #     if one_hot_stack.shape != batch_stack.shape:
-        #         one_hot_stack = one_hot_stack.unsqueeze(0)
-        #     batch_stack = torch.cat((batch_stack, one_hot_stack))
-
     return batch_stack
-    # return torch.from_numpy(batch_stack)
 
 
 def reverse_one_hot(predmask_array, class_list):
@@ -108,40 +93,55 @@ def reverse_one_hot(predmask_array, class_list):
         array_to_consider = predmask_array.cpu().numpy()
     else:
         array_to_consider = predmask_array
-    idx_argmax = np.argmax(array_to_consider, axis=0)
-    final_mask = 0
     special_cases_to_check = ["||"]
     special_case_detected = False
-    max_current = 0
+    # max_current = 0
 
     for _class in class_list:
         for case in special_cases_to_check:
             if isinstance(_class, str):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
-                    # if present, then split the sub-class
-                    class_split = _class.split(case)
-                    for i in class_split:  # find the max for computation later on
-                        if int(i) > max_current:
-                            max_current = int(i)
+                    # # if present, then split the sub-class
+                    # class_split = _class.split(case)
+                    # for i in class_split:  # find the max for computation later on
+                    #     if int(i) > max_current:
+                    #         max_current = int(i)
 
+    final_mask = None
     if special_case_detected:
-        start_idx = 0
-        if (class_list[0] == 0) or (class_list[0] == "0"):
-            start_idx = 1
+        for i, _ in enumerate(class_list):
+            # for i in range(0, len(class_list)):
+            initialize_mask = False
+            if isinstance(class_list[i], str):
+                for case in special_cases_to_check:
+                    initialize_mask = False
+                    if case in class_list[i]:
+                        initialize_mask = True
+                    else:
+                        if class_list[i] != "0":
+                            initialize_mask = True
+            else:
+                if class_list[i] != 0:
+                    initialize_mask = True
 
-        final_mask = np.asarray(predmask_array[start_idx, ...], dtype=int)
-        start_idx += 1
-        for i in range(start_idx, len(class_list)):
-            # TODO: this should be replaced with information coming from the config that defines what the specific union of labels should be defined as
-            # for example:
-            # class_list = "[0,1||2]"
-            # output_classes = [0,1]
-            # this would make "1||2" be mapped to "1", and this mechanism can be extended for N possible combinations
-            final_mask += np.asarray(predmask_array[i, ...], dtype=int)
+            if initialize_mask:
+                if final_mask is None:
+                    final_mask = np.asarray(array_to_consider[i, ...], dtype=int)
+                else:
+                    # TODO: this should be replaced with information coming from the config that defines what the specific union of labels should be defined as
+                    # for example:
+                    # class_list = "[0,1||2]"
+                    # output_classes = [0,1]
+                    # this would make "1||2" be mapped to "1", and this mechanism can be extended for N possible combinations
+                    final_mask += np.asarray(array_to_consider[i, ...], dtype=int)
     else:
-        for idx, _class in enumerate(class_list):
-            final_mask = final_mask + (idx_argmax == idx) * _class
+        for i, _ in enumerate(class_list):
+            # for i in range(0, len(class_list)):
+            if final_mask is None:
+                final_mask = np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
+            else:
+                final_mask += np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
     return final_mask
 
 
