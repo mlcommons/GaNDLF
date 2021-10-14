@@ -1087,12 +1087,12 @@ def test_one_hot_logic():
     comparison = random_array == img_tensor_oh_rev_array
     assert comparison.all(), "Arrays are not equal"
 
-    class_list = [0,"1||2||3",4]
+    class_list = [0, "1||2||3", 4]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
     comparison = (random_array == 0) == (img_tensor_oh_rev_array == 0)
     assert comparison.all(), "Arrays at '0' are not equal"
-    
+
     random_array_sp = (random_array == 1) + (random_array == 2) + (random_array == 3)
     img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
     img_tensor_oh_rev_array_sp[random_array == 4] = False
@@ -1101,7 +1101,7 @@ def test_one_hot_logic():
 
     # check for '4'
     img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
-    for i in [1,2,3]:
+    for i in [1, 2, 3]:
         img_tensor_oh_rev_array_sp[random_array == i] = False
     comparison = (random_array == 4) == img_tensor_oh_rev_array_sp
     assert comparison.all(), "Arrays at '4' are not equal"
