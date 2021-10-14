@@ -2,7 +2,6 @@ import sys
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 import torch.nn.functional as nnf
-import numpy as np
 
 from GANDLF.utils.tensor import one_hot, reverse_one_hot
 
