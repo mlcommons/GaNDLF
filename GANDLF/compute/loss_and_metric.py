@@ -1,6 +1,10 @@
 import sys
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
+import torch.nn.functional as nnf
+import numpy as np
+
+from GANDLF.utils.tensor import reverse_one_hot
 
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
@@ -37,8 +41,24 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 file=sys.stderr,
             )
 
+    loss = 0
     # specialized loss function for sdnet
     sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
+    
+    if (len(predicted) > 1) and not(sdnet_check) and (params["problem_type"] == "segmentation"):
+        ground_truth_resampled = []
+        ground_truth_prev = ground_truth
+        for i in range(len(predicted)):
+            prediction_current_rev_one_hot = np.expand_dims(reverse_one_hot(predicted[i][0].detach(), params["model"]["class_list"]), axis=0)
+            if ground_truth_prev[0].shape != prediction_current_rev_one_hot.shape:
+                expected_shape = (ground_truth_prev.shape[0],) + prediction_current_rev_one_hot.shape
+                actual_shape = []
+                for dim in expected_shape:
+                    if dim != 1:
+                        actual_shape.append(dim)
+                ground_truth_prev = nnf.interpolate(ground_truth_prev, size=actual_shape, mode="nearest")
+            ground_truth_resampled.append(ground_truth_prev)
+    
     if sdnet_check:
         # this is specific for sdnet-style archs
         loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
@@ -47,12 +67,17 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
-        loss = loss_function(predicted, ground_truth, params)
+        if len(predicted) > 1:
+            for i in range(len(predicted)):
+                loss += loss_function(predicted[i], ground_truth_resampled[i], params)
+        else:
+            loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
 
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_lower = metric.lower()
+        metric_output[metric] = 0
         if metric_lower in global_metrics_dict:
             metric_function = global_metrics_dict[metric_lower]
             if sdnet_check:
@@ -63,12 +88,17 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                     .data.item()
                 )
             else:
-                metric_output[metric] = (
-                    metric_function(predicted, ground_truth, params)
-                    .detach()
-                    .cpu()
-                    .item()
-                )
+                if len(predicted) > 1:
+                    for i in range(len(predicted)):
+                        metric_output[metric] += metric_function(predicted[i], ground_truth_resampled[i], params).detach().cpu().item()
+                        
+                else:
+                    metric_output[metric] = (
+                        metric_function(predicted, ground_truth, params)
+                        .detach()
+                        .cpu()
+                        .item()
+                    )
         else:
             print(
                 "WARNING: Could not find the requested metric '" + metric,
