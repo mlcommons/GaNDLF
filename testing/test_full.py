@@ -22,7 +22,7 @@ device = "cpu"
 all_models_segmentation = [
     "lightunet",
     "unet",
-    # "deep_resunet",
+    "deep_resunet",
     "fcn",
     "uinc",
     "msdnet",

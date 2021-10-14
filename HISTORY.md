@@ -1,6 +1,6 @@
 ## 0.0.13
 
-- 
+- Deep supervision added
 
 ## 0.0.12
 
