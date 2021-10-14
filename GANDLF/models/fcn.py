@@ -24,7 +24,8 @@ class fcn(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict,
+        self,
+        parameters: dict,
     ):
         super(fcn, self).__init__(parameters)
         self.ins = in_conv(

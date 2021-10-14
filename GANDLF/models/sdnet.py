@@ -14,7 +14,10 @@ from copy import deepcopy
 
 class Decoder(ModelBase):
     def __init__(
-        self, parameters, anatomy_factors, num_layers=5,
+        self,
+        parameters,
+        anatomy_factors,
+        num_layers=5,
     ):
         super(Decoder, self).__init__(parameters)
         self.num_layers = num_layers
@@ -89,7 +92,9 @@ class Decoder(ModelBase):
 
 class Segmentor(ModelBase):
     def __init__(
-        self, parameters, anatomy_factors,
+        self,
+        parameters,
+        anatomy_factors,
     ):
         super(Segmentor, self).__init__(parameters)
         self.layer_list = add_conv_block(
@@ -132,7 +137,11 @@ class Segmentor(ModelBase):
 
 class ModalityEncoder(ModelBase):
     def __init__(
-        self, parameters, anatomy_factors, modality_factors, num_layers=4,
+        self,
+        parameters,
+        anatomy_factors,
+        modality_factors,
+        num_layers=4,
     ):
         super(ModalityEncoder, self).__init__(parameters)
         self.num_layers = num_layers
@@ -183,7 +192,8 @@ class ModalityEncoder(ModelBase):
 
 class SDNet(ModelBase):
     def __init__(
-        self, parameters: dict,
+        self,
+        parameters: dict,
     ):
         super(SDNet, self).__init__(parameters)
         self.anatomy_factors = 8
@@ -210,10 +220,18 @@ class SDNet(ModelBase):
 
         self.cencoder = unet(parameters_unet)
         self.mencoder = ModalityEncoder(
-            parameters, self.anatomy_factors, self.modality_factors,
+            parameters,
+            self.anatomy_factors,
+            self.modality_factors,
         )
-        self.decoder = Decoder(parameters, self.anatomy_factors,)
-        self.segmentor = Segmentor(parameters, self.anatomy_factors,)
+        self.decoder = Decoder(
+            parameters,
+            self.anatomy_factors,
+        )
+        self.segmentor = Segmentor(
+            parameters,
+            self.anatomy_factors,
+        )
 
     @staticmethod
     def reparameterize(mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
