@@ -22,17 +22,11 @@ class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):
         self.args_names = ("masking_method",)
 
     def apply_normalization(
-        self,
-        subject: Subject,
-        image_name: str,
-        mask: torch.Tensor,
+        self, subject: Subject, image_name: str, mask: torch.Tensor,
     ) -> None:
         image = subject[image_name]
         mask = image.data != 0
-        standardized = self.znorm(
-            image.data,
-            mask,
-        )
+        standardized = self.znorm(image.data, mask,)
         if standardized is None:
             message = (
                 "Standard deviation is 0 for masked values"

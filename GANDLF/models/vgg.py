@@ -20,9 +20,7 @@ class VGG(nn.Module):
     """
 
     def __init__(
-        self,
-        parameters,
-        configuration,
+        self, parameters, configuration,
     ):
         """
         Initializer function for the VGG model
@@ -171,8 +169,7 @@ class vgg11(VGG):
     """
 
     def __init__(
-        self,
-        parameters,
+        self, parameters,
     ):
         super(vgg11, self).__init__(parameters=parameters, configuration=cfg["A"])
 
@@ -183,8 +180,7 @@ class vgg13(VGG):
     """
 
     def __init__(
-        self,
-        parameters,
+        self, parameters,
     ):
         super(vgg13, self).__init__(parameters=parameters, configuration=cfg["B"])
 
@@ -195,8 +191,7 @@ class vgg16(VGG):
     """
 
     def __init__(
-        self,
-        parameters,
+        self, parameters,
     ):
         super(vgg16, self).__init__(parameters=parameters, configuration=cfg["D"])
 
@@ -207,7 +202,6 @@ class vgg19(VGG):
     """
 
     def __init__(
-        self,
-        parameters,
+        self, parameters,
     ):
         super(vgg19, self).__init__(parameters=parameters, configuration=cfg["E"])
