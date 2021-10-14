@@ -26,9 +26,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         The computed metric from the label and the output
     """
     # this is currently only happening for mse_torch
-    if isinstance(
-        params["loss_function"], dict
-    ):  
+    if isinstance(params["loss_function"], dict):
         # check for mse_torch
         loss_function = global_losses_dict["mse"]
     else:
@@ -46,20 +44,20 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     # specialized loss function for sdnet
     sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
 
-    if (
-        params["problem_type"] == "segmentation"
-    ):
+    if params["problem_type"] == "segmentation":
         ground_truth = one_hot(ground_truth, params["model"]["class_list"])
-    
+
     if (
         (len(predicted) > 1)
         and not (sdnet_check)
         and (params["problem_type"] == "segmentation")
     ):
         # these weights are taken from previous publication (https://arxiv.org/pdf/2103.03759.pdf)
-        loss_weights = [0.5 , 0.25, 0.175, 0.075]
+        loss_weights = [0.5, 0.25, 0.175, 0.075]
 
-        assert len(predicted) == len(loss_weights), "Loss weights must be same length as number of outputs."
+        assert len(predicted) == len(
+            loss_weights
+        ), "Loss weights must be same length as number of outputs."
 
         ground_truth_resampled = []
         ground_truth_prev = ground_truth.detach()
@@ -67,7 +65,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             if ground_truth_prev[0].shape != predicted[i][0].shape:
 
                 # we get the expected shape of resampled ground truth
-                expected_shape = reverse_one_hot(predicted[i][0].detach(), params["model"]["class_list"]).shape
+                expected_shape = reverse_one_hot(
+                    predicted[i][0].detach(), params["model"]["class_list"]
+                ).shape
 
                 # apparently, we need to pass tri- or bi- linear for nnf.interpolate because "linear" doesn't work
                 # linear interpolation is needed because we want "soft" images for resampled ground truth
@@ -92,7 +92,10 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     else:
         if len(predicted) > 1:
             for i, _ in enumerate(predicted):
-                loss += loss_function(predicted[i], ground_truth_resampled[i], params) * loss_weights[i]
+                loss += (
+                    loss_function(predicted[i], ground_truth_resampled[i], params)
+                    * loss_weights[i]
+                )
         else:
             loss = loss_function(predicted, ground_truth, params)
     metric_output = {}
