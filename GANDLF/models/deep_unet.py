@@ -221,7 +221,7 @@ class deep_unet(ModelBase):
 
         # Currently four outputs from the deep network
 
-        return [out_3, out_2, out_1, out_0]
+        return [out_0, out_1, out_2, out_3]
 
 
 class deep_resunet(deep_unet):
