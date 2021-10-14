@@ -20,12 +20,12 @@ device = "cpu"
 ## global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
+    "deep_resunet",
     "lightunet",
     "unet",
-    # "fcn",
-    # "uinc",
-    # "msdnet",
-    "deep_resunet",
+    "fcn",
+    "uinc",
+    "msdnet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = ["densenet121", "vgg16"]
