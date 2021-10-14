@@ -124,8 +124,11 @@ def hd_generic(inp, target, params, percentile=95):
     This is a real metric. The binary images can therefore be supplied in any order.
     """
     result_array = inp.detach().cpu().numpy()
+    target_array = target.detach().cpu().numpy()
     if result_array.shape[-1] == 1:
         result_array = result_array.squeeze(-1)
+    if target_array.shape[-1] == 1:
+        target_array = target_array.squeeze(-1)
     # ensure that we are dealing with a binary array
     result_array[result_array < 0.5] = 0
     result_array[result_array >= 0.5] = 1
@@ -137,10 +140,10 @@ def hd_generic(inp, target, params, percentile=95):
             if i != params["model"]["ignore_label_validation"]:
                 hd1 = __surface_distances(
                     result_array[b, i, ...],
-                    target[b, i, ...],
+                    target_array[b, i, ...],
                 )
                 hd2 = __surface_distances(
-                    target[b, i, ...],
+                    target_array[b, i, ...],
                     result_array[b, i, ...],
                     params["subject_spacing"][b],
                 )
