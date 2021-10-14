@@ -69,8 +69,8 @@ def step(model, image, label, params):
     # one-hot encoding of 'label' will be needed for segmentation
     loss, metric_output = get_loss_and_metrics(image, label, output, params)
 
-    # if len(output) > 1:
-    #     output = output[0]
+    if len(output) > 1:
+        output = output[0]
 
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)
