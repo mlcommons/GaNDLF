@@ -44,21 +44,34 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     loss = 0
     # specialized loss function for sdnet
     sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
-    
-    if (len(predicted) > 1) and not(sdnet_check) and (params["problem_type"] == "segmentation"):
+
+    if (
+        (len(predicted) > 1)
+        and not (sdnet_check)
+        and (params["problem_type"] == "segmentation")
+    ):
         ground_truth_resampled = []
         ground_truth_prev = ground_truth
         for i in range(len(predicted)):
-            prediction_current_rev_one_hot = np.expand_dims(reverse_one_hot(predicted[i][0].detach(), params["model"]["class_list"]), axis=0)
+            prediction_current_rev_one_hot = np.expand_dims(
+                reverse_one_hot(
+                    predicted[i][0].detach(), params["model"]["class_list"]
+                ),
+                axis=0,
+            )
             if ground_truth_prev[0].shape != prediction_current_rev_one_hot.shape:
-                expected_shape = (ground_truth_prev.shape[0],) + prediction_current_rev_one_hot.shape
+                expected_shape = (
+                    ground_truth_prev.shape[0],
+                ) + prediction_current_rev_one_hot.shape
                 actual_shape = []
                 for dim in expected_shape:
                     if dim != 1:
                         actual_shape.append(dim)
-                ground_truth_prev = nnf.interpolate(ground_truth_prev, size=actual_shape, mode="nearest")
+                ground_truth_prev = nnf.interpolate(
+                    ground_truth_prev, size=actual_shape, mode="nearest"
+                )
             ground_truth_resampled.append(ground_truth_prev)
-    
+
     if sdnet_check:
         # this is specific for sdnet-style archs
         loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
@@ -90,8 +103,15 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             else:
                 if len(predicted) > 1:
                     for i in range(len(predicted)):
-                        metric_output[metric] += metric_function(predicted[i], ground_truth_resampled[i], params).detach().cpu().item()
-                        
+                        metric_output[metric] += (
+                            metric_function(
+                                predicted[i], ground_truth_resampled[i], params
+                            )
+                            .detach()
+                            .cpu()
+                            .item()
+                        )
+
                 else:
                     metric_output[metric] = (
                         metric_function(predicted, ground_truth, params)

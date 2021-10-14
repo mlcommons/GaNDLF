@@ -123,7 +123,7 @@ def reverse_one_hot(predmask_array, class_list):
             else:
                 if class_list[i] != 0:
                     initialize_mask = True
-            
+
             if initialize_mask:
                 if final_mask is None:
                     final_mask = np.asarray(array_to_consider[i, ...], dtype=int)
