@@ -25,7 +25,7 @@ all_models_segmentation = [
     # "fcn",
     # "uinc",
     # "msdnet",
-    "deep_resunet"
+    "deep_resunet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = ["densenet121", "vgg16"]

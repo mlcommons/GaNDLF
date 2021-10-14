@@ -141,7 +141,8 @@ def hd_generic(inp, target, params, percentile=95):
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
                 hd1 = __surface_distances(
-                    result_array[b, i, ...], reference_array[b, i, ...],
+                    result_array[b, i, ...],
+                    reference_array[b, i, ...],
                 )
                 hd2 = __surface_distances(
                     reference_array[b, i, ...],

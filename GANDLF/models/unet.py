@@ -22,7 +22,9 @@ class unet(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict, residualConnections=False,
+        self,
+        parameters: dict,
+        residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)

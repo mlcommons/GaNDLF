@@ -27,7 +27,8 @@ class uinc(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict,
+        self,
+        parameters: dict,
     ):
         super(uinc, self).__init__(parameters)
 
