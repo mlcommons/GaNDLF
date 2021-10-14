@@ -52,7 +52,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     ):
         ground_truth_resampled = []
         ground_truth_prev = ground_truth
-        for i in range(len(predicted)):
+        for i, _ in enumerate(predicted):
             prediction_current_rev_one_hot = np.expand_dims(
                 reverse_one_hot(
                     predicted[i][0].detach(), params["model"]["class_list"]
@@ -81,7 +81,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
         if len(predicted) > 1:
-            for i in range(len(predicted)):
+            for i, _ in enumerate(predicted):
                 loss += loss_function(predicted[i], ground_truth_resampled[i], params)
         else:
             loss = loss_function(predicted, ground_truth, params)
@@ -102,7 +102,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 )
             else:
                 if len(predicted) > 1:
-                    for i in range(len(predicted)):
+                    for i, _ in enumerate(predicted):
                         metric_output[metric] += (
                             metric_function(
                                 predicted[i], ground_truth_resampled[i], params
