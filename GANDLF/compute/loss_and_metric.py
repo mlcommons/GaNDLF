@@ -51,6 +51,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         and not (sdnet_check)
         and (params["problem_type"] == "segmentation")
     ):
+        # this case is for models that have deep-supervision - currently only used for segmentation models
         # these weights are taken from previous publication (https://arxiv.org/pdf/2103.03759.pdf)
         loss_weights = [0.5, 0.25, 0.175, 0.075]
 
@@ -68,11 +69,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                     predicted[i][0].detach(), params["model"]["class_list"]
                 ).shape
 
-                # apparently, we need to pass tri- or bi- linear for nnf.interpolate because "linear" doesn't work
                 # linear interpolation is needed because we want "soft" images for resampled ground truth
-                mode = get_linear_interpolation_mode(len(expected_shape))
                 ground_truth_prev = nnf.interpolate(
-                    ground_truth_prev, size=expected_shape, mode=mode
+                    ground_truth_prev, size=expected_shape, mode=get_linear_interpolation_mode(len(expected_shape))
                 )
             ground_truth_resampled.append(ground_truth_prev)
 
@@ -85,7 +84,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
         if len(predicted) > 1:
+            # this is for models that have deep-supervision
             for i, _ in enumerate(predicted):
+                # loss is calculated based on resampled "soft" labels using a pre-defined weights array
                 loss += (
                     loss_function(predicted[i], ground_truth_resampled[i], params)
                     * loss_weights[i]
