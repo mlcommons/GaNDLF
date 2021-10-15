@@ -14,6 +14,7 @@ from .tensor import (
     reverse_one_hot,
     send_model_to_device,
     get_class_imbalance_weights,
+    get_linear_interpolation_mode,
 )
 
 from .write_parse import (
