@@ -298,3 +298,23 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     }
 
     return penalty_dict, weights_dict
+
+
+def get_linear_interpolation_mode(dimensionality):
+    """
+    Get linear interpolation mode.
+
+    Args:
+        dimensionality (int): The dimensions based on which interpolation mode is calculated
+
+    Returns:
+        str: Interpolation type to pass to interpolation function
+    """
+
+    mode = "nearest"
+    if dimensionality == 2:
+        mode = "bilinear"
+    elif dimensionality == 3:
+        mode = "trilinear"
+    
+    return mode
