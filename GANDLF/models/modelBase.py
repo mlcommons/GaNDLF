@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from GANDLF.utils import get_linear_interpolation_mode
+
 
 def get_final_layer(final_convolution_layer):
     none_list = [
@@ -69,6 +71,8 @@ class ModelBase(nn.Module):
         self.final_convolution_layer = get_final_layer(
             parameters["model"]["final_layer"]
         )
+
+        self.linear_interpolation_mode = get_linear_interpolation_mode(self.n_dimensions)
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
