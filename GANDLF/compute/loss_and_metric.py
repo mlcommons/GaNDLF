@@ -3,7 +3,7 @@ from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 import torch.nn.functional as nnf
 
-from GANDLF.utils.tensor import one_hot, reverse_one_hot
+from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
 
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
@@ -70,11 +70,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
 
                 # apparently, we need to pass tri- or bi- linear for nnf.interpolate because "linear" doesn't work
                 # linear interpolation is needed because we want "soft" images for resampled ground truth
-                mode = "nearest"
-                if len(expected_shape) == 3:
-                    mode = "trilinear"
-                elif len(expected_shape) == 2:
-                    mode = "bilinear"
+                mode = get_linear_interpolation_mode(len(expected_shape))
                 ground_truth_prev = nnf.interpolate(
                     ground_truth_prev, size=expected_shape, mode=mode
                 )
