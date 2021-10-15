@@ -73,9 +73,8 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                 ground_truth_prev = nnf.interpolate(
                     ground_truth_prev,
                     size=expected_shape,
-                    mode=get_linear_interpolation_mode(
-                        len(expected_shape), align_corners=False
-                    ),
+                    mode=get_linear_interpolation_mode(len(expected_shape)),
+                    align_corners=False,
                 )
             ground_truth_resampled.append(ground_truth_prev)
 
