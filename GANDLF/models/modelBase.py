@@ -72,7 +72,9 @@ class ModelBase(nn.Module):
             parameters["model"]["final_layer"]
         )
 
-        self.linear_interpolation_mode = get_linear_interpolation_mode(self.n_dimensions)
+        self.linear_interpolation_mode = get_linear_interpolation_mode(
+            self.n_dimensions
+        )
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout

@@ -10,7 +10,7 @@ class UpsamplingModule(nn.Module):
         conv=nn.Conv2d,
         conv_kwargs=None,
         scale_factor=2,
-        interpolation_mode = "trilinear",
+        interpolation_mode="trilinear",
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:

@@ -316,5 +316,5 @@ def get_linear_interpolation_mode(dimensionality):
         mode = "bilinear"
     elif dimensionality == 3:
         mode = "trilinear"
-    
+
     return mode
