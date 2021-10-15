@@ -103,6 +103,7 @@ class deep_unet(ModelBase):
             input_channels=self.base_filters * 16,
             output_channels=self.base_filters * 8,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_3 = DecodingModule(
             input_channels=self.base_filters * 16,
@@ -115,6 +116,7 @@ class deep_unet(ModelBase):
             input_channels=self.base_filters * 8,
             output_channels=self.base_filters * 4,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_2 = DecodingModule(
             input_channels=self.base_filters * 8,
@@ -127,6 +129,7 @@ class deep_unet(ModelBase):
             input_channels=self.base_filters * 4,
             output_channels=self.base_filters * 2,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_1 = DecodingModule(
             input_channels=self.base_filters * 4,
@@ -139,6 +142,7 @@ class deep_unet(ModelBase):
             input_channels=self.base_filters * 2,
             output_channels=self.base_filters,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_0 = DecodingModule(
             input_channels=self.base_filters * 2,
