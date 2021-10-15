@@ -10,19 +10,16 @@ class FCNUpsamplingModule(nn.Module):
         conv=nn.Conv2d,
         conv_kwargs=None,
         scale_factor=2,
+        interpolation_mode="trilinear",
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:
             conv_kwargs = {"kernel_size": 1, "stride": 1, "padding": 0, "bias": True}
 
-        if conv == nn.Conv2d:
-            mode = "bilinear"
-        else:
-            mode = "trilinear"
         self.interp_kwargs = {
             "size": None,
             "scale_factor": 2 ** (scale_factor - 1),
-            "mode": mode,
+            "mode": interpolation_mode,
             "align_corners": True,
         }
         self.interpolate = Interpolate(interp_kwargs=self.interp_kwargs)
