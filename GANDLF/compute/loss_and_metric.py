@@ -70,12 +70,11 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
 
                 # apparently, we need to pass tri- or bi- linear for nnf.interpolate because "linear" doesn't work
                 # linear interpolation is needed because we want "soft" images for resampled ground truth
+                mode = "nearest"
                 if len(expected_shape) == 3:
                     mode = "trilinear"
                 elif len(expected_shape) == 2:
                     mode = "bilinear"
-                else:
-                    mode = "nearest"
                 ground_truth_prev = nnf.interpolate(
                     ground_truth_prev, size=expected_shape, mode=mode
                 )
