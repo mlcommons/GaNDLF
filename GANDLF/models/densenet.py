@@ -287,7 +287,7 @@ def densenet201(parameters):
 def densenet264(parameters):
     return generate_model(
         264,
-        num_classes=get_number_of_outputs(parameters),
+        num_classes=parameters["model"]["num_classes"],
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
         final_convolution_layer=parameters["model"]["final_layer"],

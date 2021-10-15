@@ -1,8 +1,5 @@
-from functools import partial
 from torchvision.transforms import ColorJitter
-from torchio.transforms import Lambda
-from collections import defaultdict
-from typing import Tuple, Union, Dict, Sequence
+from typing import Tuple, Union
 
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
