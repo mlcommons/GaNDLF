@@ -49,7 +49,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     if (
         (len(predicted) > 1)
         and not (sdnet_check)
-        and (params["problem_type"] == "segmentation")
+        and ("deep" in params["model"]["architecture"])
     ):
         # this case is for models that have deep-supervision - currently only used for segmentation models
         # these weights are taken from previous publication (https://arxiv.org/pdf/2103.03759.pdf)
