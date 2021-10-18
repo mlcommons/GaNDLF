@@ -46,11 +46,13 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     if params["problem_type"] == "segmentation":
         ground_truth = one_hot(ground_truth, params["model"]["class_list"])
 
+    deep_supervision_model = False
     if (
         (len(predicted) > 1)
         and not (sdnet_check)
-        and (params["problem_type"] == "segmentation")
+        and ("deep" in params["model"]["architecture"])
     ):
+        deep_supervision_model = True
         # this case is for models that have deep-supervision - currently only used for segmentation models
         # these weights are taken from previous publication (https://arxiv.org/pdf/2103.03759.pdf)
         loss_weights = [0.5, 0.25, 0.175, 0.075]
@@ -86,7 +88,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
-        if len(predicted) > 1:
+        if deep_supervision_model:
             # this is for models that have deep-supervision
             for i, _ in enumerate(predicted):
                 # loss is calculated based on resampled "soft" labels using a pre-defined weights array
