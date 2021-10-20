@@ -114,7 +114,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                     .data.item()
                 )
             else:
-                if len(predicted) > 1:
+                if deep_supervision_model:
                     for i, _ in enumerate(predicted):
                         metric_output[metric] += (
                             metric_function(
