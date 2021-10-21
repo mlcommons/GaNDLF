@@ -1,5 +1,6 @@
 from .unet import unet, resunet
 from .light_unet import light_unet, light_resunet
+from .deep_unet import deep_unet, deep_resunet
 from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
@@ -12,10 +13,14 @@ from .brain_age import brainage
 global_models_dict = {
     "unet": unet,
     "resunet": resunet,
-    "residualunet": unet,
+    "residualunet": resunet,
+    "deepunet": deep_unet,
     "lightunet": light_unet,
+    "deep_unet": deep_unet,
     "light_unet": light_unet,
+    "deepresunet": deep_resunet,
     "lightresunet": light_resunet,
+    "deep_resunet": deep_resunet,
     "light_resunet": light_resunet,
     "fcn": fcn,
     "uinc": uinc,

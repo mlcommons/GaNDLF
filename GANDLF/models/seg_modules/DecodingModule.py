@@ -44,16 +44,15 @@ class DecodingModule(nn.Module):
 
     def forward(self, x1, x2):
         x = torch.cat([x1, x2], dim=1)
+        x = self.conv0(self.act(self.in_0(x)))
 
-        x = self.act(self.in_0(x))
-        x = self.conv0(x)
         if self.residual == True:
             skip = x
 
-        x = self.act(self.in_1(x))
+        x = self.conv1(self.act(self.in_1(x)))
 
-        x = self.act(self.in_2(self.conv1(x)))
-        x = self.conv2(x)
+        x = self.conv2(self.act(self.in_2(x)))
+
         if self.residual == True:
             x = x + skip
 
