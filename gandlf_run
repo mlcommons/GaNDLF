@@ -4,7 +4,6 @@
 from __future__ import print_function, division
 import os, argparse, ast
 from GANDLF.utils import fix_paths
-
 fix_paths(os.getcwd())  # add relevant vips path
 
 from datetime import date

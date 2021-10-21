@@ -21,8 +21,8 @@ device = "cpu"
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
     "lightunet",
-    "lightresunet",
     "unet",
+    "deep_resunet",
     "fcn",
     "uinc",
     "msdnet",
@@ -1075,14 +1075,34 @@ def test_model_patch_divisibility():
 def test_one_hot_logic():
 
     random_array = np.random.randint(5, size=(20, 20, 20))
-    class_list = [*range(0, np.max(random_array) + 1)]
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
     img_tensor = torch.from_numpy(img_array).to(torch.float16)
     img_tensor = img_tensor.unsqueeze(0)
     img_tensor = img_tensor.unsqueeze(0)
+
+    class_list = [*range(0, np.max(random_array) + 1)]
     img_tensor_oh = one_hot(img_tensor, class_list)
-    img_tensor_oh_rev = reverse_one_hot(img_tensor_oh[0], class_list)
-    comparison = random_array == img_tensor_oh_rev
+    img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
+    comparison = random_array == img_tensor_oh_rev_array
     assert comparison.all(), "Arrays are not equal"
+
+    class_list = [0, "1||2||3", 4]
+    img_tensor_oh = one_hot(img_tensor, class_list)
+    img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
+    comparison = (random_array == 0) == (img_tensor_oh_rev_array == 0)
+    assert comparison.all(), "Arrays at '0' are not equal"
+
+    random_array_sp = (random_array == 1) + (random_array == 2) + (random_array == 3)
+    img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
+    img_tensor_oh_rev_array_sp[random_array == 4] = False
+    comparison = random_array_sp == img_tensor_oh_rev_array_sp
+    assert comparison.all(), "Special arrays are not equal"
+
+    # check for '4'
+    img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
+    for i in [1, 2, 3]:
+        img_tensor_oh_rev_array_sp[random_array == i] = False
+    comparison = (random_array == 4) == img_tensor_oh_rev_array_sp
+    assert comparison.all(), "Arrays at '4' are not equal"
     print("passed")
