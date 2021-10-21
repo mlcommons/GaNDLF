@@ -67,8 +67,12 @@ def step(model, image, label, params):
         output, attention_map = output
 
     if params["problem_type"] == "classification":
+        if not label.size():
+            label = label.unsqueeze(0)
+            
         if len(label.shape) > 1:
                 label = torch.squeeze(label, -1)
+
     # one-hot encoding of 'output' will probably be needed for segmentation
     loss, metric_output = get_loss_and_metrics(image, label, output, params)
 
