@@ -59,7 +59,7 @@ def step(model, image, label, params):
         if "value_keys" in params:
             if len(label.shape) > 1:
                 label = torch.squeeze(label, -1)
-    
+
     if params["model"]["amp"]:
         with torch.cuda.amp.autocast():
             output = model(image)
