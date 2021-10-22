@@ -41,7 +41,7 @@ class Dice():
         numerator = (flat_predicted_mask * flat_ground_truth).sum()
         denominator = (flat_predicted_mask + flat_ground_truth)
 
-        return (2 * numerator + smooth) / denominator + smooth
+        return (2 * numerator + self.smooth) / denominator + self.smooth
 
 
 def multi_class_dice(output, label, params):
@@ -67,7 +67,7 @@ def multi_class_dice(output, label, params):
     """
     total_dice = 0
     avg_counter = 0
-    dice = Dice()
+    dice = Dice
 
     for i in range(params["model"]["num_classes"]):
         # this check should only happen during validation
