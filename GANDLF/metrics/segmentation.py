@@ -11,6 +11,39 @@ from scipy.ndimage.morphology import (
 )
 
 
+class Dice():
+    """
+        This function computes the dice score for two given tensors.
+    """
+    
+    def __init__(self) -> None:
+        super().__init__()
+        smooth = 1e-5
+    
+    def forward(self, predicted_mask: torch.Tensor, ground_truth: torch.Tensor) -> torch.Tensor:
+        """
+        This function computes a dice score between two tensors
+
+        Parameters
+        ----------
+        predicted_mask : Tensor
+            Output predicted generally by the network
+        ground_truth : Tensor
+            Required target label to match the output with
+
+        Returns
+        -------
+        Tensor
+            Computed Dice Score
+        """
+        flat_predicted_mask = predicted_mask.contiguous().view(-1)
+        flat_ground_truth = ground_truth.contiguous().view(-1)
+        numerator = (flat_predicted_mask * flat_ground_truth).sum()
+        denominator = (flat_predicted_mask + flat_ground_truth)
+
+        return (2 * numerator + smooth) / denominator + smooth
+
+
 def multi_class_dice(output, label, params):
     """
     This function computes a multi-class dice
@@ -34,14 +67,17 @@ def multi_class_dice(output, label, params):
     """
     total_dice = 0
     avg_counter = 0
-    # print("Number of classes : ", params["model"]["num_classes"])
-    for i in range(0, params["model"]["num_classes"]):
+    dice = Dice()
+
+    for i in range(params["model"]["num_classes"]):
         # this check should only happen during validation
         if i != params["model"]["ignore_label_validation"]:
             total_dice += dice(output[:, i, ...], label[:, i, ...])
             avg_counter += 1
-        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
+
+    # Divide the dice to weight all classes equally and have a number less than 1
     total_dice /= avg_counter
+
     return total_dice
 
 
