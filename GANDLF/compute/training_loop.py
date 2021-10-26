@@ -387,8 +387,10 @@ def training_loop(
         # Printing times
         epoch_start_time = time.time()
         print("*" * 20)
+        print("*" * 20)
         print("Starting Epoch : ", epoch)
-        print("Epoch start time : ", get_date_time())
+        if params["verbose"]:
+            print("Epoch start time : ", get_date_time())
 
         epoch_train_loss, epoch_train_metric = train_network(
             model, train_dataloader, optimizer, params
@@ -409,7 +411,8 @@ def training_loop(
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
-        print("Epoch end time : ", get_date_time())
+        if params["verbose"]:
+            print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
         print(
             "Time taken for epoch : ",
