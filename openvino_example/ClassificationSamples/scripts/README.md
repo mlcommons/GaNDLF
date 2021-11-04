@@ -12,4 +12,6 @@
 
 ### Usage: 
 ##### The scripts are located under: ```openvino_example/ClassificationSamples/scripts/```
+- The current working directory is ```$ROOT_DIR```, and the pretrained 5-fold PyTorch classification models are located under ```$ROOT_DIR/DFU_experiments_vgg11_5fold_without_preprocess/```
 - Use script ```run_convert_to_ov.sh``` to convert the pretrained 5-fold PyTorch classification models to OpenVINO model
+- 
