@@ -12,4 +12,4 @@
 
 ### Usage: 
 ##### The scripts are located under: ```openvino_example/ClassificationSamples/scripts/```
-- 
+- Use script ```run_convert_to_ov.sh``` to convert the pretrained 5-fold PyTorch classification models to OpenVINO model
