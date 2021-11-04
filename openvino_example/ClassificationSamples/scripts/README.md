@@ -12,6 +12,8 @@
 
 ### Usage: 
 ##### The scripts are located under: ```openvino_example/ClassificationSamples/scripts/```
+
+#### Convert to OpenVINO FP32 models
 - The current working directory is ```$ROOT_DIR```, and the pretrained 5-fold PyTorch classification models are located under ```$ROOT_DIR/DFU_experiments_vgg11_5fold_without_preprocess/```
 - Use script ```run_convert_to_ov.sh``` to convert the pretrained 5-fold PyTorch classification models to OpenVINO model:
   ```
@@ -19,4 +21,6 @@
   ```
   After model conversion, we can find exported ONNX models under ```$ROOT_DIR/onnx``` and converted OpenVINO FP32 IR models under ```ROOT_DIR/ov_models```
  
+#### POT quantization to INT8 models
+
 
