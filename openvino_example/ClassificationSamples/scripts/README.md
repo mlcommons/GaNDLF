@@ -6,6 +6,10 @@
 - Install OpenVINO NNCF following [NNCF Installation](https://github.com/openvinotoolkit/nncf#installation)
 - Active virtual environment and setup OpenVINO path
 
-### Usage:
+### Set up environment:
 - Activate the conda virtual environment ```conda activate venv_gandlf```
 - Setup OpenVINO path by running ```source /opt/intel/openvino_2021.4.689/bin/setupvars.sh -pyver 3.6```
+
+### Usage: 
+##### The scripts are located under: ```openvino_example/ClassificationSamples/scripts/```
+- 
