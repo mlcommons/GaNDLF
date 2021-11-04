@@ -17,15 +17,25 @@
   where $TORCH_MODEL_DIR is the relative directory to host the pretrained PyTorch models
 - Use script ```run_convert_to_ov.sh``` to convert the pretrained 5-fold PyTorch classification models to OpenVINO model:
   ```
-  bahs run_convert_to_ov.sh $MODEL_DIR $TORCH_MODEL_DIR
+  bash run_convert_to_ov.sh $MODEL_DIR $TORCH_MODEL_DIR
   ```
   After model conversion, we can find exported ONNX models under ```$MODEL_DIR/onnx``` and converted OpenVINO FP32 IR models under ```$MODEL_DIR/ov_models```
  
 #### POT quantization to INT8 models
 - The scripts for POT quantization is located under ```./quantization```
 - Use script ```run_generate_data.sh``` to generate the patch data for both POT quantization and NNCF compression
+The script ```run_generate_data.sh``` takes 3 required positional arguments and 1 optional positional argument:
+  - The first required positional argument is the working directory $ROOT_DIR. It includes sub-directories to hold the models and the data
+  - The second required positional argument is the relative PyTorch model directory $PYTORCH_MODEL, so the model is reside under $ROOT_DIR$PYTORCH_MODEL
+  - The third required positional argument is the relative data directory $DATA, so the data is reside under $ROOT_DIR$DATA. Under data directory $ROOT_DIR$DATA, we have the following sub-directorys
+      - csv_files: it holds the data_training.csv and data_validation_csv according to GaNDLF's csv file format
+      - patch_data: the generated numpy data files that include patch data and the corresponding labels
+  - The fourth argument is optional. It specifies the data sampling rate. When this argument is specified, the user can get a sub-sample of the training data using the given sub-sampling rate. 
+Here is how we run the patch data generation script:
 ```
+bash run_generate_data.sh $ROOT_DIR $PYTORCH_MODEL $DATA [$SAMPLEING_RATE]
+```
+- Once we generate the patch data, the user can run the ```quantize.py``` to do the POT quantization to generate the quantized INT8 model. 
 
-```
 
 
