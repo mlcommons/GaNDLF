@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+<mapping>
+	<map>
+		<framework name="66" out_port_id="66"/>
+		<IR id="83" name="MaxPool_5" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="output" out_port_id="output"/>
+		<IR id="148" name="output" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="111" out_port_id="111"/>
+		<IR id="110" name="111851096" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="input" out_port_id="input"/>
+		<IR id="64" name="input" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="87" out_port_id="87"/>
+		<IR id="134" name="MaxPool_20" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="89" out_port_id="89"/>
+		<IR id="134" name="MaxPool_20" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="114" out_port_id="114"/>
+		<IR id="16" name="114911282" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="96" out_port_id="96"/>
+		<IR id="70" name="96571135" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="91" out_port_id="91"/>
+		<IR id="136" name="Constant_241031213" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="76" out_port_id="76"/>
+		<IR id="104" name="Relu_12" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="61" out_port_id="61"/>
+		<IR id="75" name="Relu_1" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="116" out_port_id="116"/>
+		<IR id="131" name="Conv_18" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="99" out_port_id="99"/>
+		<IR id="54" name="99631078" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="80" out_port_id="80"/>
+		<IR id="117" name="MaxPool_15" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="107" out_port_id="107"/>
+		<IR id="103" name="Conv_11" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="95" out_port_id="95"/>
+		<IR id="74" name="Conv_0" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="90" out_port_id="90"/>
+		<IR id="135" name="AveragePool_23" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="86" out_port_id="86"/>
+		<IR id="132" name="Relu_19" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="69" out_port_id="69"/>
+		<IR id="87" name="Relu_7" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="102" out_port_id="102"/>
+		<IR id="44" name="102691300" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="110" out_port_id="110"/>
+		<IR id="114" name="Conv_13" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="108" out_port_id="108"/>
+		<IR id="30" name="108801303" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="65" out_port_id="65"/>
+		<IR id="81" name="Relu_4" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="79" out_port_id="79"/>
+		<IR id="115" name="Relu_14" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="73" out_port_id="73"/>
+		<IR id="100" name="MaxPool_10" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="117" out_port_id="117"/>
+		<IR id="127" name="117961252" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="98" out_port_id="98"/>
+		<IR id="80" name="Conv_3" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="72" out_port_id="72"/>
+		<IR id="98" name="Relu_9" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="62" out_port_id="62"/>
+		<IR id="77" name="MaxPool_2" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="104" out_port_id="104"/>
+		<IR id="97" name="Conv_8" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="93" out_port_id="93"/>
+		<IR id="138" name="Relu_26" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="classifier.4.weight" out_port_id="classifier.4.weight"/>
+		<IR id="144" name="classifier.4.weight1061141" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="83" out_port_id="83"/>
+		<IR id="121" name="Relu_17" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="classifier.4.bias" out_port_id="classifier.4.bias"/>
+		<IR id="147" name="classifier.4.bias1081273" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="113" out_port_id="113"/>
+		<IR id="120" name="Conv_16" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="105" out_port_id="105"/>
+		<IR id="93" name="105741114" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="92" out_port_id="92"/>
+		<IR id="137" name="Reshape_25" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="101" out_port_id="101"/>
+		<IR id="86" name="Conv_6" out_port_id="2"/>
+	</map>
+</mapping>
