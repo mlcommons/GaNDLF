@@ -21,22 +21,22 @@ import torch
 import pandas as pd
 from torch.utils.data import DataLoader
 
-def generate_data_loader(ROOT_DIR, N_FOLD, is_train=True):
+def generate_data_loader(DATA_DIR, N_FOLD, is_train=True):
     train_mode=True
-    train_csv=os.path.join(ROOT_DIR, "models/ov_models/", N_FOLD,  "data_training.csv")
-    validation_csv=os.path.join(ROOT_DIR, "models/ov_models/", N_FOLD,  "data_validation.csv")
+    train_csv=os.path.join(DATA_DIR, "csv_files/", N_FOLD,  "data_training.csv")
+    validation_csv=os.path.join(DATA_DIR, "csv_files/", N_FOLD,  "data_validation.csv")
     data_train, headers_train = parseTrainingCSV(train_csv, train=train_mode)
 
     data_validation, headers_validation = parseTrainingCSV(validation_csv, train=train_mode)
 
-    with open(os.path.join(ROOT_DIR, 'models/DFU_experiments_vgg11_5fold_without_preprocess/parameters.pkl'), 'rb') as f:
+    with open(os.path.join(DATA_DIR, 'parameters.pkl'), 'rb') as f:
         parameters = pickle.load(f)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using {device} device")
 
     parameters = populate_header_in_parameters(parameters, headers_train)
-    parameters["output_dir"] = Path(os.path.join(ROOT_DIR, "NNCF/models/quantization_aware_training/models/" + N_FOLD + "/"))
+    parameters["output_dir"] = Path(os.path.join(DATA_DIR, "patch_data", N_FOLD))
     parameters["device"] = device
 
     model = global_models_dict[parameters["model"]["architecture"]](parameters=parameters)

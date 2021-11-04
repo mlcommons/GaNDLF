@@ -10,29 +10,31 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Convert the pretrained PyTorch model to ONNX model.')
 parser.add_argument('-n', '--N_FOLD', default="0", help='n-th fold of the model.')
-parser.add_argument('-r', '--root_dir', default="root_dir", help='The root working directory.')
+parser.add_argument('-p', '--pytorch_model_dir', default="models/DFU_experiments_vgg11_5fold_without_preprocess/", help='The PyTorch model directory.')
+parser.add_argument('-d', '--data_dir', default="data", help='The PyTorch model directory.')
 parser.add_argument('-t', '--data_type', default="train", help="train or validation data, options: train/validation")
 parser.add_argument('-s', '--sampling_rate', type=float, default=1, help="sampling rate")
 args = parser.parse_args()
-ROOT_DIR = args.root_dir
 N_FOLD = args.N_FOLD
+PYTORCH_MODEL_DIR = args.pytorch_model_dir
+DATA_DIR = args.data_dir
 data_type = args.data_type
 
-sys.path.append(os.path.join(ROOT_DIR, "scripts/gandlf_func"))
+sys.path.append("../gandlf_func")
 
 from generate_dataloader_and_parameter import generate_data_loader
 import forward_pass_ov as forward_pass_ov
 
 train_mode = False
-model, parameters, train_dataloader, val_dataloader, scheduler, optimizer = generate_data_loader(ROOT_DIR, N_FOLD, train_mode)
+model, parameters, train_dataloader, val_dataloader, scheduler, optimizer = generate_data_loader(DATA_DIR, N_FOLD, train_mode)
 BASE_MODEL_NAME = parameters["model"]["architecture"]
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-DATA_DIR = Path(os.path.join(ROOT_DIR, "./scripts/quantization/data/", BASE_MODEL_NAME,  N_FOLD, data_type ))
+DATA_DIR = Path(os.path.join(DATA_DIR, "patch_data",  N_FOLD, data_type ))
 
 DATA_DIR.mkdir(exist_ok=True)
 
-main_dict = torch.load(os.path.join(ROOT_DIR, 'models/DFU_experiments_vgg11_5fold_without_preprocess/', N_FOLD, BASE_MODEL_NAME + "_best.pth.tar"), map_location=device)
+main_dict = torch.load(os.path.join(PYTORCH_MODEL_DIR, N_FOLD, BASE_MODEL_NAME + "_best.pth.tar"), map_location=device)
 model.load_state_dict(main_dict["model_state_dict"])
 
 parameters['model']['type'] = "Torch"
