@@ -10,7 +10,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Convert the pretrained PyTorch model to ONNX model.')
 parser.add_argument('-n', '--N_FOLD', default="0", help='n-th fold of the model.')
-parser.add_argument('-r', '--root_dir', default="/Share/Junwen/UPenn/DFU_Example_vgg11/ClassificationModel/ClassificationModel/", help='The root working directory.')
+parser.add_argument('-r', '--root_dir', default="root_dir", help='The root working directory.')
 parser.add_argument('-t', '--data_type', default="train", help="train or validation data, options: train/validation")
 parser.add_argument('-s', '--sampling_rate', type=float, default=1, help="sampling rate")
 args = parser.parse_args()
