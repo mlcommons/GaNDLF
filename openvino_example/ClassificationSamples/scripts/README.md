@@ -38,11 +38,11 @@ bash run_generate_data.sh $ROOT_DIR $PYTORCH_MODEL $DATA [$SAMPLEING_RATE]
 - Once we generate the patch data, the user can run the ```quantize.py``` to do the POT quantization to generate the quantized INT8 model. 
 We will need to specify whether we want to accuracy_aware_quantization as well as which model we are quantizing. 
 ``` 
-python3.6 quantize.py --model_directory ../../../../../ClassificationModel/ClassificationModel/models/ov_models/ --data_directory ../../../../../ClassificationModel/ClassificationModel/data/patch_data/ --accuracy_aware_quantization
+python3.6 quantize.py --model_directory $MODEL_XML --data_directory $DATA_NPZ --accuracy_aware_quantization
 ```
 Input to the quantize.py include the follows:
-	- model_directory: the .xml file for the OpenVINO FP32 model
-        - data_directory: the data file that holds the patches of the training data
+	- model_directory: the .xml file for the OpenVINO FP32 model, $MODEL_XML
+        - data_directory: the data file that holds the patches of the training data, $DATA_NPZ
         - accuracy_aware_quantization: whether we want to use accuracy_aware_quantization
         - subsample_step: the sampling rate to the patch data, default is 200, which means 1/200 samples from the training data are used for quantization
 
