@@ -41,10 +41,10 @@ We will need to specify whether we want to accuracy_aware_quantization as well a
 python3.6 quantize.py --model_directory $MODEL_XML --data_directory $DATA_NPZ --accuracy_aware_quantization
 ```
 Input to the quantize.py include the follows:
-	- model_directory: the .xml file for the OpenVINO FP32 model, $MODEL_XML
-        - data_directory: the data file that holds the patches of the training data, $DATA_NPZ
-        - accuracy_aware_quantization: whether we want to use accuracy_aware_quantization
-        - subsample_step: the sampling rate to the patch data, default is 200, which means 1/200 samples from the training data are used for quantization
+- model_directory: the .xml file for the OpenVINO FP32 model, $MODEL_XML
+- data_directory: the data file that holds the patches of the training data, $DATA_NPZ
+- accuracy_aware_quantization: whether we want to use accuracy_aware_quantization
+- subsample_step: the sampling rate to the patch data, default is 200, which means 1/200 samples from the training data are used for quantization
 
 
 
