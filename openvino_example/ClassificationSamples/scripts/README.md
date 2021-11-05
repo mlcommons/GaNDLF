@@ -36,9 +36,10 @@ Here is how we run the patch data generation script:
 bash run_generate_data.sh $ROOT_DIR $PYTORCH_MODEL $DATA [$SAMPLEING_RATE]
 ```
 - Once we generate the patch data, the user can run the ```quantize.py``` to do the POT quantization to generate the quantized INT8 model. 
-<<<<<<< HEAD
+We will need to specify whether we want to accuracy_aware_quantization as well as which model we are quantizing. 
+``` 
+python3.6 quantize.py --accuracy_aware_quantization --n_fold $N_FOLD
+```
 
-=======
->>>>>>> 13c39316c8a1398940d36f63aa0c617a4a4b8436
 
 
