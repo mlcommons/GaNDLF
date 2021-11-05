@@ -13,16 +13,14 @@ import argparse
 parser = argparse.ArgumentParser(
     description="Quantizes an OpenVINO model to INT8.",
     add_help=True, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--root_directory", default="/Share/Junwen/UPenn/DFU_Example_vgg11/ClassificationModel/ClassificationModel/", 
-                    help="Root directory")
-parser.add_argument("--model_directory", default="models/ov_models/",
+parser.add_argument("--model_directory", default="models/ov_models/vgg11_best.xml",
                     help="Model directory")
-parser.add_argument("--data_directory", default="scripts/quantization/data/vgg11/",
+parser.add_argument("--data_directory", default="data",
                     help="Data directory")
 parser.add_argument("--maximum_metric_drop", default=1.0,
                     help="AccuracyAwareQuantization: Maximum allowed drop in metric")
-parser.add_argument("--n_fold", default="0", type=str, 
-                    help="n-fold")
+parser.add_argument("--subsample_step", default="200", type=int,
+                    help="Data subsampling rate, default is 200.")
 parser.add_argument("--accuracy_aware_quantization",
                     help="use accuracy aware quantization",
                     action="store_true", default=False)
@@ -43,9 +41,8 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def read_data(input_data):
+def read_data(input_data, subsample_step):
     npzfiles = np.load(input_data, allow_pickle = True )
-    subsample_step = 200
     image, pred_label, gt_label = npzfiles.files
     images = npzfiles[image]
     length = images.shape[0]
@@ -62,7 +59,7 @@ class DatasetsDataLoader(DataLoader):
  
     def __init__(self, config):
         super().__init__(config)
-        self.images, self.gt_labels = read_data(str(config['data_source']))
+        self.images, self.gt_labels = read_data(str(config['data_source']), config['subsample_step'])
 
     @property
     def size(self):
@@ -141,13 +138,14 @@ class MyMetric(Metric):
         return {self.name: {"direction": "higher-better", "type": ""}}
  
     
-model_directory = os.path.join(args.root_directory, args.model_directory, args.n_fold)
+model_file = args.model_directory
+model_weights = args.model_directory[:-4]+".bin"
 
 # Dictionary with the FP32 model info
 model_config = Dict({
     'model_name': 'vgg11',
-    'model': os.path.join(model_directory,  'vgg11_best.xml'),
-    'weights': os.path.join(model_directory,  'vgg11_best.bin')
+    'model': model_file,
+    'weights': model_weights
     })
 
 print(model_config)
@@ -160,7 +158,8 @@ engine_config = Dict({
 })
 
 dataset_config = Dict({
-    'data_source': os.path.join(args.root_directory, args.data_directory, args.n_fold, "train/patch_samples.npz")# Path to input data for quantization
+    'data_source': args.data_directory, # Path to input data for quantization
+    'subsample_step': args.subsample_step
 })
 
 print(dataset_config)
@@ -226,7 +225,8 @@ compressed_model = pipeline.run(model)
 
 
 # Save the compressed model.
-int8_directory = os.path.join(model_directory, 'INT8')
+int8_directory = os.path.join(os.path.dirname(args.model_directory), 'INT8')
+print(int8_directory)
 save_model(compressed_model, int8_directory)
 
 metric_results_INT8 = pipeline.evaluate(compressed_model)
