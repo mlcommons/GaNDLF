@@ -48,6 +48,8 @@ class NormalizeRGB(IntensityTransform):
             Tensor: Normalized Tensor image.
         """
 
+        # standard operation defined in ToTensor
+        tensor = tensor.div(255)
         dtype = tensor.dtype
         mean = torch.as_tensor(mean, dtype=dtype, device=tensor.device)
         std = torch.as_tensor(std, dtype=dtype, device=tensor.device)
@@ -59,8 +61,6 @@ class NormalizeRGB(IntensityTransform):
         if std.ndim == 1:
             std = std.view(-1, 1, 1)
 
-        # standard operation defined in ToTensor
-        tensor = tensor.div(255)
         tensor = tensor.sub(mean)
         tensor = tensor.div(std)
 
