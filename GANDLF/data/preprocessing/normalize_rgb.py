@@ -26,7 +26,14 @@ class NormalizeRGB(IntensityTransform):
         return subject
 
     def apply_normalize(self, image: ScalarImage) -> None:
-        image.set_data(normalize(image.data, mean=self.mean, std=self.std))
+        image_data = image.data        
+        if image_data.shape[-1] == 1:
+            image_data = image_data.squeeze(-1)
+            image_data = normalize(image_data, self.mean, self.std)
+            image_data = image_data.unsqueeze(-1)
+            image.set_data(image_data)
+        else:
+            image.set_data(normalize(image_data, self.mean, self.std))
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
