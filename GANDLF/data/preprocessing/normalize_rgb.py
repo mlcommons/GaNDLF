@@ -55,7 +55,9 @@ class NormalizeRGB(IntensityTransform):
         std = torch.as_tensor(std, dtype=dtype, device=tensor.device)
 
         if (std == 0).any():
-            raise ValueError(f"std evaluated to zero after conversion to {dtype}​​​​​, leading to division by zero.")
+            raise ValueError(
+                f"std evaluated to zero after conversion to {dtype}​​​​​, leading to division by zero."
+            )
         if mean.ndim == 1:
             mean = mean.view(-1, 1, 1)
         if std.ndim == 1:
@@ -65,6 +67,7 @@ class NormalizeRGB(IntensityTransform):
         tensor = tensor.div(std)
 
         return tensor
+
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
 def normalize_by_val_transform(mean, std):
