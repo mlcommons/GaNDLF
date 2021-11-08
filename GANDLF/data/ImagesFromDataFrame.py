@@ -217,12 +217,9 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                         resample_values = tuple(np.append(resample_values, 1))
                     transformations_list.append(Resample(resample_values))
             # normalize should be applied at the end
-            elif preprocess_lower in [
-                "normalize",
-                "normalize_nonZero",
-                "normalize_nonZero_masked",
-            ]:
-                normalize_to_apply = global_preprocessing_dict[preprocess_lower]
+            elif "normalize" in preprocess_lower:
+                if normalize_to_apply is None:
+                    normalize_to_apply = global_preprocessing_dict[preprocess_lower]
             # preprocessing routines that we only want for training
             elif preprocess_lower in ["crop_external_zero_planes"]:
                 if train:
