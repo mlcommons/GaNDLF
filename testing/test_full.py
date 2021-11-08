@@ -894,15 +894,15 @@ def test_preprocess_functions():
     # initialize an input which has values between [-1,1]
     # checking tensor with last dimension of size 1
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
-    input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"](
         input_tensor
     )
     input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
-    input_transformed = global_preprocessing_dict["normalize_imagenet"]()(input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_standardize"]()(
+    input_transformed = global_preprocessing_dict["normalize_imagenet"](input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_standardize"](
         input_tensor
     )
-    input_transformed = global_preprocessing_dict["normalize_div_by_255"]()(
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"](
         input_tensor
     )
     parameters_dict = {}
