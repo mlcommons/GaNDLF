@@ -78,9 +78,10 @@ def populate_channel_keys_in_params(data_loader, parameters):
     Returns:
         dict: Updated parameters that include key information
     """
+    # using train_loader makes this slower as train loader contains full augmentations
     batch = next(
         iter(data_loader)
-    )  # using train_loader makes this slower as train loader contains full augmentations
+    )  
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
