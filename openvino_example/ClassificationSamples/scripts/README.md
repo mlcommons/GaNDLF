@@ -14,10 +14,11 @@
 
 #### Convert to OpenVINO FP32 models
 - The current model directory is ```$MODEL_DIR```, and the pretrained 5-fold PyTorch classification models are located under ```$MODEL_DIR$TORCH_MODEL_DIR```, 
-  where $TORCH_MODEL_DIR is the relative directory to host the pretrained PyTorch models
+  where $TORCH_MODEL_DIR is the relative directory to host the pretrained PyTorch model, and $MODEL_NAME is the name of the model used. The models trained from GaNDLF 
+  have the default name $MODEL_NAME_best.pth.tar
 - Use script ```run_convert_to_ov.sh``` to convert the pretrained 5-fold PyTorch classification models to OpenVINO model:
   ```
-  bash run_convert_to_ov.sh $MODEL_DIR $TORCH_MODEL_DIR
+  bash run_convert_to_ov.sh $MODEL_DIR $TORCH_MODEL_DIR $MODEL_NAME
   ```
   After model conversion, we can find exported ONNX models under ```$MODEL_DIR/onnx``` and converted OpenVINO FP32 IR models under ```$MODEL_DIR/ov_models```
  
