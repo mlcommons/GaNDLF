@@ -3,7 +3,7 @@ MODEL_DIR=$1
 TORCH_MODEL_DIR=$2
 MODEL_NAME=$3
 
-python convert_to_onnx.py -i $MODEL_DIR$TORCH_MODEL_DIR -o $MODEL_DIR"/onnx/" -n $MODEL_NAME
+python convert_to_onnx.py -i $MODEL_DIR"/"$TORCH_MODEL_DIR -o $MODEL_DIR"/onnx/" -n $MODEL_NAME
 
 for fold in {0..4}
 do
