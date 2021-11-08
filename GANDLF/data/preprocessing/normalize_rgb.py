@@ -2,7 +2,7 @@ import torch
 
 from torchio.transforms.intensity_transform import IntensityTransform
 from torchio.data.subject import Subject
-from torchvision.transforms import Normalize
+from torchvision.transforms.functional import normalize
 from torchio.data.image import ScalarImage
 
 
@@ -26,11 +26,7 @@ class NormalizeRGB(IntensityTransform):
         return subject
 
     def apply_normalize(self, image: ScalarImage) -> None:
-        image.set_data(self.normalize(image.data))
-
-    def normalize(self, tensor: torch.Tensor) -> torch.Tensor:
-        normalizer = Normalize(self.mean, self.std)
-        return normalizer(tensor)
+        image.set_data(normalize(image.data, mean=self.mean, std=self.std))
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
