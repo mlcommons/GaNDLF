@@ -55,5 +55,7 @@ global_preprocessing_dict = {
     "normalize": ZNormalization(),
     "normalize_positive": ZNormalization(masking_method=positive_voxel_mask),
     "normalize_nonZero": ZNormalization(masking_method=nonzero_voxel_mask),
+    "normalize_nonzero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
+    "normalize_nonzero_masked": NonZeroNormalizeOnMaskedRegion(),
 }
