@@ -1,8 +1,8 @@
 import torch
+from typing import List
 
 from torchio.transforms.intensity_transform import IntensityTransform
 from torchio.data.subject import Subject
-from torchvision.transforms.functional import normalize
 from torchio.data.image import ScalarImage
 
 
@@ -26,7 +26,47 @@ class NormalizeRGB(IntensityTransform):
         return subject
 
     def apply_normalize(self, image: ScalarImage) -> None:
-        image.set_data(normalize(image.data, mean=self.mean, std=self.std))
+        image_data = image.data
+        if image_data.shape[-1] == 1:
+            image_data = image_data.squeeze(-1)
+            image_data = self.normalize(image_data, self.mean, self.std)
+            image_data = image_data.unsqueeze(-1)
+            image.set_data(image_data)
+        else:
+            image.set_data(self.normalize(image_data, self.mean, self.std))
+
+    def normalize(self, tensor: torch.Tensor, mean: List[float], std: List[float]):
+        """Normalize a float tensor image with mean and standard deviation.
+        This transform does not support PIL image.
+
+        Args:
+            tensor (Tensor): Float tensor image of size (C, H, W) or (B, C, H, W) to be normalized.
+            mean (sequence): Sequence of means for each channel.
+            std (sequence): Sequence of standard deviations for each channel.
+
+        Returns:
+            Tensor: Normalized Tensor image.
+        """
+
+        # standard operation defined in ToTensor
+        tensor = tensor.div(255)
+        dtype = tensor.dtype
+        mean = torch.as_tensor(mean, dtype=dtype, device=tensor.device)
+        std = torch.as_tensor(std, dtype=dtype, device=tensor.device)
+
+        if (std == 0).any():
+            raise ValueError(
+                f"std evaluated to zero after conversion to {dtype}​​​​​, leading to division by zero."
+            )
+        if mean.ndim == 1:
+            mean = mean.view(-1, 1, 1)
+        if std.ndim == 1:
+            std = std.view(-1, 1, 1)
+
+        tensor = tensor.sub(mean)
+        tensor = tensor.div(std)
+
+        return tensor
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
