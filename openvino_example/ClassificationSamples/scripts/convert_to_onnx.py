@@ -22,6 +22,7 @@ args = parser.parse_args()
 if os.path.exists(os.path.join(args.torch_model_dir, 'parameters.pkl')):
     with open(os.path.join(args.torch_model_dir, 'parameters.pkl'), 'rb') as f:
         parameter = pickle.load(f)
+        f.close()
 elif any(File.endswith(".yaml") for File in os.listdir(args.torch_model_dir)):
     for File in os.listdir(args.torch_model_dir):
         if File.endswith(".yaml"):
@@ -30,6 +31,9 @@ elif any(File.endswith(".yaml") for File in os.listdir(args.torch_model_dir)):
     if not 'num_classes' in parameter['model'].keys():
         parameter['model']['num_classes'] = len(
             parameter['model']['class_list'])
+    with open(os.path.join(args.torch_model_dir, 'parameters.pkl'), 'wb') as f:
+        pickle.dump(parameter, f)
+        f.close()
 else:
     print("Either a yaml config file or a pkl parameter file needs to be available under PyTorch model directory")
 

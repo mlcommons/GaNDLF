@@ -6,7 +6,7 @@ from GANDLF.utils import (
     send_model_to_device,
     populate_channel_keys_in_params,
     get_class_imbalance_weights,
-    populate_header_in_parameters, 
+    populate_header_in_parameters,
     parseTrainingCSV
 )
 
@@ -21,16 +21,23 @@ import torch
 import pandas as pd
 from torch.utils.data import DataLoader
 
-def generate_data_loader(DATA_DIR, N_FOLD, is_train=True):
-    train_mode=True
-    train_csv=os.path.join(DATA_DIR, "csv_files/", N_FOLD,  "data_training.csv")
-    validation_csv=os.path.join(DATA_DIR, "csv_files/", N_FOLD,  "data_validation.csv")
+
+def generate_data_loader(DATA_DIR, N_FOLD, is_train=True, parameters_file=None):
+    train_mode = True
+    train_csv = os.path.join(DATA_DIR, "csv_files/",
+                             N_FOLD,  "data_training.csv")
+    validation_csv = os.path.join(
+        DATA_DIR, "csv_files/", N_FOLD,  "data_validation.csv")
     data_train, headers_train = parseTrainingCSV(train_csv, train=train_mode)
 
-    data_validation, headers_validation = parseTrainingCSV(validation_csv, train=train_mode)
+    data_validation, headers_validation = parseTrainingCSV(
+        validation_csv, train=train_mode)
 
-    with open(os.path.join(DATA_DIR, 'parameters.pkl'), 'rb') as f:
-        parameters = pickle.load(f)
+    if parameters_file == None:
+       parameters_file = os.path.join(DATA_DIR, 'parameters.pkl')
+
+    with open(parameters_file, 'rb') as f:
+            parameters = pickle.load(f)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using {device} device")

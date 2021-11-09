@@ -114,7 +114,7 @@ def main(argv):
     copyfile(args.config, osp.join(config.log_dir, 'config.json'))
     source_root = Path(__file__).absolute().parents[2]  # nncf root
     create_code_snapshot(source_root, osp.join(config.log_dir, "snapshot.tar.gz"))
-
+    
     if config.seed is not None:
         warnings.warn('You have chosen to seed training. '
                       'This will turn on the CUDNN deterministic setting, '
@@ -123,6 +123,8 @@ def main(argv):
                       'from checkpoints.')
 
     config.execution_mode = get_execution_mode(config)
+
+    print("Config execution_mode", config.execution_mode)
 
     if config.metrics_dump is not None:
         write_metrics(0, config.metrics_dump)
@@ -146,7 +148,7 @@ def main_worker(current_gpu, config: SampleConfig):
 
     set_seed(config)
     
-    model, parameters, train_wi_loader, val_wi_loader, scheduler, optimizer = generate_data_loader(config['root_dir'], config['N_FOLD'])
+    model, parameters, train_wi_loader, val_wi_loader, scheduler, optimizer = generate_data_loader(config['root_dir']+'/data', config['N_FOLD'], True, config["parameter_path"])
     
     orig_pth = osp.join(config['root_dir'], config['model_dir'], config['N_FOLD'], config['model_name'])
     model = load_torch_model(orig_pth, model)
@@ -164,6 +166,8 @@ def main_worker(current_gpu, config: SampleConfig):
     pretrained = is_pretrained_model_requested(config)
 
     is_export_only = 'export' in config.mode and ('train' not in config.mode and 'test' not in config.mode)
+
+    print("Test")
 
     if is_export_only:
         assert pretrained or (resuming_checkpoint_path is not None)
