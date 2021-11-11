@@ -4,7 +4,7 @@ import sys
 
 from GANDLF.parseConfig import parseConfig
 
-def readConfig(torch_model_dir, config_file = None):
+def readConfig(torch_model_dir=None, config_file = None):
     if config_file == None:
         if os.path.exists(os.path.join(torch_model_dir, 'parameters.pkl')):
            with open(os.path.join(torch_model_dir, 'parameters.pkl'), 'rb') as f:

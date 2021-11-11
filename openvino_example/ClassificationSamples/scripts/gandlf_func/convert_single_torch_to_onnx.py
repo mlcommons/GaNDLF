@@ -6,9 +6,9 @@ print(torch.__version__)
 
 device = torch.device('cpu')
 
-def convert_single_torch_to_onnx(torch_model, torch_weight, input_shape, onnx_model):
+def convert_single_torch_to_onnx(torch_model, torch_weight, input_shape, onnx_model, key='model_state_dict'):
     checkpoint = torch.load(torch_weight, map_location=device)
-    torch_model.load_state_dict(checkpoint['model_state_dict'])
+    torch_model.load_state_dict(checkpoint[key])
     torch_model.to(device)
     torch_model.eval()
 
@@ -26,3 +26,4 @@ def convert_single_torch_to_onnx(torch_model, torch_weight, input_shape, onnx_mo
                       verbose=True,
                       input_names=['input'],
                       output_names=['output'])
+    print("Onnx model is written to {0}.".format(onnx_model))

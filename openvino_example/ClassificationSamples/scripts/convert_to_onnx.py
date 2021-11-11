@@ -16,10 +16,9 @@ args = parser.parse_args()
 
 
 if not(args.config_file):
-    parameter = readConfig(args.torch_model_dir)
+    parameter = readConfig(torch_model_dir=args.torch_model_dir)
 else:
-    parameter - readConfig(args.torch_model_dir, args.config_file)
-
+    parameter = readConfig(config_file=args.config_file)
         
 print(parameter)
 
