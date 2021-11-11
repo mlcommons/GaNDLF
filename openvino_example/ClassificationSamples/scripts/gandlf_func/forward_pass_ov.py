@@ -11,7 +11,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     resample_image,
 )
-from step_ov import step_ov
+from gandlf_func.step_ov import step_ov
 from GANDLF.compute.loss_and_metric import get_loss_and_metrics
 
 #@profile
