@@ -62,7 +62,7 @@ if __name__ == "__main__":
         # required=True,
     )
     parser.add_argument(
-        "-r", "--resetparam",
+        "-r", "--resetprev",
         metavar="",
         default=False,
         type=ast.literal_eval,
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main_run(
-        args.data, args.config, args.output, args.train, args.device, args.reset_prv
+        args.inputdata, args.config, args.modeldir, args.train, args.device, args.resetprev
     )
 
     print("Finished.")
