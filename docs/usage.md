@@ -74,10 +74,10 @@ The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_con
 # continue from previous shell
 python gandlf_constructCSV \
   # -h, --help         show help message and exit
-  -inputDir ./experiment_0/data_dir/ # this is the main data directory
-  -channelsID _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
-  -labelID _seg.nii.gz # label identifier - not needed for regression/classification
-  -outputFile ./experiment_0/train_data.csv \ # output CSV to be used for training
+  -i ./experiment_0/data_dir/ # this is the main data directory
+  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
+  -l _seg.nii.gz # label identifier - not needed for regression/classification
+  -o ./experiment_0/train_data.csv \ # output CSV to be used for training
 ```
 
 This assumes the data is in the following format:
