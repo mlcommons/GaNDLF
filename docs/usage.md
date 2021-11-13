@@ -40,9 +40,10 @@ This is optional, but recommended. It will significantly reduce the computationa
 ```bash
 # continue from previous shell
 python gandlf_preprocess \
-  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
-  -data ./experiment_0/train.csv \ # data in CSV format 
-  -output ./experiment_0/output_dir/ \ # output directory
+  # -h, --help         show help message and exit
+  -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./experiment_0/train.csv \ # data in CSV format 
+  -o ./experiment_0/output_dir/ \ # output directory
 ```
 
 This will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration.
@@ -72,6 +73,7 @@ The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_con
 ```bash
 # continue from previous shell
 python gandlf_constructCSV \
+  # -h, --help         show help message and exit
   -inputDir ./experiment_0/data_dir/ # this is the main data directory
   -channelsID _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
   -labelID _seg.nii.gz # label identifier - not needed for regression/classification
