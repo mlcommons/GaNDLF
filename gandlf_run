@@ -26,43 +26,57 @@ if __name__ == "__main__":
         + copyrightMessage,
     )
     parser.add_argument(
-        "-config",
+        "-c", "--config",
+        metavar="",
         type=str,
         help="The configuration file (contains all the information related to the training/inference session)",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
-        "-data",
+        "-i", "--inputdata",
+        metavar="",
         type=str,
         help="Data CSV file that is used for training/inference; can also take comma-separated training-validatation pre-split CSVs",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
-        "-train",
+        "-t", "--train",
+        metavar="",
         type=ast.literal_eval,
         help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-output'",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
-        "-output",
+        "-m", "--modeldir",
+        metavar="",
         type=str,
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
-        "-device",
+        "-d", "--device",
         default="cuda",
+        metavar="",
         type=str,
         help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
-        required=True,
+        # required=True,
     )
     parser.add_argument(
-        "-reset_prv",
+        "-r", "--resetparam",
+        metavar="",
         default=False,
         type=ast.literal_eval,
         help="Whether the previous run in the output directory will be discarded or not",
         required=False,
     )
+    # parser.add_argument(
+    #     "-rf", "--resetfull",
+    #     metavar="",
+    #     default=False,
+    #     type=ast.literal_eval,
+    #     help="Whether the previous run in the output directory will be discarded or not",
+    #     required=False,
+    # )
 
     parser.add_argument(
         "-v",
