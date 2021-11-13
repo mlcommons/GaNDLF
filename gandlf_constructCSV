@@ -25,28 +25,24 @@ def main():
         metavar="",
         type=str,
         help="Input data directory which contains images in specified format",
-        required=True,
     )
     parser.add_argument(
         "-c", "--channelsID",
         metavar="",
         type=str,
         help="Channels/modalities identifier string to check for in all files in 'input_dir'; for example: --channelsID _t1.nii.gz,_t2.nii.gz",
-        required=True,
     )
     parser.add_argument(
         "-l", "--labelID",
         metavar="",
         type=str,
         help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
-        required=False,
     )
     parser.add_argument(
         "-o", "--outputFile",
         metavar="",
         type=str,
         help="Output CSV file",
-        required=False,
     )
 
     args = parser.parse_args()
