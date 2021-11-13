@@ -8,13 +8,16 @@ For any DL pipeline, the following flow needs to be performed:
 
 GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
-- [Preparing the Data](#preparing-the-data)
-- [Constructing the Data CSV](#constructing-the-data-csv)
-- [Customize the Training](#customize-the-training)
-- [Running GaNDLF](#running-gandlf-traininginference)
-- [Plot the final results](#plot-the-final-results)
-- [Multi-GPU systems](#multi-gpu-systems)
-- [Interpretability using M3D-CAM](#m3d-cam-usage)
+- [Usage](#usage)
+  - [Table of Contents](#table-of-contents)
+  - [Preparing the Data](#preparing-the-data)
+    - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
+  - [Constructing the Data CSV](#constructing-the-data-csv)
+  - [Customize the Training](#customize-the-training)
+  - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
+  - [Plot the final results](#plot-the-final-results)
+    - [Multi-GPU systems](#multi-gpu-systems)
+  - [M3D-CAM usage](#m3d-cam-usage)
 
 ## Preparing the Data
 
@@ -139,11 +142,13 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 ```bash
 # continue from previous shell
 python gandlf_run \
-  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
-  -data ./experiment_0/train.csv \ # data in CSV format 
-  -output ./experiment_0/output_dir/ \ # output directory
-  -train 1 \ # 1 == train, 0 == inference
-  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
+  # -h, --help         show help message and exit
+  # -v, --version      Show program's version number and exit.
+  -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./experiment_0/train.csv \ # data in CSV format 
+  -m ./experiment_0/model_dir/ \ # model directory
+  -t True \ # True == train, False == inference
+  -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
 ```
 
 [Back To Top &uarr;](#table-of-contents)
