@@ -22,25 +22,29 @@ if __name__ == "__main__":
         + copyrightMessage,
     )
     parser.add_argument(
-        "-config",
+        "-c", "--config",
+        metavar="",
         type=str,
         help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
         required=True,
     )
     parser.add_argument(
-        "-data",
+        "-i", "--inputdata",
+        metavar="",
         type=str,
         help="Data csv file that is used for training/inference",
         required=True,
     )
     parser.add_argument(
-        "-output",
+        "-o", "--output",
+        metavar="",
         type=str,
         help="Output directory to save intermediate files and model weights",
         required=True,
     )
     parser.add_argument(
-        "-labelPad",
+        "-l", "--labelPad",
+        metavar="",
         type=str,
         default="constant",
         help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
@@ -49,6 +53,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    preprocess_and_save(args.data, args.config, args.output, args.labelPad)
+    preprocess_and_save(args.inputdata, args.config, args.output, args.labelPad)
 
     print("Finished.")
