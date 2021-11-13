@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
-import os, argparse, ast
+import os, argparse, ast, sys
 from GANDLF.utils import fix_paths
 fix_paths(os.getcwd())  # add relevant vips path
 
@@ -87,6 +87,18 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    if not(os.path.isfile(args.config)):
+        sys.exit("ERROR: Configuration file not found!")
+    
+    if args.inpudata is None:
+        sys.exit("ERROR: Input data file not found!")
+    
+    if args.train is None:
+        sys.exit("ERROR: Training flag not specified!")
+    
+    if args.modeldir is None:
+        sys.exit("ERROR: Model directory not specified!")
 
     main_run(
         args.inputdata, args.config, args.modeldir, args.train, args.device, args.resetprev
