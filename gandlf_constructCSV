@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse
+import os, argparse, sys
 from datetime import date
 from GANDLF.utils import writeTrainingCSV
 
@@ -21,26 +21,40 @@ def main():
         + copyrightMessage,
     )
     parser.add_argument(
-        "-inputDir",
+        "-i", "--inputDir",
+        metavar="",
         type=str,
         help="Input data directory which contains images in specified format",
         required=True,
     )
     parser.add_argument(
-        "-channelsID",
+        "-c", "--channelsID",
+        metavar="",
         type=str,
-        help="Channels/modalities identifier string to check for in all files in 'input_dir'; for example: -channelsID _t1.nii.gz,_t2.nii.gz",
+        help="Channels/modalities identifier string to check for in all files in 'input_dir'; for example: --channelsID _t1.nii.gz,_t2.nii.gz",
         required=True,
     )
     parser.add_argument(
-        "-labelID",
+        "-l", "--labelID",
+        metavar="",
         type=str,
-        help="Label/mask identifier string to check for in all files in 'input_dir'; for example: -labelID _seg.nii.gz",
+        help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
         required=False,
     )
-    parser.add_argument("-outputFile", type=str, help="Output CSV file", required=True)
+    parser.add_argument(
+        "-o", "--outputFile",
+        metavar="",
+        type=str,
+        help="Output CSV file",
+        required=False,
+    )
 
     args = parser.parse_args()
+
+    # check for required parameters - this is needed here to keep the cli clean
+    for param_none_check in [args.inputDir, args.channelsID, args.labelID, args.outputFile]:
+        if param_none_check is None:
+            sys.exit("ERROR: Missing required parameter:", param_none_check)
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
