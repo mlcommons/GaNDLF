@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
-import os, argparse, ast
+import os, argparse, ast, sys
 from GANDLF.utils import fix_paths
 fix_paths(os.getcwd())  # add relevant vips path
 
@@ -26,42 +26,42 @@ if __name__ == "__main__":
         + copyrightMessage,
     )
     parser.add_argument(
-        "-config",
+        "-c", "--config",
+        metavar="",
         type=str,
         help="The configuration file (contains all the information related to the training/inference session)",
-        required=True,
     )
     parser.add_argument(
-        "-data",
+        "-i", "--inputdata",
+        metavar="",
         type=str,
         help="Data CSV file that is used for training/inference; can also take comma-separated training-validatation pre-split CSVs",
-        required=True,
     )
     parser.add_argument(
-        "-train",
+        "-t", "--train",
+        metavar="",
         type=ast.literal_eval,
         help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-output'",
-        required=True,
     )
     parser.add_argument(
-        "-output",
+        "-m", "--modeldir",
+        metavar="",
         type=str,
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
-        required=True,
     )
     parser.add_argument(
-        "-device",
+        "-d", "--device",
         default="cuda",
+        metavar="",
         type=str,
         help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
-        required=True,
     )
     parser.add_argument(
-        "-reset_prv",
+        "-r", "--resetprev",
+        metavar="",
         default=False,
         type=ast.literal_eval,
         help="Whether the previous run in the output directory will be discarded or not",
-        required=False,
     )
 
     parser.add_argument(
@@ -74,8 +74,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # check for required parameters - this is needed here to keep the cli clean
+    for param_none_check in [args.inputdata, args.modeldir, args.train, args.config]:
+        if param_none_check is None:
+            sys.exit("ERROR: Missing required parameter:", param_none_check)
+
+    # config file should always be present
+    if not(os.path.isfile(args.config)):
+        sys.exit("ERROR: Configuration file not found!")
+    
     main_run(
-        args.data, args.config, args.output, args.train, args.device, args.reset_prv
+        args.inputdata, args.config, args.modeldir, args.train, args.device, args.resetprev
     )
 
     print("Finished.")
