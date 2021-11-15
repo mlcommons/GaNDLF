@@ -29,6 +29,10 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     else:
         fold_dirs = [outputDir]
 
+    # this is for the case where inference is happening using a single model
+    if len(fold_dirs) == 0:
+        fold_dirs = [outputDir]
+
     probs_list = []
 
     is_classification = parameters["problem_type"] == "classification"
@@ -42,14 +46,15 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             parameters=parameters,
         )
 
-        logits_dir = os.path.join(fold_dir, "logits.csv")
-        is_logits_dir_exist = os.path.isfile(logits_dir)
+        if parameters["problem_type"] == "classification":
+            logits_dir = os.path.join(fold_dir, "logits.csv")
+            is_logits_dir_exist = os.path.isfile(logits_dir)
 
-        if is_classification and is_logits_dir_exist:
-            fold_logits = np.genfromtxt(logits_dir, delimiter=",")
-            fold_logits = torch.from_numpy(fold_logits)
-            fold_probs = F.softmax(fold_logits, dim=1)
-            probs_list.append(fold_probs)
+            if is_classification and is_logits_dir_exist:
+                fold_logits = np.genfromtxt(logits_dir, delimiter=",")
+                fold_logits = torch.from_numpy(fold_logits)
+                fold_probs = F.softmax(fold_logits, dim=1)
+                probs_list.append(fold_probs)
 
     if probs_list and is_classification:
         probs_list = torch.stack(probs_list)
