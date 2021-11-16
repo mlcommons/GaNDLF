@@ -36,13 +36,13 @@ Recommended tool for tackling all aforementioned preprocessing tasks: https://gi
 GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using [OPM](https://github.com/CBICA/OPM):
 
 - Construct a YAML configuration for OPM with a minimum of the following keys (see [OPM usage](https://github.com/CBICA/OPM/blob/master/README.md#usage) for all options):
-  - scale: defines the magnification scale of the WSI from which patches are extracted.
-  - patch_size: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256])
-  - num_patches: defines the number of patches to extract; use -1 to mine until exhaustion
+  - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
+  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256])
+  - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
 - A CSV file with the following columns:
-  - SubjectID: the ID of the subject for the WSI
-  - Channel_0: the WSI file
-  - Label (optional): the label map file
+  - `SubjectID`: the ID of the subject for the WSI
+  - `Channel_0`: the WSI file
+  - `Label`: (optional) the label map file
 - Run the following command:
 ```bash
 python gandlf_patchMiner
