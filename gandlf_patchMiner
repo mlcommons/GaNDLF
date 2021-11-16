@@ -50,8 +50,11 @@ def generate_initial_mask(slide_path, scale):
 def parse_gandlf_csv(fpath):
     df = pd.read_csv(fpath, dtype=str)
     df = df.drop_duplicates()
-    for index, row in df.iterrows():
-        yield row["SubjectID"], row["Channel_0"], row["Label"]
+    for _, row in df.iterrows():
+        if "Label" in row:
+            yield row["SubjectID"], row["Channel_0"], row["Label"]
+        else:
+            yield row["SubjectID"], row["Channel_0"]
 
 
 if __name__ == "__main__":
@@ -83,7 +86,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    cfg = yaml.safe_load(open(args.config), Loader=yaml.FullLoader)
+    cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
 
     if not os.path.exists(args.output_path):
         print("Output Directory does not exist, we are creating one for you.")
@@ -117,5 +120,5 @@ if __name__ == "__main__":
         )
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, output_csv=out_csv_path, config=cfg)
+        manager.mine_patches(output_csv=out_csv_path, config=cfg)
         print("Total time: {}".format(time.time() - start))
