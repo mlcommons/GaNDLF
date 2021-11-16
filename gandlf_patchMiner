@@ -15,8 +15,8 @@ import numpy as np
 import yaml
 
 from PIL import Image
-from GANDLF.OPM.opm.patch_manager import *
-from GANDLF.OPM.opm.utils import *
+from GANDLF.OPM.opm.patch_manager import PatchManager
+from GANDLF.OPM.opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config
 from functools import partial
 from pathlib import Path
 
@@ -50,8 +50,11 @@ def generate_initial_mask(slide_path, scale):
 def parse_gandlf_csv(fpath):
     df = pd.read_csv(fpath, dtype=str)
     df = df.drop_duplicates()
-    for index, row in df.iterrows():
-        yield row["SubjectID"], row["Channel_0"], row["Label"]
+    for _, row in df.iterrows():
+        if "Label" in row:
+            yield row["SubjectID"], row["Channel_0"], row["Label"]
+        else:
+            yield row["SubjectID"], row["Channel_0"]
 
 
 if __name__ == "__main__":
@@ -83,23 +86,20 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    cfg = yaml.safe_load(open(args.config), Loader=yaml.FullLoader)
+    cfg = parse_config(args.config)
 
     if not os.path.exists(args.output_path):
-        print("Output Directory does not exist, we are creating one for you.")
         Path(args.output_path).mkdir(parents=True, exist_ok=True)
 
-    out_dir = os.path.abspath(args.output_path)
-    if not out_dir.endswith("/"):
-        out_dir += "/"
+    args.output_path = os.path.abspath(args.output_path)
 
-    out_csv_path = os.path.join(out_dir, "opm_train.csv")
+    out_csv_path = os.path.join(args.output_path, "opm_train.csv")
 
     for sid, slide, label in parse_gandlf_csv(args.input_path):
         start = time.time()
 
         # Create new instance of slide manager
-        manager = PatchManager(slide)
+        manager = PatchManager(slide, args.output_path)
         manager.set_label_map(label)
         manager.set_subjectID(sid)
 
@@ -117,5 +117,5 @@ if __name__ == "__main__":
         )
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, output_csv=out_csv_path, config=cfg)
+        manager.mine_patches(output_csv=out_csv_path, config=cfg)
         print("Total time: {}".format(time.time() - start))
