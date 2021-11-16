@@ -102,7 +102,7 @@ if __name__ == "__main__":
         start = time.time()
 
         # Create new instance of slide manager
-        manager = PatchManager(slide)
+        manager = PatchManager(slide, args.output_path)
         manager.set_label_map(label)
         manager.set_subjectID(sid)
 
