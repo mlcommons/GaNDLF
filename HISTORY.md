@@ -1,6 +1,7 @@
 ## 0.0.13
 
 - Deep supervision added
+- Documentation updated
 
 ## 0.0.12
 
