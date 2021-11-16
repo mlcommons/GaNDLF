@@ -89,7 +89,6 @@ if __name__ == "__main__":
     cfg = parse_config(args.config)
 
     if not os.path.exists(args.output_path):
-        print("Output Directory does not exist, we are creating one for you.")
         Path(args.output_path).mkdir(parents=True, exist_ok=True)
 
     args.output_path = os.path.abspath(args.output_path)
