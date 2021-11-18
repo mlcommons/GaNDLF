@@ -51,7 +51,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         )
         if not os.path.isfile(file_to_check):
             raise ValueError("The model specified model was not found:", file_to_check)
-    main_dict = torch.load(file_to_check)
+
+    main_dict = torch.load(file_to_check, map_location=torch.device(device))
     model.load_state_dict(main_dict["model_state_dict"])
 
     if not (os.environ.get("HOSTNAME") is None):
