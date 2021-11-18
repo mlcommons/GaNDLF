@@ -10,8 +10,8 @@ Fixes #ISSUE_NUMBER
 <!-- You do not need to complete all the items by the time you submit the pull request, 
 but PRs are more likely to be merged quickly if all the tasks are done. -->
 
-<!-- Write an `x` in all the boxes that apply 
-Note that if a box is unchecked, PR merges will take longer than usual.
+<!-- Replace `[ ]` with `[x]` in all the boxes that apply.
+Note that if a box is left unchecked, PR merges will take longer than usual.
 -->
 - [ ] I have read the [`CONTRIBUTING`](https://github.com/CBICA/GaNDLF/blob/master/CONTRIBUTING.md) guide
 - [ ] My PR is based from the [current GaNDLF master ](https://garygregory.wordpress.com/2016/11/10/how-to-catch-up-my-git-fork-to-master/)
