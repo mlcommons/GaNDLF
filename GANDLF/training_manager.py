@@ -4,10 +4,10 @@ from sklearn.model_selection import KFold
 from pathlib import Path
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.compute import training_loop
+from GANDLF.compute import training_loop, training_loop_gan
 
 
-def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
+def TrainingManager(dataframe, outputDir, parameters, device, reset_prev, gan_mode=False):
     """
     This is the training manager that ties all the training functionality together
 
@@ -221,14 +221,25 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
 
             # parallel_compute_command is an empty string, thus no parallel computing requested
             if (not parameters["parallel_compute_command"]) or (singleFoldValidation):
-                training_loop(
-                    training_data=trainingData,
-                    validation_data=validationData,
-                    output_dir=currentValOutputFolder,
-                    device=device,
-                    params=parameters,
-                    testing_data=testingData,
-                )
+                if gan_mode:
+                    training_loop_gan(
+                        training_data=trainingData,
+                        validation_data=validationData,
+                        output_dir=currentValOutputFolder,
+                        device=device,
+                        params=parameters,
+                        testing_data=None,
+                    )
+
+                else:
+                    training_loop(
+                        training_data=trainingData,
+                        validation_data=validationData,
+                        output_dir=currentValOutputFolder,
+                        device=device,
+                        params=parameters,
+                        testing_data=testingData,
+                    )
 
             else:
                 # call qsub here

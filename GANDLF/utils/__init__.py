@@ -13,6 +13,7 @@ from .tensor import (
     one_hot,
     reverse_one_hot,
     send_model_to_device,
+    send_gan_to_device,
     get_class_imbalance_weights,
     get_linear_interpolation_mode,
 )

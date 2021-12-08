@@ -143,6 +143,91 @@ def reverse_one_hot(predmask_array, class_list):
     return final_mask
 
 
+def send_gan_to_device(generator, discriminator, amp, device, optimizerG, optimizerD):
+    """
+    This function reads the environment variable(s) and send model to correct device
+
+    Args:
+        model (torch.nn.Module): The model that needs to be sent to specified device.
+        amp (bool): Whether automatic mixed precision is to be used.
+        device (str): Device type.
+        optimizer (torch.optim): The optimizer for training.
+
+    Returns:
+        torch.nn.Module: The model after it has been sent to specified device
+        bool: Whether automatic mixed precision is to be used or not.
+        torch.device: Device type.
+    """
+    if device != "cpu":
+        if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
+            sys.exit(
+                "Please set the environment variable 'CUDA_VISIBLE_DEVICES' correctly before trying to run GANDLF on GPU"
+            )
+
+        dev = os.environ.get("CUDA_VISIBLE_DEVICES")
+        # multi-gpu support
+        # ###
+        # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
+        # ###
+        if "," in dev:
+            device = torch.device("cuda")
+            generator = nn.DataParallel(generator, "[" + dev + "]")
+            discriminator = nn.DataParallel(discriminator, "[" + dev + "]")
+        else:
+            print("Device requested via CUDA_VISIBLE_DEVICES: ", dev)
+            print("Total number of CUDA devices: ", torch.cuda.device_count())
+
+            # if only a single visible device, it will be indexed as '0'
+            if torch.cuda.device_count() == 1:
+                dev = "0"
+
+            dev_int = int(dev)
+            print("Device finally used: ", dev)
+            # device = torch.device('cuda:' + dev)
+            device = torch.device("cuda")
+            print("Sending model to aforementioned device")
+            generator = generator.to(device)
+            discriminator = discriminator.to(device)
+            print(
+                "Memory Total : ",
+                round(
+                    torch.cuda.get_device_properties(dev_int).total_memory / 1024 ** 3,
+                    1,
+                ),
+                "GB, Allocated: ",
+                round(torch.cuda.memory_allocated(dev_int) / 1024 ** 3, 1),
+                "GB, Cached: ",
+                round(torch.cuda.memory_reserved(dev_int) / 1024 ** 3, 1),
+                "GB",
+            )
+
+        print(
+            "Device - Current: %s Count: %d Name: %s Availability: %s"
+            % (
+                torch.cuda.current_device(),
+                torch.cuda.device_count(),
+                torch.cuda.get_device_name(device),
+                torch.cuda.is_available(),
+            )
+        )
+
+        if not (optimizerG is None):
+            # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
+            optimizerG.load_state_dict(optimizerG.state_dict())
+        if not (optimizerD is None):
+            # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
+            optimizerD.load_state_dict(optimizerD.state_dict())
+
+    else:
+        dev = -1
+        device = torch.device("cpu")
+        generator.cpu()
+        discriminator.cpu()
+        amp = False
+        print("Since Device is CPU, Mixed Precision Training is set to False")
+
+    return generator, discriminator, amp, device
+
 def send_model_to_device(model, amp, device, optimizer):
     """
     This function reads the environment variable(s) and send model to correct device

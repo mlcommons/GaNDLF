@@ -190,7 +190,35 @@ def test_train_segmentation_sdnet_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
+        reset_prev=True
+    )
+
+    print("passed")
+
+def test_train_gan_rad_2d(device):
+    print("Starting 2D Rad synthesis tests")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_synthesis.yaml", version_check=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # patch_size is custom for sdnet
+    parameters["patch_size"] = [224, 224, 1]
+    parameters["problem_type"] = "synthesis"
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["num_channels"] = 1
+    shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
         reset_prev=True,
+        gan_mode=True
     )
 
     print("passed")
@@ -1105,3 +1133,8 @@ def test_one_hot_logic():
     comparison = (random_array == 4) == img_tensor_oh_rev_array_sp
     assert comparison.all(), "Arrays at '4' are not equal"
     print("passed")
+
+
+if __name__ == '__main__':
+    test_train_gan_rad_2d(device='cpu')
+    # test_train_segmentation_sdnet_rad_2d(device='cpu')

@@ -3,8 +3,7 @@ import torch
 from torchio.data.subject import Subject
 from torchio.data.image import ScalarImage
 from torchio.transforms.intensity_transform import IntensityTransform
-from torchio.transforms.preprocessing.intensity.clamp import Clamp
-
+import torchio
 
 class Threshold(IntensityTransform):
     """Threshold intensity values into a range :math:`[a, b]`.
@@ -61,4 +60,4 @@ def threshold_transform(parameters):
 
 
 def clip_transform(parameters):
-    return Clamp(out_min=parameters["min"], out_max=parameters["max"])
+    return torchio.Clamp(out_min=parameters["min"], out_max=parameters["max"])

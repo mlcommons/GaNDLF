@@ -69,12 +69,13 @@ class Logger:
             row += str(loss)
         row += ","
 
-        for metric in epoch_metrics:
-            if torch.is_tensor(epoch_metrics[metric]):
-                row += str(epoch_metrics[metric].cpu().item())
-            else:
-                row += str(epoch_metrics[metric])
-            row += ","
+        if epoch_metrics is not None:   # @Sarthak
+            for metric in epoch_metrics:
+                if torch.is_tensor(epoch_metrics[metric]):
+                    row += str(epoch_metrics[metric].cpu().item())
+                else:
+                    row += str(epoch_metrics[metric])
+                row += ","
         row = row[:-1]
         self.csv.write(row)
         self.csv.write("\n")

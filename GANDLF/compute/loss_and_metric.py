@@ -5,6 +5,25 @@ import torch.nn.functional as nnf
 
 from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
 
+def get_gan_loss(output, target, params):
+    if params["loss_function"] in global_losses_dict:
+        loss_function = global_losses_dict[params["loss_function"]]
+        if params["loss_function"] != params["model"]["discriminator"]:
+            sys.exit(
+            "WARNING: Could not use loss function '"
+            + params["loss_function"] + "', with discriminator '" + params["model"]["discriminator"] + "'"
+        )
+    else:
+        sys.exit(
+            "WARNING: Could not find the requested loss function '"
+            + params["loss_function"] + "'"
+        )
+
+    loss = loss_function(output, target)
+
+    return loss
+
+    
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
     """

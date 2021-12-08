@@ -1,3 +1,5 @@
+from GANDLF.losses.gan import LSGAN_loss
+from GANDLF.models.discriminators.dcgan import DCGANDiscriminator
 from .unet import unet, resunet
 from .light_unet import light_unet, light_resunet
 from .deep_unet import deep_unet, deep_resunet
@@ -8,6 +10,14 @@ from .densenet import densenet121, densenet169, densenet201, densenet264
 from .sdnet import SDNet
 from .MSDNet import MSDNet
 from .brain_age import brainage
+
+from .discriminators.vanillaGAN import vanillaGANDiscriminator
+from .discriminators.dcgan import DCGANDiscriminator
+from .discriminators.lsgan import LSGANDiscriminator
+
+from .generators.vanillaGAN import vanillaGANGenerator
+from .generators.dcgan import DCGANGenerator
+from .generators.lsgan import LSGANGenerator
 
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {
@@ -37,4 +47,16 @@ global_models_dict = {
     "msdnet": MSDNet,
     "brain_age": brainage,
     "sdnet": SDNet,
+}
+
+global_discriminators_dict = {
+    "gan": vanillaGANDiscriminator,
+    "dcgan": DCGANDiscriminator,
+    "lsgan": LSGANDiscriminator
+}
+
+global_generators_dict = {
+    "gan": vanillaGANGenerator,
+    "dcgan": DCGANGenerator,
+    "lsgan": LSGANGenerator
 }
