@@ -99,7 +99,7 @@ def version_check(version_from_config, version_to_check):
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
-    version_to_check_int = version_to_check
+    version_to_check_int =  parse_version(version_to_check)
     min_ver = parse_version(version_from_config["minimum"])
     max_ver = parse_version(version_from_config["maximum"])
     if (min_ver > version_to_check_int) or (max_ver < version_to_check_int):
