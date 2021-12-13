@@ -16,6 +16,9 @@ from GANDLF.utils import (
     send_model_to_device,
     populate_channel_keys_in_params,
     get_class_imbalance_weights,
+    save_model,
+    load_model,
+    version_check,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -329,11 +332,12 @@ def training_loop(
     if os.path.exists(best_model_path):
         print("Previous model found. Loading it up.")
         try:
-            main_dict = torch.load(best_model_path)
+            main_dict = load_model(best_model_path)
+            version_check(params["version"], version_to_check=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
-            best_loss = main_dict["best_loss"]
+            best_loss = main_dict["loss"]
             print("Previous model loaded successfully.")
         except Exception as e:
             print("Previous model could not be loaded, error: ", e)
@@ -426,12 +430,12 @@ def training_loop(
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
-            torch.save(
+            save_model(
                 {
                     "epoch": best_train_idx,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict(),
-                    "best_loss": best_loss,
+                    "loss": best_loss,
                 },
                 best_model_path,
             )

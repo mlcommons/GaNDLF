@@ -2,6 +2,7 @@
 
 - Deep supervision added
 - Documentation updated
+- Model IO is now standardized
 
 ## 0.0.12
 
