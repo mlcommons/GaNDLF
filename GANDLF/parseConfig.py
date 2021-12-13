@@ -1,5 +1,7 @@
-import sys, yaml, pkg_resources, ast
+import sys, yaml, ast
 import numpy as np
+
+from .utils import version_check
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -63,22 +65,6 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
     return params
 
 
-def parse_version(version_string):
-    """
-    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
-
-    Args:
-        version_string (str): The string to be parsed.
-
-    Returns:
-        int: The version number.
-    """
-    version_string_split = version_string.split(".")
-    if len(version_string_split) > 3:
-        del version_string_split[-1]
-    return int("".join(version_string_split))
-
-
 def initialize_key(parameters, key, value=None):
     """
     This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
@@ -105,13 +91,13 @@ def initialize_key(parameters, key, value=None):
     return parameters
 
 
-def parseConfig(config_file_path, version_check=True):
+def parseConfig(config_file_path, version_check_flag=True):
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
     Args:
         config_file_path (str): The filename of the configuration file.
-        version_check (bool, optional): Whether to check the version in configuration file. Defaults to True.
+        version_check_flag (bool, optional): Whether to check the version in configuration file. Defaults to True.
 
     Returns:
         dict: The parameter dictionary.
@@ -119,20 +105,13 @@ def parseConfig(config_file_path, version_check=True):
     with open(config_file_path) as f:
         params = yaml.safe_load(f)
 
-    if version_check:  # this is only to be used for testing
+    if version_check_flag:  # this is only to be used for testing
         if not ("version" in params):
             sys.exit(
                 "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
             )
         else:
-            gandlf_version = pkg_resources.require("GANDLF")[0].version
-            gandlf_version_int = parse_version(gandlf_version)
-            min_ver = parse_version(params["version"]["minimum"])
-            max_ver = parse_version(params["version"]["maximum"])
-            if (min_ver > gandlf_version_int) or (max_ver < gandlf_version_int):
-                sys.exit(
-                    "Incompatible version of GANDLF detected (" + gandlf_version + ")"
-                )
+            version_check(params["version"])
 
     if "patch_size" in params:
         if len(params["patch_size"]) == 2:  # 2d check
