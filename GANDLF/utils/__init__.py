@@ -38,5 +38,4 @@ from .generic import (
 from .modelio import (
     load_model,
     save_model,
-    model_dict_base,
 )
