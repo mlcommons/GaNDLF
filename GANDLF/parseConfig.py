@@ -1,4 +1,4 @@
-import sys, yaml, ast
+import sys, yaml, ast, pkg_resources
 import numpy as np
 
 from .utils import version_check
@@ -111,7 +111,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
             )
         else:
-            version_check(params["version"])
+            version_check(params["version"], version_to_check = pkg_resources.require("GANDLF")[0].version)
 
     if "patch_size" in params:
         if len(params["patch_size"]) == 2:  # 2d check
