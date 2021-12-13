@@ -88,21 +88,21 @@ def parse_version(version_string):
     return int("".join(version_string_split))
 
 
-def version_check(version_from_config):
+def version_check(version_from_config, version_to_check = pkg_resources.require("GANDLF")[0].version):
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
     Args:
         version_from_config (str): The version of the config file.
+        version_to_check (str): The version of the code or model, defaults to version of GaNDLF package in environment.
 
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
-    gandlf_version = pkg_resources.require("GANDLF")[0].version
-    gandlf_version_int = parse_version(gandlf_version)
+    version_to_check_int = version_to_check
     min_ver = parse_version(version_from_config["minimum"])
     max_ver = parse_version(version_from_config["maximum"])
-    if (min_ver > gandlf_version_int) or (max_ver < gandlf_version_int):
-        sys.exit("Incompatible version of GaNDLF detected (" + gandlf_version + ")")
+    if (min_ver > version_to_check_int) or (max_ver < version_to_check_int):
+        sys.exit("Incompatible version of GaNDLF detected (" + version_to_check_int + ")")
 
     return True
