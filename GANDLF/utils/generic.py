@@ -1,4 +1,4 @@
-import os, datetime
+import os, datetime, pkg_resources, sys
 import numpy as np
 
 
@@ -70,3 +70,41 @@ def get_filename_extension_sanitized(filename):
     if (ext == ".gz") or (ext == ".nii"):
         ext = ".nii.gz"
     return ext
+
+
+def parse_version(version_string):
+    """
+    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
+
+    Args:
+        version_string (str): The string to be parsed.
+
+    Returns:
+        int: The version number.
+    """
+    version_string_split = version_string.split(".")
+    if len(version_string_split) > 3:
+        del version_string_split[-1]
+    return int("".join(version_string_split))
+
+
+def version_check(version_from_config):
+    """
+    This function checks if the version of the config file is compatible with the version of the code.
+
+    Args:
+        version_from_config (str): The version of the config file.
+
+    Returns:
+        bool: If the version of the config file is compatible with the version of the code.
+    """
+    gandlf_version = pkg_resources.require("GANDLF")[0].version
+    gandlf_version_int = parse_version(gandlf_version)
+    min_ver = parse_version(version_from_config["minimum"])
+    max_ver = parse_version(version_from_config["maximum"])
+    if (min_ver > gandlf_version_int) or (max_ver < gandlf_version_int):
+        sys.exit(
+            "Incompatible version of GaNDLF detected (" + gandlf_version + ")"
+        )
+        
+    return True
