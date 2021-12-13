@@ -88,13 +88,13 @@ def parse_version(version_string):
     return int("".join(version_string_split))
 
 
-def version_check(version_from_config, version_to_check = pkg_resources.require("GANDLF")[0].version):
+def version_check(version_from_config, version_to_check):
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
     Args:
         version_from_config (str): The version of the config file.
-        version_to_check (str): The version of the code or model, defaults to version of GaNDLF package in environment.
+        version_to_check (str): The version of the code or model to check.
 
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
