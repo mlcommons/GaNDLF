@@ -773,7 +773,7 @@ def test_config_read():
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
 
-    parameters = parseConfig(file_config_temp, version_check=True)
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
 
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
