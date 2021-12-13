@@ -137,7 +137,7 @@ def test_train_segmentation_rad_2d(device):
     print("Starting 2D Rad segmentation tests")
     # read and parse csv
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
@@ -170,7 +170,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
     print("Starting 2D Rad segmentation tests")
     # read and parse csv
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
@@ -201,7 +201,7 @@ def test_train_segmentation_rad_3d(device):
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
@@ -234,7 +234,7 @@ def test_train_segmentation_rad_3d(device):
 def test_train_regression_rad_2d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_regression.yaml", version_check=False
+        testingDir + "/config_regression.yaml", version_check_flag=False
     )
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
@@ -268,7 +268,7 @@ def test_train_regression_rad_2d(device):
 def test_train_brainage_rad_2d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_regression.yaml", version_check=False
+        testingDir + "/config_regression.yaml", version_check_flag=False
     )
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
@@ -298,7 +298,7 @@ def test_train_brainage_rad_2d(device):
 def test_train_regression_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_regression.yaml", version_check=False
+        testingDir + "/config_regression.yaml", version_check_flag=False
     )
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
@@ -331,7 +331,7 @@ def test_train_regression_rad_3d(device):
 def test_train_classification_rad_2d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["track_memory_usage"] = True
@@ -365,7 +365,7 @@ def test_train_classification_rad_2d(device):
 def test_train_classification_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -398,7 +398,7 @@ def test_train_classification_rad_3d(device):
 def test_inference_classification_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -435,7 +435,7 @@ def test_inference_classification_rad_3d(device):
 def test_inference_classification_with_logits_single_fold_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -474,7 +474,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
 def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -515,7 +515,7 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
 def test_scheduler_classification_rad_2d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
@@ -552,7 +552,7 @@ def test_scheduler_classification_rad_2d(device):
 def test_optimizer_classification_rad_2d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
@@ -589,7 +589,7 @@ def test_optimizer_classification_rad_2d(device):
 def test_clip_train_classification_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check=False
+        testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -626,7 +626,7 @@ def test_normtype_train_segmentation_rad_3d(device):
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
@@ -661,7 +661,7 @@ def test_metrics_segmentation_rad_2d(device):
     print("Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
@@ -691,7 +691,7 @@ def test_metrics_regression_rad_2d(device):
     print("Starting 2D Rad regression tests for metrics")
     # read and parse csv
     parameters = parseConfig(
-        testingDir + "/config_regression.yaml", version_check=False
+        testingDir + "/config_regression.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"
@@ -725,7 +725,7 @@ def test_losses_segmentation_rad_2d(device):
     print("Starting 2D Rad segmentation tests for losses")
     # read and parse csv
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
@@ -765,7 +765,7 @@ def test_config_read():
         os.remove(file_config_temp)
 
     parameters = parseConfig(
-        os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check=False
+        os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check_flag=False
     )
     parameters["data_preprocessing"]["resize"] = [128, 128]
 
@@ -846,7 +846,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     params_all_preprocessing_and_augs = parseConfig(
         testingDir + "/../samples/config_all_options.yaml"
@@ -1000,7 +1000,7 @@ def test_checkpointing_segmentation_rad_2d(device):
     print("Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
@@ -1041,7 +1041,7 @@ def test_checkpointing_segmentation_rad_2d(device):
 def test_model_patch_divisibility():
 
     parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check=False
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
