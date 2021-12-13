@@ -1,3 +1,6 @@
+import hashlib
+from time import gmtime, strftime
+
 import torch
 
 # these are the base keys for the model dictionary to save
@@ -18,6 +21,8 @@ def save_model(model_dict, path):
         model_dict (dict): Model dictionary to save.
         path (str): The path to save the model dictionary to.
     """
+    model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
+    model_dict["hash"] = hashlib.sha256(str(model_dict["timestamp"]).encode("utf-8")).hexdigest()
     torch.save(model_dict, path)
 
 
