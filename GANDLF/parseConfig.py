@@ -111,13 +111,15 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
             )
         else:
-            version_check(params["version"], version_to_check = pkg_resources.require("GANDLF")[0].version)
+            version_check(
+                params["version"],
+                version_to_check=pkg_resources.require("GANDLF")[0].version,
+            )
 
     if "patch_size" in params:
         if len(params["patch_size"]) == 2:  # 2d check
-            params["patch_size"].append(
-                1
-            )  # ensuring same size during torchio processing
+            # ensuring same size during torchio processing
+            params["patch_size"].append(1)
     else:
         sys.exit(
             "The 'patch_size' parameter needs to be present in the configuration file"

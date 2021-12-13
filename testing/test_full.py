@@ -765,7 +765,8 @@ def test_config_read():
         os.remove(file_config_temp)
 
     parameters = parseConfig(
-        os.path.abspath(baseConfigDir + "/config_all_options.yaml"), version_check_flag=False
+        os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
+        version_check_flag=False,
     )
     parameters["data_preprocessing"]["resize"] = [128, 128]
 
