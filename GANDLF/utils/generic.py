@@ -103,6 +103,8 @@ def version_check(version_from_config, version_to_check):
     min_ver = parse_version(version_from_config["minimum"])
     max_ver = parse_version(version_from_config["maximum"])
     if (min_ver > version_to_check_int) or (max_ver < version_to_check_int):
-        sys.exit("Incompatible version of GaNDLF detected (" + version_to_check_int + ")")
+        sys.exit(
+            "Incompatible version of GaNDLF detected (" + version_to_check_int + ")"
+        )
 
     return True

@@ -333,7 +333,7 @@ def training_loop(
         print("Previous model found. Loading it up.")
         try:
             main_dict = load_model(best_model_path)
-            version_check(params["version"], version_to_check_int = main_dict["version"])
+            version_check(params["version"], version_to_check_int=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
