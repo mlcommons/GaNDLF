@@ -1,4 +1,4 @@
-import hashlib
+import hashlib, pkg_resources
 from time import gmtime, strftime
 
 import torch
@@ -11,6 +11,7 @@ model_dict_base = {
     "loss": None,
     "timestamp": None,
     "hash": None,
+    "version": None,
 }
 
 
@@ -26,6 +27,7 @@ def save_model(model_dict, path):
     model_dict["hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
     ).hexdigest()
+    model_dict["version"] = pkg_resources.require("GANDLF")[0].version
     torch.save(model_dict, path)
 
 
