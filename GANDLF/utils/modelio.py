@@ -13,6 +13,7 @@ model_dict_base = {
     "hash": None,
 }
 
+
 def save_model(model_dict, path):
     """
     Save the model dictionary to a file.
@@ -22,7 +23,9 @@ def save_model(model_dict, path):
         path (str): The path to save the model dictionary to.
     """
     model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
-    model_dict["hash"] = hashlib.sha256(str(model_dict["timestamp"]).encode("utf-8")).hexdigest()
+    model_dict["hash"] = hashlib.sha256(
+        str(model_dict["timestamp"]).encode("utf-8")
+    ).hexdigest()
     torch.save(model_dict, path)
 
 
@@ -39,9 +42,14 @@ def load_model(path):
     model_dict = torch.load(path)
 
     # check if the model dictionary is complete
-    incomplete_keys = [key for key in model_dict_base.keys() if key not in model_dict.keys()]
-    
+    incomplete_keys = [
+        key for key in model_dict_base.keys() if key not in model_dict.keys()
+    ]
+
     if len(incomplete_keys) > 0:
-        print("Model dictionary is incomplete; the following keys are missing:", incomplete_keys)
-    
+        print(
+            "Model dictionary is incomplete; the following keys are missing:",
+            incomplete_keys,
+        )
+
     return model_dict
