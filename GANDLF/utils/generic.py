@@ -1,4 +1,4 @@
-import os, datetime, pkg_resources, sys
+import os, datetime, sys
 import numpy as np
 
 
