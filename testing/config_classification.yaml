@@ -53,6 +53,6 @@ scaling_factor: 1
 scheduler: triangle
 version:
   maximum: 0.0.14
-  minimum: 0.0.7
+  minimum: 0.0.13
 weighted_loss: True
 which_model: resunet
