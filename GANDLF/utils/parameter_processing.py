@@ -1,4 +1,4 @@
-from GANDLF.models.modelBase import get_final_layer
+import GANDLF.models.modelBase as modelBase
 
 
 def populate_header_in_parameters(parameters, headers):
@@ -19,7 +19,7 @@ def populate_header_in_parameters(parameters, headers):
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
     parameters["problem_type"] = find_problem_type(
-        parameters, get_final_layer(parameters["model"]["final_layer"])
+        parameters, modelBase.get_final_layer(parameters["model"]["final_layer"])
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
