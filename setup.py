@@ -44,6 +44,7 @@ requirements = [
     "psutil",
     "medcam",
     "torchmetrics",
+    "zarr",
 ]
 
 setup(
