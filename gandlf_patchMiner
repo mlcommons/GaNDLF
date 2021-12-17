@@ -16,7 +16,12 @@ import yaml
 
 from PIL import Image
 from GANDLF.OPM.opm.patch_manager import PatchManager
-from GANDLF.OPM.opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config
+from GANDLF.OPM.opm.utils import (
+    tissue_mask,
+    alpha_channel_check,
+    patch_size_check,
+    parse_config,
+)
 from functools import partial
 from pathlib import Path
 
@@ -35,7 +40,7 @@ def generate_initial_mask(slide_path, scale):
     slide = openslide.open_slide(slide_path)
     slide_dims = slide.dimensions
 
-    # Call thumbnail for effiency, calculate scale relative to whole slide
+    # Call thumbnail for efficiency, calculate scale relative to whole slide
     slide_thumbnail = np.asarray(
         slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale))
     )
@@ -102,6 +107,8 @@ if __name__ == "__main__":
         manager = PatchManager(slide, args.output_path)
         manager.set_label_map(label)
         manager.set_subjectID(sid)
+        manager.set_image_header("Channel_0")
+        manager.set_mask_header("Label")
 
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(slide, cfg["scale"])
@@ -119,3 +126,5 @@ if __name__ == "__main__":
         # Save patches releases saves all patches stored in manager, dumps to specified output file
         manager.mine_patches(output_csv=out_csv_path, config=cfg)
         print("Total time: {}".format(time.time() - start))
+
+    print("Finished.")
