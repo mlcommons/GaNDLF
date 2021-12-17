@@ -12,7 +12,6 @@ import argparse
 import pandas as pd
 import openslide
 import numpy as np
-import yaml
 
 from PIL import Image
 from GANDLF.OPM.opm.patch_manager import PatchManager
@@ -85,13 +84,18 @@ if __name__ == "__main__":
         "--config",
         type=str,
         dest="config",
-        help="config.yml for running OPM. ",
-        required=True,
+        help="config (in YAML) for running OPM. Needs 'scale' and 'patch_size' to be defined, otherwise defaults to 16 and (256, 256), respectively.",
+        required=False,
     )
 
     args = parser.parse_args()
 
-    cfg = parse_config(args.config)
+    if args.config is not None:
+        cfg = parse_config(args.config)
+    else:
+        cfg = {}
+        cfg["scale"] = 16
+        cfg["patch_size"] = (256, 256)
 
     if not os.path.exists(args.output_path):
         Path(args.output_path).mkdir(parents=True, exist_ok=True)
