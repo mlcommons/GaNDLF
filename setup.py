@@ -44,7 +44,7 @@ requirements = [
     "psutil",
     "medcam",
     "torchmetrics",
-    "zarr",
+    "OpenPatchMiner=0.1.6",
 ]
 
 setup(
