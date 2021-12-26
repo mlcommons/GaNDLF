@@ -37,6 +37,8 @@ metrics:
 in_memory: False
 # this will save the generated masks for validation and testing data for qualitative analysis
 save_output: False
+# this will save the patches used during training for qualitative analysis
+save_training: False
 # If enabled, this parameter pads images and labels when label sampler is used
 enable_padding: False
 # Set the Modality : rad for radiology, path for histopathology
