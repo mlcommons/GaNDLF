@@ -1,7 +1,9 @@
 import os, time, psutil
+from pathlib import Path
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import SimpleITK as sitk
 import torchio
 from medcam import medcam
 
@@ -19,6 +21,7 @@ from GANDLF.utils import (
     save_model,
     load_model,
     version_check,
+    get_filename_extension_sanitized,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -90,6 +93,39 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
+
+        if params["save_training"]:
+            # create folder tree for saving the patches
+            training_output_dir = os.path.join(params["output_dir"], "training_patches")
+            Path(training_output_dir).mkdir(parents=True, exist_ok=True)
+            training_output_dir_epoch = os.path.join(
+                params["output_dir"], "training_patches", params["current_epoch"]
+            )
+            Path(training_output_dir_epoch).mkdir(parents=True, exist_ok=True)
+            training_output_dir_current_subject = os.path.join(
+                training_output_dir_epoch, subject["subject_id"][0]
+            )
+            Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
+
+            for key in params["channel_keys"]:
+                img_to_write = subject[key].as_sitk()
+                ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
+                sitk.Write(
+                    img_to_write,
+                    os.path.join(
+                        training_output_dir_current_subject, "modality_" + key + ext
+                    ),
+                )
+
+            for key in params["label_keys"]:
+                img_to_write = subject[key].as_sitk()
+                ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
+                sitk.Write(
+                    img_to_write,
+                    os.path.join(
+                        training_output_dir_current_subject, "label_" + key + ext
+                    ),
+                )
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
@@ -395,6 +431,8 @@ def training_loop(
         print("Starting Epoch : ", epoch)
         if params["verbose"]:
             print("Epoch start time : ", get_date_time())
+
+        params["current_epoch"] = epoch
 
         epoch_train_loss, epoch_train_metric = train_network(
             model, train_dataloader, optimizer, params
