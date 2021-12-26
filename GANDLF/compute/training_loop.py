@@ -116,7 +116,7 @@ def train_network(model, train_dataloader, optimizer, params):
                         training_output_dir_current_subject, "modality_" + key + ext
                     ),
                 )
-    
+
             for key in params["label_keys"]:
                 img_to_write = subject[key].as_sitk()
                 ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
