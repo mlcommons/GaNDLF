@@ -7,6 +7,7 @@ from .imaging import (
     resample_image,
     resize_image,
     perform_sanity_check_on_subject,
+    write_training_patches,
 )
 
 from .tensor import (

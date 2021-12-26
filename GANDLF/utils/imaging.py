@@ -1,6 +1,9 @@
-import sys, math
+import sys, math, os
 import SimpleITK as sitk
 import numpy as np
+import torchio
+
+from .generic import get_filename_extension_sanitized
 
 
 def resample_image(
@@ -171,3 +174,33 @@ def perform_sanity_check_on_subject(subject, parameters):
                     )
 
     return True
+
+
+def write_training_patches(subject, params, output_dir):
+    """
+    This function writes the training patches to disk.
+
+    Args:
+        subject (torchio.Subject): The input subject.
+        params (dict): The parameters passed by the user yaml.
+        output_dir (str): The output directory to write the patches to.
+    """
+    # write the training patches to disk
+    ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
+    for key in params["channel_keys"]:
+        img_to_write = torchio.ScalarImage(tensor=subject[key][torchio.DATA][0], affine=subject[key]["affine"][0]).as_sitk()
+        sitk.WriteImage(
+            img_to_write,
+            os.path.join(
+                output_dir, "modality_" + key + ext
+            ),
+        )
+
+    if params["label_keys"] is not None:
+        img_to_write = torchio.ScalarImage(tensor=subject[params["label_keys"][0]][torchio.DATA][0], affine=subject[key]["affine"][0]).as_sitk()
+        sitk.WriteImage(
+            img_to_write,
+            os.path.join(
+                output_dir, "label_" + key + ext
+            ),
+        )
