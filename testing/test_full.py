@@ -871,6 +871,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["3D"]
+    parameters["save_training"] = True
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
