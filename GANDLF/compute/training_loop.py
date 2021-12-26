@@ -21,7 +21,7 @@ from GANDLF.utils import (
     save_model,
     load_model,
     version_check,
-    get_filename_extension_sanitized,
+    write_training_patches,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -99,7 +99,7 @@ def train_network(model, train_dataloader, optimizer, params):
             training_output_dir = os.path.join(params["output_dir"], "training_patches")
             Path(training_output_dir).mkdir(parents=True, exist_ok=True)
             training_output_dir_epoch = os.path.join(
-                params["output_dir"], "training_patches", params["current_epoch"]
+                training_output_dir, str(params["current_epoch"])
             )
             Path(training_output_dir_epoch).mkdir(parents=True, exist_ok=True)
             training_output_dir_current_subject = os.path.join(
@@ -107,25 +107,7 @@ def train_network(model, train_dataloader, optimizer, params):
             )
             Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
 
-            for key in params["channel_keys"]:
-                img_to_write = subject[key].as_sitk()
-                ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
-                sitk.Write(
-                    img_to_write,
-                    os.path.join(
-                        training_output_dir_current_subject, "modality_" + key + ext
-                    ),
-                )
-
-            for key in params["label_keys"]:
-                img_to_write = subject[key].as_sitk()
-                ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
-                sitk.Write(
-                    img_to_write,
-                    os.path.join(
-                        training_output_dir_current_subject, "label_" + key + ext
-                    ),
-                )
+            write_training_patches(subject, params, training_output_dir_current_subject)
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
