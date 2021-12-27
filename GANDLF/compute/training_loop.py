@@ -95,7 +95,10 @@ def train_network(model, train_dataloader, optimizer, params):
         label = label.to(params["device"])
 
         if params["save_training"]:
-            write_training_patches(subject, params, )
+            write_training_patches(
+                subject,
+                params,
+            )
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
