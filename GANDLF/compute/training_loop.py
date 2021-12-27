@@ -1,9 +1,7 @@
 import os, time, psutil
-from pathlib import Path
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-import SimpleITK as sitk
 import torchio
 from medcam import medcam
 
