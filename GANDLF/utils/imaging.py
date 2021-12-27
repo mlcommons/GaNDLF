@@ -1,4 +1,4 @@
-import sys, math, os
+import sys, math, os, pathlib
 import SimpleITK as sitk
 import numpy as np
 import torchio
@@ -176,7 +176,7 @@ def perform_sanity_check_on_subject(subject, parameters):
     return True
 
 
-def write_training_patches(subject, params, output_dir):
+def write_training_patches(subject, params):
     """
     This function writes the training patches to disk.
 
@@ -184,7 +184,21 @@ def write_training_patches(subject, params, output_dir):
         subject (torchio.Subject): The input subject.
         params (dict): The parameters passed by the user yaml.
         output_dir (str): The output directory to write the patches to.
+        current_epoch (str): The current epoch.
     """
+    # create folder tree for saving the patches
+    training_output_dir = os.path.join(params["output_dir"], "training_patches")
+    pathlib.Path(training_output_dir).mkdir(parents=True, exist_ok=True)
+    training_output_dir_epoch = os.path.join(
+        training_output_dir, str(params["current_epoch"])
+    )
+    pathlib.Path(training_output_dir_epoch).mkdir(parents=True, exist_ok=True)
+    training_output_dir_current_subject = os.path.join(
+        training_output_dir_epoch, subject["subject_id"][0]
+    )
+    pathlib.Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
+
+    write_training_patches(subject, params, training_output_dir_current_subject)
     # write the training patches to disk
     ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
     for key in params["channel_keys"]:
@@ -193,7 +207,7 @@ def write_training_patches(subject, params, output_dir):
         ).as_sitk()
         sitk.WriteImage(
             img_to_write,
-            os.path.join(output_dir, "modality_" + key + ext),
+            os.path.join(training_output_dir_current_subject, "modality_" + key + ext),
         )
 
     if params["label_keys"] is not None:
@@ -203,5 +217,5 @@ def write_training_patches(subject, params, output_dir):
         ).as_sitk()
         sitk.WriteImage(
             img_to_write,
-            os.path.join(output_dir, "label_" + key + ext),
+            os.path.join(training_output_dir_current_subject, "label_" + key + ext),
         )
