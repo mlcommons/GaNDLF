@@ -182,9 +182,7 @@ def write_training_patches(subject, params):
 
     Args:
         subject (torchio.Subject): The input subject.
-        params (dict): The parameters passed by the user yaml.
-        output_dir (str): The output directory to write the patches to.
-        current_epoch (str): The current epoch.
+        params (dict): The parameters passed by the user yaml; needs the "output_dir" and "current_epoch" keys to be present.
     """
     # create folder tree for saving the patches
     training_output_dir = os.path.join(params["output_dir"], "training_patches")
