@@ -9,6 +9,7 @@ parameter_defaults = {
     "verbose": False,  # general application verbosity
     "q_verbose": False,  # queue construction verbosity
     "medcam_enabled": False,  # interpretability via medcam
+    "save_training": False,  # save outputs during training
     "save_output": False,  # save outputs during validation/testing
     "in_memory": False,  # pin data to cpu memory
     "pin_memory_dataloader": False,  # pin data to gpu memory
