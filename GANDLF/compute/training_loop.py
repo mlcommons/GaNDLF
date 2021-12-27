@@ -95,19 +95,7 @@ def train_network(model, train_dataloader, optimizer, params):
         label = label.to(params["device"])
 
         if params["save_training"]:
-            # create folder tree for saving the patches
-            training_output_dir = os.path.join(params["output_dir"], "training_patches")
-            Path(training_output_dir).mkdir(parents=True, exist_ok=True)
-            training_output_dir_epoch = os.path.join(
-                training_output_dir, str(params["current_epoch"])
-            )
-            Path(training_output_dir_epoch).mkdir(parents=True, exist_ok=True)
-            training_output_dir_current_subject = os.path.join(
-                training_output_dir_epoch, subject["subject_id"][0]
-            )
-            Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
-
-            write_training_patches(subject, params, training_output_dir_current_subject)
+            write_training_patches(subject, params, )
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
