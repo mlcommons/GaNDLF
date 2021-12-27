@@ -83,14 +83,19 @@ def populate_channel_keys_in_params(data_loader, parameters):
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
+    label_keys = []
     print("All Keys : ", all_keys)
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)
         elif "value" in item:
             value_keys.append(item)
+        elif "label" in item:
+            label_keys.append(item)
     parameters["channel_keys"] = channel_keys
     if value_keys:
         parameters["value_keys"] = value_keys
+    if label_keys:
+        parameters["label_keys"] = label_keys
 
     return parameters

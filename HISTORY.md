@@ -1,6 +1,6 @@
 ## 0.0.14
 
-- 
+- Add an option (`"save_training"`) to save training patches
 
 ## 0.0.13
 

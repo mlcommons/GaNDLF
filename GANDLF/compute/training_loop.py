@@ -19,6 +19,7 @@ from GANDLF.utils import (
     save_model,
     load_model,
     version_check,
+    write_training_patches,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -90,6 +91,12 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
+
+        if params["save_training"]:
+            write_training_patches(
+                subject,
+                params,
+            )
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
@@ -395,6 +402,8 @@ def training_loop(
         print("Starting Epoch : ", epoch)
         if params["verbose"]:
             print("Epoch start time : ", get_date_time())
+
+        params["current_epoch"] = epoch
 
         epoch_train_loss, epoch_train_metric = train_network(
             model, train_dataloader, optimizer, params
