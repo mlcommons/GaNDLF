@@ -25,7 +25,7 @@ def main():
     )
 
     parser = argparse.ArgumentParser(
-        prog="GANDLF_CollectCSV",
+        prog="GANDLF_CollectStats",
         formatter_class=argparse.RawTextHelpFormatter,
         description="Collect statistics from different testing/validation combinations from output directory.\n\n"
         + copyrightMessage,

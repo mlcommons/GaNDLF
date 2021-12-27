@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from datetime import date
 from GANDLF.utils import *
 
 fix_paths(os.getcwd())  # add relevant vips path
@@ -10,8 +11,6 @@ import time
 import warnings
 import argparse
 import pandas as pd
-import openslide
-import numpy as np
 
 from PIL import Image
 from GANDLF.OPM.opm.patch_manager import PatchManager
@@ -40,7 +39,19 @@ def parse_gandlf_csv(fpath):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_PatchMiner",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Construct patches from whole slide image(s).\n\n"
+        + copyrightMessage,
+    )
 
     parser.add_argument(
         "-i",
