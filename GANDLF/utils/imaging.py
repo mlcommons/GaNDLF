@@ -196,7 +196,6 @@ def write_training_patches(subject, params):
     )
     pathlib.Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
 
-    write_training_patches(subject, params, training_output_dir_current_subject)
     # write the training patches to disk
     ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
     for key in params["channel_keys"]:
