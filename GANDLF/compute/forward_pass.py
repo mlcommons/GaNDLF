@@ -49,7 +49,10 @@ def validate_network(
     average_epoch_valid_metric = {}
 
     for metric in params["metrics"]:
-        total_epoch_valid_metric[metric] = 0
+        if "per_label" in metric:
+            total_epoch_valid_metric[metric] = []
+        else:
+            total_epoch_valid_metric[metric] = 0
 
     logits_list = []
     is_classification = params.get("problem_type") == "classification"
@@ -176,8 +179,10 @@ def validate_network(
             # # Non network validing related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
-                # calculated_metrics[metric]
-                total_epoch_valid_metric[metric] += final_metric[metric]
+                if isinstance(total_epoch_valid_metric[metric], list):
+                    total_epoch_valid_metric[metric].append(final_metric[metric])
+                else:
+                    total_epoch_valid_metric[metric] += final_metric[metric]
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
@@ -258,8 +263,7 @@ def validate_network(
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
-                label_ground_truth = label_ground_truth.unsqueeze(0)
-                label_ground_truth = label_ground_truth.to(torch.float32)
+                label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
@@ -337,8 +341,10 @@ def validate_network(
             # loss.cpu().data.item()
             total_epoch_valid_loss += final_loss.cpu().item()
             for metric in final_metric.keys():
-                # calculated_metrics[metric]
-                total_epoch_valid_metric[metric] += final_metric[metric]
+                if isinstance(total_epoch_valid_metric[metric], list):
+                    total_epoch_valid_metric[metric].append(final_metric[metric])
+                else:
+                    total_epoch_valid_metric[metric] += final_metric[metric]
 
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
@@ -349,9 +355,15 @@ def validate_network(
                 total_epoch_valid_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
+                if isinstance(total_epoch_valid_metric[metric], list):
+                    to_print = (
+                        np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
+                    ).tolist()
+                else:
+                    to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
                 print(
                     "Half-Epoch Average " + mode + " " + metric + " : ",
-                    total_epoch_valid_metric[metric] / (batch_idx + 1),
+                    to_print,
                 )
 
     if params["medcam_enabled"]:
@@ -361,9 +373,13 @@ def validate_network(
     average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
     print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
     for metric in params["metrics"]:
-        average_epoch_valid_metric[metric] = total_epoch_valid_metric[metric] / len(
-            valid_dataloader
-        )
+        if isinstance(total_epoch_valid_metric[metric], list):
+            to_print = (
+                np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
+            ).tolist()
+        else:
+            to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
+        average_epoch_valid_metric[metric] = to_print
         print(
             "     Epoch Final   " + mode + " " + metric + " : ",
             average_epoch_valid_metric[metric],

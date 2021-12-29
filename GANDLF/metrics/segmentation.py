@@ -11,7 +11,49 @@ from scipy.ndimage.morphology import (
 )
 
 
-def multi_class_dice(output, label, params):
+def multi_class_dice(output, label, params, per_label=False):
+    """
+    This function computes a multi-class dice
+
+    Parameters
+    ----------
+    output : torch.Tensor
+        Input data containing objects. Can be any type but will be converted
+        into binary: background where 0, object everywhere else.
+    label : torch.Tensor
+        Input data containing objects. Can be any type but will be converted
+        into binary: background where 0, object everywhere else.
+    params : dict
+        The parameter dictionary containing training and data information.
+    per_label : bool
+        Whether the dice needs to be calculated per label or not.
+
+    Returns
+    -------
+    total_dice : float or list
+        The average dice for all labels or a list of per-label dice scores.
+
+    """
+    total_dice = 0
+    avg_counter = 0
+    per_label_dice = []
+    for i in range(0, params["model"]["num_classes"]):
+        # this check should only happen during validation
+        if i != params["model"]["ignore_label_validation"]:
+            current_dice = dice(output[:, i, ...], label[:, i, ...])
+            total_dice += current_dice
+            per_label_dice.append(current_dice)
+            avg_counter += 1
+        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
+    total_dice /= avg_counter
+
+    if per_label:
+        return torch.tensor(per_label_dice)
+    else:
+        return total_dice
+
+
+def multi_class_dice_per_label(output, label, params):
     """
     This function computes a multi-class dice
 
@@ -28,21 +70,10 @@ def multi_class_dice(output, label, params):
 
     Returns
     -------
-    total_dice : TYPE
-        DESCRIPTION.
-
+    total_dice : list
+        The list of per-label dice scores.
     """
-    total_dice = 0
-    avg_counter = 0
-    # print("Number of classes : ", params["model"]["num_classes"])
-    for i in range(0, params["model"]["num_classes"]):
-        # this check should only happen during validation
-        if i != params["model"]["ignore_label_validation"]:
-            total_dice += dice(output[:, i, ...], label[:, i, ...])
-            avg_counter += 1
-        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
-    total_dice /= avg_counter
-    return total_dice
+    return multi_class_dice(output, label, params, per_label=True)
 
 
 def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
@@ -92,7 +123,7 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     return sds
 
 
-def hd_generic(inp, target, params, percentile=95):
+def hd_generic(inp, target, params, percentile=95, per_label=False):
     """
     Generic Hausdorff Distance calculation
     Computes the Hausdorff Distance (HD) between the binary objects in two
@@ -110,6 +141,8 @@ def hd_generic(inp, target, params, percentile=95):
         The parameter dictionary containing training and data information.
     percentile : int
         The percentile of surface distances to include during Hausdorff calculation.
+    per_label : bool
+        Whether the hausdorff needs to be calculated per label or not.
     Returns
     -------
     hd : float
@@ -135,6 +168,7 @@ def hd_generic(inp, target, params, percentile=95):
 
     hd = 0
     avg_counter = 0
+    hd_per_label = []
     for b in range(0, result_array.shape[0]):
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
@@ -147,14 +181,28 @@ def hd_generic(inp, target, params, percentile=95):
                     result_array[b, i, ...],
                     params["subject_spacing"][b],
                 )
-                hd += numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
+                current_hd = numpy.percentile(numpy.hstack((hd1, hd2)), percentile)
+                hd += current_hd
+                hd_per_label.append(current_hd)
                 avg_counter += 1
-    return torch.tensor(hd / avg_counter)
+
+    if per_label:
+        return torch.tensor(hd_per_label)
+    else:
+        return torch.tensor(hd / avg_counter)
 
 
 def hd95(inp, target, params):
     return hd_generic(inp, target, params, 95)
 
 
+def hd95_per_label(inp, target, params):
+    return hd_generic(inp, target, params, 95, True)
+
+
 def hd100(inp, target, params):
     return hd_generic(inp, target, params, 100)
+
+
+def hd100_per_label(inp, target, params):
+    return hd_generic(inp, target, params, 100, True)

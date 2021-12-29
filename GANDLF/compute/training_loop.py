@@ -2,6 +2,7 @@ import os, time, psutil
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import numpy as np
 import torchio
 from medcam import medcam
 
@@ -61,7 +62,10 @@ def train_network(model, train_dataloader, optimizer, params):
     average_epoch_train_metric = {}
 
     for metric in params["metrics"]:
-        total_epoch_train_metric[metric] = 0
+        if "per_label" in metric:
+            total_epoch_train_metric[metric] = []
+        else:
+            total_epoch_train_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
@@ -139,7 +143,10 @@ def train_network(model, train_dataloader, optimizer, params):
         if not nan_loss:
             total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
-            total_epoch_train_metric[metric] += calculated_metrics[metric]
+            if isinstance(total_epoch_train_metric[metric], list):
+                total_epoch_train_metric[metric].append(calculated_metrics[metric])
+            else:
+                total_epoch_train_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
@@ -150,17 +157,27 @@ def train_network(model, train_dataloader, optimizer, params):
                 total_epoch_train_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
+                if isinstance(total_epoch_train_metric[metric], list):
+                    to_print = (
+                        np.array(total_epoch_train_metric[metric]) / (batch_idx + 1)
+                    ).tolist()
+                else:
+                    to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
                 print(
                     "Half-Epoch Average Train " + metric + " : ",
-                    total_epoch_train_metric[metric] / (batch_idx + 1),
+                    to_print,
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
-        average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
-            train_dataloader
-        )
+        if isinstance(total_epoch_train_metric[metric], list):
+            to_print = (
+                np.array(total_epoch_train_metric[metric]) / len(train_dataloader)
+            ).tolist()
+        else:
+            to_print = total_epoch_train_metric[metric] / len(train_dataloader)
+        average_epoch_train_metric[metric] = to_print
         print(
             "     Epoch Final   Train " + metric + " : ",
             average_epoch_train_metric[metric],
