@@ -1015,7 +1015,7 @@ def test_checkpointing_segmentation_rad_2d(device):
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = ["dice", "dice_per_label", "hausdorff", "hausdorff95", "hd95_per_label", "hd100_per_label"]
     parameters["model"]["architecture"] = "unet"
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
