@@ -6,6 +6,18 @@ import torch.nn.functional as nnf
 from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
 
 
+def get_metric_output(metric_function, predicted, ground_truth, params):
+    """
+    This function computes the output of a metric function.
+    """
+    metric_output = metric_function(predicted, ground_truth, params).detach().cpu()
+
+    if metric_output.dim() == 0:
+        return metric_output.item()
+    else:
+        return metric_output.tolist()
+
+
 def get_loss_and_metrics(image, ground_truth, predicted, params):
     """
     image: torch.Tensor
@@ -108,29 +120,18 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             metric_function = global_metrics_dict[metric_lower]
             if sdnet_check:
                 metric_output[metric] = (
-                    metric_function(predicted[0], ground_truth.squeeze(-1), params)
-                    .detach()
-                    .cpu()
-                    .data.item()
+                    get_metric_output(metric_function, predicted[0], ground_truth.squeeze(-1), params)
                 )
             else:
                 if deep_supervision_model:
                     for i, _ in enumerate(predicted):
                         metric_output[metric] += (
-                            metric_function(
-                                predicted[i], ground_truth_resampled[i], params
-                            )
-                            .detach()
-                            .cpu()
-                            .item()
+                            get_metric_output(metric_function, predicted[i], ground_truth_resampled[i], params)
                         )
 
                 else:
                     metric_output[metric] = (
-                        metric_function(predicted, ground_truth, params)
-                        .detach()
-                        .cpu()
-                        .item()
+                        get_metric_output(metric_function, predicted, ground_truth, params)
                     )
         else:
             print(
