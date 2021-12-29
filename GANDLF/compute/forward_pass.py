@@ -258,8 +258,7 @@ def validate_network(
             if is_segmentation:
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
-                label_ground_truth = label_ground_truth.unsqueeze(0)
-                label_ground_truth = label_ground_truth.to(torch.float32)
+                label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
                     path_to_metadata = subject["path_to_metadata"][0]
                     inputImage = sitk.ReadImage(path_to_metadata)
