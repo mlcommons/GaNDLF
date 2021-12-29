@@ -158,7 +158,9 @@ def train_network(model, train_dataloader, optimizer, params):
             )
             for metric in params["metrics"]:
                 if isinstance(total_epoch_train_metric[metric], list):
-                    to_print = (np.array(total_epoch_train_metric[metric]) / (batch_idx + 1)).tolist()
+                    to_print = (
+                        np.array(total_epoch_train_metric[metric]) / (batch_idx + 1)
+                    ).tolist()
                 else:
                     to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
                 print(
@@ -170,7 +172,9 @@ def train_network(model, train_dataloader, optimizer, params):
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
         if isinstance(total_epoch_train_metric[metric], list):
-            to_print = (np.array(total_epoch_train_metric[metric]) / len(train_dataloader)).tolist()
+            to_print = (
+                np.array(total_epoch_train_metric[metric]) / len(train_dataloader)
+            ).tolist()
         else:
             to_print = total_epoch_train_metric[metric] / len(train_dataloader)
         average_epoch_train_metric[metric] = to_print

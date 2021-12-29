@@ -40,7 +40,7 @@ def multi_class_dice(output, label, params, per_label=False):
     for i in range(0, params["model"]["num_classes"]):
         # this check should only happen during validation
         if i != params["model"]["ignore_label_validation"]:
-            current_dice = dice(output[:, i, ...], label[:, i, ...]) 
+            current_dice = dice(output[:, i, ...], label[:, i, ...])
             total_dice += current_dice
             per_label_dice.append(current_dice)
             avg_counter += 1
@@ -185,7 +185,7 @@ def hd_generic(inp, target, params, percentile=95, per_label=False):
                 hd += current_hd
                 hd_per_label.append(current_hd)
                 avg_counter += 1
-    
+
     if per_label:
         return torch.tensor(hd_per_label)
     else:

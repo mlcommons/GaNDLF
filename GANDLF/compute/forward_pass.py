@@ -356,7 +356,9 @@ def validate_network(
             )
             for metric in params["metrics"]:
                 if isinstance(total_epoch_valid_metric[metric], list):
-                    to_print = (np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)).tolist()
+                    to_print = (
+                        np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
+                    ).tolist()
                 else:
                     to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
                 print(
@@ -372,7 +374,9 @@ def validate_network(
     print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
     for metric in params["metrics"]:
         if isinstance(total_epoch_valid_metric[metric], list):
-            to_print = (np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)).tolist()
+            to_print = (
+                np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
+            ).tolist()
         else:
             to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
         average_epoch_valid_metric[metric] = to_print

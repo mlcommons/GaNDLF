@@ -119,19 +119,22 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         if metric_lower in global_metrics_dict:
             metric_function = global_metrics_dict[metric_lower]
             if sdnet_check:
-                metric_output[metric] = (
-                    get_metric_output(metric_function, predicted[0], ground_truth.squeeze(-1), params)
+                metric_output[metric] = get_metric_output(
+                    metric_function, predicted[0], ground_truth.squeeze(-1), params
                 )
             else:
                 if deep_supervision_model:
                     for i, _ in enumerate(predicted):
-                        metric_output[metric] += (
-                            get_metric_output(metric_function, predicted[i], ground_truth_resampled[i], params)
+                        metric_output[metric] += get_metric_output(
+                            metric_function,
+                            predicted[i],
+                            ground_truth_resampled[i],
+                            params,
                         )
 
                 else:
-                    metric_output[metric] = (
-                        get_metric_output(metric_function, predicted, ground_truth, params)
+                    metric_output[metric] = get_metric_output(
+                        metric_function, predicted, ground_truth, params
                     )
         else:
             print(
