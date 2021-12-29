@@ -15,7 +15,12 @@ def get_metric_output(metric_function, predicted, ground_truth, params):
     if metric_output.dim() == 0:
         return metric_output.item()
     else:
-        return metric_output.tolist()
+        temp = metric_output.tolist()
+        # this check is needed for precision
+        if len(temp) > 1:
+            return temp
+        else:
+            return metric_output.item()
 
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
