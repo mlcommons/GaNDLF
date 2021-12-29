@@ -1,6 +1,7 @@
 ## 0.0.14
 
 - Add an option (`"save_training"`) to save training patches
+- Add option to save per-label segmentation metrics
 
 ## 0.0.13
 
