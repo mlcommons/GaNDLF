@@ -143,7 +143,7 @@ def train_network(model, train_dataloader, optimizer, params):
         if not nan_loss:
             total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
-            if isinstance(calculated_metrics[metric], list):
+            if isinstance(total_epoch_train_metric[metric], list):
                 total_epoch_train_metric[metric].append(calculated_metrics[metric])
             else:
                 total_epoch_train_metric[metric] += calculated_metrics[metric]

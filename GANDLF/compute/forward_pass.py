@@ -179,7 +179,7 @@ def validate_network(
             # # Non network validing related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
-                if isinstance(final_metric[metric], list):
+                if isinstance(total_epoch_valid_metric[metric], list):
                     total_epoch_valid_metric[metric].append(final_metric[metric])
                 else:
                     total_epoch_valid_metric[metric] += final_metric[metric]
@@ -341,7 +341,7 @@ def validate_network(
             # loss.cpu().data.item()
             total_epoch_valid_loss += final_loss.cpu().item()
             for metric in final_metric.keys():
-                if isinstance(final_metric[metric], list):
+                if isinstance(total_epoch_valid_metric[metric], list):
                     total_epoch_valid_metric[metric].append(final_metric[metric])
                 else:
                     total_epoch_valid_metric[metric] += final_metric[metric]
