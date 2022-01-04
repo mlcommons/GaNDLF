@@ -4,7 +4,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import sys
+
+from GANDLF.utils import get_linear_interpolation_mode
 
 
 def get_final_layer(final_convolution_layer):
@@ -53,7 +54,6 @@ class ModelBase(nn.Module):
     def __init__(self, parameters):
         """
         This defines all defaults that the model base uses
-
         Args:
             parameters (dict): This is a dictionary of all parameters that are needed for the model.
         """
@@ -71,9 +71,12 @@ class ModelBase(nn.Module):
             parameters["model"]["final_layer"]
         )
 
+        self.linear_interpolation_mode = get_linear_interpolation_mode(
+            self.n_dimensions
+        )
+
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
-
         if self.n_dimensions == 2:
             self.Conv = nn.Conv2d
             self.ConvTranspose = nn.ConvTranspose2d
@@ -85,7 +88,6 @@ class ModelBase(nn.Module):
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool2d
             self.Norm = get_norm_type(self.norm_type.lower(), self.n_dimensions)
-            self.ReflectionPad = nn.ReflectionPad2d
 
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
@@ -98,4 +100,3 @@ class ModelBase(nn.Module):
             self.AdaptiveAvgPool = nn.AdaptiveAvgPool3d
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
             self.Norm = get_norm_type(self.norm_type.lower(), self.n_dimensions)
-            self.ReflectionPad = nn.ReflectionPad3d
