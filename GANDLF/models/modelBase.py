@@ -54,6 +54,7 @@ class ModelBase(nn.Module):
     def __init__(self, parameters):
         """
         This defines all defaults that the model base uses
+
         Args:
             parameters (dict): This is a dictionary of all parameters that are needed for the model.
         """
