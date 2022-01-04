@@ -8,11 +8,9 @@ import torchio
 def one_hot(segmask_array, class_list):
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
-
     Args:
         segmask_array (torch.Tensor): The segmentation mask Tensor.
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
-
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
     """
@@ -81,11 +79,9 @@ def one_hot(segmask_array, class_list):
 def reverse_one_hot(predmask_array, class_list):
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
-
     Args:
         predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
-
     Returns:
         numpy.array: The final mask as numpy array.
     """
@@ -146,13 +142,11 @@ def reverse_one_hot(predmask_array, class_list):
 def send_model_to_device(model, amp, device, optimizer):
     """
     This function reads the environment variable(s) and send model to correct device
-
     Args:
         model (torch.nn.Module): The model that needs to be sent to specified device.
         amp (bool): Whether automatic mixed precision is to be used.
         device (str): Device type.
         optimizer (torch.optim): The optimizer for training.
-
     Returns:
         torch.nn.Module: The model after it has been sent to specified device
         bool: Whether automatic mixed precision is to be used or not.
@@ -226,11 +220,9 @@ def send_model_to_device(model, amp, device, optimizer):
 def get_class_imbalance_weights(training_data_loader, parameters):
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
-
     Args:
         training_data_loader (torch.utils.data.DataLoader): The training data loader.
         parameters (dict): The parameters passed by the user yaml.
-
     Returns:
         dict: The penalty weights for different classes under consideration.
     """
@@ -303,10 +295,8 @@ def get_class_imbalance_weights(training_data_loader, parameters):
 def get_linear_interpolation_mode(dimensionality):
     """
     Get linear interpolation mode.
-
     Args:
         dimensionality (int): The dimensions based on which interpolation mode is calculated
-
     Returns:
         str: Interpolation type to pass to interpolation function
     """

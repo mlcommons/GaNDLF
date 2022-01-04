@@ -1,15 +1,12 @@
 import os, datetime, sys
 import numpy as np
 
-
 def checkPatchDivisibility(patch_size, number=16):
     """
     This function checks the divisibility of a numpy array or integer for architectural integrity
-
     Args:
         patch_size (numpy.array): The patch size for checking.
         number (int, optional): The number to check divisibility for. Defaults to 16.
-
     Returns:
         bool: If all elements of array are divisible or not, after taking 2D patches into account.
     """
@@ -32,12 +29,12 @@ def checkPatchDivisibility(patch_size, number=16):
     if (unique.shape[0] == 1) and (unique[0] <= number):
         return False
     return True
+#from GANDLF.models import global_gan_models_dict
 
 
 def fix_paths(cwd):
     """
     This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
-
     Args:
         cwd (str): The current working directory.
     """
@@ -49,7 +46,6 @@ def fix_paths(cwd):
 def get_date_time():
     """
     Get a well-parsed date string
-
     Returns:
         str: The date in format YYYY/MM/DD::HH:MM:SS
     """
@@ -75,10 +71,8 @@ def get_filename_extension_sanitized(filename):
 def parse_version(version_string):
     """
     Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
-
     Args:
         version_string (str): The string to be parsed.
-
     Returns:
         int: The version number.
     """
@@ -91,11 +85,9 @@ def parse_version(version_string):
 def version_check(version_from_config, version_to_check):
     """
     This function checks if the version of the config file is compatible with the version of the code.
-
     Args:
         version_from_config (str): The version of the config file.
         version_to_check (str): The version of the code or model to check.
-
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
@@ -108,3 +100,4 @@ def version_check(version_from_config, version_to_check):
         )
 
     return True
+

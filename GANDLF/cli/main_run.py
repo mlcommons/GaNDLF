@@ -79,6 +79,17 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, reset_prev):
         parameters = populate_header_in_parameters(parameters, headers)
 
     # # start computation - either training or inference
+    # # todo: remove this block
+    # # GAN should be integrated into training_loop_GAN, which should be then called from TrainingManager
+    # if train_mode == 2:  # training mode
+    #     TrainingManagerGAN(
+    #         dataframe=data_full,
+    #         outputDir=parameters["output_dir"],
+    #         parameters=parameters,
+    #         device=device,
+    #         reset_prev=reset_prev,
+    #     )
+    # # todo: remove this block
     if train_mode:  # training mode
         TrainingManager(
             dataframe=data_full,

@@ -1,14 +1,12 @@
 import GANDLF.models.modelBase as modelBase
-
+from GANDLF.utils import is_GAN
 
 def populate_header_in_parameters(parameters, headers):
     """
     This function populates the parameters with information from the header in a common manner
-
     Args:
         parameters (dict): The parameters passed by the user yaml.
         headers (dict): The CSV headers dictionary.
-
     Returns:
         dict: Combined parameter dictionary containing header information
     """
@@ -24,7 +22,13 @@ def populate_header_in_parameters(parameters, headers):
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
     if parameters["problem_type"] != "regression":
-        parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
+        if is_GAN(parameters["model"]["architecture"]):
+            try:
+                parameters["model"]["num_classes"] = parameters["model"]["output_channel"]
+            except:
+                parameters["model"]["num_classes"] = 1
+        else:
+            parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
 
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):
@@ -36,11 +40,9 @@ def populate_header_in_parameters(parameters, headers):
 def find_problem_type(parameters, model_final_layer):
     """
     This function determines the type of problem at hand - regression, classification or segmentation
-
     Args:
         headersFromCSV (dict): The CSV headers dictionary.
         model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
-
     Returns:
         str: The problem type (regression/classification/segmentation).
     """
@@ -70,11 +72,9 @@ def find_problem_type(parameters, model_final_layer):
 def populate_channel_keys_in_params(data_loader, parameters):
     """
     Function to read channel key information from specified data loader
-
     Args:
         data_loader (torch.DataLoader): The data loader to query key information from.
         parameters (dict): The parameters passed by the user yaml.
-
     Returns:
         dict: Updated parameters that include key information
     """

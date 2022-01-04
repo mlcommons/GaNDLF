@@ -5,6 +5,8 @@ from pathlib import Path
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.compute import training_loop
+from GANDLF.computeGAN import training_loop_GAN
+from GANDLF.utils import is_GAN
 
 
 def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
@@ -20,6 +22,11 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
     if reset_prev:
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
+
+    if is_GAN(parameters["model"]["architecture"]):  # gan mode
+        training_function = training_loop_GAN
+    else:
+        training_function = training_loop
 
     # save the current model configuration as a sanity check
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
@@ -221,7 +228,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
 
             # parallel_compute_command is an empty string, thus no parallel computing requested
             if (not parameters["parallel_compute_command"]) or (singleFoldValidation):
-                training_loop(
+                training_function(
                     training_data=trainingData,
                     validation_data=validationData,
                     output_dir=currentValOutputFolder,
@@ -243,7 +250,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
 
                 command = (
                     parallel_compute_command_actual
-                    + " -m GANDLF.training_loop -train_loader_pickle "
+                    + " -m GANDLF.training_loop -train_loader_pickle "  # todo: make appropriate change for GAN
                     + currentTrainingDataPickle
                     + " -val_loader_pickle "
                     + currentValidationDataPickle
@@ -298,7 +305,13 @@ def TrainingManager_split(
             flush=True,
         )
         parameters = pickle.load(open(currentModelConfigPickle, "rb"))
-    training_loop(
+
+    if is_GAN(parameters["model"]["architecture"]):  # gan mode
+        training_function = training_loop_GAN
+    else:
+        training_function = training_loop
+
+    training_function(
         training_data=dataframe_train,
         validation_data=dataframe_validation,
         output_dir=outputDir,

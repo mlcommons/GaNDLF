@@ -94,7 +94,7 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     )
 
 
-def perform_sanity_check_on_subject(subject, parameters):
+def perform_sanity_check_on_subject(subject, parameters, style):
     """
     This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
 
@@ -116,28 +116,20 @@ def perform_sanity_check_on_subject(subject, parameters):
     import copy
 
     list_for_comparison = copy.deepcopy(parameters["headers"]["channelHeaders"])
-    if parameters["headers"]["labelHeader"] is not None:
+    if parameters["headers"]["labelHeader"] is not None and style == True:
         list_for_comparison.append("label")
 
     if len(list_for_comparison) > 1:
         for key in list_for_comparison:
             if file_reader_base is None:
-                if subject[str(key)]["path"] != "":
-                    file_reader_base = sitk.ImageFileReader()
-                    file_reader_base.SetFileName(subject[str(key)]["path"])
-                    file_reader_base.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_base = subject[str(key)].as_sitk()
+                file_reader_base = sitk.ImageFileReader()
+                file_reader_base.SetFileName(subject[str(key)]["path"])
+                file_reader_base.ReadImageInformation()
             else:
-                if subject[str(key)]["path"] != "":
-                    # in this case, file_reader_base is ready
-                    file_reader_current = sitk.ImageFileReader()
-                    file_reader_current.SetFileName(subject[str(key)]["path"])
-                    file_reader_current.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_current = subject[str(key)].as_sitk()
+                # in this case, file_reader_base is ready
+                file_reader_current = sitk.ImageFileReader()
+                file_reader_current.SetFileName(subject[str(key)]["path"])
+                file_reader_current.ReadImageInformation()
 
                 if (
                     file_reader_base.GetDimension()

@@ -33,7 +33,6 @@ global_sampler_dict = {
 def ImagesFromDataFrame(dataframe, parameters, train):
     """
     Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
-
     Parameters
     ----------
     dataframe : pandas.DataFrame
@@ -42,7 +41,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         The parameters dictionary
     train : bool
         If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
-
     Returns
     -------
     subjects_dataset: torchio.SubjectsDataset
@@ -62,6 +60,16 @@ def ImagesFromDataFrame(dataframe, parameters, train):
     preprocessing = parameters["data_preprocessing"]
     in_memory = parameters["in_memory"]
     enable_padding = parameters["enable_padding"]
+    
+    try:
+        style_to_style = parameters["style_to_style"]
+        if style_to_style == False:
+            style = False
+        else:
+            style = True
+    except:
+        style = True
+
 
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
@@ -130,7 +138,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         #     if (subject_dict['label'] is None) and (class_list is not None):
         #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
-        if labelHeader is not None:
+        if labelHeader is not None and style == True:
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
                 skip_subject = True
 
@@ -143,6 +151,12 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
 
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
+        elif labelHeader is not None and style == False:
+            subject_dict["label"] = torchio.ScalarImage(
+                dataframe[channel][patient]
+            )
+            subject_dict["path_to_metadata"] = str(dataframe[channel][patient])
+
         else:
             subject_dict["label"] = "NA"
             subject_dict["path_to_metadata"] = str(dataframe[channel][patient])
@@ -168,7 +182,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                     + subject["subject_id"]
                     + "'"
                 )
-            perform_sanity_check_on_subject(subject, parameters)
+            perform_sanity_check_on_subject(subject, parameters, style)
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
