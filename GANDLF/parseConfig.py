@@ -292,7 +292,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         sys.exit("The key 'metrics' needs to be defined")
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
-    params = initialize_key(params, "data_augmentation")
+    params = initialize_key(params, "data_augmentation", {})
     if not (params["data_augmentation"] == None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
 
@@ -401,7 +401,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                     )
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
-    params = initialize_key(params, "data_preprocessing")
+    params = initialize_key(params, "data_preprocessing", {})
     if not (params["data_preprocessing"] == None):
         # perform this only when pre-processing is defined
         if len(params["data_preprocessing"]) > 0:
