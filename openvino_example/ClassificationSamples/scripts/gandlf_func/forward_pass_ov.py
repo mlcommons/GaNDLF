@@ -168,7 +168,7 @@ def validate_network_ov(
         # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
         if "label" in subject:
             if subject["label"] != ["NA"]:
-                print(subject["label"])
+                #print(subject["label"])
                 subject_dict["label"] = torchio.Image(
                     path=subject["label"]["path"],
                     type=torchio.LABEL,
