@@ -32,7 +32,7 @@ def motion(parameters):
         degrees=parameters["degrees"],
         translation=parameters["translation"],
         num_transforms=parameters["num_transforms"],
-        interpolation=parameters["interpolation"],
+        image_interpolation=parameters["interpolation"],
         p=parameters["probability"],
     )
 
