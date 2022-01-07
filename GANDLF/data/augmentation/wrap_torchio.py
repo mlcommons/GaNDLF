@@ -22,7 +22,17 @@ from torchio.transforms import (
 # define individual functions/lambdas for augmentations to handle properties
 def mri_artifact(parameters):
     return OneOf(
-        {RandomMotion(): 0.34, RandomGhosting(): 0.33, RandomSpike(): 0.33},
+        {RandomGhosting(): 0.5, RandomSpike(): 0.5},
+        p=parameters["probability"],
+    )
+
+
+def motion(parameters):
+    return RandomMotion(
+        degrees=parameters["degrees"],
+        translation=parameters["translation"],
+        num_transforms=parameters["num_transforms"],
+        interpolation=parameters["interpolation"],
         p=parameters["probability"],
     )
 
