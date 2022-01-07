@@ -324,7 +324,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                 params["data_augmentation"]["affine"] = initialize_key(
                     params["data_augmentation"]["affine"], "translation", 2
                 )
-                
+
             if "motion" in params["data_augmentation"]:
                 params["data_augmentation"]["motion"] = initialize_key(
                     params["data_augmentation"]["motion"], "num_transforms", 2
