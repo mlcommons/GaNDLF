@@ -2,6 +2,7 @@
 
 - Add an option (`"save_training"`) to save training patches
 - Add option to save per-label segmentation metrics
+- Separate `"motion"` artifact
 
 ## 0.0.13
 

@@ -325,6 +325,20 @@ def parseConfig(config_file_path, version_check_flag=True):
                     params["data_augmentation"]["affine"], "translation", 2
                 )
 
+            if "motion" in params["data_augmentation"]:
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "num_transforms", 2
+                )
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "degrees", 15
+                )
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "translation", 2
+                )
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "interpolation", "linear"
+                )
+
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:
                 if std_aug in params["data_augmentation"]:
