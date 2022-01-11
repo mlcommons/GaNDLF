@@ -43,6 +43,7 @@ requirements = [
     "coverage",
     "psutil",
     "medcam",
+    "opencv-python",
     "torchmetrics",
     "OpenPatchMiner==0.1.6",
 ]
