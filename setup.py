@@ -21,7 +21,7 @@ except Exception as error:
 
 requirements = [
     "black",
-    "numpy==1.19.2",
+    "numpy==1.21.0",
     "scipy",
     "SimpleITK==2.1.0",
     "torch>=1.7",
