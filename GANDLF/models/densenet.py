@@ -204,10 +204,9 @@ class DenseNet(nn.Module):
             if isinstance(m, self.Conv):
                 m.weight = nn.init.kaiming_normal_(m.weight, mode="fan_out")
             elif isinstance(m, self.Norm):
-                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(
-                    self.Norm, nn.BatchNorm3d
-                ):
+                if m.weight is not None:
                     m.weight.data.fill_(1)
+                if m.bias is not None:
                     m.bias.data.zero_()
 
         # Linear layer
@@ -217,11 +216,10 @@ class DenseNet(nn.Module):
             if isinstance(m, self.Conv):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, self.Norm):
-                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(
-                    self.Norm, nn.BatchNorm3d
-                ):
-                    nn.init.constant_(m.weight, 1)
-                    nn.init.constant_(m.bias, 0)
+                if m.weight is not None:
+                    m.weight.data.fill_(1)
+                if m.bias is not None:
+                    m.bias.data.zero_()
             elif isinstance(m, nn.Linear):
                 nn.init.constant_(m.bias, 0)
 
