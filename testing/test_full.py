@@ -528,6 +528,7 @@ def test_scheduler_classification_rad_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
+    parameters["model"]["norm_type"] = "instance"
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
