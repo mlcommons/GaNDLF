@@ -10,9 +10,7 @@ from GANDLF.models.modelBase import get_final_layer
 
 
 class _DenseLayer(nn.Sequential):
-    def __init__(
-        self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv
-    ):
+    def __init__(self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv):
         super().__init__()
         self.add_module("norm1", Norm(num_input_features))
         self.add_module("relu1", nn.ReLU(inplace=True))
@@ -75,9 +73,7 @@ class _DenseBlock(nn.Sequential):
 
 
 class _Transition(nn.Sequential):
-    def __init__(
-        self, num_input_features, num_output_features, Norm, Conv, AvgPool
-    ):
+    def __init__(self, num_input_features, num_output_features, Norm, Conv, AvgPool):
         super().__init__()
         self.add_module("norm", Norm(num_input_features))
         self.add_module("relu", nn.ReLU(inplace=True))
@@ -122,7 +118,7 @@ class DenseNet(nn.Module):
         drop_rate=0,
         num_classes=1000,
         final_convolution_layer=None,
-        norm_type="batch"
+        norm_type="batch",
     ):
 
         super().__init__()
@@ -208,7 +204,9 @@ class DenseNet(nn.Module):
             if isinstance(m, self.Conv):
                 m.weight = nn.init.kaiming_normal_(m.weight, mode="fan_out")
             elif isinstance(m, self.Norm):
-                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(self.Norm, nn.BatchNorm3d):
+                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(
+                    self.Norm, nn.BatchNorm3d
+                ):
                     m.weight.data.fill_(1)
                     m.bias.data.zero_()
 
@@ -219,7 +217,9 @@ class DenseNet(nn.Module):
             if isinstance(m, self.Conv):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, self.Norm):
-                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(self.Norm, nn.BatchNorm3d):
+                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(
+                    self.Norm, nn.BatchNorm3d
+                ):
                     nn.init.constant_(m.weight, 1)
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
