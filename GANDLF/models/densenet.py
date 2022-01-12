@@ -11,10 +11,10 @@ from GANDLF.models.modelBase import get_final_layer
 
 class _DenseLayer(nn.Sequential):
     def __init__(
-        self, num_input_features, growth_rate, bn_size, drop_rate, BatchNorm, Conv
+        self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv
     ):
         super().__init__()
-        self.add_module("norm1", BatchNorm(num_input_features))
+        self.add_module("norm1", Norm(num_input_features))
         self.add_module("relu1", nn.ReLU(inplace=True))
         self.add_module(
             "conv1",
@@ -26,7 +26,7 @@ class _DenseLayer(nn.Sequential):
                 bias=False,
             ),
         )
-        self.add_module("norm2", BatchNorm(bn_size * growth_rate))
+        self.add_module("norm2", Norm(bn_size * growth_rate))
         self.add_module("relu2", nn.ReLU(inplace=True))
         self.add_module(
             "conv2",
@@ -58,7 +58,7 @@ class _DenseBlock(nn.Sequential):
         bn_size,
         growth_rate,
         drop_rate,
-        batch_norm,
+        norm,
         conv,
     ):
         super().__init__()
@@ -68,7 +68,7 @@ class _DenseBlock(nn.Sequential):
                 growth_rate,
                 bn_size,
                 drop_rate,
-                batch_norm,
+                norm,
                 conv,
             )
             self.add_module("denselayer{}".format(i + 1), layer)
@@ -76,10 +76,10 @@ class _DenseBlock(nn.Sequential):
 
 class _Transition(nn.Sequential):
     def __init__(
-        self, num_input_features, num_output_features, BatchNorm, Conv, AvgPool
+        self, num_input_features, num_output_features, Norm, Conv, AvgPool
     ):
         super().__init__()
-        self.add_module("norm", BatchNorm(num_input_features))
+        self.add_module("norm", Norm(num_input_features))
         self.add_module("relu", nn.ReLU(inplace=True))
         self.add_module(
             "conv",
@@ -104,6 +104,8 @@ class DenseNet(nn.Module):
           (i.e. bn_size * k features in the bottleneck layer)
         drop_rate (float) - dropout rate after each dense layer
         num_classes (int) - number of classification classes
+        final_convolution_layer (str) - the final convolutional layer to use
+        norm_type (str) - the normalization type to use
     """
 
     def __init__(
@@ -120,6 +122,7 @@ class DenseNet(nn.Module):
         drop_rate=0,
         num_classes=1000,
         final_convolution_layer=None,
+        norm_type="batch"
     ):
 
         super().__init__()
@@ -127,7 +130,10 @@ class DenseNet(nn.Module):
         if num_dimensions == 2:
             self.Conv = nn.Conv2d
             self.MaxPool = nn.MaxPool2d
-            self.BatchNorm = nn.BatchNorm2d
+            if norm_type == "instance":
+                self.Norm = nn.InstanceNorm2d
+            else:
+                self.Norm = nn.BatchNorm2d
             self.AvgPool = nn.AvgPool2d
             self.adaptive_avg_pool = F.adaptive_avg_pool2d
             self.output_size = (1, 1)
@@ -135,7 +141,10 @@ class DenseNet(nn.Module):
         elif num_dimensions == 3:
             self.Conv = nn.Conv3d
             self.MaxPool = nn.MaxPool3d
-            self.BatchNorm = nn.BatchNorm3d
+            if norm_type == "instance":
+                self.Norm = nn.InstanceNorm3d
+            else:
+                self.Norm = nn.BatchNorm3d
             self.AvgPool = nn.AvgPool3d
             self.adaptive_avg_pool = F.adaptive_avg_pool3d
             self.output_size = (1, 1, 1)
@@ -156,7 +165,7 @@ class DenseNet(nn.Module):
                     bias=False,
                 ),
             ),
-            ("norm1", self.BatchNorm(num_init_features)),
+            ("norm1", self.Norm(num_init_features)),
             ("relu1", nn.ReLU(inplace=True)),
         ]
         if not no_max_pool:
@@ -176,7 +185,7 @@ class DenseNet(nn.Module):
                 bn_size=bn_size,
                 growth_rate=growth_rate,
                 drop_rate=drop_rate,
-                batch_norm=self.BatchNorm,
+                norm=self.Norm,
                 conv=self.Conv,
             )
             self.features.add_module("denseblock{}".format(i + 1), block)
@@ -185,7 +194,7 @@ class DenseNet(nn.Module):
                 trans = _Transition(
                     num_input_features=num_features,
                     num_output_features=num_features // 2,
-                    BatchNorm=self.BatchNorm,
+                    Norm=self.Norm,
                     Conv=self.Conv,
                     AvgPool=self.AvgPool,
                 )
@@ -193,14 +202,15 @@ class DenseNet(nn.Module):
                 num_features = num_features // 2
 
         # Final batch norm
-        self.features.add_module("norm5", self.BatchNorm(num_features))
+        self.features.add_module("norm5", self.Norm(num_features))
 
         for m in self.modules():
             if isinstance(m, self.Conv):
                 m.weight = nn.init.kaiming_normal_(m.weight, mode="fan_out")
-            elif isinstance(m, self.BatchNorm):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+            elif isinstance(m, self.Norm):
+                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(self.Norm, nn.BatchNorm3d):
+                    m.weight.data.fill_(1)
+                    m.bias.data.zero_()
 
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
@@ -208,9 +218,10 @@ class DenseNet(nn.Module):
         for m in self.modules():
             if isinstance(m, self.Conv):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
-            elif isinstance(m, self.BatchNorm):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, self.Norm):
+                if isinstance(self.Norm, nn.BatchNorm2d) or isinstance(self.Norm, nn.BatchNorm3d):
+                    nn.init.constant_(m.weight, 1)
+                    nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.constant_(m.bias, 0)
 
@@ -261,6 +272,7 @@ def densenet121(parameters):
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
         final_convolution_layer=parameters["model"]["final_layer"],
+        norm_type=parameters["model"]["norm_type"],
     )
 
 
@@ -271,6 +283,7 @@ def densenet169(parameters):
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
         final_convolution_layer=parameters["model"]["final_layer"],
+        norm_type=parameters["model"]["norm_type"],
     )
 
 
@@ -281,6 +294,7 @@ def densenet201(parameters):
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
         final_convolution_layer=parameters["model"]["final_layer"],
+        norm_type=parameters["model"]["norm_type"],
     )
 
 
@@ -291,4 +305,5 @@ def densenet264(parameters):
         num_dimensions=parameters["model"]["dimension"],
         num_channels=parameters["model"]["num_channels"],
         final_convolution_layer=parameters["model"]["final_layer"],
+        norm_type=parameters["model"]["norm_type"],
     )
