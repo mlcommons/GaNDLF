@@ -118,10 +118,14 @@ class ModelBase(nn.Module):
                 norm_type = nn.BatchNorm3d
             elif norm_type == "instance":
                 norm_type = nn.InstanceNorm3d
+            else:
+                norm_type = None
         elif dimensions == 2:
             if norm_type == "batch":
                 norm_type = nn.BatchNorm2d
             elif norm_type == "instance":
                 norm_type = nn.InstanceNorm2d
+            else:
+                norm_type = None
 
         return norm_type
