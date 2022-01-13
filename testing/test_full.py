@@ -565,6 +565,7 @@ def test_optimizer_classification_rad_2d(device):
     )
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
+    parameters["model"]["norm_type"] = "none"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for optimizer in global_optimizer_dict:
@@ -602,6 +603,7 @@ def test_clip_train_classification_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "vgg16"
+    parameters["model"]["norm_type"] = "None"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
