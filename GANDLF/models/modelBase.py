@@ -28,7 +28,10 @@ class ModelBase(nn.Module):
         self.model_name = parameters["model"]["architecture"]
         self.n_dimensions = parameters["model"]["dimension"]
         self.n_channels = parameters["model"]["num_channels"]
-        self.n_classes = parameters["model"]["num_classes"]
+        if "num_classes" in parameters["model"]:
+            self.n_classes = parameters["model"]["num_classes"]
+        else:
+            self.n_classes = len(parameters["model"]["class_list"])
         self.base_filters = parameters["model"]["base_filters"]
         self.norm_type = parameters["model"]["norm_type"]
         self.patch_size = parameters["patch_size"]
