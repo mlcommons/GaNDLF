@@ -4,6 +4,7 @@
 - Add option to save per-label segmentation metrics
 - Separate `"motion"` artifact
 - `DenseNet` now supports `InstanceNorm`
+- Updated implementations of `VGG` and `DenseNet` to use `ModelBase` for consistency
 
 ## 0.0.13
 
