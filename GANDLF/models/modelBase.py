@@ -101,7 +101,6 @@ class ModelBase(nn.Module):
 
         return final_convolution_layer
 
-
     def get_norm_type(self, norm_type, dimensions):
         """
         This function gets the normalization type for the model.

@@ -66,7 +66,6 @@ class VGG(ModelBase):
                 out = self.final_convolution_layer(out)
         return out
 
-
     def make_layers(self, cfg, in_channels):
         layers = []
         for v in cfg:
