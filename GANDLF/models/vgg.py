@@ -3,7 +3,7 @@
 Modified from https://github.com/pytorch/vision.git
 """
 
-import sys, math
+import math
 import torch.nn as nn
 import torch.nn.functional as F
 
