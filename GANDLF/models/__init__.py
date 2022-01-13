@@ -8,7 +8,6 @@ from .densenet import densenet121, densenet169, densenet201, densenet264
 from .sdnet import SDNet
 from .MSDNet import MSDNet
 from .brain_age import brainage
-from .modelBase import ModelBase
 
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {

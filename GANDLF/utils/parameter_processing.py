@@ -1,4 +1,4 @@
-from GANDLF.models import ModelBase
+from GANDLF.models.modelBase import ModelBase
 
 
 def populate_header_in_parameters(parameters, headers):
