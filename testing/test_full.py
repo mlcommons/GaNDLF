@@ -142,12 +142,12 @@ def test_train_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
@@ -175,7 +175,6 @@ def test_train_segmentation_sdnet_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # patch_size is custom for sdnet
     parameters["patch_size"] = [224, 224, 1]
     parameters["batch_size"] = 2
@@ -183,6 +182,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["num_channels"] = 1
     parameters["model"]["architecture"] = "sdnet"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -206,13 +206,13 @@ def test_train_segmentation_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
@@ -243,10 +243,10 @@ def test_train_regression_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -277,11 +277,11 @@ def test_train_brainage_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     parameters["model"]["architecture"] = "brain_age"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -307,9 +307,9 @@ def test_train_regression_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_regression.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -342,8 +342,8 @@ def test_train_classification_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -375,8 +375,8 @@ def test_train_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -408,8 +408,8 @@ def test_inference_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -447,8 +447,8 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -488,8 +488,8 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -525,10 +525,10 @@ def test_scheduler_classification_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "instance"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
@@ -563,9 +563,9 @@ def test_optimizer_classification_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for optimizer in global_optimizer_dict:
         parameters["optimizer"] = {}
@@ -600,9 +600,9 @@ def test_clip_train_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "vgg16"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
         parameters["clip_mode"] = clip_mode
@@ -632,13 +632,13 @@ def test_normtype_train_segmentation_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for norm in ["batch", "instance"]:
         for model in ["resunet", "unet", "fcn"]:
@@ -667,7 +667,6 @@ def test_metrics_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
@@ -675,6 +674,7 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters["model"]["architecture"] = "resunet"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -697,7 +697,6 @@ def test_metrics_regression_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
@@ -709,6 +708,7 @@ def test_metrics_regression_rad_2d(device):
     parameters["metrics"]["accuracy"] = {}
     parameters["metrics"]["accuracy"]["threshold"] = 0.5
     parameters["model"]["architecture"] = "vgg11"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -731,7 +731,6 @@ def test_losses_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
@@ -740,6 +739,7 @@ def test_losses_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
         parameters["loss_function"] = loss_type
@@ -870,7 +870,6 @@ def test_dataloader_construction_train_segmentation_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["3D"]
     parameters["save_training"] = True
     parameters["model"]["dimension"] = 3
@@ -879,6 +878,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -1008,7 +1008,6 @@ def test_checkpointing_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["patch_size"] = patch_size["2D"]
     parameters["num_epochs"] = 1
     parameters["nested_training"]["testing"] = 1
@@ -1025,6 +1024,7 @@ def test_checkpointing_segmentation_rad_2d(device):
         "hd100_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -1058,7 +1058,6 @@ def test_model_patch_divisibility():
     )
     parameters["model"]["architecture"] = "unet"
     parameters["patch_size"] = [127, 127, 1]
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["num_epochs"] = 1
     parameters["nested_training"]["testing"] = 1
     parameters["model"]["dimension"] = 2
@@ -1066,6 +1065,7 @@ def test_model_patch_divisibility():
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
     with pytest.raises(Exception) as e_info:
