@@ -113,25 +113,27 @@ class DenseNet(ModelBase):
 
         super(DenseNet, self).__init__(parameters)
 
-        # defining some defaults        
-        if not("num_init_features" in parameters):
+        # defining some defaults
+        if not ("num_init_features" in parameters):
             parameters["num_init_features"] = 64
-        if not("growth_rate" in parameters):
+        if not ("growth_rate" in parameters):
             parameters["growth_rate"] = 32
-        if not("bn_size" in parameters):
+        if not ("bn_size" in parameters):
             parameters["bn_size"] = 4
-        if not("drop_rate" in parameters):
+        if not ("drop_rate" in parameters):
             parameters["drop_rate"] = 0
-        if not("conv1_t_stride" in parameters):
+        if not ("conv1_t_stride" in parameters):
             parameters["conv1_t_stride"] = 1
-        if not("conv1_t_size" in parameters):
+        if not ("conv1_t_size" in parameters):
             parameters["conv1_t_size"] = 7
-        if not("no_max_pool" in parameters):
+        if not ("no_max_pool" in parameters):
             parameters["no_max_pool"] = False
         if self.Norm is None:
-            sys.stderr.write("Warning: densenet is not defined without a normalization layer")
+            sys.stderr.write(
+                "Warning: densenet is not defined without a normalization layer"
+            )
             self.Norm = self.BatchNorm
-        
+
         if self.n_dimensions == 2:
             self.output_size = (1, 1)
             self.conv_stride = (parameters["conv1_t_stride"], 2)
@@ -217,9 +219,7 @@ class DenseNet(ModelBase):
     def forward(self, x):
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        out = self.AdaptiveAvgPool(self.output_size)(out).view(
-            features.size(0), -1
-        )
+        out = self.AdaptiveAvgPool(self.output_size)(out).view(features.size(0), -1)
         out = self.classifier(out)
 
         if not self.final_convolution_layer is None:
@@ -233,23 +233,18 @@ class DenseNet(ModelBase):
 
 def densenet121(parameters):
     return DenseNet(
-            parameters, block_config=(6, 12, 24, 16),
-        )
+        parameters,
+        block_config=(6, 12, 24, 16),
+    )
 
 
 def densenet169(parameters):
-    return DenseNet(
-            parameters, block_config=(6, 12, 32, 32)
-        )
+    return DenseNet(parameters, block_config=(6, 12, 32, 32))
 
 
 def densenet201(parameters):
-    return DenseNet(
-            parameters, block_config=(6, 12, 48, 32)
-        )
+    return DenseNet(parameters, block_config=(6, 12, 48, 32))
 
 
 def densenet264(parameters):
-    return DenseNet(
-            parameters, block_config=(6, 12, 64, 48)
-        )
+    return DenseNet(parameters, block_config=(6, 12, 64, 48))

@@ -18,7 +18,7 @@ def populate_header_in_parameters(parameters, headers):
 
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
-    
+
     parameters["problem_type"] = find_problem_type(
         parameters, ModelBase(parameters).final_convolution_layer
     )
