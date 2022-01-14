@@ -1,4 +1,4 @@
-import GANDLF.models.modelBase as modelBase
+from GANDLF.models.modelBase import ModelBase
 
 
 def populate_header_in_parameters(parameters, headers):
@@ -18,17 +18,18 @@ def populate_header_in_parameters(parameters, headers):
 
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
+
+    # initialize number of channels for processing
+    if not ("num_channels" in parameters["model"]):
+        parameters["model"]["num_channels"] = len(headers["channelHeaders"])
+
     parameters["problem_type"] = find_problem_type(
-        parameters, modelBase.get_final_layer(parameters["model"]["final_layer"])
+        parameters, ModelBase(parameters).final_convolution_layer
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
     if parameters["problem_type"] != "regression":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
-
-    # initialize number of channels for processing
-    if not ("num_channels" in parameters["model"]):
-        parameters["model"]["num_channels"] = len(headers["channelHeaders"])
 
     return parameters
 
