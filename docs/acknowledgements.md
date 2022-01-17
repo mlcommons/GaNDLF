@@ -14,6 +14,7 @@ This file records the following pieces of information:
 |     Brain Extraction     | Siddhesh Thakur | [DOI:10.1016/j.neuroimage.2020.117081](https://doi.org/10.1016/j.neuroimage.2020.117081) |
 | Brain Tumor Segmentation |  Megh Bhalerao  |   [DOI:10.1007/978-3-030-46643-5_21](https://doi.org/10.1007/978-3-030-46643-5_21)   |
 |   Brain Age Prediction   |  Vishnu Bashyam |       [DOI:10.1093/brain/awaa160](https://doi.org/10.1093/brain/awaa160)      |
+|   Dental Segmentation    |  Atıf Emre Yüksel |       [DOI:10.1038/s41598-021-90386-1](https://dx.doi.org/10.1038%2Fs41598-021-90386-1)      |
 
 ## Challenges
 
