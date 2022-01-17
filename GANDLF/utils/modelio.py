@@ -1,4 +1,4 @@
-import hashlib, pkg_resources
+import hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
 
 import torch
@@ -10,7 +10,8 @@ model_dict_base = {
     "optimizer_state_dict": None,
     "loss": None,
     "timestamp": None,
-    "hash": None,
+    "timestamp_hash": None,
+    "git_hash": None,
     "version": None,
 }
 
@@ -24,10 +25,13 @@ def save_model(model_dict, path):
         path (str): The path to save the model dictionary to.
     """
     model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
-    model_dict["hash"] = hashlib.sha256(
+    model_dict["timestamp_hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
     ).hexdigest()
     model_dict["version"] = pkg_resources.require("GANDLF")[0].version
+    model_dict["git_hash"] = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+    )
     torch.save(model_dict, path)
 
 
