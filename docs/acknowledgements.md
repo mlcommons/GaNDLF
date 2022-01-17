@@ -11,9 +11,9 @@ This file records the following pieces of information:
 
 |        **Application**       |   **Lead Author**   |                       **Link**                       |
 |:------------------------:|:---------------:|:------------------------------------------------:|
-|     Brain Extraction     | Siddhesh Thakur | https://doi.org/10.1016/j.neuroimage.2020.117081 |
-| Brain Tumor Segmentation |  Megh Bhalerao  |   https://doi.org/10.1007/978-3-030-46643-5_21   |
-|   Brain Age Prediction   |  Vishnu Bashyam |       https://doi.org/10.1093/brain/awaa160      |
+|     Brain Extraction     | Siddhesh Thakur | [DOI:10.1016/j.neuroimage.2020.117081](https://doi.org/10.1016/j.neuroimage.2020.117081) |
+| Brain Tumor Segmentation |  Megh Bhalerao  |   [DOI:10.1007/978-3-030-46643-5_21](https://doi.org/10.1007/978-3-030-46643-5_21)   |
+|   Brain Age Prediction   |  Vishnu Bashyam |       [DOI:10.1093/brain/awaa160](https://doi.org/10.1093/brain/awaa160)      |
 
 ## Challenges
 
