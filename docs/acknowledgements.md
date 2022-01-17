@@ -19,9 +19,9 @@ This file records the following pieces of information:
 
 |    **Challenge Name**   | **Year** |               **Host Conference**               |                       **Link**                       |
 |:-------------------:|:----:|:-------------------------------------------:|:------------------------------------------------:|
-|  Pathologic Myopia  | 2019 | [ISBI](https://biomedicalimaging.org/2019/) |         https://palm.grand-challenge.org/        |
-|      DigestPath     | 2019 |    [MICCAI](https://www.miccai2019.org/)    | https://digestpath2019.grand-challenge.org/Home/ |
-| Diabetic Foot Ulcer | 2021 |     [MICCAI](https://miccai2021.org/en/)    |       https://dfu-2021.grand-challenge.org/      |
+|  Pathologic Myopia  | 2019 | [ISBI](https://biomedicalimaging.org/2019/) |         [palm.grand-challenge.org](https://palm.grand-challenge.org/)        |
+|      DigestPath     | 2019 |    [MICCAI](https://www.miccai2019.org/)    | [digestpath2019.grand-challenge.org](https://digestpath2019.grand-challenge.org/Home/) |
+| Diabetic Foot Ulcer | 2021 |     [MICCAI](https://miccai2021.org/en/)    |       [dfu-2021.grand-challenge.org](https://dfu-2021.grand-challenge.org/)      |
 
 
 ## People
