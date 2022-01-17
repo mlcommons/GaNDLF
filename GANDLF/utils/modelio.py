@@ -29,7 +29,9 @@ def save_model(model_dict, path):
         str(model_dict["timestamp"]).encode("utf-8")
     ).hexdigest()
     model_dict["version"] = pkg_resources.require("GANDLF")[0].version
-    model_dict["git_hash"] = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    model_dict["git_hash"] = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+    )
     torch.save(model_dict, path)
 
 
