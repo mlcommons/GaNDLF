@@ -31,7 +31,8 @@ This file records the following pieces of information:
 
 - Supervisors:
   - [Aimilia Gastounioti](https://www.med.upenn.edu/cbica/sbia/aimiliag.html)
-  - [Mark Bergman](https://www.med.upenn.edu/sbia/mbergman.html)
+  - [Mark Bergman](https://www.med.upenn.edu/cbica/sbia/mbergman.html)
+  - [Yong Fan](https://www.med.upenn.edu/apps/faculty/index.php/g275/p4257219)
   - [Anirban Mukhopadhyay](https://sites.google.com/site/geometricanirban/)
   - [Sotirios Tsaftaris](https://vios.science/team/tsaftaris)
   - [Bjoern Menze](https://www.dqbm.uzh.ch/en/research/groups/menze.html)
