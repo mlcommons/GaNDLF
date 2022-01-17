@@ -19,7 +19,7 @@ The [usage](https://cbica.github.io/GaNDLF/usage) guide is fairly comprehensive 
 
 ### Which parts of a GaNDLF configuration are customizable?
 
-Virtually all of it! For more details, please see the [usage](https://cbica.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/CBICA/GaNDLF/tree/master/samples).
+Virtually all of it! For more details, please see the [usage](https://cbica.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/CBICA/GaNDLF/tree/master/samples). All available options are documented in the [config_all_options.yaml file](https://github.com/CBICA/GaNDLF/blob/master/samples/config_all_options.yaml).
 
 ### Can I run GaNDLF on a high performance computing (HPC) cluster?
 
