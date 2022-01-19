@@ -29,7 +29,9 @@ def step_ov(model, image, label, params):
 
     """
     if params["verbose"]:
-        print(torch.cuda.memory_summary())
+        if params["device"] == 'gpu':
+            print(torch.cuda.memory_summary())
+            
         print(
             "|===========================================================================|\n|                             CPU Utilization                            |\n|"
         )

@@ -1,20 +1,40 @@
+# Usage example: python benchmark_pt_ov.py -m './infer_models' -mn 'resunet' -ptm 3dresunet_pt -ovm 3dresunet_ov -nnm 3dresunet_ov_nncf -p ./3dresunet_exp_nncf/data_dir/parameters.pkl -d ./3dresunet_exp_nncf/tcga-val-data-pre-ma-test.csv -o ./3dresunet_exp_nncf/data_dir -v False
+
 from pathlib import Path
 
 import os
 import sys
 import time
-
 import torch
 print(torch.__version__)
 
+import argparse
+import pickle
 from openvino.inference_engine import IECore
 
-N_FOLD = "0"
-ROOT_DIR = "/Share/Junwen/UPenn/DFU_Example_vgg11/ClassificationModel/ClassificationModel/"
-TORCH_MODEL_PTH = "models/DenseNet121/densenet121/trained_models/"
-OV_MODEL_PTH = "models/DenseNet121/densenet121/"
-NNCF_MODEL_PTH = "models/DenseNet121/densenet121/nncf_models/quantization/"
-BASE_MODEL_NAME = "densenet121"
+parser = argparse.ArgumentParser(
+    description='Convert the NNCF PyTorch model to ONNX model.')
+parser.add_argument('-nfold', '--n_fold',
+                    help='The fold to use for evaluation')
+parser.add_argument('-mn', '--model_name',
+                    help='The model name', default='resunet')
+parser.add_argument('-m', '--model_dir',
+                    help='The PyTorch or OpenVINO model root directory path.')
+parser.add_argument('-ptm', '--pytorch_model',
+                    help='The PyTorch model path.')
+parser.add_argument('-ovm', '--ov_model',
+                    help='The OpenVINO model path.')
+parser.add_argument('-nnm', '--nncf_model',
+                    help='The NNCF optimized model path.')
+parser.add_argument('-d', '--data_csv',
+                    help='The path to data csv containing path to images and labels.')
+parser.add_argument('-p', '--parameters_file', required=False, 
+                    help='Config yaml file or the parameter file')
+parser.add_argument('-o', '--output_dir', required=False, 
+                    help='Output directory to store segmenation results')
+parser.add_argument('-v', '--verbose', required=False, 
+                    help='Whether to print verbose results')
+args = parser.parse_args()
 
 from tqdm import tqdm
 import torchio
@@ -39,75 +59,50 @@ def load_ov_model(path):
     exec_net = ie.load_network(network=net, device_name="CPU")
     return exec_net, input_blob, out_blob
 
-model, parameters, train_dataloader, val_dataloader, scheduler, optimizer = generate_data_loader(os.path.join(ROOT_DIR, "data"), N_FOLD, True, os.path.join(ROOT_DIR, TORCH_MODEL_PTH, "parameters.pkl"))
+with open(args.parameters_file, 'rb') as f:
+    parameters = pickle.load(f)
+
+model, val_dataloader, parameters = generate_data_loader(args.data_csv, parameters, args.output_dir, args.verbose)
 
 ###Original PyTorch Model
-orig_pth = os.path.join(ROOT_DIR, TORCH_MODEL_PTH,  N_FOLD, BASE_MODEL_NAME+"_best.pth.tar")
+orig_pth = os.path.join(args.model_dir, args.pytorch_model, args.model_name +"_best.pth.tar")
 model = load_torch_model(orig_pth, model)
 parameters['model']['type'] = "Torch"
 st_time = time.time()
 epoch_valid_loss, epoch_valid_metric = forward_pass_ov.validate_network_ov(
-            model, val_dataloader, scheduler, parameters, epoch=0, mode="validation")
+            model, val_dataloader, scheduler=None, params=parameters, epoch=0, mode="validation")
 ed_time = time.time()
-print("*****" + "Inference Time for Original PyTorch Model is: " + str((ed_time - st_time)/len(val_dataloader)))
+print("*****" + "Avg inference Time for Original PyTorch Model is: " + str((ed_time - st_time)/len(val_dataloader)))
 
 ### Original OpenVINO FP32 Model 
-fp32_ir_path = Path(os.path.join(ROOT_DIR, OV_MODEL_PTH, "ov_models",  N_FOLD + '/'))
-exec_net, input_blob, out_blob = load_ov_model(Path(fp32_ir_path / (BASE_MODEL_NAME + "_best")))
+fp32_ir_path = Path(os.path.join(args.model_dir, args.ov_model + '/FP32'))
+exec_net, input_blob, out_blob = load_ov_model(Path(fp32_ir_path / (args.model_name)))
 parameters['model']['type'] = "OV"
 parameters['model']['IO'] = [input_blob, out_blob]
 st_time = time.time()
 epoch_valid_loss, epoch_valid_metric = forward_pass_ov.validate_network_ov(
-            exec_net, val_dataloader, scheduler, parameters, epoch=0, mode="validation")
+            exec_net, val_dataloader, scheduler=None, params=parameters, epoch=0, mode="validation")
 ed_time = time.time()
-print("*****" + "Inference Time for Original OV FP32 Model is: " + str((ed_time - st_time)/len(val_dataloader)))
+print("*****" + "Avg inference Time for Original OV FP32 Model is: " + str((ed_time - st_time)/len(val_dataloader)))
 
 ###OpenVINO POT INT8 Model 
-int8_ir_path = Path(os.path.join(ROOT_DIR, OV_MODEL_PTH, 'ov_models', N_FOLD, 'INT8/'))
-exec_net, input_blob, out_blob = load_ov_model(Path(int8_ir_path / (BASE_MODEL_NAME + "_best")))
+int8_ir_path = Path(os.path.join(args.model_dir, args.ov_model + '/INT8'))
+exec_net, input_blob, out_blob = load_ov_model(Path(int8_ir_path / (args.model_name)))
 parameters['model']['type'] = "OV"
 parameters['model']['IO'] = [input_blob, out_blob]
 st_time = time.time()
 epoch_valid_loss, epoch_valid_metric = forward_pass_ov.validate_network_ov(
-            exec_net, val_dataloader, scheduler, parameters, epoch=0, mode="validation")
+            exec_net, val_dataloader, scheduler=None, params=parameters, epoch=0, mode="validation")
 ed_time = time.time()
-print("*****" + "Inference Time for POT OV INT8 Model is: " + str((ed_time - st_time)/len(val_dataloader)))
+print("*****" + "Avg inference Time for POT OV INT8 Model is: " + str((ed_time - st_time)/len(val_dataloader)))
 
 ###OpenVINO NNCF INT8 Model 
-int8_onnx_path = Path(os.path.join(ROOT_DIR, NNCF_MODEL_PTH, "onnx", N_FOLD, "/"))
-exec_net, input_blob, out_blob = load_ov_model(Path(int8_onnx_path / (BASE_MODEL_NAME + "_nncf_best")))
+int8_nncf_path = Path(os.path.join(args.model_dir, args.nncf_model))
+exec_net, input_blob, out_blob = load_ov_model(Path(int8_nncf_path / (args.model_name)))
 parameters['model']['type'] = "OV"
 parameters['model']['IO'] = [input_blob, out_blob]
 st_time = time.time()
 epoch_valid_loss, epoch_valid_metric = forward_pass_ov.validate_network_ov(
-            exec_net, val_dataloader, scheduler, parameters, epoch=0, mode="validation")
+            exec_net, val_dataloader, scheduler=None, params=parameters, epoch=0, mode="validation")
 ed_time = time.time()
-print("*****" + "Inference Time for NNCF OV INT8 Model is: " + str((ed_time - st_time)/len(val_dataloader)))
-
-'''
-pruned_factor = "05"
-MODEL_DIR = Path(os.path.join(ROOT_DIR, "NNCF/models/pruning/models/" + N_FOLD + "/" + pruned_factor + "/"))
-OUTPUT_DIR = Path(os.path.join(ROOT_DIR, "NNCF/models/pruning/outputs/" + N_FOLD + "/" + pruned_factor + "/"))
-###OpenVINO NNCF filter pruned Model 
-int8_onnx_path = Path(OUTPUT_DIR / (BASE_MODEL_NAME + "_pruned"))
-int8_ir_path = int8_onnx_path.with_suffix(".xml")
-exec_net, input_blob, out_blob = load_ov_model(Path(int8_ir_path / (BASE_MODEL_NAME + "_pruned")))
-parameters['model']['type'] = "OV"
-parameters['model']['IO'] = [input_blob, out_blob]
-st_time = time.time()
-epoch_valid_loss, epoch_valid_metric = forward_pass_ov.validate_network_ov(
-            exec_net, val_dataloader, scheduler, parameters, epoch=0, mode="validation")
-ed_time = time.time()
-print("*****" + "Inference Time for NNCF OV filter prunning Model is: " + str((ed_time - st_time)/len(val_dataloader)))
-
-# OpenVINO NNCF Pruned Model
-pruned_model_path = Path("/Share/Junwen/UPenn/DFU_Example_vgg11/ClassificationModel/ClassificationModel/NNCF/models/pruning/ckpt/pruning_50pcnt_01pcnt")
-exec_net, input_blob, out_blob = load_ov_model(pruned_model_path)
-parameters['model']['type'] = "OV"
-parameters['model']['IO'] = [input_blob, out_blob]
-st_time = time.time()
-epoch_valid_loss, epoch_valid_metric = forward_pass_ov.validate_network_ov(
-            exec_net, val_dataloader, scheduler, parameters, epoch=0, mode="validation")
-ed_time = time.time()
-print("*****" + "Inference Time for NNCF OV PRUNED Model is: " + str((ed_time - st_time)/len(val_dataloader)))
-'''
+print("*****" + "Avg inference Time for NNCF OV INT8 Model is: " + str((ed_time - st_time)/len(val_dataloader)))
