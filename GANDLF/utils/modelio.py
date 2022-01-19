@@ -31,7 +31,9 @@ def save_model(model_dict, path):
     model_dict["version"] = pkg_resources.require("GANDLF")[0].version
     try:
         model_dict["git_hash"] = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("ascii")
+            .strip()
         )
     except subprocess.CalledProcessError:
         model_dict["git_hash"] = None
