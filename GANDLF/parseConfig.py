@@ -195,18 +195,26 @@ def parseConfig(config_file_path, version_check_flag=True):
                     temp_dict[comparison_string] = metric
             elif not isinstance(metric, dict):
                 temp_dict[metric] = None
-            
+
             # special case for accuracy, precision, and recall; which could be dicts
             ## need to find a better way to do this
             if "accuracy" in comparison_string:
                 if comparison_string != "classification_accuracy":
-                    temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "average", "weighted")
-                    temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "multi_class", True)
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "average", "weighted"
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "multi_class", True
+                    )
                     temp_dict["accuracy"] = initialize_key(
                         temp_dict["accuracy"], "mdmc_average", "samplewise"
                     )
-                    temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "threshold", 0.5)
-                    temp_dict["accuracy"] = initialize_key(temp_dict["accuracy"], "subset_accuracy", False)
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "threshold", 0.5
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "subset_accuracy", False
+                    )
             elif "f1" in comparison_string:
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
