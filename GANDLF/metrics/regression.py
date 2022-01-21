@@ -15,33 +15,6 @@ def classification_accuracy(output, label, params):
     return acc
 
 
-def accuracy(output, label, params):
-    """
-    Calculates the accuracy between output and a label
-
-    Parameters
-    ----------
-    output : torch.Tensor
-        Input data containing objects. Can be any type but will be converted
-        into binary: background where 0, object everywhere else.
-    label : torch.Tensor
-        Input data containing objects. Can be any type but will be converted
-        into binary: background where 0, object everywhere else.
-    params : dict
-        The parameter dictionary containing training and data information.
-
-    Returns
-    -------
-    TYPE
-        DESCRIPTION.
-
-    """
-    if params["metrics"]["accuracy"]["threshold"] is not None:
-        output = (output >= params["metrics"]["accuracy"]["threshold"]).float()
-    correct = (output == label).float().sum()
-    return correct / len(label)
-
-
 def balanced_acc_score(output, label, params):
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(output, 1)
