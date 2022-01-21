@@ -14,6 +14,7 @@ def generic_function_output_with_check(predicted_classes, label, metric_function
         predicted_new = torch.clamp(
             predicted_classes.cpu().int(), max=metric_function.num_classes - 1
         )
+        predicted_new = predicted_new.reshape(label.shape)
         return metric_function(predicted_new, label.cpu().int())
 
 
