@@ -34,8 +34,8 @@ metrics:
   - dice # segmentation
   # - hausdorff # hausdorff 100 percentile, segmentation
   # - hausdorff95 # hausdorff 95 percentile, segmentation
-  # - accuracy # regression/classification
   # - mse # regression/classification
+  # - accuracy # classification
   # - classification_accuracy # classification
   # - balanced_accuracy # classification ## more details https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html
   # - f1 # classification/segmentation
