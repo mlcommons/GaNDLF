@@ -10,8 +10,8 @@ from .segmentation import (
     hd95,
     hd95_per_label,
 )
-from .regression import accuracy, classification_accuracy, balanced_acc_score
-from .generic import recall_score, precision_score, iou_score, f1_score
+from .regression import classification_accuracy, balanced_acc_score
+from .generic import recall_score, precision_score, iou_score, f1_score, accuracy
 
 
 # global defines for the metrics
