@@ -7,6 +7,7 @@
 - Updated implementations of `VGG` and `DenseNet` to use `ModelBase` for consistency
 - Model saving now includes the git commit hash
 - Added FAQ in documentation
+- Accuracy is now standardized from `torchmetrics`
 
 ## 0.0.13
 
