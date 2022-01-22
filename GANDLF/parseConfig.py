@@ -183,25 +183,46 @@ def parseConfig(config_file_path, version_check_flag=True):
 
         # initialize metrics dict
         for metric in params["metrics"]:
-            if not isinstance(metric, dict):
+            # assigning a new variable because some metrics can be dicts, and we want to get the first key
+            comparison_string = metric
+            if isinstance(metric, dict):
+                comparison_string = list(metric.keys())[0]
+            # these metrics always need to be dicts
+            if comparison_string in ["accuracy", "f1", "precision", "recall", "iou"]:
+                if not isinstance(metric, dict):
+                    temp_dict[metric] = {}
+                else:
+                    temp_dict[comparison_string] = metric
+            elif not isinstance(metric, dict):
                 temp_dict[metric] = None
+
             # special case for accuracy, precision, and recall; which could be dicts
             ## need to find a better way to do this
-            elif "accuracy" in metric:
-                temp_dict["accuracy"] = metric["accuracy"]
-                temp_dict["accuracy"] = initialize_key(
-                    temp_dict["accuracy"], "threshold", 0.5
-                )
-            elif "f1" in metric:
-                temp_dict["f1"] = metric["f1"]
+            if "accuracy" in comparison_string:
+                if comparison_string != "classification_accuracy":
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "average", "weighted"
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "multi_class", True
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "mdmc_average", "samplewise"
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "threshold", 0.5
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "subset_accuracy", False
+                    )
+            elif "f1" in comparison_string:
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
                 temp_dict["f1"] = initialize_key(
                     temp_dict["f1"], "mdmc_average", "samplewise"
                 )
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
-            elif "precision" in metric:
-                temp_dict["precision"] = metric["precision"]
+            elif "precision" in comparison_string:
                 temp_dict["precision"] = initialize_key(
                     temp_dict["precision"], "average", "weighted"
                 )
@@ -214,8 +235,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                 temp_dict["precision"] = initialize_key(
                     temp_dict["precision"], "threshold", 0.5
                 )
-            elif "recall" in metric:
-                temp_dict["recall"] = metric["recall"]
+            elif "recall" in comparison_string:
                 temp_dict["recall"] = initialize_key(
                     temp_dict["recall"], "average", "weighted"
                 )
@@ -228,63 +248,11 @@ def parseConfig(config_file_path, version_check_flag=True):
                 temp_dict["recall"] = initialize_key(
                     temp_dict["recall"], "threshold", 0.5
                 )
-            elif "iou" in metric:
-                temp_dict["iou"] = metric["iou"]
+            elif "iou" in comparison_string:
                 temp_dict["iou"] = initialize_key(
                     temp_dict["iou"], "reduction", "elementwise_mean"
                 )
                 temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
-
-        ## need to find a better way to do this
-        # special case for accuracy
-        if "accuracy" in params["metrics"]:
-            temp_dict["accuracy"] = initialize_key(
-                temp_dict["accuracy"], "threshold", 0.5
-            )
-
-        # special case for precision
-        if "precision" in params["metrics"]:
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "average", "weighted"
-            )
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "multi_class", True
-            )
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "mdmc_average", "samplewise"
-            )
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "threshold", 0.5
-            )
-
-        # special case for f1
-        if "f1" in params["metrics"]:
-            temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
-            temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
-            temp_dict["f1"] = initialize_key(
-                temp_dict["f1"], "mdmc_average", "samplewise"
-            )
-            temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
-
-        # special case for recall
-        if "recall" in params["metrics"]:
-            temp_dict["recall"] = initialize_key(
-                temp_dict["recall"], "average", "weighted"
-            )
-            temp_dict["recall"] = initialize_key(
-                temp_dict["recall"], "multi_class", True
-            )
-            temp_dict["recall"] = initialize_key(
-                temp_dict["recall"], "mdmc_average", "samplewise"
-            )
-            temp_dict["recall"] = initialize_key(temp_dict["recall"], "threshold", 0.5)
-
-        # special case for iou
-        if "iou" in params["metrics"]:
-            temp_dict["iou"] = initialize_key(
-                temp_dict["iou"], "reduction", "elementwise_mean"
-            )
-            temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
 
         params["metrics"] = temp_dict
 

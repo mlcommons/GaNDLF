@@ -705,10 +705,6 @@ def test_metrics_regression_rad_2d(device):
     parameters["model"]["norm_type"] = "instance"
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = {}
-    parameters["metrics"]["mse"] = {}
-    parameters["metrics"]["accuracy"] = {}
-    parameters["metrics"]["accuracy"]["threshold"] = 0.5
     parameters["model"]["architecture"] = "vgg11"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
