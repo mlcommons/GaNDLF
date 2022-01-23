@@ -1,1 +1,1 @@
-from .fill_holes import torch_morphological
+from .morphology import torch_morphological, fill_holes
