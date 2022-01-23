@@ -956,14 +956,12 @@ def test_preprocess_functions():
     assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
 
     # test pure morphological operations
-    input_tensor = torch.rand(1, 1, 256, 256, 256)
-    for mode in ['dilation', 'erosion', 'opening', 'closing']:
-        input_transformed = torch_morphological(input_tensor, mode=mode)
+    input_tensor_3d = torch.rand(1, 1, 256, 256, 256)
+    input_tensor_2d = torch.rand(1, 3, 256, 256)
+    for mode in ["dilation", "erosion", "opening", "closing"]:
+        input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
+        input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
 
-    input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
-    for mode in ['dilation', 'erosion', 'opening', 'closing']:
-        input_transformed = torch_morphological(input_tensor, mode=mode)
-        
     print("passed")
 
 
