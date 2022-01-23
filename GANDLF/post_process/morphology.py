@@ -1,8 +1,6 @@
 import torch
 import torch.nn.functional as F
-from skimage.morphology import cube
-from scipy.ndimage.morphology import binary_fill_holes
-from scipy.ndimage.morphology import binary_closing
+from scipy.ndimage.morphology import binary_fill_holes, binary_closing
 
 
 def torch_morphological(input_image, kernel_size=1, mode="dilation"):
