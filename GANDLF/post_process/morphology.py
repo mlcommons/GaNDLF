@@ -1,5 +1,8 @@
+import torch
 import torch.nn.functional as F
-import numpy as np
+from skimage.morphology import cube
+from scipy.ndimage.morphology import binary_fill_holes
+from scipy.ndimage.morphology import binary_closing
 
 def torch_morphological(input_image, kernel_size=1, mode='dilation'):
     """
@@ -33,3 +36,21 @@ def torch_morphological(input_image, kernel_size=1, mode='dilation'):
         output_image = max_pool(output_image, kernel_size=kernel_size, stride=1, padding=kernel_size//2)
 
     return output_image
+
+
+
+def fill_holes(input_image):
+    """
+    This function fills holes in masks.
+
+    Args:
+        input_image (torch.Tensor): The input image.
+
+    Returns:
+        torch.Tensor: The output image after morphological operations.
+    """
+    input_image_array_closed = binary_closing(input_image.numpy())
+    # Fill the holes in binary objects
+    output_array = binary_fill_holes(input_image_array_closed)
+
+    return torch.from_numpy(output_array)
