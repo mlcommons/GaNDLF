@@ -15,6 +15,7 @@ from GANDLF.cli.preprocess_and_save import preprocess_and_save
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
+from GANDLF.post_process import torch_morphological, fill_holes
 
 device = "cpu"
 ## global defines
@@ -930,6 +931,8 @@ def test_preprocess_functions():
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
 
+    input_transformed = fill_holes(input_tensor)
+
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resize_image(
         input_image,
@@ -952,6 +955,15 @@ def test_preprocess_functions():
     input_transformed = cropper(input_tensor)
     assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
 
+    # test pure morphological operations
+    input_tensor = torch.rand(1, 1, 256, 256, 256)
+    for mode in ['dilation', 'erosion', 'opening', 'closing']:
+        input_transformed = torch_morphological(input_tensor, mode=mode)
+
+    input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
+    for mode in ['dilation', 'erosion', 'opening', 'closing']:
+        input_transformed = torch_morphological(input_tensor, mode=mode)
+        
     print("passed")
 
 
