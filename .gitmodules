@@ -1,3 +1,6 @@
 [submodule "GANDLF/OPM"]
 	path = GANDLF/OPM
 	url = https://github.com/CBICA/OPM.git
+[submodule "GANDLF/anonymize/dicom-anonymizer"]
+	path = GANDLF/anonymize/dicom-anonymizer
+	url = https://github.com/KitwareMedical/dicom-anonymizer.git
