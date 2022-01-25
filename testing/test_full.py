@@ -1132,6 +1132,8 @@ def test_anonymizer():
     input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(testingDir, "MR_small_anonymized.yaml")
+    if os.path.exists(output_file):
+        os.remove(output_file)
 
     config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
 
