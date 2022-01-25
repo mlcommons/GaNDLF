@@ -21,19 +21,22 @@ def main():
         + copyrightMessage,
     )
     parser.add_argument(
-        "-i", "--inputDir",
+        "-i",
+        "--inputDir",
         metavar="",
         type=str,
         help="Input directory or file which contains images to be anonymized.",
     )
     parser.add_argument(
-        "-c", "--config",
+        "-c",
+        "--config",
         metavar="",
         type=str,
         help="config (in YAML) for running anonymization.",
     )
     parser.add_argument(
-        "-o", "--outputFile",
+        "-o",
+        "--outputFile",
         metavar="",
         type=str,
         help="Output directory or file which will contain the image(s) after anonymization.",
@@ -54,7 +57,7 @@ def main():
         args.labelID = ""
 
     run_anonymizer(inputDir, outputFile, config)
-    
+
     print("Finished successfully.")
 
 

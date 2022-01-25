@@ -18,7 +18,7 @@ def run_anonymizer(
         torch.Tensor: The output image after morphological operations.
     """
     if not isinstance(parameters, dict):
-        with open(parameters, 'r') as file_data:
+        with open(parameters, "r") as file_data:
             yaml_data = file_data.read()
         parameters = yaml.safe_load(yaml_data)
 
