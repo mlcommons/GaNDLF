@@ -1129,7 +1129,7 @@ def test_one_hot_logic():
 
 
 def test_anonymizer():
-    input_file = get_testdata_file('MR_small.dcm')
+    input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(testingDir, "MR_small_anonymized.yaml")
 

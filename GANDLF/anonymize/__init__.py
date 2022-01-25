@@ -2,7 +2,10 @@ import yaml
 from typing import Union
 from .dicomanonymizer.dicomanonymizer import anonymize
 
-def run_anonymizer(input_path: str, output_path: str, parameters: Union[str, list, int]):
+
+def run_anonymizer(
+    input_path: str, output_path: str, parameters: Union[str, list, int]
+):
     """
     This function performs anonymization of a single image or a collection of images.
 
@@ -20,6 +23,13 @@ def run_anonymizer(input_path: str, output_path: str, parameters: Union[str, lis
     if "rad" in parameters["modality"]:
         if "delete_private_tags" not in parameters:
             parameters["delete_private_tags"] = True
-        return anonymize(input_path, output_path, anonymization_actions={}, deletePrivateTags=parameters["delete_private_tags"])
+        return anonymize(
+            input_path,
+            output_path,
+            anonymization_actions={},
+            deletePrivateTags=parameters["delete_private_tags"],
+        )
     elif parameters["modality"] in ["histo", "path"]:
-        raise NotImplementedError("Anonymization for histology images has not been implemented yet.")
+        raise NotImplementedError(
+            "Anonymization for histology images has not been implemented yet."
+        )
