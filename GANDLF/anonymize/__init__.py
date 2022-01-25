@@ -1,17 +1,22 @@
+import yaml
+from typing import Union
 from .dicomanonymizer.dicomanonymizer import anonymize
 
-def run_anonymizer(input_path: str, output_path: str, parameters: dict):
+def run_anonymizer(input_path: str, output_path: str, parameters: Union[str, list, int]):
     """
     This function performs anonymization of a single image or a collection of images.
 
     Args:
         input_path (str): The input file or folder.
         output_path (str): The output file or folder.
-        parameters (dict): The parameters for anonymization; for DICOM scans, the only optional argument is "delete_private_tags", which defaults to True.
+        parameters (Union[str, list, int]): The parameters for anonymization; for DICOM scans, the only optional argument is "delete_private_tags", which defaults to True.
 
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
+    if not isinstance(parameters, dict):
+        parameters = yaml.load(open(parameters), Loader=yaml.FullLoader)
+
     if "rad" in parameters["modality"]:
         if "delete_private_tags" not in parameters:
             parameters["delete_private_tags"] = True
