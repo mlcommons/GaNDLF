@@ -63,6 +63,7 @@ setup(
         "gandlf_collectStats",
         "gandlf_patchMiner",
         "gandlf_preprocess",
+        "gandlf_anonymizer",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
