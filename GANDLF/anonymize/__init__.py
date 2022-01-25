@@ -18,7 +18,9 @@ def run_anonymizer(
         torch.Tensor: The output image after morphological operations.
     """
     if not isinstance(parameters, dict):
-        parameters = yaml.load(open(parameters), Loader=yaml.FullLoader)
+        with open(parameters, 'r') as file_data:
+            yaml_data = file_data.read()
+        parameters = yaml.safe_load(yaml_data)
 
     if "rad" in parameters["modality"]:
         if "delete_private_tags" not in parameters:
