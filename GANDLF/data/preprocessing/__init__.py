@@ -16,6 +16,8 @@ from torchio.transforms import (
     ToCanonical,
     Crop,
     CropOrPad,
+    Resize,
+    Resample
 )
 
 
@@ -58,4 +60,6 @@ global_preprocessing_dict = {
     "normalize_nonzero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
     "normalize_nonzero_masked": NonZeroNormalizeOnMaskedRegion(),
+    "resize": Resize(),
+    "resample": Resample(),
 }
