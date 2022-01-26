@@ -3,6 +3,8 @@ import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, p
 import SimpleITK as sitk
 import numpy as np
 
+from pydicom.data import get_testdata_file
+
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.data.preprocessing import global_preprocessing_dict
@@ -15,6 +17,8 @@ from GANDLF.cli.preprocess_and_save import preprocess_and_save
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
+from GANDLF.post_process import torch_morphological, fill_holes
+from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"
 ## global defines
@@ -930,6 +934,8 @@ def test_preprocess_functions():
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
 
+    input_transformed = fill_holes(input_tensor)
+
     input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
     img_resized = resize_image(
         input_image,
@@ -951,6 +957,13 @@ def test_preprocess_functions():
     cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
     input_transformed = cropper(input_tensor)
     assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
+
+    # test pure morphological operations
+    input_tensor_3d = torch.rand(1, 1, 256, 256, 256)
+    input_tensor_2d = torch.rand(1, 3, 256, 256)
+    for mode in ["dilation", "erosion", "opening", "closing"]:
+        input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
+        input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
 
     print("passed")
 
@@ -1113,3 +1126,17 @@ def test_one_hot_logic():
     comparison = (random_array == 4) == img_tensor_oh_rev_array_sp
     assert comparison.all(), "Arrays at '4' are not equal"
     print("passed")
+
+
+def test_anonymizer():
+    input_file = get_testdata_file("MR_small.dcm")
+
+    output_file = os.path.join(testingDir, "MR_small_anonymized.yaml")
+    if os.path.exists(output_file):
+        os.remove(output_file)
+
+    config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
+
+    run_anonymizer(input_file, output_file, config_file)
+
+    os.remove(output_file)
