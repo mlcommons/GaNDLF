@@ -8,6 +8,8 @@
 - Model saving now includes the git commit hash
 - Added FAQ in documentation
 - Accuracy is now standardized from `torchmetrics`
+- New post-processing module added
+- Anonymization module has been added
 
 ## 0.0.13
 
