@@ -3,5 +3,6 @@ extend-exclude = '''
 /(
   | testing/data
   | GANDLF/OPM
+  | GANDLF/anonymize/dicomanonymizer
 )/
 '''
