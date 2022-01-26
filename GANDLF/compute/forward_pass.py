@@ -285,11 +285,10 @@ def validate_network(
                     result_image = sitk.Cast(result_image, inputImage.GetPixelID())
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
-                        result_image = resample_image(
-                            result_image,
-                            inputImage.GetSpacing(),
-                            interpolator=sitk.sitkNearestNeighbor,
+                        resampler = torchio.transform.Resampler(
+                            inputImage.GetSpacing(), interpolator=sitk.NearestNeighbor
                         )
+                        resized_image = resampler(result_image
                     sitk.WriteImage(
                         result_image,
                         os.path.join(
@@ -323,10 +322,7 @@ def validate_network(
 
             # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
-                image,
-                label_ground_truth,
-                output_prediction.to(torch.float32),
-                params,
+                image, label_ground_truth, output_prediction.to(torch.float32), params,
             )
             if params["verbose"]:
                 print(
@@ -362,8 +358,7 @@ def validate_network(
                 else:
                     to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
                 print(
-                    "Half-Epoch Average " + mode + " " + metric + " : ",
-                    to_print,
+                    "Half-Epoch Average " + mode + " " + metric + " : ", to_print,
                 )
 
     if params["medcam_enabled"]:

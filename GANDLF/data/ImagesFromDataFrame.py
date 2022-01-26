@@ -190,9 +190,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 if "resolution" in preprocessing[preprocess_lower]:
                     # resample_split = str(aug).split(':')
                     resample_values = tuple(
-                        np.array(preprocessing["resample"]["resolution"]).astype(
-                            np.float
-                        )
+                        np.array(preprocessing["resample"]["resolution"])
                     )
                     # Need to take a look here
                     if len(resample_values) == 2:
