@@ -84,13 +84,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         sampler = sampler.lower()  # for easier parsing
         sampler_padding = "symmetric"
 
-    resize_images = False
-    # if resize has been defined but resample is not (or is none)
-    if not (preprocessing is None) and ("resize" in preprocessing):
-        if preprocessing["resize"] is not None:
-            if not ("resample" in preprocessing):
-                resize_images = True
-
     # iterating through the dataframe
     for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
@@ -116,14 +109,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
 
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
-            # if resize is requested, the perform per-image resize with appropriate interpolator
-            if resize_images:
-                img = subject_dict[str(channel)].as_sitk()
-                img_resized = resize_image(img, preprocessing["resize"])
-                # always ensure resized image spacing is used
-                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
-                subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
-
         # # for regression
         # if predictionHeaders:
         #     # get the mask
@@ -135,13 +120,6 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 skip_subject = True
 
             subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
-
-            # if resize is requested, the perform per-image resize with appropriate interpolator
-            if resize_images:
-                img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                img_resized = resize_image(img, preprocessing["resize"])
-                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
-
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
         else:
             subject_dict["label"] = "NA"
@@ -205,7 +183,10 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         for preprocess in preprocessing:
             preprocess_lower = preprocess.lower()
             # special check for resample
-            if preprocess_lower == "resample":
+            if preprocess_lower == "resize":
+                resize_values = tuple(preprocessing["resize"]).astype(np.float)
+                transformations_list.append(torchio.Resize(resize_values))
+            elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
                     # resample_split = str(aug).split(':')
                     resample_values = tuple(
@@ -213,6 +194,7 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                             np.float
                         )
                     )
+                    # Need to take a look here
                     if len(resample_values) == 2:
                         resample_values = tuple(np.append(resample_values, 1))
                     transformations_list.append(Resample(resample_values))
