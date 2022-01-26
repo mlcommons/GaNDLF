@@ -1,3 +1,5 @@
 [run] 
 source = ./GANDLF
-omit = ./GANDLF/OPM
+omit = 
+    ./GANDLF/OPM
+    ./GANDLF/anonymize/dicomanonymizer

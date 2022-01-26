@@ -1,0 +1,66 @@
+#!usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os, argparse, sys, yaml
+from datetime import date
+from GANDLF.anonymize import run_anonymizer
+
+
+def main():
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_Anonymize",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Anonymize images/scans in the data directory.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-i",
+        "--inputDir",
+        metavar="",
+        type=str,
+        help="Input directory or file which contains images to be anonymized.",
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        metavar="",
+        type=str,
+        help="config (in YAML) for running anonymization.",
+    )
+    parser.add_argument(
+        "-o",
+        "--outputFile",
+        metavar="",
+        type=str,
+        help="Output directory or file which will contain the image(s) after anonymization.",
+    )
+
+    args = parser.parse_args()
+
+    # check for required parameters - this is needed here to keep the cli clean
+    for param_none_check in [args.inputDir, args.config, args.outputFile]:
+        if param_none_check is None:
+            sys.exit("ERROR: Missing required parameter:", param_none_check)
+
+    inputDir = os.path.normpath(args.inputDir)
+    outputFile = os.path.normpath(args.outputFile)
+    config = yaml.load(open(args.config), Loader=yaml.FullLoader)
+
+    if not args.labelID:
+        args.labelID = ""
+
+    run_anonymizer(inputDir, outputFile, config)
+
+    print("Finished successfully.")
+
+
+# main function
+if __name__ == "__main__":
+    main()
