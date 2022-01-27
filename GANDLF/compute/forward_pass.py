@@ -288,7 +288,7 @@ def validate_network(
                         resampler = torchio.transform.Resampler(
                             inputImage.GetSpacing(), interpolator=sitk.NearestNeighbor
                         )
-                        resized_image = resampler(result_image
+                        resized_image = resampler(result_image)
                     sitk.WriteImage(
                         result_image,
                         os.path.join(
