@@ -87,10 +87,10 @@ setup(
     author_email="software@cbica.upenn.edu",
     python_requires=">=3.6",
     packages=find_packages(),
-    cmdclass={ # this ensures git_submodule_update is called during install
-        'install': CustomInstallCommand,
-        'develop': CustomDevelopCommand,
-        'egg_info': CustomEggInfoCommand,
+    cmdclass={  # this ensures git_submodule_update is called during install
+        "install": CustomInstallCommand,
+        "develop": CustomDevelopCommand,
+        "egg_info": CustomEggInfoCommand,
     },
     scripts=[
         "gandlf_run",
