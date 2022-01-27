@@ -3,6 +3,7 @@
 """The setup script."""
 
 
+import os
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
@@ -13,8 +14,6 @@ with open("README.md") as readme_file:
 
 
 def git_submodule_update():
-    import os
-
     ## submodule update
     os.system("git submodule update --init --recursive")
 
@@ -124,8 +123,6 @@ setup(
     keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging",
     zip_safe=False,
 )
-
-import os
 
 ## windows vips installation
 if os.name == "nt":  # proceed for windows
