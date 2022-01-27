@@ -72,6 +72,7 @@ requirements = [
     "pyvips",
     "pytest",
     "coverage",
+    "pytest-cov",
     "psutil",
     "medcam",
     "opencv-python",
