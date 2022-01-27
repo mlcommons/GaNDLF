@@ -1,5 +1,6 @@
 [run] 
 source = ./GANDLF
 omit = 
+    ./setup.py
     ./GANDLF/OPM
     ./GANDLF/anonymize/dicomanonymizer
