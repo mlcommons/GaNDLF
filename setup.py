@@ -2,10 +2,39 @@
 
 """The setup script."""
 
+
+import os
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+from setuptools.command.develop import develop
+from setuptools.command.egg_info import egg_info
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
+
+
+def git_submodule_update():
+    ## submodule update
+    os.system("git submodule update --init --recursive")
+
+
+class CustomInstallCommand(install):
+    def run(self):
+        install.run(self)
+        git_submodule_update()
+
+
+class CustomDevelopCommand(develop):
+    def run(self):
+        develop.run(self)
+        git_submodule_update()
+
+
+class CustomEggInfoCommand(egg_info):
+    def run(self):
+        egg_info.run(self)
+        git_submodule_update()
+
 
 # read version.py
 import sys, re
@@ -42,6 +71,7 @@ requirements = [
     "pyvips",
     "pytest",
     "coverage",
+    "pytest-cov",
     "psutil",
     "medcam",
     "opencv-python",
@@ -53,10 +83,15 @@ requirements = [
 setup(
     name="GANDLF",
     version=__version__,
-    author="Jose Agraz, Vinayak Ahluwalia, Bhakti Baheti, Spyridon Bakas, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Orhun Güley, Sarthak Pati, Micah Sheller, Juliia Skobleva, Siddhesh Thakur, Spiros Thermos",  # alphabetical order
+    author="Jose Agraz, Vinayak Ahluwalia, Bhakti Baheti, Spyridon Bakas, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Orhun Güley, Ibrahim Ethem Hamamci, Sarthak Pati, Micah Sheller, Juliia Skobleva, Siddhesh Thakur, Spiros Thermos",  # alphabetical order
     author_email="software@cbica.upenn.edu",
     python_requires=">=3.6",
     packages=find_packages(),
+    cmdclass={  # this ensures git_submodule_update is called during install
+        "install": CustomInstallCommand,
+        "develop": CustomDevelopCommand,
+        "egg_info": CustomEggInfoCommand,
+    },
     scripts=[
         "gandlf_run",
         "gandlf_constructCSV",
@@ -88,11 +123,6 @@ setup(
     keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging",
     zip_safe=False,
 )
-
-import os
-
-## submodule update
-os.system("git submodule update --init --recursive")
 
 ## windows vips installation
 if os.name == "nt":  # proceed for windows
