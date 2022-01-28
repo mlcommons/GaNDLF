@@ -330,7 +330,7 @@ def parseConfig(config_file_path, version_check_flag=True):
             # special case for colorjitter
             if "colorjitter" in params["data_augmentation"]:
                 params["data_augmentation"] = initialize_key(
-                    params["data_augmentation"], "colorjitter"
+                    params["data_augmentation"], "colorjitter", {}
                 )
                 for key in ["brightness", "contrast", "saturation"]:
                     params["data_augmentation"]["colorjitter"] = initialize_key(
