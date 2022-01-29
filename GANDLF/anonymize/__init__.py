@@ -1,6 +1,7 @@
 import yaml
 from typing import Union
 from .dicomanonymizer.dicomanonymizer import anonymize
+from .convert_to_nifti import convert_to_nifti
 
 
 def run_anonymizer(
@@ -23,14 +24,22 @@ def run_anonymizer(
         parameters = yaml.safe_load(yaml_data)
 
     if "rad" in parameters["modality"]:
+        # initialize defaults
         if "delete_private_tags" not in parameters:
             parameters["delete_private_tags"] = True
-        return anonymize(
-            input_path,
-            output_path,
-            anonymization_actions={},
-            deletePrivateTags=parameters["delete_private_tags"],
-        )
+        if "convert_to_nifti" not in parameters:
+            parameters["convert_to_nifti"] = False
+
+        # if nifti conversion is requested, no other anonymization is required
+        if parameters["convert_to_nifti"]:
+            return convert_to_nifti(input_path, output_path)
+        else:
+            return anonymize(
+                input_path,
+                output_path,
+                anonymization_actions={},
+                deletePrivateTags=parameters["delete_private_tags"],
+            )
     elif parameters["modality"] in ["histo", "path"]:
         raise NotImplementedError(
             "Anonymization for histology images has not been implemented yet."

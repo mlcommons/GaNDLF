@@ -10,6 +10,7 @@
 - Accuracy is now standardized from `torchmetrics`
 - New post-processing module added
 - Anonymization module has been added
+- NIfTI conversion added in anonymization
 
 ## 0.0.13
 
