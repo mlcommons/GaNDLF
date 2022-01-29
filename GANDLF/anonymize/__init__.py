@@ -29,7 +29,7 @@ def run_anonymizer(
             parameters["delete_private_tags"] = True
         if "convert_to_nifti" not in parameters:
             parameters["convert_to_nifti"] = False
-        
+
         # if nifti conversion is requested, no other anonymization is required
         if parameters["convert_to_nifti"]:
             return convert_to_nifti(input_path, output_path)
