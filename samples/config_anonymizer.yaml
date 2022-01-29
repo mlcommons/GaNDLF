@@ -1,3 +1,5 @@
 modality: rad
 
 delete_private_tags: True
+
+convert_to_nifti: False
