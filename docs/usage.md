@@ -11,6 +11,9 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Usage](#usage)
   - [Table of Contents](#table-of-contents)
   - [Preparing the Data](#preparing-the-data)
+    - [Anonymize Data](#anonymize-data)
+    - [Cleanup/Harmonize Data](#cleanupharmonize-data)
+    - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
     - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
   - [Constructing the Data CSV](#constructing-the-data-csv)
   - [Customize the Training](#customize-the-training)
@@ -20,6 +23,19 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [M3D-CAM usage](#m3d-cam-usage)
 
 ## Preparing the Data
+
+### Anonymize Data
+
+GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
+```bash
+python gandlf_anonymizer
+  # -h, --help         show help message and exit
+  -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
+  -o ./output_dir_or_file # output directory to save anonymized images or a single output image file
+```
+
+### Cleanup/Harmonize Data
 
 It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
 
@@ -31,7 +47,7 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 
 Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
 
-**For Histopathology Only:**
+### Offline Patch Extraction (for histology images only)
 
 GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using [OPM](https://github.com/CBICA/OPM):
 
