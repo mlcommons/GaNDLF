@@ -1131,7 +1131,7 @@ def test_one_hot_logic():
 def test_anonymizer():
     input_file = get_testdata_file("MR_small.dcm")
 
-    output_file = os.path.join(testingDir, "MR_small_anonymized.yaml")
+    output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
     if os.path.exists(output_file):
         os.remove(output_file)
 
@@ -1140,3 +1140,31 @@ def test_anonymizer():
     run_anonymizer(input_file, output_file, config_file)
 
     os.remove(output_file)
+
+    # test nifti conversion
+    config_file_for_nifti = os.path.join(testingDir, "config_anonymizer_nifti.yaml")
+    with open(config_file, "r") as file_data:
+        yaml_data = file_data.read()
+    parameters = yaml.safe_load(yaml_data)
+    parameters["convert_to_nifti"] = True
+    with open(config_file_for_nifti, "w") as file:
+        yaml.dump(parameters, file)
+    
+    # for nifti conversion, the input needs to be in a dir   
+    input_folder_for_nifti = os.path.join(testingDir, "nifti_input") 
+    Path(input_folder_for_nifti).mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(input_file, os.path.join(input_folder_for_nifti, "MR_small.dcm"))
+
+    output_file = os.path.join(testingDir, "MR_small.nii.gz")
+    
+    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti)
+
+    if not os.path.exists(output_file):
+        raise Exception("Output NIfTI file was not created")
+        
+    for file_to_delete in [input_folder_for_nifti, config_file_for_nifti, output_file]:
+        if os.path.exists(file_to_delete):
+            if os.path.isdir(file_to_delete):
+                shutil.rmtree(file_to_delete)
+            else:
+                os.remove(file_to_delete)
