@@ -278,7 +278,6 @@ def training_loop(
 
     # Start training time here
     start_time = time.time()
-    print("\n\n")
 
     if not (os.environ.get("HOSTNAME") is None):
         print("Hostname :", os.environ.get("HOSTNAME"))
