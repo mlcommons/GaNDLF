@@ -39,7 +39,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(
-        inferenceDataFromPickle, parameters, train=False, "inference"
+        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
     )
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
