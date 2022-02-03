@@ -783,7 +783,7 @@ def test_config_read():
     )
     if not parameters:
         sys.exit(1)
-    data_loader = ImagesFromDataFrame(training_data, parameters, True)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
     if not data_loader:
         sys.exit(1)
     print("passed")
