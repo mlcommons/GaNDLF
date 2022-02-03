@@ -11,6 +11,7 @@
 - New post-processing module added
 - Anonymization module has been added
 - More progress bars added for better feedback
+- NIfTI conversion added in anonymization
 
 ## 0.0.13
 
