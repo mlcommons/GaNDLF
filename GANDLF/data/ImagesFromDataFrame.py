@@ -95,7 +95,7 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type = ""):
                 resize_images = True
 
     # iterating through the dataframe
-    for patient in tqdm(num_row, desc="Constructing queue for " + loader_type + " data"):
+    for patient in tqdm(range(num_row), desc="Constructing queue for " + loader_type + " data"):
     # for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
