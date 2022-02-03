@@ -4,7 +4,7 @@ version:
     minimum: 0.0.14,
     maximum: 0.0.14 # this should NOT be made a variable, but should be tested after every tag is created
   }
-# Choose the model parameters here
+## Choose the model parameters here
 model:
   {
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
@@ -29,7 +29,7 @@ model:
     # final_convolution_layer (str) - the final convolutional layer to use
     # norm_type (str) - the normalization type to use
   }
-# metrics to evaluate the validation performance
+## metrics to evaluate the validation performance
 metrics:
   - dice # segmentation
   # - hausdorff # hausdorff 100 percentile, segmentation
@@ -49,11 +49,9 @@ in_memory: False
 save_output: False
 # this will save the patches used during training for qualitative analysis
 save_training: False
-# If enabled, this parameter pads images and labels when label sampler is used
-enable_padding: False
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
-# Patch size during training - 2D patch for breast images since third dimension is not patched 
+## Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: uniform
@@ -65,18 +63,20 @@ patch_sampler: uniform
 #         padding_type: constant # how the label gets padded
 #       }
 #   }
+# If enabled, this parameter pads images and labels when label sampler is used
+enable_padding: False
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
 patience: 50
 # Set the batch size
 batch_size: 1
-# Set the initial learning rate
-learning_rate: 0.001
 # gradient clip : norm, value, agc
 clip_mode: norm
 # clip_gradient value
 clip_grad: 0.1
+## Set the initial learning rate
+learning_rate: 0.001
 # Learning rate scheduler - options:"triangle", "triangle_modified", "exp", "step", "reduce-on-plateau", "cosineannealing", "triangular", "triangular2", "exp_range"
 # triangle/triangle_modified use LambdaLR but triangular/triangular2/exp_range uses CyclicLR
 scheduler:
@@ -101,7 +101,7 @@ weighted_loss: True
 # Which optimizer do you want to use - sgd, asgd, adam, adamw, adamax, sparseadam, rprop, adadelta, adagrad, rmsprop,
 # each has their own options and functionalities, which are initialized with defaults, see GANDLF.optimizers.wrap_torch for details
 optimizer: adam
-# this parameter controls the nested training process
+## this parameter controls the nested training process
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
@@ -147,7 +147,7 @@ data_preprocessing:
     'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
     'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
   }
-# various data augmentation techniques
+## various data augmentation techniques
 # options: affine, elastic, downsample, motion, kspace, bias, blur, gaussianNoise, swap
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
@@ -199,7 +199,7 @@ data_augmentation:
       'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
     }, 
   }
-# parallel training on HPC - here goes the command to prepend to send to a high performance computing
+## parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
 # not used for single fold training
 # this gets passed before the training_loop, so ensure enough memory is provided along with other parameters
