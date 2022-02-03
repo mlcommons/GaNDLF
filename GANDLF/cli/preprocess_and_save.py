@@ -1,6 +1,5 @@
 import os, sys, pickle
 from pathlib import Path
-from unittest import loader
 import numpy as np
 import SimpleITK as sitk
 import pandas as pd
