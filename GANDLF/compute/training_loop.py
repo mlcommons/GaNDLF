@@ -314,6 +314,7 @@ def training_loop(
             training_data,
             parameters=params,
             train=False,
+            loader_type= "penalty",
         )
         penalty_loader = DataLoader(
             penalty_data,
