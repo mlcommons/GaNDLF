@@ -190,13 +190,13 @@ def send_model_to_device(model, amp, device, optimizer):
             print(
                 "Memory Total : ",
                 round(
-                    torch.cuda.get_device_properties(dev_int).total_memory / 1024 ** 3,
+                    torch.cuda.get_device_properties(dev_int).total_memory / 1024**3,
                     1,
                 ),
                 "GB, Allocated: ",
-                round(torch.cuda.memory_allocated(dev_int) / 1024 ** 3, 1),
+                round(torch.cuda.memory_allocated(dev_int) / 1024**3, 1),
                 "GB, Cached: ",
-                round(torch.cuda.memory_reserved(dev_int) / 1024 ** 3, 1),
+                round(torch.cuda.memory_reserved(dev_int) / 1024**3, 1),
                 "GB",
             )
 
