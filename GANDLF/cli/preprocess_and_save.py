@@ -51,7 +51,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
 
     parameters = populate_header_in_parameters(parameters, headers)
 
-    data_for_processing = ImagesFromDataFrame(dataframe, parameters, train=False)
+    data_for_processing = ImagesFromDataFrame(dataframe, parameters, train=False, "full")
 
     dataloader_for_processing = DataLoader(
         data_for_processing,
