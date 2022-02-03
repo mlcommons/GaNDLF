@@ -96,7 +96,6 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type = ""):
 
     # iterating through the dataframe
     for patient in tqdm(range(num_row), desc="Constructing queue for " + loader_type + " data"):
-    # for patient in range(num_row):
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
         subject_dict = {}
