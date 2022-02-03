@@ -10,6 +10,7 @@
 - Accuracy is now standardized from `torchmetrics`
 - New post-processing module added
 - Anonymization module has been added
+- More progress bars added for better feedback
 
 ## 0.0.13
 
