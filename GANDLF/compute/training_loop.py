@@ -220,10 +220,12 @@ def training_loop(
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
     # Set up the dataloaders
-    training_data_for_torch = ImagesFromDataFrame(training_data, params, train=True, loader_type= "train")
+    training_data_for_torch = ImagesFromDataFrame(
+        training_data, params, train=True, loader_type="train"
+    )
 
     validation_data_for_torch = ImagesFromDataFrame(
-        validation_data, params, train=False, loader_type= "validation"
+        validation_data, params, train=False, loader_type="validation"
     )
 
     testingDataDefined = True
@@ -232,7 +234,9 @@ def training_loop(
         testingDataDefined = False
 
     if testingDataDefined:
-        test_data_for_torch = ImagesFromDataFrame(testing_data, params, train=False, loader_type= "testing")
+        test_data_for_torch = ImagesFromDataFrame(
+            testing_data, params, train=False, loader_type="testing"
+        )
 
     train_dataloader = DataLoader(
         training_data_for_torch,
@@ -314,7 +318,7 @@ def training_loop(
             training_data,
             parameters=params,
             train=False,
-            loader_type= "penalty",
+            loader_type="penalty",
         )
         penalty_loader = DataLoader(
             penalty_data,

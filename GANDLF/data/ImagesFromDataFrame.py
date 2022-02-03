@@ -31,7 +31,7 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, parameters, train, loader_type = ""):
+def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
     """
     Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
 
@@ -95,7 +95,9 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type = ""):
                 resize_images = True
 
     # iterating through the dataframe
-    for patient in tqdm(range(num_row), desc="Constructing queue for " + loader_type + " data"):
+    for patient in tqdm(
+        range(num_row), desc="Constructing queue for " + loader_type + " data"
+    ):
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
         subject_dict = {}
