@@ -9,6 +9,7 @@ from torchio.transforms import (
     Pad,
 )
 import SimpleITK as sitk
+from tqdm import tqdm
 
 from GANDLF.utils import (
     perform_sanity_check_on_subject,
@@ -30,7 +31,7 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, parameters, train):
+def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
     """
     Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
 
@@ -42,6 +43,8 @@ def ImagesFromDataFrame(dataframe, parameters, train):
         The parameters dictionary
     train : bool
         If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
+    loader_type : str
+        Type of loader for printing.
 
     Returns
     -------
@@ -92,7 +95,9 @@ def ImagesFromDataFrame(dataframe, parameters, train):
                 resize_images = True
 
     # iterating through the dataframe
-    for patient in range(num_row):
+    for patient in tqdm(
+        range(num_row), desc="Constructing queue for " + loader_type + " data"
+    ):
         # We need this dict for storing the meta data for each subject
         # such as different image modalities, labels, any other data
         subject_dict = {}
