@@ -64,7 +64,7 @@ requirements = [
     "setuptools",
     "seaborn",
     "pyyaml",
-    "openslide-python",
+    "tiffslide",
     "scikit-image",
     "matplotlib",
     "requests>=2.25.0",
