@@ -91,7 +91,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 row[parameters["headers"]["channelHeaders"]],
             )
             print(row[parameters["headers"]["channelHeaders"]].values[0])
-            os_image = openslide.OpenSlide(
+            os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
             level_width, level_height = os_image.level_dimensions[
