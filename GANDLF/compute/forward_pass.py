@@ -285,10 +285,10 @@ def validate_network(
                     result_image = sitk.Cast(result_image, inputImage.GetPixelID())
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
-                        resampler = torchio.transform.Resampler(
+                        resampler = torchio.transforms.Resample(
                             inputImage.GetSpacing(), interpolator=sitk.NearestNeighbor
                         )
-                        resized_image = resampler(result_image)
+                        result_image = resampler(result_image)
                     sitk.WriteImage(
                         result_image,
                         os.path.join(
