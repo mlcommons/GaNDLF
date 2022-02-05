@@ -62,7 +62,7 @@ class InferTumorSegDataset(Dataset):
         self._stride_size = stride_size
         self._selected_level = selected_level
         self._mask_level = mask_level
-        self._os_image = openslide.OpenSlide(os.path.join(self._wsi_path))
+        self._os_image = openslide.open_slide(os.path.join(self._wsi_path))
         self._points = []
         self._basic_preprocessing()
 
