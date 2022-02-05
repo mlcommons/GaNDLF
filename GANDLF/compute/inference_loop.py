@@ -76,100 +76,91 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         )
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif (parameters["modality"] == "path") or (parameters["modality"] == "histo"):
-        # histology inference
-        if os.name != "nt":
-            """
-            path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
-            """
-            from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
-            from openslide import OpenSlide
+        from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
+        import tiffslide as openslide
 
-            # actual computation
-            for _, row in inferenceDataForTorch.iterrows():
-                subject_name = row[parameters["headers"]["subjectIDHeader"]]
-                print(
-                    "Patient Slide       : ",
-                    row[parameters["headers"]["subjectIDHeader"]],
-                )
-                print(
-                    "Patient Location    : ",
-                    row[parameters["headers"]["channelHeaders"]],
-                )
-                print(row[parameters["headers"]["channelHeaders"]].values[0])
-                os_image = OpenSlide(
-                    row[parameters["headers"]["channelHeaders"]].values[0]
-                )
-                level_width, level_height = os_image.level_dimensions[
-                    int(parameters["slide_level"])
-                ]
-                subject_dest_dir = os.path.join(outputDir, subject_name)
-                os.makedirs(subject_dest_dir, exist_ok=True)
-
-                probs_map = np.zeros((level_height, level_width), dtype=np.float16)
-                count_map = np.zeros((level_height, level_width), dtype=np.uint8)
-
-                patient_dataset_obj = InferTumorSegDataset(
-                    row[parameters["headers"]["channelHeaders"]].values[0],
-                    patch_size=patch_size,
-                    stride_size=parameters["stride_size"],
-                    selected_level=parameters["slide_level"],
-                    mask_level=4,
-                )
-
-                dataloader = DataLoader(
-                    patient_dataset_obj,
-                    batch_size=int(parameters["batch_size"]),
-                    shuffle=False,
-                    num_workers=parameters["q_num_workers"],
-                )
-                for image_patches, (x_coords, y_coords) in tqdm(dataloader):
-                    x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                    if parameters["model"]["amp"]:
-                        with autocast():
-                            output = model(
-                                image_patches.float().to(parameters["device"])
-                            )
-                    else:
-                        output = model(image_patches.float().to(parameters["device"]))
-                    output = output.detach().cpu().numpy()
-                    for i in range(int(output.shape[0])):
-                        count_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += 1
-                        probs_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += output[i][0]
-                probs_map = probs_map / count_map
-                count_map = count_map / count_map.max()
-                out = count_map * probs_map
-                count_map = np.array(count_map * 255, dtype=np.uint16)
-                out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        row[parameters["headers"]["subjectIDHeader"]] + "_prob.png",
-                    ),
-                    out,
-                )
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        row[parameters["headers"]["subjectIDHeader"]] + "_seg.png",
-                    ),
-                    out_thresh,
-                )
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        row[parameters["headers"]["subjectIDHeader"]] + "_count.png",
-                    ),
-                    count_map,
-                )
-        else:
+        # actual computation
+        for _, row in inferenceDataForTorch.iterrows():
+            subject_name = row[parameters["headers"]["subjectIDHeader"]]
             print(
-                "ERROR: histo/path inference is Linux-only because openslide for Windows works only for Python-3.8, whereas pickle5 works only for 3.6 and 3.7"
+                "Patient Slide       : ",
+                row[parameters["headers"]["subjectIDHeader"]],
+            )
+            print(
+                "Patient Location    : ",
+                row[parameters["headers"]["channelHeaders"]],
+            )
+            print(row[parameters["headers"]["channelHeaders"]].values[0])
+            os_image = openslide.OpenSlide(
+                row[parameters["headers"]["channelHeaders"]].values[0]
+            )
+            level_width, level_height = os_image.level_dimensions[
+                int(parameters["slide_level"])
+            ]
+            subject_dest_dir = os.path.join(outputDir, subject_name)
+            os.makedirs(subject_dest_dir, exist_ok=True)
+
+            probs_map = np.zeros((level_height, level_width), dtype=np.float16)
+            count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+
+            patient_dataset_obj = InferTumorSegDataset(
+                row[parameters["headers"]["channelHeaders"]].values[0],
+                patch_size=patch_size,
+                stride_size=parameters["stride_size"],
+                selected_level=parameters["slide_level"],
+                mask_level=4,
+            )
+
+            dataloader = DataLoader(
+                patient_dataset_obj,
+                batch_size=int(parameters["batch_size"]),
+                shuffle=False,
+                num_workers=parameters["q_num_workers"],
+            )
+            for image_patches, (x_coords, y_coords) in tqdm(dataloader):
+                x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
+                if parameters["model"]["amp"]:
+                    with autocast():
+                        output = model(
+                            image_patches.float().to(parameters["device"])
+                        )
+                else:
+                    output = model(image_patches.float().to(parameters["device"]))
+                output = output.detach().cpu().numpy()
+                for i in range(int(output.shape[0])):
+                    count_map[
+                        x_coords[i] : x_coords[i] + patch_size[0],
+                        y_coords[i] : y_coords[i] + patch_size[1],
+                    ] += 1
+                    probs_map[
+                        x_coords[i] : x_coords[i] + patch_size[0],
+                        y_coords[i] : y_coords[i] + patch_size[1],
+                    ] += output[i][0]
+            probs_map = probs_map / count_map
+            count_map = count_map / count_map.max()
+            out = count_map * probs_map
+            count_map = np.array(count_map * 255, dtype=np.uint16)
+            out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    row[parameters["headers"]["subjectIDHeader"]] + "_prob.png",
+                ),
+                out,
+            )
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    row[parameters["headers"]["subjectIDHeader"]] + "_seg.png",
+                ),
+                out_thresh,
+            )
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    row[parameters["headers"]["subjectIDHeader"]] + "_count.png",
+                ),
+                count_map,
             )
 
 
