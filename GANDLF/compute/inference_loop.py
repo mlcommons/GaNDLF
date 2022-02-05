@@ -11,9 +11,12 @@ from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
+import tiffslide as openslide
+
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
 from GANDLF.models import global_models_dict
+from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
@@ -76,9 +79,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         )
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif (parameters["modality"] == "path") or (parameters["modality"] == "histo"):
-        from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
-        import tiffslide as openslide
-
         # actual computation
         for _, row in inferenceDataForTorch.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
