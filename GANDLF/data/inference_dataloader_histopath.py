@@ -16,6 +16,7 @@ from skimage.filters import threshold_otsu, median
 from skimage.morphology import binary_closing, disk
 from scipy.ndimage import binary_fill_holes
 
+
 def tissue_mask_generation(img_rgb, rgb_min=50):
     """
     This function is used to generate tissue masks
@@ -53,10 +54,9 @@ def tissue_mask_generation(img_rgb, rgb_min=50):
 
     return tissue_mask
 
+
 class InferTumorSegDataset(Dataset):
-    def __init__(
-        self, wsi_path, patch_size, stride_size, selected_level, mask_level
-    ):
+    def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level):
         self._wsi_path = wsi_path
         self._patch_size = patch_size
         self._stride_size = stride_size
