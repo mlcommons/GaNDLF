@@ -936,14 +936,6 @@ def test_preprocess_functions():
 
     input_transformed = fill_holes(input_tensor)
 
-    input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
-    img_resized = resize_image(
-        input_image,
-        [128, 128, 3],
-    )
-    temp_array = sitk.GetArrayFromImage(img_resized)
-    assert temp_array.shape == (3, 128, 128), "Resampling should work"
-
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
         patch_size=[128, 128, 128]
