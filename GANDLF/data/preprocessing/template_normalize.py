@@ -25,3 +25,23 @@ class TemplateNormalizeBase(IntensityTransform):
 
     def apply_normalize(self, image: ScalarImage) -> None:
         raise NotImplementedError("This method must be implemented in a subclass.")
+
+
+class HistogramMatching(TemplateNormalizeBase):
+    """
+    This class performs histogram matching.
+
+    Args:
+        TemplateNormalizeBase (object): Base class
+    """
+    
+    def __init__(self, num_hist_level=1024, num_match_points=7,**kwargs):
+        super().__init__(**kwargs)
+        self.num_hist_level = num_hist_level
+        self.num_match_points = num_match_points
+
+    def apply_normalize(self, image: ScalarImage) -> None:
+        image_sitk = image.as_sitk()
+        target_sitk = sitk.ReadImage(self.target)
+        return sitk.HistogramMatching(image_sitk, target_sitk, self.num_hist_level, self.num_match_points)
+    
