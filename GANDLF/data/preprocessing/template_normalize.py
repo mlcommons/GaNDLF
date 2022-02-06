@@ -43,7 +43,7 @@ class HistogramMatching(TemplateNormalizeBase):
     def apply_normalize(self, image: ScalarImage) -> None:
         image_sitk = image.as_sitk()
         if self.target is not None:
-            target_sitk = sitk.ReadImage(self.target)
+            target_sitk = sitk.ReadImage(self.target, image_sitk.GetPixelID())
         else:
             # if target is not present, perform global histogram equalization
             image_sitk_arr = sitk.GetArrayFromImage(image_sitk)
