@@ -9,7 +9,6 @@ from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
     reverse_one_hot,
-    resample_image,
 )
 from .step import step
 from .loss_and_metric import get_loss_and_metrics
