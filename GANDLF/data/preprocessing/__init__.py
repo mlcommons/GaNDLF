@@ -10,6 +10,7 @@ from .normalize_rgb import (
     normalize_standardize_transform,
     normalize_div_by_255_transform,
 )
+from .template_normalize import histogram_matching
 
 from torchio.transforms import (
     ZNormalization,
@@ -58,4 +59,5 @@ global_preprocessing_dict = {
     "normalize_nonzero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
     "normalize_nonzero_masked": NonZeroNormalizeOnMaskedRegion(),
+    "histogram_matching": histogram_matching,
 }
