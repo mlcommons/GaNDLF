@@ -11,9 +11,7 @@ from torchio.transforms import (
 import SimpleITK as sitk
 from tqdm import tqdm
 
-from GANDLF.utils import (
-    perform_sanity_check_on_subject
-)
+from GANDLF.utils import perform_sanity_check_on_subject
 from .preprocessing import global_preprocessing_dict
 from .augmentation import global_augs_dict
 
