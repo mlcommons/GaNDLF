@@ -435,8 +435,6 @@ def parseConfig(config_file_path, version_check_flag=True):
                         initialize_key(params["data_preprocessing"], key, {})
                         # if histogram equalization is enabled, call histogram_matching
                         params["data_preprocessing"]["histogram_matching"]= {}
-                        params["data_preprocessing"]["histogram_matching"]["num_hist_level"] = params["data_preprocessing"].get("num_hist_level", 1024)
-                        params["data_preprocessing"]["histogram_matching"]["num_match_points"] = params["data_preprocessing"].get("num_match_points", 16)
 
     if "model" in params:
 
