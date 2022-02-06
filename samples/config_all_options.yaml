@@ -128,7 +128,7 @@ nested_training:
 data_preprocessing:
   {
     # 'histogram_matching':{
-    #   'target': '/path/to/target/image.nii.gz' # this is the target image to which the histogram of the current image is matched, if this not defined, histogram equilization is performed on the entire image with an equal ramp of [-1,1]
+    #   'target': '/path/to/target/image.nii.gz' # this is the target image to which the histogram of the current image is matched, if this not defined, histogram equalization is performed on the entire image with an equal ramp of [-1,1]
     # }
     'threshold':{
       'min': 10, 
