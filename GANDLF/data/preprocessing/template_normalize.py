@@ -16,7 +16,7 @@ class TemplateNormalizeBase(IntensityTransform):
     def __init__(self, target: str = None, **kwargs):
         super().__init__(**kwargs)
         self.target = target
-        self.args_names = "target"
+        self.args_names = "target",
 
     def apply_transform(self, subject: Subject) -> Subject:
         for image in self.get_images(subject):
