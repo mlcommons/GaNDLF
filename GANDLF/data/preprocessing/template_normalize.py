@@ -35,7 +35,7 @@ class HistogramMatching(TemplateNormalizeBase):
         TemplateNormalizeBase (object): Base class
     """
     
-    def __init__(self, num_hist_level=1024, num_match_points=7,**kwargs):
+    def __init__(self, num_hist_level=1024, num_match_points=16,**kwargs):
         super().__init__(**kwargs)
         self.num_hist_level = num_hist_level
         self.num_match_points = num_match_points
