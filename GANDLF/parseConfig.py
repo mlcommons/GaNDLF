@@ -411,7 +411,8 @@ def parseConfig(config_file_path, version_check_flag=True):
                     if key in thresholdOrClipDict:
                         thresholdOrClip = True  # we only allow one of threshold or clip to occur and not both
                         # initialize if nothing is present
-                        initialize_key(params["data_preprocessing"], key, {})
+                        if not (isinstance(params["data_preprocessing"][key], dict)):
+                            params["data_preprocessing"][key] = {}
 
                         # if one of the required parameters is not present, initialize with lowest/highest possible values
                         # this ensures the absence of a field doesn't affect processing
@@ -428,11 +429,13 @@ def parseConfig(config_file_path, version_check_flag=True):
                 
                 if key == "histogram_matching":
                     if params["data_preprocessing"][key] is not False:
-                        initialize_key(params["data_preprocessing"], key, {})
+                        if not (isinstance(params["data_preprocessing"][key], dict)):
+                            params["data_preprocessing"][key] = {}
 
                 if key == "histogram_equalization":
                     if params["data_preprocessing"][key] is not False:
-                        initialize_key(params["data_preprocessing"], key, {})
+                        if not (isinstance(params["data_preprocessing"][key], dict)):
+                            params["data_preprocessing"][key] = {}
                         # if histogram equalization is enabled, call histogram_matching
                         params["data_preprocessing"]["histogram_matching"]= {}
 
