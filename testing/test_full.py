@@ -936,7 +936,9 @@ def test_preprocess_functions():
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {}
-    non_zero_normalizer = global_preprocessing_dict["histogram_matching"](parameters_temp)
+    non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
+        parameters_temp
+    )
     input_transformed = non_zero_normalizer(input_tensor)
 
     input_transformed = fill_holes(input_tensor)
