@@ -221,6 +221,10 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                     if len(resample_values) == 2:
                         resample_values = tuple(np.append(resample_values, 1))
                     transformations_list.append(Resample(resample_values))
+            # special check for histogram_matching
+            elif preprocess_lower == "histogram_matching":
+                if preprocessing[preprocess_lower] is not False:
+                    transformations_list.append(global_preprocessing_dict[preprocess_lower](preprocessing[preprocess_lower]))
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
