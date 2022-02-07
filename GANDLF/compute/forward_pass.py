@@ -117,6 +117,7 @@ def validate_network(
                     path=subject["label"]["path"],
                     type=torchio.LABEL,
                     tensor=subject["label"]["data"].squeeze(0),
+                    affine=subject["label"]["affine"].squeeze(0),
                 )
                 label_present = True
                 label_ground_truth = subject_dict["label"]["data"]
