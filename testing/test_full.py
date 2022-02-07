@@ -306,7 +306,6 @@ def test_train_regression_rad_3d(device):
     )
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_regression.csv"
@@ -341,7 +340,6 @@ def test_train_classification_rad_2d(device):
     parameters["track_memory_usage"] = True
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
@@ -374,7 +372,6 @@ def test_train_classification_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -407,7 +404,6 @@ def test_inference_classification_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -444,7 +440,6 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
 
     # read and parse csv
@@ -483,7 +478,6 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
     # necessary for n-fold cross-validation inference
     parameters["nested_training"]["validation"] = 2
@@ -524,7 +518,6 @@ def test_scheduler_classification_rad_2d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
@@ -562,7 +555,6 @@ def test_optimizer_classification_rad_2d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
@@ -600,7 +592,6 @@ def test_clip_train_classification_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -933,6 +924,7 @@ def test_preprocess_functions():
     input_transformed = non_zero_normalizer(input_tensor)
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
+
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {}
