@@ -824,10 +824,28 @@ def test_cli_function_preprocess():
 
 def test_cli_function_mainrun(device):
     print("Starting testing cli function main_run")
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
     file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
-    # if preprocess wasn't run, this file should not be present
-    if not os.path.exists(file_config_temp):
-        file_config_temp = os.path.join(testingDir, "config_segmentation.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = 1
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = [
+        "dice",
+    ]
+    parameters["model"]["architecture"] = "unet"
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
 
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
