@@ -843,7 +843,7 @@ def test_cli_function_mainrun(device):
         "dice",
     ]
     parameters["model"]["architecture"] = "unet"
-    
+
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
 
