@@ -48,8 +48,8 @@ class HistogramMatching(TemplateNormalizeBase):
         else:
             # if target is not present, perform global histogram equalization
             image_sitk_arr = sitk.GetArrayFromImage(image_sitk)
-            target_arr = np.linspace(
-                -1.0,
+            target_arr = np.random.normal(
+                0.0,
                 1.0,
                 np.array(image_sitk_arr.shape).prod(),
                 dtype=image_sitk_arr.dtype,
