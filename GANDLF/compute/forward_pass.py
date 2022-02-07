@@ -265,8 +265,14 @@ def validate_network(
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
-                    img_for_metadata=torchio.Image(type=subject["1"]["type"],tensor=subject["1"]["data"].squeeze(0),affine=subject["1"]["affine"].squeeze(0)).as_sitk()
-                    ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
+                    img_for_metadata = torchio.Image(
+                        type=subject["1"]["type"],
+                        tensor=subject["1"]["data"].squeeze(0),
+                        affine=subject["1"]["affine"].squeeze(0),
+                    ).as_sitk()
+                    ext = get_filename_extension_sanitized(
+                        subject["path_to_metadata"][0]
+                    )
                     pred_mask = output_prediction.numpy()
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
@@ -282,11 +288,14 @@ def validate_network(
                     result_image.CopyInformation(img_for_metadata)
                     subject["0"].as_sitk()
                     # cast as the same data type
-                    result_image = sitk.Cast(result_image, img_for_metadata.GetPixelID())
+                    result_image = sitk.Cast(
+                        result_image, img_for_metadata.GetPixelID()
+                    )
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         resampler = torchio.transforms.Resample(
-                            img_for_metadata.GetSpacing(), interpolator=sitk.NearestNeighbor
+                            img_for_metadata.GetSpacing(),
+                            interpolator=sitk.NearestNeighbor,
                         )
                         result_image = resampler(result_image)
                     sitk.WriteImage(
