@@ -9,7 +9,6 @@ from GANDLF.utils import (
     get_date_time,
     get_filename_extension_sanitized,
     reverse_one_hot,
-    resample_image,
 )
 from .step import step
 from .loss_and_metric import get_loss_and_metrics
@@ -134,6 +133,7 @@ def validate_network(
                 path=subject[key]["path"],
                 type=subject[key]["type"],
                 tensor=subject[key]["data"].squeeze(0),
+                affine=subject[key]["affine"].squeeze(0),
             )
 
         # regression/classification problem AND label is present
@@ -265,9 +265,14 @@ def validate_network(
                 output_prediction = output_prediction.unsqueeze(0)
                 label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
-                    path_to_metadata = subject["path_to_metadata"][0]
-                    inputImage = sitk.ReadImage(path_to_metadata)
-                    ext = get_filename_extension_sanitized(path_to_metadata)
+                    img_for_metadata = torchio.Image(
+                        type=subject["1"]["type"],
+                        tensor=subject["1"]["data"].squeeze(0),
+                        affine=subject["1"]["affine"].squeeze(0),
+                    ).as_sitk()
+                    ext = get_filename_extension_sanitized(
+                        subject["path_to_metadata"][0]
+                    )
                     pred_mask = output_prediction.numpy()
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
@@ -280,15 +285,19 @@ def validate_network(
                         result_image = sitk.GetImageFromArray(pred_mask)
                     else:
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
-                    result_image.CopyInformation(inputImage)
+                    result_image.CopyInformation(img_for_metadata)
+                    subject["0"].as_sitk()
                     # cast as the same data type
-                    result_image = sitk.Cast(result_image, inputImage.GetPixelID())
+                    result_image = sitk.Cast(
+                        result_image, img_for_metadata.GetPixelID()
+                    )
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
-                        resampler = torchio.transform.Resampler(
-                            inputImage.GetSpacing(), interpolator=sitk.NearestNeighbor
+                        resampler = torchio.transforms.Resample(
+                            img_for_metadata.GetSpacing(),
+                            interpolator=sitk.NearestNeighbor,
                         )
-                        resized_image = resampler(result_image)
+                        result_image = resampler(result_image)
                     sitk.WriteImage(
                         result_image,
                         os.path.join(
@@ -322,7 +331,10 @@ def validate_network(
 
             # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
-                image, label_ground_truth, output_prediction.to(torch.float32), params,
+                image,
+                label_ground_truth,
+                output_prediction.to(torch.float32),
+                params,
             )
             if params["verbose"]:
                 print(
@@ -358,7 +370,8 @@ def validate_network(
                 else:
                     to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
                 print(
-                    "Half-Epoch Average " + mode + " " + metric + " : ", to_print,
+                    "Half-Epoch Average " + mode + " " + metric + " : ",
+                    to_print,
                 )
 
     if params["medcam_enabled"]:
