@@ -57,7 +57,7 @@ class HistogramMatching(TemplateNormalizeBase):
             target_sitk = sitk.GetImageFromArray(
                 target_arr.reshape(image_sitk_arr.shape)
             )
-        
+
         normalized_img = sitk.HistogramMatching(
             image_sitk, target_sitk, self.num_hist_level, self.num_match_points
         )

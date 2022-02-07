@@ -426,7 +426,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                             ] = sys.float_info.max
                 elif key in thresholdOrClipDict:
                     sys.exit("Use only 'threshold' or 'clip', not both")
-                
+
                 if key == "histogram_matching":
                     if params["data_preprocessing"][key] is not False:
                         if not (isinstance(params["data_preprocessing"][key], dict)):
@@ -437,7 +437,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                         if not (isinstance(params["data_preprocessing"][key], dict)):
                             params["data_preprocessing"][key] = {}
                         # if histogram equalization is enabled, call histogram_matching
-                        params["data_preprocessing"]["histogram_matching"]= {}
+                        params["data_preprocessing"]["histogram_matching"] = {}
 
     if "model" in params:
 
