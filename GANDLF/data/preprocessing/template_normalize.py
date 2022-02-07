@@ -24,6 +24,7 @@ class TemplateNormalizeBase(IntensityTransform):
         return subject
 
     def apply_normalize(self, image: ScalarImage) -> None:
+        # ensure you call image.set_data() with the normalized tensor/array/image
         raise NotImplementedError("This method must be implemented in a subclass.")
 
 
