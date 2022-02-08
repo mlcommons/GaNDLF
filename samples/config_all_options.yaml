@@ -136,6 +136,7 @@ data_preprocessing:
     #   'num_hist_level': 1024, # number of histogram levels
     #   'num_match_points': 16, # number of matching points for histogram matching
     # },
+    # 'adaptive_histogram_equalization', # this performs Power Law Adaptive Histogram Equalization using https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1AdaptiveHistogramEqualizationImageFilter.html
     'threshold':{
       'min': 10, 
       'max': 75
