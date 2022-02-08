@@ -1,6 +1,5 @@
-import sys, math, os, pathlib
+import os, pathlib
 import SimpleITK as sitk
-import numpy as np
 import torchio
 
 from .generic import get_filename_extension_sanitized
