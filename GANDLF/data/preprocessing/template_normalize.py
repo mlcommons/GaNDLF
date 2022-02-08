@@ -1,3 +1,4 @@
+import os
 import SimpleITK as sitk
 import numpy as np
 
@@ -43,9 +44,7 @@ class HistogramMatching(TemplateNormalizeBase):
 
     def apply_normalize(self, image: ScalarImage) -> None:
         image_sitk = image.as_sitk()
-        if self.target is not None:
-            target_sitk = sitk.ReadImage(self.target, image_sitk.GetPixelID())
-        else:
+        if self.target is None:
             # if target is not present, perform global histogram equalization
             image_sitk_arr = sitk.GetArrayFromImage(image_sitk)
             target_arr = np.linspace(
@@ -57,11 +56,16 @@ class HistogramMatching(TemplateNormalizeBase):
             target_sitk = sitk.GetImageFromArray(
                 target_arr.reshape(image_sitk_arr.shape)
             )
+        elif os.path.exists(self.target):
+            target_sitk = sitk.ReadImage(self.target, image_sitk.GetPixelID())
 
-        normalized_img = sitk.HistogramMatching(
-            image_sitk, target_sitk, self.num_hist_level, self.num_match_points
-        )
-        image.set_data(sitk.GetArrayFromImage(normalized_img))
+        if self.target is "adaptive":
+            normalized_img = sitk.AdaptiveHistogramEqualization(image_sitk)
+        else:
+            normalized_img = sitk.HistogramMatching(
+                image_sitk, target_sitk, self.num_hist_level, self.num_match_points
+            )
+        image.from_sitk(normalized_img)
 
 
 def histogram_matching(parameters):
