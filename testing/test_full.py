@@ -633,6 +633,7 @@ def test_normtype_train_segmentation_rad_3d(device):
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
+    parameters["save_output"] = True
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -824,10 +825,28 @@ def test_cli_function_preprocess():
 
 def test_cli_function_mainrun(device):
     print("Starting testing cli function main_run")
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
     file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
-    # if preprocess wasn't run, this file should not be present
-    if not os.path.exists(file_config_temp):
-        file_config_temp = os.path.join(testingDir, "config_segmentation.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = 1
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = [
+        "dice",
+    ]
+    parameters["model"]["architecture"] = "unet"
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
 
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
@@ -955,14 +974,6 @@ def test_preprocess_functions():
     input_transformed = non_zero_normalizer(input_tensor)
 
     input_transformed = fill_holes(input_tensor)
-
-    input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
-    img_resized = resize_image(
-        input_image,
-        [128, 128, 3],
-    )
-    temp_array = sitk.GetArrayFromImage(img_resized)
-    assert temp_array.shape == (3, 128, 128), "Resampling should work"
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](

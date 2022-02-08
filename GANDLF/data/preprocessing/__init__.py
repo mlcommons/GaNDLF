@@ -17,6 +17,8 @@ from torchio.transforms import (
     ToCanonical,
     Crop,
     CropOrPad,
+    Resize,
+    Resample,
 )
 
 

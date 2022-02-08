@@ -11,10 +11,7 @@ from torchio.transforms import (
 import SimpleITK as sitk
 from tqdm import tqdm
 
-from GANDLF.utils import (
-    perform_sanity_check_on_subject,
-    resize_image,
-)
+from GANDLF.utils import perform_sanity_check_on_subject
 from .preprocessing import global_preprocessing_dict
 from .augmentation import global_augs_dict
 
@@ -87,13 +84,6 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
         sampler = sampler.lower()  # for easier parsing
         sampler_padding = "symmetric"
 
-    resize_images = False
-    # if resize has been defined but resample is not (or is none)
-    if not (preprocessing is None) and ("resize" in preprocessing):
-        if preprocessing["resize"] is not None:
-            if not ("resample" in preprocessing):
-                resize_images = True
-
     # iterating through the dataframe
     for patient in tqdm(
         range(num_row), desc="Constructing queue for " + loader_type + " data"
@@ -121,14 +111,6 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
 
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
-            # if resize is requested, the perform per-image resize with appropriate interpolator
-            if resize_images:
-                img = subject_dict[str(channel)].as_sitk()
-                img_resized = resize_image(img, preprocessing["resize"])
-                # always ensure resized image spacing is used
-                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
-                subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
-
         # # for regression
         # if predictionHeaders:
         #     # get the mask
@@ -140,13 +122,6 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                 skip_subject = True
 
             subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
-
-            # if resize is requested, the perform per-image resize with appropriate interpolator
-            if resize_images:
-                img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                img_resized = resize_image(img, preprocessing["resize"])
-                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
-
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
         else:
             subject_dict["label"] = "NA"
@@ -210,14 +185,16 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
         for preprocess in preprocessing:
             preprocess_lower = preprocess.lower()
             # special check for resample
-            if preprocess_lower == "resample":
+            if preprocess_lower == "resize":
+                resize_values = tuple(preprocessing["resize"])
+                transformations_list.append(torchio.Resize(resize_values))
+            elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
                     # resample_split = str(aug).split(':')
                     resample_values = tuple(
-                        np.array(preprocessing["resample"]["resolution"]).astype(
-                            np.float
-                        )
+                        np.array(preprocessing["resample"]["resolution"])
                     )
+                    # Need to take a look here
                     if len(resample_values) == 2:
                         resample_values = tuple(np.append(resample_values, 1))
                     transformations_list.append(Resample(resample_values))
