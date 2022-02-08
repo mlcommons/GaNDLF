@@ -925,9 +925,30 @@ def test_preprocess_functions():
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
 
+    ## histogram matching tests
+    # histogram equalization
+    training_data, _ = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {}
+    non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
+        parameters_temp
+    )
+    input_transformed = non_zero_normalizer(input_tensor)
+    # adaptive histogram equalization
+    parameters_temp = {}
+    parameters_temp["data_preprocessing"] = {}
+    parameters_temp["data_preprocessing"]["histogram_matching"] = {"target": "adaptive"}
+    non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
+        parameters_temp
+    )
+    input_transformed = non_zero_normalizer(input_tensor)
+    # histogram matching
+    parameters_temp = {}
+    parameters_temp["data_preprocessing"] = {}
+    parameters_temp["data_preprocessing"]["histogram_matching"] = {"target": training_data["Channel_0"][0]}
     non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
         parameters_temp
     )
