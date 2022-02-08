@@ -946,9 +946,6 @@ def test_preprocess_functions():
 
     ## histogram matching tests
     # histogram equalization
-    training_data, _ = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {}
@@ -965,9 +962,12 @@ def test_preprocess_functions():
     )
     input_transformed = non_zero_normalizer(input_tensor)
     # histogram matching
+    training_data, _ = parseTrainingCSV(inputDir + "/train_2d_rad_segmentation.csv")
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
-    parameters_temp["data_preprocessing"]["histogram_matching"] = {"target": training_data["Channel_0"][0]}
+    parameters_temp["data_preprocessing"]["histogram_matching"] = {
+        "target": training_data["Channel_0"][0]
+    }
     non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
         parameters_temp
     )

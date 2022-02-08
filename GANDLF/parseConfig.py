@@ -440,7 +440,9 @@ def parseConfig(config_file_path, version_check_flag=True):
                 if key == "adaptive_histogram_equalization":
                     if params["data_preprocessing"][key] is not False:
                         # if histogram equalization is enabled, call histogram_matching
-                        params["data_preprocessing"]["histogram_matching"] = {"target": "adaptive"}
+                        params["data_preprocessing"]["histogram_matching"] = {
+                            "target": "adaptive"
+                        }
 
     if "model" in params:
 
