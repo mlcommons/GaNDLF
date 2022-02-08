@@ -287,7 +287,6 @@ def validate_network(
                     else:
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(img_for_metadata)
-                    subject["0"].as_sitk()
                     # cast as the same data type
                     result_image = sitk.Cast(
                         result_image, img_for_metadata.GetPixelID()
