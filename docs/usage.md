@@ -196,7 +196,7 @@ After the testing/validation training is finished, GaNDLF makes it possible to c
 ```bash
 # continue from previous shell
 python gandlf_collectStats \
-  -i /path/to/trained/models \  # directory which contains testing and validation models
+  -m /path/to/trained/models \  # directory which contains testing and validation models
   -o ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
 
