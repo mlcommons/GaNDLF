@@ -306,7 +306,6 @@ def test_train_regression_rad_3d(device):
     )
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_regression.csv"
@@ -341,7 +340,6 @@ def test_train_classification_rad_2d(device):
     parameters["track_memory_usage"] = True
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
@@ -374,7 +372,6 @@ def test_train_classification_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -407,7 +404,6 @@ def test_inference_classification_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -444,7 +440,6 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
 
     # read and parse csv
@@ -483,7 +478,6 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     parameters["model"]["final_layer"] = "logits"
     # necessary for n-fold cross-validation inference
     parameters["nested_training"]["validation"] = 2
@@ -524,7 +518,6 @@ def test_scheduler_classification_rad_2d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
@@ -562,7 +555,6 @@ def test_optimizer_classification_rad_2d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_classification.csv"
@@ -600,7 +592,6 @@ def test_clip_train_classification_rad_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -834,10 +825,28 @@ def test_cli_function_preprocess():
 
 def test_cli_function_mainrun(device):
     print("Starting testing cli function main_run")
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
     file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
-    # if preprocess wasn't run, this file should not be present
-    if not os.path.exists(file_config_temp):
-        file_config_temp = os.path.join(testingDir, "config_segmentation.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = 1
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = [
+        "dice",
+    ]
+    parameters["model"]["architecture"] = "unet"
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
 
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
@@ -936,14 +945,6 @@ def test_preprocess_functions():
     input_transformed = non_zero_normalizer(input_tensor)
 
     input_transformed = fill_holes(input_tensor)
-
-    input_image = sitk.GetImageFromArray(input_tensor[0].numpy())
-    img_resized = resize_image(
-        input_image,
-        [128, 128, 3],
-    )
-    temp_array = sitk.GetArrayFromImage(img_resized)
-    assert temp_array.shape == (3, 128, 128), "Resampling should work"
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
