@@ -10,6 +10,7 @@ from GANDLF.utils import (
     get_filename_extension_sanitized,
     reverse_one_hot,
 )
+from GANDLF.post_process import fill_holes
 from .step import step
 from .loss_and_metric import get_loss_and_metrics
 
@@ -267,9 +268,9 @@ def validate_network(
                 label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
                     img_for_metadata = torchio.Image(
-                        type=subject["1"]["type"],
-                        tensor=subject["1"]["data"].squeeze(0),
-                        affine=subject["1"]["affine"].squeeze(0),
+                        type=subject["label"]["type"],
+                        tensor=subject["label"]["data"].squeeze(0),
+                        affine=subject["label"]["affine"].squeeze(0),
                     ).as_sitk()
                     ext = get_filename_extension_sanitized(
                         subject["path_to_metadata"][0]
@@ -287,10 +288,15 @@ def validate_network(
                     else:
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(img_for_metadata)
+                    
                     # cast as the same data type
                     result_image = sitk.Cast(
                         result_image, img_for_metadata.GetPixelID()
                     )
+                    # perform postprocessing here
+                    if "fill_holes" in params["data_postprocessing"]:
+                        result_image = fill_holes(result_image)
+                    
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         resampler = torchio.transforms.Resample(
