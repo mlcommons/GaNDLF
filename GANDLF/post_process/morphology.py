@@ -61,6 +61,6 @@ def fill_holes(input_image):
     """
     input_image_array_closed = binary_closing(input_image.numpy())
     # Fill the holes in binary objects
-    output_array = binary_fill_holes(input_image_array_closed)
+    output_array = binary_fill_holes(input_image_array_closed).astype(int)
 
     return torch.from_numpy(output_array)
