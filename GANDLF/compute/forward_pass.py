@@ -284,14 +284,14 @@ def validate_network(
                     # perform numpy-specific postprocessing here
                     if "fill_holes" in params["data_postprocessing"]:
                         pred_mask = fill_holes(pred_mask)
-                    
+
                     ## special case for 2D
                     if image.shape[-1] > 1:
                         result_image = sitk.GetImageFromArray(pred_mask)
                     else:
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(img_for_metadata)
-                    
+
                     # cast as the same data type
                     result_image = sitk.Cast(
                         result_image, img_for_metadata.GetPixelID()
