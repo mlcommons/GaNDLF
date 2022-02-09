@@ -944,7 +944,12 @@ def test_preprocess_functions():
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
 
+    ## hole-filling tests
+    # tensor input
     input_transformed = fill_holes(input_tensor)
+    # sitk.Image input
+    input_tensor_image = sitk.GetImageFromArray(input_tensor.numpy())
+    input_transformed = fill_holes(input_tensor_image)
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
