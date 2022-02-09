@@ -634,6 +634,7 @@ def test_normtype_train_segmentation_rad_3d(device):
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
+    parameters["data_postprocessing"] = {"fill_holes"}
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -669,6 +670,7 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
+    parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters["model"]["architecture"] = "resunet"
