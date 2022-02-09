@@ -281,9 +281,12 @@ def validate_network(
                         pred_mask[0], params["model"]["class_list"]
                     )
                     pred_mask = np.swapaxes(pred_mask, 0, 2)
+                    # perform numpy-specific postprocessing here
+                    if "fill_holes" in params["data_postprocessing"]:
+                        pred_mask = fill_holes(pred_mask)
+                    
                     ## special case for 2D
                     if image.shape[-1] > 1:
-                        # ITK expects array as Z,X,Y
                         result_image = sitk.GetImageFromArray(pred_mask)
                     else:
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
@@ -293,10 +296,6 @@ def validate_network(
                     result_image = sitk.Cast(
                         result_image, img_for_metadata.GetPixelID()
                     )
-                    # perform postprocessing here
-                    if "fill_holes" in params["data_postprocessing"]:
-                        result_image = fill_holes(result_image)
-                    
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         resampler = torchio.transforms.Resample(
