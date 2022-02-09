@@ -25,6 +25,7 @@ parameter_defaults = {
     "clip_grad": None,  # clip_gradient value
     "track_memory_usage": False,  # default memory tracking
     "print_rgb_label_warning": True,  # default memory tracking
+    "data_postprocessing": {},  # default data postprocessing
 }
 
 ## dictionary to define string defaults for appropriate options
