@@ -375,6 +375,8 @@ import struct
 import sys
 import io
 import shutil
+from pathlib import Path
+from distutils.dir_util import copy_tree
 
 PROG_DESCRIPTION = '''
 Delete the slide label from an MRXS, NDPI, or SVS whole-slide image.
@@ -867,18 +869,11 @@ format_handlers = [
 ]
 
 
-def anonymize_slide(input_path, output_path):
-
-    input_path = os.path.abspath(input_path)
-    output_path = os.path.abspath(output_path)
-    shutil.copyfile(input_path, output_path)
-    filename = output_path
-
-    exit_code = 0
+def anonymize_per_file(input_file):
     try:
         for handler in format_handlers:
             try:
-                handler(filename)
+                handler(input_file)
                 break
             except UnrecognizedFile:
                 pass
@@ -887,6 +882,23 @@ def anonymize_slide(input_path, output_path):
     except Exception as e:
         if DEBUG:
             raise
-        print(sys.stderr, '%s: %s' % (filename, str(e)))
-        exit_code = 1
-    sys.exit(exit_code)
+        print(sys.stderr, '%s: %s' % (input_file, str(e)))
+
+
+def anonymize_slide(input_path, output_path):
+
+    input_path = os.path.abspath(input_path)
+    output_path = os.path.abspath(output_path)
+    if os.path.isdir(input_path):
+        Path(output_path).mkdir(parents=True, exist_ok=True)
+        copy_tree(input_path, output_path)
+
+        all_files = os.listdir(output_path)
+        for f in all_files:
+            current_file = os.path.join(output_path, f)
+            if os.path.isfile(current_file):
+                anonymize_per_file(current_file)
+    else:
+        shutil.copyfile(input_path, output_path)
+        anonymize_per_file(output_path)
+
