@@ -2,6 +2,7 @@ import yaml
 from typing import Union
 from .dicomanonymizer.dicomanonymizer import anonymize
 from .convert_to_nifti import convert_to_nifti
+from .slide_anonymizer import anonymize_slide
 
 
 def run_anonymizer(
@@ -41,6 +42,7 @@ def run_anonymizer(
                 deletePrivateTags=parameters["delete_private_tags"],
             )
     elif parameters["modality"] in ["histo", "path"]:
-        raise NotImplementedError(
-            "Anonymization for histology images has not been implemented yet."
+        anonymize_slide(
+            input_path,
+            output_path,
         )
