@@ -13,7 +13,7 @@ from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
-from GANDLF.models import global_models_dict
+from GANDLF.models import get_model
 
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
@@ -33,9 +33,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
 
     # Fetch the model according to params mentioned in the configuration file
-    model = global_models_dict[parameters["model"]["architecture"]](
-        parameters=parameters
-    )
+    model = get_model(parameters)
 
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(
