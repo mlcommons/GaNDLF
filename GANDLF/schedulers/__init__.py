@@ -26,3 +26,15 @@ global_schedulers_dict = {
     "reduceonplateau": reduce_on_plateau,
     "cosineannealing": cosineannealing,
 }
+
+def get_scheduler(params):
+    """
+    Function to get the scheduler definition.
+
+    Args:
+        params (dict): The parameters' dictionary.
+
+    Returns:
+        model (object): The scheduler definition.
+    """
+    return global_schedulers_dict[params["scheduler"]["type"]](params)
