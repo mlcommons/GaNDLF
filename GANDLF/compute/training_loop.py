@@ -10,7 +10,7 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.data import get_train_loader, get_validation_loader, get_testing_loader, get_penalty_loader
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
-from GANDLF.models import global_models_dict
+from GANDLF.models import get_model
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.utils import (
@@ -225,7 +225,7 @@ def training_loop(
     print("Number of channels : ", params["model"]["num_channels"])
 
     # Fetch the model according to params mentioned in the configuration file
-    model = global_models_dict[params["model"]["architecture"]](parameters=params)
+    model = get_model(params)
 
     validation_data_for_torch = ImagesFromDataFrame(
         validation_data, params, train=False, loader_type="validation"
