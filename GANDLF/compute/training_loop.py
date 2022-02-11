@@ -7,6 +7,7 @@ import torchio
 from medcam import medcam
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data import get_train_loader, get_validation_loader, get_testing_loader, get_penalty_loader
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.models import global_models_dict
@@ -212,6 +213,13 @@ def training_loop(
         epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
+    params["training_data"] = training_data
+    params["validation_data"] = validation_data
+    params["testing_data"] = testing_data
+    testingDataDefined = True
+    if params["testing_data"] is None:
+        # testing_data = validation_data
+        testingDataDefined = False
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
@@ -219,49 +227,20 @@ def training_loop(
     # Fetch the model according to params mentioned in the configuration file
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
-    # Set up the dataloaders
-    training_data_for_torch = ImagesFromDataFrame(
-        training_data, params, train=True, loader_type="train"
-    )
-
     validation_data_for_torch = ImagesFromDataFrame(
         validation_data, params, train=False, loader_type="validation"
     )
-
-    testingDataDefined = True
-    if testing_data is None:
-        # testing_data = validation_data
-        testingDataDefined = False
-
-    if testingDataDefined:
-        test_data_for_torch = ImagesFromDataFrame(
-            testing_data, params, train=False, loader_type="testing"
-        )
-
-    train_dataloader = DataLoader(
-        training_data_for_torch,
-        batch_size=params["batch_size"],
-        shuffle=True,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-    params["training_samples_size"] = len(train_dataloader.dataset)
-
-    val_dataloader = DataLoader(
-        validation_data_for_torch,
-        batch_size=1,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-
-    if testingDataDefined:
-        test_dataloader = DataLoader(
-            test_data_for_torch,
-            batch_size=1,
-            pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-        )
-
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
     params = populate_channel_keys_in_params(validation_data_for_torch, params)
+
+    train_dataloader = get_train_loader(params)
+    params["training_samples_size"] = len(train_dataloader.dataset)
+
+    val_dataloader = get_validation_loader(params)
+
+    if testingDataDefined:
+        test_dataloader = get_testing_loader(params)
 
     # Fetch the optimizers
     params["model_parameters"] = model.parameters()
@@ -313,24 +292,12 @@ def training_loop(
     # Calculate the weights here
     if params["weighted_loss"]:
         print("Calculating weights for loss")
-        # Set up the dataloader for penalty calculation
-        penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
-            loader_type="penalty",
-        )
-        penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
-        )
+        penalty_loader = get_penalty_loader(params)
 
         params["weights"], params["class_weights"] = get_class_imbalance_weights(
             penalty_loader, params
         )
-        del penalty_data, penalty_loader
+        del penalty_loader
     else:
         params["weights"], params["class_weights"] = None, None
 
