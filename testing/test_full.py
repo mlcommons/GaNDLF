@@ -1146,7 +1146,7 @@ def test_anonymizer():
 
     config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
 
-    run_anonymizer(input_file, output_file, config_file)
+    run_anonymizer(input_file, output_file, config_file, "rad")
 
     os.remove(output_file)
 
@@ -1166,7 +1166,7 @@ def test_anonymizer():
 
     output_file = os.path.join(testingDir, "MR_small.nii.gz")
 
-    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti)
+    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti, "rad")
 
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
