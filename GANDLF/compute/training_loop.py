@@ -11,7 +11,7 @@ from GANDLF.data import get_train_loader, get_validation_loader, get_testing_loa
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.models import get_model
-from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.schedulers import get_scheduler
 from GANDLF.optimizers import get_optimizer
 from GANDLF.utils import (
     get_date_time,
@@ -252,7 +252,7 @@ def training_loop(
             params["training_samples_size"] / params["learning_rate"]
         )
 
-    scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
+    scheduler = get_scheduler(params)
 
     # these keys contain generators, and are not needed beyond this point in params
     generator_keys_to_remove = ["optimizer_object", "model_parameters"]
