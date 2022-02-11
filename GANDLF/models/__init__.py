@@ -38,3 +38,15 @@ global_models_dict = {
     "brain_age": brainage,
     "sdnet": SDNet,
 }
+
+def get_model(params):
+    """
+    Function to get the model definition.
+
+    Args:
+        params (dict): The parameters' dictionary.
+
+    Returns:
+        model (torch.nn.Module): The model definition.
+    """
+    return global_models_dict[params["model"]["architecture"]](parameters=params)
