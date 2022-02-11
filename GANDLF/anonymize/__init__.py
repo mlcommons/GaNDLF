@@ -29,7 +29,7 @@ def run_anonymizer(
         with open(parameters, "r") as file_data:
             yaml_data = file_data.read()
         parameters = yaml.safe_load(yaml_data)
-    
+
     if "rad" in parameters["modality"]:
 
         # initialize defaults
