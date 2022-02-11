@@ -24,12 +24,13 @@ def run_anonymizer(
         parameters = {}
         parameters["modality"] = modality
 
+    # read the parameters
+    if not isinstance(parameters, dict):
+        with open(parameters, "r") as file_data:
+            yaml_data = file_data.read()
+        parameters = yaml.safe_load(yaml_data)
+    
     if "rad" in parameters["modality"]:
-        # read the parameters
-        if not isinstance(parameters, dict):
-            with open(parameters, "r") as file_data:
-                yaml_data = file_data.read()
-            parameters = yaml.safe_load(yaml_data)
 
         # initialize defaults
         if "delete_private_tags" not in parameters:
