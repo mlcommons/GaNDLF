@@ -375,11 +375,13 @@ import struct
 import sys
 import io
 import shutil
+from pathlib import Path
+from distutils.dir_util import copy_tree
 
-PROG_DESCRIPTION = '''
+PROG_DESCRIPTION = """
 Delete the slide label from an MRXS, NDPI, or SVS whole-slide image.
-'''.strip()
-PROG_VERSION = '1.1.1'
+""".strip()
+PROG_VERSION = "1.1.1"
 DEBUG = False
 
 # TIFF types
@@ -398,12 +400,12 @@ NDPI_MAGIC = 65420
 NDPI_SOURCELENS = 65421
 
 # Format headers
-LZW_CLEARCODE = b'\x80'
-JPEG_SOI = b'\xff\xd8'
-UTF8_BOM = b'\xef\xbb\xbf'
+LZW_CLEARCODE = b"\x80"
+JPEG_SOI = b"\xff\xd8"
+UTF8_BOM = b"\xef\xbb\xbf"
 
 # MRXS
-MRXS_HIERARCHICAL = 'HIERARCHICAL'
+MRXS_HIERARCHICAL = "HIERARCHICAL"
 MRXS_NONHIER_ROOT_OFFSET = 41
 
 
@@ -412,27 +414,27 @@ class UnrecognizedFile(Exception):
 
 
 class TiffFile(io.FileIO):
-    def __init__(self, path, mode='r+b', *args, **kwargs):
+    def __init__(self, path, mode="r+b", *args, **kwargs):
         super(TiffFile, self).__init__(path, mode)
 
         # Check header, decide endianness
-        endian = self.read(2).decode('utf-8')
-        if endian == 'II':
-            self._fmt_prefix = '<'
-        elif endian == 'MM':
-            self._fmt_prefix = '>'
+        endian = self.read(2).decode("utf-8")
+        if endian == "II":
+            self._fmt_prefix = "<"
+        elif endian == "MM":
+            self._fmt_prefix = ">"
         else:
             raise UnrecognizedFile
 
         # Check TIFF version
         self._bigtiff = False
         self._ndpi = False
-        version = self.read_fmt('H')
+        version = self.read_fmt("H")
         if version == 42:
             pass
         elif version == 43:
             self._bigtiff = True
-            magic2, reserved = self.read_fmt('HH')
+            magic2, reserved = self.read_fmt("HH")
             if magic2 != 8 or reserved != 0:
                 raise UnrecognizedFile
         else:
@@ -442,23 +444,22 @@ class TiffFile(io.FileIO):
         self.directories = []
         while True:
             in_pointer_offset = self.tell()
-            directory_offset = self.read_fmt('D')
+            directory_offset = self.read_fmt("D")
             if directory_offset == 0:
                 break
             self.seek(directory_offset)
-            directory = TiffDirectory(self, len(self.directories),
-                    in_pointer_offset)
+            directory = TiffDirectory(self, len(self.directories), in_pointer_offset)
             if not self.directories and not self._bigtiff:
                 # Check for NDPI.  Because we don't know we have an NDPI file
                 # until after reading the first directory, we will choke if
                 # the first directory is beyond 4 GB.
                 if NDPI_MAGIC in directory.entries:
                     if DEBUG:
-                        print('Enabling NDPI mode.')
+                        print("Enabling NDPI mode.")
                     self._ndpi = True
             self.directories.append(directory)
         if not self.directories:
-            raise IOError('No directories')
+            raise IOError("No directories")
 
     def _convert_format(self, fmt):
         # Format strings can have special characters:
@@ -468,11 +469,11 @@ class TiffFile(io.FileIO):
         # Z: 32-bit unsigned on little TIFF, 64-bit unsigned on BigTIFF
         # D: 32-bit unsigned on little TIFF, 64-bit unsigned on BigTIFF/NDPI
         if self._bigtiff:
-            fmt = fmt.translate(str.maketrans('yYzZD', 'qQqQQ'))
+            fmt = fmt.translate(str.maketrans("yYzZD", "qQqQQ"))
         elif self._ndpi:
-            fmt = fmt.translate(str.maketrans('yYzZD', 'hHiIQ'))
+            fmt = fmt.translate(str.maketrans("yYzZD", "hHiIQ"))
         else:
-            fmt = fmt.translate(str.maketrans('yYzZD', 'hHiII'))
+            fmt = fmt.translate(str.maketrans("yYzZD", "hHiII"))
         return self._fmt_prefix + fmt
 
     def fmt_size(self, fmt):
@@ -503,7 +504,7 @@ class TiffFile(io.FileIO):
 class TiffDirectory(object):
     def __init__(self, fh, number, in_pointer_offset):
         self.entries = {}
-        count = fh.read_fmt('Y')
+        count = fh.read_fmt("Y")
         for _ in range(count):
             entry = TiffEntry(fh)
             self.entries[entry.tag] = entry
@@ -518,69 +519,68 @@ class TiffDirectory(object):
             offsets = self.entries[STRIP_OFFSETS].value()
             lengths = self.entries[STRIP_BYTE_COUNTS].value()
         except KeyError:
-            raise IOError('Directory is not stripped')
+            raise IOError("Directory is not stripped")
 
         # Wipe strips
         for offset, length in zip(offsets, lengths):
             offset = self._fh.near_pointer(self._out_pointer_offset, offset)
             if DEBUG:
-                print('Zeroing', offset, 'for', length)
+                print("Zeroing", offset, "for", length)
             self._fh.seek(offset)
 
             # This was taken out because the buffers wouldn't line up correctly.
             if expected_prefix:
                 buf = self._fh.read(len(expected_prefix))
                 if buf != expected_prefix:
-                    raise IOError('Unexpected data in image strip')
+                    raise IOError("Unexpected data in image strip")
                 self._fh.seek(offset)
 
-            self._fh.write(b'\x00' * length)
+            self._fh.write(b"\x00" * length)
 
         # Remove directory
         if DEBUG:
-            print('Deleting directory', self._number)
+            print("Deleting directory", self._number)
         self._fh.seek(self._out_pointer_offset)
-        out_pointer = self._fh.read_fmt('D')
+        out_pointer = self._fh.read_fmt("D")
         self._fh.seek(self._in_pointer_offset)
-        self._fh.write_fmt('D', out_pointer)
+        self._fh.write_fmt("D", out_pointer)
 
 
 class TiffEntry(object):
     def __init__(self, fh):
         self.start = fh.tell()
-        self.tag, self.type, self.count, self.value_offset = \
-                fh.read_fmt('HHZZ')
+        self.tag, self.type, self.count, self.value_offset = fh.read_fmt("HHZZ")
         self._fh = fh
 
     def value(self):
         if self.type == ASCII:
-            item_fmt = 'c'
+            item_fmt = "c"
         elif self.type == SHORT:
-            item_fmt = 'H'
+            item_fmt = "H"
         elif self.type == LONG:
-            item_fmt = 'I'
+            item_fmt = "I"
         elif self.type == LONG8:
-            item_fmt = 'Q'
+            item_fmt = "Q"
         elif self.type == FLOAT:
-            item_fmt = 'f'
+            item_fmt = "f"
         elif self.type == DOUBLE:
-            item_fmt = 'd'
+            item_fmt = "d"
         else:
-            raise ValueError('Unsupported type')
+            raise ValueError("Unsupported type")
 
-        fmt = '%d%s' % (self.count, item_fmt)
+        fmt = "%d%s" % (self.count, item_fmt)
         len = self._fh.fmt_size(fmt)
-        if len <= self._fh.fmt_size('Z'):
+        if len <= self._fh.fmt_size("Z"):
             # Inline value
-            self._fh.seek(self.start + self._fh.fmt_size('HHZ'))
+            self._fh.seek(self.start + self._fh.fmt_size("HHZ"))
         else:
             # Out-of-line value
             self._fh.seek(self._fh.near_pointer(self.start, self.value_offset))
         items = self._fh.read_fmt(fmt, force_list=True)
         if self.type == ASCII:
-            if items[-1] != b'\x00':
-                raise ValueError('String not null-terminated')
-            return ''.join([item.decode('utf-8') for item in items[:-1]])
+            if items[-1] != b"\x00":
+                raise ValueError("String not null-terminated")
+            return "".join([item.decode("utf-8") for item in items[:-1]])
         else:
             return items
 
@@ -589,16 +589,16 @@ class MrxsFile(object):
     def __init__(self, filename):
         # Split filename
         dirname, ext = os.path.splitext(filename)
-        if ext != '.mrxs':
+        if ext != ".mrxs":
             raise UnrecognizedFile
 
         # Parse slidedat
-        self._slidedatfile = os.path.join(dirname, 'Slidedat.ini')
+        self._slidedatfile = os.path.join(dirname, "Slidedat.ini")
         self._dat = RawConfigParser()
         self._dat.optionxform = str
         try:
-            with open(self._slidedatfile, 'rb') as fh:
-                self._have_bom = (fh.read(len(UTF8_BOM)) == UTF8_BOM)
+            with open(self._slidedatfile, "rb") as fh:
+                self._have_bom = fh.read(len(UTF8_BOM)) == UTF8_BOM
                 if not self._have_bom:
                     fh.seek(0)
                 self._dat.readfp(fh)
@@ -606,11 +606,13 @@ class MrxsFile(object):
             raise UnrecognizedFile
 
         # Get file paths
-        self._indexfile = os.path.join(dirname,
-                self._dat.get(MRXS_HIERARCHICAL, 'INDEXFILE'))
-        self._datafiles = [os.path.join(dirname,
-                self._dat.get('DATAFILE', 'FILE_%d' % i))
-                for i in range(self._dat.getint('DATAFILE', 'FILE_COUNT'))]
+        self._indexfile = os.path.join(
+            dirname, self._dat.get(MRXS_HIERARCHICAL, "INDEXFILE")
+        )
+        self._datafiles = [
+            os.path.join(dirname, self._dat.get("DATAFILE", "FILE_%d" % i))
+            for i in range(self._dat.getint("DATAFILE", "FILE_COUNT"))
+        ]
 
         # Build levels
         self._make_levels()
@@ -618,13 +620,15 @@ class MrxsFile(object):
     def _make_levels(self):
         self._levels = {}
         self._level_list = []
-        layer_count = self._dat.getint(MRXS_HIERARCHICAL, 'NONHIER_COUNT')
+        layer_count = self._dat.getint(MRXS_HIERARCHICAL, "NONHIER_COUNT")
         for layer_id in range(layer_count):
-            level_count = self._dat.getint(MRXS_HIERARCHICAL,
-                    'NONHIER_%d_COUNT' % layer_id)
+            level_count = self._dat.getint(
+                MRXS_HIERARCHICAL, "NONHIER_%d_COUNT" % layer_id
+            )
             for level_id in range(level_count):
-                level = MrxsNonHierLevel(self._dat, layer_id, level_id,
-                        len(self._level_list))
+                level = MrxsNonHierLevel(
+                    self._dat, layer_id, level_id, len(self._level_list)
+                )
                 self._levels[(level.layer_name, level.name)] = level
                 self._level_list.append(level)
 
@@ -632,17 +636,17 @@ class MrxsFile(object):
     def _read_int32(cls, f):
         buf = f.read(4)
         if len(buf) != 4:
-            raise IOError('Short read')
-        return struct.unpack('<i', buf)[0]
+            raise IOError("Short read")
+        return struct.unpack("<i", buf)[0]
 
     @classmethod
     def _assert_int32(cls, f, value):
         v = cls._read_int32(f)
         if v != value:
-            raise ValueError('%d != %d' % (v, value))
+            raise ValueError("%d != %d" % (v, value))
 
     def _get_data_location(self, record):
-        with open(self._indexfile, 'rb') as fh:
+        with open(self._indexfile, "rb") as fh:
             fh.seek(MRXS_NONHIER_ROOT_OFFSET)
             # seek to record
             table_base = self._read_int32(fh)
@@ -668,28 +672,28 @@ class MrxsFile(object):
 
     def _zero_record(self, record):
         path, offset, length = self._get_data_location(record)
-        with open(path, 'r+b') as fh:
+        with open(path, "r+b") as fh:
             fh.seek(0, 2)
-            do_truncate = (fh.tell() == offset + length)
+            do_truncate = fh.tell() == offset + length
             if DEBUG:
                 if do_truncate:
-                    print('Truncating', path, 'to', offset)
+                    print("Truncating", path, "to", offset)
                 else:
-                    print('Zeroing', path, 'at', offset, 'for', length)
+                    print("Zeroing", path, "at", offset, "for", length)
             fh.seek(offset)
             buf = fh.read(len(JPEG_SOI))
             if buf != JPEG_SOI:
-                raise IOError('Unexpected data in nonhier image')
+                raise IOError("Unexpected data in nonhier image")
             if do_truncate:
                 fh.truncate(offset)
             else:
                 fh.seek(offset)
-                fh.write('\0' * length)
+                fh.write("\0" * length)
 
     def _delete_index_record(self, record):
         if DEBUG:
-            print('Deleting record', record)
-        with open(self._indexfile, 'r+b') as fh:
+            print("Deleting record", record)
+        with open(self._indexfile, "r+b") as fh:
             entries_to_move = len(self._level_list) - record - 1
             if entries_to_move == 0:
                 return
@@ -700,7 +704,7 @@ class MrxsFile(object):
             fh.seek(table_base + (record + 1) * 4)
             buf = fh.read(entries_to_move * 4)
             if len(buf) != entries_to_move * 4:
-                raise IOError('Short read')
+                raise IOError("Short read")
             # overwrite the target record
             fh.seek(table_base + record * 4)
             fh.write(buf)
@@ -708,51 +712,51 @@ class MrxsFile(object):
     def _hier_keys_for_level(self, level):
         ret = []
         for k, _ in self._dat.items(MRXS_HIERARCHICAL):
-            if k == level.key_prefix or k.startswith(level.key_prefix + '_'):
+            if k == level.key_prefix or k.startswith(level.key_prefix + "_"):
                 ret.append(k)
         return ret
 
     def _rename_section(self, old, new):
         if self._dat.has_section(old):
             if DEBUG:
-                print('[%s] -> [%s]' % (old, new))
+                print("[%s] -> [%s]" % (old, new))
             self._dat.add_section(new)
             for k, v in self._dat.items(old):
                 self._dat.set(new, k, v)
             self._dat.remove_section(old)
         elif DEBUG:
-            print('[%s] does not exist' % old)
+            print("[%s] does not exist" % old)
 
     def _delete_section(self, section):
         if DEBUG:
-            print('Deleting [%s]' % section)
+            print("Deleting [%s]" % section)
         self._dat.remove_section(section)
 
     def _set_key(self, section, key, value):
         if DEBUG:
             prev = self._dat.get(section, key)
-            print('[%s] %s: %s -> %s' % (section, key, prev, value))
+            print("[%s] %s: %s -> %s" % (section, key, prev, value))
         self._dat.set(section, key, value)
 
     def _rename_key(self, section, old, new):
         if DEBUG:
-            print('[%s] %s -> %s' % (section, old, new))
+            print("[%s] %s -> %s" % (section, old, new))
         v = self._dat.get(section, old)
         self._dat.remove_option(section, old)
         self._dat.set(section, new, v)
 
     def _delete_key(self, section, key):
         if DEBUG:
-            print('Deleting [%s] %s' % (section, key))
+            print("Deleting [%s] %s" % (section, key))
         self._dat.remove_option(section, key)
 
     def _write(self):
         buf = io.StringIO()
         self._dat.write(buf)
-        with open(self._slidedatfile, 'wb') as fh:
+        with open(self._slidedatfile, "wb") as fh:
             if self._have_bom:
                 fh.write(bytearray(UTF8_BOM))
-            fh.write(bytearray(buf.getvalue().replace('\n', '\r\n')))
+            fh.write(bytearray(buf.getvalue().replace("\n", "\r\n")))
 
     def delete_level(self, layer_name, level_name):
         level = self._levels[(layer_name, level_name)]
@@ -773,20 +777,18 @@ class MrxsFile(object):
 
         # Rename section and keys for subsequent levels in the layer
         prev_level = level
-        for cur_level in self._level_list[record + 1:]:
+        for cur_level in self._level_list[record + 1 :]:
             if cur_level.layer_id != prev_level.layer_id:
                 break
             for k in self._hier_keys_for_level(cur_level):
-                new_k = k.replace(cur_level.key_prefix,
-                        prev_level.key_prefix, 1)
+                new_k = k.replace(cur_level.key_prefix, prev_level.key_prefix, 1)
                 self._rename_key(MRXS_HIERARCHICAL, k, new_k)
-            self._set_key(MRXS_HIERARCHICAL, prev_level.section_key,
-                    prev_level.section)
+            self._set_key(MRXS_HIERARCHICAL, prev_level.section_key, prev_level.section)
             self._rename_section(cur_level.section, prev_level.section)
             prev_level = cur_level
 
         # Update level count within layer
-        count_k = 'NONHIER_%d_COUNT' % level.layer_id
+        count_k = "NONHIER_%d_COUNT" % level.layer_id
         count_v = self._dat.getint(MRXS_HIERARCHICAL, count_k)
         self._set_key(MRXS_HIERARCHICAL, count_k, count_v - 1)
 
@@ -802,17 +804,16 @@ class MrxsNonHierLevel(object):
         self.layer_id = layer_id
         self.id = level_id
         self.record = record
-        self.layer_name = dat.get(MRXS_HIERARCHICAL,
-                'NONHIER_%d_NAME' % layer_id)
-        self.key_prefix = 'NONHIER_%d_VAL_%d' % (layer_id, level_id)
+        self.layer_name = dat.get(MRXS_HIERARCHICAL, "NONHIER_%d_NAME" % layer_id)
+        self.key_prefix = "NONHIER_%d_VAL_%d" % (layer_id, level_id)
         self.name = dat.get(MRXS_HIERARCHICAL, self.key_prefix)
-        self.section_key = self.key_prefix + '_SECTION'
+        self.section_key = self.key_prefix + "_SECTION"
         self.section = dat.get(MRXS_HIERARCHICAL, self.section_key)
 
 
 def accept(filename, format):
     if DEBUG:
-        print(filename + ':', format)
+        print(filename + ":", format)
 
 
 def do_aperio_svs(filename):
@@ -820,16 +821,16 @@ def do_aperio_svs(filename):
         # Check for SVS file
         try:
             desc0 = fh.directories[0].entries[IMAGE_DESCRIPTION].value()
-            if not desc0.startswith('Aperio'):
+            if not desc0.startswith("Aperio"):
                 raise UnrecognizedFile
         except KeyError:
             raise UnrecognizedFile
-        accept(filename, 'SVS')
+        accept(filename, "SVS")
 
         # Find and delete label
         for directory in fh.directories:
             lines = directory.entries[IMAGE_DESCRIPTION].value().splitlines()
-            if len(lines) >= 2 and lines[1].startswith('label '):
+            if len(lines) >= 2 and lines[1].startswith("label "):
                 directory.delete(expected_prefix=LZW_CLEARCODE)
                 break
         else:
@@ -841,7 +842,7 @@ def do_hamamatsu_ndpi(filename):
         # Check for NDPI file
         if NDPI_MAGIC not in fh.directories[0].entries:
             raise UnrecognizedFile
-        accept(filename, 'NDPI')
+        accept(filename, "NDPI")
 
         # Find and delete macro image
         for directory in fh.directories:
@@ -855,9 +856,9 @@ def do_hamamatsu_ndpi(filename):
 def do_3dhistech_mrxs(filename):
     mrxs = MrxsFile(filename)
     try:
-        mrxs.delete_level('Scan data layer', 'ScanDataLayer_SlideBarcode')
+        mrxs.delete_level("Scan data layer", "ScanDataLayer_SlideBarcode")
     except KeyError:
-        raise IOError('No label in MRXS file')
+        raise IOError("No label in MRXS file")
 
 
 format_handlers = [
@@ -867,26 +868,34 @@ format_handlers = [
 ]
 
 
-def anonymize_slide(input_path, output_path):
-
-    input_path = os.path.abspath(input_path)
-    output_path = os.path.abspath(output_path)
-    shutil.copyfile(input_path, output_path)
-    filename = output_path
-
-    exit_code = 0
+def anonymize_per_file(input_file):
     try:
         for handler in format_handlers:
             try:
-                handler(filename)
+                handler(input_file)
                 break
             except UnrecognizedFile:
                 pass
         else:
-            raise IOError('Unrecognized file type')
+            raise IOError("Unrecognized file type")
     except Exception as e:
         if DEBUG:
             raise
-        print(sys.stderr, '%s: %s' % (filename, str(e)))
-        exit_code = 1
-    sys.exit(exit_code)
+        print(sys.stderr, "%s: %s" % (input_file, str(e)))
+
+
+def anonymize_slide(input_path, output_path):
+    input_path = os.path.abspath(input_path)
+    output_path = os.path.abspath(output_path)
+    if os.path.isdir(input_path):
+        Path(output_path).mkdir(parents=True, exist_ok=True)
+        copy_tree(input_path, output_path)
+
+        all_files = os.listdir(output_path)
+        for f in all_files:
+            current_file = os.path.join(output_path, f)
+            if os.path.isfile(current_file):
+                anonymize_per_file(current_file)
+    else:
+        shutil.copyfile(input_path, output_path)
+        anonymize_per_file(output_path)
