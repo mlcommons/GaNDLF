@@ -12,7 +12,7 @@ from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclud
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.models import get_model
 from GANDLF.schedulers import global_schedulers_dict
-from GANDLF.optimizers import global_optimizer_dict
+from GANDLF.optimizers import get_optimizer
 from GANDLF.utils import (
     get_date_time,
     send_model_to_device,
@@ -244,7 +244,7 @@ def training_loop(
 
     # Fetch the optimizers
     params["model_parameters"] = model.parameters()
-    optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
+    optimizer = get_optimizer(params)
     params["optimizer_object"] = optimizer
 
     if not ("step_size" in params["scheduler"]):
