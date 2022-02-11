@@ -46,8 +46,11 @@ def get_testing_loader(params):
     Returns:
         torch.utils.data.DataLoader: The testing loader.
     """
-    return DataLoader(
-        ImagesFromDataFrame(params["testing_data"], params, train=False, loader_type="testing"),
-        batch_size=1,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
+    if params["testing_data"] is None:
+        return None
+    else:
+        return DataLoader(
+            ImagesFromDataFrame(params["testing_data"], params, train=False, loader_type="testing"),
+            batch_size=1,
+            pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
+        )
