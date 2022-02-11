@@ -19,6 +19,24 @@ def get_train_loader(params):
     )
 
 
+def get_penalty_loader(params):
+    """
+    Get the penalty data loader.
+
+    Args:
+        params (dict): Dictionary of parameters.
+
+    Returns:
+        torch.utils.data.DataLoader: The penalty loader.
+    """
+    return DataLoader(
+        ImagesFromDataFrame(params["training_data"], params, train=True, loader_type="penalty"),
+        batch_size=1,
+        shuffle=False,
+        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
+    )
+
+
 def get_validation_loader(params):
     """
     Get the validation data loader.
