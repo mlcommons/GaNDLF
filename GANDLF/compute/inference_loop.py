@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data import get_testing_loader
 from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
 from GANDLF.models import get_model
 
@@ -31,15 +31,13 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     if "num_channels" in parameters["model"]:
         print("Number of channels : ", parameters["model"]["num_channels"])
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
+    parameters["testing_data"] = inferenceDataFromPickle
 
     # Fetch the model according to params mentioned in the configuration file
     model = get_model(parameters)
 
     # Setting up the inference loader
-    inferenceDataForTorch = ImagesFromDataFrame(
-        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
-    )
-    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
+    inference_loader = get_testing_loader(parameters)
 
     # Loading the weights into the model
     main_dict = outputDir
