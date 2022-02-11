@@ -53,9 +53,6 @@ def main():
     outputFile = os.path.normpath(args.outputFile)
     config = yaml.load(open(args.config), Loader=yaml.FullLoader)
 
-    if not args.labelID:
-        args.labelID = ""
-
     run_anonymizer(inputDir, outputFile, config)
 
     print("Finished successfully.")
