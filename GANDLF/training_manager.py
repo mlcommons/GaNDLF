@@ -5,6 +5,7 @@ from pathlib import Path
 
 # from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.compute import training_loop
+from GANDLF.utils import get_dataframe
 
 
 def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
@@ -213,11 +214,11 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             if (not os.path.exists(currentTrainingDataPickle)) or reset_prev:
                 trainingData.to_pickle(currentTrainingDataPickle)
             else:
-                trainingData = pd.read_pickle(currentTrainingDataPickle)
+                trainingData = get_dataframe(currentTrainingDataPickle)
             if (not os.path.exists(currentValidationDataPickle)) or reset_prev:
                 validationData.to_pickle(currentValidationDataPickle)
             else:
-                validationData = pd.read_pickle(currentValidationDataPickle)
+                validationData = get_dataframe(currentValidationDataPickle)
 
             # parallel_compute_command is an empty string, thus no parallel computing requested
             if (not parameters["parallel_compute_command"]) or (singleFoldValidation):

@@ -8,6 +8,7 @@ from GANDLF.utils import (
     get_filename_extension_sanitized,
     parseTrainingCSV,
     populate_header_in_parameters,
+    get_dataframe,
 )
 from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -62,7 +63,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
     )
 
     # initialize a new dict for the preprocessed data
-    base_df = pd.read_csv(data_csv)
+    base_df = get_dataframe(data_csv)
     # ensure csv only contains lower case columns
     base_df.columns = base_df.columns.str.lower()
     # only store the column names
