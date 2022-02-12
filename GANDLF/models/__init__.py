@@ -39,6 +39,7 @@ global_models_dict = {
     "sdnet": SDNet,
 }
 
+
 def get_model(params):
     """
     Function to get the model definition.

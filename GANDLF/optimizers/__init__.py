@@ -24,6 +24,7 @@ global_optimizer_dict = {
     "rmsprop": rmsprop,
 }
 
+
 def get_optimizer(params):
     """
     Function to get the optimizer definition.
