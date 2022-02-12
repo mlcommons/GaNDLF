@@ -12,7 +12,7 @@ from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data import get_testing_loader
-from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
+from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device, get_dataframe
 from GANDLF.models import get_model
 
 
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     headers = pickle.load(open(args.headers_pickle, "rb"))
     label_header = pickle.load(open(args.label_header_pickle, "rb"))
     parameters = pickle.load(open(args.parameter_pickle, "rb"))
-    inferenceDataFromPickle = pd.read_pickle(args.inference_loader_pickle)
+    inferenceDataFromPickle = get_dataframe(args.inference_loader_pickle)
 
     inference_loop(
         inferenceDataFromPickle=inferenceDataFromPickle,
