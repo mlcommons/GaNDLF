@@ -27,6 +27,7 @@ global_schedulers_dict = {
     "cosineannealing": cosineannealing,
 }
 
+
 def get_scheduler(params):
     """
     Function to get the scheduler definition.

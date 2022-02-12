@@ -107,7 +107,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     params = config_file_path
     if not isinstance(config_file_path, dict):
         with open(config_file_path) as f:
-            params = yaml.safe_load(f)        
+            params = yaml.safe_load(f)
 
     if version_check_flag:  # this is only to be used for testing
         if not ("version" in params):
