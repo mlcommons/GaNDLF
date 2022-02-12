@@ -17,7 +17,10 @@ def get_train_loader(params):
 
     return DataLoader(
         ImagesFromDataFrame(
-            get_dataframe(params["training_data"]), params, train=True, loader_type="train"
+            get_dataframe(params["training_data"]),
+            params,
+            train=True,
+            loader_type="train",
         ),
         batch_size=params["batch_size"],
         shuffle=True,
@@ -37,7 +40,10 @@ def get_penalty_loader(params):
     """
     return DataLoader(
         ImagesFromDataFrame(
-            get_dataframe(params["training_data"]), params, train=True, loader_type="penalty"
+            get_dataframe(params["training_data"]),
+            params,
+            train=True,
+            loader_type="penalty",
         ),
         batch_size=1,
         shuffle=False,
@@ -57,7 +63,10 @@ def get_validation_loader(params):
     """
     return DataLoader(
         ImagesFromDataFrame(
-            get_dataframe(params["validation_data"]), params, train=False, loader_type="validation"
+            get_dataframe(params["validation_data"]),
+            params,
+            train=False,
+            loader_type="validation",
         ),
         batch_size=1,
         pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
@@ -79,7 +88,10 @@ def get_testing_loader(params):
     else:
         return DataLoader(
             ImagesFromDataFrame(
-                get_dataframe(params["testing_data"]), params, train=False, loader_type="testing"
+                get_dataframe(params["testing_data"]),
+                params,
+                train=False,
+                loader_type="testing",
             ),
             batch_size=1,
             pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation

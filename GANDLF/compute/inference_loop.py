@@ -12,7 +12,11 @@ from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data import get_testing_loader
-from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device, get_dataframe
+from GANDLF.utils import (
+    populate_channel_keys_in_params,
+    send_model_to_device,
+    get_dataframe,
+)
 from GANDLF.models import get_model
 
 
