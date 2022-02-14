@@ -6,7 +6,7 @@ NUM_CORES=56
 NUM_CORES_PER_SOCK=28
 NUM_SOCKETS=2
 
-total_num_workers=2 #$(($NUM_CORES/$OMP_NUM_THREADS))
+total_num_workers=2 
  
 echo "Total Cores: $NUM_CORES"
 echo "Num Workers: $total_num_workers"
@@ -14,17 +14,14 @@ echo "Num Workers: $total_num_workers"
 ht=$(lscpu | grep "Thread(s) per core:" | awk '{print $NF}')
 
 num_cores_per_worker=$(($NUM_CORES/$total_num_workers))
-num_steppings=1
-num_cores_per_worker_per_stepping=$(($num_cores_per_worker/$num_steppings))
 echo "Num cores per worker:"$num_cores_per_worker
-echo "Num cores per worker per stepping:"$num_cores_per_worker_per_stepping
 
 for t in 8
   do
     for ((i=0;i<$total_num_workers;i++));
       do 
-         phy_core_start=$(($i*$num_cores_per_worker)) #$OMP_NUM_THREADS))
-         log_core_start=$((($i*$num_cores_per_worker)+$NUM_CORES)) #$OMP_NUM_THREADS)+$NUM_CORES))
+         phy_core_start=$(($i*$num_cores_per_worker)) 
+         log_core_start=$((($i*$num_cores_per_worker)+$NUM_CORES)) 
     
          taskset_phy_core_start=$phy_core_start
          taskset_phy_core_end=("$(($phy_core_start+$t-1))")
