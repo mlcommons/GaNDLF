@@ -16,7 +16,7 @@ ht=$(lscpu | grep "Thread(s) per core:" | awk '{print $NF}')
 num_cores_per_worker=$(($NUM_CORES/$total_num_workers))
 echo "Num cores per worker:"$num_cores_per_worker
 
-for t in 8
+for t in 1 2 4 8 16 28
   do
     for ((i=0;i<$total_num_workers;i++));
       do 
