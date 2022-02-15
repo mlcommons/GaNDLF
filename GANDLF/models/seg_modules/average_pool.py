@@ -9,7 +9,12 @@ class GlobalAveragePooling2D(nn.Module):
     def forward(self, x):
         assert len(x.size()) == 4, x.size()
         B, C, W, H = x.size()
-        return F.avg_pool2d(x, (W, H)).view(B, C)
+
+        # This is a temporary fix to make sure the size is an integer, not a tensor
+        if isinstance(B, int):
+            return F.avg_pool2d(x, (W, H)).view(B, C)
+        else:
+            return F.avg_pool2d(x, (W.item(), H.item())).view(B.item(), C.item())
 
 
 class GlobalAveragePooling3D(nn.Module):
@@ -19,4 +24,11 @@ class GlobalAveragePooling3D(nn.Module):
     def forward(self, x):
         assert len(x.size()) == 5, x.size()
         B, C, W, H, D = x.size()
-        return F.avg_pool3d(x, (W, H, D)).view(B, C)
+
+        # This is a temporary fix to make sure the size is an integer, not a tensor
+        if isinstance(B, int):
+            return F.avg_pool3d(x, (W, H, D)).view(B, C)
+        else:
+            return F.avg_pool2d(x, (W.item(), H.item(), D.item())).view(
+                B.item(), C.item()
+            )

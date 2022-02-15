@@ -1,5 +1,6 @@
 from .wrap_torchio import (
     mri_artifact,
+    motion,
     affine,
     elastic,
     swap,
@@ -21,6 +22,7 @@ global_augs_dict = {
     "affine": affine,
     "elastic": elastic,
     "kspace": mri_artifact,
+    "motion": motion,
     "bias": bias,
     "blur": blur,
     "noise": noise,

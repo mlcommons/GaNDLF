@@ -1,5 +1,7 @@
-import sys, yaml, pkg_resources, ast
+import sys, yaml, ast, pkg_resources
 import numpy as np
+
+from .utils import version_check
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -7,6 +9,7 @@ parameter_defaults = {
     "verbose": False,  # general application verbosity
     "q_verbose": False,  # queue construction verbosity
     "medcam_enabled": False,  # interpretability via medcam
+    "save_training": False,  # save outputs during training
     "save_output": False,  # save outputs during validation/testing
     "in_memory": False,  # pin data to cpu memory
     "pin_memory_dataloader": False,  # pin data to gpu memory
@@ -22,6 +25,7 @@ parameter_defaults = {
     "clip_grad": None,  # clip_gradient value
     "track_memory_usage": False,  # default memory tracking
     "print_rgb_label_warning": True,  # default memory tracking
+    "data_postprocessing": {},  # default data postprocessing
 }
 
 ## dictionary to define string defaults for appropriate options
@@ -63,22 +67,6 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
     return params
 
 
-def parse_version(version_string):
-    """
-    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
-
-    Args:
-        version_string (str): The string to be parsed.
-
-    Returns:
-        int: The version number.
-    """
-    version_string_split = version_string.split(".")
-    if len(version_string_split) > 3:
-        del version_string_split[-1]
-    return int("".join(version_string_split))
-
-
 def initialize_key(parameters, key, value=None):
     """
     This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
@@ -105,13 +93,13 @@ def initialize_key(parameters, key, value=None):
     return parameters
 
 
-def parseConfig(config_file_path, version_check=True):
+def parseConfig(config_file_path, version_check_flag=True):
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
     Args:
         config_file_path (str): The filename of the configuration file.
-        version_check (bool, optional): Whether to check the version in configuration file. Defaults to True.
+        version_check_flag (bool, optional): Whether to check the version in configuration file. Defaults to True.
 
     Returns:
         dict: The parameter dictionary.
@@ -119,26 +107,21 @@ def parseConfig(config_file_path, version_check=True):
     with open(config_file_path) as f:
         params = yaml.safe_load(f)
 
-    if version_check:  # this is only to be used for testing
+    if version_check_flag:  # this is only to be used for testing
         if not ("version" in params):
             sys.exit(
                 "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
             )
         else:
-            gandlf_version = pkg_resources.require("GANDLF")[0].version
-            gandlf_version_int = parse_version(gandlf_version)
-            min_ver = parse_version(params["version"]["minimum"])
-            max_ver = parse_version(params["version"]["maximum"])
-            if (min_ver > gandlf_version_int) or (max_ver < gandlf_version_int):
-                sys.exit(
-                    "Incompatible version of GANDLF detected (" + gandlf_version + ")"
-                )
+            version_check(
+                params["version"],
+                version_to_check=pkg_resources.require("GANDLF")[0].version,
+            )
 
     if "patch_size" in params:
         if len(params["patch_size"]) == 2:  # 2d check
-            params["patch_size"].append(
-                1
-            )  # ensuring same size during torchio processing
+            # ensuring same size during torchio processing
+            params["patch_size"].append(1)
     else:
         sys.exit(
             "The 'patch_size' parameter needs to be present in the configuration file"
@@ -201,25 +184,46 @@ def parseConfig(config_file_path, version_check=True):
 
         # initialize metrics dict
         for metric in params["metrics"]:
-            if not isinstance(metric, dict):
+            # assigning a new variable because some metrics can be dicts, and we want to get the first key
+            comparison_string = metric
+            if isinstance(metric, dict):
+                comparison_string = list(metric.keys())[0]
+            # these metrics always need to be dicts
+            if comparison_string in ["accuracy", "f1", "precision", "recall", "iou"]:
+                if not isinstance(metric, dict):
+                    temp_dict[metric] = {}
+                else:
+                    temp_dict[comparison_string] = metric
+            elif not isinstance(metric, dict):
                 temp_dict[metric] = None
+
             # special case for accuracy, precision, and recall; which could be dicts
             ## need to find a better way to do this
-            elif "accuracy" in metric:
-                temp_dict["accuracy"] = metric["accuracy"]
-                temp_dict["accuracy"] = initialize_key(
-                    temp_dict["accuracy"], "threshold", 0.5
-                )
-            elif "f1" in metric:
-                temp_dict["f1"] = metric["f1"]
+            if "accuracy" in comparison_string:
+                if comparison_string != "classification_accuracy":
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "average", "weighted"
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "multi_class", True
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "mdmc_average", "samplewise"
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "threshold", 0.5
+                    )
+                    temp_dict["accuracy"] = initialize_key(
+                        temp_dict["accuracy"], "subset_accuracy", False
+                    )
+            elif "f1" in comparison_string:
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
                 temp_dict["f1"] = initialize_key(
                     temp_dict["f1"], "mdmc_average", "samplewise"
                 )
                 temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
-            elif "precision" in metric:
-                temp_dict["precision"] = metric["precision"]
+            elif "precision" in comparison_string:
                 temp_dict["precision"] = initialize_key(
                     temp_dict["precision"], "average", "weighted"
                 )
@@ -232,8 +236,7 @@ def parseConfig(config_file_path, version_check=True):
                 temp_dict["precision"] = initialize_key(
                     temp_dict["precision"], "threshold", 0.5
                 )
-            elif "recall" in metric:
-                temp_dict["recall"] = metric["recall"]
+            elif "recall" in comparison_string:
                 temp_dict["recall"] = initialize_key(
                     temp_dict["recall"], "average", "weighted"
                 )
@@ -246,63 +249,11 @@ def parseConfig(config_file_path, version_check=True):
                 temp_dict["recall"] = initialize_key(
                     temp_dict["recall"], "threshold", 0.5
                 )
-            elif "iou" in metric:
-                temp_dict["iou"] = metric["iou"]
+            elif "iou" in comparison_string:
                 temp_dict["iou"] = initialize_key(
                     temp_dict["iou"], "reduction", "elementwise_mean"
                 )
                 temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
-
-        ## need to find a better way to do this
-        # special case for accuracy
-        if "accuracy" in params["metrics"]:
-            temp_dict["accuracy"] = initialize_key(
-                temp_dict["accuracy"], "threshold", 0.5
-            )
-
-        # special case for precision
-        if "precision" in params["metrics"]:
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "average", "weighted"
-            )
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "multi_class", True
-            )
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "mdmc_average", "samplewise"
-            )
-            temp_dict["precision"] = initialize_key(
-                temp_dict["precision"], "threshold", 0.5
-            )
-
-        # special case for f1
-        if "f1" in params["metrics"]:
-            temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
-            temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
-            temp_dict["f1"] = initialize_key(
-                temp_dict["f1"], "mdmc_average", "samplewise"
-            )
-            temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
-
-        # special case for recall
-        if "recall" in params["metrics"]:
-            temp_dict["recall"] = initialize_key(
-                temp_dict["recall"], "average", "weighted"
-            )
-            temp_dict["recall"] = initialize_key(
-                temp_dict["recall"], "multi_class", True
-            )
-            temp_dict["recall"] = initialize_key(
-                temp_dict["recall"], "mdmc_average", "samplewise"
-            )
-            temp_dict["recall"] = initialize_key(temp_dict["recall"], "threshold", 0.5)
-
-        # special case for iou
-        if "iou" in params["metrics"]:
-            temp_dict["iou"] = initialize_key(
-                temp_dict["iou"], "reduction", "elementwise_mean"
-            )
-            temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
 
         params["metrics"] = temp_dict
 
@@ -310,7 +261,7 @@ def parseConfig(config_file_path, version_check=True):
         sys.exit("The key 'metrics' needs to be defined")
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
-    params = initialize_key(params, "data_augmentation")
+    params = initialize_key(params, "data_augmentation", {})
     if not (params["data_augmentation"] == None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
 
@@ -343,6 +294,20 @@ def parseConfig(config_file_path, version_check=True):
                     params["data_augmentation"]["affine"], "translation", 2
                 )
 
+            if "motion" in params["data_augmentation"]:
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "num_transforms", 2
+                )
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "degrees", 15
+                )
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "translation", 2
+                )
+                params["data_augmentation"]["motion"] = initialize_key(
+                    params["data_augmentation"]["motion"], "interpolation", "linear"
+                )
+
             # special case for random blur/noise - which takes a std-dev range
             for std_aug in ["blur", "noise"]:
                 if std_aug in params["data_augmentation"]:
@@ -366,7 +331,7 @@ def parseConfig(config_file_path, version_check=True):
             # special case for colorjitter
             if "colorjitter" in params["data_augmentation"]:
                 params["data_augmentation"] = initialize_key(
-                    params["data_augmentation"], "colorjitter"
+                    params["data_augmentation"], "colorjitter", {}
                 )
                 for key in ["brightness", "contrast", "saturation"]:
                     params["data_augmentation"]["colorjitter"] = initialize_key(
@@ -419,7 +384,7 @@ def parseConfig(config_file_path, version_check=True):
                     )
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
-    params = initialize_key(params, "data_preprocessing")
+    params = initialize_key(params, "data_preprocessing", {})
     if not (params["data_preprocessing"] == None):
         # perform this only when pre-processing is defined
         if len(params["data_preprocessing"]) > 0:
