@@ -75,7 +75,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     else:
         raise ValueError("The model type is not recognized: ", parameters['model']['type'])
         
-
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
 

@@ -24,7 +24,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **GaNDLF Version**
-Version information is found on Help > About
+<!-- Put the output of the following command:
+python -c 'import GANDLF as g;print(g.__version__)'
+-->
+Version information of the GaNDLF package in the virtual environment.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Windows/Linux (include detailed distro information)/macOS]
