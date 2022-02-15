@@ -76,14 +76,9 @@ def validate_network(
     # Set the model to valid
     if params["model"]["type"] == "Torch":
         model.eval()
-    is_recording = False
 
     if "save_data" in params["model"].keys():
-        is_recording = True
         torch.manual_seed(0)
-        image_patch_data = []
-        pred_patch_data = []
-        label_patch_data = []
 
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
