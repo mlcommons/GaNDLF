@@ -62,11 +62,11 @@ def save_model(model_dict, model, input_shape, path):
         [
             "mo.py",
             "--input_model",
-            "{0}".format(onnx_path) ,
+            "{0}".format(onnx_path),
             "--input_shape",
             "[1,3,{0},{1}]".format(input_shape[0], input_shape[1]),
             "--output_dir",
-            "{0}".format(ov_output_dir)
+            "{0}".format(ov_output_dir),
         ],
     )
 
