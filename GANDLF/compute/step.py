@@ -60,7 +60,7 @@ def step(model, image, label, params, train=True):
             if len(label.shape) > 1:
                 label = torch.squeeze(label, -1)
 
-    if train == True or (train == False and params["model"]["type"] == "Torch"):
+    if not(train == False and params["model"]["type"].lower() == "openvino"):
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
                 output = model(image)
