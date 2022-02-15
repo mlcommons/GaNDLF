@@ -12,13 +12,12 @@ from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device, load_ov_model
 from GANDLF.models import global_models_dict
 from GANDLF.utils import (
-        populate_channel_keys_in_params, 
-        send_model_to_device, 
-        load_ov_model,
-        )
+    populate_channel_keys_in_params, 
+    send_model_to_device, 
+    load_ov_model,
+)
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     """
@@ -57,8 +56,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             )
             if not os.path.isfile(file_to_check):
                 raise ValueError(
-                        "The model specified model was not found:", file_to_check
-                        )
+                    "The model specified model was not found:", file_to_check
+                )
 
         main_dict = torch.load(file_to_check, map_location=torch.device(device))
         model.load_state_dict(main_dict["model_state_dict"])
@@ -73,15 +72,19 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 outputDir, str(parameters["model"]["architecture"]) + "_best.bin"
             )
             if not os.path.isfile(xml_to_check):
-                raise ValueError("The model specified model IR was not found:", xml_to_check)
+                raise ValueError(
+                    "The model specified model IR was not found:", xml_to_check
+                )
             if not os.path.isfile(bin_to_check):
-                raise ValueError("The model specified model weights was not found:", bin_to_check)
+                raise ValueError(
+                    "The model specified model weights was not found:", bin_to_check
+                )
             model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
-            parameters['model']['IO'] = [input_blob, output_blob]
+            parameters["model"]["IO"] = [input_blob, output_blob]
     else:
         raise ValueError(
-                "The model type is not recognized: ", parameters["model"]["type"]
-                )
+            "The model type is not recognized: ", parameters["model"]["type"]
+        )
         
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
@@ -161,17 +164,17 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                                 )
                         else:
                             output = model(
-                                    image_patches.float().to(parameters["device"])
-                                    )
+                                image_patches.float().to(parameters["device"])
+                            )
                         output = output.detach().cpu().numpy()
                     else:
                         output = model.infer( 
-                                inputs={
-                                    params["model"]["IO"][0]:image_patches.float()
-                                    .cpu()
-                                    .numpy()
-                                    }
-                                )[params["model"]["IO"][1]]
+                            inputs={
+                                params["model"]["IO"][0]:image_patches.float()
+                                .cpu()
+                                .numpy()
+                            }
+                        )[params["model"]["IO"][1]]
 
                     for i in range(int(output.shape[0])):
                         count_map[
