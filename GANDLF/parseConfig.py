@@ -98,7 +98,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     This function parses the configuration file and returns a dictionary of parameters.
 
     Args:
-        config_file_path (str): The filename of the configuration file.
+        config_file_path (Union[str, dict]): The filename of the configuration file.
         version_check_flag (bool, optional): Whether to check the version in configuration file. Defaults to True.
 
     Returns:
