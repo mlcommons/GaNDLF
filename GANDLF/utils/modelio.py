@@ -53,10 +53,10 @@ def save_model(model_dict, model, input_shape, path):
             opset_version=11,
             export_params=True,
             verbose=True,
-            input_names = ["input"],
-            output_names = ["output"]
+            input_names=["input"],
+            output_names=["output"]
         )
-    
+
     ov_output_dir = os.path.dirname(os.path.abspath(path))
     subprocess.call(
         "mo.py -m {0} --input_shape [1,3,{1},{2}] --output_dir {3}".format(
@@ -64,7 +64,7 @@ def save_model(model_dict, model, input_shape, path):
         ),
         shell=True,
     )
-    
+
 
 def load_model(path):
     """
