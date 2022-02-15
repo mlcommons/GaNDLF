@@ -1,9 +1,9 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse, sys
+import os, argparse, sys, yaml
 from datetime import date
-from GANDLF.utils import writeTrainingCSV
+from GANDLF.anonymize import run_anonymizer
 
 
 def main():
@@ -15,50 +15,50 @@ def main():
     )
 
     parser = argparse.ArgumentParser(
-        prog="GANDLF_ConstructCSV",
+        prog="GANDLF_Anonymize",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Generate training/inference CSV from data directory.\n\n"
+        description="Anonymize images/scans in the data directory.\n\n"
         + copyrightMessage,
     )
     parser.add_argument(
-        "-i", "--inputDir",
+        "-i",
+        "--inputDir",
         metavar="",
         type=str,
-        help="Input data directory which contains images in specified format",
+        help="Input directory or file which contains images to be anonymized.",
     )
     parser.add_argument(
-        "-c", "--channelsID",
+        "-c",
+        "--config",
         metavar="",
         type=str,
-        help="Channels/modalities identifier string to check for in all files in 'input_dir'; for example: --channelsID _t1.nii.gz,_t2.nii.gz",
+        help="config (in YAML) for running anonymization.",
     )
     parser.add_argument(
-        "-l", "--labelID",
+        "-o",
+        "--outputFile",
         metavar="",
         type=str,
-        help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
-    )
-    parser.add_argument(
-        "-o", "--outputFile",
-        metavar="",
-        type=str,
-        help="Output CSV file",
+        help="Output directory or file which will contain the image(s) after anonymization.",
     )
 
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [args.inputDir, args.channelsID, args.labelID, args.outputFile]:
+    for param_none_check in [args.inputDir, args.config, args.outputFile]:
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
+    config = yaml.load(open(args.config), Loader=yaml.FullLoader)
 
     if not args.labelID:
         args.labelID = ""
 
-    writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
+    run_anonymizer(inputDir, outputFile, config)
+
+    print("Finished successfully.")
 
 
 # main function

@@ -2,6 +2,7 @@ import os, time, psutil
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import numpy as np
 import torchio
 from medcam import medcam
 
@@ -16,6 +17,10 @@ from GANDLF.utils import (
     send_model_to_device,
     populate_channel_keys_in_params,
     get_class_imbalance_weights,
+    save_model,
+    load_model,
+    version_check,
+    write_training_patches,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -57,7 +62,10 @@ def train_network(model, train_dataloader, optimizer, params):
     average_epoch_train_metric = {}
 
     for metric in params["metrics"]:
-        total_epoch_train_metric[metric] = 0
+        if "per_label" in metric:
+            total_epoch_train_metric[metric] = []
+        else:
+            total_epoch_train_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
@@ -87,6 +95,12 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
+
+        if params["save_training"]:
+            write_training_patches(
+                subject,
+                params,
+            )
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
@@ -129,7 +143,10 @@ def train_network(model, train_dataloader, optimizer, params):
         if not nan_loss:
             total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
-            total_epoch_train_metric[metric] += calculated_metrics[metric]
+            if isinstance(total_epoch_train_metric[metric], list):
+                total_epoch_train_metric[metric].append(calculated_metrics[metric])
+            else:
+                total_epoch_train_metric[metric] += calculated_metrics[metric]
 
         # For printing information at halftime during an epoch
         if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
@@ -140,17 +157,27 @@ def train_network(model, train_dataloader, optimizer, params):
                 total_epoch_train_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
+                if isinstance(total_epoch_train_metric[metric], list):
+                    to_print = (
+                        np.array(total_epoch_train_metric[metric]) / (batch_idx + 1)
+                    ).tolist()
+                else:
+                    to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
                 print(
                     "Half-Epoch Average Train " + metric + " : ",
-                    total_epoch_train_metric[metric] / (batch_idx + 1),
+                    to_print,
                 )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
-        average_epoch_train_metric[metric] = total_epoch_train_metric[metric] / len(
-            train_dataloader
-        )
+        if isinstance(total_epoch_train_metric[metric], list):
+            to_print = (
+                np.array(total_epoch_train_metric[metric]) / len(train_dataloader)
+            ).tolist()
+        else:
+            to_print = total_epoch_train_metric[metric] / len(train_dataloader)
+        average_epoch_train_metric[metric] = to_print
         print(
             "     Epoch Final   Train " + metric + " : ",
             average_epoch_train_metric[metric],
@@ -193,10 +220,12 @@ def training_loop(
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
     # Set up the dataloaders
-    training_data_for_torch = ImagesFromDataFrame(training_data, params, train=True)
+    training_data_for_torch = ImagesFromDataFrame(
+        training_data, params, train=True, loader_type="train"
+    )
 
     validation_data_for_torch = ImagesFromDataFrame(
-        validation_data, params, train=False
+        validation_data, params, train=False, loader_type="validation"
     )
 
     testingDataDefined = True
@@ -205,7 +234,9 @@ def training_loop(
         testingDataDefined = False
 
     if testingDataDefined:
-        test_data_for_torch = ImagesFromDataFrame(testing_data, params, train=False)
+        test_data_for_torch = ImagesFromDataFrame(
+            testing_data, params, train=False, loader_type="testing"
+        )
 
     train_dataloader = DataLoader(
         training_data_for_torch,
@@ -251,7 +282,6 @@ def training_loop(
 
     # Start training time here
     start_time = time.time()
-    print("\n\n")
 
     if not (os.environ.get("HOSTNAME") is None):
         print("Hostname :", os.environ.get("HOSTNAME"))
@@ -288,6 +318,7 @@ def training_loop(
             training_data,
             parameters=params,
             train=False,
+            loader_type="penalty",
         )
         penalty_loader = DataLoader(
             penalty_data,
@@ -329,11 +360,12 @@ def training_loop(
     if os.path.exists(best_model_path):
         print("Previous model found. Loading it up.")
         try:
-            main_dict = torch.load(best_model_path)
+            main_dict = load_model(best_model_path)
+            version_check(params["version"], version_to_check=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
-            best_loss = main_dict["best_loss"]
+            best_loss = main_dict["loss"]
             print("Previous model loaded successfully.")
         except Exception as e:
             print("Previous model could not be loaded, error: ", e)
@@ -387,8 +419,12 @@ def training_loop(
         # Printing times
         epoch_start_time = time.time()
         print("*" * 20)
+        print("*" * 20)
         print("Starting Epoch : ", epoch)
-        print("Epoch start time : ", get_date_time())
+        if params["verbose"]:
+            print("Epoch start time : ", get_date_time())
+
+        params["current_epoch"] = epoch
 
         epoch_train_loss, epoch_train_metric = train_network(
             model, train_dataloader, optimizer, params
@@ -409,7 +445,8 @@ def training_loop(
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
-        print("Epoch end time : ", get_date_time())
+        if params["verbose"]:
+            print("Epoch end time : ", get_date_time())
         epoch_end_time = time.time()
         print(
             "Time taken for epoch : ",
@@ -423,15 +460,19 @@ def training_loop(
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
-            torch.save(
+            model.eval()
+            save_model(
                 {
                     "epoch": best_train_idx,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict(),
-                    "best_loss": best_loss,
+                    "loss": best_loss,
                 },
+                model,
+                params["patch_size"],
                 best_model_path,
             )
+            model.train()
             first_model_saved = True
 
         if patience > params["patience"]:

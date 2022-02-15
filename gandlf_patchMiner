@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from datetime import date
 from GANDLF.utils import *
 
 fix_paths(os.getcwd())  # add relevant vips path
@@ -10,13 +11,16 @@ import time
 import warnings
 import argparse
 import pandas as pd
-import openslide
-import numpy as np
-import yaml
 
 from PIL import Image
-from GANDLF.OPM.opm.patch_manager import *
-from GANDLF.OPM.opm.utils import *
+from GANDLF.OPM.opm.patch_manager import PatchManager
+from GANDLF.OPM.opm.utils import (
+    tissue_mask,
+    alpha_channel_check,
+    patch_size_check,
+    parse_config,
+    generate_initial_mask,
+)
 from functools import partial
 from pathlib import Path
 
@@ -24,38 +28,30 @@ Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
 
 
-def generate_initial_mask(slide_path, scale):
-    """
-    Helper method to generate random coordinates within a slide
-    :param slide_path: Path to slide (str)
-    :param num_patches: Number of patches you want to generate
-    :return: list of n (x,y) coordinates
-    """
-    # Open slide and get properties
-    slide = openslide.open_slide(slide_path)
-    slide_dims = slide.dimensions
-
-    # Call thumbnail for effiency, calculate scale relative to whole slide
-    slide_thumbnail = np.asarray(
-        slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale))
-    )
-    real_scale = (
-        slide_dims[0] / slide_thumbnail.shape[1],
-        slide_dims[1] / slide_thumbnail.shape[0],
-    )
-
-    return tissue_mask(slide_thumbnail), real_scale
-
-
 def parse_gandlf_csv(fpath):
     df = pd.read_csv(fpath, dtype=str)
     df = df.drop_duplicates()
-    for index, row in df.iterrows():
-        yield row["SubjectID"], row["Channel_0"], row["Label"]
+    for _, row in df.iterrows():
+        if "Label" in row:
+            yield row["SubjectID"], row["Channel_0"], row["Label"]
+        else:
+            yield row["SubjectID"], row["Channel_0"]
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_PatchMiner",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Construct patches from whole slide image(s).\n\n"
+        + copyrightMessage,
+    )
 
     parser.add_argument(
         "-i",
@@ -77,31 +73,35 @@ if __name__ == "__main__":
         "--config",
         type=str,
         dest="config",
-        help="config.yml for running OPM. ",
-        required=True,
+        help="config (in YAML) for running OPM. Needs 'scale' and 'patch_size' to be defined, otherwise defaults to 16 and (256, 256), respectively.",
+        required=False,
     )
 
     args = parser.parse_args()
 
-    cfg = yaml.safe_load(open(args.config), Loader=yaml.FullLoader)
+    if args.config is not None:
+        cfg = parse_config(args.config)
+    else:
+        cfg = {}
+        cfg["scale"] = 16
+        cfg["patch_size"] = (256, 256)
 
     if not os.path.exists(args.output_path):
-        print("Output Directory does not exist, we are creating one for you.")
         Path(args.output_path).mkdir(parents=True, exist_ok=True)
 
-    out_dir = os.path.abspath(args.output_path)
-    if not out_dir.endswith("/"):
-        out_dir += "/"
+    args.output_path = os.path.abspath(args.output_path)
 
-    out_csv_path = os.path.join(out_dir, "opm_train.csv")
+    out_csv_path = os.path.join(args.output_path, "opm_train.csv")
 
     for sid, slide, label in parse_gandlf_csv(args.input_path):
         start = time.time()
 
         # Create new instance of slide manager
-        manager = PatchManager(slide)
+        manager = PatchManager(slide, args.output_path)
         manager.set_label_map(label)
         manager.set_subjectID(sid)
+        manager.set_image_header("Channel_0")
+        manager.set_mask_header("Label")
 
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(slide, cfg["scale"])
@@ -117,5 +117,7 @@ if __name__ == "__main__":
         )
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, output_csv=out_csv_path, config=cfg)
+        manager.mine_patches(output_csv=out_csv_path, config=cfg)
         print("Total time: {}".format(time.time() - start))
+
+    print("Finished.")

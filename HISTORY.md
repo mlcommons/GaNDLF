@@ -1,3 +1,24 @@
+## 0.0.14
+
+- Add an option (`"save_training"`) to save training patches
+- Add option to save per-label segmentation metrics
+- Separate `"motion"` artifact
+- `DenseNet` now supports `InstanceNorm`
+- Updated implementations of `VGG` and `DenseNet` to use `ModelBase` for consistency
+- Model saving now includes the git commit hash
+- Added FAQ in documentation
+- Accuracy is now standardized from `torchmetrics`
+- New post-processing module added
+- Anonymization module has been added
+- More progress bars added for better feedback
+- NIfTI conversion added in anonymization
+
+## 0.0.13
+
+- Deep supervision added
+- Documentation updated
+- Model IO is now standardized
+
 ## 0.0.12
 
 - Misc bugfixes
@@ -8,6 +29,7 @@
 - Affine augmentation can now be significantly fine-tuned
 - Update logic for penalty calculation
 - RGB-specific augmentation added
+- Cropping added
 
 ## 0.0.11
 

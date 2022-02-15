@@ -1,94 +1,9 @@
-import sys, math
+import sys, math, os, pathlib
 import SimpleITK as sitk
 import numpy as np
+import torchio
 
-
-def resample_image(
-    img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0
-):
-    """
-    Resample image to certain spacing and size.
-
-    Args:
-        img (SimpleITK.Image): The input image to resample.
-        spacing (list): List of length 3 indicating the voxel spacing as [x, y, z].
-        size (list, optional): List of length 3 indicating the number of voxels per dim [x, y, z], which will use compute the appropriate size based on the spacing. Defaults to [].
-        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
-        origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
-        outsideValue (int, optional): value used to pad are outside image.  Defaults to 0.
-
-    Raises:
-        Exception: Spacing/resolution mismatch.
-        Exception: Size mismatch.
-
-    Returns:
-        SimpleITK.Image: The resampled input image.
-    """
-    if len(spacing) != img.GetDimension():
-        raise Exception("len(spacing) != " + str(img.GetDimension()))
-
-    # Set Size
-    if size == None:
-        inSpacing = img.GetSpacing()
-        inSize = img.GetSize()
-        size = [
-            int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
-            for i in range(img.GetDimension())
-        ]
-    else:
-        if len(size) != img.GetDimension():
-            raise Exception("len(size) != " + str(img.GetDimension()))
-
-    # Resample input image
-    return sitk.Resample(
-        img,
-        size,
-        sitk.Transform(),
-        interpolator,
-        img.GetOrigin(),
-        spacing,
-        img.GetDirection(),
-        outsideValue,
-    )
-
-
-def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
-    """
-
-    This function resizes the input image based on the output size and interpolator.
-
-    Args:
-        input_image (SimpleITK.Image): The input image to be resized.
-        output_size (numpy.array | list): The output size to resample input_image to.
-        interpolator (SimpleITK.sitkInterpolator): The desired interpolator.
-
-    Returns:
-        SimpleITK.Image: The output image after resizing.
-    """
-    output_size_parsed = None
-    inputSize = input_image.GetSize()
-    inputSpacing = np.array(input_image.GetSpacing())
-    outputSpacing = np.array(inputSpacing)
-
-    if isinstance(output_size, dict):
-        if "resize" in output_size:
-            output_size_parsed = output_size["resize"]
-    elif isinstance(output_size, list) or isinstance(output_size, np.array):
-        output_size_parsed = output_size
-
-    if len(output_size_parsed) != len(inputSpacing):
-        sys.exit(
-            "The output size dimension is inconsistent with the input dataset, please check parameters."
-        )
-
-    for i, n in enumerate(output_size_parsed):
-        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
-
-    return resample_image(
-        input_image,
-        outputSpacing,
-        interpolator=interpolator,
-    )
+from .generic import get_filename_extension_sanitized
 
 
 def perform_sanity_check_on_subject(subject, parameters):
@@ -171,3 +86,45 @@ def perform_sanity_check_on_subject(subject, parameters):
                     )
 
     return True
+
+
+def write_training_patches(subject, params):
+    """
+    This function writes the training patches to disk.
+
+    Args:
+        subject (torchio.Subject): The input subject.
+        params (dict): The parameters passed by the user yaml; needs the "output_dir" and "current_epoch" keys to be present.
+    """
+    # create folder tree for saving the patches
+    training_output_dir = os.path.join(params["output_dir"], "training_patches")
+    pathlib.Path(training_output_dir).mkdir(parents=True, exist_ok=True)
+    training_output_dir_epoch = os.path.join(
+        training_output_dir, str(params["current_epoch"])
+    )
+    pathlib.Path(training_output_dir_epoch).mkdir(parents=True, exist_ok=True)
+    training_output_dir_current_subject = os.path.join(
+        training_output_dir_epoch, subject["subject_id"][0]
+    )
+    pathlib.Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
+
+    # write the training patches to disk
+    ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
+    for key in params["channel_keys"]:
+        img_to_write = torchio.ScalarImage(
+            tensor=subject[key][torchio.DATA][0], affine=subject[key]["affine"][0]
+        ).as_sitk()
+        sitk.WriteImage(
+            img_to_write,
+            os.path.join(training_output_dir_current_subject, "modality_" + key + ext),
+        )
+
+    if params["label_keys"] is not None:
+        img_to_write = torchio.ScalarImage(
+            tensor=subject[params["label_keys"][0]][torchio.DATA][0],
+            affine=subject[key]["affine"][0],
+        ).as_sitk()
+        sitk.WriteImage(
+            img_to_write,
+            os.path.join(training_output_dir_current_subject, "label_" + key + ext),
+        )

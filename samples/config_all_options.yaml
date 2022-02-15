@@ -1,16 +1,16 @@
 # affix version
 version:
   {
-    minimum: 0.0.12,
-    maximum: 0.0.12 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.14,
+    maximum: 0.0.14 # this should NOT be made a variable, but should be tested after every tag is created
   }
-# Choose the model parameters here
+## Choose the model parameters here
 model:
   {
     dimension: 3, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 30, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
-    architecture: resunet, # options: unet, resunet, fcn, uinc, vgg, densenet
-    norm_type: batch, # options: batch, instance, used for all networks
+    architecture: resunet, # options: unet, resunet, deep_resunet, deep_unet, light_resunet, light_unet, fcn, uinc, vgg, densenet
+    norm_type: batch, # options: batch, instance, or none (only for VGG); used for all networks
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
     # class_list: '[*range(0,100,1)]' # a range of values from 0 to 99 with a step of 1 will be created; customize as needed, but ensure this is defined as a string as it will be passed through 'eval' function
@@ -18,14 +18,24 @@ model:
     ignore_label_validation: 0, # this is the location of the class_list whose performance is ignore during validation metric calculation
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
+    
+    ## densenet models have the following optional parameters:
+    # growth_rate (int) - how many filters to add each layer (k in paper)
+    # num_init_features (int) - the number of filters to learn in the first convolution layer
+    # bn_size (int) - multiplicative factor for number of bottle neck layers
+    # (i.e. bn_size * k features in the bottleneck layer)
+    # drop_rate (float) - dropout rate after each dense layer
+    # num_classes (int) - number of classification classes
+    # final_convolution_layer (str) - the final convolutional layer to use
+    # norm_type (str) - the normalization type to use
   }
-# metrics to evaluate the validation performance
+## metrics to evaluate the validation performance
 metrics:
   - dice # segmentation
   # - hausdorff # hausdorff 100 percentile, segmentation
   # - hausdorff95 # hausdorff 95 percentile, segmentation
-  # - accuracy # regression/classification
   # - mse # regression/classification
+  # - accuracy # classification
   # - classification_accuracy # classification
   # - balanced_accuracy # classification ## more details https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html
   # - f1 # classification/segmentation
@@ -37,11 +47,11 @@ metrics:
 in_memory: False
 # this will save the generated masks for validation and testing data for qualitative analysis
 save_output: False
-# If enabled, this parameter pads images and labels when label sampler is used
-enable_padding: False
+# this will save the patches used during training for qualitative analysis
+save_training: False
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
-# Patch size during training - 2D patch for breast images since third dimension is not patched 
+## Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [144,144,64]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: uniform
@@ -53,18 +63,20 @@ patch_sampler: uniform
 #         padding_type: constant # how the label gets padded
 #       }
 #   }
+# If enabled, this parameter pads images and labels when label sampler is used
+enable_padding: False
 # Number of epochs
 num_epochs: 100
 # Set the patience - measured in number of epochs after which, if the performance metric does not improve, exit the training loop - defaults to the number of epochs
 patience: 50
 # Set the batch size
 batch_size: 1
-# Set the initial learning rate
-learning_rate: 0.001
 # gradient clip : norm, value, agc
 clip_mode: norm
 # clip_gradient value
 clip_grad: 0.1
+## Set the initial learning rate
+learning_rate: 0.001
 # Learning rate scheduler - options:"triangle", "triangle_modified", "exp", "step", "reduce-on-plateau", "cosineannealing", "triangular", "triangular2", "exp_range"
 # triangle/triangle_modified use LambdaLR but triangular/triangular2/exp_range uses CyclicLR
 scheduler:
@@ -89,7 +101,7 @@ weighted_loss: True
 # Which optimizer do you want to use - sgd, asgd, adam, adamw, adamax, sparseadam, rprop, adadelta, adagrad, rmsprop,
 # each has their own options and functionalities, which are initialized with defaults, see GANDLF.optimizers.wrap_torch for details
 optimizer: adam
-# this parameter controls the nested training process
+## this parameter controls the nested training process
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
@@ -132,12 +144,14 @@ data_preprocessing:
     },
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
+    'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
+    'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
   }
-# various data augmentation techniques
-# options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
+## various data augmentation techniques
+# options: affine, elastic, downsample, motion, kspace, bias, blur, gaussianNoise, swap
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
-# 'kspace': one of motion, ghosting or spiking is picked (randomly) for augmentation
+# 'kspace': one of ghosting or spiking is picked (randomly) for augmentation
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
@@ -149,6 +163,9 @@ data_augmentation:
     },
     'elastic',
     'kspace':{
+      'probability': 1
+    },
+    'motion':{
       'probability': 1
     },
     'bias',
@@ -182,7 +199,12 @@ data_augmentation:
       'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
     }, 
   }
-# parallel training on HPC - here goes the command to prepend to send to a high performance computing
+# ## post-processing steps
+# data_postprocessing:
+#   {
+#     'fill_holes', # this will fill holes in the image
+#   }
+## parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
 # not used for single fold training
 # this gets passed before the training_loop, so ensure enough memory is provided along with other parameters

@@ -12,7 +12,7 @@ from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
+from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device, load_ov_model
 from GANDLF.models import global_models_dict
 
 
@@ -27,6 +27,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         outputDir (str): The output directory.
     """
     # Defining our model here according to parameters mentioned in the configuration file
+    print("Current model type : ", parameters["model"]["type"])
     print("Number of dims     : ", parameters["model"]["dimension"])
     if "num_channels" in parameters["model"]:
         print("Number of channels : ", parameters["model"]["num_channels"])
@@ -39,20 +40,41 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
     # Setting up the inference loader
     inferenceDataForTorch = ImagesFromDataFrame(
-        inferenceDataFromPickle, parameters, train=False
+        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
     )
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
-    # Loading the weights into the model
-    main_dict = outputDir
-    if os.path.isdir(outputDir):
-        file_to_check = os.path.join(
-            outputDir, str(parameters["model"]["architecture"]) + "_best.pth.tar"
-        )
-        if not os.path.isfile(file_to_check):
-            raise ValueError("The model specified model was not found:", file_to_check)
-    main_dict = torch.load(file_to_check)
-    model.load_state_dict(main_dict["model_state_dict"])
+    if parameters['model']['type'] == "Torch":
+        # Loading the weights into the model
+        main_dict = outputDir
+        if os.path.isdir(outputDir):
+            file_to_check = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + "_best.pth.tar"
+            )
+            if not os.path.isfile(file_to_check):
+                raise ValueError("The model specified model was not found:", file_to_check)
+
+        main_dict = torch.load(file_to_check, map_location=torch.device(device))
+        model.load_state_dict(main_dict["model_state_dict"])
+    elif parameters['model']['type'].lower() == "openvino":
+        # Loading the executable OpenVINO model
+        main_dict = outputDir
+        if os.path.isdir(outputDir):
+            xml_to_check = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + "_best.xml"
+            )
+            bin_to_check = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + "_best.bin"
+            )
+            if not os.path.isfile(xml_to_check):
+                raise ValueError("The model specified model IR was not found:", xml_to_check)
+            if not os.path.isfile(bin_to_check):
+                raise ValueError("The model specified model weights was not found:", bin_to_check)
+            model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
+            parameters['model']['IO'] = [input_blob, output_blob]
+    else:
+        raise ValueError("The model type is not recognized: ", parameters['model']['type'])
+        
 
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
@@ -62,9 +84,10 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     parameters["save_output"] = True
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-        model, parameters["model"]["amp"], device, optimizer=None
-    )
+    if parameters['model']['type'] == "Torch":
+        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
+            model, parameters["model"]["amp"], device, optimizer=None
+        )
 
     print("Using device:", parameters["device"], flush=True)
 
@@ -123,14 +146,18 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 )
                 for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                     x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                    if parameters["model"]["amp"]:
-                        with autocast():
-                            output = model(
-                                image_patches.float().to(parameters["device"])
-                            )
+                    if parameters["model"]["type"] == "Torch":
+                        if parameters["model"]["amp"]:
+                            with autocast():
+                                output = model(
+                                    image_patches.float().to(parameters["device"])
+                                )
+                        else:
+                            output = model(image_patches.float().to(parameters["device"]))
+                        output = output.detach().cpu().numpy()
                     else:
-                        output = model(image_patches.float().to(parameters["device"]))
-                    output = output.detach().cpu().numpy()
+                        output = model.infer( inputs={params["model"]["IO"][0]:image_patches.float().cpu().numpy()})[params["model"]["IO"][1]]
+
                     for i in range(int(output.shape[0])):
                         count_map[
                             x_coords[i] : x_coords[i] + patch_size[0],

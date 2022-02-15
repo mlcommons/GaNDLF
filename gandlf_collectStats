@@ -25,22 +25,22 @@ def main():
     )
 
     parser = argparse.ArgumentParser(
-        prog="GANDLF_CollectCSV",
+        prog="GANDLF_CollectStats",
         formatter_class=argparse.RawTextHelpFormatter,
         description="Collect statistics from different testing/validation combinations from output directory.\n\n"
         + copyrightMessage,
     )
     parser.add_argument(
-        "-inputDir",
+        "-m", "--modeldir",
+        metavar="",
         type=str,
         help="Input directory which contains testing and validation models",
-        required=True,
     )
     parser.add_argument(
-        "-outputDir",
+        "-o", "--outputDir",
+        metavar="",
         type=str,
         help="Output directory to save stats and plot",
-        required=True,
     )
 
     args = parser.parse_args()
@@ -73,13 +73,9 @@ def main():
 
                         for i, n in enumerate(filesInDir):
                             # when the log has been found, collect the final numbers
-                            if (
-                                "trainingScores_log" in n
-                            ):  
+                            if "trainingScores_log" in n:
 
-                                log_file = os.path.join(
-                                    currentValidationDir, n
-                                )
+                                log_file = os.path.join(currentValidationDir, n)
                                 with open(log_file) as f:
                                     for line in f:
                                         pass

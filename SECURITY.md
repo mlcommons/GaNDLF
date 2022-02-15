@@ -11,6 +11,10 @@ currently being supported with security updates.
 | ------- | ------------------ |
 |   0.x   | :white_check_mark: |
 
-## Reporting a Vulnerability
+## Reporting a PUBLIC Vulnerability
 
-Please report any vulnerabilities via [GitHub Issues](https://github.com/CBICA/GaNDLF/issues/new/choose)
+Please report any vulnerabilities that can be publicly shared via [GitHub Issues](https://github.com/CBICA/GaNDLF/issues/new/choose).
+
+## Reporting a PRIVATE Vulnerability
+
+Please report any vulnerabilities that cannot be publicly shared via [email](mailto:gandlf@cbica.upenn.edu).
