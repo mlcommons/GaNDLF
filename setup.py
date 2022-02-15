@@ -49,6 +49,7 @@ except Exception as error:
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 requirements = [
+    "openvino",
     "black",
     "numpy==1.21.0",
     "scipy",
