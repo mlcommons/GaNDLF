@@ -14,8 +14,8 @@ from torch.cuda.amp import autocast
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.models import global_models_dict
 from GANDLF.utils import (
-    populate_channel_keys_in_params, 
-    send_model_to_device, 
+    populate_channel_keys_in_params,
+    send_model_to_device,
     load_ov_model,
 )
 
@@ -85,7 +85,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         raise ValueError(
             "The model type is not recognized: ", parameters["model"]["type"]
         )
-        
+
+
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
 
@@ -168,9 +169,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             )
                         output = output.detach().cpu().numpy()
                     else:
-                        output = model.infer( 
+                        output = model.infer(
                             inputs={
-                                params["model"]["IO"][0]:image_patches.float()
+                                params["model"]["IO"][0]: image_patches.float()
                                 .cpu()
                                 .numpy()
                             }

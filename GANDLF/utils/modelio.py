@@ -53,18 +53,19 @@ def save_model(model_dict, model, input_shape, path):
             opset_version=11,
             export_params=True,
             verbose=True,
-            input_names = ['input'],
-            output_names = ['output']
+            input_names = ["input"],
+            output_names = ["output"]
         )
     
     ov_output_dir = os.path.dirname(os.path.abspath(path))
     subprocess.call(
         "mo.py -m {0} --input_shape [1,3,{1},{2}] --output_dir {3}".format(
             onnx_path, input_shape[0], input_shape[1], ov_output_dir
-        ), 
-        shell=True
+        ),
+        shell=True,
     )
     
+
 def load_model(path):
     """
     Load a model dictionary from a file.
@@ -90,6 +91,7 @@ def load_model(path):
 
     return model_dict
 
+
 def load_ov_model(path, device="CPU"):
     """
     Load an OpenVINO IR model from an .xml file.
@@ -107,8 +109,8 @@ def load_ov_model(path, device="CPU"):
     ie = IECore()
     if device == "GPU":
         ie.set_config(
-            config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))}, 
-            device_name=device
+            config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))},
+            device_name=device,
         )
 
     net = ie.read_network(model=path, weights=path.replace("xml", "bin"))

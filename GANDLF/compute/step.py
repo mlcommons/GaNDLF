@@ -68,7 +68,7 @@ def step(model, image, label, params, train=True):
             output = model(image)
     else:
         output = torch.from_numpy(
-            model.infer(inputs={params["model"]["IO"][0]:image.cpu().numpy()})[
+            model.infer(inputs={params["model"]["IO"][0]: image.cpu().numpy()})[
                 params["model"]["IO"][1]
             ]
         )
