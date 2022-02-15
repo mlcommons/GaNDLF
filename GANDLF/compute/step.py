@@ -68,10 +68,10 @@ def step(model, image, label, params, train=True):
             output = model(image)
     else:
         output = torch.from_numpy(
-                model.infer(inputs={params["model"]["IO"][0]:image.cpu().numpy()})[
-                    params["model"]["IO"][1]
-                    ]
-                )
+            model.infer(inputs={params["model"]["IO"][0]:image.cpu().numpy()})[
+                params["model"]["IO"][1]
+            ]
+        )
 
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output

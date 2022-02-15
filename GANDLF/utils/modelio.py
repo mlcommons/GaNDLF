@@ -43,20 +43,27 @@ def save_model(model_dict, model, input_shape, path):
     torch.save(model_dict, path)
 
     onnx_path = path.replace("pth.tar", "onnx")
-    dummy_input = torch.randn((1,3,input_shape[0],input_shape[1]))
+    dummy_input = torch.randn((1, 3, input_shape[0], input_shape[1]))
 
     with torch.no_grad():
-        torch.onnx.export(model,
-                dummy_input.to("cpu"),
-                onnx_path,
-                opset_version=11,
-                export_params=True,
-                verbose=True,
-                input_names = ['input'],
-                output_names = ['output'])
+        torch.onnx.export(
+            model,
+            dummy_input.to("cpu"),
+            onnx_path,
+            opset_version=11,
+            export_params=True,
+            verbose=True,
+            input_names = ['input'],
+            output_names = ['output']
+        )
     
     ov_output_dir = os.path.dirname(os.path.abspath(path))
-    subprocess.call("mo.py -m {0} --input_shape [1,3,{1},{2}] --output_dir {3}".format(onnx_path, input_shape[0], input_shape[1], ov_output_dir), shell=True)
+    subprocess.call(
+        "mo.py -m {0} --input_shape [1,3,{1},{2}] --output_dir {3}".format(
+            onnx_path, input_shape[0], input_shape[1], ov_output_dir
+        ), 
+        shell=True
+    )
     
 def load_model(path):
     """
@@ -83,7 +90,7 @@ def load_model(path):
 
     return model_dict
 
-def load_ov_model(path, device = "CPU"):
+def load_ov_model(path, device="CPU"):
     """
     Load an OpenVINO IR model from an .xml file.
 
@@ -99,7 +106,10 @@ def load_ov_model(path, device = "CPU"):
 
     ie = IECore()
     if device == "GPU":
-        ie.set_config(config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))}, device_name=device)
+        ie.set_config(
+            config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))}, 
+            device_name=device
+        )
 
     net = ie.read_network(model=path, weights=path.replace("xml", "bin"))
 
