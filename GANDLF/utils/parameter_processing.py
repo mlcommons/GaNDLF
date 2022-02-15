@@ -1,4 +1,4 @@
-from GANDLF.models.modelBase import get_final_layer
+from GANDLF.models.modelBase import ModelBase
 
 
 def populate_header_in_parameters(parameters, headers):
@@ -18,17 +18,18 @@ def populate_header_in_parameters(parameters, headers):
 
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
+
+    # initialize number of channels for processing
+    if not ("num_channels" in parameters["model"]):
+        parameters["model"]["num_channels"] = len(headers["channelHeaders"])
+
     parameters["problem_type"] = find_problem_type(
-        parameters, get_final_layer(parameters["model"]["final_layer"])
+        parameters, ModelBase(parameters).final_convolution_layer
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
     if parameters["problem_type"] != "regression":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
-
-    # initialize number of channels for processing
-    if not ("num_channels" in parameters["model"]):
-        parameters["model"]["num_channels"] = len(headers["channelHeaders"])
 
     return parameters
 
@@ -78,20 +79,24 @@ def populate_channel_keys_in_params(data_loader, parameters):
     Returns:
         dict: Updated parameters that include key information
     """
-    batch = next(
-        iter(data_loader)
-    )  # using train_loader makes this slower as train loader contains full augmentations
+    # using train_loader makes this slower as train loader contains full augmentations
+    batch = next(iter(data_loader))
     all_keys = list(batch.keys())
     channel_keys = []
     value_keys = []
+    label_keys = []
     print("All Keys : ", all_keys)
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)
         elif "value" in item:
             value_keys.append(item)
+        elif "label" in item:
+            label_keys.append(item)
     parameters["channel_keys"] = channel_keys
     if value_keys:
         parameters["value_keys"] = value_keys
+    if label_keys:
+        parameters["label_keys"] = label_keys
 
     return parameters

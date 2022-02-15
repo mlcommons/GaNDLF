@@ -8,15 +8,34 @@ For any DL pipeline, the following flow needs to be performed:
 
 GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
-- [Preparing the Data](#preparing-the-data)
-- [Constructing the Data CSV](#constructing-the-data-csv)
-- [Customize the Training](#customize-the-training)
-- [Running GaNDLF](#running-gandlf-traininginference)
-- [Plot the final results](#plot-the-final-results)
-- [Multi-GPU systems](#multi-gpu-systems)
-- [Interpretability using M3D-CAM](#m3d-cam-usage)
+- [Usage](#usage)
+  - [Table of Contents](#table-of-contents)
+  - [Preparing the Data](#preparing-the-data)
+    - [Anonymize Data](#anonymize-data)
+    - [Cleanup/Harmonize Data](#cleanupharmonize-data)
+    - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
+    - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
+  - [Constructing the Data CSV](#constructing-the-data-csv)
+  - [Customize the Training](#customize-the-training)
+  - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
+  - [Plot the final results](#plot-the-final-results)
+    - [Multi-GPU systems](#multi-gpu-systems)
+  - [M3D-CAM usage](#m3d-cam-usage)
 
 ## Preparing the Data
+
+### Anonymize Data
+
+GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
+```bash
+python gandlf_anonymizer
+  # -h, --help         show help message and exit
+  -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
+  -o ./output_dir_or_file # output directory to save anonymized images or a single output image file
+```
+
+### Cleanup/Harmonize Data
 
 It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
 
@@ -26,10 +45,30 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 - Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GaNDLF's preprocessing module](#customize-the-training).
 - Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GaNDLF's preprocessing module](#customize-the-training).
 
-Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
+Recommended tools for tackling all aforementioned preprocessing tasks: 
+- [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
+- [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
 
-**For Histopathology Only:**
-- Convert WSI/label map to patches with OPM: [See using OPM](https://github.com/CBICA/OPM/blob/master/README.md)
+### Offline Patch Extraction (for histology images only)
+
+GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using [OPM](https://github.com/CBICA/OPM):
+
+- Construct a YAML configuration for OPM with a minimum of the following keys (see [OPM usage](https://github.com/CBICA/OPM/blob/master/README.md#usage) for all options):
+  - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
+  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256])
+  - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
+- A CSV file with the following columns:
+  - `SubjectID`: the ID of the subject for the WSI
+  - `Channel_0`: the WSI file
+  - `Label`: (optional) the label map file
+- Run the following command:
+```bash
+python gandlf_patchMiner
+  # -h, --help         show help message and exit
+  -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./exp_patchMiner/input.csv \ # data in CSV format 
+  -o ./exp_patchMiner/output_dir/ \ # output directory
+```
 
 ### Running preprocessing before training/inference
 
@@ -37,9 +76,10 @@ This is optional, but recommended. It will significantly reduce the computationa
 ```bash
 # continue from previous shell
 python gandlf_preprocess \
-  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
-  -data ./experiment_0/train.csv \ # data in CSV format 
-  -output ./experiment_0/output_dir/ \ # output directory
+  # -h, --help         show help message and exit
+  -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./experiment_0/train.csv \ # data in CSV format 
+  -o ./experiment_0/output_dir/ \ # output directory
 ```
 
 This will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration.
@@ -69,10 +109,11 @@ The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_con
 ```bash
 # continue from previous shell
 python gandlf_constructCSV \
-  -inputDir ./experiment_0/data_dir/ # this is the main data directory
-  -channelsID _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
-  -labelID _seg.nii.gz # label identifier - not needed for regression/classification
-  -outputFile ./experiment_0/train_data.csv \ # output CSV to be used for training
+  # -h, --help         show help message and exit
+  -i ./experiment_0/data_dir/ # this is the main data directory
+  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
+  -l _seg.nii.gz # label identifier - not needed for regression/classification
+  -o ./experiment_0/train_data.csv \ # output CSV to be used for training
 ```
 
 This assumes the data is in the following format:
@@ -139,11 +180,13 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 ```bash
 # continue from previous shell
 python gandlf_run \
-  -config ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
-  -data ./experiment_0/train.csv \ # data in CSV format 
-  -output ./experiment_0/output_dir/ \ # output directory
-  -train 1 \ # 1 == train, 0 == inference
-  -device cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
+  # -h, --help         show help message and exit
+  # -v, --version      Show program's version number and exit.
+  -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
+  -i ./experiment_0/train.csv \ # data in CSV format 
+  -m ./experiment_0/model_dir/ \ # model directory
+  -t True \ # True == train, False == inference
+  -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
 ```
 
 [Back To Top &uarr;](#table-of-contents)
@@ -155,8 +198,8 @@ After the testing/validation training is finished, GaNDLF makes it possible to c
 ```bash
 # continue from previous shell
 python gandlf_collectStats \
-  -inputDir /path/to/trained/models \  # directory which contains testing and validation models
-  -outputDir ./experiment_0/output_dir_stats/  # output directory to save stats and plot
+  -m /path/to/trained/models \  # directory which contains testing and validation models
+  -o ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
 
 [Back To Top &uarr;](#table-of-contents)
