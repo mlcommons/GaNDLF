@@ -22,7 +22,7 @@ class GradScaler:
             # unscale the gradients of optimizer's assigned params in-place
             self._scaler.unscale_(optimizer)
             if (clip_mode is None) or (str(clip_mode).lower() == "none"):
-                clip_mode == "norm"  # default, in case none gets passed
+                clip_mode = "norm"  # default, in case none gets passed
             dispatch_clip_grad_(parameters, clip_grad, mode=clip_mode)
         self._scaler.step(optimizer)
         self._scaler.update()

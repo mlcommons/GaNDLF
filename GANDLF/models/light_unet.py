@@ -102,6 +102,7 @@ class light_unet(ModelBase):
             input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_3 = DecodingModule(
             input_channels=self.base_filters * 2,
@@ -114,6 +115,7 @@ class light_unet(ModelBase):
             input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_2 = DecodingModule(
             input_channels=self.base_filters * 2,
@@ -126,6 +128,7 @@ class light_unet(ModelBase):
             input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.de_1 = DecodingModule(
             input_channels=self.base_filters * 2,
@@ -138,6 +141,15 @@ class light_unet(ModelBase):
             input_channels=self.base_filters,
             output_channels=self.base_filters,
             conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
+        )
+        # Important to take a look here, this looks confusing but it is like the original implementation of unet
+        self.de_0 = DecodingModule(
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
         )
         self.out = out_conv(
             input_channels=self.base_filters * 2,
@@ -177,7 +189,8 @@ class light_unet(ModelBase):
         x = self.us_1(x)
         x = self.de_1(x, x2)
         x = self.us_0(x)
-        x = self.out(x, x1)
+        x = self.de_0(x, x1)
+        x = self.out(x)
         return x
 
 

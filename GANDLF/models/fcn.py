@@ -92,30 +92,35 @@ class fcn(ModelBase):
             output_channels=1,
             conv=self.Conv,
             scale_factor=5,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.us_3 = FCNUpsamplingModule(
             input_channels=self.base_filters * 8,
             output_channels=1,
             conv=self.Conv,
             scale_factor=4,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.us_2 = FCNUpsamplingModule(
             input_channels=self.base_filters * 4,
             output_channels=1,
             conv=self.Conv,
             scale_factor=3,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.us_1 = FCNUpsamplingModule(
             input_channels=self.base_filters * 2,
             output_channels=1,
             conv=self.Conv,
             scale_factor=2,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.us_0 = FCNUpsamplingModule(
             input_channels=self.base_filters,
             output_channels=1,
             conv=self.Conv,
             scale_factor=1,
+            interpolation_mode=self.linear_interpolation_mode,
         )
         self.conv_0 = self.Conv(
             in_channels=5,

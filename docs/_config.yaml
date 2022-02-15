@@ -9,5 +9,7 @@ navigation:
     url: usage
   - title: Extending GaNDLF
     url: extending
+  - title: FAQ
+    url: faq
   - title: Acknowledgements
     url: acknowledgements

@@ -8,9 +8,6 @@ learning_rate: 0.001
 loss_function: mse
 metrics:
   - mse
-  - accuracy: {
-      threshold: 0.5,
-    }
 model:
   amp: false
   architecture: densenet121
@@ -40,7 +37,7 @@ save_output: false
 scaling_factor: 1
 scheduler: triangle
 version:
-  maximum: 0.0.12
-  minimum: 0.0.7
+  maximum: 0.0.14
+  minimum: 0.0.13
 weighted_loss: false
 which_model: resunet

@@ -50,10 +50,13 @@ Please cite the following article for GaNDLF ([full PDF](https://arxiv.org/abs/2
 
 ## Documentation
 
-Start at https://cbica.github.io/GaNDLF/. Includes the following:
+GaNDLF has extensive documentation and it is arranged in the following manner:
+
+- [Home](https://cbica.github.io/GaNDLF/)
 - [Installation](https://cbica.github.io/GaNDLF/setup)
 - [Usage](https://cbica.github.io/GaNDLF/usage)
 - [Extension](https://cbica.github.io/GaNDLF/extending)
+- [Frequently Asked Questions](https://cbica.github.io/GaNDLF/faq)
 - [Acknowledgements](https://cbica.github.io/GaNDLF/acknowledgements)
 
 
