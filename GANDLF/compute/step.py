@@ -3,7 +3,7 @@ import psutil
 from .loss_and_metric import get_loss_and_metrics
 
 
-def step(model, image, label, params, train = True):
+def step(model, image, label, params, train=True):
     """
     Function that steps the model for a single batch
 
@@ -67,7 +67,11 @@ def step(model, image, label, params, train = True):
         else:
             output = model(image)
     else:
-        output = torch.from_numpy(model.infer( inputs={params["model"]["IO"][0]:image.cpu().numpy()})[params["model"]["IO"][1]])
+        output = torch.from_numpy(
+                model.infer(inputs={params["model"]["IO"][0]:image.cpu().numpy()})[
+                    params["model"]["IO"][1]
+                    ]
+                )
 
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output

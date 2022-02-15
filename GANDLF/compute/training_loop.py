@@ -460,6 +460,7 @@ def training_loop(
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
+
             model.eval()
             save_model(
                 {

@@ -78,7 +78,7 @@ def validate_network(
         model.eval()
     is_recording = False
 
-    if 'save_data' in params['model'].keys():
+    if "save_data" in params["model"].keys():
         is_recording = True
         torch.manual_seed(0)
         image_patch_data = []
