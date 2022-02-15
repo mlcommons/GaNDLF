@@ -1,10 +1,7 @@
 import hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
-
 import os
-
 import torch
-
 from openvino.inference_engine import IECore
 
 # these are the base keys for the model dictionary to save
@@ -61,7 +58,6 @@ def save_model(model_dict, model, input_shape, path):
     ov_output_dir = os.path.dirname(os.path.abspath(path))
     subprocess.call("mo.py -m {0} --input_shape [1,3,{1},{2}] --output_dir {3}".format(onnx_path, input_shape[0], input_shape[1], ov_output_dir), shell=True)
     
-
 def load_model(path):
     """
     Load a model dictionary from a file.

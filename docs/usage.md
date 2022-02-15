@@ -45,7 +45,9 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 - Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GaNDLF's preprocessing module](#customize-the-training).
 - Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GaNDLF's preprocessing module](#customize-the-training).
 
-Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
+Recommended tools for tackling all aforementioned preprocessing tasks: 
+- [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
+- [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
 
 ### Offline Patch Extraction (for histology images only)
 
