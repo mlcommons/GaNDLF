@@ -54,7 +54,7 @@ def save_model(model_dict, model, input_shape, path):
             export_params=True,
             verbose=True,
             input_names=["input"],
-            output_names=["output"]
+            output_names=["output"],
         )
 
     ov_output_dir = os.path.dirname(os.path.abspath(path))
