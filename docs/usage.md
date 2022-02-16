@@ -139,6 +139,7 @@ Notes:
 
 [Back To Top &uarr;](#table-of-contents)
 
+
 ## Customize the Training
 
 GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
@@ -176,6 +177,7 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 
 [Back To Top &uarr;](#table-of-contents)
 
+
 ## Running GaNDLF (Training/Inference)
 
 ```bash
@@ -191,6 +193,7 @@ python gandlf_run \
 ```
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## Plot the final results
 
@@ -212,6 +215,7 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref]
 For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## M3D-CAM usage
 
