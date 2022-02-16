@@ -21,6 +21,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Plot the final results](#plot-the-final-results)
     - [Multi-GPU systems](#multi-gpu-systems)
   - [M3D-CAM usage](#m3d-cam-usage)
+  - [Examples](#examples)
 
 ## Preparing the Data
 
@@ -237,3 +238,9 @@ The default behavior is "auto" which chooses the last convolutional layer.
 
 All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
+
+
+## Examples
+
+- Example data can be found in [the main repo](https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
+- Configurations can be found in [the main repo](https://github.com/CBICA/GaNDLF/tree/master/testing).
