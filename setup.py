@@ -51,7 +51,7 @@ except Exception as error:
 requirements = [
     "openvino-dev",
     "black",
-    "numpy==1.21.0",
+    "numpy>=1.19.0",
     "scipy",
     "SimpleITK==2.1.0",
     "torch>=1.7",
