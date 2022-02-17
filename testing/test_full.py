@@ -599,7 +599,7 @@ def test_clip_train_classification_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "vgg16"
     parameters["model"]["norm_type"] = "None"
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])    
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
         parameters["clip_mode"] = clip_mode
