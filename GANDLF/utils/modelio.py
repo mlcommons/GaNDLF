@@ -3,8 +3,10 @@ from time import gmtime, strftime
 import os
 import torch
 
-try: from openvino.inference_engine import IECore, StatusCode
-except ImportError: pass
+try: 
+    from openvino.inference_engine import IECore, StatusCode
+except ImportError: 
+    pass
 
 # these are the base keys for the model dictionary to save
 model_dict_base = {
