@@ -31,12 +31,13 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, reset_prev):
     model_parameters_prev = os.path.join(
         os.path.dirname(file_data_full), "parameters.pkl"
     )
-    if os.path.exists(model_parameters_prev):
-        parameters_prev = pickle.load(open(model_parameters_prev, "rb"))
-        if parameters != parameters_prev:
-            raise ValueError(
-                "The parameters are not the same as the ones stored in the previous run, please re-check."
-            )
+    if not reset_prev:
+        if os.path.exists(model_parameters_prev):
+            parameters_prev = pickle.load(open(model_parameters_prev, "rb"))
+            if parameters != parameters_prev:
+                raise ValueError(
+                    "The parameters are not the same as the ones stored in the previous run, please re-check."
+                )
 
         parameters["data_preprocessing"] = {}
     parameters["output_dir"] = output_dir
