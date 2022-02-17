@@ -21,6 +21,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Plot the final results](#plot-the-final-results)
     - [Multi-GPU systems](#multi-gpu-systems)
   - [M3D-CAM usage](#m3d-cam-usage)
+  - [Examples](#examples)
 
 ## Preparing the Data
 
@@ -45,7 +46,9 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 - Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GaNDLF's preprocessing module](#customize-the-training).
 - Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GaNDLF's preprocessing module](#customize-the-training).
 
-Recommended tool for tackling all aforementioned preprocessing tasks: https://github.com/CBICA/CaPTk
+Recommended tools for tackling all aforementioned preprocessing tasks: 
+- [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
+- [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
 
 ### Offline Patch Extraction (for histology images only)
 
@@ -136,6 +139,7 @@ Notes:
 
 [Back To Top &uarr;](#table-of-contents)
 
+
 ## Customize the Training
 
 GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
@@ -173,6 +177,7 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 
 [Back To Top &uarr;](#table-of-contents)
 
+
 ## Running GaNDLF (Training/Inference)
 
 ```bash
@@ -188,6 +193,7 @@ python gandlf_run \
 ```
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## Plot the final results
 
@@ -209,6 +215,7 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref]
 For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## M3D-CAM usage
 
@@ -235,3 +242,9 @@ The default behavior is "auto" which chooses the last convolutional layer.
 
 All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
+
+
+## Examples
+
+- Example data can be found in [the main repo](https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
+- Configurations can be found in [the main repo](https://github.com/CBICA/GaNDLF/tree/master/testing).
