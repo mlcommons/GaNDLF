@@ -49,7 +49,7 @@ except Exception as error:
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 requirements = [
-    "openvino",
+    "openvino-dev",
     "black",
     "numpy==1.21.0",
     "scipy",
@@ -60,7 +60,7 @@ requirements = [
     "torchio==0.18.57",
     "pandas",
     "pylint",
-    "scikit-learn==0.23.1",
+    "scikit-learn>=0.23.1",
     "pickle5==0.0.11",
     "setuptools",
     "seaborn",
