@@ -34,6 +34,10 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
         )
         parameters = pickle.load(open(currentModelConfigPickle, "rb"))
 
+    # initialize model type for processing: if not defined, default to Torch
+    if not ("type" in parameters["model"]):
+        parameters["model"]["type"] = "Torch"
+
     # check for single fold training
     singleFoldValidation = False
     singleFoldTesting = False

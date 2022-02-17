@@ -35,6 +35,7 @@ def populate_header_in_parameters(parameters, headers):
     if parameters["problem_type"] != "regression":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
 
+    print("Parameters are: ", parameters)
     return parameters
 
 

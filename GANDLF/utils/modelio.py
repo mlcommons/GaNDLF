@@ -2,7 +2,9 @@ import hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
 import os
 import torch
-from openvino.inference_engine import IECore
+
+try: from openvino.inference_engine import IECore, StatusCode
+except ImportError: pass
 
 # these are the base keys for the model dictionary to save
 model_dict_base = {
@@ -60,7 +62,7 @@ def save_model(model_dict, model, input_shape, path):
     ov_output_dir = os.path.dirname(os.path.abspath(path))
     subprocess.call(
         [
-            "mo.py",
+            "mo",
             "--input_model",
             "{0}".format(onnx_path),
             "--input_shape",

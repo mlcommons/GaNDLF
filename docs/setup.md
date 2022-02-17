@@ -16,8 +16,6 @@
     - NVIDIA: [CUDA](https://developer.nvidia.com/cuda-download) and a compatible [cuDNN](https://developer.nvidia.com/cudnn) installed system-wide
     - AMD: [ROCm](https://www.amd.com/en/graphics/servers-solutions-rocm)
 
-- CPU compute: use Intel Distribution of OpenVINO toolkit for inference performance gain
-  - Install [Intel Distribution of OpenVINO toolkit](https://docs.openvino.ai/latest/openvino_docs_install_guides_installing_openvino_linux.html)
 
 ## Installation
 
@@ -40,6 +38,4 @@ pip install -e .
 ## verify installation
 python -c "import GANDLF as gf;print(gf.__version__)"
 
-## setup OpenVINO path:
-source $INTEL_OpenVINO_Installation_Path/bin/setupvars.sh
 ```
