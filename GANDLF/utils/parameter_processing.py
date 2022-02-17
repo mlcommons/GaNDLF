@@ -19,9 +19,9 @@ def populate_header_in_parameters(parameters, headers):
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
 
-    # initialize model type for processing: if not defined, default to Torch
+    # initialize model type for processing: if not defined, default to torch
     if not ("type" in parameters["model"]):
-        parameters["model"]["type"] = "Torch"
+        parameters["model"]["type"] = "torch"
 
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):

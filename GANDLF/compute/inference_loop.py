@@ -48,7 +48,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     )
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
-    if parameters["model"]["type"] == "Torch":
+    if parameters["model"]["type"] == "torch":
         # Loading the weights into the model
         main_dict = outputDir
         if os.path.isdir(outputDir):
@@ -95,7 +95,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     parameters["save_output"] = True
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    if parameters["model"]["type"] == "Torch":
+    if parameters["model"]["type"] == "torch":
         model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
             model, parameters["model"]["amp"], device, optimizer=None
         )
@@ -157,7 +157,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 )
                 for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                     x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                    if parameters["model"]["type"] == "Torch":
+                    if parameters["model"]["type"] == "torch":
                         if parameters["model"]["amp"]:
                             with autocast():
                                 output = model(
