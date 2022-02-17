@@ -23,7 +23,7 @@ def validate_network(
 
     Parameters
     ----------
-    model : if parameters["model"]["type"] == Torch, this is a torch.model, otherwise this is OV exec_net
+    model : if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net
         The model to process the input image with, it should support appropriate dimensions.
     valid_dataloader : torch.DataLoader
         The dataloader for the validation epoch
@@ -74,7 +74,7 @@ def validate_network(
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set the model to valid
-    if params["model"]["type"] == "Torch":
+    if params["model"]["type"] == "torch":
         model.eval()
 
     if "save_data" in params["model"].keys():
@@ -83,7 +83,7 @@ def validate_network(
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
     # all_predics = []
-    if params["medcam_enabled"] and params["model"]["type"] == "Torch":
+    if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.enable_medcam()
         params["medcam_enabled"] = True
 
@@ -161,7 +161,7 @@ def validate_network(
                 ## special case for 2D
                 if image.shape[-1] == 1:
                     image = torch.squeeze(image, -1)
-                if params["model"]["type"] == "Torch":
+                if params["model"]["type"] == "torch":
                     pred_output += model(image)
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
@@ -330,7 +330,7 @@ def validate_network(
                     )
 
             # get the final attention map and save it
-            if params["medcam_enabled"] and params["model"]["type"] == "Torch":
+            if params["medcam_enabled"] and params["model"]["type"] == "torch":
                 attention_map = attention_map_aggregator.get_output_tensor()
                 for i, n in enumerate(attention_map):
                     model.save_attention_map(
@@ -386,7 +386,7 @@ def validate_network(
                     to_print,
                 )
 
-    if params["medcam_enabled"] and params["model"]["type"] == "Torch":
+    if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
         params["medcam_enabled"] = False
 

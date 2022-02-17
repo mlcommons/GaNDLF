@@ -37,9 +37,9 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
     is_classification = parameters["problem_type"] == "classification"
 
-    # initialize model type for processing: if not defined, default to Torch
+    # initialize model type for processing: if not defined, default to torch
     if not ("type" in parameters["model"]):
-        parameters["model"]["type"] = "Torch"
+        parameters["model"]["type"] = "torch"
 
     for fold_dir in fold_dirs:
         parameters["current_fold_dir"] = fold_dir
