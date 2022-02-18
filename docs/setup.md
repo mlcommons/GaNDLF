@@ -34,5 +34,5 @@ pip install -e .
 # conda install -c conda-forge gandlf -y
 
 ## verify installation
-python -c "import GANDLF as gf;print(gf.__version__)"
+python ./gandlf_verifyInstall
 ```
