@@ -1,0 +1,43 @@
+#!usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os, argparse
+from datetime import date
+
+
+# main function
+if __name__ == "__main__":
+    copyrightMessage = (
+        "Contact: software@cbica.upenn.edu\n\n"
+        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
+        + str(date.today().year)
+        + " University of Pennsylvania. All rights reserved."
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_VerifyInstall",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Verify GaNDLF installation.\n\n"
+        + copyrightMessage,
+    )
+
+    try:
+        import GANDLF as gf
+        print("GaNDLF installed version:", gf.__version__)
+    except:
+        raise Exception("GaNDLF not properly installed, please see https://cbica.github.io/GaNDLF/setup")
+    
+    try:
+        import GANDLF.anonymize.dicomanonymizer as anon
+        if anon:
+            print("GANDLF's git submodules were successfully imported.")
+    except:
+        try:
+            os.system("git submodule update --init --recursive")
+        except:
+            print("Git was not found, please try again.")
+        os.system("pip install -e .")
+    
+    args = parser.parse_args()
+
+    print("GaNDLF is ready. See https://cbica.github.io/GaNDLF/usage")
