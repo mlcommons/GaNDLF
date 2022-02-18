@@ -17,18 +17,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Verify GaNDLF installation.\n\n"
-        + copyrightMessage,
+        description="Verify GaNDLF installation.\n\n" + copyrightMessage,
     )
 
     try:
         import GANDLF as gf
+
         print("GaNDLF installed version:", gf.__version__)
     except:
-        raise Exception("GaNDLF not properly installed, please see https://cbica.github.io/GaNDLF/setup")
-    
+        raise Exception(
+            "GaNDLF not properly installed, please see https://cbica.github.io/GaNDLF/setup"
+        )
+
     try:
         import GANDLF.anonymize.dicomanonymizer as anon
+
         if anon:
             print("GANDLF's git submodules were successfully imported.")
     except:
@@ -37,7 +40,7 @@ if __name__ == "__main__":
         except:
             print("Git was not found, please try again.")
         os.system("pip install -e .")
-    
+
     args = parser.parse_args()
 
     print("GaNDLF is ready. See https://cbica.github.io/GaNDLF/usage")
