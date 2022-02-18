@@ -21,7 +21,7 @@ model_dict_base = {
 }
 
 
-def save_model(model_dict, model, input_shape, path):
+def save_model(model_dict, model, input_shape, path, onnx_export):
     """
     Save the model dictionary to a file.
 
@@ -49,30 +49,31 @@ def save_model(model_dict, model, input_shape, path):
     onnx_path = path.replace("pth.tar", "onnx")
     dummy_input = torch.randn((1, 3, input_shape[0], input_shape[1]))
 
-    with torch.no_grad():
-        torch.onnx.export(
-            model,
-            dummy_input.to("cpu"),
-            onnx_path,
-            opset_version=11,
-            export_params=True,
-            verbose=True,
-            input_names=["input"],
-            output_names=["output"],
-        )
+    if onnx_export:
+        with torch.no_grad():
+            torch.onnx.export(
+                model,
+                dummy_input.to("cpu"),
+                onnx_path,
+                opset_version=11,
+                export_params=True,
+                verbose=True,
+                input_names=["input"],
+                output_names=["output"],
+            )
 
-    ov_output_dir = os.path.dirname(os.path.abspath(path))
-    subprocess.call(
-        [
-            "mo",
-            "--input_model",
-            "{0}".format(onnx_path),
-            "--input_shape",
-            "[1,3,{0},{1}]".format(input_shape[0], input_shape[1]),
-            "--output_dir",
-            "{0}".format(ov_output_dir),
-        ],
-    )
+        ov_output_dir = os.path.dirname(os.path.abspath(path))
+        subprocess.call(
+            [
+                "mo",
+                "--input_model",
+                "{0}".format(onnx_path),
+                "--input_shape",
+                "[1,3,{0},{1}]".format(input_shape[0], input_shape[1]),
+                "--output_dir",
+                "{0}".format(ov_output_dir),
+            ],
+        )
 
 
 def load_model(path):
