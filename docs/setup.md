@@ -37,5 +37,4 @@ pip install -e .
 
 ## verify installation
 python ./gandlf_verifyInstall
-
 ```
