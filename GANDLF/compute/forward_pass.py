@@ -246,7 +246,10 @@ def validate_network(
                         flush=True,
                     )
 
-                result = step(model, image, label, params, train=False)
+                if is_inference:
+                    result = step(model, image, label, params, train=False)
+                else:
+                    result = step(model, image, label, params, train=True)
 
                 # get the current attention map and add it to its aggregator
                 if params["medcam_enabled"]:
