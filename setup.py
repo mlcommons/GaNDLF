@@ -78,7 +78,7 @@ requirements = [
     "torchmetrics",
     "OpenPatchMiner==0.1.6",
     "pydicom",
-    "openvino-dev==2021.3.0",    
+    "openvino-dev==2021.3.0",
 ]
 
 setup(
