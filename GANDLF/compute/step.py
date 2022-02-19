@@ -60,18 +60,18 @@ def step(model, image, label, params, train=True):
             if len(label.shape) > 1:
                 label = torch.squeeze(label, -1)
 
-    if not (train == False and params["model"]["type"].lower() == "openvino"):
-        if params["model"]["amp"]:
-            with torch.cuda.amp.autocast():
-                output = model(image)
-        else:
-            output = model(image)
-    else:
+    if train == False and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             model.infer(inputs={params["model"]["IO"][0]: image.cpu().numpy()})[
                 params["model"]["IO"][1]
             ]
         )
+    else:
+        if params["model"]["amp"]:
+            with torch.cuda.amp.autocast():
+                output = model(image)
+        else:
+            output = model(image)
 
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
