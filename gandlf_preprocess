@@ -50,9 +50,17 @@ if __name__ == "__main__":
         help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
         required=False,
     )
+    parser.add_argument(
+        "-a", "--applyaugs",
+        metavar="",
+        type=bool,
+        default=False,
+        help="This specifies the whether to apply data augmentation during output creation. Defaults to False",
+        required=False,
+    )
 
     args = parser.parse_args()
 
-    preprocess_and_save(args.inputdata, args.config, args.output, args.labelPad)
+    preprocess_and_save(args.inputdata, args.config, args.output, args.labelPad, args.applyaugs)
 
     print("Finished.")
