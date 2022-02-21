@@ -17,7 +17,9 @@ from tqdm import tqdm
 import torchio
 
 
-def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="constant", applyaugs=False):
+def preprocess_and_save(
+    data_csv, config_file, output_dir, label_pad_mode="constant", applyaugs=False
+):
     """
     This function performs preprocessing based on parameters provided and saves the output.
 
