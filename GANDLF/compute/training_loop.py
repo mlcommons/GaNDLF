@@ -462,7 +462,10 @@ def training_loop(
             patience = 0
 
             model.eval()
-            if params["model"]["architecture"] in ["brain_age", "sdnet"] or params["model"]["type"]=="torch":
+            if (
+                params["model"]["architecture"] in ["brain_age", "sdnet"] 
+                or params["model"]["type"]=="torch"
+            ):
                 onnx_export = False
             else:
                 onnx_export = True
