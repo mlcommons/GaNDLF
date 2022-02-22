@@ -4,7 +4,7 @@ import os
 import torch
 
 try:
-    from openvino.inference_engine import IECore, StatusCode
+    from openvino.inference_engine import IECore
 except ImportError:
     raise ImportError("OpenVINO is not configured correctly.")
 
