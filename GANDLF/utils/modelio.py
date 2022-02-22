@@ -47,10 +47,10 @@ def save_model(model_dict, model, input_shape, path, onnx_export):
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
 
-    onnx_path = path.replace("pth.tar", "onnx")
-    dummy_input = torch.randn((1, 3, input_shape[0], input_shape[1]))
-
     if onnx_export:
+        onnx_path = path.replace("pth.tar", "onnx")
+        dummy_input = torch.randn((1, 3, input_shape[0], input_shape[1]))
+
         with torch.no_grad():
             torch.onnx.export(
                 model,
@@ -64,6 +64,7 @@ def save_model(model_dict, model, input_shape, path, onnx_export):
             )
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
+
         try:
             subprocess.call(
                 [
@@ -77,7 +78,7 @@ def save_model(model_dict, model, input_shape, path, onnx_export):
                 ],
             )
         except subprocess.CalledProcessError:
-            print("OpenVINO Model Optimizer IR conversion failed.")
+            raise subprocess.CalledProcessError("OpenVINO Model Optimizer IR conversion failed.")
 
 
 def load_model(path):
@@ -119,6 +120,11 @@ def load_ov_model(path, device="CPU"):
         input_blob (str): Input name.
         output_blob (str): Output name.
     """
+
+    try:
+        from openvino.inference_engine import IECore
+    except ImportError:
+        raise ImportError("OpenVINO is not configured correctly.")
 
     ie = IECore()
     if device == "GPU":
