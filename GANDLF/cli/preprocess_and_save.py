@@ -18,7 +18,9 @@ from tqdm import tqdm
 import torchio
 
 
-def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="constant"):
+def preprocess_and_save(
+    data_csv, config_file, output_dir, label_pad_mode="constant", applyaugs=False
+):
     """
     This function performs preprocessing based on parameters provided and saves the output.
 
@@ -27,6 +29,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         config_file (str): The YAML file of the training configuration.
         output_dir (str): The output directory.
         label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
+        applyaugs (bool): If data augmentation is to be applied before saving the image. Defaults to False.
 
     Raises:
         ValueError: Parameter check from previous
@@ -53,7 +56,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
     parameters = populate_header_in_parameters(parameters, headers)
 
     data_for_processing = ImagesFromDataFrame(
-        dataframe, parameters, train=False, loader_type="full"
+        dataframe, parameters, train=applyaugs, loader_type="full"
     )
 
     dataloader_for_processing = DataLoader(
