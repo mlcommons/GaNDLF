@@ -64,17 +64,22 @@ def save_model(model_dict, model, input_shape, path, onnx_export):
             )
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
-        subprocess.call(
-            [
-                "mo",
-                "--input_model",
-                "{0}".format(onnx_path),
-                "--input_shape",
-                "[1,3,{0},{1}]".format(input_shape[0], input_shape[1]),
-                "--output_dir",
-                "{0}".format(ov_output_dir),
-            ],
-        )
+        try:
+            subprocess.call(
+                [
+                    "mo",
+                    "--input_model",
+                    "{0}".format(onnx_path),
+                    "--input_shape",
+                    "[1,3,{0},{1}]".format(input_shape[0], input_shape[1]),
+                    "--output_dir",
+                    "{0}".format(ov_output_dir),
+                ],
+            )
+        except subprocess.CalledProcessError:
+            print(
+                    "OpenVINO Model Optimizer IR conversion failed."
+                )
 
 
 def load_model(path):
