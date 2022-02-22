@@ -25,4 +25,7 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmen
 
 
 ## Contact
-GaNDLF developers can be reached at https://github.com/CBICA/GaNDLF/discussions and via [email](mailto:gandlf@cbica.upenn.edu).
+GaNDLF developers can be reached via the following ways:
+
+- [GitHub Discussions](https://github.com/CBICA/GaNDLF/discussions)
+- [Email](mailto:gandlf@cbica.upenn.edu)

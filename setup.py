@@ -99,6 +99,7 @@ setup(
         "gandlf_patchMiner",
         "gandlf_preprocess",
         "gandlf_anonymizer",
+        "gandlf_verifyInstall",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
