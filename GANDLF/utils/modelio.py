@@ -6,8 +6,8 @@ import torch
 try:
     from openvino.inference_engine import IECore, StatusCode
 except ImportError:
-    raise ImportError("OpenVINO is not configured correctly..")
-    
+    raise ImportError("OpenVINO is not configured correctly.")
+
 
 # these are the base keys for the model dictionary to save
 model_dict_base = {
