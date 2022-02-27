@@ -32,7 +32,7 @@ all_models_segmentation = [
     "msdnet",
 ]
 # pre-defined regression/classification model types for testing
-all_models_regression = ["densenet121", "vgg16"]
+all_models_regression = ["densenet121", "vgg16", "resnet18"]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -1177,73 +1177,3 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
-
-def test_resnet_rad_3d(device):
-# read and initialize parameters for specific data dimension
-    parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check_flag=False
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["3D"]
-    parameters["model"]["dimension"] = 3
-    parameters["model"]["amp"] = True
-    # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_3d_rad_classification.csv"
-    )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through models and train for single epoch
-    parameters["model"]["architecture"] = "resnet18"
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        reset_prev=True,
-    )
-    parameters["output_dir"] = outputDir  # this is in inference mode
-    InferenceManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-    )
-
-    print("passed")
-
-def test_resnet_rad_2d(device):
-# read and initialize parameters for specific data dimension
-    parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check_flag=False
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["amp"] = True
-    # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_classification.csv"
-    )
-    parameters["model"]["num_channels"] = 3
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    parameters["model"]["architecture"] = "resnet18"
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        reset_prev=True,
-    )
-    parameters["output_dir"] = outputDir  # this is in inference mode
-    InferenceManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-    )
-
-    print("passed")
