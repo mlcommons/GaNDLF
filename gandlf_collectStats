@@ -45,7 +45,7 @@ def main():
 
     args = parser.parse_args()
 
-    inputDir = os.path.normpath(args.inputDir)
+    inputDir = os.path.normpath(args.modelDir)
     outputDir = os.path.normpath(args.outputDir)
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     outputFile = os.path.join(outputDir, "data.csv")  # data file name
