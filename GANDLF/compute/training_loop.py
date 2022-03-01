@@ -27,6 +27,7 @@ from GANDLF.utils import (
     load_model,
     version_check,
     write_training_patches,
+    create_pytorch_objects,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -229,40 +230,42 @@ def training_loop(
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
 
-    # Fetch the model according to params mentioned in the configuration file
-    model = get_model(params)
+    model, optimizer, train_dataloader, val_dataloader, scheduler, params = create_pytorch_objects(params, training_data, validation_data, device)
 
-    validation_data_for_torch = ImagesFromDataFrame(
-        validation_data, params, train=False, loader_type="validation"
-    )
-    # Fetch the appropriate channel keys
-    # Getting the channels for training and removing all the non numeric entries from the channels
-    params = populate_channel_keys_in_params(validation_data_for_torch, params)
+    # # Fetch the model according to params mentioned in the configuration file
+    # model = get_model(params)
 
-    train_dataloader = get_train_loader(params)
-    params["training_samples_size"] = len(train_dataloader.dataset)
+    # validation_data_for_torch = ImagesFromDataFrame(
+    #     validation_data, params, train=False, loader_type="validation"
+    # )
+    # # Fetch the appropriate channel keys
+    # # Getting the channels for training and removing all the non numeric entries from the channels
+    # params = populate_channel_keys_in_params(validation_data_for_torch, params)
 
-    val_dataloader = get_validation_loader(params)
+    # train_dataloader = get_train_loader(params)
+    # params["training_samples_size"] = len(train_dataloader.dataset)
+
+    # val_dataloader = get_validation_loader(params)
 
     if testingDataDefined:
         test_dataloader = get_testing_loader(params)
 
-    # Fetch the optimizers
-    params["model_parameters"] = model.parameters()
-    optimizer = get_optimizer(params)
-    params["optimizer_object"] = optimizer
+    # # Fetch the optimizers
+    # params["model_parameters"] = model.parameters()
+    # optimizer = get_optimizer(params)
+    # params["optimizer_object"] = optimizer
 
-    if not ("step_size" in params["scheduler"]):
-        params["scheduler"]["step_size"] = (
-            params["training_samples_size"] / params["learning_rate"]
-        )
+    # if not ("step_size" in params["scheduler"]):
+    #     params["scheduler"]["step_size"] = (
+    #         params["training_samples_size"] / params["learning_rate"]
+    #     )
 
-    scheduler = get_scheduler(params)
+    # scheduler = get_scheduler(params)
 
-    # these keys contain generators, and are not needed beyond this point in params
-    generator_keys_to_remove = ["optimizer_object", "model_parameters"]
-    for key in generator_keys_to_remove:
-        params.pop(key, None)
+    # # these keys contain generators, and are not needed beyond this point in params
+    # generator_keys_to_remove = ["optimizer_object", "model_parameters"]
+    # for key in generator_keys_to_remove:
+    #     params.pop(key, None)
 
     # Start training time here
     start_time = time.time()
@@ -290,21 +293,21 @@ def training_loop(
     valid_logger.write_header(mode="valid")
     test_logger.write_header(mode="test")
 
-    model, params["model"]["amp"], device = send_model_to_device(
-        model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
-    )
+    # model, params["model"]["amp"], device = send_model_to_device(
+    #     model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
+    # )
 
-    # Calculate the weights here
-    if params["weighted_loss"]:
-        print("Calculating weights for loss")
-        penalty_loader = get_penalty_loader(params)
+    # # Calculate the weights here
+    # if params["weighted_loss"]:
+    #     print("Calculating weights for loss")
+    #     penalty_loader = get_penalty_loader(params)
 
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, params
-        )
-        del penalty_loader
-    else:
-        params["weights"], params["class_weights"] = None, None
+    #     params["weights"], params["class_weights"] = get_class_imbalance_weights(
+    #         penalty_loader, params
+    #     )
+    #     del penalty_loader
+    # else:
+    #     params["weights"], params["class_weights"] = None, None
 
     if "medcam" in params:
         model = medcam.inject(
