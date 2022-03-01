@@ -32,7 +32,7 @@ all_models_segmentation = [
     "msdnet",
 ]
 # pre-defined regression/classification model types for testing
-all_models_regression = ["densenet121", "vgg16"]
+all_models_regression = ["densenet121", "vgg16", "resnet18", "resnet50"]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
