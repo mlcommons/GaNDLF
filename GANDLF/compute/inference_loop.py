@@ -44,8 +44,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         _,
         _,
         _,
-        params,
-    ) = create_pytorch_objects(params, device=device)
+        parameters,
+    ) = create_pytorch_objects(parameters, device=device)
 
     # Fetch the model according to params mentioned in the configuration file
     model = get_model(parameters)
