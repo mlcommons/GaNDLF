@@ -221,7 +221,14 @@ def training_loop(
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
 
-    model, optimizer, train_dataloader, val_dataloader, scheduler, params = create_pytorch_objects(params, training_data, validation_data, device)
+    (
+        model,
+        optimizer,
+        train_dataloader,
+        val_dataloader,
+        scheduler,
+        params,
+    ) = create_pytorch_objects(params, training_data, validation_data, device)
 
     if testingDataDefined:
         test_dataloader = get_testing_loader(params)
