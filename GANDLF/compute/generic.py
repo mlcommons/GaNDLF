@@ -16,7 +16,7 @@ from GANDLF.utils import (
 )
 
 
-def create_pytorch_objects(parameters, train_csv, val_csv, device):
+def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu"):
     """
     This function creates all the PyTorch objects needed for training.
 
@@ -33,6 +33,9 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
         val_loader (torch.utils.data.DataLoader): The validation data loader.
         scheduler (object): The scheduler to use for training.
     """
+    # initialize train and val loaders
+    train_loader, val_loader = None, None
+    
     if train_csv is not None:
         # populate the data frames
         parameters["training_data"], headers_train = parseTrainingCSV(train_csv, train=True)
@@ -53,11 +56,7 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
             del penalty_loader
         else:
             parameters["weights"], parameters["class_weights"] = None, None
-    
-    else:
-        train_loader = None
-
-    
+        
     if val_csv is not None:
         parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
         # get the validation loader
@@ -70,9 +69,6 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
         # Getting the channels for training and removing all the non numeric entries from the channels
         parameters = populate_channel_keys_in_params(validation_data_for_torch, parameters)
     
-    else:
-        val_loader = None
-
 
     # get the model
     model = get_model(parameters)
