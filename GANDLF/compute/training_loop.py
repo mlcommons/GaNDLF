@@ -8,21 +8,12 @@ from medcam import medcam
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.data import (
-    get_train_loader,
-    get_validation_loader,
     get_testing_loader,
-    get_penalty_loader,
 )
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
-from GANDLF.models import get_model
-from GANDLF.schedulers import get_scheduler
-from GANDLF.optimizers import get_optimizer
 from GANDLF.utils import (
     get_date_time,
-    send_model_to_device,
-    populate_channel_keys_in_params,
-    get_class_imbalance_weights,
     save_model,
     load_model,
     version_check,
@@ -232,40 +223,8 @@ def training_loop(
 
     model, optimizer, train_dataloader, val_dataloader, scheduler, params = create_pytorch_objects(params, training_data, validation_data, device)
 
-    # # Fetch the model according to params mentioned in the configuration file
-    # model = get_model(params)
-
-    # validation_data_for_torch = ImagesFromDataFrame(
-    #     validation_data, params, train=False, loader_type="validation"
-    # )
-    # # Fetch the appropriate channel keys
-    # # Getting the channels for training and removing all the non numeric entries from the channels
-    # params = populate_channel_keys_in_params(validation_data_for_torch, params)
-
-    # train_dataloader = get_train_loader(params)
-    # params["training_samples_size"] = len(train_dataloader.dataset)
-
-    # val_dataloader = get_validation_loader(params)
-
     if testingDataDefined:
         test_dataloader = get_testing_loader(params)
-
-    # # Fetch the optimizers
-    # params["model_parameters"] = model.parameters()
-    # optimizer = get_optimizer(params)
-    # params["optimizer_object"] = optimizer
-
-    # if not ("step_size" in params["scheduler"]):
-    #     params["scheduler"]["step_size"] = (
-    #         params["training_samples_size"] / params["learning_rate"]
-    #     )
-
-    # scheduler = get_scheduler(params)
-
-    # # these keys contain generators, and are not needed beyond this point in params
-    # generator_keys_to_remove = ["optimizer_object", "model_parameters"]
-    # for key in generator_keys_to_remove:
-    #     params.pop(key, None)
 
     # Start training time here
     start_time = time.time()
