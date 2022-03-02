@@ -27,11 +27,11 @@ from GANDLF.utils import (
     load_model,
     version_check,
     write_training_patches,
-    create_pytorch_objects,
 )
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
+from . import create_pytorch_objects
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
