@@ -35,15 +35,17 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
     """
     # initialize train and val loaders
     train_loader, val_loader = None, None
-    
+
     if train_csv is not None:
         # populate the data frames
-        parameters["training_data"], headers_train = parseTrainingCSV(train_csv, train=True)
+        parameters["training_data"], headers_train = parseTrainingCSV(
+            train_csv, train=True
+        )
         parameters = populate_header_in_parameters(parameters, headers_train)
         # get the train loader
         train_loader = get_train_loader(parameters)
         parameters["training_samples_size"] = len(train_loader)
-        
+
         # Calculate the weights here
         if parameters["weighted_loss"]:
             print("Calculating weights for loss")
@@ -56,19 +58,23 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             del penalty_loader
         else:
             parameters["weights"], parameters["class_weights"] = None, None
-        
+
     if val_csv is not None:
         parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
         # get the validation loader
         val_loader = get_validation_loader(parameters)
-        
+
         validation_data_for_torch = ImagesFromDataFrame(
-            parameters["validation_data"], parameters, train=False, loader_type="populating_headers"
+            parameters["validation_data"],
+            parameters,
+            train=False,
+            loader_type="populating_headers",
         )
         # Fetch the appropriate channel keys
         # Getting the channels for training and removing all the non numeric entries from the channels
-        parameters = populate_channel_keys_in_params(validation_data_for_torch, parameters)
-    
+        parameters = populate_channel_keys_in_params(
+            validation_data_for_torch, parameters
+        )
 
     # get the model
     model = get_model(parameters)
