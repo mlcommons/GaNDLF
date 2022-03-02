@@ -33,10 +33,46 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
         val_loader (torch.utils.data.DataLoader): The validation data loader.
         scheduler (object): The scheduler to use for training.
     """
-    # populate the data frames
-    parameters["training_data"], headers_train = parseTrainingCSV(train_csv, train=True)
-    parameters = populate_header_in_parameters(parameters, headers_train)
-    parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
+    if train_csv is not None:
+        # populate the data frames
+        parameters["training_data"], headers_train = parseTrainingCSV(train_csv, train=True)
+        parameters = populate_header_in_parameters(parameters, headers_train)
+        # get the train loader
+        train_loader = get_train_loader(parameters)
+        parameters["training_samples_size"] = len(train_loader)
+        
+        # Calculate the weights here
+        if parameters["weighted_loss"]:
+            print("Calculating weights for loss")
+            penalty_loader = get_penalty_loader(parameters)
+
+            (
+                parameters["weights"],
+                parameters["class_weights"],
+            ) = get_class_imbalance_weights(penalty_loader, parameters)
+            del penalty_loader
+        else:
+            parameters["weights"], parameters["class_weights"] = None, None
+    
+    else:
+        train_loader = None
+
+    
+    if val_csv is not None:
+        parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
+        # get the validation loader
+        val_loader = get_validation_loader(parameters)
+        
+        validation_data_for_torch = ImagesFromDataFrame(
+            parameters["validation_data"], parameters, train=False, loader_type="populating_headers"
+        )
+        # Fetch the appropriate channel keys
+        # Getting the channels for training and removing all the non numeric entries from the channels
+        parameters = populate_channel_keys_in_params(validation_data_for_torch, parameters)
+    
+    else:
+        val_loader = None
+
 
     # get the model
     model = get_model(parameters)
@@ -51,12 +87,6 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
 
-    # get the train loader
-    train_loader = get_train_loader(parameters)
-    parameters["training_samples_size"] = len(train_loader)
-    # get the validation loader
-    val_loader = get_validation_loader(parameters)
-
     if not ("step_size" in parameters["scheduler"]):
         parameters["scheduler"]["step_size"] = (
             parameters["training_samples_size"] / parameters["learning_rate"]
@@ -68,25 +98,5 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
     generator_keys_to_remove = ["optimizer_object", "model_parameters"]
     for key in generator_keys_to_remove:
         parameters.pop(key, None)
-
-    validation_data_for_torch = ImagesFromDataFrame(
-        parameters["validation_data"], parameters, train=False, loader_type="validation"
-    )
-    # Fetch the appropriate channel keys
-    # Getting the channels for training and removing all the non numeric entries from the channels
-    parameters = populate_channel_keys_in_params(validation_data_for_torch, parameters)
-
-    # Calculate the weights here
-    if parameters["weighted_loss"]:
-        print("Calculating weights for loss")
-        penalty_loader = get_penalty_loader(parameters)
-
-        (
-            parameters["weights"],
-            parameters["class_weights"],
-        ) = get_class_imbalance_weights(penalty_loader, parameters)
-        del penalty_loader
-    else:
-        parameters["weights"], parameters["class_weights"] = None, None
 
     return model, optimizer, train_loader, val_loader, scheduler, parameters
