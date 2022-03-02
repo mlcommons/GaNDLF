@@ -607,7 +607,7 @@ def test_clip_train_classification_rad_3d(device):
         parameters["clip_mode"] = clip_mode
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        # shutil.rmtree(outputDir)  # overwrite previous results
+        shutil.rmtree(outputDir)  # overwrite previous results
         Path(outputDir).mkdir(parents=True, exist_ok=True)
         TrainingManager(
             dataframe=training_data,
