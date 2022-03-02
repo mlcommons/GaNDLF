@@ -1,4 +1,3 @@
-
 from GANDLF.models import get_model
 from GANDLF.schedulers import get_scheduler
 from GANDLF.optimizers import get_optimizer
@@ -38,7 +37,7 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
     parameters["training_data"], headers_train = parseTrainingCSV(train_csv, train=True)
     parameters = populate_header_in_parameters(parameters, headers_train)
     parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
-    
+
     # get the model
     model = get_model(parameters)
     parameters["model_parameters"] = model.parameters()
@@ -58,7 +57,6 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
     # get the validation loader
     val_loader = get_validation_loader(parameters)
 
-    
     if not ("step_size" in parameters["scheduler"]):
         parameters["scheduler"]["step_size"] = (
             parameters["training_samples_size"] / parameters["learning_rate"]
@@ -77,17 +75,18 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
     # Fetch the appropriate channel keys
     # Getting the channels for training and removing all the non numeric entries from the channels
     parameters = populate_channel_keys_in_params(validation_data_for_torch, parameters)
-    
+
     # Calculate the weights here
     if parameters["weighted_loss"]:
         print("Calculating weights for loss")
         penalty_loader = get_penalty_loader(parameters)
 
-        parameters["weights"], parameters["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, parameters
-        )
+        (
+            parameters["weights"],
+            parameters["class_weights"],
+        ) = get_class_imbalance_weights(penalty_loader, parameters)
         del penalty_loader
     else:
         parameters["weights"], parameters["class_weights"] = None, None
-    
+
     return model, optimizer, train_loader, val_loader, scheduler, parameters
