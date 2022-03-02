@@ -32,6 +32,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         train_loader (torch.utils.data.DataLoader): The training data loader.
         val_loader (torch.utils.data.DataLoader): The validation data loader.
         scheduler (object): The scheduler to use for training.
+        parameters (dict): The updated parameters dictionary.
     """
     # initialize train and val loaders
     train_loader, val_loader = None, None
