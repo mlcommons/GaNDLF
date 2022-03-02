@@ -43,16 +43,18 @@ def create_pytorch_objects(parameters, train_csv, val_csv, device):
     model = get_model(parameters)
     parameters["model_parameters"] = model.parameters()
 
+    # get the optimizer
+    optimizer = get_optimizer(parameters)
+    parameters["optimizer_object"] = optimizer
+
     # send model to correct device
     model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
 
-    # get the optimizer
-    optimizer = get_optimizer(parameters, model)
-    parameters["optimizer_object"] = optimizer
     # get the train loader
     train_loader = get_train_loader(parameters)
+    parameters["training_samples_size"] = len(train_loader)
     # get the validation loader
     val_loader = get_validation_loader(parameters)
 
