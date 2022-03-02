@@ -18,20 +18,20 @@ from GANDLF.utils import (
 
 def create_pytorch_objects(parameters, train_csv, val_csv, device):
     """
-    _summary_
+    This function creates all the PyTorch objects needed for training.
 
     Args:
-        parameters (_type_): _description_
-        train_csv (_type_): _description_
-        val_csv (_type_): _description_
-        device (_type_): _description_
+        parameters (dict): The parameters dictionary.
+        train_csv (str): The path to the training CSV file.
+        val_csv (str): The path to the validation CSV file.
+        device (str): The device to perform computations on.
 
     Returns:
-        model (_type_): _description_
-        optimizer (_type_): _description_
-        train_loader (_type_): _description_
-        val_loader (_type_): _description_
-        scheduler (_type_): _description_
+        model (torch.nn.Module): The model to use for training.
+        optimizer (Optimizer): The optimizer to use for training.
+        train_loader (torch.utils.data.DataLoader): The training data loader.
+        val_loader (torch.utils.data.DataLoader): The validation data loader.
+        scheduler (object): The scheduler to use for training.
     """
     # populate the data frames
     parameters["training_data"], headers_train = parseTrainingCSV(train_csv, train=True)
