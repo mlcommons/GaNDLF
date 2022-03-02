@@ -1,4 +1,5 @@
 from .forward_pass import validate_network
+from .generic import create_pytorch_objects
 import os
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
@@ -36,6 +37,15 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         print("Number of channels : ", parameters["model"]["num_channels"])
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
     parameters["testing_data"] = inferenceDataFromPickle
+
+    (
+        model,
+        _,
+        _,
+        _,
+        _,
+        params,
+    ) = create_pytorch_objects(params, None, None, device)
 
     # Fetch the model according to params mentioned in the configuration file
     model = get_model(parameters)
