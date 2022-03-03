@@ -190,13 +190,9 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                 transformations_list.append(torchio.Resize(resize_values))
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
-                    # resample_split = str(aug).split(':')
-                    resample_values = tuple(
-                        np.array(preprocessing[preprocess_lower]["resolution"])
-                    )
                     # Need to take a look here
                     if len(resample_values) == 2:
-                        resample_values = tuple(np.append(resample_values, 1))
+                        resample_values = tuple(np.append(np.array(preprocessing[preprocess_lower]["resolution"]), 1))
                     transformations_list.append(Resample(resample_values))
             elif preprocess_lower in ["resample_minimum", "resample_min"]:
                 if "resolution" in preprocessing[preprocess_lower]:
