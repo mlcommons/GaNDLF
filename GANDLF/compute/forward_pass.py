@@ -23,7 +23,7 @@ def validate_network(
 
     Parameters
     ----------
-    model : torch.model
+    model : if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net
         The model to process the input image with, it should support appropriate dimensions.
     valid_dataloader : torch.DataLoader
         The dataloader for the validation epoch
@@ -74,11 +74,16 @@ def validate_network(
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set the model to valid
-    model.eval()
+    if params["model"]["type"] == "torch":
+        model.eval()
+
+    if "save_data" in params["model"].keys():
+        torch.manual_seed(0)
+
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
     # all_predics = []
-    if params["medcam_enabled"]:
+    if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.enable_medcam()
         params["medcam_enabled"] = True
 
@@ -156,7 +161,9 @@ def validate_network(
                 ## special case for 2D
                 if image.shape[-1] == 1:
                     image = torch.squeeze(image, -1)
-                pred_output += model(image)
+                if params["model"]["type"] == "torch":
+                    pred_output += model(image)
+
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
             pred_output /= params["scaling_factor"]
             # all_predics.append(pred_output.double())
@@ -239,7 +246,10 @@ def validate_network(
                         flush=True,
                     )
 
-                result = step(model, image, label, params)
+                if is_inference:
+                    result = step(model, image, label, params, train=False)
+                else:
+                    result = step(model, image, label, params, train=True)
 
                 # get the current attention map and add it to its aggregator
                 if params["medcam_enabled"]:
@@ -323,7 +333,7 @@ def validate_network(
                     )
 
             # get the final attention map and save it
-            if params["medcam_enabled"]:
+            if params["medcam_enabled"] and params["model"]["type"] == "torch":
                 attention_map = attention_map_aggregator.get_output_tensor()
                 for i, n in enumerate(attention_map):
                     model.save_attention_map(
@@ -379,7 +389,7 @@ def validate_network(
                     to_print,
                 )
 
-    if params["medcam_enabled"]:
+    if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
         params["medcam_enabled"] = False
 

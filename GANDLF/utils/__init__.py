@@ -36,5 +36,6 @@ from .generic import (
 
 from .modelio import (
     load_model,
+    load_ov_model,
     save_model,
 )

@@ -59,7 +59,7 @@ requirements = [
     "torchio==0.18.57",
     "pandas",
     "pylint",
-    "scikit-learn==0.23.1",
+    "scikit-learn>=0.23.1",
     "pickle5==0.0.11",
     "setuptools",
     "seaborn",
