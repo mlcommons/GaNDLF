@@ -192,11 +192,20 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                 if "resolution" in preprocessing[preprocess_lower]:
                     # Need to take a look here
                     if len(resample_values) == 2:
-                        resample_values = tuple(np.append(np.array(preprocessing[preprocess_lower]["resolution"]), 1))
+                        resample_values = tuple(
+                            np.append(
+                                np.array(preprocessing[preprocess_lower]["resolution"]),
+                                1,
+                            )
+                        )
                     transformations_list.append(Resample(resample_values))
             elif preprocess_lower in ["resample_minimum", "resample_min"]:
                 if "resolution" in preprocessing[preprocess_lower]:
-                    transformations_list.append(Resample_Minimum(np.array(preprocessing[preprocess_lower]["resolution"])))
+                    transformations_list.append(
+                        Resample_Minimum(
+                            np.array(preprocessing[preprocess_lower]["resolution"])
+                        )
+                    )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
