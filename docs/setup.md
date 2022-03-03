@@ -15,6 +15,8 @@
   - Compute toolkit appropriate for your hardware
     - NVIDIA: [CUDA](https://developer.nvidia.com/cuda-download) and a compatible [cuDNN](https://developer.nvidia.com/cudnn) installed system-wide
     - AMD: [ROCm](https://www.amd.com/en/graphics/servers-solutions-rocm)
+- OpenVINO inference:
+    - Need to install OpenVINO to accelerate inference on Intel CPU/GPU architecture.
 
 ## Installation
 
@@ -28,6 +30,7 @@ conda activate venv_gandlf
 conda install -c conda-forge mamba -y # [OPTIONAL] mamba allows for faster dependency solving
 mamba install -c pytorch pytorch torchvision -y # 1.8.0 installs cuda 10.2 by default, personalize based on your system via https://pytorch.org/get-started/locally
 mamba install -c sdvillal openslide # this is useful to do explicit openslide install for OPM
+pip install openvino-dev
 pip install -e .
 
 ## alternatively you can also use:

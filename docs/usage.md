@@ -154,6 +154,9 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   - Final layer of model
   - Mixed precision
   - Class list
+  - Model type: model used for inference, can be "torch" or "openvino"
+      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "Torch"
+      - "openvino": use the OpenVINO Inference Engine for inference
 - Various training parameters:
   - Patch size
   - Number of epochs and patience parameter
