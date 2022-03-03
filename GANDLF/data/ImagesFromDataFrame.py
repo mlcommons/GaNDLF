@@ -192,7 +192,9 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
                     # Need to take a look here
-                    resample_values = np.array(preprocessing[preprocess_lower]["resolution"])
+                    resample_values = np.array(
+                        preprocessing[preprocess_lower]["resolution"]
+                    )
                     if len(resample_values) == 2:
                         resample_values = tuple(
                             np.append(
