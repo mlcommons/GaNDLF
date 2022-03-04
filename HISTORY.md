@@ -12,6 +12,7 @@
 - Anonymization module has been added
 - More progress bars added for better feedback
 - NIfTI conversion added in anonymization
+- Minimum resampling resolution is now available
 
 ## 0.0.13
 
