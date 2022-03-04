@@ -483,6 +483,7 @@ def training_loop(
             )
             model.train()
             first_model_saved = True
+            print("Best epoch: ", best_train_idx)
 
         if patience > params["patience"]:
             print(
