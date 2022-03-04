@@ -961,11 +961,11 @@ def test_preprocess_functions():
 
     cropper = global_preprocessing_dict["crop"]([64, 64, 64])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
+    assert input_transformed.shape == (1, 128, 128, 128), "Cropping should work"
 
     cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (1, 128, 128, 128), "Resampling should work"
+    assert input_transformed.shape == (1, 128, 128, 128), "Center-crop should work"
 
     # test pure morphological operations
     input_tensor_3d = torch.rand(1, 1, 256, 256, 256)
