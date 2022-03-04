@@ -13,6 +13,7 @@
 - More progress bars added for better feedback
 - NIfTI conversion added in anonymization
 - Using TiffSlide instead of OpenSlide
+- Minimum resampling resolution is now available
 
 ## 0.0.13
 

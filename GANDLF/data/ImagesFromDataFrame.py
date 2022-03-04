@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from sklearn.utils import resample
 
 import torch
 import torchio
@@ -12,7 +13,7 @@ import SimpleITK as sitk
 from tqdm import tqdm
 
 from GANDLF.utils import perform_sanity_check_on_subject
-from .preprocessing import global_preprocessing_dict
+from .preprocessing import global_preprocessing_dict, Resample_Minimum
 from .augmentation import global_augs_dict
 
 global_sampler_dict = {
@@ -190,14 +191,25 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                 transformations_list.append(torchio.Resize(resize_values))
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
-                    # resample_split = str(aug).split(':')
-                    resample_values = tuple(
-                        np.array(preprocessing["resample"]["resolution"])
-                    )
                     # Need to take a look here
+                    resample_values = np.array(
+                        preprocessing[preprocess_lower]["resolution"]
+                    )
                     if len(resample_values) == 2:
-                        resample_values = tuple(np.append(resample_values, 1))
+                        resample_values = tuple(
+                            np.append(
+                                np.array(preprocessing[preprocess_lower]["resolution"]),
+                                1,
+                            )
+                        )
                     transformations_list.append(Resample(resample_values))
+            elif preprocess_lower in ["resample_minimum", "resample_min"]:
+                if "resolution" in preprocessing[preprocess_lower]:
+                    transformations_list.append(
+                        Resample_Minimum(
+                            np.array(preprocessing[preprocess_lower]["resolution"])
+                        )
+                    )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
