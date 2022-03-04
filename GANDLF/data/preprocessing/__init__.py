@@ -10,6 +10,7 @@ from .normalize_rgb import (
     normalize_standardize_transform,
     normalize_div_by_255_transform,
 )
+from .resample_minimum import Resample_Minimum
 
 from torchio.transforms import (
     ZNormalization,
