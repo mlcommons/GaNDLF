@@ -35,7 +35,7 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         fold_dirs = [outputDir]
 
     probs_list = []
-
+    class_list = None
     is_classification = parameters["problem_type"] == "classification"
 
     for fold_dir in fold_dirs:
@@ -53,9 +53,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
             if is_classification and is_logits_dir_exist:
                 # fold_logits = np.genfromtxt(logits_dir, delimiter=",")
-                fold_logits = pd.read_csv(logits_dir)[
-                    parameters["model"]["class_list"]
-                ].values
+                class_list = [str(c) for c in parameters["model"]["class_list"]]
+                fold_logits = pd.read_csv(logits_dir)[class_list].values
                 fold_logits = torch.from_numpy(fold_logits)
                 fold_probs = F.softmax(fold_logits, dim=1)
                 probs_list.append(fold_probs)
@@ -68,9 +67,9 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
         probs_list = torch.stack(probs_list)
         averaged_probs = torch.mean(probs_list, 0).numpy()
-        averaged_probs_df[parameters["model"]["class_list"]] = averaged_probs
+        averaged_probs_df[class_list] = averaged_probs
         averaged_probs_df.PredictedClass = [
-            parameters["model"]["class_list"][a] for a in averaged_probs.argmax(1)
+            class_list[a] for a in averaged_probs.argmax(1)
         ]
         averaged_probs_df.to_csv(
             os.path.join(outputDir, "averaged_probabilities.csv"), index=False, sep=","
