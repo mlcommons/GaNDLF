@@ -73,8 +73,3 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         averaged_probs_df.to_csv(
             os.path.join(outputDir, "averaged_probabilities.csv"), index=False, sep=","
         )
-        # np.savetxt(
-        #     os.path.join(outputDir, "averaged_probabilities.csv"),
-        #     averaged_probs,
-        #     delimiter=",",
-        # )
