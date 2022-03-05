@@ -416,13 +416,14 @@ def validate_network(
     # write the predictions, if appropriate
     if params["save_output"]:
         if is_inference and is_classification and logits_list:
+            class_list = [str(c) for c in params["model"]["class_list"]]
             logit_tensor = torch.cat(logits_list)
             current_fold_dir = params["current_fold_dir"]
             logit_tensor = logit_tensor.detach().cpu().numpy()
-            columns = ["SubjectID"] + params["model"]["class_list"]
+            columns = ["SubjectID"] + class_list
             logits_df = pd.DataFrame(columns=columns)
             logits_df.SubjectID = subject_id_list
-            logits_df[params["model"]["class_list"]] = logit_tensor
+            logits_df[class_list] = logit_tensor
 
             logits_df.to_csv(
                 os.path.join(current_fold_dir, "logits.csv"), index=False, sep=","
