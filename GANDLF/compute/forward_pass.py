@@ -428,11 +428,6 @@ def validate_network(
             logits_df.to_csv(
                 os.path.join(current_fold_dir, "logits.csv"), index=False, sep=","
             )
-            # np.savetxt(
-            #     os.path.join(current_fold_dir, "logits.csv"),
-            #     logit_tensor.detach().cpu().numpy(),
-            #     delimiter=",",
-            # )
 
         if "value_keys" in params:
             file.write(outputToWrite)
