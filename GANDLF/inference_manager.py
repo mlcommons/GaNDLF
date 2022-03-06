@@ -71,5 +71,9 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             class_list[a] for a in averaged_probs.argmax(1)
         ]
         averaged_probs_df.to_csv(
-            os.path.join(outputDir, "averaged_probabilities.csv"), index=False, sep=","
+            os.path.join(
+                outputDir, "final_predictions_with_averaged_probabilities.csv"
+            ),
+            index=False,
+            sep=",",
         )
