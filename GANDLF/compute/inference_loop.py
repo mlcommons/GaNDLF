@@ -85,21 +85,15 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["slide_level"] = 0
         if not "stride_size" in parameters:
             parameters["stride_size"] = 10
-        if not "stride_size" in parameters:
-            parameters["stride_size"] = 10
 
+        parameters["stride_size"] = np.array(parameters["stride_size"])
+        
+        if parameters["stride_size"].size == 1:
+            parameters["stride_size"] = np.append(parameters["stride_size"], parameters["stride_size"])
+        
         # actual computation
         for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
-            print(
-                "Patient Slide       : ",
-                row[parameters["headers"]["subjectIDHeader"]],
-            )
-            print(
-                "Patient Location    : ",
-                row[parameters["headers"]["channelHeaders"]],
-            )
-            print(row[parameters["headers"]["channelHeaders"]].values[0])
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
