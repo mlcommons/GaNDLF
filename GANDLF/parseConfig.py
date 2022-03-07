@@ -1,6 +1,5 @@
 import sys, yaml, ast, pkg_resources
 import numpy as np
-import tqdm as tqdm
 
 from .utils import version_check
 
@@ -60,6 +59,9 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
                         params[parameter_to_initialize]
                     )
     else:
+        print(
+            "WARNING: Initializing '" + parameter_to_initialize + "' as " + str(value)
+        )
         params[parameter_to_initialize] = value
 
     return params
@@ -538,12 +540,12 @@ def parseConfig(config_file_path, version_check_flag=True):
         params["optimizer"] = params["opt"]
 
     # define defaults
-    for current_parameter in tqdm(parameter_defaults, desc="Defining defaults"):
+    for current_parameter in parameter_defaults:
         params = initialize_parameter(
             params, current_parameter, parameter_defaults[current_parameter], True
         )
 
-    for current_parameter in tqdm(parameter_defaults_string, desc="Defining string defaults"):
+    for current_parameter in parameter_defaults_string:
         params = initialize_parameter(
             params,
             current_parameter,
