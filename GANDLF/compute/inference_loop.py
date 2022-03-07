@@ -112,7 +112,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
 
-            patch_size=parameters["patch_size"]
+            patch_size = parameters["patch_size"]
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
