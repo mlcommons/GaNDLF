@@ -87,10 +87,12 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["stride_size"] = 10
 
         parameters["stride_size"] = np.array(parameters["stride_size"])
-        
+
         if parameters["stride_size"].size == 1:
-            parameters["stride_size"] = np.append(parameters["stride_size"], parameters["stride_size"])
-        
+            parameters["stride_size"] = np.append(
+                parameters["stride_size"], parameters["stride_size"]
+            )
+
         # actual computation
         for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
