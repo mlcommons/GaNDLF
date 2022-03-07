@@ -79,6 +79,14 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         )
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
+        # set some defaults
+        if not "slide_level" in parameters:
+            parameters["slide_level"] = 16
+        if not "stride_size" in parameters:
+            parameters["stride_size"] = 50
+        if not "slide_level" in parameters:
+            parameters["slide_level"] = 10
+        
         # actual computation
         for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
