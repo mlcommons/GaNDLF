@@ -1240,8 +1240,10 @@ def test_train_inference_segmentation_histology_2d(device):
         reset_prev=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
-    inference_data, parameters["headers"] = parseTrainingCSV(inputDir + "/train_2d_histo_segmentation.csv", train = False)
-    
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_histo_segmentation.csv", train=False
+    )
+
     InferenceManager(
         dataframe=inference_data,
         outputDir=outputDir,
