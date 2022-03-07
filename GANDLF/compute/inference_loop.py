@@ -1,5 +1,6 @@
 from .forward_pass import validate_network
 import os
+from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -81,11 +82,11 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     elif parameters["modality"] in ["path", "histo"]:
         # set some defaults
         if not "slide_level" in parameters:
-            parameters["slide_level"] = 16
+            parameters["slide_level"] = 2
         if not "stride_size" in parameters:
-            parameters["stride_size"] = 50
-        if not "slide_level" in parameters:
-            parameters["slide_level"] = 10
+            parameters["stride_size"] = 10
+        if not "stride_size" in parameters:
+            parameters["stride_size"] = 10
 
         # actual computation
         for _, row in inferenceDataFromPickle.iterrows():
@@ -105,18 +106,20 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             level_width, level_height = os_image.level_dimensions[
                 int(parameters["slide_level"])
             ]
-            subject_dest_dir = os.path.join(outputDir, subject_name)
-            os.makedirs(subject_dest_dir, exist_ok=True)
+            subject_dest_dir = os.path.join(outputDir, str(subject_name))
+            Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+
+            patch_size=parameters["patch_size"]
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
                 patch_size=patch_size,
                 stride_size=parameters["stride_size"],
                 selected_level=parameters["slide_level"],
-                mask_level=4,
+                mask_level=parameters["slide_level"],
             )
 
             dataloader = DataLoader(
