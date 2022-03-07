@@ -1,4 +1,3 @@
-
 import os, warnings
 from functools import partial
 from pathlib import Path
@@ -13,6 +12,7 @@ from GANDLF.OPM.opm.utils import (
     parse_config,
     generate_initial_mask,
 )
+
 
 def parse_gandlf_csv(fpath):
     df = pd.read_csv(fpath, dtype=str)
@@ -33,7 +33,7 @@ def patch_extraction(input_path, output_path, config=None):
         config (Union[str, dict, none]): The input yaml config.
         output_path (_type_): _description_
     """
-    
+
     Image.MAX_IMAGE_PIXELS = None
     warnings.simplefilter("ignore")
 
@@ -44,7 +44,7 @@ def patch_extraction(input_path, output_path, config=None):
     else:
         cfg = {}
         cfg["scale"] = 16
-    
+
     if "patch_size" not in cfg:
         cfg["patch_size"] = (256, 256)
 
