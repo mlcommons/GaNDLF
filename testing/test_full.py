@@ -61,7 +61,7 @@ def test_download_data():
     """
     This function downloads the sample data, which is the first step towards getting everything ready
     """
-    urlToDownload = "https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip"
+    urlToDownload = "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
     # do not download data again
     if not Path(
         os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
