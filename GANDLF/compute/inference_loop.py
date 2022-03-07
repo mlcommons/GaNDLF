@@ -86,7 +86,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["stride_size"] = 50
         if not "slide_level" in parameters:
             parameters["slide_level"] = 10
-        
+
         # actual computation
         for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
