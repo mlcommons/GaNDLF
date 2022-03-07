@@ -2,9 +2,8 @@ import sys
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-import numpy as np
 import math
-from GANDLF.utils.generic import checkPatchDivisibility
+import numpy as np
 
 from .modelBase import ModelBase
 
@@ -27,11 +26,6 @@ class _MBConv1(nn.Sequential):
         # depthwise conv -> batch norm -> swish
         # SE
         # conv -> batch norm
-
-        print(
-            "MBCONV1 - %d KERNEL, %d IN, %d OUT, %d STRIDE"
-            % (kernel_size, num_in_feats, num_out_feats, stride)
-        )
 
         self.add_module(
             "depthconv1",
@@ -99,11 +93,6 @@ class _MBConv6(nn.Sequential):
         # depthwise conv -> batch norm --> swish
         # SE
         # conv -> batch norm
-
-        print(
-            "MBCONV6 - %d KERNEL, %d IN, %d OUT, %d STRIDE"
-            % (kernel_size, num_in_feats, num_out_feats, stride)
-        )
 
         self.add_module(
             "conv1",
@@ -273,6 +262,26 @@ def num_layers(default_lay, depth_factor):
     return int(math.ceil(default_lay * depth_factor))
 
 
+def checkPatchDivisibility(patch_size, number=16):
+    # check that dimensions are legal (same from gandlf/generic.py except patch can equal number)
+    if isinstance(patch_size, int):
+        patch_size_to_check = np.array(patch_size)
+    else:
+        patch_size_to_check = patch_size
+    # for 2D, don't check divisibility of last dimension
+    if patch_size_to_check[-1] == 1:
+        patch_size_to_check = patch_size_to_check[:-1]
+    # for 2D, don't check divisibility of first dimension
+    elif patch_size_to_check[0] == 1:
+        patch_size_to_check = patch_size_to_check[1:]
+    if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
+        return False
+    unique = np.unique(patch_size_to_check)
+    if (unique.shape[0] == 1) and (unique[0] < number):
+        return False
+    return True
+
+
 class EfficientNet(ModelBase):
     """
     Initializer function for the Resnet model
@@ -303,6 +312,8 @@ class EfficientNet(ModelBase):
             )
             self.Norm = self.BatchNorm
 
+        print(parameters["patch_size"])
+        print(checkPatchDivisibility(parameters["patch_size"], number=32))
         if not (checkPatchDivisibility(parameters["patch_size"], number=32)):
             sys.exit(
                 "The patch size is not divisible by 32, which is required for efficientnet",
