@@ -1186,28 +1186,32 @@ def test_train_inference_segmentation_histology_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(output_dir_patches, "config_patch-extraction_temp.yaml")
+    file_config_temp = os.path.join(
+        output_dir_patches, "config_patch-extraction_temp.yaml"
+    )
     # if found in previous run, discard.
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
 
-    parameters_patch={}
+    parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 20
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
-    
-    patch_extraction(inputDir + "/train_2d_histo_segmentation.csv", output_dir_patches_output, file_config_temp)
+
+    patch_extraction(
+        inputDir + "/train_2d_histo_segmentation.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        file_for_Training
-    )
+    training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
     parameters["patch_size"] = patch_size["2D"]
     parameters["modality"] = "histo"
     parameters["model"]["dimension"] = 2
@@ -1234,6 +1238,5 @@ def test_train_inference_segmentation_histology_2d(device):
         parameters=parameters,
         device=device,
     )
-
 
     shutil.rmtree(output_dir_patches)
