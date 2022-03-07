@@ -80,7 +80,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
         # actual computation
-        for _, row in inferenceDataForTorch.iterrows():
+        for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
             print(
                 "Patient Slide       : ",
