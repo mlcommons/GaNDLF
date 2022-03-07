@@ -1188,6 +1188,8 @@ def test_anonymizer():
 def test_train_inference_segmentation_histology_2d(device):
     print("Starting histology train/inference tests")
     output_dir_patches = os.path.join(testingDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
@@ -1225,8 +1227,8 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["architecture"] = "resunet"
-    parameters["nested_training"]["testing"] = -5
-    parameters["nested_training"]["validation"] = -5
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
     shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
