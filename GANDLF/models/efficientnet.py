@@ -244,24 +244,6 @@ DEFAULT_BLOCKS = [
     },
 ]
 
-
-def num_channels(default_chan, width_factor, divisor):
-    # find the number of channels closest to default * width such that it's divisible by divisor
-    default_chan *= width_factor
-    new_out = int(default_chan + divisor / 2) // divisor * divisor
-    new_out = max(new_out, divisor)
-
-    if new_out < 0.9 * default_chan:
-        new_out += divisor
-
-    return int(new_out)
-
-
-def num_layers(default_lay, depth_factor):
-    # find the number of layers closest to default * depth
-    return int(math.ceil(default_lay * depth_factor))
-
-
 def checkPatchDivisibility(patch_size, number=16):
     # check that dimensions are legal (same from gandlf/generic.py except patch can equal number)
     if isinstance(patch_size, int):
@@ -281,6 +263,21 @@ def checkPatchDivisibility(patch_size, number=16):
         return False
     return True
 
+def num_channels(default_chan, width_factor, divisor):
+    # find the number of channels closest to default * width such that it's divisible by divisor
+    default_chan *= width_factor
+    new_out = int(default_chan + divisor / 2) // divisor * divisor
+    new_out = max(new_out, divisor)
+
+    if new_out < 0.9 * default_chan:
+        new_out += divisor
+
+    return int(new_out)
+
+
+def num_layers(default_lay, depth_factor):
+    # find the number of layers closest to default * depth
+    return int(math.ceil(default_lay * depth_factor))
 
 class EfficientNet(ModelBase):
     """
