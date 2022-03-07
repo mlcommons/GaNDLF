@@ -1,5 +1,5 @@
 
-import time, os, warnings
+import os, warnings
 from functools import partial
 from pathlib import Path
 
@@ -24,30 +24,40 @@ def parse_gandlf_csv(fpath):
             yield row["SubjectID"], row["Channel_0"]
 
 
-def patch_extraction(args,):
+def patch_extraction(input_path, output_path, config=None):
+    """
+    This function extracts patches from WSIs.
+
+    Args:
+        input_path (str): The input CSV.
+        config (Union[str, dict, none]): The input yaml config.
+        output_path (_type_): _description_
+    """
     
     Image.MAX_IMAGE_PIXELS = None
     warnings.simplefilter("ignore")
-    
-    if args.config is not None:
-        cfg = parse_config(args.config)
+
+    if config is not None:
+        cfg = config
+        if isinstance(config, str):
+            cfg = parse_config(config)
     else:
         cfg = {}
         cfg["scale"] = 16
+    
+    if "patch_size" not in cfg:
         cfg["patch_size"] = (256, 256)
 
-    if not os.path.exists(args.output_path):
-        Path(args.output_path).mkdir(parents=True, exist_ok=True)
+    if not os.path.exists(output_path):
+        Path(output_path).mkdir(parents=True, exist_ok=True)
 
-    args.output_path = os.path.abspath(args.output_path)
+    output_path = os.path.abspath(output_path)
 
-    out_csv_path = os.path.join(args.output_path, "opm_train.csv")
+    out_csv_path = os.path.join(output_path, "opm_train.csv")
 
-    for sid, slide, label in parse_gandlf_csv(args.input_path):
-        start = time.time()
-
+    for sid, slide, label in parse_gandlf_csv(input_path):
         # Create new instance of slide manager
-        manager = PatchManager(slide, args.output_path)
+        manager = PatchManager(slide, output_path)
         manager.set_label_map(label)
         manager.set_subjectID(sid)
         manager.set_image_header("Channel_0")
