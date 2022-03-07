@@ -78,7 +78,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             model, inference_loader, None, parameters, mode="inference"
         )
         print(average_epoch_valid_loss, average_epoch_valid_metric)
-    elif (parameters["modality"] == "path") or (parameters["modality"] == "histo"):
+    elif parameters["modality"] in ["path", "histo"]:
         # actual computation
         for _, row in inferenceDataForTorch.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
