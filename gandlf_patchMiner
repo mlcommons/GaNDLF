@@ -50,6 +50,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    patch_extraction(args)
+    patch_extraction(args.input_path, args.output_path, args.config)
 
     print("Finished.")
