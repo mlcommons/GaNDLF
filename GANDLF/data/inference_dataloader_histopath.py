@@ -59,6 +59,8 @@ class InferTumorSegDataset(Dataset):
     def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level):
         self._wsi_path = wsi_path
         self._patch_size = patch_size
+        if self._patch_size[-1] == 1 :
+            self._patch_size = self._patch_size[:-1]
         self._stride_size = stride_size
         self._selected_level = selected_level
         self._mask_level = mask_level
