@@ -1073,7 +1073,7 @@ def test_checkpointing_segmentation_rad_2d(device):
 
 
 def test_model_patch_divisibility():
-
+    print("Starting patch divisibility tests")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1106,7 +1106,7 @@ def test_model_patch_divisibility():
 
 
 def test_one_hot_logic():
-
+    print("Starting one hot logic tests")
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
@@ -1142,6 +1142,7 @@ def test_one_hot_logic():
 
 
 def test_anonymizer():
+    print("Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
@@ -1181,9 +1182,11 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
+    print("passed")
 
 
 def test_train_inference_segmentation_histology_2d(device):
+    print("Starting histology train/inference tests")
     output_dir_patches = os.path.join(testingDir, "histo_patches")
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
@@ -1242,3 +1245,5 @@ def test_train_inference_segmentation_histology_2d(device):
     )
 
     shutil.rmtree(output_dir_patches)
+
+    print("passed")
