@@ -12,8 +12,7 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli.main_run import main_run
-from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -91,6 +90,9 @@ def test_constructTrainingCSV():
             channelsID = "image.png"
             labelID = "mask.png"
         elif "3d_rad_segmentation" in application_data:
+            channelsID = "image"
+            labelID = "mask"
+        elif "2d_histo_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
         writeTrainingCSV(
@@ -1177,3 +1179,61 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
+
+
+def test_train_inference_segmentation_histology_2d(device):
+    output_dir_patches = os.path.join(testingDir, "histo_patches")
+    Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+    file_config_temp = os.path.join(output_dir_patches, "config_patch-extraction_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters_patch={}
+    # extracting minimal number of patches to ensure that the test does not take too long
+    parameters_patch["num_patches"] = 20
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_patch, file)
+    
+    patch_extraction(inputDir + "/train_2d_histo_segmentation.csv", output_dir_patches_output, file_config_temp)
+
+    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        file_for_Training
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["modality"] = "histo"
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["architecture"] = "resunet"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    InferenceManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+    )
+
+
+    shutil.rmtree(output_dir_patches)
