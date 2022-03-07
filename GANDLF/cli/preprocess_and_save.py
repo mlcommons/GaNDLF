@@ -55,7 +55,7 @@ def preprocess_and_save(
     parameters = populate_header_in_parameters(parameters, headers)
 
     data_for_processing = ImagesFromDataFrame(
-        dataframe, parameters, train=applyaugs, loader_type="full"
+        dataframe, parameters, train=applyaugs, apply_zero_crop=True, loader_type="full"
     )
 
     dataloader_for_processing = DataLoader(
