@@ -82,7 +82,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     elif parameters["modality"] in ["path", "histo"]:
         # set some defaults
         if not "slide_level" in parameters:
-            parameters["slide_level"] = 2
+            parameters["slide_level"] = 0
         if not "stride_size" in parameters:
             parameters["stride_size"] = 10
         if not "stride_size" in parameters:
