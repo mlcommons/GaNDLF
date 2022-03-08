@@ -308,7 +308,7 @@ def test_train_brainage_rad_2d(device):
 
     print("passed")
 
-
+"""
 def test_train_regression_rad_3d(device):
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -339,7 +339,7 @@ def test_train_regression_rad_3d(device):
         )
 
     print("passed")
-
+"""
 
 def test_train_classification_rad_2d(device):
     # read and initialize parameters for specific data dimension
