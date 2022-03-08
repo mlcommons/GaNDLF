@@ -1230,7 +1230,9 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
-    shutil.rmtree(outputDir)  # overwrite previous results
+    # overwrite previous results
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
