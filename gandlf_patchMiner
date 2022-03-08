@@ -4,8 +4,7 @@
 import os, argparse
 from datetime import date
 from GANDLF.cli.patch_extraction import patch_extraction
-from GANDLF.utils import *
-
+from GANDLF.utils import fix_paths
 fix_paths(os.getcwd())  # add relevant vips path
 
 
