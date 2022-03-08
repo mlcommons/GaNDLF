@@ -9,7 +9,7 @@ fix_paths(os.getcwd())  # add relevant vips path
 from datetime import date
 
 from GANDLF import version
-from GANDLF.cli.main_run import main_run
+from GANDLF.cli import main_run
 
 
 if __name__ == "__main__":

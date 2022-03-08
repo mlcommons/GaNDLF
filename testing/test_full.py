@@ -12,8 +12,7 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli.main_run import main_run
-from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -68,7 +67,9 @@ def test_download_data():
     """
     This function downloads the sample data, which is the first step towards getting everything ready
     """
-    urlToDownload = "https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip"
+    urlToDownload = (
+        "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
+    )
     # do not download data again
     if not Path(
         os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
@@ -97,6 +98,9 @@ def test_constructTrainingCSV():
             channelsID = "image.png"
             labelID = "mask.png"
         elif "3d_rad_segmentation" in application_data:
+            channelsID = "image"
+            labelID = "mask"
+        elif "2d_histo_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
         writeTrainingCSV(
@@ -1075,7 +1079,7 @@ def test_checkpointing_segmentation_rad_2d(device):
 
 
 def test_model_patch_divisibility():
-
+    print("Starting patch divisibility tests")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1108,7 +1112,7 @@ def test_model_patch_divisibility():
 
 
 def test_one_hot_logic():
-
+    print("Starting one hot logic tests")
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
@@ -1144,6 +1148,7 @@ def test_one_hot_logic():
 
 
 def test_anonymizer():
+    print("Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
@@ -1152,7 +1157,7 @@ def test_anonymizer():
 
     config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
 
-    run_anonymizer(input_file, output_file, config_file)
+    run_anonymizer(input_file, output_file, config_file, "rad")
 
     os.remove(output_file)
 
@@ -1172,7 +1177,7 @@ def test_anonymizer():
 
     output_file = os.path.join(testingDir, "MR_small.nii.gz")
 
-    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti)
+    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti, "rad")
 
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
@@ -1183,3 +1188,77 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
+    print("passed")
+
+
+def test_train_inference_segmentation_histology_2d(device):
+    print("Starting histology train/inference tests")
+    output_dir_patches = os.path.join(testingDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
+    Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+    file_config_temp = os.path.join(
+        output_dir_patches, "config_patch-extraction_temp.yaml"
+    )
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters_patch = {}
+    # extracting minimal number of patches to ensure that the test does not take too long
+    parameters_patch["num_patches"] = 5
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_patch, file)
+
+    patch_extraction(
+        inputDir + "/train_2d_histo_segmentation.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
+    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["modality"] = "histo"
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["architecture"] = "resunet"
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
+    parameters["metrics"] = ["dice"]
+    # overwrite previous results
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        reset_prev=True,
+    )
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_histo_segmentation.csv", train=False
+    )
+
+    InferenceManager(
+        dataframe=inference_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+    )
+
+    shutil.rmtree(output_dir_patches)
+
+    print("passed")
