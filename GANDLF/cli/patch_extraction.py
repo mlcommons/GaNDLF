@@ -57,7 +57,7 @@ def patch_extraction(input_path, output_path, config=None):
 
     for sid, slide, label in parse_gandlf_csv(input_path):
         # Create new instance of slide manager
-        manager = PatchManager(slide, output_path)
+        manager = PatchManager(slide, os.path.join(output_path, sid))
         manager.set_label_map(label)
         manager.set_subjectID(sid)
         manager.set_image_header("Channel_0")

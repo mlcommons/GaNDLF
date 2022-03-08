@@ -1,5 +1,6 @@
 from .forward_pass import validate_network
 import os
+from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -79,36 +80,45 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         )
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
+        # set some defaults
+        if not "slide_level" in parameters:
+            parameters["slide_level"] = 0
+        if not "stride_size" in parameters:
+            parameters["stride_size"] = parameters["patch_size"]
+
+        parameters["stride_size"] = np.array(parameters["stride_size"])
+
+        if parameters["stride_size"].size == 1:
+            parameters["stride_size"] = np.append(
+                parameters["stride_size"], parameters["stride_size"]
+            )
+
+        if not "mask_level" in parameters:
+            parameters["mask_level"] = parameters["slide_level"]
+
         # actual computation
-        for _, row in inferenceDataForTorch.iterrows():
+        for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
-            print(
-                "Patient Slide       : ",
-                row[parameters["headers"]["subjectIDHeader"]],
-            )
-            print(
-                "Patient Location    : ",
-                row[parameters["headers"]["channelHeaders"]],
-            )
-            print(row[parameters["headers"]["channelHeaders"]].values[0])
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
             level_width, level_height = os_image.level_dimensions[
                 int(parameters["slide_level"])
             ]
-            subject_dest_dir = os.path.join(outputDir, subject_name)
-            os.makedirs(subject_dest_dir, exist_ok=True)
+            subject_dest_dir = os.path.join(outputDir, str(subject_name))
+            Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+
+            patch_size = parameters["patch_size"]
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
                 patch_size=patch_size,
                 stride_size=parameters["stride_size"],
                 selected_level=parameters["slide_level"],
-                mask_level=4,
+                mask_level=parameters["mask_level"],
             )
 
             dataloader = DataLoader(
@@ -142,21 +152,21 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    row[parameters["headers"]["subjectIDHeader"]] + "_prob.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
                 ),
                 out,
             )
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    row[parameters["headers"]["subjectIDHeader"]] + "_seg.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
                 ),
                 out_thresh,
             )
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    row[parameters["headers"]["subjectIDHeader"]] + "_count.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
                 ),
                 count_map,
             )
