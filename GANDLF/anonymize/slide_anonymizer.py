@@ -368,8 +368,6 @@
 from __future__ import division
 
 from configparser import RawConfigParser
-from glob import glob
-from optparse import OptionParser
 import os
 import struct
 import sys
@@ -569,8 +567,8 @@ class TiffEntry(object):
             raise ValueError("Unsupported type")
 
         fmt = "%d%s" % (self.count, item_fmt)
-        len = self._fh.fmt_size(fmt)
-        if len <= self._fh.fmt_size("Z"):
+        length = self._fh.fmt_size(fmt)
+        if length <= self._fh.fmt_size("Z"):
             # Inline value
             self._fh.seek(self.start + self._fh.fmt_size("HHZ"))
         else:
@@ -811,9 +809,9 @@ class MrxsNonHierLevel(object):
         self.section = dat.get(MRXS_HIERARCHICAL, self.section_key)
 
 
-def accept(filename, format):
+def accept(filename, file_format):
     if DEBUG:
-        print(filename + ":", format)
+        print(filename + ":", file_format)
 
 
 def do_aperio_svs(filename):
