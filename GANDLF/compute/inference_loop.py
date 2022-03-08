@@ -1,5 +1,6 @@
 from .forward_pass import validate_network
 import os
+from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -11,9 +12,12 @@ from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
+import tiffslide as openslide
+
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
 from GANDLF.models import global_models_dict
+from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
@@ -75,101 +79,96 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             model, inference_loader, None, parameters, mode="inference"
         )
         print(average_epoch_valid_loss, average_epoch_valid_metric)
-    elif (parameters["modality"] == "path") or (parameters["modality"] == "histo"):
-        # histology inference
-        if os.name != "nt":
-            """
-            path inference is Linux-only because openslide for Windows works only for Python-3.8  whereas pickle5 works only for 3.6 and 3.7
-            """
-            from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
-            from openslide import OpenSlide
+    elif parameters["modality"] in ["path", "histo"]:
+        # set some defaults
+        if not "slide_level" in parameters:
+            parameters["slide_level"] = 0
+        if not "stride_size" in parameters:
+            parameters["stride_size"] = parameters["patch_size"]
 
-            # actual computation
-            for _, row in inferenceDataForTorch.iterrows():
-                subject_name = row[parameters["headers"]["subjectIDHeader"]]
-                print(
-                    "Patient Slide       : ",
-                    row[parameters["headers"]["subjectIDHeader"]],
-                )
-                print(
-                    "Patient Location    : ",
-                    row[parameters["headers"]["channelHeaders"]],
-                )
-                print(row[parameters["headers"]["channelHeaders"]].values[0])
-                os_image = OpenSlide(
-                    row[parameters["headers"]["channelHeaders"]].values[0]
-                )
-                level_width, level_height = os_image.level_dimensions[
-                    int(parameters["slide_level"])
-                ]
-                subject_dest_dir = os.path.join(outputDir, subject_name)
-                os.makedirs(subject_dest_dir, exist_ok=True)
+        parameters["stride_size"] = np.array(parameters["stride_size"])
 
-                probs_map = np.zeros((level_height, level_width), dtype=np.float16)
-                count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+        if parameters["stride_size"].size == 1:
+            parameters["stride_size"] = np.append(
+                parameters["stride_size"], parameters["stride_size"]
+            )
 
-                patient_dataset_obj = InferTumorSegDataset(
-                    row[parameters["headers"]["channelHeaders"]].values[0],
-                    patch_size=patch_size,
-                    stride_size=parameters["stride_size"],
-                    selected_level=parameters["slide_level"],
-                    mask_level=4,
-                )
+        if not "mask_level" in parameters:
+            parameters["mask_level"] = parameters["slide_level"]
 
-                dataloader = DataLoader(
-                    patient_dataset_obj,
-                    batch_size=int(parameters["batch_size"]),
-                    shuffle=False,
-                    num_workers=parameters["q_num_workers"],
-                )
-                for image_patches, (x_coords, y_coords) in tqdm(dataloader):
-                    x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                    if parameters["model"]["amp"]:
-                        with autocast():
-                            output = model(
-                                image_patches.float().to(parameters["device"])
-                            )
-                    else:
+        # actual computation
+        for _, row in inferenceDataFromPickle.iterrows():
+            subject_name = row[parameters["headers"]["subjectIDHeader"]]
+            os_image = openslide.open_slide(
+                row[parameters["headers"]["channelHeaders"]].values[0]
+            )
+            level_width, level_height = os_image.level_dimensions[
+                int(parameters["slide_level"])
+            ]
+            subject_dest_dir = os.path.join(outputDir, str(subject_name))
+            Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
+
+            probs_map = np.zeros((level_height, level_width), dtype=np.float16)
+            count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+
+            patch_size = parameters["patch_size"]
+
+            patient_dataset_obj = InferTumorSegDataset(
+                row[parameters["headers"]["channelHeaders"]].values[0],
+                patch_size=patch_size,
+                stride_size=parameters["stride_size"],
+                selected_level=parameters["slide_level"],
+                mask_level=parameters["mask_level"],
+            )
+
+            dataloader = DataLoader(
+                patient_dataset_obj,
+                batch_size=int(parameters["batch_size"]),
+                shuffle=False,
+                num_workers=parameters["q_num_workers"],
+            )
+            for image_patches, (x_coords, y_coords) in tqdm(dataloader):
+                x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
+                if parameters["model"]["amp"]:
+                    with autocast():
                         output = model(image_patches.float().to(parameters["device"]))
-                    output = output.detach().cpu().numpy()
-                    for i in range(int(output.shape[0])):
-                        count_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += 1
-                        probs_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += output[i][0]
-                probs_map = probs_map / count_map
-                count_map = count_map / count_map.max()
-                out = count_map * probs_map
-                count_map = np.array(count_map * 255, dtype=np.uint16)
-                out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        row[parameters["headers"]["subjectIDHeader"]] + "_prob.png",
-                    ),
-                    out,
-                )
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        row[parameters["headers"]["subjectIDHeader"]] + "_seg.png",
-                    ),
-                    out_thresh,
-                )
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        row[parameters["headers"]["subjectIDHeader"]] + "_count.png",
-                    ),
-                    count_map,
-                )
-        else:
-            print(
-                "ERROR: histo/path inference is Linux-only because openslide for Windows works only for Python-3.8, whereas pickle5 works only for 3.6 and 3.7"
+                else:
+                    output = model(image_patches.float().to(parameters["device"]))
+                output = output.detach().cpu().numpy()
+                for i in range(int(output.shape[0])):
+                    count_map[
+                        x_coords[i] : x_coords[i] + patch_size[0],
+                        y_coords[i] : y_coords[i] + patch_size[1],
+                    ] += 1
+                    probs_map[
+                        x_coords[i] : x_coords[i] + patch_size[0],
+                        y_coords[i] : y_coords[i] + patch_size[1],
+                    ] += output[i][0]
+            probs_map = probs_map / count_map
+            count_map = count_map / count_map.max()
+            out = count_map * probs_map
+            count_map = np.array(count_map * 255, dtype=np.uint16)
+            out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
+                ),
+                out,
+            )
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
+                ),
+                out_thresh,
+            )
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
+                ),
+                count_map,
             )
 
 
