@@ -84,7 +84,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         if not "slide_level" in parameters:
             parameters["slide_level"] = 0
         if not "stride_size" in parameters:
-            parameters["stride_size"] = 10
+            parameters["stride_size"] = parameters["patch_size"]
 
         parameters["stride_size"] = np.array(parameters["stride_size"])
 
@@ -152,21 +152,21 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    row[parameters["headers"]["subjectIDHeader"]] + "_prob.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
                 ),
                 out,
             )
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    row[parameters["headers"]["subjectIDHeader"]] + "_seg.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
                 ),
                 out_thresh,
             )
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    row[parameters["headers"]["subjectIDHeader"]] + "_count.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
                 ),
                 count_map,
             )
