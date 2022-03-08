@@ -29,7 +29,9 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
+def ImagesFromDataFrame(
+    dataframe, parameters, train, apply_zero_crop=False, loader_type=""
+):
     """
     Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
 
@@ -41,6 +43,8 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
         The parameters dictionary
     train : bool
         If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
+    apply_zero_crop : bool
+        If enabled, the crop_external_zero_plane is applied.
     loader_type : str
         Type of loader for printing.
 
@@ -216,7 +220,7 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                     normalize_to_apply = global_preprocessing_dict[preprocess_lower]
             # preprocessing routines that we only want for training
             elif preprocess_lower in ["crop_external_zero_planes"]:
-                if train:
+                if train or apply_zero_crop:
                     transformations_list.append(
                         global_preprocessing_dict["crop_external_zero_planes"](
                             patch_size=patch_size
