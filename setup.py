@@ -77,6 +77,7 @@ requirements = [
     "opencv-python",
     "torchmetrics",
     "OpenPatchMiner==0.1.6",
+    "zarr==2.10.3",
     "pydicom",
 ]
 

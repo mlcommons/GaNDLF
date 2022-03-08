@@ -59,6 +59,8 @@ class InferTumorSegDataset(Dataset):
     def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level):
         self._wsi_path = wsi_path
         self._patch_size = patch_size
+        if self._patch_size[-1] == 1:
+            self._patch_size = self._patch_size[:-1]
         self._stride_size = stride_size
         self._selected_level = selected_level
         self._mask_level = mask_level
@@ -68,7 +70,6 @@ class InferTumorSegDataset(Dataset):
 
     def _basic_preprocessing(self):
         mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
-        print(self._wsi_path, self._os_image)
         extracted_image = self._os_image.read_region(
             (0, 0), self._mask_level, (mask_xdim, mask_ydim)
         ).convert("RGB")
@@ -112,7 +113,7 @@ class InferTumorSegDataset(Dataset):
         x_loc, y_loc = self._points[idx]
         patch = np.array(
             self._os_image.read_region(
-                (x_loc * 4, y_loc * 4),
+                (x_loc * self._mask_level, y_loc * self._mask_level),
                 self._selected_level,
                 (self._patch_size[0], self._patch_size[1]),
             ).convert("RGB")

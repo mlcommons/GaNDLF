@@ -1188,6 +1188,8 @@ def test_anonymizer():
 def test_train_inference_segmentation_histology_2d(device):
     print("Starting histology train/inference tests")
     output_dir_patches = os.path.join(testingDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
@@ -1200,7 +1202,7 @@ def test_train_inference_segmentation_histology_2d(device):
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 20
+    parameters_patch["num_patches"] = 5
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1225,9 +1227,12 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["architecture"] = "resunet"
-    parameters["nested_training"]["testing"] = -5
-    parameters["nested_training"]["validation"] = -5
-    shutil.rmtree(outputDir)  # overwrite previous results
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
+    parameters["metrics"] = ["dice"]
+    # overwrite previous results
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -1237,8 +1242,12 @@ def test_train_inference_segmentation_histology_2d(device):
         reset_prev=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_histo_segmentation.csv", train=False
+    )
+
     InferenceManager(
-        dataframe=training_data,
+        dataframe=inference_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
