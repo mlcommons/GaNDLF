@@ -83,6 +83,36 @@ if __name__ == "__main__":
     if not(os.path.isfile(args.config)):
         sys.exit("ERROR: Configuration file not found!")
     
+    ### 
+    # from testing.test_full import test_differential_privacy_epsilon_classification_rad_2d, test_differential_privacy_simple_classification_rad_2d
+    
+    # test_differential_privacy_simple_classification_rad_2d("cuda")
+    # test_differential_privacy_epsilon_classification_rad_2d("cuda")
+    
+    from testing.test_full import test_clip_train_classification_rad_3d, test_scheduler_classification_rad_2d, test_inference_classification_rad_3d, test_train_classification_rad_2d, test_train_classification_rad_3d, test_train_segmentation_rad_2d, test_metrics_regression_rad_2d, test_preprocess_functions, test_dataloader_construction_train_segmentation_3d, test_augmentation_functions, test_train_regression_rad_2d, test_train_regression_rad_3d, test_cli_function_mainrun, test_normtype_train_segmentation_rad_3d, test_metrics_segmentation_rad_2d, test_anonymizer, test_inference_classification_with_logits_single_fold_rad_3d, test_config_read, test_constructTrainingCSV, test_train_inference_segmentation_histology_2d 
+
+    # test_train_segmentation_rad_2d("cuda")
+    # test_metrics_regression_rad_2d("cuda")
+    # test_clip_train_classification_rad_3d("cuda")
+    # test_scheduler_classification_rad_2d("cuda")
+    # test_inference_classification_rad_3d("cuda")
+    # test_train_classification_rad_2d("cuda")
+    # test_train_classification_rad_3d("cuda")
+    # test_preprocess_functions()
+    # test_train_regression_rad_2d("cuda")
+    # test_train_regression_rad_3d("cuda")
+    # test_cli_function_mainrun("cuda")
+    # test_normtype_train_segmentation_rad_3d("cuda")
+    # test_dataloader_construction_train_segmentation_3d("cuda")
+    # test_config_read()
+    # test_augmentation_functions()
+    # test_anonymizer()
+    # test_inference_classification_with_logits_single_fold_rad_3d("cuda")
+    # test_metrics_segmentation_rad_2d("cuda")
+    test_constructTrainingCSV()
+    test_train_inference_segmentation_histology_2d("cpu")
+    
+    ###
     main_run(
         args.inputdata, args.config, args.modeldir, args.train, args.device, args.resetprev
     )
