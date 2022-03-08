@@ -92,7 +92,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["stride_size"] = np.append(
                 parameters["stride_size"], parameters["stride_size"]
             )
-        
+
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
 
