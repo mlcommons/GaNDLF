@@ -92,6 +92,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["stride_size"] = np.append(
                 parameters["stride_size"], parameters["stride_size"]
             )
+        
+        if not "mask_level" in parameters:
+            parameters["mask_level"] = parameters["slide_level"]
 
         # actual computation
         for _, row in inferenceDataFromPickle.iterrows():
@@ -115,7 +118,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 patch_size=patch_size,
                 stride_size=parameters["stride_size"],
                 selected_level=parameters["slide_level"],
-                mask_level=parameters["slide_level"],
+                mask_level=parameters["mask_level"],
             )
 
             dataloader = DataLoader(
