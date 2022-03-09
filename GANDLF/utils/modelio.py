@@ -59,7 +59,7 @@ def save_model(model_dict, model, num_channel, input_shape, path):
             )
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
-    except:
+    except RuntimeWarning:
         warnings.warn("Cannot export to ONNX model.")
         return
 
