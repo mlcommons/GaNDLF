@@ -11,6 +11,7 @@ from .normalize_rgb import (
     normalize_div_by_255_transform,
 )
 from .template_normalize import histogram_matching
+from .resample_minimum import Resample_Minimum
 
 from torchio.transforms import (
     ZNormalization,

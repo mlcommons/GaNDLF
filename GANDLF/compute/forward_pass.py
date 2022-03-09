@@ -3,6 +3,7 @@ import torch
 from tqdm import tqdm
 import SimpleITK as sitk
 import numpy as np
+import pandas as pd
 import torchio
 
 from GANDLF.utils import (
@@ -10,6 +11,7 @@ from GANDLF.utils import (
     get_filename_extension_sanitized,
     reverse_one_hot,
 )
+from GANDLF.post_process import fill_holes
 from .step import step
 from .loss_and_metric import get_loss_and_metrics
 
@@ -54,6 +56,7 @@ def validate_network(
             total_epoch_valid_metric[metric] = 0
 
     logits_list = []
+    subject_id_list = []
     is_classification = params.get("problem_type") == "classification"
     is_inference = mode == "inference"
 
@@ -164,6 +167,7 @@ def validate_network(
 
             if is_inference and is_classification:
                 logits_list.append(pred_output)
+                subject_id_list.append(subject.get("subject_id")[0])
 
             if params["save_output"]:
                 outputToWrite += (
@@ -267,9 +271,9 @@ def validate_network(
                 label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
                     img_for_metadata = torchio.Image(
-                        type=subject["1"]["type"],
-                        tensor=subject["1"]["data"].squeeze(0),
-                        affine=subject["1"]["affine"].squeeze(0),
+                        type=subject["label"]["type"],
+                        tensor=subject["label"]["data"].squeeze(0),
+                        affine=subject["label"]["affine"].squeeze(0),
                     ).as_sitk()
                     ext = get_filename_extension_sanitized(
                         subject["path_to_metadata"][0]
@@ -280,13 +284,17 @@ def validate_network(
                         pred_mask[0], params["model"]["class_list"]
                     )
                     pred_mask = np.swapaxes(pred_mask, 0, 2)
+                    # perform numpy-specific postprocessing here
+                    if "fill_holes" in params["data_postprocessing"]:
+                        pred_mask = fill_holes(pred_mask)
+
                     ## special case for 2D
                     if image.shape[-1] > 1:
-                        # ITK expects array as Z,X,Y
                         result_image = sitk.GetImageFromArray(pred_mask)
                     else:
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(img_for_metadata)
+
                     # cast as the same data type
                     result_image = sitk.Cast(
                         result_image, img_for_metadata.GetPixelID()
@@ -328,6 +336,7 @@ def validate_network(
             output_prediction = output_prediction.squeeze(-1)
             if is_inference and is_classification:
                 logits_list.append(output_prediction)
+                subject_id_list.append(subject.get("subject_id")[0])
 
             # we cast to float32 because float16 was causing nan
             final_loss, final_metric = get_loss_and_metrics(
@@ -407,12 +416,17 @@ def validate_network(
     # write the predictions, if appropriate
     if params["save_output"]:
         if is_inference and is_classification and logits_list:
+            class_list = [str(c) for c in params["model"]["class_list"]]
             logit_tensor = torch.cat(logits_list)
             current_fold_dir = params["current_fold_dir"]
-            np.savetxt(
-                os.path.join(current_fold_dir, "logits.csv"),
-                logit_tensor.detach().cpu().numpy(),
-                delimiter=",",
+            logit_tensor = logit_tensor.detach().cpu().numpy()
+            columns = ["SubjectID"] + class_list
+            logits_df = pd.DataFrame(columns=columns)
+            logits_df.SubjectID = subject_id_list
+            logits_df[class_list] = logit_tensor
+
+            logits_df.to_csv(
+                os.path.join(current_fold_dir, "logits.csv"), index=False, sep=","
             )
 
         if "value_keys" in params:

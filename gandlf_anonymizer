@@ -31,8 +31,17 @@ def main():
         "-c",
         "--config",
         metavar="",
+        default="",
         type=str,
-        help="config (in YAML) for running anonymization.",
+        help="config (in YAML) for running anonymization, optionally, specify modality using '-m' for defaults.",
+    )
+    parser.add_argument(
+        "-m",
+        "--modality",
+        metavar="",
+        default="rad",
+        type=str,
+        help="The modality type, can be 'rad' or 'histo'.",
     )
     parser.add_argument(
         "-o",
@@ -45,18 +54,18 @@ def main():
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [args.inputDir, args.config, args.outputFile]:
+    for param_none_check in [args.inputDir, args.outputFile]:
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
-    config = yaml.load(open(args.config), Loader=yaml.FullLoader)
+    if os.path.isfile(args.config):
+        config = yaml.load(open(args.config), Loader=yaml.FullLoader)
+    else:
+        config = None
 
-    if not args.labelID:
-        args.labelID = ""
-
-    run_anonymizer(inputDir, outputFile, config)
+    run_anonymizer(inputDir, outputFile, config, args.modality)
 
     print("Finished successfully.")
 
