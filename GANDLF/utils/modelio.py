@@ -76,9 +76,7 @@ def save_model(model_dict, model, num_channel, input_shape, path):
             ],
         )
     except subprocess.CalledProcessError:
-        warnings.warn(
-            "OpenVINO Model Optimizer IR conversion failed."
-        )
+        warnings.warn("OpenVINO Model Optimizer IR conversion failed.")
 
 
 def load_model(path):
