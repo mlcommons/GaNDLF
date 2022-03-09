@@ -312,8 +312,6 @@ class EfficientNet(ModelBase):
             )
             self.Norm = self.BatchNorm
 
-        print(parameters["patch_size"])
-        print(checkPatchDivisibility(parameters["patch_size"], number=32))
         if not (checkPatchDivisibility(parameters["patch_size"], number=32)):
             sys.exit(
                 "The patch size is not divisible by 32, which is required for efficientnet",
