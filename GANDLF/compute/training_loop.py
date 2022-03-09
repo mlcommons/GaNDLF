@@ -462,13 +462,6 @@ def training_loop(
             patience = 0
 
             model.eval()
-            if (
-                params["model"]["architecture"] in ["brain_age", "sdnet"]
-                or params["model"]["type"] == "torch"
-            ):
-                onnx_export = False
-            else:
-                onnx_export = True
             save_model(
                 {
                     "epoch": best_train_idx,
@@ -477,9 +470,9 @@ def training_loop(
                     "loss": best_loss,
                 },
                 model,
+                params["model"]["num_channels"],
                 params["patch_size"],
                 best_model_path,
-                onnx_export,
             )
             model.train()
             first_model_saved = True

@@ -2,11 +2,12 @@ import hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
 import os
 import torch
+import warnings
 
 try:
     from openvino.inference_engine import IECore
 except ImportError:
-    raise ImportError("OpenVINO is not configured correctly.")
+    warnings.warn("OpenVINO is not configured correctly.")
 
 
 # these are the base keys for the model dictionary to save
@@ -22,7 +23,7 @@ model_dict_base = {
 }
 
 
-def save_model(model_dict, model, input_shape, path, onnx_export):
+def save_model(model_dict, model, num_channel, input_shape, path):
     """
     Save the model dictionary to a file.
 
@@ -47,9 +48,9 @@ def save_model(model_dict, model, input_shape, path, onnx_export):
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
 
-    if onnx_export:
+    try:
         onnx_path = path.replace("pth.tar", "onnx")
-        dummy_input = torch.randn((1, 3, input_shape[0], input_shape[1]))
+        dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1]))
 
         with torch.no_grad():
             torch.onnx.export(
@@ -64,21 +65,24 @@ def save_model(model_dict, model, input_shape, path, onnx_export):
             )
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
+    except:
+        warnings.warn("Cannot export to ONNX model.")
+        return
 
-        try:
+    try:
             subprocess.call(
                 [
                     "mo",
                     "--input_model",
                     "{0}".format(onnx_path),
                     "--input_shape",
-                    "[1,3,{0},{1}]".format(input_shape[0], input_shape[1]),
+                    "[1,{0},{1},{2}]".format(num_channel, input_shape[0], input_shape[1]),
                     "--output_dir",
                     "{0}".format(ov_output_dir),
                 ],
             )
-        except subprocess.CalledProcessError:
-            raise subprocess.CalledProcessError(
+    except subprocess.CalledProcessError:
+            warnings.warn(
                 "OpenVINO Model Optimizer IR conversion failed."
             )
 
