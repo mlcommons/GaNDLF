@@ -219,7 +219,9 @@ def ImagesFromDataFrame(
                 if preprocessing[preprocess_lower] is not False:
                     transformations_list.append(
                         global_preprocessing_dict[preprocess_lower](
-                            preprocessing[preprocess_lower]))
+                            preprocessing[preprocess_lower]
+                        )
+                    )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
