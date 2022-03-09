@@ -70,21 +70,21 @@ def save_model(model_dict, model, num_channel, input_shape, path):
         return
 
     try:
-            subprocess.call(
-                [
-                    "mo",
-                    "--input_model",
-                    "{0}".format(onnx_path),
-                    "--input_shape",
-                    "[1,{0},{1},{2}]".format(num_channel, input_shape[0], input_shape[1]),
-                    "--output_dir",
-                    "{0}".format(ov_output_dir),
-                ],
-            )
+        subprocess.call(
+            [
+                "mo",
+                "--input_model",
+                "{0}".format(onnx_path),
+                "--input_shape",
+                "[1,{0},{1},{2}]".format(num_channel, input_shape[0], input_shape[1]),
+                "--output_dir",
+                "{0}".format(ov_output_dir),
+            ],
+        )
     except subprocess.CalledProcessError:
-            warnings.warn(
-                "OpenVINO Model Optimizer IR conversion failed."
-            )
+        warnings.warn(
+            "OpenVINO Model Optimizer IR conversion failed."
+        )
 
 
 def load_model(path):
