@@ -6,7 +6,8 @@ For any new feature, please ensure the corresponding option in the [sample confi
 - [Extending GaNDLF](#extending-gandlf)
   - [Table of Contents](#table-of-contents)
   - [Environment](#environment)
-  - [Architecture](#architecture)
+  - [Overall Architecture](#overall-architecture)
+  - [Dependency Management](#dependency-management)
   - [Adding Models](#adding-models)
   - [Adding Augmentation Transformations](#adding-augmentation-transformations)
   - [Adding Preprocessing functionality](#adding-preprocessing-functionality)
@@ -29,17 +30,13 @@ conda create -p ./venv python=3.6 -y
 conda activate ./venv
 conda install -c conda-forge mamba -y # allows for faster dependency solving
 mamba install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
-## For windows
-# mamba install -c sdvillal openslide -y
-## For linux
-# mamba install -c conda-forge libvips openslide -y
 conda install -c conda-forge gandlf -y
 pip install -e .
 ```
 
 [Back To Top &uarr;](#table-of-contents)
 
-## Architecture
+## Overall Architecture
 
 - Command-line parsing: [gandlf_run](https://github.com/CBICA/GaNDLF/blob/master/gandlf_run)
 - Parameters from [training configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/config_all_options.yaml) get passed as a `dict` via [parameter parser](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/parseConfig.py)
@@ -55,6 +52,14 @@ pip install -e .
   - Performs actual inference
 
 [Back To Top &uarr;](#table-of-contents)
+
+## Dependency Management
+
+To update/change/add a dependency in [setup](https://github.com/CBICA/GaNDLF/blob/master/setup.py), please ensure **at least** the following conditions are met:
+
+- The package is being [actively maintained](https://opensource.com/life/14/1/evaluate-sustainability-open-source-project).
+- The new dependency is being testing against the **minimum python version** supported by GaNDLF (see the `python_requires` variable in [setup](https://github.com/CBICA/GaNDLF/blob/master/setup.py)).
+- It does not clash with any existing dependencies.
 
 ## Adding Models
 
@@ -75,7 +80,7 @@ pip install -e .
 
 ## Adding Preprocessing functionality
 
-- Update or add dependency in [setup](https://github.com/CBICA/GaNDLF/blob/master/setup.py), if appropriate.
+- Update or add dependency in [setup](https://github.com/CBICA/GaNDLF/blob/master/setup.py), if appropriate; see section on [Dependency Management](#dependency-management) for details.
 - All transforms should be defined by inheriting from `torchio.transforms.intensity_transform.IntensityTransform`. For example, please see the threshold/clip functionality in the [`GANDLF/data/preprocessing/threshold_and_clip.py`](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/preprocessing/threshold_and_clip.py) file.
 - Define each option in the configuration file under the correct key (again, see threshold/clip as examples)
 - Add transformation to `global_preprocessing_dict`, defined in [`GANDLF/data/preprocessing/__init__.py`](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/data/preprocessing/__init__.py)
