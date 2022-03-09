@@ -4,12 +4,6 @@ import os
 import torch
 import warnings
 
-try:
-    from openvino.inference_engine import IECore
-except ImportError:
-    warnings.warn("OpenVINO is not configured correctly.")
-
-
 # these are the base keys for the model dictionary to save
 model_dict_base = {
     "epoch": 0,
@@ -130,7 +124,7 @@ def load_ov_model(path, device="CPU"):
     try:
         from openvino.inference_engine import IECore
     except ImportError:
-        raise ImportError("OpenVINO is not configured correctly.")
+        raise ImportError("OpenVINO inference engine is not configured correctly.")
 
     ie = IECore()
     if device == "GPU":
