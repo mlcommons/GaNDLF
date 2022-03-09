@@ -4,3 +4,4 @@ omit =
     ./setup.py
     ./GANDLF/OPM
     ./GANDLF/anonymize/dicomanonymizer
+    ./GANDLF/anonymize/slide_anonymizer.py

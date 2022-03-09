@@ -142,6 +142,9 @@ data_preprocessing:
     'resample':{
       'resolution': [1,2,3]
     },
+    'resample_min':{
+      'resolution': 1, # this will be the maximum spacing (translates to minium resolution) across all axes
+    },
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
     'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
