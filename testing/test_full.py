@@ -41,7 +41,7 @@ all_models_regression = [
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
-patch_size = {"2D": [64, 64, 1], "3D": [32, 32, 32]}
+patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 16]}
 
 baseConfigDir = os.path.abspath(os.path.normpath("./samples"))
 testingDir = os.path.abspath(os.path.normpath("./testing"))
