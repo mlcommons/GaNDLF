@@ -364,14 +364,14 @@ class EfficientNet(ModelBase):
                 "conv2",
                 self.Conv(
                     in_channels=num_out_channels,
-                    out_channels=num_channels(1280, scale_params["width"], 8),
+                    out_channels=num_channels(32, scale_params["width"], 8),#1280, scale_params["width"], 8),
                     kernel_size=1,
                     stride=1,
                     padding=0,
                     bias=False,
                 ),
             ),
-            ("norm2", self.Norm(num_channels(1280, scale_params["width"], 8))),
+            ("norm2", self.Norm(num_channels(32, scale_params["width"], 8))),#1280, scale_params["width"], 8))),
             ("swish2", nn.SiLU(inplace=True)),
         ]
 
@@ -379,7 +379,7 @@ class EfficientNet(ModelBase):
 
         self.classifier = nn.Sequential(
             nn.Dropout(p=scale_params["dropout"], inplace=True),
-            nn.Linear(num_channels(1280, scale_params["width"], 8), self.n_classes),
+            nn.Linear(num_channels(32, scale_params["width"], 8), self.n_classes),#1280, scale_params["width"], 8), self.n_classes),
         )
 
         # define starting weights
