@@ -400,13 +400,10 @@ def parseConfig(config_file_path, version_check_flag=True):
             for key in params["data_preprocessing"]:
                 if key in ["resize", "resize_image", "resize_images", "resize_patch"]:
                     resize_requested = True
-            if (
-                resize_requested
-                and "resample" in params["data_preprocessing"]
-            ):
+            if resize_requested and "resample" in params["data_preprocessing"]:
                 for key in ["resize", "resize_image", "resize_images", "resize_patch"]:
                     params["data_preprocessing"].pop(key)
-                
+
                 warnings.warn(
                     "WARNING: Different 'resize' operations are ignored as 'resample' is defined under 'data_processing'"
                 )
