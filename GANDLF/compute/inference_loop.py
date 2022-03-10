@@ -8,7 +8,6 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 import pickle, argparse, torch
 import numpy as np
-import pandas as pd
 from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
@@ -19,12 +18,13 @@ from GANDLF.utils import (
     populate_channel_keys_in_params,
     send_model_to_device,
     get_dataframe,
+    load_model,
 )
 from GANDLF.models import get_model
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 
 
-def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
+def inference_loop(inferenceDataFromPickle, device, parameters, outputDir_or_optimizedModel):
     """
     The main training loop.
 
@@ -32,7 +32,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         inferenceDataFromPickle (pandas.DataFrame): The data to use for inference.
         device (str): The device to perform computations on.
         parameters (dict): The parameters dictionary.
-        outputDir (str): The output directory.
+        outputDir_or_optimizedModel (str): The output directory or optimized model file.
     """
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of dims     : ", parameters["model"]["dimension"])
@@ -57,15 +57,16 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     inference_loader = get_testing_loader(parameters)
 
     # Loading the weights into the model
-    main_dict = outputDir
-    if os.path.isdir(outputDir):
-        file_to_check = os.path.join(
-            outputDir, str(parameters["model"]["architecture"]) + "_best.pth.tar"
+    model_file = outputDir_or_optimizedModel   
+    if os.path.isdir(model_file):
+        model_file = os.path.join(
+            outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + "_best.pth.tar"
         )
-        if not os.path.isfile(file_to_check):
-            raise ValueError("The model specified model was not found:", file_to_check)
+    
+    if not os.path.isfile(model_file):
+        raise FileNotFoundError("The model specified in file was not found:", model_file)
 
-    main_dict = torch.load(file_to_check, map_location=torch.device(device))
+    main_dict = load_model(model_file, map_location=torch.device(device), full_sanity_check=False)
     model.load_state_dict(main_dict["model_state_dict"])
 
     if not (os.environ.get("HOSTNAME") is None):
@@ -114,7 +115,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             level_width, level_height = os_image.level_dimensions[
                 int(parameters["slide_level"])
             ]
-            subject_dest_dir = os.path.join(outputDir, str(subject_name))
+            subject_dest_dir = os.path.join(outputDir_or_optimizedModel, str(subject_name))
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
@@ -212,6 +213,6 @@ if __name__ == "__main__":
     inference_loop(
         inferenceDataFromPickle=inferenceDataFromPickle,
         parameters=parameters,
-        outputDir=args.outputDir,
+        outputDir_or_optimizedModel=args.outputDir,
         device=args.device,
     )
