@@ -31,13 +31,15 @@ def main():
         + copyrightMessage,
     )
     parser.add_argument(
-        "-m", "--modeldir",
+        "-m",
+        "--modeldir",
         metavar="",
         type=str,
         help="Input directory which contains testing and validation models",
     )
     parser.add_argument(
-        "-o", "--outputdir",
+        "-o",
+        "--outputdir",
         metavar="",
         type=str,
         help="Output directory to save stats and plot",
