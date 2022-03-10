@@ -18,6 +18,7 @@ from GANDLF.utils import (
     populate_channel_keys_in_params,
     send_model_to_device,
     get_dataframe,
+    best_model_path_end,
     load_model,
 )
 from GANDLF.models import get_model
@@ -63,7 +64,7 @@ def inference_loop(
     if os.path.isdir(model_file):
         model_file = os.path.join(
             outputDir_or_optimizedModel,
-            str(parameters["model"]["architecture"]) + "_best.pth.tar",
+            str(parameters["model"]["architecture"]) + best_model_path_end,
         )
 
     if not os.path.isfile(model_file):
