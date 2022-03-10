@@ -462,6 +462,12 @@ def training_loop(
             patience = 0
 
             model.eval()
+            onnx_export = True
+            if params["model"]["architecture"] in ["sdnet", "brain_age"]:
+                onnx_export = False
+
+            print("current model is: ", params["model"]["architecture"], onnx_export)
+
             save_model(
                 {
                     "epoch": best_train_idx,
@@ -472,7 +478,9 @@ def training_loop(
                 model,
                 params["model"]["num_channels"],
                 params["patch_size"],
+                params["model"]["dimension"],
                 best_model_path,
+                onnx_export,
             )
             model.train()
             first_model_saved = True
