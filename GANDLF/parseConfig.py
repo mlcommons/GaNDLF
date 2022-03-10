@@ -1,4 +1,4 @@
-import sys, yaml, ast, pkg_resources, warnings
+import sys, yaml, ast, pkg_resources
 import numpy as np
 
 from .utils import version_check
@@ -402,10 +402,12 @@ def parseConfig(config_file_path, version_check_flag=True):
                     resize_requested = True
             if resize_requested and "resample" in params["data_preprocessing"]:
                 for key in ["resize", "resize_image", "resize_images", "resize_patch"]:
-                    params["data_preprocessing"].pop(key)
+                    if key in params["data_preprocessing"]:
+                        params["data_preprocessing"].pop(key)
 
-                warnings.warn(
-                    "WARNING: Different 'resize' operations are ignored as 'resample' is defined under 'data_processing'"
+                print(
+                    "WARNING: Different 'resize' operations are ignored as 'resample' is defined under 'data_processing'",
+                    file=sys.stderr,
                 )
 
             # iterate through all keys
