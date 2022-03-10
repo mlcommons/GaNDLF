@@ -162,12 +162,23 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             )
             for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                if parameters["model"]["amp"]:
-                    with autocast():
+                if parameters["model"]["type"] == "torch":
+                    if parameters["model"]["amp"]:
+                        with autocast():
+                            output = model(
+                                image_patches.float().to(parameters["device"])
+                            )
+                    else:
                         output = model(image_patches.float().to(parameters["device"]))
+                    output = output.detach().cpu().numpy()
                 else:
-                    output = model(image_patches.float().to(parameters["device"]))
-                output = output.detach().cpu().numpy()
+                    output = model.infer(
+                        inputs={
+                            parameters["model"]["IO"][0]: image_patches.float()
+                            .cpu()
+                            .numpy()
+                        }
+                    )[parameters["model"]["IO"][1]]
                 for i in range(int(output.shape[0])):
                     count_map[
                         x_coords[i] : x_coords[i] + patch_size[0],
