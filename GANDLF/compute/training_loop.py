@@ -259,22 +259,6 @@ def training_loop(
     valid_logger.write_header(mode="valid")
     test_logger.write_header(mode="test")
 
-    # model, params["model"]["amp"], device = send_model_to_device(
-    #     model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
-    # )
-
-    # # Calculate the weights here
-    # if params["weighted_loss"]:
-    #     print("Calculating weights for loss")
-    #     penalty_loader = get_penalty_loader(params)
-
-    #     params["weights"], params["class_weights"] = get_class_imbalance_weights(
-    #         penalty_loader, params
-    #     )
-    #     del penalty_loader
-    # else:
-    #     params["weights"], params["class_weights"] = None, None
-
     if "medcam" in params:
         model = medcam.inject(
             model,
