@@ -20,6 +20,8 @@ model_dict_required = {
     "optimizer_state_dict": None,
 }
 
+best_model_path_end = "_best.pth.tar"
+
 
 def save_model(model_dict, path):
     """
