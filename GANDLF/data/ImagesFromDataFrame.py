@@ -95,7 +95,9 @@ def ImagesFromDataFrame(
         for key in preprocessing.keys():
             # check for different resizing keys
             if key in ["resize_image", "resize_images"]:
-                resize_images_flag = True
+                if not (preprocessing[key] is None):
+                    resize_images_flag = True
+                    break            
 
     # iterating through the dataframe
     for patient in tqdm(
