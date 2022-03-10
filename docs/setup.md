@@ -27,7 +27,7 @@ conda create -n venv_gandlf python=3.7 -y
 conda activate venv_gandlf
 conda install -c conda-forge mamba -y # [OPTIONAL] mamba allows for faster dependency solving
 mamba install -c pytorch pytorch torchvision -y # 1.8.0 installs cuda 10.2 by default, personalize based on your system via https://pytorch.org/get-started/locally
-pip install openvino-dev
+pip install openvino-dev # [OPTIONAL] to generate optimized models for inference
 pip install -e .
 
 ## alternatively you can also use:
