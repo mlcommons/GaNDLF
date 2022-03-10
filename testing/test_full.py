@@ -784,6 +784,28 @@ def test_config_read():
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
     if not data_loader:
         sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize is triggered
+    parameters["data_preprocessing"].pop("resample")
+    parameters["data_preprocessing"].pop("resample_min")
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
     print("passed")
 
 
