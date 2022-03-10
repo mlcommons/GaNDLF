@@ -176,7 +176,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                         }
                     )[parameters["model"]["IO"][1]]
 
-
                 for i in range(int(output.shape[0])):
                     count_map[
                         x_coords[i] : x_coords[i] + patch_size[0],
