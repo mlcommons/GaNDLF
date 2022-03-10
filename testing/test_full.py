@@ -1202,7 +1202,9 @@ def test_train_inference_segmentation_histology_2d(device):
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 3
+    parameters_patch["num_patches"] = 5
+    parameters_patch["patch_size"] = patch_size["2D"]
+    parameters_patch["patch_size"].pop()
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
