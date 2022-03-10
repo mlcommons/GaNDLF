@@ -72,7 +72,7 @@ def inference_loop(
         )
 
     main_dict = load_model(
-        model_file, map_location=torch.device(device), full_sanity_check=False
+        model_file, device=torch.device(device), full_sanity_check=False
     )
     model.load_state_dict(main_dict["model_state_dict"])
 
