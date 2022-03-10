@@ -466,8 +466,6 @@ def training_loop(
             if params["model"]["architecture"] in ["sdnet", "brain_age"]:
                 onnx_export = False
 
-            print("current model is: ", params["model"]["architecture"], onnx_export)
-
             save_model(
                 {
                     "epoch": best_train_idx,

@@ -59,7 +59,7 @@ def save_model(
 
         with torch.no_grad():
             torch.onnx.export(
-                model,
+                model.to("cpu"),
                 dummy_input.to("cpu"),
                 onnx_path,
                 opset_version=11,
