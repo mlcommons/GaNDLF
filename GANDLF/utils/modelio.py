@@ -17,7 +17,9 @@ model_dict_base = {
 }
 
 
-def save_model(model_dict, model, num_channel, input_shape, model_dimension, path, onnx_export=True):
+def save_model(
+    model_dict, model, num_channel, input_shape, model_dimension, path, onnx_export=True
+):
     """
     Save the model dictionary to a file.
 
@@ -42,6 +44,7 @@ def save_model(model_dict, model, num_channel, input_shape, model_dimension, pat
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
     
+
     if onnx_export == False:
         warnings.warn("Current model is not supported by ONNX/OpenVINO!")
         return
@@ -49,9 +52,13 @@ def save_model(model_dict, model, num_channel, input_shape, model_dimension, pat
     try:
         onnx_path = path.replace("pth.tar", "onnx")
         if model_dimension == 2:
-            dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1]))
+            dummy_input = torch.randn(
+                (1, num_channel, input_shape[0], input_shape[1])
+            )
         else:
-            dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1], input_shape[2]))
+            dummy_input = torch.randn(
+                (1, num_channel, input_shape[0], input_shape[1], input_shape[2])
+            )
 
         with torch.no_grad():
             torch.onnx.export(
@@ -78,7 +85,9 @@ def save_model(model_dict, model, num_channel, input_shape, model_dimension, pat
                     "--input_model",
                     "{0}".format(onnx_path),
                     "--input_shape",
-                    "[1,{0},{1},{2}]".format(num_channel, input_shape[0], input_shape[1]),
+                    "[1,{0},{1},{2}]".format(
+                        num_channel, input_shape[0], input_shape[1]
+                    ),
                     "--output_dir",
                     "{0}".format(ov_output_dir),
                 ],
