@@ -95,7 +95,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     parameters["save_output"] = True
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    if parameters["model"]["type"] == "torch":    
+    if parameters["model"]["type"] == "torch":
         model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
             model, parameters["model"]["amp"], device, optimizer=None
         )
