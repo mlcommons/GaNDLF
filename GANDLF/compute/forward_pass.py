@@ -170,7 +170,6 @@ def validate_network(
             pred_output /= params["scaling_factor"]
             # all_predics.append(pred_output.double())
             # all_targets.append(valuesToPredict.double())
-            print(f"pred_output.shape: {pred_output.shape}")
 
             if is_inference and is_classification:
                 logits_list.append(pred_output)
