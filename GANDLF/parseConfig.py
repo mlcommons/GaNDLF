@@ -508,7 +508,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                     params["model"]["class_list"]
                 )
             except AssertionError:
-                AssertionError("Could not evaluate the 'class_list' in 'model'")
+                raise AssertionError("Could not evaluate the 'class_list' in 'model'")
 
     if "kcross_validation" in params:
         sys.exit(
@@ -541,7 +541,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     params["parallel_compute_command"] = parallel_compute_command
 
     if "opt" in params:
-        DeprecationWarning("'opt' has been superceded by 'optimizer'")
+        print("DeprecationWarning: 'opt' has been superceded by 'optimizer'")
         params["optimizer"] = params["opt"]
 
     # define defaults
