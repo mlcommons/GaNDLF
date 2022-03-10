@@ -15,12 +15,12 @@ from torch.cuda.amp import autocast
 import tiffslide as openslide
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.models import global_models_dict
 from GANDLF.utils import (
     populate_channel_keys_in_params,
     send_model_to_device,
     load_ov_model,
 )
-from GANDLF.models import global_models_dict
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 
 
