@@ -96,7 +96,7 @@ def ImagesFromDataFrame(
             # check for different resizing keys
             if key in ["resize_image", "resize_images"]:
                 resize_images_flag = True
-    
+
     # iterating through the dataframe
     for patient in tqdm(
         range(num_row), desc="Constructing queue for " + loader_type + " data"
@@ -123,7 +123,7 @@ def ImagesFromDataFrame(
                 file_reader.ReadImageInformation()
 
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
-            
+
             # if resize_image is requested, the perform per-image resize with appropriate interpolator
             if resize_images_flag:
                 img = subject_dict[str(channel)].as_sitk()
@@ -131,7 +131,7 @@ def ImagesFromDataFrame(
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
                 subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
-        
+
         # # for regression -- this logic needs to be thought through
         # if predictionHeaders:
         #     # get the mask
@@ -144,13 +144,15 @@ def ImagesFromDataFrame(
 
             subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
-            
+
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images_flag:
                 img = sitk.ReadImage(str(dataframe[labelHeader][patient]))
-                img_resized = resize_image(img, preprocessing["resize_image"], sitk.sitkNearestNeighbor)
+                img_resized = resize_image(
+                    img, preprocessing["resize_image"], sitk.sitkNearestNeighbor
+                )
                 subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
-        
+
         else:
             subject_dict["label"] = "NA"
             subject_dict["path_to_metadata"] = str(dataframe[channel][patient])

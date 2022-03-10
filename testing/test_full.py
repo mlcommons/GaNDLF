@@ -769,7 +769,7 @@ def test_config_read():
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
         version_check_flag=False,
     )
-    parameters["data_preprocessing"]["resize"] = [128, 128]
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
