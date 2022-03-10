@@ -97,7 +97,7 @@ def ImagesFromDataFrame(
             if key in ["resize_image", "resize_images"]:
                 if not (preprocessing[key] is None):
                     resize_images_flag = True
-                    break            
+                    break
 
     # iterating through the dataframe
     for patient in tqdm(
