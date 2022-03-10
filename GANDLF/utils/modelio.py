@@ -4,7 +4,7 @@ from time import gmtime, strftime
 import torch
 
 # these are the base keys for the model dictionary to save
-model_dict_base = {
+model_dict_full = {
     "epoch": 0,
     "model_state_dict": None,
     "optimizer_state_dict": None,
@@ -13,6 +13,11 @@ model_dict_base = {
     "timestamp_hash": None,
     "git_hash": None,
     "version": None,
+}
+
+model_dict_required = {
+    "model_state_dict": None,
+    "optimizer_state_dict": None,
 }
 
 
@@ -40,7 +45,7 @@ def save_model(model_dict, path):
     torch.save(model_dict, path)
 
 
-def load_model(path):
+def load_model(path, full_sanity_check=True):
     """
     Load a model dictionary from a file.
 
@@ -53,14 +58,24 @@ def load_model(path):
     model_dict = torch.load(path)
 
     # check if the model dictionary is complete
-    incomplete_keys = [
-        key for key in model_dict_base.keys() if key not in model_dict.keys()
-    ]
-
-    if len(incomplete_keys) > 0:
-        print(
+    if full_sanity_check:
+        incomplete_keys = [
+            key for key in model_dict_full.keys() if key not in model_dict.keys()
+        ]
+        if len(incomplete_keys) > 0:
+            raise RuntimeWarning(
+                "Model dictionary is incomplete; the following keys are missing:",
+                incomplete_keys,
+            )
+    
+    # check if required keys are absent, and if so raise an error
+    incomplete_required_keys = [
+            key for key in model_dict_required.keys() if key not in model_dict.keys()
+        ]
+    if len(incomplete_required_keys) > 0:
+        raise KeyError(
             "Model dictionary is incomplete; the following keys are missing:",
-            incomplete_keys,
+            incomplete_required_keys,
         )
 
     return model_dict
