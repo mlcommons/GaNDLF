@@ -43,7 +43,6 @@ def save_model(
     except subprocess.CalledProcessError:
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
-    
 
     if onnx_export == False:
         warnings.warn("Current model is not supported by ONNX/OpenVINO!")
@@ -52,9 +51,7 @@ def save_model(
     try:
         onnx_path = path.replace("pth.tar", "onnx")
         if model_dimension == 2:
-            dummy_input = torch.randn(
-                (1, num_channel, input_shape[0], input_shape[1])
-            )
+            dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1]))
         else:
             dummy_input = torch.randn(
                 (1, num_channel, input_shape[0], input_shape[1], input_shape[2])
