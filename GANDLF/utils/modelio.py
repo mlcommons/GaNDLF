@@ -45,17 +45,19 @@ def save_model(model_dict, path):
     torch.save(model_dict, path)
 
 
-def load_model(path, full_sanity_check=True):
+def load_model(path, device, full_sanity_check=True):
     """
     Load a model dictionary from a file.
 
     Args:
         path (str): The path to save the model dictionary to.
+        device (torch.device): The device to run the model on.
+        full_sanity_check (bool): Whether to run full sanity checking on model.
 
     Returns:
         dict: Model dictionary containing model parameters and metadata.
     """
-    model_dict = torch.load(path)
+    model_dict = torch.load(path, map_location=device)
 
     # check if the model dictionary is complete
     if full_sanity_check:
