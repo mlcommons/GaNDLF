@@ -14,6 +14,7 @@ from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclud
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.utils import (
     get_date_time,
+    best_model_path_end,
     save_model,
     load_model,
     version_check,
@@ -278,7 +279,7 @@ def training_loop(
     patience, start_epoch = 0, 0
     first_model_saved = False
     best_model_path = os.path.join(
-        output_dir, params["model"]["architecture"] + "_best.pth.tar"
+        output_dir, params["model"]["architecture"] + best_model_path_end
     )
 
     # if previous model file is present, load it up
