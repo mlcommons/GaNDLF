@@ -122,6 +122,11 @@ def parseConfig(config_file_path, version_check_flag=True):
         if len(params["patch_size"]) == 2:  # 2d check
             # ensuring same size during torchio processing
             params["patch_size"].append(1)
+            if "dimension" not in params["model"]:
+                params["model"]["dimension"] = 2
+        elif len(params["patch_size"]) == 3:  # 2d check
+            if "dimension" not in params["model"]:
+                params["model"]["dimension"] = 3
     else:
         sys.exit(
             "The 'patch_size' parameter needs to be present in the configuration file"

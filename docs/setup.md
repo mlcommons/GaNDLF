@@ -15,8 +15,6 @@
   - Compute toolkit appropriate for your hardware
     - NVIDIA: [CUDA](https://developer.nvidia.com/cuda-download) and a compatible [cuDNN](https://developer.nvidia.com/cudnn) installed system-wide
     - AMD: [ROCm](https://www.amd.com/en/graphics/servers-solutions-rocm)
-- OpenVINO inference:
-    - Need to install OpenVINO to accelerate inference on Intel CPU/GPU architecture.
 
 ## Installation
 

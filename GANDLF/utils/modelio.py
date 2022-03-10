@@ -17,7 +17,9 @@ model_dict_base = {
 }
 
 
-def save_model(model_dict, model, num_channel, input_shape, path):
+def save_model(
+    model_dict, model, num_channel, input_shape, model_dimension, path, onnx_export=True
+):
     """
     Save the model dictionary to a file.
 
@@ -42,9 +44,18 @@ def save_model(model_dict, model, num_channel, input_shape, path):
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
 
+    if onnx_export == False:
+        warnings.warn("Current model is not supported by ONNX/OpenVINO!")
+        return
+
     try:
         onnx_path = path.replace("pth.tar", "onnx")
-        dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1]))
+        if model_dimension == 2:
+            dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1]))
+        else:
+            dummy_input = torch.randn(
+                (1, num_channel, input_shape[0], input_shape[1], input_shape[2])
+            )
 
         with torch.no_grad():
             torch.onnx.export(
@@ -59,22 +70,39 @@ def save_model(model_dict, model, num_channel, input_shape, path):
             )
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
-    except:
+    except RuntimeWarning:
         warnings.warn("Cannot export to ONNX model.")
         return
 
     try:
-        subprocess.call(
-            [
-                "mo",
-                "--input_model",
-                "{0}".format(onnx_path),
-                "--input_shape",
-                "[1,{0},{1},{2}]".format(num_channel, input_shape[0], input_shape[1]),
-                "--output_dir",
-                "{0}".format(ov_output_dir),
-            ],
-        )
+        if model_dimension == 2:
+            subprocess.call(
+                [
+                    "mo",
+                    "--input_model",
+                    "{0}".format(onnx_path),
+                    "--input_shape",
+                    "[1,{0},{1},{2}]".format(
+                        num_channel, input_shape[0], input_shape[1]
+                    ),
+                    "--output_dir",
+                    "{0}".format(ov_output_dir),
+                ],
+            )
+        else:
+            subprocess.call(
+                [
+                    "mo",
+                    "--input_model",
+                    "{0}".format(onnx_path),
+                    "--input_shape",
+                    "[1,{0},{1},{2},{3}]".format(
+                        num_channel, input_shape[0], input_shape[1], input_shape[2]
+                    ),
+                    "--output_dir",
+                    "{0}".format(ov_output_dir),
+                ],
+            )
     except subprocess.CalledProcessError:
         warnings.warn("OpenVINO Model Optimizer IR conversion failed.")
 
