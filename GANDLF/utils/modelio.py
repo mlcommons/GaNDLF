@@ -67,11 +67,11 @@ def load_model(path, full_sanity_check=True):
                 "Model dictionary is incomplete; the following keys are missing:",
                 incomplete_keys,
             )
-    
+
     # check if required keys are absent, and if so raise an error
     incomplete_required_keys = [
-            key for key in model_dict_required.keys() if key not in model_dict.keys()
-        ]
+        key for key in model_dict_required.keys() if key not in model_dict.keys()
+    ]
     if len(incomplete_required_keys) > 0:
         raise KeyError(
             "Model dictionary is incomplete; the following keys are missing:",
