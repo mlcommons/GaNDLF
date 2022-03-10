@@ -24,7 +24,9 @@ from GANDLF.models import get_model
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 
 
-def inference_loop(inferenceDataFromPickle, device, parameters, outputDir_or_optimizedModel):
+def inference_loop(
+    inferenceDataFromPickle, device, parameters, outputDir_or_optimizedModel
+):
     """
     The main training loop.
 
@@ -57,16 +59,21 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir_or_opt
     inference_loader = get_testing_loader(parameters)
 
     # Loading the weights into the model
-    model_file = outputDir_or_optimizedModel   
+    model_file = outputDir_or_optimizedModel
     if os.path.isdir(model_file):
         model_file = os.path.join(
-            outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + "_best.pth.tar"
+            outputDir_or_optimizedModel,
+            str(parameters["model"]["architecture"]) + "_best.pth.tar",
         )
-    
-    if not os.path.isfile(model_file):
-        raise FileNotFoundError("The model specified in file was not found:", model_file)
 
-    main_dict = load_model(model_file, map_location=torch.device(device), full_sanity_check=False)
+    if not os.path.isfile(model_file):
+        raise FileNotFoundError(
+            "The model specified in file was not found:", model_file
+        )
+
+    main_dict = load_model(
+        model_file, map_location=torch.device(device), full_sanity_check=False
+    )
     model.load_state_dict(main_dict["model_state_dict"])
 
     if not (os.environ.get("HOSTNAME") is None):
@@ -115,7 +122,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir_or_opt
             level_width, level_height = os_image.level_dimensions[
                 int(parameters["slide_level"])
             ]
-            subject_dest_dir = os.path.join(outputDir_or_optimizedModel, str(subject_name))
+            subject_dest_dir = os.path.join(
+                outputDir_or_optimizedModel, str(subject_name)
+            )
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             probs_map = np.zeros((level_height, level_width), dtype=np.float16)
