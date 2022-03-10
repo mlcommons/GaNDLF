@@ -285,7 +285,7 @@ def training_loop(
     if os.path.exists(best_model_path):
         print("Previous model found. Loading it up.")
         try:
-            main_dict = load_model(best_model_path)
+            main_dict = load_model(best_model_path, params["device"])
             version_check(params["version"], version_to_check=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
