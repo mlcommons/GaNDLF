@@ -127,7 +127,9 @@ def ImagesFromDataFrame(
 
             # if resize_image is requested, the perform per-image resize with appropriate interpolator
             if resize_images_flag:
-                img_resized = resize_image(subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"])
+                img_resized = resize_image(
+                    subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
+                )
                 # always ensure resized image spacing is used
                 subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
                 subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
@@ -148,7 +150,9 @@ def ImagesFromDataFrame(
             # if resize is requested, the perform per-image resize with appropriate interpolator
             if resize_images_flag:
                 img_resized = resize_image(
-                    subject_dict["label"].as_sitk(), preprocessing["resize_image"], sitk.sitkNearestNeighbor
+                    subject_dict["label"].as_sitk(),
+                    preprocessing["resize_image"],
+                    sitk.sitkNearestNeighbor,
                 )
                 subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
 
