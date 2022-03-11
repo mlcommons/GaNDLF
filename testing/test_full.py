@@ -427,7 +427,6 @@ def test_inference_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
-    parameters["model"]["onnx_export"] = False
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
