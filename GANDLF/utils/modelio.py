@@ -1,8 +1,6 @@
-import hashlib, pkg_resources, subprocess
+import os, hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
-import os
 import torch
-import warnings
 
 # these are the base keys for the model dictionary to save
 model_dict_base = {
@@ -17,18 +15,21 @@ model_dict_base = {
 }
 
 
-def save_model(
-    model_dict, model, num_channel, input_shape, model_dimension, path, onnx_export=True
-):
+def save_model(model_dict, model, params, path, onnx_export=True):
     """
     Save the model dictionary to a file.
 
     Args:
         model_dict (dict): Model dictionary to save.
-        model (torch model): trained torch model.
-        input_shape (list or triple): input patch size to export the model.
+        model (torch model): Trained torch model.
+        params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
+        onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
+    num_channel = params["model"]["num_channels"]
+    model_dimension = params["model"]["dimension"]
+    input_shape = params["patch_size"]
+
     model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
     model_dict["timestamp_hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
@@ -45,7 +46,7 @@ def save_model(
     torch.save(model_dict, path)
 
     if onnx_export == False:
-        warnings.warn("Current model is not supported by ONNX/OpenVINO!")
+        print("WARNING: Current model is not supported by ONNX/OpenVINO!")
         return
 
     try:
@@ -71,7 +72,7 @@ def save_model(
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
     except RuntimeWarning:
-        warnings.warn("Cannot export to ONNX model.")
+        print("WARNING: Cannot export to ONNX model.")
         return
 
     try:
@@ -104,7 +105,7 @@ def save_model(
                 ],
             )
     except subprocess.CalledProcessError:
-        warnings.warn("OpenVINO Model Optimizer IR conversion failed.")
+        print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
 
 
 def load_model(path):
@@ -153,6 +154,9 @@ def load_ov_model(path, device="CPU"):
         raise ImportError("OpenVINO inference engine is not configured correctly.")
 
     ie = IECore()
+    if device.lower() == "cuda":
+        device = "GPU"
+
     if device == "GPU":
         ie.set_config(
             config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))},
@@ -164,5 +168,5 @@ def load_ov_model(path, device="CPU"):
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
 
-    exec_net = ie.load_network(network=net, device_name=device)
+    exec_net = ie.load_network(network=net, device_name=device.upper())
     return exec_net, input_blob, out_blob

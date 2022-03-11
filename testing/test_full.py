@@ -323,6 +323,7 @@ def test_train_regression_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -426,6 +427,7 @@ def test_inference_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -790,7 +792,7 @@ def test_config_read():
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
         version_check_flag=False,
     )
-    parameters["data_preprocessing"]["resize"] = [128, 128]
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -805,6 +807,70 @@ def test_config_read():
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
     if not data_loader:
         sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resample")
+    parameters["data_preprocessing"].pop("resample_min")
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resize_image")
+    parameters["data_preprocessing"]["resize_patch"] = [64, 64]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resize_patch")
+    parameters["data_preprocessing"]["resize"] = [64, 64]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
     print("passed")
 
 
@@ -1226,6 +1292,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
+    parameters_patch["patch_size"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)

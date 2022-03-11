@@ -12,7 +12,7 @@ from torchio.transforms import (
 import SimpleITK as sitk
 from tqdm import tqdm
 
-from GANDLF.utils import perform_sanity_check_on_subject
+from GANDLF.utils import perform_sanity_check_on_subject, resize_image
 from .preprocessing import global_preprocessing_dict, Resample_Minimum
 from .augmentation import global_augs_dict
 
@@ -89,6 +89,16 @@ def ImagesFromDataFrame(
         sampler = sampler.lower()  # for easier parsing
         sampler_padding = "symmetric"
 
+    resize_images_flag = False
+    # if resize has been defined but resample is not (or is none)
+    if not (preprocessing is None):
+        for key in preprocessing.keys():
+            # check for different resizing keys
+            if key in ["resize_image", "resize_images"]:
+                if not (preprocessing[key] is None):
+                    resize_images_flag = True
+                    break
+
     # iterating through the dataframe
     for patient in tqdm(
         range(num_row), desc="Constructing queue for " + loader_type + " data"
@@ -113,10 +123,18 @@ def ImagesFromDataFrame(
                 file_reader = sitk.ImageFileReader()
                 file_reader.SetFileName(dataframe[channel][patient])
                 file_reader.ReadImageInformation()
-
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
-        # # for regression
+            # if resize_image is requested, the perform per-image resize with appropriate interpolator
+            if resize_images_flag:
+                img_resized = resize_image(
+                    subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
+                )
+                # always ensure resized image spacing is used
+                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
+                subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
+
+        # # for regression -- this logic needs to be thought through
         # if predictionHeaders:
         #     # get the mask
         #     if (subject_dict['label'] is None) and (class_list is not None):
@@ -128,6 +146,16 @@ def ImagesFromDataFrame(
 
             subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
+
+            # if resize is requested, the perform per-image resize with appropriate interpolator
+            if resize_images_flag:
+                img_resized = resize_image(
+                    subject_dict["label"].as_sitk(),
+                    preprocessing["resize_image"],
+                    sitk.sitkNearestNeighbor,
+                )
+                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
+
         else:
             subject_dict["label"] = "NA"
             subject_dict["path_to_metadata"] = str(dataframe[channel][patient])
@@ -192,6 +220,9 @@ def ImagesFromDataFrame(
             # special check for resample
             if preprocess_lower == "resize":
                 resize_values = tuple(preprocessing["resize"])
+                transformations_list.append(torchio.Resize(resize_values))
+            elif preprocess_lower == "resize_patch":
+                resize_values = tuple(preprocessing["resize_patch"])
                 transformations_list.append(torchio.Resize(resize_values))
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
