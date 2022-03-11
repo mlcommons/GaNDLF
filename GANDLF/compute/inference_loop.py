@@ -61,7 +61,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             )
             if not os.path.isfile(file_to_check):
                 raise ValueError(
-                    "The model specified model was not found:", file_to_check
+                    "The specified model was not found: {0}.".format(file_to_check)
                 )
 
         main_dict = torch.load(file_to_check, map_location=torch.device(device))
@@ -78,11 +78,11 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             )
             if not os.path.isfile(xml_to_check):
                 raise ValueError(
-                    "The model specified model IR was not found:", xml_to_check
+                    "The specified model IR was not found: {0}.".format(xml_to_check)
                 )
             if not os.path.isfile(bin_to_check):
                 raise ValueError(
-                    "The model specified model weights was not found:", bin_to_check
+                    "The model specified model weights was not found: {0}.".format(bin_to_check)
                 )
             model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
             parameters["model"]["IO"] = [input_blob, output_blob]
