@@ -12,7 +12,9 @@
 - Anonymization module has been added
 - More progress bars added for better feedback
 - NIfTI conversion added in anonymization
+- Using TiffSlide instead of OpenSlide
 - Minimum resampling resolution is now available
+- Adding option to resize images and resize patches separately
 
 ## 0.0.13
 

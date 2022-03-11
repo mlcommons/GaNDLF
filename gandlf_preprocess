@@ -4,7 +4,7 @@
 import argparse
 from datetime import date
 
-from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.cli import preprocess_and_save
 
 # main function
 if __name__ == "__main__":
@@ -22,28 +22,32 @@ if __name__ == "__main__":
         + copyrightMessage,
     )
     parser.add_argument(
-        "-c", "--config",
+        "-c",
+        "--config",
         metavar="",
         type=str,
         help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
         required=True,
     )
     parser.add_argument(
-        "-i", "--inputdata",
+        "-i",
+        "--inputdata",
         metavar="",
         type=str,
         help="Data csv file that is used for training/inference",
         required=True,
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         metavar="",
         type=str,
         help="Output directory to save intermediate files and model weights",
         required=True,
     )
     parser.add_argument(
-        "-l", "--labelPad",
+        "-l",
+        "--labelPad",
         metavar="",
         type=str,
         default="constant",
@@ -51,7 +55,8 @@ if __name__ == "__main__":
         required=False,
     )
     parser.add_argument(
-        "-a", "--applyaugs",
+        "-a",
+        "--applyaugs",
         metavar="",
         type=bool,
         default=False,
@@ -61,6 +66,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    preprocess_and_save(args.inputdata, args.config, args.output, args.labelPad, args.applyaugs)
+    preprocess_and_save(
+        args.inputdata, args.config, args.output, args.labelPad, args.applyaugs
+    )
 
     print("Finished.")
