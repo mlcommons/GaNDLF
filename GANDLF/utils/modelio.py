@@ -158,7 +158,7 @@ def load_ov_model(path, device="CPU"):
     ie = IECore()
     if device.lower() == "cuda":
         device = "GPU"
-    
+
     if device == "GPU":
         ie.set_config(
             config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))},
