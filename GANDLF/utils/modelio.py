@@ -156,6 +156,9 @@ def load_ov_model(path, device="CPU"):
         raise ImportError("OpenVINO inference engine is not configured correctly.")
 
     ie = IECore()
+    if device.lower() == "cuda":
+        device = "GPU"
+    
     if device == "GPU":
         ie.set_config(
             config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))},
@@ -167,5 +170,5 @@ def load_ov_model(path, device="CPU"):
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
 
-    exec_net = ie.load_network(network=net, device_name=device)
+    exec_net = ie.load_network(network=net, device_name=device.upper())
     return exec_net, input_blob, out_blob
