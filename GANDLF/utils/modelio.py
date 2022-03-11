@@ -1,8 +1,6 @@
-import hashlib, pkg_resources, subprocess
+import os, hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
-import os
 import torch
-import warnings
 
 # these are the base keys for the model dictionary to save
 model_dict_base = {
@@ -48,7 +46,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     torch.save(model_dict, path)
 
     if onnx_export == False:
-        warnings.warn("Current model is not supported by ONNX/OpenVINO!")
+        print("WARNING: Current model is not supported by ONNX/OpenVINO!")
         return
 
     try:
@@ -74,7 +72,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
 
         ov_output_dir = os.path.dirname(os.path.abspath(path))
     except RuntimeWarning:
-        warnings.warn("Cannot export to ONNX model.")
+        print("WARNING: Cannot export to ONNX model.")
         return
 
     try:
@@ -107,7 +105,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
                 ],
             )
     except subprocess.CalledProcessError:
-        warnings.warn("OpenVINO Model Optimizer IR conversion failed.")
+        print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
 
 
 def load_model(path):
