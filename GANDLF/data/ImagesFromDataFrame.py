@@ -218,8 +218,11 @@ def ImagesFromDataFrame(
         for preprocess in preprocessing:
             preprocess_lower = preprocess.lower()
             # special check for resample
-            if preprocess_lower in ["resize", "resize_patch"]:
+            if preprocess_lower == "resize":
                 resize_values = tuple(preprocessing["resize"])
+                transformations_list.append(torchio.Resize(resize_values))
+            elif preprocess_lower == "resize_patch":
+                resize_values = tuple(preprocessing["resize_patch"])
                 transformations_list.append(torchio.Resize(resize_values))
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
