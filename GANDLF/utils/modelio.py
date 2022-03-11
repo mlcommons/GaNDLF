@@ -17,18 +17,21 @@ model_dict_base = {
 }
 
 
-def save_model(
-    model_dict, model, num_channel, input_shape, model_dimension, path, onnx_export=True
-):
+def save_model(model_dict, model, params, path, onnx_export=True):
     """
     Save the model dictionary to a file.
 
     Args:
         model_dict (dict): Model dictionary to save.
-        model (torch model): trained torch model.
-        input_shape (list or triple): input patch size to export the model.
+        model (torch model): Trained torch model.
+        params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
+        onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
+    num_channel = params["model"]["num_channels"]
+    model_dimension = params["model"]["dimension"]
+    input_shape = params["patch_size"]
+
     model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
     model_dict["timestamp_hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
