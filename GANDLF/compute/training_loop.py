@@ -466,7 +466,7 @@ def training_loop(
             if params["model"]["architecture"] in ["sdnet", "brain_age"]:
                 onnx_export = False
             elif (
-                "onnx_export" in params["model"] 
+                "onnx_export" in params["model"]
                 and params["model"]["onnx_export"] == False
             ):
                 onnx_export = False

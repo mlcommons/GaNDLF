@@ -193,7 +193,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["num_channels"] = 1
     parameters["model"]["architecture"] = "sdnet"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -224,7 +224,7 @@ def test_train_segmentation_rad_3d(device):
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
@@ -259,7 +259,7 @@ def test_train_regression_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -295,7 +295,7 @@ def test_train_brainage_rad_2d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     parameters["model"]["architecture"] = "brain_age"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -356,7 +356,7 @@ def test_train_classification_rad_2d(device):
         inputDir + "/train_2d_rad_classification.csv"
     )
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -390,7 +390,7 @@ def test_train_classification_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -467,7 +467,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -544,7 +544,7 @@ def test_scheduler_classification_rad_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "instance"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
@@ -581,7 +581,7 @@ def test_optimizer_classification_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for optimizer in global_optimizer_dict:
@@ -619,7 +619,7 @@ def test_clip_train_classification_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "vgg16"
     parameters["model"]["norm_type"] = "None"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
@@ -657,7 +657,7 @@ def test_normtype_train_segmentation_rad_3d(device):
     parameters["save_output"] = True
     parameters["data_postprocessing"] = {"fill_holes"}
     parameters["in_memory"] = True
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
@@ -696,7 +696,7 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters["model"]["architecture"] = "resunet"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -727,7 +727,7 @@ def test_metrics_regression_rad_2d(device):
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "vgg11"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -759,7 +759,7 @@ def test_losses_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
