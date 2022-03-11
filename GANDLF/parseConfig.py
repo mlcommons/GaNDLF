@@ -483,6 +483,10 @@ def parseConfig(config_file_path, version_check_flag=True):
             print("Using default 'norm_type' in 'model': batch")
             params["model"]["norm_type"] = "batch"
 
+        # initialize model type for processing: if not defined, default to torch
+        if not ("type" in params["model"]):
+            params["model"]["type"] = "torch"
+
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
