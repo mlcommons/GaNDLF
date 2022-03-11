@@ -88,6 +88,27 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     )
 
 
+def softer_sanity_check(base_property, new_property, threshold=0.00001):
+    """
+    This function checks if the new property is within the threshold of the base property.
+    Args:
+        base_property (float): The base property to check.
+        new_property (float): The new property to check
+        threshold (float, optional): The threshold to check if the new property is within the base property. Defaults to 0.00001.
+    Returns:
+        bool: Whether the new property is within the threshold of the base property.
+    """
+    arr_1 = np.array(base_property)
+    arr_2 = np.array(new_property)
+    diff = np.sum(arr_1 - arr_2)
+
+    result = False
+    if diff <= threshold:
+        result = True
+
+    return result
+
+
 def perform_sanity_check_on_subject(subject, parameters):
     """
     This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
@@ -133,6 +154,7 @@ def perform_sanity_check_on_subject(subject, parameters):
                     # this case is required if any tensor/imaging operation has been applied in dataloader
                     file_reader_current = subject[str(key)].as_sitk()
 
+                # this check needs to be absolute
                 if (
                     file_reader_base.GetDimension()
                     != file_reader_current.GetDimension()
@@ -143,16 +165,18 @@ def perform_sanity_check_on_subject(subject, parameters):
                         + "' are not consistent."
                     )
 
-                if file_reader_base.GetOrigin() != file_reader_current.GetOrigin():
+                # other checks can be softer
+                if not softer_sanity_check(
+                    file_reader_base.GetOrigin(), file_reader_current.GetOrigin()
+                ):
                     raise ValueError(
                         "Origin for Subject '"
                         + subject["subject_id"]
                         + "' are not consistent."
                     )
 
-                if (
-                    file_reader_base.GetDirection()
-                    != file_reader_current.GetDirection()
+                if not softer_sanity_check(
+                    file_reader_base.GetDirection(), file_reader_current.GetDirection()
                 ):
                     raise ValueError(
                         "Orientation for Subject '"
@@ -160,7 +184,9 @@ def perform_sanity_check_on_subject(subject, parameters):
                         + "' are not consistent."
                     )
 
-                if file_reader_base.GetSpacing() != file_reader_current.GetSpacing():
+                if not softer_sanity_check(
+                    file_reader_base.GetSpacing(), file_reader_current.GetSpacing()
+                ):
                     raise ValueError(
                         "Spacing for Subject '"
                         + subject["subject_id"]
