@@ -917,7 +917,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -1070,7 +1070,7 @@ def test_checkpointing_segmentation_rad_2d(device):
         "hd100_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
-    parameters["model"]["onnx_export"] = False    
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(

@@ -465,7 +465,10 @@ def training_loop(
             onnx_export = True
             if params["model"]["architecture"] in ["sdnet", "brain_age"]:
                 onnx_export = False
-            elif "onnx_export" in params["model"] and params["model"]["onnx_export"] == False:
+            elif (
+                "onnx_export" in params["model"] 
+                and params["model"]["onnx_export"] == False
+            ):
                 onnx_export = False
             elif epoch < epochs - 1:
                 onnx_export = False
@@ -493,7 +496,9 @@ def training_loop(
                     print("Previous model found. Loading it up.")
                     try:
                         main_dict = load_model(best_model_path)
-                        version_check(params["version"], version_to_check=main_dict["version"])
+                        version_check(
+                            params["version"], version_to_check=main_dict["version"]
+                        )
                         model.load_state_dict(main_dict["model_state_dict"])
                         best_epoch = main_dict["epoch"]
                         optimizer.load_state_dict(main_dict["optimizer_state_dict"])
@@ -501,18 +506,18 @@ def training_loop(
                         print("Best model loaded successfully.")
                         onnx_export = True
                         save_model(
-                        {
-                            "epoch": best_epoch,
-                            "model_state_dict": model.state_dict(),
-                            "optimizer_state_dict": optimizer.state_dict(),
-                            "loss": best_loss,
-                        },
-                        model,
-                        params["model"]["num_channels"],
-                        params["patch_size"],
-                        params["model"]["dimension"],
-                        best_model_path,
-                        onnx_export,
+                            {
+                                "epoch": best_epoch,
+                                "model_state_dict": model.state_dict(),
+                                "optimizer_state_dict": optimizer.state_dict(),
+                                "loss": best_loss,
+                            },
+                            model,
+                            params["model"]["num_channels"],
+                            params["patch_size"],
+                            params["model"]["dimension"],
+                            best_model_path,
+                            onnx_export,
                         )
                     except Exception as e:
                         print("Best model could not be loaded, error: ", e)
