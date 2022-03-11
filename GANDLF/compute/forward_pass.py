@@ -173,7 +173,7 @@ def validate_network(
                     )
                 else:
                     raise Exception(
-                            "Model type not supported. Please only use 'torch' or 'openvino'."
+                        "Model type not supported. Please only use 'torch' or 'openvino'."
                     ) 
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
