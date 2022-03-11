@@ -203,9 +203,12 @@ def ImagesFromDataFrame(
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
-    
+
     if subjects_with_error:
-        raise ValueError("The following subjects could not be loaded, please recheck or remove and retry:", subjects_with_error)
+        raise ValueError(
+            "The following subjects could not be loaded, please recheck or remove and retry:",
+            subjects_with_error,
+        )
 
     transformations_list = []
 
