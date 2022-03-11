@@ -30,8 +30,6 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     else:
         fold_dirs = [outputDir]
 
-    print("current folders are: ", fold_dirs)
-
     # this is for the case where inference is happening using a single model
     if len(fold_dirs) == 0:
         fold_dirs = [outputDir]
