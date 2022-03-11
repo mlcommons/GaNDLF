@@ -462,16 +462,6 @@ def training_loop(
             patience = 0
 
             model.eval()
-            onnx_export = True
-            if params["model"]["architecture"] in ["sdnet", "brain_age"]:
-                onnx_export = False
-            elif (
-                "onnx_export" in params["model"]
-                and params["model"]["onnx_export"] == False
-            ):
-                onnx_export = False
-            elif epoch < epochs - 1:
-                onnx_export = False
             save_model(
                 {
                     "epoch": best_train_idx,
@@ -480,11 +470,9 @@ def training_loop(
                     "loss": best_loss,
                 },
                 model,
-                params["model"]["num_channels"],
-                params["patch_size"],
-                params["model"]["dimension"],
+                params,
                 best_model_path,
-                onnx_export,
+                onnx_export=False,
             )
             model.train()
             first_model_saved = True
@@ -511,6 +499,17 @@ def training_loop(
     # once the training is done, optimize the best model
     if os.path.exists(best_model_path):
         print("Optimizing best model.")
+
+        onnx_export = True
+        if params["model"]["architecture"] in ["sdnet", "brain_age"]:
+            onnx_export = False
+        elif (
+            "onnx_export" in params["model"] and params["model"]["onnx_export"] == False
+        ):
+            onnx_export = False
+        elif epoch < epochs - 1:
+            onnx_export = False
+
         try:
             main_dict = load_model(best_model_path)
             version_check(params["version"], version_to_check=main_dict["version"])
@@ -519,7 +518,6 @@ def training_loop(
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
             best_loss = main_dict["loss"]
             print("Best model loaded successfully.")
-            onnx_export = True
             save_model(
                 {
                     "epoch": best_epoch,
@@ -528,9 +526,7 @@ def training_loop(
                     "loss": best_loss,
                 },
                 model,
-                params["model"]["num_channels"],
-                params["patch_size"],
-                params["model"]["dimension"],
+                params,
                 best_model_path,
                 onnx_export,
             )
