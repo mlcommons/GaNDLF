@@ -154,8 +154,9 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   - Final layer of model
   - Mixed precision
   - Class list
+  - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
   - Model type: model used for inference, can be "torch" or "openvino"
-      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "Torch"
+      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "torch"
       - "openvino": use the OpenVINO Inference Engine for inference
 - Various training parameters:
   - Patch size

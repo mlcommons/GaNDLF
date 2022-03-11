@@ -165,6 +165,16 @@ def validate_network(
                     image = torch.squeeze(image, -1)
                 if params["model"]["type"] == "torch":
                     pred_output += model(image)
+                elif params["model"]["type"] == "openvino":
+                    pred_output += torch.from_numpy(
+                        model.infer(
+                            inputs={params["model"]["IO"][0]: image.cpu().numpy()}
+                        )[params["model"]["IO"][1]]
+                    )
+                else:
+                    raise Exception(
+                        "Model type not supported. Please only use 'torch' or 'openvino'."
+                    )
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
             pred_output /= params["scaling_factor"]
