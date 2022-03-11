@@ -428,6 +428,7 @@ def test_inference_classification_rad_3d(device):
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["type"] = "torch"
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -437,15 +438,13 @@ def test_inference_classification_rad_3d(device):
         reset_prev=True,
     )
 
-    for model_type in all_model_type:
-        parameters["model"]["type"] = model_type
-        parameters["output_dir"] = outputDir  # this is in inference mode
-        InferenceManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-        )
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    InferenceManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+    )
 
     print("passed")
 
