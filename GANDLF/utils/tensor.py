@@ -126,7 +126,9 @@ def reverse_one_hot(predmask_array, class_list):
 
             if initialize_mask:
                 if final_mask is None:
-                    final_mask = idx * np.asarray(array_to_consider_bool[idx, ...], dtype=int)
+                    final_mask = idx * np.asarray(
+                        array_to_consider_bool[idx, ...], dtype=int
+                    )
                 else:
                     final_mask[array_to_consider_bool[idx, ...]] = idx
     else:
