@@ -15,6 +15,7 @@
 - Using TiffSlide instead of OpenSlide
 - Minimum resampling resolution is now available
 - Adding option to resize images and resize patches separately
+- Reverse one-hot logic is now updated to output unique labels
 
 ## 0.0.13
 
