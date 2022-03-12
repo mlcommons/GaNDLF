@@ -244,11 +244,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
                         flush=True,
                     )
                     trainingData = pd.read_pickle(currentTrainingDataPickle)
-            if (
-                (not os.path.exists(currentValidationDataPickle))
-                or reset
-                or resume
-            ):
+            if (not os.path.exists(currentValidationDataPickle)) or reset or resume:
                 validationData.to_pickle(currentValidationDataPickle)
             else:
                 if os.path.exists(currentValidationDataPickle):

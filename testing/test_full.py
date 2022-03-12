@@ -457,7 +457,7 @@ def test_inference_classification_rad_3d(device):
         resume=False,
         reset=False,
     )
-    
+
     ## testing inference
     parameters["output_dir"] = outputDir
     InferenceManager(
