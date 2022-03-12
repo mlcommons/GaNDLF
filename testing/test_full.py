@@ -1193,13 +1193,17 @@ def test_one_hot_logic():
     assert comparison.all(), "Arrays at '0' are not equal"
 
     # check last foreground
-    comparison = (random_array == np.max(random_array)) == (img_tensor_oh_rev_array == len(class_list)-1)
+    comparison = (random_array == np.max(random_array)) == (
+        img_tensor_oh_rev_array == len(class_list) - 1
+    )
     assert comparison.all(), "Arrays at final foreground are not equal"
 
     # check combined foreground
-    combined_array = np.logical_or(np.logical_or((random_array == 1), (random_array == 2)),(random_array == 3))
-    comparison = (combined_array == (img_tensor_oh_rev_array == 1))
-    assert comparison.all(), "Arrays at the combined foreground are not equal"    
+    combined_array = np.logical_or(
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
+    )
+    comparison = combined_array == (img_tensor_oh_rev_array == 1)
+    assert comparison.all(), "Arrays at the combined foreground are not equal"
 
     print("passed")
 

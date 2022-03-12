@@ -496,12 +496,8 @@ def parseConfig(config_file_path, version_check_flag=True):
             )
             temp_classList = params["model"]["class_list"]
             # we don't need the brackets
-            temp_classList = temp_classList.replace(
-                "[", ""
-            )
-            temp_classList = temp_classList.replace(
-                "]", ""
-            )
+            temp_classList = temp_classList.replace("[", "")
+            temp_classList = temp_classList.replace("]", "")
             params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
