@@ -168,7 +168,8 @@ def test_train_segmentation_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -198,7 +199,8 @@ def test_train_segmentation_sdnet_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
 
     print("passed")
@@ -233,7 +235,8 @@ def test_train_segmentation_rad_3d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -267,7 +270,8 @@ def test_train_regression_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -297,7 +301,8 @@ def test_train_brainage_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
 
     print("passed")
@@ -329,7 +334,8 @@ def test_train_regression_rad_3d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -362,7 +368,8 @@ def test_train_classification_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -394,7 +401,8 @@ def test_train_classification_rad_3d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -423,9 +431,35 @@ def test_inference_classification_rad_3d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
-    parameters["output_dir"] = outputDir  # this is in inference mode
+    ## testing resume with parameter updates
+    parameters["num_epochs"] = 2
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=True,
+        reset=False,
+    )
+
+    ## testing resume without parameter updates
+    parameters["num_epochs"] = 3
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=False,
+    )
+    
+    ## testing inference
+    parameters["output_dir"] = outputDir
     InferenceManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -461,7 +495,8 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
@@ -501,7 +536,8 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
@@ -544,7 +580,8 @@ def test_scheduler_classification_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     shutil.rmtree(outputDir)
@@ -581,7 +618,8 @@ def test_optimizer_classification_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     shutil.rmtree(outputDir)
@@ -616,7 +654,8 @@ def test_clip_train_classification_rad_3d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
@@ -655,7 +694,8 @@ def test_normtype_train_segmentation_rad_3d(device):
                 outputDir=outputDir,
                 parameters=parameters,
                 device=device,
-                reset_prev=True,
+                resume=False,
+                reset=True,
             )
             shutil.rmtree(outputDir)  # overwrite previous results
         print("passed")
@@ -685,7 +725,8 @@ def test_metrics_segmentation_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     shutil.rmtree(outputDir)  # overwrite previous results
 
@@ -715,7 +756,8 @@ def test_metrics_regression_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     shutil.rmtree(outputDir)  # overwrite previous results
 
@@ -751,7 +793,8 @@ def test_losses_segmentation_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
         shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
@@ -968,7 +1011,8 @@ def test_dataloader_construction_train_segmentation_3d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
@@ -1119,7 +1163,8 @@ def test_checkpointing_segmentation_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["num_epochs"] = 2
     parameters["nested_training"]["validation"] = -2
@@ -1129,7 +1174,8 @@ def test_checkpointing_segmentation_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=False,
+        resume=False,
+        reset=False,
     )
     shutil.rmtree(outputDir)  # overwrite previous results
 
@@ -1304,7 +1350,8 @@ def test_train_inference_segmentation_histology_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
     inference_data, parameters["headers"] = parseTrainingCSV(
