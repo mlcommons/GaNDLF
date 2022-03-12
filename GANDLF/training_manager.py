@@ -25,7 +25,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
     # save the current model configuration as a sanity check
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
-    if (not os.path.exists(currentModelConfigPickle)) or reset or not (resume):
+    if (not os.path.exists(currentModelConfigPickle)) or reset or resume:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
@@ -142,7 +142,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
                 currentOutputFolder, "data_testing.pkl"
             )
 
-            if (not os.path.exists(currentTestingDataPickle)) or reset or not (resume):
+            if (not os.path.exists(currentTestingDataPickle)) or reset or resume:
                 testingData.to_pickle(currentTestingDataPickle)
             else:
                 if os.path.exists(currentTestingDataPickle):
@@ -156,7 +156,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
             if (
                 (not os.path.exists(currentTrainingAndValidationDataPickle))
                 or reset
-                or not (resume)
+                or resume
             ):
                 trainingAndValidationData.to_pickle(
                     currentTrainingAndValidationDataPickle
@@ -234,7 +234,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
             currentValidationDataPickle = os.path.join(
                 currentValOutputFolder, "data_validation.pkl"
             )
-            if (not os.path.exists(currentTrainingDataPickle)) or reset or not (resume):
+            if (not os.path.exists(currentTrainingDataPickle)) or reset or resume:
                 trainingData.to_pickle(currentTrainingDataPickle)
             else:
                 if os.path.exists(currentTrainingDataPickle):
@@ -247,7 +247,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
             if (
                 (not os.path.exists(currentValidationDataPickle))
                 or reset
-                or not (resume)
+                or resume
             ):
                 validationData.to_pickle(currentValidationDataPickle)
             else:
@@ -330,7 +330,7 @@ def TrainingManager_split(
         reset (bool): Whether the previous run will be reset or not.
     """
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
-    if (not os.path.exists(currentModelConfigPickle)) or reset or not (resume):
+    if (not os.path.exists(currentModelConfigPickle)) or reset or resume:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
