@@ -1187,21 +1187,20 @@ def test_one_hot_logic():
     class_list = [0, "1||2||3", 4]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
+
+    # check for background
     comparison = (random_array == 0) == (img_tensor_oh_rev_array == 0)
     assert comparison.all(), "Arrays at '0' are not equal"
 
-    random_array_sp = (random_array == 1) + (random_array == 2) + (random_array == 3)
-    img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
-    img_tensor_oh_rev_array_sp[random_array == 4] = False
-    comparison = random_array_sp == img_tensor_oh_rev_array_sp
-    assert comparison.all(), "Special arrays are not equal"
+    # check last foreground
+    comparison = (random_array == np.max(random_array)) == (img_tensor_oh_rev_array == len(class_list)-1)
+    assert comparison.all(), "Arrays at final foreground are not equal"
 
-    # check for '4'
-    img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
-    for i in [1, 2, 3]:
-        img_tensor_oh_rev_array_sp[random_array == i] = False
-    comparison = (random_array == 4) == img_tensor_oh_rev_array_sp
-    assert comparison.all(), "Arrays at '4' are not equal"
+    # check combined foreground
+    combined_array = np.logical_or(np.logical_or((random_array == 1), (random_array == 2)),(random_array == 3))
+    comparison = (combined_array == (img_tensor_oh_rev_array == 1))
+    assert comparison.all(), "Arrays at the combined foreground are not equal"    
+
     print("passed")
 
 
