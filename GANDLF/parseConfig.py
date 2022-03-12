@@ -495,12 +495,13 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "WARNING: This is a special case for multi-class computation, where different labels are processed together, `reverse_one_hot` will need mapping information to work correctly"
             )
             temp_classList = params["model"]["class_list"]
+            # we don't need the brackets
             temp_classList = temp_classList.replace(
                 "[", ""
-            )  # we don't need the brackets
+            )
             temp_classList = temp_classList.replace(
                 "]", ""
-            )  # we don't need the brackets
+            )
             params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
