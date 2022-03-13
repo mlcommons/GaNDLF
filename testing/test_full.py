@@ -891,13 +891,8 @@ def test_config_read():
 def test_cli_function_preprocess():
     print("Starting testing cli function preprocess")
     file_config = os.path.join(testingDir, "config_segmentation.yaml")
+    sanitize_outputDir()
     file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
-        parameter_pickle_file = os.path.join(outputDir, "parameters.pkl")
-        if os.path.exists(parameter_pickle_file):
-            os.remove(parameter_pickle_file)
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     parameters = parseConfig(file_config)
@@ -926,8 +921,6 @@ def test_cli_function_preprocess():
     # check that the length of training data is what we expect
     assert len(training_data) == 10, "Number of rows in dataframe is not 10"
 
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
 
