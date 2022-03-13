@@ -16,6 +16,7 @@
 - Minimum resampling resolution is now available
 - Adding option to resize images and resize patches separately
 - Reverse one-hot logic is now updated to output unique labels
+- Added option to resume previous training with and without parameter/data updates
 
 ## 0.0.13
 
