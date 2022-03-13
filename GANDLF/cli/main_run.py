@@ -31,7 +31,10 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
     # and if it does, compare the two and if they are the same, ensure no preprocess is done.
     model_parameters_prev = os.path.join(os.path.dirname(output_dir), "parameters.pkl")
     if not (reset) or not (resume):
-        print("Trying to resume training without changing any parameters from previous run.", flush=True)
+        print(
+            "Trying to resume training without changing any parameters from previous run.",
+            flush=True,
+        )
         if os.path.exists(model_parameters_prev):
             parameters_prev = pickle.load(open(model_parameters_prev, "rb"))
             if parameters != parameters_prev:
