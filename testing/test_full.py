@@ -1295,9 +1295,7 @@ def test_anonymizer():
 def test_train_inference_segmentation_histology_2d(device):
     print("Starting histology train/inference tests")
     # overwrite previous results
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     output_dir_patches = os.path.join(outputDir, "histo_patches")
     if os.path.isdir(output_dir_patches):
         shutil.rmtree(output_dir_patches)
