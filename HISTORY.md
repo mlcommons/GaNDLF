@@ -15,6 +15,7 @@
 - Using TiffSlide instead of OpenSlide
 - Minimum resampling resolution is now available
 - Adding option to resize images and resize patches separately
+- Added option to resume previous training with and without parameter/data updates
 
 ## 0.0.13
 
