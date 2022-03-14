@@ -66,6 +66,7 @@ def step(model, image, label, params, train=True):
                 params["model"]["IO"][1]
             ]
         )
+        output = output.to(params["device"])
     else:
         if params["model"]["amp"]:
             with torch.cuda.amp.autocast():
