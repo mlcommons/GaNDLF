@@ -52,7 +52,9 @@ def save_model(model_dict, model, params, path, onnx_export=True):
         try:
             onnx_path = path.replace("pth.tar", "onnx")
             if model_dimension == 2:
-                dummy_input = torch.randn((1, num_channel, input_shape[0], input_shape[1]))
+                dummy_input = torch.randn(
+                    (1, num_channel, input_shape[0], input_shape[1])
+                )
             else:
                 dummy_input = torch.randn(
                     (1, num_channel, input_shape[0], input_shape[1], input_shape[2])

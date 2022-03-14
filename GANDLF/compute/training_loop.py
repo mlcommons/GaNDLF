@@ -506,7 +506,7 @@ def training_loop(
             "onnx_export" in params["model"] and params["model"]["onnx_export"] == False
         ):
             onnx_export = False
-        
+
         if onnx_export:
             print("Optimizing best model.")
 

@@ -532,7 +532,7 @@ def test_inference_optimize_classification_rad_3d(device):
         resume=False,
         reset=True,
     )
-    
+
     ## testing inference
     for model_type in all_model_type:
         parameters["model"]["type"] = model_type
@@ -576,7 +576,7 @@ def test_inference_optimize_segmentation_rad_2d(device):
         resume=False,
         reset=True,
     )
-    
+
     ## testing inference
     for model_type in all_model_type:
         parameters["model"]["type"] = model_type
