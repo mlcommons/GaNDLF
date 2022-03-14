@@ -100,6 +100,9 @@ def test_constructTrainingCSV():
         elif "3d_rad_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
+        elif "2d_histo_segmentation" in application_data:
+            channelsID = "image"
+            labelID = "mask"
         writeTrainingCSV(
             currentApplicationDir,
             channelsID,
