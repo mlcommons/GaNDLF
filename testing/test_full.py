@@ -816,7 +816,7 @@ def test_config_read():
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
         version_check_flag=False,
     )
-    parameters["data_preprocessing"]["resize"] = [128, 128]
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -831,6 +831,70 @@ def test_config_read():
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
     if not data_loader:
         sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resample")
+    parameters["data_preprocessing"].pop("resample_min")
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resize_image")
+    parameters["data_preprocessing"]["resize_patch"] = [64, 64]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resize_patch")
+    parameters["data_preprocessing"]["resize"] = [64, 64]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
     print("passed")
 
 
@@ -1119,7 +1183,7 @@ def test_checkpointing_segmentation_rad_2d(device):
 
 
 def test_model_patch_divisibility():
-
+    print("Starting patch divisibility tests")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1152,7 +1216,7 @@ def test_model_patch_divisibility():
 
 
 def test_one_hot_logic():
-
+    print("Starting one hot logic tests")
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
@@ -1191,6 +1255,7 @@ def test_one_hot_logic():
 
 
 def test_anonymizer():
+    print("Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
