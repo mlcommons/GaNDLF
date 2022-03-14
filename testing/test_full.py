@@ -31,7 +31,13 @@ all_models_segmentation = [
     "msdnet",
 ]
 # pre-defined regression/classification model types for testing
-all_models_regression = ["densenet121", "vgg16", "resnet18", "resnet50"]
+all_models_regression = [
+    "densenet121",
+    "vgg16",
+    "resnet18",
+    "resnet50",
+    "efficientnetb0",
+]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -141,6 +147,12 @@ def test_constructTrainingCSV():
                 i += 1
 
 
+def sanitize_outputDir():
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+
+
 def test_train_segmentation_rad_2d(device):
     print("Starting 2D Rad segmentation tests")
     # read and parse csv
@@ -161,14 +173,14 @@ def test_train_segmentation_rad_2d(device):
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -191,14 +203,14 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["model"]["num_channels"] = 1
     parameters["model"]["architecture"] = "sdnet"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    shutil.rmtree(outputDir)  # overwrite previous results
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
 
     print("passed")
@@ -226,14 +238,14 @@ def test_train_segmentation_rad_3d(device):
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -260,14 +272,14 @@ def test_train_regression_rad_2d(device):
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -290,14 +302,14 @@ def test_train_brainage_rad_2d(device):
     parameters["scaling_factor"] = 1
     parameters["model"]["architecture"] = "brain_age"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    shutil.rmtree(outputDir)  # overwrite previous results
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
 
     print("passed")
@@ -319,17 +331,21 @@ def test_train_regression_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -355,14 +371,14 @@ def test_train_classification_rad_2d(device):
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -384,17 +400,21 @@ def test_train_classification_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
@@ -417,15 +437,41 @@ def test_inference_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
-    parameters["output_dir"] = outputDir  # this is in inference mode
+    ## testing resume with parameter updates
+    parameters["num_epochs"] = 2
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=True,
+        reset=False,
+    )
+
+    ## testing resume without parameter updates
+    parameters["num_epochs"] = 3
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=False,
+    )
+
+    ## testing inference
+    parameters["output_dir"] = outputDir
     InferenceManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -455,13 +501,14 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
@@ -495,13 +542,14 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
@@ -544,10 +592,10 @@ def test_scheduler_classification_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
-    shutil.rmtree(outputDir)
     print("passed")
 
 
@@ -581,10 +629,10 @@ def test_optimizer_classification_rad_2d(device):
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
 
-    shutil.rmtree(outputDir)
     print("passed")
 
 
@@ -609,16 +657,15 @@ def test_clip_train_classification_rad_3d(device):
         parameters["clip_mode"] = clip_mode
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        # shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
-    shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
 
@@ -649,15 +696,18 @@ def test_normtype_train_segmentation_rad_3d(device):
             parameters["model"]["norm_type"] = norm
             parameters["nested_training"]["testing"] = -5
             parameters["nested_training"]["validation"] = -5
+            if os.path.isdir(outputDir):
+                shutil.rmtree(outputDir)  # overwrite previous results
             Path(outputDir).mkdir(parents=True, exist_ok=True)
             TrainingManager(
                 dataframe=training_data,
                 outputDir=outputDir,
                 parameters=parameters,
                 device=device,
-                reset_prev=True,
+                resume=False,
+                reset=True,
             )
-            shutil.rmtree(outputDir)  # overwrite previous results
+
         print("passed")
 
 
@@ -679,15 +729,15 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters["model"]["architecture"] = "resunet"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
-    shutil.rmtree(outputDir)  # overwrite previous results
 
     print("passed")
 
@@ -709,15 +759,15 @@ def test_metrics_regression_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "vgg11"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
-    shutil.rmtree(outputDir)  # overwrite previous results
 
     print("passed")
 
@@ -745,22 +795,23 @@ def test_losses_segmentation_rad_2d(device):
         parameters["loss_function"] = loss_type
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
             parameters=parameters,
             device=device,
-            reset_prev=True,
+            resume=False,
+            reset=True,
         )
-        shutil.rmtree(outputDir)  # overwrite previous results
+
     print("passed")
 
 
 def test_config_read():
     print("Starting testing reading configuration")
     # read and parse csv
-    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
+    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
     # if found in previous run, discard.
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
@@ -769,7 +820,7 @@ def test_config_read():
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
         version_check_flag=False,
     )
-    parameters["data_preprocessing"]["resize"] = [128, 128]
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -784,19 +835,78 @@ def test_config_read():
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
     if not data_loader:
         sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resample")
+    parameters["data_preprocessing"].pop("resample_min")
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resize_image")
+    parameters["data_preprocessing"]["resize_patch"] = [64, 64]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
+    # ensure resize_image is triggered
+    parameters["data_preprocessing"].pop("resize_patch")
+    parameters["data_preprocessing"]["resize"] = [64, 64]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    if not parameters:
+        sys.exit(1)
+    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    if not data_loader:
+        sys.exit(1)
+
+    os.remove(file_config_temp)
+
     print("passed")
 
 
 def test_cli_function_preprocess():
     print("Starting testing cli function preprocess")
     file_config = os.path.join(testingDir, "config_segmentation.yaml")
-    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
-        parameter_pickle_file = os.path.join(outputDir, "parameters.pkl")
-        if os.path.exists(parameter_pickle_file):
-            os.remove(parameter_pickle_file)
+    sanitize_outputDir()
+    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     parameters = parseConfig(file_config)
@@ -825,7 +935,6 @@ def test_cli_function_preprocess():
     # check that the length of training data is what we expect
     assert len(training_data) == 10, "Number of rows in dataframe is not 10"
 
-    shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
 
@@ -834,7 +943,7 @@ def test_cli_function_mainrun(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    file_config_temp = os.path.join(testingDir, "config_segmentation_temp.yaml")
+    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
     # if found in previous run, discard.
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
@@ -856,8 +965,11 @@ def test_cli_function_mainrun(device):
 
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
-    main_run(file_data, file_config_temp, outputDir, True, device, True)
-    shutil.rmtree(outputDir)  # overwrite previous results
+    main_run(
+        file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
+    )
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
     print("passed")
 
 
@@ -898,15 +1010,16 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["weighted_loss"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
-    shutil.rmtree(outputDir)  # overwrite previous results
+
     print("passed")
 
 
@@ -1078,13 +1191,14 @@ def test_checkpointing_segmentation_rad_2d(device):
     ]
     parameters["model"]["architecture"] = "unet"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
     parameters["num_epochs"] = 2
     parameters["nested_training"]["validation"] = -2
@@ -1094,9 +1208,9 @@ def test_checkpointing_segmentation_rad_2d(device):
         outputDir=outputDir,
         parameters=parameters,
         device=device,
-        reset_prev=False,
+        resume=False,
+        reset=False,
     )
-    shutil.rmtree(outputDir)  # overwrite previous results
 
     print("passed")
 
@@ -1152,21 +1266,24 @@ def test_one_hot_logic():
     class_list = [0, "1||2||3", 4]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
+
+    # check for background
     comparison = (random_array == 0) == (img_tensor_oh_rev_array == 0)
     assert comparison.all(), "Arrays at '0' are not equal"
 
-    random_array_sp = (random_array == 1) + (random_array == 2) + (random_array == 3)
-    img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
-    img_tensor_oh_rev_array_sp[random_array == 4] = False
-    comparison = random_array_sp == img_tensor_oh_rev_array_sp
-    assert comparison.all(), "Special arrays are not equal"
+    # check last foreground
+    comparison = (random_array == np.max(random_array)) == (
+        img_tensor_oh_rev_array == len(class_list) - 1
+    )
+    assert comparison.all(), "Arrays at final foreground are not equal"
 
-    # check for '4'
-    img_tensor_oh_rev_array_sp = img_tensor_oh_rev_array == 1
-    for i in [1, 2, 3]:
-        img_tensor_oh_rev_array_sp[random_array == i] = False
-    comparison = (random_array == 4) == img_tensor_oh_rev_array_sp
-    assert comparison.all(), "Arrays at '4' are not equal"
+    # check combined foreground
+    combined_array = np.logical_or(
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
+    )
+    comparison = combined_array == (img_tensor_oh_rev_array == 1)
+    assert comparison.all(), "Arrays at the combined foreground are not equal"
+
     print("passed")
 
 
@@ -1211,12 +1328,15 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
+
     print("passed")
 
 
 def test_train_inference_segmentation_histology_2d(device):
     print("Starting histology train/inference tests")
-    output_dir_patches = os.path.join(testingDir, "histo_patches")
+    # overwrite previous results
+    sanitize_outputDir()
+    output_dir_patches = os.path.join(outputDir, "histo_patches")
     if os.path.isdir(output_dir_patches):
         shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
@@ -1231,7 +1351,8 @@ def test_train_inference_segmentation_histology_2d(device):
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 5
+    parameters_patch["num_patches"] = 3
+    parameters_patch["patch_size"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1259,29 +1380,27 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
-    # overwrite previous results
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    modelDir = os.path.join(outputDir, "modelDir")
+    if os.path.isdir(modelDir):
+        shutil.rmtree(modelDir)
+    Path(modelDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
-        outputDir=outputDir,
+        outputDir=modelDir,
         parameters=parameters,
         device=device,
-        reset_prev=True,
+        resume=False,
+        reset=True,
     )
-    parameters["output_dir"] = outputDir  # this is in inference mode
+    parameters["output_dir"] = modelDir  # this is in inference mode
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_segmentation.csv", train=False
     )
-
     InferenceManager(
         dataframe=inference_data,
-        outputDir=outputDir,
+        outputDir=modelDir,
         parameters=parameters,
         device=device,
     )
-
-    shutil.rmtree(output_dir_patches)
 
     print("passed")
