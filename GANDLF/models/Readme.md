@@ -1,5 +1,20 @@
 # GANDLF Models
 
+## Current Models
+
+|            **Architecture**           |                   **Link**                  |
+|:-------------------------------------:|:-------------------------------------------:|
+| [Brain Age Predictor](./brain_age.py) |    https://doi.org/10.1093/brain/awaa160    |
+|      [Deep UNet](./deep_unet.py)      | https://doi.org/10.1109/JSTARS.2018.2833382 |
+|       [DenseNet](./densenet.py)       |       https://arxiv.org/abs/2004.04968      |
+|   [EfficientNet](./efficientnet.py)   |       https://arxiv.org/abs/1905.11946      |
+|  [Fully Connected Network](./fcn.py)  |       https://arxiv.org/abs/1411.4038       |
+|         [ResNet](./resnet.py)         |     https://arxiv.org/pdf/1512.03385.pdf    |
+|          [SDNet](./sdnet.py)          | https://doi.org/10.1016/j.media.2019.101535 |
+|           [UInc](./uinc.py)           |       https://arxiv.org/abs/1907.02110      |
+|           [Unet](./unet.py)           |      https://arxiv.org/abs/1606.06650v1     |
+|            [VGG](./vgg.py)            |       https://arxiv.org/abs/1409.1556       | 
+
 ## Adding a new model
 
 - Follow example of `GANDLF.models.unet`.
