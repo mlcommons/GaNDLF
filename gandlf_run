@@ -63,12 +63,20 @@ if __name__ == "__main__":
         help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
     )
     parser.add_argument(
-        "-r",
-        "--resetprev",
+        "-rt",
+        "--reset",
         metavar="",
         default=False,
         type=ast.literal_eval,
-        help="Whether the previous run in the output directory will be discarded or not",
+        help="Completely resets the previous run by deleting 'modeldir'",
+    )
+    parser.add_argument(
+        "-rm",
+        "--resume",
+        metavar="",
+        default=False,
+        type=ast.literal_eval,
+        help="Resume previous training by only keeping model dict in 'modeldir'",
     )
 
     parser.add_argument(
@@ -86,6 +94,10 @@ if __name__ == "__main__":
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
 
+    if args.reset and args.resume:
+        print("WARNING: 'reset' and 'resume' are mutually exclusive; 'resume' will be used.")
+        args.reset = False    
+    
     # config file should always be present
     if not (os.path.isfile(args.config)):
         sys.exit("ERROR: Configuration file not found!")
@@ -96,7 +108,8 @@ if __name__ == "__main__":
         args.modeldir,
         args.train,
         args.device,
-        args.resetprev,
+        args.resume,
+        args.reset,
     )
 
     print("Finished.")
