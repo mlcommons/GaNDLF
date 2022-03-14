@@ -317,6 +317,7 @@ def test_train_regression_rad_3d(device):
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
     )
+    parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
