@@ -31,13 +31,15 @@ def main():
         + copyrightMessage,
     )
     parser.add_argument(
-        "-m", "--modeldir",
+        "-m",
+        "--modeldir",
         metavar="",
         type=str,
         help="Input directory which contains testing and validation models",
     )
     parser.add_argument(
-        "-o", "--outputDir",
+        "-o",
+        "--outputdir",
         metavar="",
         type=str,
         help="Output directory to save stats and plot",
@@ -45,8 +47,8 @@ def main():
 
     args = parser.parse_args()
 
-    inputDir = os.path.normpath(args.modelDir)
-    outputDir = os.path.normpath(args.outputDir)
+    inputDir = os.path.normpath(args.modeldir)
+    outputDir = os.path.normpath(args.outputdir)
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     outputFile = os.path.join(outputDir, "data.csv")  # data file name
     outputPlot = os.path.join(outputDir, "plot.png")  # plot file
