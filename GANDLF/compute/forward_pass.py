@@ -79,7 +79,6 @@ def validate_network(
     if params["model"]["type"] == "torch":
         model.eval()
 
-
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
     # all_predics = []
