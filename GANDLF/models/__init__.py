@@ -6,6 +6,16 @@ from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
 from .densenet import densenet121, densenet169, densenet201, densenet264
 from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from .efficientnet import (
+    efficientnetB0,
+    efficientnetB1,
+    efficientnetB2,
+    efficientnetB3,
+    efficientnetB4,
+    efficientnetB5,
+    efficientnetB6,
+    efficientnetB7,
+)
 from .sdnet import SDNet
 from .MSDNet import MSDNet
 from .brain_age import brainage
@@ -43,4 +53,12 @@ global_models_dict = {
     "resnet50": resnet50,
     "resnet101": resnet101,
     "resnet152": resnet152,
+    "efficientnetb0": efficientnetB0,
+    "efficientnetb1": efficientnetB1,
+    "efficientnetb2": efficientnetB2,
+    "efficientnetb3": efficientnetB3,
+    "efficientnetb4": efficientnetB4,
+    "efficientnetb5": efficientnetB5,
+    "efficientnetb6": efficientnetB6,
+    "efficientnetb7": efficientnetB7,
 }
