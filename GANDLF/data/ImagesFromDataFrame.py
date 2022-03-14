@@ -75,6 +75,7 @@ def ImagesFromDataFrame(
     dataframe.index = range(0, num_row)
     # This list will later contain the list of subjects
     subjects_list = []
+    subjects_with_error = []
 
     channelHeaders = headers["channelHeaders"]
     labelHeader = headers["labelHeader"]
@@ -181,7 +182,11 @@ def ImagesFromDataFrame(
                     + subject["subject_id"]
                     + "'"
                 )
-            perform_sanity_check_on_subject(subject, parameters)
+            try:
+                perform_sanity_check_on_subject(subject, parameters)
+            except Exception as e:
+                print(e)
+                subjects_with_error.append(subject["subject_id"])
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
@@ -199,6 +204,12 @@ def ImagesFromDataFrame(
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
+
+    if subjects_with_error:
+        raise ValueError(
+            "The following subjects could not be loaded, please recheck or remove and retry:",
+            subjects_with_error,
+        )
 
     transformations_list = []
 

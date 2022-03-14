@@ -12,6 +12,7 @@ This page contains answers to frequently asked questions about GaNDLF.
     - [Which parts of a GaNDLF configuration are customizable?](#which-parts-of-a-gandlf-configuration-are-customizable)
     - [Can I run GaNDLF on a high performance computing (HPC) cluster?](#can-i-run-gandlf-on-a-high-performance-computing-hpc-cluster)
     - [How can I track the per-epoch training performance?](#how-can-i-track-the-per-epoch-training-performance)
+    - [How can I resume training from a previous checkpoint?](#how-can-i-resume-training-from-a-previous-checkpoint)
     - [What I have another question?](#what-i-have-another-question)
 
 ### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
@@ -50,6 +51,11 @@ Yes, look for `logs_*.csv` files in the output directory. It should be arranged 
 
 [Back To Top &uarr;](#table-of-contents)
 
+### How can I resume training from a previous checkpoint?
+
+GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
+- By using the `--resume` CLI parameter in `gandlf_run`, only the model weights and state dictionary will be preserved, but parameters and data are taken from the new options in the CLI. This is helpful when you are updated the training data or **some** compatible options in the parameters.
+- If both `--resume` and `--reset` are `False` in `gandlf_run`, the model weights, state dictionary, and all previously saved information (parameters, training/validation/testing data) is used to resume training.
 ### What I have another question?
 
 Please [post a support request](https://github.com/CBICA/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
