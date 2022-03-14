@@ -12,7 +12,7 @@
 |         [ResNet](./resnet.py)         |     https://arxiv.org/pdf/1512.03385.pdf    |
 |          [SDNet](./sdnet.py)          | https://doi.org/10.1016/j.media.2019.101535 |
 |           [UInc](./uinc.py)           |       https://arxiv.org/abs/1907.02110      |
-|           [Unet](./unet.py)           |      https://arxiv.org/abs/1606.06650v1     |
+|           [UNet](./unet.py)           |      https://arxiv.org/abs/1606.06650v1     |
 |            [VGG](./vgg.py)            |       https://arxiv.org/abs/1409.1556       | 
 
 ## Adding a new model
