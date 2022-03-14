@@ -1034,8 +1034,8 @@ def test_cli_function_preprocess():
     file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
-    parameters["modality"] = "rad"
     parameters = parseConfig(file_config)
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = "[0, 255||125]"
