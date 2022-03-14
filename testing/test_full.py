@@ -31,7 +31,13 @@ all_models_segmentation = [
     "msdnet",
 ]
 # pre-defined regression/classification model types for testing
-all_models_regression = ["densenet121", "vgg16", "resnet18", "resnet50"]
+all_models_regression = [
+    "densenet121",
+    "vgg16",
+    "resnet18",
+    "resnet50",
+    "efficientnetb0",
+]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -325,6 +331,10 @@ def test_train_regression_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -390,6 +400,10 @@ def test_train_classification_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -1285,6 +1299,7 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
+
     print("passed")
 
 
