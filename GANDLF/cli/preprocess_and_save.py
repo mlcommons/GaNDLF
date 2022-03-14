@@ -17,7 +17,9 @@ from tqdm import tqdm
 import torchio
 
 
-def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="constant"):
+def preprocess_and_save(
+    data_csv, config_file, output_dir, label_pad_mode="constant", applyaugs=False
+):
     """
     This function performs preprocessing based on parameters provided and saves the output.
 
@@ -26,6 +28,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
         config_file (str): The YAML file of the training configuration.
         output_dir (str): The output directory.
         label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
+        applyaugs (bool): If data augmentation is to be applied before saving the image. Defaults to False.
 
     Raises:
         ValueError: Parameter check from previous
@@ -52,7 +55,7 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
     parameters = populate_header_in_parameters(parameters, headers)
 
     data_for_processing = ImagesFromDataFrame(
-        dataframe, parameters, train=False, loader_type="full"
+        dataframe, parameters, train=applyaugs, apply_zero_crop=True, loader_type="full"
     )
 
     dataloader_for_processing = DataLoader(
@@ -177,12 +180,11 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
                 try:
                     sitk.WriteImage(image_to_write, image_file)
                 except IOError:
-                    IOError(
+                    raise IOError(
                         "Could not write image file: {}. Make sure that the file is not open and try again.".format(
                             image_file
                         )
                     )
-                    sys.exit(1)
 
         # now try to write the label
         if "label" in subject_dict_to_write:
@@ -200,12 +202,11 @@ def preprocess_and_save(data_csv, config_file, output_dir, label_pad_mode="const
                 try:
                     sitk.WriteImage(image_to_write, image_file)
                 except IOError:
-                    IOError(
+                    raise IOError(
                         "Could not write image file: {}. Make sure that the file is not open and try again.".format(
                             image_file
                         )
                     )
-                    sys.exit(1)
 
         # ensure prediction headers are getting saved, as well
         if len(parameters["headers"]["predictionHeaders"]) > 1:

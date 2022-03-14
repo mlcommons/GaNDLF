@@ -21,6 +21,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Plot the final results](#plot-the-final-results)
     - [Multi-GPU systems](#multi-gpu-systems)
   - [M3D-CAM usage](#m3d-cam-usage)
+  - [Examples](#examples)
 
 ## Preparing the Data
 
@@ -138,6 +139,7 @@ Notes:
 
 [Back To Top &uarr;](#table-of-contents)
 
+
 ## Customize the Training
 
 GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
@@ -175,21 +177,25 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 
 [Back To Top &uarr;](#table-of-contents)
 
+
 ## Running GaNDLF (Training/Inference)
 
 ```bash
 # continue from previous shell
 python gandlf_run \
-  # -h, --help         show help message and exit
-  # -v, --version      Show program's version number and exit.
+  ## -h, --help         show help message and exit
+  ## -v, --version      Show program's version number and exit.
+  # -rt , --reset      Completely resets the previous run by deleting 'modeldir'
+  # -rm , --resume     Resume previous training by only keeping model dict in 'modeldir'
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
-  -m ./experiment_0/model_dir/ \ # model directory
+  -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   -t True \ # True == train, False == inference
   -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
 ```
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## Plot the final results
 
@@ -211,6 +217,7 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref]
 For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## M3D-CAM usage
 
@@ -237,3 +244,9 @@ The default behavior is "auto" which chooses the last convolutional layer.
 
 All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
+
+
+## Examples
+
+- Example data can be found in [the main repo](https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
+- Configurations can be found in [the main repo](https://github.com/CBICA/GaNDLF/tree/master/testing).

@@ -7,32 +7,35 @@ from pathlib import Path
 from GANDLF.compute import training_loop
 
 
-def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
+def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
     """
     This is the training manager that ties all the training functionality together
 
-    dataframe = full data from CSV
-    outputDir = the main output directory
-    parameters = parameters read from YAML
-    device = self-explanatory
-    reset_prev = whether the previous run in the same output directory is used or not
+    Args:
+        dataframe (pandas.DataFrame): The full data from CSV.
+        outputDir (str): The main output directory.
+        parameters (dict): The parameters dictionary.
+        device (str): The device to perform computations on.
+        resume (bool): Whether the previous run will be resumed or not.
+        reset (bool): Whether the previous run will be reset or not.
     """
-    if reset_prev:
+    if reset:
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
 
     # save the current model configuration as a sanity check
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
-    if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
+    if (not os.path.exists(currentModelConfigPickle)) or reset or resume:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-        print(
-            "Using previously saved parameter file",
-            currentModelConfigPickle,
-            flush=True,
-        )
-        parameters = pickle.load(open(currentModelConfigPickle, "rb"))
+        if os.path.exists(currentModelConfigPickle):
+            print(
+                "Using previously saved parameter file",
+                currentModelConfigPickle,
+                flush=True,
+            )
+            parameters = pickle.load(open(currentModelConfigPickle, "rb"))
 
     # check for single fold training
     singleFoldValidation = False
@@ -139,14 +142,35 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
                 currentOutputFolder, "data_testing.pkl"
             )
 
-            if (not os.path.exists(currentTestingDataPickle)) or reset_prev:
+            if (not os.path.exists(currentTestingDataPickle)) or reset or resume:
                 testingData.to_pickle(currentTestingDataPickle)
+            else:
+                if os.path.exists(currentTestingDataPickle):
+                    print(
+                        "Using previously saved testing data",
+                        currentTestingDataPickle,
+                        flush=True,
+                    )
+                    testingData = pd.read_pickle(currentTestingDataPickle)
+
             if (
-                not os.path.exists(currentTrainingAndValidationDataPickle)
-            ) or reset_prev:
+                (not os.path.exists(currentTrainingAndValidationDataPickle))
+                or reset
+                or resume
+            ):
                 trainingAndValidationData.to_pickle(
                     currentTrainingAndValidationDataPickle
                 )
+            else:
+                if os.path.exists(currentTrainingAndValidationDataPickle):
+                    print(
+                        "Using previously saved training+validation data",
+                        currentTrainingAndValidationDataPickle,
+                        flush=True,
+                    )
+                    trainingAndValidationData = pd.read_pickle(
+                        currentTrainingAndValidationDataPickle
+                    )
 
             current_training_subject_indeces_full = (
                 trainingAndValidationData[
@@ -210,14 +234,26 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
             currentValidationDataPickle = os.path.join(
                 currentValOutputFolder, "data_validation.pkl"
             )
-            if (not os.path.exists(currentTrainingDataPickle)) or reset_prev:
+            if (not os.path.exists(currentTrainingDataPickle)) or reset or resume:
                 trainingData.to_pickle(currentTrainingDataPickle)
             else:
-                trainingData = pd.read_pickle(currentTrainingDataPickle)
-            if (not os.path.exists(currentValidationDataPickle)) or reset_prev:
+                if os.path.exists(currentTrainingDataPickle):
+                    print(
+                        "Using previously saved training data",
+                        currentTrainingDataPickle,
+                        flush=True,
+                    )
+                    trainingData = pd.read_pickle(currentTrainingDataPickle)
+            if (not os.path.exists(currentValidationDataPickle)) or reset or resume:
                 validationData.to_pickle(currentValidationDataPickle)
             else:
-                validationData = pd.read_pickle(currentValidationDataPickle)
+                if os.path.exists(currentValidationDataPickle):
+                    print(
+                        "Using previously saved validation data",
+                        currentValidationDataPickle,
+                        flush=True,
+                    )
+                    validationData = pd.read_pickle(currentValidationDataPickle)
 
             # parallel_compute_command is an empty string, thus no parallel computing requested
             if (not parameters["parallel_compute_command"]) or (singleFoldValidation):
@@ -275,29 +311,33 @@ def TrainingManager(dataframe, outputDir, parameters, device, reset_prev):
 
 
 def TrainingManager_split(
-    dataframe_train, dataframe_validation, outputDir, parameters, device, reset_prev
+    dataframe_train, dataframe_validation, outputDir, parameters, device, resume, reset
 ):
     """
     This is the training manager that ties all the training functionality together
 
-    dataframe_train = training data from CSV
-    dataframe_validation = validation data from CSV
-    outputDir = the main output directory
-    parameters = parameters read from YAML
-    device = self-explanatory
-    reset_prev = whether the previous run in the same output directory is used or not
+    Args:
+        dataframe_train (pandas.DataFrame): The training data from CSV.
+        dataframe_validation (pandas.DataFrame): The validation data from CSV.
+        outputDir (str): The main output directory.
+        parameters (dict): The parameters dictionary.
+        device (str): The device to perform computations on.
+        resume (bool): Whether the previous run will be resumed or not.
+        reset (bool): Whether the previous run will be reset or not.
     """
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
-    if (not os.path.exists(currentModelConfigPickle)) or reset_prev:
+    if (not os.path.exists(currentModelConfigPickle)) or reset or resume:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-        print(
-            "Using previously saved parameter file",
-            currentModelConfigPickle,
-            flush=True,
-        )
-        parameters = pickle.load(open(currentModelConfigPickle, "rb"))
+        if os.path.exists(currentModelConfigPickle):
+            print(
+                "Using previously saved parameter file",
+                currentModelConfigPickle,
+                flush=True,
+            )
+            parameters = pickle.load(open(currentModelConfigPickle, "rb"))
+
     training_loop(
         training_data=dataframe_train,
         validation_data=dataframe_validation,

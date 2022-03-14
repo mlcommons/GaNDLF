@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from sklearn.utils import resample
 
 import torch
 import torchio
@@ -11,8 +12,8 @@ from torchio.transforms import (
 import SimpleITK as sitk
 from tqdm import tqdm
 
-from GANDLF.utils import perform_sanity_check_on_subject
-from .preprocessing import global_preprocessing_dict
+from GANDLF.utils import perform_sanity_check_on_subject, resize_image
+from .preprocessing import global_preprocessing_dict, Resample_Minimum
 from .augmentation import global_augs_dict
 
 global_sampler_dict = {
@@ -28,7 +29,9 @@ global_sampler_dict = {
 }
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
-def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
+def ImagesFromDataFrame(
+    dataframe, parameters, train, apply_zero_crop=False, loader_type=""
+):
     """
     Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
 
@@ -40,6 +43,8 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
         The parameters dictionary
     train : bool
         If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
+    apply_zero_crop : bool
+        If enabled, the crop_external_zero_plane is applied.
     loader_type : str
         Type of loader for printing.
 
@@ -70,6 +75,7 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
     dataframe.index = range(0, num_row)
     # This list will later contain the list of subjects
     subjects_list = []
+    subjects_with_error = []
 
     channelHeaders = headers["channelHeaders"]
     labelHeader = headers["labelHeader"]
@@ -83,6 +89,16 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
     else:
         sampler = sampler.lower()  # for easier parsing
         sampler_padding = "symmetric"
+
+    resize_images_flag = False
+    # if resize has been defined but resample is not (or is none)
+    if not (preprocessing is None):
+        for key in preprocessing.keys():
+            # check for different resizing keys
+            if key in ["resize_image", "resize_images"]:
+                if not (preprocessing[key] is None):
+                    resize_images_flag = True
+                    break
 
     # iterating through the dataframe
     for patient in tqdm(
@@ -108,10 +124,18 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                 file_reader = sitk.ImageFileReader()
                 file_reader.SetFileName(dataframe[channel][patient])
                 file_reader.ReadImageInformation()
-
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
-        # # for regression
+            # if resize_image is requested, the perform per-image resize with appropriate interpolator
+            if resize_images_flag:
+                img_resized = resize_image(
+                    subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
+                )
+                # always ensure resized image spacing is used
+                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
+                subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
+
+        # # for regression -- this logic needs to be thought through
         # if predictionHeaders:
         #     # get the mask
         #     if (subject_dict['label'] is None) and (class_list is not None):
@@ -123,6 +147,16 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
 
             subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
             subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
+
+            # if resize is requested, the perform per-image resize with appropriate interpolator
+            if resize_images_flag:
+                img_resized = resize_image(
+                    subject_dict["label"].as_sitk(),
+                    preprocessing["resize_image"],
+                    sitk.sitkNearestNeighbor,
+                )
+                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
+
         else:
             subject_dict["label"] = "NA"
             subject_dict["path_to_metadata"] = str(dataframe[channel][patient])
@@ -148,7 +182,11 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
                     + subject["subject_id"]
                     + "'"
                 )
-            perform_sanity_check_on_subject(subject, parameters)
+            try:
+                perform_sanity_check_on_subject(subject, parameters)
+            except Exception as e:
+                print(e)
+                subjects_with_error.append(subject["subject_id"])
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
@@ -166,6 +204,12 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
 
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
+
+    if subjects_with_error:
+        raise ValueError(
+            "The following subjects could not be loaded, please recheck or remove and retry:",
+            subjects_with_error,
+        )
 
     transformations_list = []
 
@@ -188,23 +232,37 @@ def ImagesFromDataFrame(dataframe, parameters, train, loader_type=""):
             if preprocess_lower == "resize":
                 resize_values = tuple(preprocessing["resize"])
                 transformations_list.append(torchio.Resize(resize_values))
+            elif preprocess_lower == "resize_patch":
+                resize_values = tuple(preprocessing["resize_patch"])
+                transformations_list.append(torchio.Resize(resize_values))
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
-                    # resample_split = str(aug).split(':')
-                    resample_values = tuple(
-                        np.array(preprocessing["resample"]["resolution"])
-                    )
                     # Need to take a look here
+                    resample_values = np.array(
+                        preprocessing[preprocess_lower]["resolution"]
+                    )
                     if len(resample_values) == 2:
-                        resample_values = tuple(np.append(resample_values, 1))
+                        resample_values = tuple(
+                            np.append(
+                                np.array(preprocessing[preprocess_lower]["resolution"]),
+                                1,
+                            )
+                        )
                     transformations_list.append(Resample(resample_values))
+            elif preprocess_lower in ["resample_minimum", "resample_min"]:
+                if "resolution" in preprocessing[preprocess_lower]:
+                    transformations_list.append(
+                        Resample_Minimum(
+                            np.array(preprocessing[preprocess_lower]["resolution"])
+                        )
+                    )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
                     normalize_to_apply = global_preprocessing_dict[preprocess_lower]
             # preprocessing routines that we only want for training
             elif preprocess_lower in ["crop_external_zero_planes"]:
-                if train:
+                if train or apply_zero_crop:
                     transformations_list.append(
                         global_preprocessing_dict["crop_external_zero_planes"](
                             patch_size=patch_size

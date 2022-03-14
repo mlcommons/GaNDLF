@@ -103,38 +103,34 @@ def reverse_one_hot(predmask_array, class_list):
             if isinstance(_class, str):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
-                    # # if present, then split the sub-class
-                    # class_split = _class.split(case)
-                    # for i in class_split:  # find the max for computation later on
-                    #     if int(i) > max_current:
-                    #         max_current = int(i)
 
     final_mask = None
     if special_case_detected:
-        for i, _ in enumerate(class_list):
+        # for this case, the output mask will be formed with the following logic:
+        # for each class in class_list
+        #   unless the class is 0, the output will be index * predmask_array at that class
+        array_to_consider_bool = array_to_consider.astype(bool)
+        for idx, i in enumerate(class_list):
             initialize_mask = False
-            if isinstance(class_list[i], str):
+            if isinstance(class_list[idx], str):
                 for case in special_cases_to_check:
                     initialize_mask = False
-                    if case in class_list[i]:
+                    if case in class_list[idx]:
                         initialize_mask = True
                     else:
-                        if class_list[i] != "0":
+                        if class_list[idx] != "0":
                             initialize_mask = True
             else:
-                if class_list[i] != 0:
+                if class_list[idx] != 0:
                     initialize_mask = True
 
             if initialize_mask:
                 if final_mask is None:
-                    final_mask = np.asarray(array_to_consider[i, ...], dtype=int)
+                    final_mask = idx * np.asarray(
+                        array_to_consider_bool[idx, ...], dtype=int
+                    )
                 else:
-                    # TODO: this should be replaced with information coming from the config that defines what the specific union of labels should be defined as
-                    # for example:
-                    # class_list = "[0,1||2]"
-                    # output_classes = [0,1]
-                    # this would make "1||2" be mapped to "1", and this mechanism can be extended for N possible combinations
-                    final_mask += np.asarray(array_to_consider[i, ...], dtype=int)
+                    final_mask[array_to_consider_bool[idx, ...]] = idx
     else:
         for i, _ in enumerate(class_list):
             if final_mask is None:
