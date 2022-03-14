@@ -12,7 +12,8 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
+from GANDLF.cli.main_run import main_run
+from GANDLF.cli.preprocess_and_save import preprocess_and_save
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -67,9 +68,7 @@ def test_download_data():
     """
     This function downloads the sample data, which is the first step towards getting everything ready
     """
-    urlToDownload = (
-        "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
-    )
+    urlToDownload = "https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip"
     # do not download data again
     if not Path(
         os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
@@ -98,9 +97,6 @@ def test_constructTrainingCSV():
             channelsID = "image.png"
             labelID = "mask.png"
         elif "3d_rad_segmentation" in application_data:
-            channelsID = "image"
-            labelID = "mask"
-        elif "2d_histo_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
         writeTrainingCSV(
@@ -321,7 +317,6 @@ def test_train_regression_rad_3d(device):
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
     )
-    parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
@@ -332,6 +327,10 @@ def test_train_regression_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -398,6 +397,10 @@ def test_train_classification_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -814,7 +817,7 @@ def test_config_read():
         os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
         version_check_flag=False,
     )
-    parameters["data_preprocessing"]["resize_image"] = [128, 128]
+    parameters["data_preprocessing"]["resize"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -829,70 +832,6 @@ def test_config_read():
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
     if not data_loader:
         sys.exit(1)
-
-    os.remove(file_config_temp)
-
-    # ensure resize_image is triggered
-    parameters["data_preprocessing"].pop("resample")
-    parameters["data_preprocessing"].pop("resample_min")
-    parameters["data_preprocessing"]["resize_image"] = [128, 128]
-
-    with open(file_config_temp, "w") as file:
-        yaml.dump(parameters, file)
-
-    parameters = parseConfig(file_config_temp, version_check_flag=True)
-
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
-    if not parameters:
-        sys.exit(1)
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
-
-    os.remove(file_config_temp)
-
-    # ensure resize_image is triggered
-    parameters["data_preprocessing"].pop("resize_image")
-    parameters["data_preprocessing"]["resize_patch"] = [64, 64]
-
-    with open(file_config_temp, "w") as file:
-        yaml.dump(parameters, file)
-
-    parameters = parseConfig(file_config_temp, version_check_flag=True)
-
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
-    if not parameters:
-        sys.exit(1)
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
-
-    os.remove(file_config_temp)
-
-    # ensure resize_image is triggered
-    parameters["data_preprocessing"].pop("resize_patch")
-    parameters["data_preprocessing"]["resize"] = [64, 64]
-
-    with open(file_config_temp, "w") as file:
-        yaml.dump(parameters, file)
-
-    parameters = parseConfig(file_config_temp, version_check_flag=True)
-
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
-    if not parameters:
-        sys.exit(1)
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
-
-    os.remove(file_config_temp)
-
     print("passed")
 
 
@@ -1181,7 +1120,7 @@ def test_checkpointing_segmentation_rad_2d(device):
 
 
 def test_model_patch_divisibility():
-    print("Starting patch divisibility tests")
+
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1214,7 +1153,7 @@ def test_model_patch_divisibility():
 
 
 def test_one_hot_logic():
-    print("Starting one hot logic tests")
+
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
@@ -1253,7 +1192,6 @@ def test_one_hot_logic():
 
 
 def test_anonymizer():
-    print("Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
@@ -1262,7 +1200,7 @@ def test_anonymizer():
 
     config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
 
-    run_anonymizer(input_file, output_file, config_file, "rad")
+    run_anonymizer(input_file, output_file, config_file)
 
     os.remove(output_file)
 
@@ -1282,7 +1220,7 @@ def test_anonymizer():
 
     output_file = os.path.join(testingDir, "MR_small.nii.gz")
 
-    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti, "rad")
+    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti)
 
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
@@ -1293,6 +1231,7 @@ def test_anonymizer():
                 shutil.rmtree(file_to_delete)
             else:
                 os.remove(file_to_delete)
+
     print("passed")
 
 
