@@ -79,8 +79,6 @@ def validate_network(
     if params["model"]["type"] == "torch":
         model.eval()
 
-    if "save_data" in params["model"].keys():
-        torch.manual_seed(0)
 
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
