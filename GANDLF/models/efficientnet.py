@@ -245,8 +245,7 @@ DEFAULT_BLOCKS = [
 ]
 
 
-def checkPatchDivisibility(patch_size, number=16):
-    # check that dimensions are legal (same from gandlf/generic.py except patch can equal number)
+def checkPatchDimensions(patch_size, numlay):
     if isinstance(patch_size, int):
         patch_size_to_check = np.array(patch_size)
     else:
@@ -254,15 +253,22 @@ def checkPatchDivisibility(patch_size, number=16):
     # for 2D, don't check divisibility of last dimension
     if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
-    # for 2D, don't check divisibility of first dimension
-    elif patch_size_to_check[0] == 1:
-        patch_size_to_check = patch_size_to_check[1:]
-    if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
-        return False
-    unique = np.unique(patch_size_to_check)
-    if (unique.shape[0] == 1) and (unique[0] < number):
-        return False
-    return True
+
+    if all([x >= 2**numlay and x % 2**numlay == 0 for x in patch_size_to_check]):
+        return numlay
+    else:
+        base2 = np.array(
+            [getBase2(x) for x in patch_size_to_check]
+        )  # get largest possible number of layers for each dim
+        return int(np.min(base2))
+
+
+def getBase2(num):
+    base = 0
+    while num % 2 == 0:
+        num = num / 2
+        base = base + 1
+    return base
 
 
 def num_channels(default_chan, width_factor, divisor):
@@ -312,9 +318,22 @@ class EfficientNet(ModelBase):
             )
             self.Norm = self.BatchNorm
 
-        if not (checkPatchDivisibility(parameters["patch_size"], number=32)):
+        patch_check = checkPatchDimensions(parameters["patch_size"], numlay=5)
+        self.DEFAULT_BLOCKS = DEFAULT_BLOCKS
+
+        if patch_check != 5 and patch_check >= 2:
+            downsamp = np.where(
+                np.array([x["stride"] == 2 for x in self.DEFAULT_BLOCKS])
+            )[0][patch_check - 1]
+            self.DEFAULT_BLOCKS = self.DEFAULT_BLOCKS[:downsamp]
+            print(
+                "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2 Only the first %d layers will run."
+                % patch_check
+            )
+
+        elif patch_check != 5 and patch_check <= 1:
             sys.exit(
-                "The patch size is not divisible by 32, which is required for efficientnet",
+                "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
             )
 
         num_out_channels = num_channels(32, scale_params["width"], 8)
@@ -336,7 +355,7 @@ class EfficientNet(ModelBase):
         ]
         self.features = nn.Sequential(OrderedDict(self.features))
 
-        for i, block in enumerate(DEFAULT_BLOCKS):
+        for i, block in enumerate(self.DEFAULT_BLOCKS):
             for i_lay in range(
                 0, num_layers(block["num_layers"], scale_params["depth"])
             ):
