@@ -12,8 +12,7 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli.main_run import main_run
-from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
