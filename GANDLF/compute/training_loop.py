@@ -358,7 +358,6 @@ def training_loop(
 
     # if previous model file is present, load it up
     if os.path.exists(best_model_path):
-        print("Previous model found. Loading it up.")
         try:
             main_dict = load_model(best_model_path)
             version_check(params["version"], version_to_check=main_dict["version"])
@@ -366,9 +365,9 @@ def training_loop(
             start_epoch = main_dict["epoch"]
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
             best_loss = main_dict["loss"]
-            print("Previous model loaded successfully.")
-        except IOError:
-            raise IOError("Previous model could not be loaded, error: ")
+            print("Previous model successfully loaded.")
+        except RuntimeWarning:
+            RuntimeWarning("Previous model could not be loaded, initializing model")
 
     print("Using device:", device, flush=True)
 
