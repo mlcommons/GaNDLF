@@ -2,7 +2,7 @@ FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
-RUN apt-get update && apt-get install -y python3.7 python3-pip
+#RUN apt-get update && apt-get install -y python3.7 python3-pip
 RUN python3.7 -m pip install --upgrade pip
 # CUDA 10.2 is, as of March 16, 2022, the default torch/torchvision is built against. If this changes we'll need to update this to install that version explicitly.
 COPY . /GaNDLF
