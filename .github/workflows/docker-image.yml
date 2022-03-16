@@ -16,15 +16,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build and verify the CUDA 10.X Docker image
       run: docker build . --file Dockerfile-CUDA10.X --tag alexandergetka/gandlf:cuda10x &&
-           docker run -it alexandergetka/gandlf:cuda10x &&
-           docker run -it alexandergetka/gandlf:cuda10x python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+           docker run alexandergetka/gandlf:cuda10x &&
+           docker run alexandergetka/gandlf:cuda10x python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
       
     - name: Build and verify CUDA 11.X Docker image
       run: docker build . --file Dockerfile-CUDA11.X --tag alexandergetka/gandlf:cuda11x &&
-           docker run -it alexandergetka/gandlf:cuda11x &&
-           docker run -it alexandergetka/gandlf:cuda11x python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+           docker run alexandergetka/gandlf:cuda11x &&
+           docker run alexandergetka/gandlf:cuda11x python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
       
     - name: Build and verify CPU Docker image
       run: docker build . --file Dockerfile-CPU --tag alexandergetka/gandlf:cpu &&
-           docker run -it alexandergetka/gandlf:cpu &&
-           docker run -it alexandergetka/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+           docker run alexandergetka/gandlf:cpu &&
+           docker run alexandergetka/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
