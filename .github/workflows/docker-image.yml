@@ -34,3 +34,12 @@ jobs:
       run: docker build . --file Dockerfile-CPU --tag alexandergetka/gandlf:cpu &&
            docker run alexandergetka/gandlf:cpu &&
            docker run alexandergetka/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+           
+  build-ROCm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and verify ROCm Docker image
+      run: docker build . --file Dockerfile-ROCm --tag alexandergetka/gandlf:rocm &&
+           docker run alexandergetka/gandlf:rocm &&
+           docker run alexandergetka/gandlf:rocm python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
