@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
-RUN apt-get update && apt-get install -y python3.7 python3-pip
+RUN apt-get update && apt-get install -y python3.7 python3-pip libjpeg8-dev zlib1g-dev
 RUN python3.7 -m pip install --upgrade pip
 # EXPLICITLY install cpu versions of torch/torchvision (not all versions have +cpu modes on PyPI...)
 RUN python3 -m pip install torch==1.10.0+cpu torchvision==0.11.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
