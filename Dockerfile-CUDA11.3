@@ -3,6 +3,8 @@ LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
 RUN apt-get update && apt-get install -y python3.7 python3-pip
+# EXPLICITLY install the torch/torchvision versions built against CUDA 11.3
+RUN pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 COPY . /GaNDLF
 WORKDIR /GaNDLF
 RUN pip install -e .
