@@ -13,18 +13,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and verify the CUDA 10.2 Docker image
-      run: docker build . --file Dockerfile-CUDA10.X --tag alexandergetka/gandlf:cuda102 &&
+      run: docker build . --file Dockerfile-CUDA10.2 --tag alexandergetka/gandlf:cuda102 &&
            docker run alexandergetka/gandlf:cuda102 &&
            docker run alexandergetka/gandlf:cuda102 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
   
-  build-cuda11x:
+  build-cuda113:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build and verify CUDA 11.X Docker image
-      run: docker build . --file Dockerfile-CUDA11.X --tag alexandergetka/gandlf:cuda11x &&
-           docker run alexandergetka/gandlf:cuda11x &&
-           docker run alexandergetka/gandlf:cuda11x python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+    - name: Build and verify CUDA 11.3 Docker image
+      run: docker build . --file Dockerfile-CUDA11.3 --tag alexandergetka/gandlf:cuda113 &&
+           docker run alexandergetka/gandlf:cuda113 &&
+           docker run alexandergetka/gandlf:cuda113 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
   
   build-cpu:
     runs-on: ubuntu-latest
