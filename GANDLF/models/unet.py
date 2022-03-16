@@ -12,6 +12,7 @@ from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 import sys
 
+
 def checkPatchDimensions(patch_size, numlay):
     if isinstance(patch_size, int):
         patch_size_to_check = np.array(patch_size)
@@ -28,6 +29,7 @@ def checkPatchDimensions(patch_size, numlay):
             [getBase2(x) for x in patch_size_to_check]
         )  # get largest possible number of layers for each dim
         return int(np.min(base2))
+
 
 def getBase2(num):
     base = 0
@@ -52,19 +54,21 @@ class unet(ModelBase):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
 
-        if not ('depth' in parameters['model']):
-            parameters['model']['depth'] = 4
+        if not ("depth" in parameters["model"]):
+            parameters["model"]["depth"] = 4
             print("Default depth set to 4.")
 
-        patch_check = checkPatchDimensions(parameters["patch_size"], numlay=parameters['model']['depth'])
+        patch_check = checkPatchDimensions(
+            parameters["patch_size"], numlay=parameters["model"]["depth"]
+        )
 
-        if patch_check != parameters['model']['depth'] and patch_check >= 1:
+        if patch_check != parameters["model"]["depth"] and patch_check >= 1:
             print(
                 "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2 Only the first %d layers will run."
                 % patch_check
             )
 
-        elif patch_check != parameters['model']['depth'] and patch_check <= 1:
+        elif patch_check != parameters["model"]["depth"] and patch_check <= 1:
             sys.exit(
                 "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
             )
@@ -158,7 +162,7 @@ class unet(ModelBase):
         x = y[-1]
 
         # [upsample --> encode] x num layers
-        for i in range(self.num_layers-1, -1, -1):
+        for i in range(self.num_layers - 1, -1, -1):
             x = self.us[i](x)
             x = self.de[i](x, y[i])
 

@@ -74,6 +74,7 @@ def test_download_data():
     if not Path(
         os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
     ).exists():
+        print("AGAIN")
         print("Downloading and extracting sample data")
         r = requests.get(urlToDownload)
         z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -1372,6 +1373,47 @@ def test_train_inference_segmentation_histology_2d(device):
         outputDir=modelDir,
         parameters=parameters,
         device=device,
+    )
+
+    print("passed")
+
+
+def test_unet_layerchange_3d(device):
+    # test case to up code coverage --> test decreasing allowed layers for unet
+    # read and initialize parameters for specific data dimension
+    print("Starting 3D Rad segmentation tests for normtype")
+    # read and parse csv
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
+    parameters["patch_size"] = [8, 8, 8]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["amp"] = True
+    parameters["save_output"] = True
+    parameters["data_postprocessing"] = {"fill_holes"}
+    parameters["in_memory"] = True
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    parameters["model"]["architecture"] = "unet"
+    parameters["model"]["norm_type"] = "batch"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
     )
 
     print("passed")
