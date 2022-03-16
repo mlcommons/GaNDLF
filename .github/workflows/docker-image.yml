@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the CPU Docker image
+      run: docker build . --file Dockerfile-CPU --tag GaNDLF:CPU+$(date +%s)
+      
+    - name: Build the CUDA 10.X Docker image
+      run: docker build . --file Dockerfile-CUDA10.X --tag GaNDLF:CUDA10.X+$(date +%s)
+      
+    - name: Build the CUDA 11.X Docker image
+      run: docker build . --file Dockerfile-CUDA11.X --tag GaNDLF:CUDA11.X+$(date +%s)
