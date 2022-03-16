@@ -14,11 +14,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the CPU Docker image
-      run: docker build . --file Dockerfile-CPU --tag GaNDLF:CPU+$(date +%s)
+    - name: Build and verify the CUDA 10.X Docker image
+      run: docker build . --file Dockerfile-CUDA10.X --tag GaNDLF:CUDA10.X+$(date +%s) &&
+           docker run -it GaNDLF:CUDA10.X+$(date +%s) &&
+           docker run -it GaNDLF:CUDA10.X+$(date +%s) python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
       
-    - name: Build the CUDA 10.X Docker image
-      run: docker build . --file Dockerfile-CUDA10.X --tag GaNDLF:CUDA10.X+$(date +%s)
+    - name: Build and verify CUDA 11.X Docker image
+      run: docker build . --file Dockerfile-CUDA11.X --tag GaNDLF:CUDA11.X+$(date +%s) &&
+           docker run -it GaNDLF:CUDA11.X+$(date +%s) &&
+           docker run -it GaNDLF:CUDA10.X+$(date +%s) python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
       
-    - name: Build the CUDA 11.X Docker image
-      run: docker build . --file Dockerfile-CUDA11.X --tag GaNDLF:CUDA11.X+$(date +%s)
+    - name: Build and verify CPU Docker image
+      run: docker build . --file Dockerfile-CPU --tag GaNDLF:CPU+$(date +%s) &&
+           docker run -it GaNDLF:CPU+$(date +%s) &&
+           docker run -it GaNDLF:CUDA10.X+$(date +%s) python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
