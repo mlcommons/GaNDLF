@@ -3,6 +3,7 @@ LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
 # The base image contains ROCm, python 3.7 and pytorch already, no need to install those
+RUN python3.7 -m pip install --upgrade pip
 COPY . /GaNDLF
 WORKDIR /GaNDLF
 RUN pip install -e .
