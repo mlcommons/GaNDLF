@@ -107,7 +107,7 @@ class unet(ModelBase):
             self.de.append(
                 DecodingModule(
                     input_channels=self.base_filters * 2 ** (i_lay + 1),
-                    output_channels=self.base_filters * 2 ** (i_lay + 1),
+                    output_channels=self.base_filters * 2 ** (i_lay),
                     conv=self.Conv,
                     norm=self.Norm,
                     network_kwargs=self.network_kwargs,
@@ -126,7 +126,7 @@ class unet(ModelBase):
             )
 
         self.out = out_conv(
-            input_channels=self.base_filters * 2,
+            input_channels=self.base_filters,
             output_channels=self.n_classes,
             conv=self.Conv,
             norm=self.Norm,
