@@ -2,7 +2,8 @@ FROM ubuntu:18.04
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
-RUN apt-get update && apt-get install -y python3.7 python3-pip
+# zlib and libjpeg required for Pillow in this config
+RUN apt-get update && apt-get install -y python3.7 python3-pip libjpeg zlib
 # EXPLICITLY install cpu versions of torch/torchvision (not all versions have +cpu modes on PyPI...)
 RUN pip3 install torch==1.10.0+cpu torchvision==0.11.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
 COPY . /GaNDLF
