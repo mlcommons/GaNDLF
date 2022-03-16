@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: 'recursive'
     - name: Build and verify the CUDA 10.2 Docker image
       run: docker build . --file Dockerfile-CUDA10.2 --tag alexandergetka/gandlf:cuda102 &&
            docker run alexandergetka/gandlf:cuda102 &&
@@ -21,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: 'recursive'
     - name: Build and verify CUDA 11.3 Docker image
       run: docker build . --file Dockerfile-CUDA11.3 --tag alexandergetka/gandlf:cuda113 &&
            docker run alexandergetka/gandlf:cuda113 &&
@@ -30,6 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: 'recursive'
     - name: Build and verify CPU Docker image
       run: docker build . --file Dockerfile-CPU --tag alexandergetka/gandlf:cpu &&
            docker run alexandergetka/gandlf:cpu &&
@@ -39,6 +48,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: 'recursive'
     - name: Build and verify ROCm Docker image
       run: docker build . --file Dockerfile-ROCm --tag alexandergetka/gandlf:rocm &&
            docker run alexandergetka/gandlf:rocm &&
