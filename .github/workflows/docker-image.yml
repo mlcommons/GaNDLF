@@ -15,12 +15,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and verify the CUDA 10.X Docker image
-      run: docker build . --file Dockerfile-CUDA10.X --tag gandlf:cuda10.X+$(date +%s) &&
+      run: docker build . --file Dockerfile-CUDA10.X --tag gandlf:cuda10.x+$(date +%s) &&
            docker run -it GaNDLF:CUDA10.X+$(date +%s) &&
            docker run -it GaNDLF:CUDA10.X+$(date +%s) python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
       
     - name: Build and verify CUDA 11.X Docker image
-      run: docker build . --file Dockerfile-CUDA11.X --tag gandlf:cuda11.X+$(date +%s) &&
+      run: docker build . --file Dockerfile-CUDA11.X --tag gandlf:cuda11.x+$(date +%s) &&
            docker run -it GaNDLF:CUDA11.X+$(date +%s) &&
            docker run -it GaNDLF:CUDA10.X+$(date +%s) python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
       
