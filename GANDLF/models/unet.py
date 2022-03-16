@@ -11,6 +11,7 @@ from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 import sys
+import numpy as np
 
 
 def checkPatchDimensions(patch_size, numlay):
