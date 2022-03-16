@@ -1,10 +1,8 @@
-FROM ubuntu:18.04
+FROM rocm/pytorch:rocm5.0.1_ubuntu18.04_py3.7_pytorch_1.9.0
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
-RUN apt-get update && apt-get install -y python3.7 python3-pip
-# EXPLICITLY install cpu versions of torch/torchvision
-RUN pip3 install torch==1.11.0+cpu torchvision==0.12.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+# The base image contains ROCm, python 3.7 and pytorch already, no need to install those
 COPY . /GaNDLF
 WORKDIR /GaNDLF
 RUN pip install -e .
