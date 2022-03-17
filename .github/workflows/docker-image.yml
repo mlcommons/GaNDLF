@@ -41,8 +41,8 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
-        username: alexandergetka #${{ secrets.DOCKER_HUB_USER }}
-        password: 5e1810c9-de4a-4072-8592-8ade15f00a10 #${{ secrets.DOCKER_HUB_TOKEN }} # Revokable token
+        username: ${{ secrets.DOCKER_HUB_USER }} # These two fields need to be set on GitHub under Secrets.
+        password: ${{ secrets.DOCKER_HUB_TOKEN }} # Recommend using a revokable token here.
         
     - name: Docker prune to save space # If you switch to self-hosted runners, this should be removed.
       run: echo y | docker system prune -a
