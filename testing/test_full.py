@@ -1380,8 +1380,7 @@ def test_train_inference_segmentation_histology_2d(device):
 
 def test_unet_layerchange_2d(device):
     # test case to up code coverage --> test decreasing allowed layers for unet
-    # read and initialize parameters for specific data dimension
-    print("Starting 3D Rad segmentation tests for normtype")
+    print("Starting 2D Rad segmentation tests for normtype")
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -1390,7 +1389,7 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters["patch_size"] = [16,16,1]
+    parameters["patch_size"] = [4, 4, 1]
     parameters["model"]["dimension"] = 2
 
     # this assertion should fail
@@ -1398,7 +1397,7 @@ def test_unet_layerchange_2d(device):
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["depth"] = 6
+    parameters["model"]["depth"] = 7
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
