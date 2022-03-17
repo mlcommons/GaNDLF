@@ -1390,9 +1390,15 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
+    parameters["patch_size"] = [4,4,1]
+    parameters["model"]["dimension"] = 2
+
+    # this assertion should fail
+    with pytest.raises(Exception) as e_info:
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
     for patch in [[8,8,1], [128,128,1]]:
         parameters["patch_size"] = patch
-        parameters["model"]["dimension"] = 2
         parameters["model"]["depth"] = 6
         parameters["model"]["class_list"] = [0, 1]
         parameters["model"]["amp"] = True
@@ -1418,4 +1424,4 @@ def test_unet_layerchange_2d(device):
             reset=True,
         )
 
-        print("passed")
+    print("passed")
