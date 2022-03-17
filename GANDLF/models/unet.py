@@ -23,13 +23,20 @@ def checkPatchDimensions(patch_size, numlay):
     if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
 
-    if all([x >= 2**numlay and x % 2**numlay == 0 for x in patch_size_to_check]):
+    if all(
+        [
+            x >= 2 ** (numlay + 2) and x % 2 ** (numlay + 1) == 0
+            for x in patch_size_to_check
+        ]
+    ):
         return numlay
     else:
-        base2 = np.array(
-            [getBase2(x) for x in patch_size_to_check]
-        )  # get largest possible number of layers for each dim
-        return int(np.min(base2))
+        # base2 = np.floor(np.log2(patch_size_to_check))
+        base2 = np.array([getBase2(x) for x in patch_size_to_check])
+        remain = patch_size_to_check / 2**base2  # check that at least 1
+
+        layers = np.where(remain == 1, base2 - 1, base2)
+        return int(np.min(layers) - 1)
 
 
 def getBase2(num):
@@ -63,9 +70,9 @@ class unet(ModelBase):
             parameters["patch_size"], numlay=parameters["model"]["depth"]
         )
 
-        if patch_check != parameters["model"]["depth"] and patch_check >= 1:
+        if patch_check != parameters["model"]["depth"] and patch_check > 1:
             print(
-                "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2 Only the first %d layers will run."
+                "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
                 % patch_check
             )
 
