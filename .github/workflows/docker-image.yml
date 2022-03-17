@@ -33,7 +33,7 @@ jobs:
       run: docker build . --file Dockerfile-CUDA11.3 --tag cbica/gandlf:cuda113 &&
            docker run cbica/gandlf:cuda113 &&
            docker run cbica/gandlf:cuda113 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets_DOCKER_HUB_PASS }} &&
+           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
            docker push cbica/gandlf:cuda113
   
   build-and-push-CPU:
@@ -47,7 +47,7 @@ jobs:
       run: docker build . --file Dockerfile-CPU --tag cbica/gandlf:cpu &&
            docker run cbica/gandlf:cpu &&
            docker run cbica/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets_DOCKER_HUB_PASS }} &&
+           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
            docker push cbica/gandlf:cpu
            
   build-and-push-ROCm:
@@ -61,5 +61,5 @@ jobs:
       run: docker build . --file Dockerfile-ROCm --tag cbica/gandlf:rocm &&
            docker run cbica/gandlf:rocm &&
            docker run cbica/gandlf:rocm python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets_DOCKER_HUB_PASS }} &&
+           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
            docker push cbica/gandlf:rocm
