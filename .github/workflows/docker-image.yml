@@ -37,7 +37,7 @@ jobs:
         password: 5e1810c9-de4a-4072-8592-8ade15f00a10 #${{ secrets.DOCKER_HUB_TOKEN }} # Revokable token
         
     - name: Docker prune to save space
-      run: docker system prune -A
+      run: docker system prune -a
         
     - name: Build and export to Docker
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
