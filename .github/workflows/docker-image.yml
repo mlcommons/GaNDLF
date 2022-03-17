@@ -4,7 +4,7 @@ name: Docker Image CI
 on:
   push:
     branches: [ master ]
-  pull_request:
+  pull_request_target:
     branches: [ master ]
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_PASS }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
         
     - name: Build and export to Docker
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -47,6 +47,7 @@ jobs:
       run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
       
     - name: Push to Docker Hub
+      if: github.event_name != 'pull_request' # Don't push on PRs
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: .
