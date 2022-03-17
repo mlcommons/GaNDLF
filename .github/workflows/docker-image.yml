@@ -16,9 +16,9 @@ jobs:
         lfs: true
         submodules: 'recursive'
     - name: Build and verify the CUDA 10.2 Docker image
-      run: docker build . --file Dockerfile-CUDA10.2 --tag alexandergetka/gandlf:cuda102 &&
-           docker run alexandergetka/gandlf:cuda102 &&
-           docker run alexandergetka/gandlf:cuda102 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+      run: docker build . --file Dockerfile-CUDA10.2 --tag cbica/gandlf:cuda102 &&
+           docker run cbica/gandlf:cuda102 &&
+           docker run cbica/gandlf:cuda102 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
   
   build-cuda113:
     runs-on: ubuntu-latest
@@ -28,9 +28,9 @@ jobs:
         lfs: true
         submodules: 'recursive'
     - name: Build and verify CUDA 11.3 Docker image
-      run: docker build . --file Dockerfile-CUDA11.3 --tag alexandergetka/gandlf:cuda113 &&
-           docker run alexandergetka/gandlf:cuda113 &&
-           docker run alexandergetka/gandlf:cuda113 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+      run: docker build . --file Dockerfile-CUDA11.3 --tag cbica/gandlf:cuda113 &&
+           docker run cbica/gandlf:cuda113 &&
+           docker run cbica/gandlf:cuda113 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" 
   
   build-cpu:
     runs-on: ubuntu-latest
@@ -40,9 +40,9 @@ jobs:
         lfs: true
         submodules: 'recursive'
     - name: Build and verify CPU Docker image
-      run: docker build . --file Dockerfile-CPU --tag alexandergetka/gandlf:cpu &&
-           docker run alexandergetka/gandlf:cpu &&
-           docker run alexandergetka/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+      run: docker build . --file Dockerfile-CPU --tag cbica/gandlf:cpu &&
+           docker run cbica/gandlf:cpu &&
+           docker run cbica/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
            
   build-ROCm:
     runs-on: ubuntu-latest
@@ -52,6 +52,6 @@ jobs:
         lfs: true
         submodules: 'recursive'
     - name: Build and verify ROCm Docker image
-      run: docker build . --file Dockerfile-ROCm --tag alexandergetka/gandlf:rocm &&
-           docker run alexandergetka/gandlf:rocm &&
-           docker run alexandergetka/gandlf:rocm python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+      run: docker build . --file Dockerfile-ROCm --tag cbica/gandlf:rocm &&
+           docker run cbica/gandlf:rocm &&
+           docker run cbica/gandlf:rocm python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
