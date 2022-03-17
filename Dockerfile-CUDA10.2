@@ -2,6 +2,10 @@ FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
+
+# Install instructions for NVIDIA Container Toolkit allowing you to use the host's GPU: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+# Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
+
 RUN python3 -m pip install --upgrade pip
 COPY . /GaNDLF
 WORKDIR /GaNDLF

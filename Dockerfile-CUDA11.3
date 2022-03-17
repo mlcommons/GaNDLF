@@ -2,10 +2,13 @@ FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
+
+# Install instructions for NVIDIA Container Toolkit allowing you to use the host's GPU: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+# Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
+
 # Install Python 3.7 -- base image has 3.8, but pickle5 is redundant in 3.8 (and will cause setup errors). This could be resolved at setup time but this simplifies the build for now.
 RUN apt-get update && apt-get install -y python3.7 python3-pip libvips libjpeg8-dev zlib1g-dev python3-dev libpython3.7-dev libffi-dev
 RUN python3.7 -m pip install --upgrade pip
-# Uncomment this to EXPLICITLY install the torch/torchvision versions built against CUDA 11.3 -- should already be done
 RUN python3.7 -m pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 COPY . /GaNDLF
 WORKDIR /GaNDLF
