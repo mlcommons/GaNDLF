@@ -1378,7 +1378,7 @@ def test_train_inference_segmentation_histology_2d(device):
     print("passed")
 
 
-def test_unet_layerchange_3d(device):
+def test_unet_layerchange_2d(device):
     # test case to up code coverage --> test decreasing allowed layers for unet
     # read and initialize parameters for specific data dimension
     print("Starting 3D Rad segmentation tests for normtype")
@@ -1388,32 +1388,34 @@ def test_unet_layerchange_3d(device):
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_3d_rad_segmentation.csv"
+        inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters["patch_size"] = [8, 8, 8]
-    parameters["model"]["dimension"] = 3
-    parameters["model"]["class_list"] = [0, 1]
-    parameters["model"]["amp"] = True
-    parameters["save_output"] = True
-    parameters["data_postprocessing"] = {"fill_holes"}
-    parameters["in_memory"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    parameters["model"]["architecture"] = "unet"
-    parameters["model"]["norm_type"] = "batch"
-    parameters["nested_training"]["testing"] = -5
-    parameters["nested_training"]["validation"] = -5
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)  # overwrite previous results
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        resume=False,
-        reset=True,
-    )
+    for patch in [[8,8,1], [128,128,1]]:
+        parameters["patch_size"] = patch
+        parameters["model"]["dimension"] = 2
+        parameters["model"]["depth"] = 6
+        parameters["model"]["class_list"] = [0, 1]
+        parameters["model"]["amp"] = True
+        parameters["save_output"] = True
+        parameters["data_postprocessing"] = {"fill_holes"}
+        parameters["in_memory"] = True
+        parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        # loop through selected models and train for single epoch
+        parameters["model"]["architecture"] = "unet"
+        parameters["model"]["norm_type"] = "batch"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        if os.path.isdir(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
 
-    print("passed")
+        print("passed")
