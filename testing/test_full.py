@@ -1207,14 +1207,14 @@ def test_model_patch_divisibility():
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     print("passed")
@@ -1390,38 +1390,37 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters["patch_size"] = [4,4,1]
+    parameters["patch_size"] = [16,16,1]
     parameters["model"]["dimension"] = 2
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    for patch in [[8,8,1], [128,128,1]]:
-        parameters["patch_size"] = patch
-        parameters["model"]["depth"] = 6
-        parameters["model"]["class_list"] = [0, 1]
-        parameters["model"]["amp"] = True
-        parameters["save_output"] = True
-        parameters["data_postprocessing"] = {"fill_holes"}
-        parameters["in_memory"] = True
-        parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
-        # loop through selected models and train for single epoch
-        parameters["model"]["architecture"] = "unet"
-        parameters["model"]["norm_type"] = "batch"
-        parameters["nested_training"]["testing"] = -5
-        parameters["nested_training"]["validation"] = -5
-        if os.path.isdir(outputDir):
-            shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            resume=False,
-            reset=True,
-        )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["depth"] = 6
+    parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["amp"] = True
+    parameters["save_output"] = True
+    parameters["data_postprocessing"] = {"fill_holes"}
+    parameters["in_memory"] = True
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    parameters["model"]["architecture"] = "unet"
+    parameters["model"]["norm_type"] = "batch"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
     print("passed")
