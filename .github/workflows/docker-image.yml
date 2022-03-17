@@ -6,6 +6,13 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      versionTag:
+        description: 'Version tag to push to Docker Hub (lowercase, alphanumeric)'
+        required: true
+        type: string
+        
 
 jobs:
 
@@ -14,15 +21,16 @@ jobs:
     strategy:
       fail-fast: false # So that remaining jobs don't instantly quit if one fails
       matrix:
-        include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), dockertag has to be all lowercase for mysterious docker reasons
+        include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), docker tag has to be all lowercase alphanumeric for mysterious docker reasons
           - platform: CUDA10.2
             dockertag: cuda102
           - platform: CUDA11.3
             dockertag: cuda113
-          - platform: ROCm
-            dockertag: rocm
           - platform: CPU
             dockertag: cpu
+          - platform: ROCm
+            dockertag: rocm
+
     steps:
     - name: Check out the repository
       uses: actions/checkout@v2
@@ -50,7 +58,7 @@ jobs:
     - name: Test container with entrypoint
       run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
       
-    - name: Push to Docker Hub
+    - name: Push to Docker Hub (latest)
       if: github.event_name != 'pull_request' # Don't push on PRs (security reasons etc.)
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
@@ -58,6 +66,15 @@ jobs:
         file: Dockerfile-${{ matrix.platform }}
         push: true
         tags: cbica/gandlf:${{ matrix.dockertag }}-latest
+        
+    - name: Push to Docker Hub (version-tagged)
+      if: github.event_name == 'workflow_dispatch' # Only do this one for versioned releases done manually
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: Dockerfile-${{ matrix.platform }}
+        push: true
+        tags: cbica/gandlf:${{ matrix.dockertag }}-${{ inputs.versionTag }}
     
     #- name: Build and push the CUDA 10.2 Docker image
     #  run: docker build . --file Dockerfile-CUDA10.2 --tag cbica/gandlf:cuda102 &&
