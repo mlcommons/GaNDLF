@@ -1399,12 +1399,9 @@ def test_unet_layerchange_2d(device):
 
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["depth"] = 6
-    parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
-    parameters["save_output"] = True
-    parameters["data_postprocessing"] = {"fill_holes"}
-    parameters["in_memory"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = 3
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     parameters["model"]["architecture"] = "unet"
@@ -1413,7 +1410,7 @@ def test_unet_layerchange_2d(device):
     parameters["nested_training"]["validation"] = -5
     if os.path.isdir(outputDir):
         shutil.rmtree(outputDir)  # overwrite previous results
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
+    sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
