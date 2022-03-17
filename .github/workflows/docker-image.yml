@@ -1,5 +1,6 @@
 name: Docker Image CI
 
+#This only pushes to Docker Hub at the moment. To push to GitHub Packages, other steps are needed: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
 on:
   push:
     branches: [ master ]
@@ -8,58 +9,95 @@ on:
 
 jobs:
 
-  build-and-push-CUDA102:
+  build_test_push_all_platforms:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), dockertag has to be all lowercase for mysterious docker reasons
+          - platform: CUDA10.2
+            dockertag: cuda102
+          - platform: CUDA11.3
+            dockertag: cuda113
+          - platform: ROCm
+            dockertag: rocm
+          - platform: CPU
+            dockertag: cpu
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out the repository
+      uses: actions/checkout@v2
       with:
         lfs: true
         submodules: 'recursive'
-    - name: Build and push the CUDA 10.2 Docker image
-      run: docker build . --file Dockerfile-CUDA10.2 --tag cbica/gandlf:cuda102 &&
-           docker run cbica/gandlf:cuda102 &&
-           docker run cbica/gandlf:cuda102 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets_DOCKER_HUB_PASS }} &&
-           docker push cbica/gandlf:cuda102
+        
+    - name: Log in to Docker Hub
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_PASS }}
+        
+    - name: Build and export to Docker
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: Dockerfile-${{ matrix.platform }}
+        load: true
+        tags: cbica/gandlf:${{ matrix.dockertag }}-latest
+        
+    - name: Test container with entrypoint
+      run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
+      
+    - name: Push to Docker Hub
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: Dockerfile-${{ matrix.platform }}
+        push: true
+        tags: cbica/gandlf:${{ matrix.dockertag }}-latest
+    
+    #- name: Build and push the CUDA 10.2 Docker image
+    #  run: docker build . --file Dockerfile-CUDA10.2 --tag cbica/gandlf:cuda102 &&
+    #       docker run cbica/gandlf:cuda102 &&
+    #       docker run cbica/gandlf:cuda102 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+    #       docker push cbica/gandlf:cuda102
   
-  build-and-push-CUDA113:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
-        submodules: 'recursive'
-    - name: Build and push the CUDA 11.3 Docker image
-      run: docker build . --file Dockerfile-CUDA11.3 --tag cbica/gandlf:cuda113 &&
-           docker run cbica/gandlf:cuda113 &&
-           docker run cbica/gandlf:cuda113 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
-           docker push cbica/gandlf:cuda113
+  # build-and-push-CUDA113:
+    # runs-on: ubuntu-latest
+    # steps:
+    # - uses: actions/checkout@v2
+      # with:
+        # lfs: true
+        # submodules: 'recursive'
+    # - name: Build and push the CUDA 11.3 Docker image
+      # run: docker build . --file Dockerfile-CUDA11.3 --tag cbica/gandlf:cuda113 &&
+           # docker run cbica/gandlf:cuda113 &&
+           # docker run cbica/gandlf:cuda113 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
+           # docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
+           # docker push cbica/gandlf:cuda113
   
-  build-and-push-CPU:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
-        submodules: 'recursive'
-    - name: Build and push the CPU Docker image
-      run: docker build . --file Dockerfile-CPU --tag cbica/gandlf:cpu &&
-           docker run cbica/gandlf:cpu &&
-           docker run cbica/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
-           docker push cbica/gandlf:cpu
+  # build-and-push-CPU:
+    # runs-on: ubuntu-latest
+    # steps:
+    # - uses: actions/checkout@v2
+      # with:
+        # lfs: true
+        # submodules: 'recursive'
+    # - name: Build and push the CPU Docker image
+      # run: docker build . --file Dockerfile-CPU --tag cbica/gandlf:cpu &&
+           # docker run cbica/gandlf:cpu &&
+           # docker run cbica/gandlf:cpu python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
+           # docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
+           # docker push cbica/gandlf:cpu
            
-  build-and-push-ROCm:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
-        submodules: 'recursive'
-    - name: Build and push the ROCm Docker image
-      run: docker build . --file Dockerfile-ROCm --tag cbica/gandlf:rocm &&
-           docker run cbica/gandlf:rocm &&
-           docker run cbica/gandlf:rocm python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
-           docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
-           docker push cbica/gandlf:rocm
+  # build-and-push-ROCm:
+    # runs-on: ubuntu-latest
+    # steps:
+    # - uses: actions/checkout@v2
+      # with:
+        # lfs: true
+        # submodules: 'recursive'
+    # - name: Build and push the ROCm Docker image
+      # run: docker build . --file Dockerfile-ROCm --tag cbica/gandlf:rocm &&
+           # docker run cbica/gandlf:rocm &&
+           # docker run cbica/gandlf:rocm python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())" &&
+           # docker login --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASS }} &&
+           # docker push cbica/gandlf:rocm
