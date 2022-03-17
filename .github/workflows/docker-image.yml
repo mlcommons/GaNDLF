@@ -47,7 +47,7 @@ jobs:
       run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
       
     - name: Push to Docker Hub
-      if: github.event_name != 'pull_request' # Don't push on PRs
+      if: github.event_name != 'pull_request' # Don't push on PRs (security reasons etcetera)
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: .
