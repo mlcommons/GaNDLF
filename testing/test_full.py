@@ -1389,34 +1389,35 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters["patch_size"] = [4, 4, 1]
-    parameters["model"]["dimension"] = 2
+    for model in ["unet", "lightunet"]:
+        parameters["model"]["architecture"] = "unet"
+        parameters["patch_size"] = [4, 4, 1]
+        parameters["model"]["dimension"] = 2
 
-    # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        # this assertion should fail
+        with pytest.raises(BaseException) as e_info:
+            global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["depth"] = 7
-    parameters["model"]["class_list"] = [0, 255]
-    parameters["model"]["amp"] = True
-    parameters["model"]["num_channels"] = 3
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    parameters["model"]["architecture"] = "unet"
-    parameters["model"]["norm_type"] = "batch"
-    parameters["nested_training"]["testing"] = -5
-    parameters["nested_training"]["validation"] = -5
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)  # overwrite previous results
-    sanitize_outputDir()
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        resume=False,
-        reset=True,
-    )
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["depth"] = 7
+        parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["amp"] = True
+        parameters["model"]["num_channels"] = 3
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        # loop through selected models and train for single epoch
+        parameters["model"]["norm_type"] = "batch"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        if os.path.isdir(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
 
     print("passed")
