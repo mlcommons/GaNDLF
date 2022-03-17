@@ -2,6 +2,9 @@ FROM rocm/pytorch:rocm5.0.1_ubuntu18.04_py3.7_pytorch_1.9.0
 LABEL github="https://github.com/CBICA/GaNDLF"
 LABEL docs="https://cbica.github.io/GaNDLF/"
 LABEL version=1.0
+
+# Quick start instructions on using Docker with ROCm: https://github.com/RadeonOpenCompute/ROCm-docker/blob/master/quick-start.md
+
 # The base image contains ROCm, python 3.7 and pytorch already, no need to install those
 RUN python3 -m pip install --upgrade pip
 COPY . /GaNDLF
