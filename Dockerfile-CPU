@@ -1,0 +1,17 @@
+FROM ubuntu:18.04
+LABEL github="https://github.com/CBICA/GaNDLF"
+LABEL docs="https://cbica.github.io/GaNDLF/"
+LABEL version=1.0
+# Install fresh Python and dependencies for build-from-source
+RUN apt-get update && apt-get install -y python3.7 python3-pip libvips libjpeg8-dev zlib1g-dev python3-dev libpython3.7-dev libffi-dev
+RUN python3.7 -m pip install --upgrade pip
+# EXPLICITLY install cpu versions of torch/torchvision (not all versions have +cpu modes on PyPI...)
+RUN python3.7 -m pip install torch==1.10.0+cpu torchvision==0.11.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+COPY . /GaNDLF
+WORKDIR /GaNDLF
+RUN python3.7 -m pip install -e .
+# Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
+# If a user calls "docker run gandlf:[tag] gandlf_anonymize", it will resolve to running "python gandlf_anonymize" instead.
+# CMD is inherently overridden by args to "docker run", entrypoint is constant.
+ENTRYPOINT python3.7
+CMD gandlf_run
