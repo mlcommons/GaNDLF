@@ -102,7 +102,7 @@ jobs:
     - name: Test container with entrypoint
       # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
       run: |
-      echo "Running ${{ steps.meta.outputs.tags[0] }} ..."
+      echo "Running ${{ steps.meta.outputs.tags[0] }} ..." &&
       docker run --rm ${{ steps.meta.outputs.tags[0] }}
      
     # Push Docker image with Buildx (but don't push on PR)
