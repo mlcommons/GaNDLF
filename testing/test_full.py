@@ -1398,7 +1398,9 @@ def test_unet_layerchange_2d(device):
 
         # this assertion should fail
         with pytest.raises(BaseException) as e_info:
-            global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+            global_models_dict[parameters["model"]["architecture"]](
+                parameters=parameters
+            )
 
         parameters["patch_size"] = patch_size["2D"]
         parameters["model"]["depth"] = 7
