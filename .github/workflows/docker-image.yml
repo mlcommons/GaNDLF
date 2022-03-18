@@ -51,14 +51,7 @@ jobs:
         
     - name: Docker prune to save space # If you switch to self-hosted runners, this should be removed.
       run: echo y | docker system prune -a
-        
-    - name: Build and export to Docker
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-      with:
-        context: .
-        file: Dockerfile-${{ matrix.platform }}
-        load: true
-        tags: cbica/gandlf:${{ matrix.dockertag }}-latest
+    
         
     - name: Test container with entrypoint
       run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
@@ -96,7 +89,7 @@ jobs:
         
     # Build and push Docker image with Buildx (don't push on PR)
     # https://github.com/docker/build-push-action
-    - name: Upload to Docker Hub (docker.io) and GitHub Packages (ghcr.io)
+    - name: Build + Upload to Docker Hub (docker.io) and GitHub Packages (ghcr.io)
       id: build-and-push
       uses: docker/build-push-action@v2
       with:
