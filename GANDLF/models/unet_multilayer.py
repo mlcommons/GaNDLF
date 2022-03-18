@@ -14,7 +14,7 @@ import sys
 import numpy as np
 from GANDLF.utils.generic import checkPatchDimensions
 
-class unet(ModelBase):
+class unet_multilayer(ModelBase):
     """
     This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
@@ -27,7 +27,7 @@ class unet(ModelBase):
         residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
-        super(unet, self).__init__(parameters)
+        super(unet_multilayer, self).__init__(parameters)
 
         if not ("depth" in parameters["model"]):
             parameters["model"]["depth"] = 4
@@ -144,7 +144,7 @@ class unet(ModelBase):
         return x
 
 
-class resunet(unet):
+class resunet_multilayer(unet_multilayer):
     """
     This is the standard U-Net architecture with residual connections : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
@@ -152,4 +152,4 @@ class resunet(unet):
     """
 
     def __init__(self, parameters: dict):
-        super(resunet, self).__init__(parameters, residualConnections=True)
+        super(resunet_multilayer, self).__init__(parameters, residualConnections=True)
