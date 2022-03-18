@@ -46,8 +46,8 @@ jobs:
     - name: Log in to Docker Hub (docker.io)
       uses: docker/login-action@v1
       with:
-        username: alexandergetka #${{ secrets.DOCKER_HUB_USER }} # These two fields need to be set on GitHub under Secrets.
-        password: 6677f7bc-0c76-46cb-bfa0-66360b3ac318 #${{ secrets.DOCKER_HUB_TOKEN }} # Recommend using a revokable token here.
+        username: ${{ secrets.DOCKER_HUB_USER }} # These two fields need to be set on GitHub under Secrets.
+        password: ${{ secrets.DOCKER_HUB_TOKEN }} # Recommend using a revokable token here.
         
     - name: Docker prune to save space # If you switch to self-hosted runners, this should be removed.
       run: echo y | docker system prune -a
@@ -79,7 +79,7 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: docker/metadata-action@v3
       with:
-        images: docker.io/alexandergetka/gandlf, ghcr.io/AlexanderGetka-cbica/gandlf # Push to both registries
+        images: docker.io/cbica/gandlf, ghcr.io/cbica/gandlf # Push to both registries
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=true
           prefix=${{ matrix.dockertag }}-,onlatest=true
@@ -105,8 +105,8 @@ jobs:
     # Run the image from the base entrypoint as a test
     - name: Test container with entrypoint
       # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
-      run: echo "Running docker.io/alexandergetka/gandlf:${{ matrix.dockertag }}-latest ..." &&
-           docker run --rm docker.io/alexandergetka/gandlf:${{ matrix.dockertag }}-latest
+      run: echo "Running docker.io/cbica/gandlf:${{ matrix.dockertag }}-latest ..." &&
+           docker run --rm docker.io/cbica/gandlf:${{ matrix.dockertag }}-latest
      
     # Push Docker image with Buildx (but don't push on PR)
     # https://github.com/docker/build-push-action
@@ -121,19 +121,22 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        
-    # Sign the resulting Docker image digest except on PRs.
-    # This will only write to the public Rekor transparency log when the Docker
-    # repository is public to avoid leaking data.  If you would like to publish
-    # transparency data even for private images, pass --force to cosign below.
-    # https://github.com/sigstore/cosign
-    - name: Sign published Docker image (ghcr.io)
-      if: ${{ github.event_name != 'pull_request' }}
-      env:
-        COSIGN_EXPERIMENTAL: "true"
-      # This step uses the identity token to provision an ephemeral certificate
-      # against the sigstore community Fulcio instance.
-      run: cosign sign ghcr.io/alexandergetka-cbica/gandlf@${{ steps.upload.outputs.digest }}
+    
+    # Below is for signing images (keyless) with cosign. But this adds confusing sha256-digest.sig tags to the container registry.
+    # Leave this commented if container signing is not required.
+    # # Sign the resulting Docker image digest except on PRs.
+    # # Uses cosign keyless signing: https://github.com/sigstore/cosign/blob/main/KEYLESS.md
+    # # This will only write to the public Rekor transparency log when the Docker
+    # # repository is public to avoid leaking data.  If you would like to publish
+    # # transparency data even for private images, pass --force to cosign below.
+    # # https://github.com/sigstore/cosign
+    #- name: Sign published Docker image (ghcr.io)
+    #  if: ${{ github.event_name != 'pull_request' }}
+    #  env:
+    #    COSIGN_EXPERIMENTAL: "true"
+    #  # This step uses the identity token to provision an ephemeral certificate
+    #  # against the sigstore community Fulcio instance.
+    #  run: cosign sign ghcr.io/cbica/gandlf@${{ steps.upload.outputs.digest }}
         
         
         
