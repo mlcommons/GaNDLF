@@ -48,7 +48,7 @@ jobs:
       run: echo y | docker system prune -a
         
     - name: Build and export to Docker
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      uses: docker/build-push-action@v2
       with:
         context: .
         file: Dockerfile-${{ matrix.platform }}
@@ -60,7 +60,7 @@ jobs:
       
     - name: Push to Docker Hub (latest)
       if: github.event_name != 'pull_request' # Don't push on PRs (security reasons etc.)
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      uses: docker/build-push-action@v2
       with:
         context: .
         file: Dockerfile-${{ matrix.platform }}
@@ -69,7 +69,7 @@ jobs:
         
     - name: Push to Docker Hub (version-tagged)
       if: github.event_name == 'workflow_dispatch' # Only do this one for versioned releases done manually
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      uses: docker/build-push-action@v2
       with:
         context: .
         file: Dockerfile-${{ matrix.platform }}
