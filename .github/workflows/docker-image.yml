@@ -138,5 +138,4 @@ jobs:
     #  # against the sigstore community Fulcio instance.
     #  run: cosign sign ghcr.io/cbica/gandlf@${{ steps.upload.outputs.digest }}
         
-        
-        
+       
