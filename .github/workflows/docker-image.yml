@@ -83,6 +83,10 @@ jobs:
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=auto
           prefix=${{ matrix.dockertag }}-,onlatest=true
+        tags: |
+          type=semver,pattern={{version}}
+          type=ref,event=branch
+          type=ref,event=pr
           
     # Build Docker Image (but don't push yet -- wait for the test step first).
     # https://github.com/docker/build-push-action
