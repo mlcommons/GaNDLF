@@ -11,37 +11,7 @@ from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 import sys
-import numpy as np
-
-
-def checkPatchDimensions(patch_size, numlay):
-    if isinstance(patch_size, int):
-        patch_size_to_check = np.array(patch_size)
-    else:
-        patch_size_to_check = patch_size
-    # for 2D, don't check divisibility of last dimension
-    if patch_size_to_check[-1] == 1:
-        patch_size_to_check = patch_size_to_check[:-1]
-
-    if all(
-        [x >= 2 ** (numlay + 1) and x % 2**numlay == 0 for x in patch_size_to_check]
-    ):
-        return numlay
-    else:
-        # base2 = np.floor(np.log2(patch_size_to_check))
-        base2 = np.array([getBase2(x) for x in patch_size_to_check])
-        remain = patch_size_to_check / 2**base2  # check that at least 1
-
-        layers = np.where(remain == 1, base2 - 1, base2)
-        return int(np.min(layers))
-
-
-def getBase2(num):
-    base = 0
-    while num % 2 == 0:
-        num = num / 2
-        base = base + 1
-    return base
+from GANDLF.utils.generic import checkPatchDivisibility
 
 
 class unet(ModelBase):
@@ -59,25 +29,11 @@ class unet(ModelBase):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
 
-        if not ("depth" in parameters["model"]):
-            parameters["model"]["depth"] = 4
-            print("Default depth set to 4.")
-
-        patch_check = checkPatchDimensions(
-            parameters["patch_size"], numlay=parameters["model"]["depth"]
-        )
-
-        if patch_check != parameters["model"]["depth"] and patch_check >= 2:
-            print(
-                "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
-                % patch_check
-            )
-        elif patch_check < 2:
+        if not (checkPatchDivisibility(parameters["patch_size"])):
             sys.exit(
-                "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
+                "The patch size is not divisible by 16, which is required for",
+                parameters["model"]["architecture"],
             )
-
-        self.num_layers = patch_check
 
         self.ins = in_conv(
             input_channels=self.n_channels,
@@ -87,54 +43,116 @@ class unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
         )
-
-        self.ds = []
-        self.en = []
-        self.us = []
-        self.de = []
-
-        for i_lay in range(0, self.num_layers):
-            self.ds.append(
-                DownsamplingModule(
-                    input_channels=self.base_filters * 2 ** (i_lay),
-                    output_channels=self.base_filters * 2 ** (i_lay + 1),
-                    conv=self.Conv,
-                    norm=self.Norm,
-                )
-            )
-
-            self.us.append(
-                UpsamplingModule(
-                    input_channels=self.base_filters * 2 ** (i_lay + 1),
-                    output_channels=self.base_filters * 2 ** (i_lay),
-                    conv=self.Conv,
-                    interpolation_mode=self.linear_interpolation_mode,
-                )
-            )
-
-            self.de.append(
-                DecodingModule(
-                    input_channels=self.base_filters * 2 ** (i_lay + 1),
-                    output_channels=self.base_filters * 2 ** (i_lay),
-                    conv=self.Conv,
-                    norm=self.Norm,
-                    network_kwargs=self.network_kwargs,
-                )
-            )
-
-            self.en.append(
-                EncodingModule(
-                    input_channels=self.base_filters * 2 ** (i_lay + 1),
-                    output_channels=self.base_filters * 2 ** (i_lay + 1),
-                    conv=self.Conv,
-                    dropout=self.Dropout,
-                    norm=self.Norm,
-                    network_kwargs=self.network_kwargs,
-                )
-            )
-
-        self.out = out_conv(
+        self.ds_0 = DownsamplingModule(
             input_channels=self.base_filters,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.en_1 = EncodingModule(
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.ds_1 = DownsamplingModule(
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters * 4,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.en_2 = EncodingModule(
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 4,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.ds_2 = DownsamplingModule(
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 8,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.en_3 = EncodingModule(
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 8,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.ds_3 = DownsamplingModule(
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 16,
+            conv=self.Conv,
+            norm=self.Norm,
+        )
+        self.en_4 = EncodingModule(
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 16,
+            conv=self.Conv,
+            dropout=self.Dropout,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.us_3 = UpsamplingModule(
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 8,
+            conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
+        )
+        self.de_3 = DecodingModule(
+            input_channels=self.base_filters * 16,
+            output_channels=self.base_filters * 8,
+            conv=self.Conv,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.us_2 = UpsamplingModule(
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 4,
+            conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
+        )
+        self.de_2 = DecodingModule(
+            input_channels=self.base_filters * 8,
+            output_channels=self.base_filters * 4,
+            conv=self.Conv,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.us_1 = UpsamplingModule(
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
+        )
+        self.de_1 = DecodingModule(
+            input_channels=self.base_filters * 4,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.us_0 = UpsamplingModule(
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters,
+            conv=self.Conv,
+            interpolation_mode=self.linear_interpolation_mode,
+        )
+        self.de_0 = DecodingModule(
+            input_channels=self.base_filters * 2,
+            output_channels=self.base_filters * 2,
+            conv=self.Conv,
+            norm=self.Norm,
+            network_kwargs=self.network_kwargs,
+        )
+        self.out = out_conv(
+            input_channels=self.base_filters * 2,
             output_channels=self.n_classes,
             conv=self.Conv,
             norm=self.Norm,
@@ -155,21 +173,24 @@ class unet(ModelBase):
             Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
-        y = []
-        y.append(self.ins(x))
+        x1 = self.ins(x)
+        x2 = self.ds_0(x1)
+        x2 = self.en_1(x2)
+        x3 = self.ds_1(x2)
+        x3 = self.en_2(x3)
+        x4 = self.ds_2(x3)
+        x4 = self.en_3(x4)
+        x5 = self.ds_3(x4)
+        x5 = self.en_4(x5)
 
-        # [downsample --> encode] x num layers
-        for i in range(0, self.num_layers):
-            temp = self.ds[i](y[i])
-            y.append(self.en[i](temp))
-
-        x = y[-1]
-
-        # [upsample --> encode] x num layers
-        for i in range(self.num_layers - 1, -1, -1):
-            x = self.us[i](x)
-            x = self.de[i](x, y[i])
-
+        x = self.us_3(x5)
+        x = self.de_3(x, x4)
+        x = self.us_2(x)
+        x = self.de_2(x, x3)
+        x = self.us_1(x)
+        x = self.de_1(x, x2)
+        x = self.us_0(x)
+        x = self.de_0(x, x1)
         x = self.out(x)
         return x
 
