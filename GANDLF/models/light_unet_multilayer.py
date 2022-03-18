@@ -13,6 +13,7 @@ from .modelBase import ModelBase
 import sys
 from GANDLF.utils.generic import checkPatchDimensions
 
+
 class light_unet_multilayer(ModelBase):
     """
     This is the LIGHT U-Net architecture.
@@ -62,7 +63,7 @@ class light_unet_multilayer(ModelBase):
         self.us = []
         self.de = []
 
-        for i_lay in range(0, self.num_layers):
+        for _ in range(0, self.num_layers):
             self.ds.append(
                 DownsamplingModule(
                     input_channels=self.base_filters,
@@ -142,10 +143,13 @@ class light_unet_multilayer(ModelBase):
         x = self.out(x)
         return x
 
+
 class light_resunet_multilayer(light_unet_multilayer):
     """
     This is the LIGHT U-Net architecture with residual connections.
     """
 
     def __init__(self, parameters: dict):
-        super(light_resunet_multilayer, self).__init__(parameters, residualConnections=True)
+        super(light_resunet_multilayer, self).__init__(
+            parameters, residualConnections=True
+        )

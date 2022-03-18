@@ -14,6 +14,7 @@ import sys
 import numpy as np
 from GANDLF.utils.generic import checkPatchDimensions
 
+
 class unet_multilayer(ModelBase):
     """
     This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
