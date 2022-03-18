@@ -1,0 +1,140 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ '*.*.*' ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      versionTag:
+        description: 'Version tag to push to Docker Hub (lowercase, alphanumeric)'
+        required: true
+        type: string
+        
+jobs:
+
+  build_test_push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false # So that remaining jobs don't instantly quit if one fails (e.g, CPU/ROCm don't upload if CUDA just fails to push to ghcr...)
+      matrix:
+        include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), docker tag has to be all lowercase alphanumeric for mysterious docker reasons
+          - platform: CUDA10.2
+            dockertag: cuda102
+          - platform: CUDA11.3
+            dockertag: cuda113
+          - platform: CPU
+            dockertag: cpu
+          - platform: ROCm
+            dockertag: rocm
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: 'recursive'
+        
+
+    - name: Log in to Docker Hub (docker.io)
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }} # These two fields need to be set on GitHub under Secrets.
+        password: ${{ secrets.DOCKER_HUB_TOKEN }} # Recommend using a revokable token here.
+        
+    - name: Docker prune to save space # If you switch to self-hosted runners, this should be removed.
+      run: echo y | docker system prune -a
+    
+    
+    # Below steps are for GitHub Packages integration, metadata and signing
+    # See https://github.com/CBICA/GaNDLF/new/master?filename=.github%2Fworkflows%2Fdocker-publish.yml&workflow_template=docker-publish
+    
+    # Install the cosign tool except on PR
+    # https://github.com/sigstore/cosign-installer
+    - name: Install cosign
+      if: github.event_name != 'pull_request'
+      uses: sigstore/cosign-installer@1e95c1de343b5b0c23352d6417ee3e48d5bcd422
+      with:
+        cosign-release: 'v1.4.0'
+        
+    - name: Log into GitHub Packages registry (ghcr.io)
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    # Extract metadata (tags, labels) for Docker
+    # https://github.com/docker/metadata-action
+    - name: Extract Docker metadata
+      id: meta
+      if: github.event_name != 'pull_request'
+      uses: docker/metadata-action@v3
+      with:
+        images: docker.io/cbica/gandlf, ghcr.io/cbica/gandlf # Push to both registries
+        flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
+          latest=true
+          prefix=${{ matrix.dockertag }}-,onlatest=true
+        tags: |
+          type=semver,pattern={{version}}
+          type=ref,event=branch
+          type=ref,event=pr
+          
+    # Build Docker Image (but don't push yet -- wait for the test step first).
+    # https://github.com/docker/build-push-action
+    - name: Build Docker images
+      id: build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile-${{ matrix.platform }}
+        push: false
+        load: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        
+    
+    # Run the image from the base entrypoint as a test
+    - name: Test container with entrypoint
+      # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
+      run: echo "Running docker.io/cbica/gandlf:${{ matrix.dockertag }}-latest ..." &&
+           docker run --rm docker.io/cbica/gandlf:${{ matrix.dockertag }}-latest
+     
+    # Push Docker image with Buildx (but don't push on PR)
+    # https://github.com/docker/build-push-action
+    # This won't re-build the images fully or anything, they should already exist from the build step and use the cache.
+    - name: Upload to Docker Hub (docker.io) and GitHub Packages (ghcr.io)
+      id: upload
+      if: github.event_name != 'pull_request'
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile-${{ matrix.platform }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+    
+    # Below is for signing images (keyless) with cosign. But this adds confusing sha256-digest.sig tags to the container registry.
+    # Leave this commented if container signing is not required.
+    # # Sign the resulting Docker image digest except on PRs.
+    # # Uses cosign keyless signing: https://github.com/sigstore/cosign/blob/main/KEYLESS.md
+    # # This will only write to the public Rekor transparency log when the Docker
+    # # repository is public to avoid leaking data.  If you would like to publish
+    # # transparency data even for private images, pass --force to cosign below.
+    # # https://github.com/sigstore/cosign
+    #- name: Sign published Docker image (ghcr.io)
+    #  if: ${{ github.event_name != 'pull_request' }}
+    #  env:
+    #    COSIGN_EXPERIMENTAL: "true"
+    #  # This step uses the identity token to provision an ephemeral certificate
+    #  # against the sigstore community Fulcio instance.
+    #  run: cosign sign ghcr.io/cbica/gandlf@${{ steps.upload.outputs.digest }}
+        
+       
