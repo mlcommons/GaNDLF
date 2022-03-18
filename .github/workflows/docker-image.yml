@@ -133,7 +133,7 @@ jobs:
         COSIGN_EXPERIMENTAL: "true"
       # This step uses the identity token to provision an ephemeral certificate
       # against the sigstore community Fulcio instance.
-      run: cosign sign ghcr.io/alexandergetka-cbica/gandlf
+      run: cosign sign ghcr.io/alexandergetka-cbica/gandlf@${{ steps.upload.outputs.digest }}
         
         
         
