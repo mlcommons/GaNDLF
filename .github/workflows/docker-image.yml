@@ -79,7 +79,7 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: docker/metadata-action@v3
       with:
-        images: docker.io/alexandergetka/gandlf, ghcr.io/alexandergetka/gandlf # Push to both registries
+        images: docker.io/alexandergetka/gandlf, ghcr.io/AlexanderGetka-cbica/gandlf # Push to both registries
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=true
           prefix=${{ matrix.dockertag }}-,onlatest=true
@@ -133,7 +133,7 @@ jobs:
         COSIGN_EXPERIMENTAL: "true"
       # This step uses the identity token to provision an ephemeral certificate
       # against the sigstore community Fulcio instance.
-      run: cosign sign ghcr.io/alexandergetka/gandlf@${{ steps.build-and-push.outputs.digest }}
+      run: cosign sign ghcr.io/AlexanderGetka-cbica/gandlf@${{ steps.build-and-push.outputs.digest }}
         
         
         
