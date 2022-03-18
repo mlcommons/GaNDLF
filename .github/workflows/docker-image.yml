@@ -1,6 +1,5 @@
 name: Docker Image CI
 
-#This only pushes to Docker Hub at the moment. To push to GitHub Packages, other steps are needed: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
 on:
   push:
     branches: [ master ]
