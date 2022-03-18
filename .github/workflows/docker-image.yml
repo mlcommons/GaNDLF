@@ -23,7 +23,7 @@ jobs:
       packages: write
       id-token: write
     strategy:
-      fail-fast: false # So that remaining jobs don't instantly quit if one fails
+      fail-fast: false # So that remaining jobs don't instantly quit if one fails (e.g, CPU/ROCm don't upload if CUDA just fails to push to ghcr...)
       matrix:
         include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), docker tag has to be all lowercase alphanumeric for mysterious docker reasons
           - platform: CUDA10.2
@@ -81,7 +81,7 @@ jobs:
       with:
         images: docker.io/alexandergetka/gandlf, ghcr.io/alexandergetka/gandlf # Push to both registries
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
-          latest=auto
+          latest=true
           prefix=${{ matrix.dockertag }}-,onlatest=true
         tags: |
           type=semver,pattern={{version}}
@@ -105,8 +105,8 @@ jobs:
     # Run the image from the base entrypoint as a test
     - name: Test container with entrypoint
       # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
-      run: echo "Running ${{ steps.meta.outputs.tags[0] }} ..." &&
-           docker run --rm ${{ steps.meta.outputs.tags[0] }}
+      run: echo "Running docker.io/alexandergetka/gandlf:${{ matrix.dockertag }}-latest ..." &&
+           docker run --rm docker.io/alexandergetka/gandlf:${{ matrix.dockertag }}-latest
      
     # Push Docker image with Buildx (but don't push on PR)
     # https://github.com/docker/build-push-action
