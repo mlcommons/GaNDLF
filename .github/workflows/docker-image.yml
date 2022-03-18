@@ -1,0 +1,78 @@
+name: Docker Image CI
+
+#This only pushes to Docker Hub at the moment. To push to GitHub Packages, other steps are needed: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      versionTag:
+        description: 'Version tag to push to Docker Hub (lowercase, alphanumeric)'
+        required: true
+        type: string
+        
+
+jobs:
+
+  build_test_push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # So that remaining jobs don't instantly quit if one fails
+      matrix:
+        include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), docker tag has to be all lowercase alphanumeric for mysterious docker reasons
+          - platform: CUDA10.2
+            dockertag: cuda102
+          - platform: CUDA11.3
+            dockertag: cuda113
+          - platform: CPU
+            dockertag: cpu
+          - platform: ROCm
+            dockertag: rocm
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: 'recursive'
+        
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }} # These two fields need to be set on GitHub under Secrets.
+        password: ${{ secrets.DOCKER_HUB_TOKEN }} # Recommend using a revokable token here.
+        
+    - name: Docker prune to save space # If you switch to self-hosted runners, this should be removed.
+      run: echo y | docker system prune -a
+        
+    - name: Build and export to Docker
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: Dockerfile-${{ matrix.platform }}
+        load: true
+        tags: cbica/gandlf:${{ matrix.dockertag }}-latest
+        
+    - name: Test container with entrypoint
+      run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
+      
+    - name: Push to Docker Hub (latest)
+      if: github.event_name != 'pull_request' # Don't push on PRs (security reasons etc.)
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: Dockerfile-${{ matrix.platform }}
+        push: true
+        tags: cbica/gandlf:${{ matrix.dockertag }}-latest
+        
+    - name: Push to Docker Hub (version-tagged)
+      if: github.event_name == 'workflow_dispatch' # Only do this one for versioned releases done manually
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: Dockerfile-${{ matrix.platform }}
+        push: true
+        tags: cbica/gandlf:${{ matrix.dockertag }}-${{ inputs.versionTag }}
+        
