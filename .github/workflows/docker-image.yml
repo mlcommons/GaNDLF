@@ -39,7 +39,7 @@ jobs:
         submodules: 'recursive'
         
     - name: Log in to Docker Hub
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_HUB_USER }} # These two fields need to be set on GitHub under Secrets.
         password: ${{ secrets.DOCKER_HUB_TOKEN }} # Recommend using a revokable token here.
