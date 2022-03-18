@@ -100,7 +100,10 @@ jobs:
     
     # Run the image from the base entrypoint as a test
     - name: Test container with entrypoint
-      run: docker run --rm docker.io/alexandergetka/gandlf:${{ matrix.dockertag }}-latest 
+      # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
+      run: |
+      echo "Running ${{ steps.meta.outputs.tags[0] }} ..."
+      docker run --rm ${{ steps.meta.outputs.tags[0] }}
      
     # Push Docker image with Buildx (but don't push on PR)
     # https://github.com/docker/build-push-action
