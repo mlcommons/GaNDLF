@@ -52,9 +52,6 @@ jobs:
     - name: Docker prune to save space # If you switch to self-hosted runners, this should be removed.
       run: echo y | docker system prune -a
     
-        
-    - name: Test container with entrypoint
-      run: docker run --rm cbica/gandlf:${{ matrix.dockertag }}-latest
     
     # Below steps are for GitHub Packages integration, metadata and signing
     # See https://github.com/CBICA/GaNDLF/new/master?filename=.github%2Fworkflows%2Fdocker-publish.yml&workflow_template=docker-publish
@@ -82,20 +79,40 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: docker/metadata-action@v3
       with:
-        images: docker.io/cbica/gandlf, ghcr.io/cbica/gandlf # Push to both registries
+        images: docker.io/alexandergetka/gandlf, ghcr.io/alexandergetka/gandlf # Push to both registries
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=auto
           prefix=${{ matrix.dockertag }}-,onlatest=true
-        
-    # Build and push Docker image with Buildx (don't push on PR)
+          
+    # Build Docker Image (but don't push yet -- wait for the test step first).
     # https://github.com/docker/build-push-action
-    - name: Build + Upload to Docker Hub (docker.io) and GitHub Packages (ghcr.io)
-      id: build-and-push
+    - name: Build Docker images
+      id: build
       uses: docker/build-push-action@v2
       with:
         context: .
         file: ./Dockerfile-${{ matrix.platform }}
-        push: ${{ github.event_name != 'pull_request' }}
+        push: false
+        load: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        
+    
+    # Run the image from the base entrypoint as a test
+    - name: Test container with entrypoint
+      run: docker run --rm docker.io/alexandergetka/gandlf:${{ matrix.dockertag }}-latest 
+     
+    # Push Docker image with Buildx (but don't push on PR)
+    # https://github.com/docker/build-push-action
+    # This won't re-build the images fully or anything, they should already exist from the build step and use the cache.
+    - name: Upload to Docker Hub (docker.io) and GitHub Packages (ghcr.io)
+      id: upload
+      if: github.event_name != 'pull_request'
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile-${{ matrix.platform }}
+        push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         
@@ -110,7 +127,7 @@ jobs:
         COSIGN_EXPERIMENTAL: "true"
       # This step uses the identity token to provision an ephemeral certificate
       # against the sigstore community Fulcio instance.
-      run: cosign sign ghcr.io/cbica/gandlf@${{ steps.build-and-push.outputs.digest }}
+      run: cosign sign ghcr.io/alexandergetka/gandlf@${{ steps.build-and-push.outputs.digest }}
         
         
         
