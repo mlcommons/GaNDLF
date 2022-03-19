@@ -160,17 +160,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             x_coords[i] : x_coords[i] + patch_size[0],
                             y_coords[i] : y_coords[i] + patch_size[1],
                         ] += output[i][0]
-                    for i in range(int(output.shape[0])):
-                        count_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += 1
-                        probs_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += output[i][0]
                 else:
-                    output_to_write += str(subject_name) + "," + str(x_coords[i]) + "," + str(y_coords[i]) + "," + str(output[i][0]) + "\n"
+                    for i in range(int(output.shape[0])):
+                        output_to_write += str(subject_name) + "," + str(x_coords[i]) + "," + str(y_coords[i]) + "," + str(output[i][0]) + "\n"
                 
             if parameters["problem_type"] == "segmentation":
                 probs_map = probs_map / count_map
