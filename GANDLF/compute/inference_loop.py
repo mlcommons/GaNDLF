@@ -1,3 +1,5 @@
+from cv2 import transform
+from matplotlib import transforms
 from .forward_pass import validate_network
 import os
 from pathlib import Path
@@ -18,6 +20,7 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
 from GANDLF.models import global_models_dict
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
+from GANDLF.data.preprocessing import get_transforms_for_preprocessing
 
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
@@ -41,12 +44,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         parameters=parameters
     )
 
-    # Setting up the inference loader
-    inferenceDataForTorch = ImagesFromDataFrame(
-        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
-    )
-    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
-
     # Loading the weights into the model
     main_dict = outputDir
     if os.path.isdir(outputDir):
@@ -56,25 +53,35 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         if not os.path.isfile(file_to_check):
             raise ValueError("The model specified model was not found:", file_to_check)
 
+    parameters["save_output"] = True
+
     main_dict = torch.load(file_to_check, map_location=torch.device(device))
     model.load_state_dict(main_dict["model_state_dict"])
+    model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
+        model, parameters["model"]["amp"], device, optimizer=None
+    )
+    print("Using device:", parameters["device"], flush=True)
+
+    # ensure batch_size is 1, so that output can be written properly
+    parameters["batch_size"] = 1
 
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
 
-    # get the channel keys for concatenation later (exclude non numeric channel keys)
-    parameters = populate_channel_keys_in_params(inference_loader, parameters)
-    parameters["save_output"] = True
-
-    print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-        model, parameters["model"]["amp"], device, optimizer=None
-    )
-
-    print("Using device:", parameters["device"], flush=True)
-
     # radiology inference
     if parameters["modality"] == "rad":
+        
+        # Setting up the inference loader
+        inferenceDataForTorch = ImagesFromDataFrame(
+            inferenceDataFromPickle, parameters, train=False, loader_type="inference"
+        )
+        inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
+
+        # get the channel keys for concatenation later (exclude non numeric channel keys)
+        parameters = populate_channel_keys_in_params(inference_loader, parameters)
+
+        print("Data Samples: ", len(inference_loader.dataset), flush=True)
+
         average_epoch_valid_loss, average_epoch_valid_metric = validate_network(
             model, inference_loader, None, parameters, mode="inference"
         )
@@ -97,6 +104,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["mask_level"] = parameters["slide_level"]
 
         # actual computation
+        output_to_write = "SubjectID,x_coords,y_coords,output\n"
         for _, row in inferenceDataFromPickle.iterrows():
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
             os_image = openslide.open_slide(
@@ -108,10 +116,15 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             subject_dest_dir = os.path.join(outputDir, str(subject_name))
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
-            probs_map = np.zeros((level_height, level_width), dtype=np.float16)
-            count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+            if parameters["problem_type"] == "segmentation":
+                probs_map = np.zeros((level_height, level_width), dtype=np.float16)
+                count_map = np.zeros((level_height, level_width), dtype=np.uint8)
 
             patch_size = parameters["patch_size"]
+
+            print("Constructing loader for subject:",subject_name, flush=True)
+
+            transform = get_transforms_for_preprocessing(parameters, [], False, False)
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
@@ -119,6 +132,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 stride_size=parameters["stride_size"],
                 selected_level=parameters["slide_level"],
                 mask_level=parameters["mask_level"],
+                transform=transform,
             )
 
             dataloader = DataLoader(
@@ -135,41 +149,63 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 else:
                     output = model(image_patches.float().to(parameters["device"]))
                 output = output.detach().cpu().numpy()
-                for i in range(int(output.shape[0])):
-                    count_map[
-                        x_coords[i] : x_coords[i] + patch_size[0],
-                        y_coords[i] : y_coords[i] + patch_size[1],
-                    ] += 1
-                    probs_map[
-                        x_coords[i] : x_coords[i] + patch_size[0],
-                        y_coords[i] : y_coords[i] + patch_size[1],
-                    ] += output[i][0]
-            probs_map = probs_map / count_map
-            count_map = count_map / count_map.max()
-            out = count_map * probs_map
-            count_map = np.array(count_map * 255, dtype=np.uint16)
-            out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
-            imsave(
-                os.path.join(
-                    subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
-                ),
-                out,
-            )
-            imsave(
-                os.path.join(
-                    subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
-                ),
-                out_thresh,
-            )
-            imsave(
-                os.path.join(
-                    subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
-                ),
-                count_map,
-            )
+
+                if parameters["problem_type"] == "segmentation":
+                    for i in range(int(output.shape[0])):
+                        count_map[
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += 1
+                        probs_map[
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += output[i][0]
+                    for i in range(int(output.shape[0])):
+                        count_map[
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += 1
+                        probs_map[
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += output[i][0]
+                else:
+                    output_to_write += str(subject_name) + "," + str(x_coords[i]) + "," + str(y_coords[i]) + "," + str(output[i][0]) + "\n"
+                
+            if parameters["problem_type"] == "segmentation":
+                probs_map = probs_map / count_map
+                count_map = count_map / count_map.max()
+                out = count_map * probs_map
+                count_map = np.array(count_map * 255, dtype=np.uint16)
+                out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
+                    ),
+                    out,
+                )
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
+                    ),
+                    out_thresh,
+                )
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
+                    ),
+                    count_map,
+                )
+            else:
+                output_file = os.path.join(
+                        subject_dest_dir,
+                        "predictions.csv",
+                    )
+                with open(output_file, 'w') as f:
+                    f.write(output_to_write)
 
 
 if __name__ == "__main__":
