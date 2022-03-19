@@ -55,7 +55,7 @@ def preprocess_and_save(
     parameters = populate_header_in_parameters(parameters, headers)
 
     data_for_processing = ImagesFromDataFrame(
-        dataframe, parameters, train=applyaugs, loader_type="full"
+        dataframe, parameters, train=applyaugs, apply_zero_crop=True, loader_type="full"
     )
 
     dataloader_for_processing = DataLoader(
@@ -180,12 +180,11 @@ def preprocess_and_save(
                 try:
                     sitk.WriteImage(image_to_write, image_file)
                 except IOError:
-                    IOError(
+                    raise IOError(
                         "Could not write image file: {}. Make sure that the file is not open and try again.".format(
                             image_file
                         )
                     )
-                    sys.exit(1)
 
         # now try to write the label
         if "label" in subject_dict_to_write:
@@ -203,12 +202,11 @@ def preprocess_and_save(
                 try:
                     sitk.WriteImage(image_to_write, image_file)
                 except IOError:
-                    IOError(
+                    raise IOError(
                         "Could not write image file: {}. Make sure that the file is not open and try again.".format(
                             image_file
                         )
                     )
-                    sys.exit(1)
 
         # ensure prediction headers are getting saved, as well
         if len(parameters["headers"]["predictionHeaders"]) > 1:
