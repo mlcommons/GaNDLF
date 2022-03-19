@@ -103,9 +103,12 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
 
+        if parameters["problem_type"] != "segmentation":
+            output_to_write = "SubjectID,x_coords,y_coords,output\n"
+
         # actual computation
-        output_to_write = "SubjectID,x_coords,y_coords,output\n"
-        for _, row in inferenceDataFromPickle.iterrows():
+        pbar = tqdm(inferenceDataFromPickle.iterrows())
+        for _, row in pbar:
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
@@ -122,9 +125,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             patch_size = parameters["patch_size"]
 
-            print("Constructing loader for subject:", subject_name, flush=True)
-
             transform = get_transforms_for_preprocessing(parameters, [], False, False)
+
+            pbar.set_description("Constructing loader for subject: " + str(subject_name))
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
@@ -141,7 +144,10 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 shuffle=False,
                 num_workers=parameters["q_num_workers"],
             )
-            for image_patches, (x_coords, y_coords) in tqdm(dataloader):
+
+            pbar.set_description("Looping over patches for subject: " + str(subject_name))
+
+            for image_patches, (x_coords, y_coords) in dataloader:
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
                 if parameters["model"]["amp"]:
                     with autocast():
