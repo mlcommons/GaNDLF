@@ -56,7 +56,8 @@ def tissue_mask_generation(img_rgb, rgb_min=50):
 
 
 class InferTumorSegDataset(Dataset):
-    def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level):
+    def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level, transform= None):
+        self.transform = transform
         self._wsi_path = wsi_path
         self._patch_size = patch_size
         if self._patch_size[-1] == 1:
@@ -118,6 +119,10 @@ class InferTumorSegDataset(Dataset):
                 (self._patch_size[0], self._patch_size[1]),
             ).convert("RGB")
         )
-        patch = np.array(patch / 255)
+        if self.transform is not None:
+            patch = self.transform(patch)
+        
+        #patch = np.array(patch / 255)
+        # this is to ensure that channels come at the end
         patch = patch.transpose([2, 0, 1])
         return patch, (x_loc, y_loc)
