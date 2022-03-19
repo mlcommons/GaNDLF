@@ -11,8 +11,7 @@ def classification_accuracy(output, label, params):
         predicted_classes = torch.argmax(output, 1)
     else:
         predicted_classes = output
-        
-    
+
     acc = torch.sum(predicted_classes == label.squeeze()) / len(label)
     return acc
 
