@@ -119,10 +119,14 @@ class InferTumorSegDataset(Dataset):
                 (self._patch_size[0], self._patch_size[1]),
             ).convert("RGB")
         )
+        # this is to ensure that channels come at the end
+        patch = patch.transpose([2, 0, 1])
+        # this is to ensure that we always have a z-stack before applying any torchio transforms
+        patch = np.expand_dims(patch, axis=-1)
         if self.transform is not None:
             patch = self.transform(patch)
         
-        #patch = np.array(patch / 255)
-        # this is to ensure that channels come at the end
-        patch = patch.transpose([2, 0, 1])
+        # remove z-stack
+        patch = patch.squeeze(-1)
+        
         return patch, (x_loc, y_loc)
