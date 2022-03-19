@@ -80,8 +80,8 @@ class InferTumorSegDataset(Dataset):
     def _basic_preprocessing(self):
         mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
         extracted_image = self._os_image.read_region(
-            (0, 0), self._mask_level, (mask_xdim, mask_ydim)
-        ).convert("RGB")
+            (0, 0), self._mask_level, (mask_xdim, mask_ydim), as_array=True,
+        )
         mask = tissue_mask_generation(extracted_image)
         del extracted_image
         ydim, xdim = self._os_image.level_dimensions[self._selected_level]
@@ -99,7 +99,7 @@ class InferTumorSegDataset(Dataset):
                 ]
             ):
                 self._points[i] = [-1, -1]
-        self._points = np.array(self._points)
+        self._points = np.array(self._points) * (2**self._mask_level)
         self._points = np.delete(
             self._points, np.argwhere(self._points == np.array([-1, -1])), 0
         )
@@ -120,13 +120,13 @@ class InferTumorSegDataset(Dataset):
             (string, int, int): The patch, x and y locations.
         """
         x_loc, y_loc = self._points[idx]
-        patch = np.array(
-            self._os_image.read_region(
-                (x_loc * self._mask_level, y_loc * self._mask_level),
+        patch = self._os_image.read_region(
+                (x_loc, y_loc),
                 self._selected_level,
                 (self._patch_size[0], self._patch_size[1]),
-            ).convert("RGB")
-        )
+                as_array=True,
+            )
+
         # this is to ensure that channels come at the end
         patch = patch.transpose([2, 0, 1])
         # this is to ensure that we always have a z-stack before applying any torchio transforms
