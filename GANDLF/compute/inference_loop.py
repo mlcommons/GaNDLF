@@ -156,8 +156,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                     output = model(image_patches.float().to(parameters["device"]))
                 output = output.detach().cpu().numpy()
 
-                if parameters["problem_type"] == "segmentation":
-                    for i in range(int(output.shape[0])):
+                for i in range(int(output.shape[0])):
+                    if parameters["problem_type"] == "segmentation":
                         count_map[
                             x_coords[i] : x_coords[i] + patch_size[0],
                             y_coords[i] : y_coords[i] + patch_size[1],
@@ -166,8 +166,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             x_coords[i] : x_coords[i] + patch_size[0],
                             y_coords[i] : y_coords[i] + patch_size[1],
                         ] += output[i][0]
-                else:
-                    for i in range(int(output.shape[0])):
+                    else:
                         output_to_write += (
                             str(subject_name)
                             + ","
