@@ -1,19 +1,16 @@
 import os
 import numpy as np
-from sklearn.utils import resample
 
 import torch
 import torchio
 from torchio.transforms import (
-    Resample,
-    Compose,
     Pad,
 )
 import SimpleITK as sitk
 from tqdm import tqdm
 
 from GANDLF.utils import perform_sanity_check_on_subject, resize_image
-from .preprocessing import global_preprocessing_dict, Resample_Minimum
+from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
 
 global_sampler_dict = {
@@ -222,69 +219,8 @@ def ImagesFromDataFrame(
                     global_augs_dict[aug_lower](augmentations[aug])
                 )
 
-    # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
-    normalize_to_apply = None
-    if not (preprocessing is None):
-        # go through preprocessing in the order they are specified
-        for preprocess in preprocessing:
-            preprocess_lower = preprocess.lower()
-            # special check for resample
-            if preprocess_lower == "resize":
-                resize_values = tuple(preprocessing["resize"])
-                transformations_list.append(torchio.Resize(resize_values))
-            elif preprocess_lower == "resize_patch":
-                resize_values = tuple(preprocessing["resize_patch"])
-                transformations_list.append(torchio.Resize(resize_values))
-            elif preprocess_lower == "resample":
-                if "resolution" in preprocessing[preprocess_lower]:
-                    # Need to take a look here
-                    resample_values = np.array(
-                        preprocessing[preprocess_lower]["resolution"]
-                    )
-                    if len(resample_values) == 2:
-                        resample_values = tuple(
-                            np.append(
-                                np.array(preprocessing[preprocess_lower]["resolution"]),
-                                1,
-                            )
-                        )
-                    transformations_list.append(Resample(resample_values))
-            elif preprocess_lower in ["resample_minimum", "resample_min"]:
-                if "resolution" in preprocessing[preprocess_lower]:
-                    transformations_list.append(
-                        Resample_Minimum(
-                            np.array(preprocessing[preprocess_lower]["resolution"])
-                        )
-                    )
-            # normalize should be applied at the end
-            elif "normalize" in preprocess_lower:
-                if normalize_to_apply is None:
-                    normalize_to_apply = global_preprocessing_dict[preprocess_lower]
-            # preprocessing routines that we only want for training
-            elif preprocess_lower in ["crop_external_zero_planes"]:
-                if train or apply_zero_crop:
-                    transformations_list.append(
-                        global_preprocessing_dict["crop_external_zero_planes"](
-                            patch_size=patch_size
-                        )
-                    )
-            # everything else is taken in the order passed by user
-            elif preprocess_lower in global_preprocessing_dict:
-                transformations_list.append(
-                    global_preprocessing_dict[preprocess_lower](
-                        preprocessing[preprocess]
-                    )
-                )
-
-    # normalization type is applied at the end
-    if normalize_to_apply is not None:
-        transformations_list.append(normalize_to_apply)
-
-    # compose the transformations
-    if transformations_list:
-        transform = Compose(transformations_list)
-    else:
-        transform = None
+    transform = get_transforms_for_preprocessing(parameters, transformations_list, train, apply_zero_crop)
+    
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
     if not train:
         return subjects_dataset
