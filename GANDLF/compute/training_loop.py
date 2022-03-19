@@ -367,8 +367,8 @@ def training_loop(
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
             best_loss = main_dict["loss"]
             print("Previous model loaded successfully.")
-        except Exception as e:
-            print("Previous model could not be loaded, error: ", e)
+        except IOError:
+            raise IOError("Previous model could not be loaded, error: ")
 
     print("Using device:", device, flush=True)
 
@@ -470,7 +470,8 @@ def training_loop(
                 best_model_path,
             )
             first_model_saved = True
-            print("Best epoch: ", best_train_idx)
+
+        print("Current Best epoch: ", best_train_idx)
 
         if patience > params["patience"]:
             print(

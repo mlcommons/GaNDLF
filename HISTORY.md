@@ -12,7 +12,12 @@
 - Anonymization module has been added
 - More progress bars added for better feedback
 - NIfTI conversion added in anonymization
+- Using TiffSlide instead of OpenSlide
 - Minimum resampling resolution is now available
+- Adding option to resize images and resize patches separately
+- Reverse one-hot logic is now updated to output unique labels
+- Added option to resume previous training with and without parameter/data updates
+- Added autmated builds of Docker images
 
 ## 0.0.13
 

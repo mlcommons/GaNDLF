@@ -125,6 +125,8 @@ nested_training:
 # 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
 # resize the image(s) and mask (this should be greater than or equal to patch_size); resize is done ONLY when resample is not defined -- WARNING: resizing images on the fly ensures that images get loaded in memory, which dramatically increases RAM usage
+# 'resize_image' resizes the image and mask BEFORE applying any another operation
+# 'resize_patch' resizes the image and mask AFTER extracting the patch
 data_preprocessing:
   {
     'threshold':{
@@ -145,7 +147,8 @@ data_preprocessing:
     'resample_min':{
       'resolution': 1, # this will be the maximum spacing (translates to minium resolution) across all axes
     },
-    #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
+    #'resize_image': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
+    #'resize_patch': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
     'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
     'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad

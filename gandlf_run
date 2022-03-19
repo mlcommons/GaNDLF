@@ -4,12 +4,13 @@
 from __future__ import print_function, division
 import os, argparse, ast, sys
 from GANDLF.utils import fix_paths
+
 fix_paths(os.getcwd())  # add relevant vips path
 
 from datetime import date
 
 from GANDLF import version
-from GANDLF.cli.main_run import main_run
+from GANDLF.cli import main_run
 
 
 if __name__ == "__main__":
@@ -26,42 +27,56 @@ if __name__ == "__main__":
         + copyrightMessage,
     )
     parser.add_argument(
-        "-c", "--config",
+        "-c",
+        "--config",
         metavar="",
         type=str,
         help="The configuration file (contains all the information related to the training/inference session)",
     )
     parser.add_argument(
-        "-i", "--inputdata",
+        "-i",
+        "--inputdata",
         metavar="",
         type=str,
         help="Data CSV file that is used for training/inference; can also take comma-separated training-validatation pre-split CSVs",
     )
     parser.add_argument(
-        "-t", "--train",
+        "-t",
+        "--train",
         metavar="",
         type=ast.literal_eval,
         help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-output'",
     )
     parser.add_argument(
-        "-m", "--modeldir",
+        "-m",
+        "--modeldir",
         metavar="",
         type=str,
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
     )
     parser.add_argument(
-        "-d", "--device",
+        "-d",
+        "--device",
         default="cuda",
         metavar="",
         type=str,
         help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
     )
     parser.add_argument(
-        "-r", "--resetprev",
+        "-rt",
+        "--reset",
         metavar="",
         default=False,
         type=ast.literal_eval,
-        help="Whether the previous run in the output directory will be discarded or not",
+        help="Completely resets the previous run by deleting 'modeldir'",
+    )
+    parser.add_argument(
+        "-rm",
+        "--resume",
+        metavar="",
+        default=False,
+        type=ast.literal_eval,
+        help="Resume previous training by only keeping model dict in 'modeldir'",
     )
 
     parser.add_argument(
@@ -78,13 +93,27 @@ if __name__ == "__main__":
     for param_none_check in [args.inputdata, args.modeldir, args.train, args.config]:
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
-
-    # config file should always be present
-    if not(os.path.isfile(args.config)):
-        sys.exit("ERROR: Configuration file not found!")
     
+    if not args.train:
+        # if inference mode, then no need to check for reset/resume
+        args.reset, args.resume = False, False
+
+    if args.reset and args.resume:
+        print("WARNING: 'reset' and 'resume' are mutually exclusive; 'resume' will be used.")
+        args.reset = False    
+    
+    # config file should always be present
+    if not (os.path.isfile(args.config)):
+        sys.exit("ERROR: Configuration file not found!")
+
     main_run(
-        args.inputdata, args.config, args.modeldir, args.train, args.device, args.resetprev
+        args.inputdata,
+        args.config,
+        args.modeldir,
+        args.train,
+        args.device,
+        args.resume,
+        args.reset,
     )
 
     print("Finished.")

@@ -2,10 +2,11 @@ import yaml
 from typing import Union
 from .dicomanonymizer.dicomanonymizer import anonymize
 from .convert_to_nifti import convert_to_nifti
+from .slide_anonymizer import anonymize_slide
 
 
 def run_anonymizer(
-    input_path: str, output_path: str, parameters: Union[str, list, int]
+    input_path: str, output_path: str, parameters: Union[str, list, int], modality: str
 ):
     """
     This function performs anonymization of a single image or a collection of images.
@@ -14,16 +15,23 @@ def run_anonymizer(
         input_path (str): The input file or folder.
         output_path (str): The output file or folder.
         parameters (Union[str, list, int]): The parameters for anonymization; for DICOM scans, the only optional argument is "delete_private_tags", which defaults to True.
+        output_path (str): The modality type to process.
 
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
+    if parameters is None:
+        parameters = {}
+        parameters["modality"] = modality
+
+    # read the parameters
     if not isinstance(parameters, dict):
         with open(parameters, "r") as file_data:
             yaml_data = file_data.read()
         parameters = yaml.safe_load(yaml_data)
 
     if "rad" in parameters["modality"]:
+
         # initialize defaults
         if "delete_private_tags" not in parameters:
             parameters["delete_private_tags"] = True
@@ -41,6 +49,7 @@ def run_anonymizer(
                 deletePrivateTags=parameters["delete_private_tags"],
             )
     elif parameters["modality"] in ["histo", "path"]:
-        raise NotImplementedError(
-            "Anonymization for histology images has not been implemented yet."
+        anonymize_slide(
+            input_path,
+            output_path,
         )
