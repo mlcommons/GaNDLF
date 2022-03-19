@@ -219,8 +219,10 @@ def ImagesFromDataFrame(
                     global_augs_dict[aug_lower](augmentations[aug])
                 )
 
-    transform = get_transforms_for_preprocessing(parameters, transformations_list, train, apply_zero_crop)
-    
+    transform = get_transforms_for_preprocessing(
+        parameters, transformations_list, train, apply_zero_crop
+    )
+
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
     if not train:
         return subjects_dataset

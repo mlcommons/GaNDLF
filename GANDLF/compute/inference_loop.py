@@ -70,7 +70,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
     # radiology inference
     if parameters["modality"] == "rad":
-        
+
         # Setting up the inference loader
         inferenceDataForTorch = ImagesFromDataFrame(
             inferenceDataFromPickle, parameters, train=False, loader_type="inference"
@@ -122,7 +122,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             patch_size = parameters["patch_size"]
 
-            print("Constructing loader for subject:",subject_name, flush=True)
+            print("Constructing loader for subject:", subject_name, flush=True)
 
             transform = get_transforms_for_preprocessing(parameters, [], False, False)
 
@@ -162,8 +162,17 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                         ] += output[i][0]
                 else:
                     for i in range(int(output.shape[0])):
-                        output_to_write += str(subject_name) + "," + str(x_coords[i]) + "," + str(y_coords[i]) + "," + str(output[i][0]) + "\n"
-                
+                        output_to_write += (
+                            str(subject_name)
+                            + ","
+                            + str(x_coords[i])
+                            + ","
+                            + str(y_coords[i])
+                            + ","
+                            + str(output[i][0])
+                            + "\n"
+                        )
+
             if parameters["problem_type"] == "segmentation":
                 probs_map = probs_map / count_map
                 count_map = count_map / count_map.max()
@@ -173,7 +182,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 imsave(
                     os.path.join(
                         subject_dest_dir,
-                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
+                        str(row[parameters["headers"]["subjectIDHeader"]])
+                        + "_prob.png",
                     ),
                     out,
                 )
@@ -187,16 +197,17 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 imsave(
                     os.path.join(
                         subject_dest_dir,
-                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
+                        str(row[parameters["headers"]["subjectIDHeader"]])
+                        + "_count.png",
                     ),
                     count_map,
                 )
             else:
                 output_file = os.path.join(
-                        subject_dest_dir,
-                        "predictions.csv",
-                    )
-                with open(output_file, 'w') as f:
+                    subject_dest_dir,
+                    "predictions.csv",
+                )
+                with open(output_file, "w") as f:
                     f.write(output_to_write)
 
 

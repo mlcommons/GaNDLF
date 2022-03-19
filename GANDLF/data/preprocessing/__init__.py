@@ -72,7 +72,9 @@ global_preprocessing_dict = {
 }
 
 
-def get_transforms_for_preprocessing(parameters, current_transformations, train_mode, apply_zero_crop):
+def get_transforms_for_preprocessing(
+    parameters, current_transformations, train_mode, apply_zero_crop
+):
 
     preprocessing = parameters["data_preprocessing"]
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
@@ -137,5 +139,5 @@ def get_transforms_for_preprocessing(parameters, current_transformations, train_
     transforms_to_apply = None
     if current_transformations:
         transforms_to_apply = Compose(current_transformations)
-    
+
     return transforms_to_apply
