@@ -80,7 +80,10 @@ class InferTumorSegDataset(Dataset):
     def _basic_preprocessing(self):
         mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
         extracted_image = self._os_image.read_region(
-            (0, 0), self._mask_level, (mask_xdim, mask_ydim), as_array=True,
+            (0, 0),
+            self._mask_level,
+            (mask_xdim, mask_ydim),
+            as_array=True,
         )
         mask = tissue_mask_generation(extracted_image)
         del extracted_image
@@ -121,11 +124,11 @@ class InferTumorSegDataset(Dataset):
         """
         x_loc, y_loc = self._points[idx]
         patch = self._os_image.read_region(
-                (x_loc, y_loc),
-                self._selected_level,
-                (self._patch_size[0], self._patch_size[1]),
-                as_array=True,
-            )
+            (x_loc, y_loc),
+            self._selected_level,
+            (self._patch_size[0], self._patch_size[1]),
+            as_array=True,
+        )
 
         # this is to ensure that channels come at the end
         patch = patch.transpose([2, 0, 1])
