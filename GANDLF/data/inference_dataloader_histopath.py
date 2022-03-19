@@ -56,7 +56,15 @@ def tissue_mask_generation(img_rgb, rgb_min=50):
 
 
 class InferTumorSegDataset(Dataset):
-    def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level, transform= None):
+    def __init__(
+        self,
+        wsi_path,
+        patch_size,
+        stride_size,
+        selected_level,
+        mask_level,
+        transform=None,
+    ):
         self.transform = transform
         self._wsi_path = wsi_path
         self._patch_size = patch_size
@@ -125,8 +133,8 @@ class InferTumorSegDataset(Dataset):
         patch = np.expand_dims(patch, axis=-1)
         if self.transform is not None:
             patch = self.transform(patch)
-        
+
         # remove z-stack
         patch = patch.squeeze(-1)
-        
+
         return patch, (x_loc, y_loc)
