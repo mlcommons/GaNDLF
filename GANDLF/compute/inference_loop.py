@@ -127,7 +127,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             transform = get_transforms_for_preprocessing(parameters, [], False, False)
 
-            pbar.set_description("Constructing loader for subject: " + str(subject_name))
+            pbar.set_description(
+                "Constructing loader for subject: " + str(subject_name)
+            )
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
@@ -145,7 +147,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 num_workers=parameters["q_num_workers"],
             )
 
-            pbar.set_description("Looping over patches for subject: " + str(subject_name))
+            pbar.set_description(
+                "Looping over patches for subject: " + str(subject_name)
+            )
 
             for image_patches, (x_coords, y_coords) in dataloader:
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
