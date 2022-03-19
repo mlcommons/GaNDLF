@@ -106,6 +106,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         if parameters["problem_type"] != "segmentation":
             output_to_write = "SubjectID,x_coords,y_coords,output\n"
 
+        model.eval()
         # actual computation
         pbar = tqdm(inferenceDataFromPickle.iterrows())
         for _, row in pbar:
@@ -178,7 +179,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             + ","
                             + str(y_coords[i])
                             + ","
-                            + str(output[i][0])
+                            + str(tuple(output[i]))
                             + "\n"
                         )
 
