@@ -30,6 +30,28 @@ from torchio.transforms import (
 )
 
 
+def generic_3d_check(patch_size):
+    """
+    This function reads the value from the configuration and returns an appropriate tuple for torchio to ingest.
+
+    Args:
+        patch_size (Union[list, tuple, array]): The generic list/tuple/array to check.
+
+    Returns:
+        tuple: The tuple to be ingested by torchio.
+    """
+    patch_size_new = np.array(patch_size)
+    if len(patch_size) == 2:
+        patch_size_new = tuple(
+            np.append(
+                np.array(patch_size),
+                1,
+            )
+        )
+
+    return patch_size_new
+
+
 def positive_voxel_mask(image):
     return image > 0
 
@@ -43,11 +65,11 @@ def to_canonical_transform(parameters):
 
 
 def crop_transform(patch_size):
-    return Crop(patch_size)
+    return Crop(generic_3d_check(patch_size))
 
 
 def centercrop_transform(patch_size):
-    return CropOrPad(target_shape=patch_size)
+    return CropOrPad(target_shape=generic_3d_check(patch_size))
 
 
 # defining dict for pre-processing - key is the string and the value is the transform object
@@ -85,32 +107,24 @@ def get_transforms_for_preprocessing(
             preprocess_lower = preprocess.lower()
             # special check for resample
             if preprocess_lower == "resize":
-                resize_values = tuple(preprocessing["resize"])
-                current_transformations.append(torchio.Resize(resize_values))
+                resize_values = generic_3d_check(preprocessing["resize"])
+                current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resize_patch":
-                resize_values = tuple(preprocessing["resize_patch"])
-                current_transformations.append(torchio.Resize(resize_values))
+                resize_values = generic_3d_check(preprocessing["resize_patch"])
+                current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resample":
                 if "resolution" in preprocessing[preprocess_lower]:
                     # Need to take a look here
-                    resample_values = np.array(
+                    resample_values = generic_3d_check(
                         preprocessing[preprocess_lower]["resolution"]
                     )
-                    if len(resample_values) == 2:
-                        resample_values = tuple(
-                            np.append(
-                                np.array(preprocessing[preprocess_lower]["resolution"]),
-                                1,
-                            )
-                        )
                     current_transformations.append(Resample(resample_values))
             elif preprocess_lower in ["resample_minimum", "resample_min"]:
                 if "resolution" in preprocessing[preprocess_lower]:
-                    current_transformations.append(
-                        Resample_Minimum(
-                            np.array(preprocessing[preprocess_lower]["resolution"])
-                        )
+                    resample_values = generic_3d_check(
+                        preprocessing[preprocess_lower]["resolution"]
                     )
+                    current_transformations.append(Resample_Minimum(resample_values))
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
