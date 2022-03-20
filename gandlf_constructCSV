@@ -37,7 +37,6 @@ def main():
     parser.add_argument(
         "-l",
         "--labelID",
-        metavar="",
         type=str,
         help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
     )
@@ -55,7 +54,6 @@ def main():
     for param_none_check in [
         args.inputDir,
         args.channelsID,
-        args.labelID,
         args.outputFile,
     ]:
         if param_none_check is None:
