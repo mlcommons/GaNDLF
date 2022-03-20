@@ -27,14 +27,14 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
         # only consider sub-folders
         if os.path.isdir(currentSubjectDir):
             # get all files in each directory
-            filesInDir = os.listdir(
-                currentSubjectDir
-            )
+            filesInDir = os.listdir(currentSubjectDir)
             maskFile = ""
             allImageFiles = ""
             for channel in channelsID_list:
                 for i, n in enumerate(filesInDir):
-                    currentFile = pathlib.Path(os.path.join(currentSubjectDir, n)).as_posix()
+                    currentFile = pathlib.Path(
+                        os.path.join(currentSubjectDir, n)
+                    ).as_posix()
                     if channel in n:
                         allImageFiles += currentFile + ","
                     elif labelID is not None:
