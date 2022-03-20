@@ -37,6 +37,7 @@ def main():
     parser.add_argument(
         "-l",
         "--labelID",
+        default=None,
         type=str,
         help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
     )
@@ -61,9 +62,6 @@ def main():
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
-
-    if not args.labelID:
-        args.labelID = ""
 
     writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
 
