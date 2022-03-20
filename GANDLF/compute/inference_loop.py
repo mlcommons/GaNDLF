@@ -45,17 +45,25 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     )
 
     # Loading the weights into the model
-    main_dict = outputDir
+    main_dict = None
     if os.path.isdir(outputDir):
-        file_to_check = os.path.join(
-            outputDir, str(parameters["model"]["architecture"]) + "_best.pth.tar"
-        )
-        if not os.path.isfile(file_to_check):
-            raise ValueError("The model specified model was not found:", file_to_check)
+        model_files_to_check = ["_best.pth.tar", "_last.pth.tar", "_latest.pth.tar"]
+        for model_to_check in model_files_to_check:
+            full_path = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + model_to_check
+            )
+            if os.path.isfile(full_path):
+                main_dict = torch.load(full_path)
+                break
+
+        if main_dict is None:
+            raise ValueError(
+                "The model files were not found, checked following endings:",
+                model_files_to_check,
+            )
 
     parameters["save_output"] = True
 
-    main_dict = torch.load(file_to_check)
     model.load_state_dict(main_dict["model_state_dict"])
     model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
         model, parameters["model"]["amp"], device, optimizer=None
