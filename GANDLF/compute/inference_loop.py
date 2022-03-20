@@ -117,7 +117,13 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             parameters["mask_level"] = parameters["slide_level"]
 
         if parameters["problem_type"] != "segmentation":
-            output_to_write = "SubjectID,x_coords,y_coords,output\n"
+            output_to_write = "SubjectID,x_coords,y_coords"
+            if parameters["problem_type"] == "regression":
+                output_to_write += ",output"
+            elif parameters["problem_type"] == "classification":
+                for n in range(parameters["model"]["num_classes"]):
+                    output_to_write += ",probability_" + str(n)
+            output_to_write += "\n"
 
         model.eval()
         # actual computation
@@ -133,9 +139,15 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             subject_dest_dir = os.path.join(outputDir, str(subject_name))
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
+            count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+            ## this can probably be made into a single multi-class probability map that functions for all workloads
             if parameters["problem_type"] == "segmentation":
                 probs_map = np.zeros((level_height, level_width), dtype=np.float16)
-                count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+            else:
+                probs_map = np.zeros(
+                    (parameters["model"]["num_classes"], level_height, level_width),
+                    dtype=np.float16,
+                )
 
             patch_size = parameters["patch_size"]
 
@@ -175,11 +187,11 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 output = output.detach().cpu().numpy()
 
                 for i in range(int(output.shape[0])):
+                    count_map[
+                        x_coords[i] : x_coords[i] + patch_size[0],
+                        y_coords[i] : y_coords[i] + patch_size[1],
+                    ] += 1
                     if parameters["problem_type"] == "segmentation":
-                        count_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += 1
                         probs_map[
                             x_coords[i] : x_coords[i] + patch_size[0],
                             y_coords[i] : y_coords[i] + patch_size[1],
@@ -191,13 +203,21 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             + str(x_coords[i])
                             + ","
                             + str(y_coords[i])
-                            + ","
-                            + str(tuple(output[i]))
-                            + "\n"
                         )
+                        for n in range(parameters["model"]["num_classes"]):
+                            probs_map[
+                                n,
+                                x_coords[i] : x_coords[i] + patch_size[0],
+                                y_coords[i] : y_coords[i] + patch_size[1],
+                            ] += output[i][n]
+                            output_to_write += "," + str(output[i][n])
+                        # ensure csv row terminates in new line
+                        output_to_write += "\n"
+
+            # ensure probability map is scaled
+            probs_map /= count_map
 
             if parameters["problem_type"] == "segmentation":
-                probs_map = probs_map / count_map
                 count_map = count_map / count_map.max()
                 out = count_map * probs_map
                 count_map = np.array(count_map * 255, dtype=np.uint16)
@@ -232,6 +252,21 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 )
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
+                import matplotlib.pylab as plt
+
+                for n in range(parameters["model"]["num_classes"]):
+                    plt.imshow(probs_map[n, ...], cmap="hot")
+                    plt.axis("off")
+                    plt.axis("image")
+                    plt.axis("tight")
+                    plt.savefig(
+                        os.path.join(
+                            subject_dest_dir,
+                            "probability_map_" + str(n) + ".png",
+                        ),
+                        dpi=300,
+                        bbox_inches="tight",
+                    )
 
 
 if __name__ == "__main__":
