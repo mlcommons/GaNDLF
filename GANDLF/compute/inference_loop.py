@@ -55,7 +55,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
     parameters["save_output"] = True
 
-    main_dict = torch.load(file_to_check, map_location=torch.device(device))
+    main_dict = torch.load(file_to_check)
     model.load_state_dict(main_dict["model_state_dict"])
     model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
         model, parameters["model"]["amp"], device, optimizer=None
