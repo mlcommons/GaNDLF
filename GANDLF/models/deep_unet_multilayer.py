@@ -140,22 +140,6 @@ class deep_unet_multilayer(ModelBase):
         x = y[-1]
         o = []
 
-        x = self.us_3(x5)
-        xl4 = self.de_3(x, x4)
-        out_3 = self.out_3(xl4)
-
-        x = self.us_2(xl4)
-        xl3 = self.de_2(x, x3)
-        out_2 = self.out_2(xl3)
-
-        x = self.us_1(xl3)
-        xl2 = self.de_1(x, x2)
-        out_1 = self.out_1(xl2)
-
-        x = self.us_0(xl2)
-        xl1 = self.de_0(x, x1)
-        out_0 = self.out_0(xl1)
-
         # [upsample --> encode] x num layers
         for i in range(self.num_layers - 1, -1, -1):
             x = self.us[i](x)
