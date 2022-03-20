@@ -215,20 +215,19 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                         output_to_write += "\n"
 
             # ensure probability map is scaled
-            probs_map /= count_map
+            count_map = count_map / count_map.max()
+            out_probs_map = count_map * probs_map
 
             if parameters["problem_type"] == "segmentation":
-                count_map = count_map / count_map.max()
-                out = count_map * probs_map
                 count_map = np.array(count_map * 255, dtype=np.uint16)
-                out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
+                out_thresh = np.array((out_probs_map > 0.5) * 255, dtype=np.uint16)
                 imsave(
                     os.path.join(
                         subject_dest_dir,
                         str(row[parameters["headers"]["subjectIDHeader"]])
                         + "_prob.png",
                     ),
-                    out,
+                    out_probs_map,
                 )
                 imsave(
                     os.path.join(
@@ -252,21 +251,19 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 )
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
-                import matplotlib.pylab as plt
+
+                import cv2
 
                 for n in range(parameters["model"]["num_classes"]):
-                    plt.imshow(probs_map[n, ...], cmap="hot")
-                    plt.axis("off")
-                    plt.axis("image")
-                    plt.axis("tight")
-                    plt.savefig(
-                        os.path.join(
-                            subject_dest_dir,
-                            "probability_map_" + str(n) + ".png",
-                        ),
-                        dpi=300,
-                        bbox_inches="tight",
+                    file_to_write = os.path.join(
+                        subject_dest_dir, "probability_map_" + str(n) + ".png"
                     )
+                    image = np.array(
+                        out_probs_map[n, ...] * 255 / out_probs_map[n, ...].max(),
+                        dtype=np.uint8,
+                    )
+                    heatmap = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
+                    cv2.imwrite(file_to_write, heatmap)
 
 
 if __name__ == "__main__":
