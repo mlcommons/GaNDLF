@@ -47,7 +47,12 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     # Loading the weights into the model
     main_dict = None
     if os.path.isdir(outputDir):
-        model_files_to_check = ["_best.pth.tar", "_last.pth.tar", "_latest.pth.tar", "_init.pth.tar"]
+        model_files_to_check = [
+            "_best.pth.tar",
+            "_last.pth.tar",
+            "_latest.pth.tar",
+            "_init.pth.tar",
+        ]
         for model_to_check in model_files_to_check:
             full_path = os.path.join(
                 outputDir, str(parameters["model"]["architecture"]) + model_to_check
