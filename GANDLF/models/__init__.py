@@ -3,6 +3,7 @@ from .light_unet import light_unet, light_resunet
 from .unet_multilayer import unet_multilayer, resunet_multilayer
 from .light_unet_multilayer import light_unet_multilayer, light_resunet_multilayer
 from .deep_unet import deep_unet, deep_resunet
+from .deep_unet_multilayer import deep_unet_multilayer, deep_resunet_multilayer
 from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19

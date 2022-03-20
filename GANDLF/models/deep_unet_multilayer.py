@@ -14,7 +14,7 @@ import sys
 from GANDLF.utils.generic import checkPatchDimensions
 
 
-class unet_multilayer(ModelBase):
+class deep_unet_multilayer(ModelBase):
     """
     This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
@@ -27,7 +27,7 @@ class unet_multilayer(ModelBase):
         residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
-        super(unet_multilayer, self).__init__(parameters)
+        super(deep_unet_multilayer, self).__init__(parameters)
 
         if not ("depth" in parameters["model"]):
             parameters["model"]["depth"] = 4
@@ -62,6 +62,7 @@ class unet_multilayer(ModelBase):
         self.en = []
         self.us = []
         self.de = []
+        self.out = []
 
         for i_lay in range(0, self.num_layers):
             self.ds.append(
@@ -103,14 +104,16 @@ class unet_multilayer(ModelBase):
                 )
             )
 
-        self.out = out_conv(
-            input_channels=self.base_filters,
-            output_channels=self.n_classes,
-            conv=self.Conv,
-            norm=self.Norm,
-            network_kwargs=self.network_kwargs,
-            final_convolution_layer=self.final_convolution_layer,
-        )
+            self.out.append(
+                out_conv(
+                    input_channels=self.base_filters * 2**i_lay,
+                    output_channels=self.n_classes,
+                    conv=self.Conv,
+                    norm=self.Norm,
+                    network_kwargs=self.network_kwargs,
+                    final_convolution_layer=self.final_convolution_layer,
+                )
+            )
 
     def forward(self, x):
         """
@@ -125,6 +128,7 @@ class unet_multilayer(ModelBase):
             Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
+
         y = []
         y.append(self.ins(x))
 
@@ -134,17 +138,20 @@ class unet_multilayer(ModelBase):
             y.append(self.en[i](temp))
 
         x = y[-1]
+        o = []
 
         # [upsample --> encode] x num layers
         for i in range(self.num_layers - 1, -1, -1):
             x = self.us[i](x)
             x = self.de[i](x, y[i])
+            o.append(self.out[i](x))
 
-        x = self.out(x)
-        return x
+        # Currently four outputs from the deep network
+
+        return o.reverse()
 
 
-class resunet_multilayer(unet_multilayer):
+class deep_resunet_multilayer(deep_unet_multilayer):
     """
     This is the standard U-Net architecture with residual connections : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
@@ -152,4 +159,6 @@ class resunet_multilayer(unet_multilayer):
     """
 
     def __init__(self, parameters: dict):
-        super(resunet_multilayer, self).__init__(parameters, residualConnections=True)
+        super(deep_resunet_multilayer, self).__init__(
+            parameters, residualConnections=True
+        )
