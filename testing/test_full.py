@@ -43,10 +43,10 @@ all_norm_type = ["batch", "instance"]
 
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
-baseConfigDir = os.path.abspath(os.path.normpath("./samples"))
-testingDir = os.path.abspath(os.path.normpath("./testing"))
-inputDir = os.path.abspath(os.path.normpath("./testing/data"))
-outputDir = os.path.abspath(os.path.normpath("./testing/data_output"))
+testingDir=Path(__file__).parent.absolute().__str__()
+baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
+inputDir = os.path.join(testingDir,"data")
+outputDir = os.path.join(testingDir,"data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
 
 
@@ -817,7 +817,7 @@ def test_config_read():
         os.remove(file_config_temp)
 
     parameters = parseConfig(
-        os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
+        os.path.join(baseConfigDir, "config_all_options.yaml"),
         version_check_flag=False,
     )
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
@@ -981,7 +981,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     params_all_preprocessing_and_augs = parseConfig(
-        testingDir + "/../samples/config_all_options.yaml"
+        os.path.join(baseConfigDir, "config_all_options.yaml")
     )
 
     # take preprocessing and augmentations from all options
@@ -1097,7 +1097,7 @@ def test_preprocess_functions():
 def test_augmentation_functions():
     print("Starting testing augmentation functions")
     params_all_preprocessing_and_augs = parseConfig(
-        testingDir + "/../samples/config_all_options.yaml"
+        os.path.join(baseConfigDir, "config_all_options.yaml")
     )
 
     # this is for rgb augmentation
