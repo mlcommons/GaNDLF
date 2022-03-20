@@ -43,10 +43,10 @@ all_norm_type = ["batch", "instance"]
 
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
-testingDir=Path(__file__).parent.absolute().__str__()
+testingDir = Path(__file__).parent.absolute().__str__()
 baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
-inputDir = os.path.join(testingDir,"data")
-outputDir = os.path.join(testingDir,"data_output")
+inputDir = os.path.join(testingDir, "data")
+outputDir = os.path.join(testingDir, "data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
 
 
