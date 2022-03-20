@@ -24,10 +24,12 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     # iterate over all subject directories
     for dirs in os.listdir(inputDir):
         currentSubjectDir = os.path.join(inputDir, dirs)
-        if os.path.isdir(currentSubjectDir):  # only consider folders
+        # only consider sub-folders
+        if os.path.isdir(currentSubjectDir):
+            # get all files in each directory
             filesInDir = os.listdir(
                 currentSubjectDir
-            )  # get all files in each directory
+            )
             maskFile = ""
             allImageFiles = ""
             for channel in channelsID_list:
