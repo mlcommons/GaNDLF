@@ -28,6 +28,7 @@ all_models_segmentation = [
     "unet",
     "unet_multilayer",
     "deep_resunet",
+    "deep_resunet_multilayer",
     "fcn",
     "uinc",
     "msdnet",
@@ -1391,7 +1392,7 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    for model in ["unet_multilayer", "lightunet_multilayer"]:
+    for model in ["unet_multilayer", "lightunet_multilayer", "deepunet_multilayer"]:
         parameters["model"]["architecture"] = model
         parameters["patch_size"] = [4, 4, 1]
         parameters["model"]["dimension"] = 2
