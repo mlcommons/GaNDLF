@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, pathlib
 import pandas as pd
 
 
@@ -16,9 +16,10 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
 
     outputToWrite = "SubjectID,"
     for i, n in enumerate(channelsID_list):
-        outputToWrite = outputToWrite + "Channel_" + str(i) + ","
-    outputToWrite = outputToWrite + "Label"
-    outputToWrite = outputToWrite + "\n"
+        outputToWrite += "Channel_" + str(i) + ","
+    if labelID is not None:
+        outputToWrite += "Label"
+    outputToWrite += "\n"
 
     # iterate over all subject directories
     for dirs in os.listdir(inputDir):
@@ -31,12 +32,12 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
             allImageFiles = ""
             for channel in channelsID_list:
                 for i, n in enumerate(filesInDir):
-                    currentFile = os.path.abspath(os.path.join(currentSubjectDir, n))
-                    currentFile = currentFile.replace("\\", "/")
+                    currentFile = pathlib.Path(os.path.join(currentSubjectDir, n)).as_posix()
                     if channel in n:
                         allImageFiles += currentFile + ","
-                    elif labelID in n:
-                        maskFile = currentFile
+                    elif labelID is not None:
+                        if labelID in n:
+                            maskFile = currentFile
             if allImageFiles:
                 outputToWrite += dirs + "," + allImageFiles + maskFile + "\n"
 
