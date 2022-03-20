@@ -471,7 +471,10 @@ def parseConfig(config_file_path, version_check_flag=True):
         if not ("ignore_label_validation" in params["model"]):
             params["model"]["ignore_label_validation"] = None
         if "batch_norm" in params["model"]:
-            print("WARNING: 'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead", flush=True)
+            print(
+                "WARNING: 'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead",
+                flush=True,
+            )
 
         channel_keys_to_check = ["n_channels", "channels", "model_channels"]
         for key in channel_keys_to_check:
