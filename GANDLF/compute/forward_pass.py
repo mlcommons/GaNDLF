@@ -237,13 +237,13 @@ def validate_network(
                     .float()
                     .to(params["device"])
                 )
-                
+
                 # calculate metrics if ground truth is present
                 if params["problem_type"] != "segmentation":
                     label = label_ground_truth
                 else:
                     label = patches_batch["label"][torchio.DATA]
-                
+
                 if label is not None:
                     label = label.to(params["device"])
                     if params["verbose"]:
