@@ -65,10 +65,11 @@ def inference_loop(
     # Loading the weights into the model
     main_dict = None
     if parameters["model"]["type"] == "torch":
-        # Loading the weights into the model        
+        # Loading the weights into the model
         if os.path.isdir(outputDir_or_optimizedModel):
             file_to_check = os.path.join(
-                outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + best_model_path_end
+                outputDir_or_optimizedModel,
+                str(parameters["model"]["architecture"]) + best_model_path_end,
             )
             if not os.path.isfile(file_to_check):
                 raise ValueError(
@@ -81,10 +82,12 @@ def inference_loop(
         # Loading the executable OpenVINO model
         if os.path.isdir(outputDir_or_optimizedModel):
             xml_to_check = os.path.join(
-                outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + "_best.xml"
+                outputDir_or_optimizedModel,
+                str(parameters["model"]["architecture"]) + "_best.xml",
             )
             bin_to_check = os.path.join(
-                outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + "_best.bin"
+                outputDir_or_optimizedModel,
+                str(parameters["model"]["architecture"]) + "_best.bin",
             )
             if not os.path.isfile(xml_to_check):
                 raise ValueError(
