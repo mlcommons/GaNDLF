@@ -154,6 +154,10 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   - Final layer of model
   - Mixed precision
   - Class list
+  - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
+  - Model type: model used for inference, can be "torch" or "openvino"
+      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "torch"
+      - "openvino": use the OpenVINO Inference Engine for inference
 - Various training parameters:
   - Patch size
   - Number of epochs and patience parameter
@@ -183,11 +187,13 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 ```bash
 # continue from previous shell
 python gandlf_run \
-  # -h, --help         show help message and exit
-  # -v, --version      Show program's version number and exit.
+  ## -h, --help         show help message and exit
+  ## -v, --version      Show program's version number and exit.
+  # -rt , --reset      Completely resets the previous run by deleting 'modeldir'
+  # -rm , --resume     Resume previous training by only keeping model dict in 'modeldir'
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
-  -m ./experiment_0/model_dir/ \ # model directory
+  -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   -t True \ # True == train, False == inference
   -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
 ```

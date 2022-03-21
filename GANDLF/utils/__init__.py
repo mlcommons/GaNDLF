@@ -4,6 +4,7 @@ import os
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 from .imaging import (
+    resize_image,
     perform_sanity_check_on_subject,
     write_training_patches,
 )
@@ -38,5 +39,6 @@ from .generic import (
 from .modelio import (
     best_model_path_end,
     load_model,
+    load_ov_model,
     save_model,
 )

@@ -20,8 +20,10 @@ from GANDLF.utils import (
     get_dataframe,
     best_model_path_end,
     load_model,
+    load_ov_model,
 )
 from GANDLF.models import get_model
+
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 
 
@@ -38,6 +40,7 @@ def inference_loop(
         outputDir_or_optimizedModel (str): The output directory or optimized model file.
     """
     # Defining our model here according to parameters mentioned in the configuration file
+    print("Current model type : ", parameters["model"]["type"])
     print("Number of dims     : ", parameters["model"]["dimension"])
     if "num_channels" in parameters["model"]:
         print("Number of channels : ", parameters["model"]["num_channels"])
@@ -60,22 +63,45 @@ def inference_loop(
     inference_loader = get_testing_loader(parameters)
 
     # Loading the weights into the model
-    model_file = outputDir_or_optimizedModel
-    if os.path.isdir(model_file):
-        model_file = os.path.join(
-            outputDir_or_optimizedModel,
-            str(parameters["model"]["architecture"]) + best_model_path_end,
-        )
+    main_dict = None
+    if parameters["model"]["type"] == "torch":
+        # Loading the weights into the model        
+        if os.path.isdir(outputDir_or_optimizedModel):
+            file_to_check = os.path.join(
+                outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + best_model_path_end
+            )
+            if not os.path.isfile(file_to_check):
+                raise ValueError(
+                    "The specified model was not found: {0}.".format(file_to_check)
+                )
 
-    if not os.path.isfile(model_file):
-        raise FileNotFoundError(
-            "The model specified in file was not found:", model_file
+        main_dict = torch.load(file_to_check, map_location=torch.device(device))
+        model.load_state_dict(main_dict["model_state_dict"])
+    elif parameters["model"]["type"].lower() == "openvino":
+        # Loading the executable OpenVINO model
+        if os.path.isdir(outputDir_or_optimizedModel):
+            xml_to_check = os.path.join(
+                outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + "_best.xml"
+            )
+            bin_to_check = os.path.join(
+                outputDir_or_optimizedModel, str(parameters["model"]["architecture"]) + "_best.bin"
+            )
+            if not os.path.isfile(xml_to_check):
+                raise ValueError(
+                    "The specified model IR was not found: {0}.".format(xml_to_check)
+                )
+            if not os.path.isfile(bin_to_check):
+                raise ValueError(
+                    "The model specified model weights was not found: {0}.".format(
+                        bin_to_check
+                    )
+                )
+            model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
+            parameters["model"]["IO"] = [input_blob, output_blob]
+    else:
+        raise ValueError(
+            "The model type is not recognized: ", parameters["model"]["type"]
         )
-
-    main_dict = load_model(
-        model_file, device=torch.device(device), full_sanity_check=False
-    )
-    model.load_state_dict(main_dict["model_state_dict"])
 
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
@@ -85,9 +111,10 @@ def inference_loop(
     parameters["save_output"] = True
 
     print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-        model, parameters["model"]["amp"], device, optimizer=None
-    )
+    if parameters["model"]["type"] == "torch":
+        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
+            model, parameters["model"]["amp"], device, optimizer=None
+        )
 
     print("Using device:", parameters["device"], flush=True)
 
@@ -149,12 +176,23 @@ def inference_loop(
             )
             for image_patches, (x_coords, y_coords) in tqdm(dataloader):
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                if parameters["model"]["amp"]:
-                    with autocast():
+                if parameters["model"]["type"] == "torch":
+                    if parameters["model"]["amp"]:
+                        with autocast():
+                            output = model(
+                                image_patches.float().to(parameters["device"])
+                            )
+                    else:
                         output = model(image_patches.float().to(parameters["device"]))
+                    output = output.detach().cpu().numpy()
                 else:
-                    output = model(image_patches.float().to(parameters["device"]))
-                output = output.detach().cpu().numpy()
+                    output = model.infer(
+                        inputs={
+                            parameters["model"]["IO"][0]: image_patches.float()
+                            .cpu()
+                            .numpy()
+                        }
+                    )[parameters["model"]["IO"][1]]
                 for i in range(int(output.shape[0])):
                     count_map[
                         x_coords[i] : x_coords[i] + patch_size[0],
