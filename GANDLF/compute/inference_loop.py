@@ -215,7 +215,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                         output_to_write += "\n"
 
             # ensure probability map is scaled
-            count_map = count_map / count_map.max()
+            count_map /= count_map.max()
             out_probs_map = count_map * probs_map
 
             if parameters["problem_type"] == "segmentation":
