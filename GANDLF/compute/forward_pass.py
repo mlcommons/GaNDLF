@@ -287,13 +287,11 @@ def validate_network(
                 output_prediction = output_prediction.unsqueeze(0)
                 if params["save_output"]:
                     img_for_metadata = torchio.Image(
-                        type=subject["0"]["type"],
-                        tensor=subject["0"]["data"].squeeze(0),
-                        affine=subject["0"]["affine"].squeeze(0),
+                        type=subject["1"]["type"],
+                        tensor=subject["1"]["data"].squeeze(0),
+                        affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
-                    ext = get_filename_extension_sanitized(
-                        subject["path_to_metadata"][0]
-                    )
+                    ext = get_filename_extension_sanitized(subject["1"]["path"][0])
                     pred_mask = output_prediction.numpy()
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
@@ -312,9 +310,7 @@ def validate_network(
                     result_image.CopyInformation(img_for_metadata)
 
                     # cast as the same data type
-                    result_image = sitk.Cast(
-                        result_image, img_for_metadata.GetPixelID()
-                    )
+                    result_image = sitk.Cast(result_image, sitk.sitkUInt16)
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         resampler = torchio.transforms.Resample(
@@ -356,10 +352,11 @@ def validate_network(
 
             # we cast to float32 because float16 was causing nan
             if label_ground_truth is not None:
+                # this is for RGB label
                 if label_ground_truth.shape[0] == 3:
-                    label_ground_truth = (
-                        label_ground_truth[0, ...].unsqueeze(0).unsqueeze(0)
-                    )
+                    label_ground_truth = label_ground_truth[0, ...].unsqueeze(0)
+                # we always want the ground truth to be in the same format as the prediction
+                label_ground_truth = label_ground_truth.unsqueeze(0)
                 if label_ground_truth.shape[-1] == 1:
                     label_ground_truth = label_ground_truth.squeeze(-1)
                 final_loss, final_metric = get_loss_and_metrics(
