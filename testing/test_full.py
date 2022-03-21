@@ -37,6 +37,7 @@ all_models_regression = [
     "resnet18",
     "resnet50",
     "efficientnetb0",
+    "imagenet_vgg16",
 ]
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
