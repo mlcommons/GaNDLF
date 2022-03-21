@@ -1,6 +1,5 @@
-import hashlib, pkg_resources, subprocess
+import os, hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
-
 import torch
 
 # these are the base keys for the model dictionary to save
@@ -23,14 +22,21 @@ model_dict_required = {
 best_model_path_end = "_best.pth.tar"
 
 
-def save_model(model_dict, path):
+def save_model(model_dict, model, params, path, onnx_export=True):
     """
     Save the model dictionary to a file.
 
     Args:
         model_dict (dict): Model dictionary to save.
+        model (torch model): Trained torch model.
+        params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
+        onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
+    num_channel = params["model"]["num_channels"]
+    model_dimension = params["model"]["dimension"]
+    input_shape = params["patch_size"]
+
     model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
     model_dict["timestamp_hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
@@ -45,6 +51,70 @@ def save_model(model_dict, path):
     except subprocess.CalledProcessError:
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
+
+    if onnx_export == False:
+        print("WARNING: Current model is not supported by ONNX/OpenVINO!")
+        return
+    else:
+        try:
+            onnx_path = path.replace("pth.tar", "onnx")
+            if model_dimension == 2:
+                dummy_input = torch.randn(
+                    (1, num_channel, input_shape[0], input_shape[1])
+                )
+            else:
+                dummy_input = torch.randn(
+                    (1, num_channel, input_shape[0], input_shape[1], input_shape[2])
+                )
+
+            with torch.no_grad():
+                torch.onnx.export(
+                    model.to("cpu"),
+                    dummy_input.to("cpu"),
+                    onnx_path,
+                    opset_version=11,
+                    export_params=True,
+                    verbose=True,
+                    input_names=["input"],
+                    output_names=["output"],
+                )
+
+            ov_output_dir = os.path.dirname(os.path.abspath(path))
+        except RuntimeWarning:
+            print("WARNING: Cannot export to ONNX model.")
+            return
+
+        try:
+            if model_dimension == 2:
+                subprocess.call(
+                    [
+                        "mo",
+                        "--input_model",
+                        "{0}".format(onnx_path),
+                        "--input_shape",
+                        "[1,{0},{1},{2}]".format(
+                            num_channel, input_shape[0], input_shape[1]
+                        ),
+                        "--output_dir",
+                        "{0}".format(ov_output_dir),
+                    ],
+                )
+            else:
+                subprocess.call(
+                    [
+                        "mo",
+                        "--input_model",
+                        "{0}".format(onnx_path),
+                        "--input_shape",
+                        "[1,{0},{1},{2},{3}]".format(
+                            num_channel, input_shape[0], input_shape[1], input_shape[2]
+                        ),
+                        "--output_dir",
+                        "{0}".format(ov_output_dir),
+                    ],
+                )
+        except subprocess.CalledProcessError:
+            print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
 
 
 def load_model(path, device, full_sanity_check=True):
@@ -83,3 +153,41 @@ def load_model(path, device, full_sanity_check=True):
         )
 
     return model_dict
+
+
+def load_ov_model(path, device="CPU"):
+    """
+    Load an OpenVINO IR model from an .xml file.
+
+    Args:
+        path (str): The path to the OpenVINO .xml file.
+        device (str): The device to run inference, can be "CPU", "GPU" or "MULTI:CPU,GPU". Default to be "CPU".
+
+    Returns:
+        exec_net (OpenVINO executable net): executable OpenVINO model.
+        input_blob (str): Input name.
+        output_blob (str): Output name.
+    """
+
+    try:
+        from openvino.inference_engine import IECore
+    except ImportError:
+        raise ImportError("OpenVINO inference engine is not configured correctly.")
+
+    ie = IECore()
+    if device.lower() == "cuda":
+        device = "GPU"
+
+    if device == "GPU":
+        ie.set_config(
+            config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))},
+            device_name=device,
+        )
+
+    net = ie.read_network(model=path, weights=path.replace("xml", "bin"))
+
+    input_blob = next(iter(net.input_info))
+    out_blob = next(iter(net.outputs))
+
+    exec_net = ie.load_network(network=net, device_name=device.upper())
+    return exec_net, input_blob, out_blob

@@ -124,6 +124,11 @@ def parseConfig(config_file_path, version_check_flag=True):
         if len(params["patch_size"]) == 2:  # 2d check
             # ensuring same size during torchio processing
             params["patch_size"].append(1)
+            if "dimension" not in params["model"]:
+                params["model"]["dimension"] = 2
+        elif len(params["patch_size"]) == 3:  # 2d check
+            if "dimension" not in params["model"]:
+                params["model"]["dimension"] = 3
     else:
         sys.exit(
             "The 'patch_size' parameter needs to be present in the configuration file"
@@ -398,12 +403,17 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "clamp",
             ]
 
-            if (
-                "resize" in params["data_preprocessing"]
-                and "resample" in params["data_preprocessing"]
-            ):
+            resize_requested = False
+            for key in params["data_preprocessing"]:
+                if key in ["resize", "resize_image", "resize_images", "resize_patch"]:
+                    resize_requested = True
+            if resize_requested and "resample" in params["data_preprocessing"]:
+                for key in ["resize", "resize_image", "resize_images", "resize_patch"]:
+                    if key in params["data_preprocessing"]:
+                        params["data_preprocessing"].pop(key)
+
                 print(
-                    "WARNING: 'resize' is ignored as 'resample' is defined under 'data_processing'",
+                    "WARNING: Different 'resize' operations are ignored as 'resample' is defined under 'data_processing'",
                     file=sys.stderr,
                 )
 
@@ -480,6 +490,10 @@ def parseConfig(config_file_path, version_check_flag=True):
             print("Using default 'norm_type' in 'model': batch")
             params["model"]["norm_type"] = "batch"
 
+        # initialize model type for processing: if not defined, default to torch
+        if not ("type" in params["model"]):
+            params["model"]["type"] = "torch"
+
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
@@ -492,12 +506,9 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "WARNING: This is a special case for multi-class computation, where different labels are processed together, `reverse_one_hot` will need mapping information to work correctly"
             )
             temp_classList = params["model"]["class_list"]
-            temp_classList = temp_classList.replace(
-                "[", ""
-            )  # we don't need the brackets
-            temp_classList = temp_classList.replace(
-                "]", ""
-            )  # we don't need the brackets
+            # we don't need the brackets
+            temp_classList = temp_classList.replace("[", "")
+            temp_classList = temp_classList.replace("]", "")
             params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
@@ -505,7 +516,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                     params["model"]["class_list"]
                 )
             except AssertionError:
-                AssertionError("Could not evaluate the 'class_list' in 'model'")
+                raise AssertionError("Could not evaluate the 'class_list' in 'model'")
 
     if "kcross_validation" in params:
         sys.exit(
@@ -538,7 +549,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     params["parallel_compute_command"] = parallel_compute_command
 
     if "opt" in params:
-        DeprecationWarning("'opt' has been superceded by 'optimizer'")
+        print("DeprecationWarning: 'opt' has been superceded by 'optimizer'")
         params["optimizer"] = params["opt"]
 
     # define defaults

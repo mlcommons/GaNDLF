@@ -1,0 +1,21 @@
+FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
+LABEL github="https://github.com/CBICA/GaNDLF"
+LABEL docs="https://cbica.github.io/GaNDLF/"
+LABEL version=1.0
+
+# Install instructions for NVIDIA Container Toolkit allowing you to use the host's GPU: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+# Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
+
+# Install Python 3.7 -- base image has 3.8, but pickle5 is redundant in 3.8 (and will cause setup errors). This could be resolved at setup time but this simplifies the build for now.
+RUN apt-get update && apt-get install -y python3.7 python3-pip libvips libjpeg8-dev zlib1g-dev python3-dev libpython3.7-dev libffi-dev
+RUN python3.7 -m pip install --upgrade pip
+RUN python3.7 -m pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+COPY . /GaNDLF
+WORKDIR /GaNDLF
+RUN python3.7 -m pip install --upgrade pip && python3.7 -m pip install openvino-dev
+RUN python3.7 -m pip install -e .
+# Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
+# If a user calls "docker run gandlf:[tag] gandlf_anonymize", it will resolve to running "python gandlf_anonymize" instead.
+# CMD is inherently overridden by args to "docker run", entrypoint is constant.
+ENTRYPOINT python3.7
+CMD gandlf_run
