@@ -7,7 +7,7 @@ import torchvision
 import torch.nn as nn
 
 from .modelBase import ModelBase
-from GANDLF.models import modelBase
+
 
 def create_torchvision_model(modelname, pretrained=True, num_classes=2):
     if modelname == "vgg16":
@@ -23,39 +23,49 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2):
         in_features=prev_out_features, out_features=num_classes
     )
     return model
-    
-class imagenet_vgg16(modelBase):
 
-    def __init__(self) -> None:
+
+class imagenet_vgg16(ModelBase):
+    def __init__(
+        self,
+    ) -> None:
         super().__init__()
-        self.model = create_torchvision_model("vgg16", pretrained=True, num_classes=self.n_classes)
+        self.model = create_torchvision_model(
+            "vgg16", pretrained=True, num_classes=self.n_classes
+        )
 
     def forward(self, x):
         return self.model(x)
 
-class imagenet_vgg19(modelBase):
 
+class imagenet_vgg19(ModelBase):
     def __init__(self) -> None:
         super().__init__()
-        self.model = create_torchvision_model("vgg19", pretrained=True, num_classes=self.n_classes)
+        self.model = create_torchvision_model(
+            "vgg19", pretrained=True, num_classes=self.n_classes
+        )
 
     def forward(self, x):
         return self.model(x)
 
-class imagenet_vgg16_bn(modelBase):
 
+class imagenet_vgg16_bn(ModelBase):
     def __init__(self) -> None:
         super().__init__()
-        self.model = create_torchvision_model("vgg16_bn", pretrained=True, num_classes=self.n_classes)
+        self.model = create_torchvision_model(
+            "vgg16_bn", pretrained=True, num_classes=self.n_classes
+        )
 
     def forward(self, x):
         return self.model(x)
 
-class imagenet_vgg19_bn(modelBase):
 
+class imagenet_vgg19_bn(ModelBase):
     def __init__(self) -> None:
         super().__init__()
-        self.model = create_torchvision_model("vgg19_bn", pretrained=True, num_classes=self.n_classes)
+        self.model = create_torchvision_model(
+            "vgg19_bn", pretrained=True, num_classes=self.n_classes
+        )
 
     def forward(self, x):
         return self.model(x)
