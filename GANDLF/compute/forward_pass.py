@@ -239,6 +239,7 @@ def validate_network(
                 )
 
                 # calculate metrics if ground truth is present
+                label = None
                 if params["problem_type"] != "segmentation":
                     label = label_ground_truth
                 else:
@@ -256,7 +257,7 @@ def validate_network(
                         )
 
                 if is_inference:
-                    result = step(model, image, label, params, train=False)
+                    result = step(model, image, None, params, train=False)
                 else:
                     result = step(model, image, label, params, train=True)
 
@@ -355,6 +356,12 @@ def validate_network(
 
             # we cast to float32 because float16 was causing nan
             if label_ground_truth is not None:
+                if label_ground_truth.shape[0] == 3:
+                    label_ground_truth = (
+                        label_ground_truth[0, ...].unsqueeze(0).unsqueeze(0)
+                    )
+                if label_ground_truth.shape[-1] == 1:
+                    label_ground_truth = label_ground_truth.squeeze(-1)
                 final_loss, final_metric = get_loss_and_metrics(
                     image,
                     label_ground_truth,
