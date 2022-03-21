@@ -175,8 +175,6 @@ def validate_network(
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
             pred_output /= params["scaling_factor"]
-            # all_predics.append(pred_output.double())
-            # all_targets.append(valuesToPredict.double())
 
             if is_inference and is_classification:
                 logits_list.append(pred_output)
@@ -216,7 +214,6 @@ def validate_network(
 
             output_prediction = 0  # this is used for regression/classification
             current_patch = 0
-            is_segmentation = True
             for patches_batch in patch_loader:
                 if params["verbose"]:
                     print(
@@ -240,20 +237,23 @@ def validate_network(
                     .float()
                     .to(params["device"])
                 )
-                if "value_keys" in params:
-                    is_segmentation = False
+                
+                # calculate metrics if ground truth is present
+                if params["problem_type"] != "segmentation":
                     label = label_ground_truth
                 else:
                     label = patches_batch["label"][torchio.DATA]
-                label = label.to(params["device"])
-                if params["verbose"]:
-                    print(
-                        "=== Validation shapes : label:",
-                        label.shape,
-                        ", image:",
-                        image.shape,
-                        flush=True,
-                    )
+                
+                if label is not None:
+                    label = label.to(params["device"])
+                    if params["verbose"]:
+                        print(
+                            "=== Validation shapes : label:",
+                            label.shape,
+                            ", image:",
+                            image.shape,
+                            flush=True,
+                        )
 
                 if is_inference:
                     result = step(model, image, label, params, train=False)
@@ -269,7 +269,7 @@ def validate_network(
                 else:
                     _, _, output = result
 
-                if is_segmentation:
+                if params["problem_type"] == "segmentation":
                     aggregator.add_batch(
                         output.detach().cpu(), patches_batch[torchio.LOCATION]
                     )
@@ -281,15 +281,14 @@ def validate_network(
                         output_prediction += output
 
             # save outputs
-            if is_segmentation:
+            if params["problem_type"] == "segmentation":
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
-                label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
                     img_for_metadata = torchio.Image(
-                        type=subject["label"]["type"],
-                        tensor=subject["label"]["data"].squeeze(0),
-                        affine=subject["label"]["affine"].squeeze(0),
+                        type=subject["0"]["type"],
+                        tensor=subject["0"]["data"].squeeze(0),
+                        affine=subject["0"]["affine"].squeeze(0),
                     ).as_sitk()
                     ext = get_filename_extension_sanitized(
                         subject["path_to_metadata"][0]
@@ -355,20 +354,21 @@ def validate_network(
                 subject_id_list.append(subject.get("subject_id")[0])
 
             # we cast to float32 because float16 was causing nan
-            final_loss, final_metric = get_loss_and_metrics(
-                image,
-                label_ground_truth,
-                output_prediction.to(torch.float32),
-                params,
-            )
-            if params["verbose"]:
-                print(
-                    "Full image " + mode + ":: Loss: ",
-                    final_loss,
-                    "; Metric: ",
-                    final_metric,
-                    flush=True,
+            if label_ground_truth is not None:
+                final_loss, final_metric = get_loss_and_metrics(
+                    image,
+                    label_ground_truth,
+                    output_prediction.to(torch.float32),
+                    params,
                 )
+                if params["verbose"]:
+                    print(
+                        "Full image " + mode + ":: Loss: ",
+                        final_loss,
+                        "; Metric: ",
+                        final_metric,
+                        flush=True,
+                    )
 
             # # Non network validing related
             # loss.cpu().data.item()
