@@ -16,11 +16,14 @@ from GANDLF.utils import (
     get_date_time,
     send_model_to_device,
     populate_channel_keys_in_params,
-    get_class_imbalance_weights,
     save_model,
     load_model,
     version_check,
     write_training_patches,
+)
+from GANDLF.utils.tensor import (
+    get_class_imbalance_weights_segmentation,
+    get_class_imbalance_weights_classification,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -312,27 +315,33 @@ def training_loop(
 
     # Calculate the weights here
     if params["weighted_loss"]:
-        print("Calculating weights for loss")
-        # Set up the dataloader for penalty calculation
-        penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
-            loader_type="penalty",
-        )
-        penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
-        )
+        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
+        if params["problem_type"] == "classification":
+            params["weights"] = get_class_imbalance_weights_classification(
+                training_data, params
+            )
+        elif params["problem_type"] == "segmentation":
+            print("Calculating weights for loss")
+            # Set up the dataloader for penalty calculation
+            penalty_data = ImagesFromDataFrame(
+                training_data,
+                parameters=params,
+                train=False,
+                loader_type="penalty",
+            )
+            penalty_loader = DataLoader(
+                penalty_data,
+                batch_size=1,
+                shuffle=True,
+                pin_memory=False,
+            )
 
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, params
-        )
-        del penalty_data, penalty_loader
-    else:
-        params["weights"], params["class_weights"] = None, None
+            params["weights"] = get_class_imbalance_weights_segmentation(
+                penalty_loader, params
+            )
+            del penalty_data, penalty_loader
+        else:
+            params["weights"], params["class_weights"] = None, None
 
     if "medcam" in params:
         model = medcam.inject(
