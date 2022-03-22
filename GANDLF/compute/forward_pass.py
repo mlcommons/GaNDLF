@@ -8,6 +8,7 @@ import torchio
 
 from GANDLF.utils import (
     get_date_time,
+    get_unique_timestamp,
     get_filename_extension_sanitized,
     reverse_one_hot,
 )
@@ -86,18 +87,15 @@ def validate_network(
         model.enable_medcam()
         params["medcam_enabled"] = True
 
-    if params["save_output"]:
-        if "value_keys" in params:
+    if params["save_output"] or is_inference:
+        if params["problem_type"] != "segmentation":
+            outputToWrite = "Epoch,SubjectID,PredictedValue\n"
             file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
             if os.path.exists(file_to_write):
-                # append to previously generated file
-                file = open(file_to_write, "a")
-                outputToWrite = ""
-            else:
-                # if file was absent, write header information
-                file = open(file_to_write, "w")
-                # used to write output
-                outputToWrite = "Epoch,SubjectID,PredictedValue\n"
+                file_to_write = os.path.join(
+                    current_output_dir,
+                    "output_predictions_" + get_unique_timestamp() + ".csv",
+                )
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
@@ -143,7 +141,7 @@ def validate_network(
             )
 
         # regression/classification problem AND label is present
-        if ("value_keys" in params) and label_present:
+        if (params["problem_type"] != "segmentation") and label_present:
             sampler = torchio.data.LabelSampler(params["patch_size"])
             tio_subject = torchio.Subject(subject_dict)
             generator = sampler(tio_subject, num_patches=params["q_samples_per_volume"])
@@ -180,7 +178,7 @@ def validate_network(
                 logits_list.append(pred_output)
                 subject_id_list.append(subject.get("subject_id")[0])
 
-            if params["save_output"]:
+            if params["save_output"] or is_inference:
                 outputToWrite += (
                     str(epoch)
                     + ","
@@ -374,53 +372,57 @@ def validate_network(
                         flush=True,
                     )
 
-            # # Non network validing related
-            # loss.cpu().data.item()
-            total_epoch_valid_loss += final_loss.cpu().item()
-            for metric in final_metric.keys():
-                if isinstance(total_epoch_valid_metric[metric], list):
-                    total_epoch_valid_metric[metric].append(final_metric[metric])
-                else:
-                    total_epoch_valid_metric[metric] += final_metric[metric]
+                # # Non network validing related
+                # loss.cpu().data.item()
+                total_epoch_valid_loss += final_loss.cpu().item()
+                for metric in final_metric.keys():
+                    if isinstance(total_epoch_valid_metric[metric], list):
+                        total_epoch_valid_metric[metric].append(final_metric[metric])
+                    else:
+                        total_epoch_valid_metric[metric] += final_metric[metric]
 
-        # For printing information at halftime during an epoch
-        if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
-            (batch_idx + 1) < len(valid_dataloader)
-        ):
-            print(
-                "\nHalf-Epoch Average " + mode + " loss : ",
-                total_epoch_valid_loss / (batch_idx + 1),
-            )
-            for metric in params["metrics"]:
-                if isinstance(total_epoch_valid_metric[metric], list):
-                    to_print = (
-                        np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
-                    ).tolist()
-                else:
-                    to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+        if label_ground_truth is not None:
+            # For printing information at halftime during an epoch
+            if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
+                (batch_idx + 1) < len(valid_dataloader)
+            ):
                 print(
-                    "Half-Epoch Average " + mode + " " + metric + " : ",
-                    to_print,
+                    "\nHalf-Epoch Average " + mode + " loss : ",
+                    total_epoch_valid_loss / (batch_idx + 1),
                 )
+                for metric in params["metrics"]:
+                    if isinstance(total_epoch_valid_metric[metric], list):
+                        to_print = (
+                            np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
+                        ).tolist()
+                    else:
+                        to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+                    print(
+                        "Half-Epoch Average " + mode + " " + metric + " : ",
+                        to_print,
+                    )
 
     if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
         params["medcam_enabled"] = False
 
-    average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
-    print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
-    for metric in params["metrics"]:
-        if isinstance(total_epoch_valid_metric[metric], list):
-            to_print = (
-                np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
-            ).tolist()
-        else:
-            to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
-        average_epoch_valid_metric[metric] = to_print
-        print(
-            "     Epoch Final   " + mode + " " + metric + " : ",
-            average_epoch_valid_metric[metric],
-        )
+    if label_ground_truth is not None:
+        average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
+        print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
+        for metric in params["metrics"]:
+            if isinstance(total_epoch_valid_metric[metric], list):
+                to_print = (
+                    np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
+                ).tolist()
+            else:
+                to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
+            average_epoch_valid_metric[metric] = to_print
+            print(
+                "     Epoch Final   " + mode + " " + metric + " : ",
+                average_epoch_valid_metric[metric],
+            )
+    else:
+        average_epoch_valid_loss, average_epoch_valid_metric = 0, {}
 
     if scheduler is not None:
         if params["scheduler"]["type"] in [
@@ -445,11 +447,15 @@ def validate_network(
             logits_df.SubjectID = subject_id_list
             logits_df[class_list] = logit_tensor
 
-            logits_df.to_csv(
-                os.path.join(current_fold_dir, "logits.csv"), index=False, sep=","
-            )
+            logits_file = os.path.join(current_fold_dir, "logits.csv")
+            if os.path.isfile(logits_file):
+                logits_file = os.path.join(
+                    current_fold_dir, "logits_" + get_unique_timestamp() + ".csv"
+                )
+            logits_df.to_csv(logits_file, index=False, sep=",")
 
         if "value_keys" in params:
+            file = open(file_to_write, "w")
             file.write(outputToWrite)
             file.close()
 
