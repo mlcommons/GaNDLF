@@ -28,6 +28,7 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2):
 class imagenet_vgg16(ModelBase):
     def __init__(
         self,
+        parameters,
     ) -> None:
         super().__init__()
         self.model = create_torchvision_model(
@@ -39,7 +40,10 @@ class imagenet_vgg16(ModelBase):
 
 
 class imagenet_vgg19(ModelBase):
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         super().__init__()
         self.model = create_torchvision_model(
             "vgg19", pretrained=True, num_classes=self.n_classes
@@ -50,7 +54,10 @@ class imagenet_vgg19(ModelBase):
 
 
 class imagenet_vgg16_bn(ModelBase):
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         super().__init__()
         self.model = create_torchvision_model(
             "vgg16_bn", pretrained=True, num_classes=self.n_classes
@@ -61,7 +68,10 @@ class imagenet_vgg16_bn(ModelBase):
 
 
 class imagenet_vgg19_bn(ModelBase):
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         super().__init__()
         self.model = create_torchvision_model(
             "vgg19_bn", pretrained=True, num_classes=self.n_classes
