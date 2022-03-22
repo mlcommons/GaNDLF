@@ -17,7 +17,8 @@
 - Adding option to resize images and resize patches separately
 - Reverse one-hot logic is now updated to output unique labels
 - Added option to resume previous training with and without parameter/data updates
-- Added autmated builds of Docker images
+- Added automated builds of Docker images
+- Added mechanism to perform inference without having access to ground truth labels
 
 ## 0.0.13
 
