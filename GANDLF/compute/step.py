@@ -40,25 +40,27 @@ def step(model, image, label, params, train=True):
         )
 
     # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
-    if params["problem_type"] == "segmentation":
-        if label.shape[1] == 3:
-            label = label[:, 0, ...].unsqueeze(1)
-            # this warning should only come up once
-            if params["print_rgb_label_warning"]:
-                print(
-                    "WARNING: The label image is an RGB image, only the first channel will be used.",
-                    flush=True,
-                )
-                params["print_rgb_label_warning"] = False
+    if label is not None:
+        if params["problem_type"] == "segmentation":
+            if label.shape[1] == 3:
+                label = label[:, 0, ...].unsqueeze(1)
+                # this warning should only come up once
+                if params["print_rgb_label_warning"]:
+                    print(
+                        "WARNING: The label image is an RGB image, only the first channel will be used.",
+                        flush=True,
+                    )
+                    params["print_rgb_label_warning"] = False
 
-        if params["model"]["dimension"] == 2:
-            label = torch.squeeze(label, -1)
+            if params["model"]["dimension"] == 2:
+                label = torch.squeeze(label, -1)
 
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
         if "value_keys" in params:
-            if len(label.shape) > 1:
-                label = torch.squeeze(label, -1)
+            if label is not None:
+                if len(label.shape) > 1:
+                    label = torch.squeeze(label, -1)
 
     if train == False and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
@@ -78,7 +80,10 @@ def step(model, image, label, params, train=True):
         output, attention_map = output
 
     # one-hot encoding of 'label' will probably be needed for segmentation
-    loss, metric_output = get_loss_and_metrics(image, label, output, params)
+    if label is not None:
+        loss, metric_output = get_loss_and_metrics(image, label, output, params)
+    else:
+        loss, metric_output = None, None
 
     if len(output) > 1:
         output = output[0]
