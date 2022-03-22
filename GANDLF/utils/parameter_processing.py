@@ -19,6 +19,20 @@ def populate_header_in_parameters(parameters, headers):
     if len(headers["predictionHeaders"]) > 0:
         parameters["model"]["num_classes"] = len(headers["predictionHeaders"])
 
+    # initialize model type for processing: if not defined, default to torch
+    if not ("type" in parameters["model"]):
+        parameters["model"]["type"] = "torch"
+
+    if parameters["model"]["type"] == "openvino" and parameters["model"][
+        "architecture"
+    ] in ["brain_age", "sdnet"]:
+        print(
+            "Only PyTorch for inference is supported for the current model architecture: {0}.".format(
+                parameters["model"]["architecture"]
+            )
+        )
+        parameters["model"]["type"] = "torch"
+
     # initialize number of channels for processing
     if not ("num_channels" in parameters["model"]):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])

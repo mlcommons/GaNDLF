@@ -29,6 +29,6 @@ class GlobalAveragePooling3D(nn.Module):
         if isinstance(B, int):
             return F.avg_pool3d(x, (W, H, D)).view(B, C)
         else:
-            return F.avg_pool2d(x, (W.item(), H.item(), D.item())).view(
+            return F.avg_pool3d(x, (W.item(), H.item(), D.item())).view(
                 B.item(), C.item()
             )
