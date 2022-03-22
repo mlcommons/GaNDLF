@@ -222,6 +222,8 @@ def training_loop(
     # Fetch the model according to params mentioned in the configuration file
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
+    print("Training data columns  : ", training_data.columns)
+
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(
         training_data, params, train=True, loader_type="train"

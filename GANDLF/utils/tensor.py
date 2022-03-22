@@ -235,8 +235,8 @@ def get_class_imbalance_weights_classification(training_df, parameters):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    print("Unique labels available : ", training_df["ValueToPredict"].unique())
     print("Training Data Columns : ", training_df.columns)
+    print("Unique labels available : ", training_df["ValueToPredict"].unique())
     class_count = training_df["ValueToPredict"].value_counts().to_dict()
     total_count = len(training_df)
 
