@@ -38,6 +38,10 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     class_list = None
     is_classification = parameters["problem_type"] == "classification"
 
+    # initialize model type for processing: if not defined, default to torch
+    if not ("type" in parameters["model"]):
+        parameters["model"]["type"] = "torch"
+
     for fold_dir in fold_dirs:
         parameters["current_fold_dir"] = fold_dir
         inference_loop(

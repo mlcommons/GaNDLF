@@ -367,7 +367,6 @@ def training_loop(
 
     # if previous model file is present, load it up
     if os.path.exists(best_model_path):
-        print("Previous model found. Loading it up.")
         try:
             main_dict = load_model(best_model_path)
             version_check(params["version"], version_to_check=main_dict["version"])
@@ -375,9 +374,9 @@ def training_loop(
             start_epoch = main_dict["epoch"]
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
             best_loss = main_dict["loss"]
-            print("Previous model loaded successfully.")
-        except IOError:
-            raise IOError("Previous model could not be loaded, error: ")
+            print("Previous model successfully loaded.")
+        except RuntimeWarning:
+            RuntimeWarning("Previous model could not be loaded, initializing model")
 
     print("Using device:", device, flush=True)
 
@@ -469,6 +468,8 @@ def training_loop(
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
+
+            model.eval()
             save_model(
                 {
                     "epoch": best_train_idx,
@@ -476,8 +477,12 @@ def training_loop(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "loss": best_loss,
                 },
+                model,
+                params,
                 best_model_path,
+                onnx_export=False,
             )
+            model.train()
             first_model_saved = True
 
         print("Current Best epoch: ", best_train_idx)
@@ -499,6 +504,42 @@ def training_loop(
         " mins",
         flush=True,
     )
+
+    # once the training is done, optimize the best model
+    if os.path.exists(best_model_path):
+
+        onnx_export = True
+        if params["model"]["architecture"] in ["sdnet", "brain_age"]:
+            onnx_export = False
+        elif (
+            "onnx_export" in params["model"] and params["model"]["onnx_export"] == False
+        ):
+            onnx_export = False
+
+        if onnx_export:
+            print("Optimizing best model.")
+
+            try:
+                main_dict = load_model(best_model_path)
+                version_check(params["version"], version_to_check=main_dict["version"])
+                model.load_state_dict(main_dict["model_state_dict"])
+                best_epoch = main_dict["epoch"]
+                optimizer.load_state_dict(main_dict["optimizer_state_dict"])
+                best_loss = main_dict["loss"]
+                save_model(
+                    {
+                        "epoch": best_epoch,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "loss": best_loss,
+                    },
+                    model,
+                    params,
+                    best_model_path,
+                    onnx_export,
+                )
+            except Exception as e:
+                print("Best model could not be loaded, error: ", e)
 
 
 if __name__ == "__main__":
