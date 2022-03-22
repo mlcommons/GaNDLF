@@ -1,9 +1,10 @@
-from GANDLF.compute import inference_loop
 import os
-from datetime import datetime
+import pandas as pd
 import torch
 import torch.nn.functional as F
-import pandas as pd
+
+from GANDLF.compute import inference_loop
+from GANDLF.utils import get_unique_timestamp
 
 
 def InferenceManager(dataframe, outputDir, parameters, device):
@@ -38,6 +39,10 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     class_list = None
     is_classification = parameters["problem_type"] == "classification"
 
+    # initialize model type for processing: if not defined, default to torch
+    if not ("type" in parameters["model"]):
+        parameters["model"]["type"] = "torch"
+
     for fold_dir in fold_dirs:
         parameters["current_fold_dir"] = fold_dir
         inference_loop(
@@ -71,24 +76,10 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         averaged_probs_df.PredictedClass = [
             class_list[a] for a in averaged_probs.argmax(1)
         ]
-
-        filepath_to_save = os.path.join(
-            outputDir, "final_predictions_with_averaged_probabilities.csv"
-        )
+        filepath_to_save = os.path.join(outputDir, "final_preds_and_avg_probs.csv")
         if os.path.isfile(filepath_to_save):
-            timestamp = str(datetime.now()).replace(" ", "_")
-            timestamp = timestamp.replace("-", "")
-            timestamp = timestamp.replace(":", "")
-            timestamp = timestamp.replace(".", "")
             filepath_to_save = os.path.join(
                 outputDir,
-                "final_predictions_with_averaged_probabilities"
-                + timestamp
-                + ".csv",
+                "final_preds_and_avg_probs" + get_unique_timestamp() + ".csv",
             )
-
-        averaged_probs_df.to_csv(
-            filepath_to_save,
-            index=False,
-            sep=",",
-        )
+        averaged_probs_df.to_csv(filepath_to_save, index=False)

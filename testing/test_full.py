@@ -42,6 +42,8 @@ all_models_regression = [
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
+all_model_type = ["torch", "openvino"]
+
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
 testingDir = Path(__file__).parent.absolute().__str__()
@@ -163,11 +165,13 @@ def test_train_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
@@ -203,6 +207,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["num_channels"] = 1
     parameters["model"]["architecture"] = "sdnet"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -227,12 +232,14 @@ def test_train_segmentation_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
@@ -253,10 +260,12 @@ def test_train_segmentation_rad_3d(device):
 
 
 def test_train_regression_rad_2d(device):
+    print("Starting 2D Rad regression tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["amp"] = False
@@ -267,6 +276,7 @@ def test_train_regression_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -287,10 +297,12 @@ def test_train_regression_rad_2d(device):
 
 
 def test_train_brainage_rad_2d(device):
+    print("Starting brain age tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["amp"] = False
@@ -302,6 +314,7 @@ def test_train_brainage_rad_2d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     parameters["model"]["architecture"] = "brain_age"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -317,10 +330,12 @@ def test_train_brainage_rad_2d(device):
 
 
 def test_train_regression_rad_3d(device):
+    print("Starting 3D Rad regression tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     # read and parse csv
@@ -329,6 +344,7 @@ def test_train_regression_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -353,6 +369,7 @@ def test_train_regression_rad_3d(device):
 
 
 def test_train_classification_rad_2d(device):
+    print("Starting 2D Rad classification tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -366,6 +383,7 @@ def test_train_classification_rad_2d(device):
         inputDir + "/train_2d_rad_classification.csv"
     )
     parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -386,6 +404,7 @@ def test_train_classification_rad_2d(device):
 
 
 def test_train_classification_rad_3d(device):
+    print("Starting 3D Rad classification tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -399,6 +418,7 @@ def test_train_classification_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["onnx_export"] = False
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         if "efficientnet" in model:
@@ -421,7 +441,8 @@ def test_train_classification_rad_3d(device):
     print("passed")
 
 
-def test_inference_classification_rad_3d(device):
+def test_train_resume_inference_classification_rad_3d(device):
+    print("Starting 3D Rad classification tests for resume and reset")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -438,6 +459,7 @@ def test_inference_classification_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -447,6 +469,7 @@ def test_inference_classification_rad_3d(device):
         resume=False,
         reset=True,
     )
+
     ## testing resume with parameter updates
     parameters["num_epochs"] = 2
     parameters["nested_training"]["testing"] = -5
@@ -461,7 +484,9 @@ def test_inference_classification_rad_3d(device):
     )
 
     ## testing resume without parameter updates
-    parameters["num_epochs"] = 3
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -471,8 +496,7 @@ def test_inference_classification_rad_3d(device):
         reset=False,
     )
 
-    ## testing inference
-    parameters["output_dir"] = outputDir
+    parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -483,7 +507,93 @@ def test_inference_classification_rad_3d(device):
     print("passed")
 
 
+def test_inference_optimize_classification_rad_3d(device):
+    print("Starting 3D Rad segmentation tests for optimization")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["architecture"] = all_models_regression[0]
+    parameters["model"]["onnx_export"] = True
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+
+    ## testing inference
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        parameters["output_dir"] = outputDir  # this is in inference mode
+        InferenceManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+        )
+
+    print("passed")
+
+
+def test_inference_optimize_segmentation_rad_2d(device):
+    print("Starting 2D Rad segmentation tests for optimization")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["modality"] = "rad"
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["save_output"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = ["dice"]
+    parameters["model"]["architecture"] = "resunet"
+    parameters["model"]["onnx_export"] = True
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+
+    ## testing inference
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        parameters["output_dir"] = outputDir  # this is in inference mode
+        InferenceManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+        )
+
+    print("passed")
+
+
 def test_inference_classification_with_logits_single_fold_rad_3d(device):
+    print("Starting 3D Rad classification tests for single fold logits inference")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -502,6 +612,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -511,7 +622,28 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
         resume=False,
         reset=True,
     )
+    ## this is to test if inference can run without having ground truth column
+    training_data.drop("ValueToPredict", axis=1, inplace=True)
+    training_data.drop("Label", axis=1, inplace=True)
+    temp_infer_csv = os.path.join(outputDir, "temp_infer_csv.csv")
+    training_data.to_csv(temp_infer_csv, index=False)
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
     parameters["output_dir"] = outputDir  # this is in inference mode
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["final_layer"] = "logits"
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
     InferenceManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -523,6 +655,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
 
 
 def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
+    print("Starting 3D Rad classification tests for multi-fold logits inference")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -533,7 +666,7 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     parameters["model"]["final_layer"] = "logits"
     # necessary for n-fold cross-validation inference
     parameters["nested_training"]["validation"] = 2
-
+    parameters["model"]["onnx_export"] = False
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -564,6 +697,7 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
 
 
 def test_scheduler_classification_rad_2d(device):
+    print("Starting 2D Rad segmentation tests for scheduler")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -579,6 +713,7 @@ def test_scheduler_classification_rad_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "instance"
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["onnx_export"] = False
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters["scheduler"] = {}
@@ -601,6 +736,7 @@ def test_scheduler_classification_rad_2d(device):
 
 
 def test_optimizer_classification_rad_2d(device):
+    print("Starting 2D Rad classification tests for optimizer")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -615,6 +751,7 @@ def test_optimizer_classification_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for optimizer in global_optimizer_dict:
@@ -638,6 +775,7 @@ def test_optimizer_classification_rad_2d(device):
 
 
 def test_clip_train_classification_rad_3d(device):
+    print("Starting 3D Rad classification tests for clipping")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -652,6 +790,7 @@ def test_clip_train_classification_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "vgg16"
     parameters["model"]["norm_type"] = "None"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
@@ -671,8 +810,8 @@ def test_clip_train_classification_rad_3d(device):
 
 
 def test_normtype_train_segmentation_rad_3d(device):
-    # read and initialize parameters for specific data dimension
     print("Starting 3D Rad segmentation tests for normtype")
+    # read and initialize parameters for specific data dimension
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -688,6 +827,7 @@ def test_normtype_train_segmentation_rad_3d(device):
     parameters["save_output"] = True
     parameters["data_postprocessing"] = {"fill_holes"}
     parameters["in_memory"] = True
+    parameters["model"]["onnx_export"] = False
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
@@ -721,6 +861,7 @@ def test_metrics_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
@@ -729,6 +870,7 @@ def test_metrics_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters["model"]["architecture"] = "resunet"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -752,6 +894,7 @@ def test_metrics_regression_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
@@ -759,6 +902,7 @@ def test_metrics_regression_rad_2d(device):
     parameters["model"]["amp"] = False
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "vgg11"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -782,6 +926,7 @@ def test_losses_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
@@ -790,6 +935,7 @@ def test_losses_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
@@ -911,6 +1057,7 @@ def test_cli_function_preprocess():
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     parameters = parseConfig(file_config)
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = "[0, 255||125]"
@@ -949,6 +1096,7 @@ def test_cli_function_mainrun(device):
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
 
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["num_epochs"] = 1
     parameters["nested_training"]["testing"] = 1
@@ -1001,6 +1149,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_segmentation.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["save_training"] = True
     parameters["model"]["dimension"] = 3
@@ -1009,6 +1158,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     sanitize_outputDir()
@@ -1146,6 +1296,7 @@ def test_checkpointing_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
+    parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["num_epochs"] = 1
     parameters["nested_training"]["testing"] = 1
@@ -1162,6 +1313,7 @@ def test_checkpointing_segmentation_rad_2d(device):
         "hd100_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
+    parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -1352,9 +1504,8 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
+    parameters["model"]["onnx_export"] = True
     modelDir = os.path.join(outputDir, "modelDir")
-    if os.path.isdir(modelDir):
-        shutil.rmtree(modelDir)
     Path(modelDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
         dataframe=training_data,
@@ -1364,7 +1515,6 @@ def test_train_inference_segmentation_histology_2d(device):
         resume=False,
         reset=True,
     )
-    parameters["output_dir"] = modelDir  # this is in inference mode
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_segmentation.csv", train=False
     )
@@ -1446,12 +1596,19 @@ def test_train_inference_classification_histology_2d(device):
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
     )
-    inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
-    InferenceManager(
-        dataframe=inference_data,
-        outputDir=modelDir,
-        parameters=parameters,
-        device=device,
-    )
+    for model_type in all_model_type:
+        parameters["nested_training"]["testing"] = 1
+        parameters["nested_training"]["validation"] = -2
+        parameters["output_dir"] = modelDir  # this is in inference mode
+        inference_data, parameters["headers"] = parseTrainingCSV(
+            inputDir + "/train_2d_histo_segmentation.csv", train=False
+        )
+        parameters["model"]["type"] = model_type
+        InferenceManager(
+            dataframe=inference_data,
+            outputDir=modelDir,
+            parameters=parameters,
+            device=device,
+        )
 
     print("passed")

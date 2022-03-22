@@ -17,8 +17,12 @@ from torch.cuda.amp import autocast
 import tiffslide as openslide
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import populate_channel_keys_in_params, send_model_to_device
 from GANDLF.models import global_models_dict
+from GANDLF.utils import (
+    populate_channel_keys_in_params,
+    send_model_to_device,
+    load_ov_model,
+)
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
 
@@ -34,6 +38,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         outputDir (str): The output directory.
     """
     # Defining our model here according to parameters mentioned in the configuration file
+    print("Current model type : ", parameters["model"]["type"])
     print("Number of dims     : ", parameters["model"]["dimension"])
     if "num_channels" in parameters["model"]:
         print("Number of channels : ", parameters["model"]["num_channels"])
@@ -44,46 +49,58 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         parameters=parameters
     )
 
-    # Loading the weights into the model
-    main_dict = None
-    if os.path.isdir(outputDir):
-        model_files_to_check = [
-            "_best.pth.tar",
-            "_last.pth.tar",
-            "_latest.pth.tar",
-            "_init.pth.tar",
-        ]
-        for model_to_check in model_files_to_check:
-            full_path = os.path.join(
-                outputDir, str(parameters["model"]["architecture"]) + model_to_check
-            )
-            if os.path.isfile(full_path):
-                main_dict = torch.load(full_path)
-                break
-
-        if main_dict is None:
-            raise ValueError(
-                "The model files were not found, checked following endings:",
-                model_files_to_check,
-            )
-
-    parameters["save_output"] = True
-
-    model.load_state_dict(main_dict["model_state_dict"])
-    model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-        model, parameters["model"]["amp"], device, optimizer=None
+    # Setting up the inference loader
+    inferenceDataForTorch = ImagesFromDataFrame(
+        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
     )
-    print("Using device:", parameters["device"], flush=True)
+    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
-    # ensure batch_size is 1, so that output can be written properly
-    parameters["batch_size"] = 1
+    if parameters["model"]["type"] == "torch":
+        # Loading the weights into the model
+        main_dict = outputDir
+        if os.path.isdir(outputDir):
+            file_to_check = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + "_best.pth.tar"
+            )
+            if not os.path.isfile(file_to_check):
+                raise ValueError(
+                    "The specified model was not found: {0}.".format(file_to_check)
+                )
+
+        main_dict = torch.load(file_to_check, map_location=torch.device(device))
+        model.load_state_dict(main_dict["model_state_dict"])
+    elif parameters["model"]["type"].lower() == "openvino":
+        # Loading the executable OpenVINO model
+        main_dict = outputDir
+        if os.path.isdir(outputDir):
+            xml_to_check = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + "_best.xml"
+            )
+            bin_to_check = os.path.join(
+                outputDir, str(parameters["model"]["architecture"]) + "_best.bin"
+            )
+            if not os.path.isfile(xml_to_check):
+                raise ValueError(
+                    "The specified model IR was not found: {0}.".format(xml_to_check)
+                )
+            if not os.path.isfile(bin_to_check):
+                raise ValueError(
+                    "The model specified model weights was not found: {0}.".format(
+                        bin_to_check
+                    )
+                )
+            model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
+            parameters["model"]["IO"] = [input_blob, output_blob]
+    else:
+        raise ValueError(
+            "The model type is not recognized: ", parameters["model"]["type"]
+        )
 
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
 
     # radiology inference
     if parameters["modality"] == "rad":
-
         # Setting up the inference loader
         inferenceDataForTorch = ImagesFromDataFrame(
             inferenceDataFromPickle, parameters, train=False, loader_type="inference"
@@ -179,13 +196,24 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             for image_patches, (x_coords, y_coords) in dataloader:
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
-                if parameters["model"]["amp"]:
-                    with autocast():
+                if parameters["model"]["type"] == "torch":
+                    if parameters["model"]["amp"]:
+                        with autocast():
+                            output = model(
+                                image_patches.float().to(parameters["device"])
+                            )
+                    else:
                         output = model(image_patches.float().to(parameters["device"]))
+                    output = output.detach().cpu().numpy()
                 else:
-                    output = model(image_patches.float().to(parameters["device"]))
-                output = output.detach().cpu().numpy()
-
+                    output = model.infer(
+                        inputs={
+                            parameters["model"]["IO"][0]: image_patches.float()
+                            .cpu()
+                            .numpy()
+                        }
+                    )[parameters["model"]["IO"][1]]
+                
                 for i in range(int(output.shape[0])):
                     count_map[
                         x_coords[i] : x_coords[i] + patch_size[0],

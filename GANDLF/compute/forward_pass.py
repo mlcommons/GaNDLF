@@ -8,6 +8,7 @@ import torchio
 
 from GANDLF.utils import (
     get_date_time,
+    get_unique_timestamp,
     get_filename_extension_sanitized,
     reverse_one_hot,
 )
@@ -24,7 +25,7 @@ def validate_network(
 
     Parameters
     ----------
-    model : torch.model
+    model : if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net
         The model to process the input image with, it should support appropriate dimensions.
     valid_dataloader : torch.DataLoader
         The dataloader for the validation epoch
@@ -76,26 +77,25 @@ def validate_network(
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     # Set the model to valid
-    model.eval()
+    if params["model"]["type"] == "torch":
+        model.eval()
+
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
     # all_predics = []
-    if params["medcam_enabled"]:
+    if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.enable_medcam()
         params["medcam_enabled"] = True
 
-    if params["save_output"]:
-        if "value_keys" in params:
+    if params["save_output"] or is_inference:
+        if params["problem_type"] != "segmentation":
+            outputToWrite = "Epoch,SubjectID,PredictedValue\n"
             file_to_write = os.path.join(current_output_dir, "output_predictions.csv")
             if os.path.exists(file_to_write):
-                # append to previously generated file
-                file = open(file_to_write, "a")
-                outputToWrite = ""
-            else:
-                # if file was absent, write header information
-                file = open(file_to_write, "w")
-                # used to write output
-                outputToWrite = "Epoch,SubjectID,PredictedValue\n"
+                file_to_write = os.path.join(
+                    current_output_dir,
+                    "output_predictions_" + get_unique_timestamp() + ".csv",
+                )
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
@@ -141,7 +141,7 @@ def validate_network(
             )
 
         # regression/classification problem AND label is present
-        if ("value_keys" in params) and label_present:
+        if (params["problem_type"] != "segmentation") and label_present:
             sampler = torchio.data.LabelSampler(params["patch_size"])
             tio_subject = torchio.Subject(subject_dict)
             generator = sampler(tio_subject, num_patches=params["q_samples_per_volume"])
@@ -158,18 +158,27 @@ def validate_network(
                 ## special case for 2D
                 if image.shape[-1] == 1:
                     image = torch.squeeze(image, -1)
-                pred_output += model(image)
+                if params["model"]["type"] == "torch":
+                    pred_output += model(image)
+                elif params["model"]["type"] == "openvino":
+                    pred_output += torch.from_numpy(
+                        model.infer(
+                            inputs={params["model"]["IO"][0]: image.cpu().numpy()}
+                        )[params["model"]["IO"][1]]
+                    )
+                else:
+                    raise Exception(
+                        "Model type not supported. Please only use 'torch' or 'openvino'."
+                    )
+
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
             pred_output /= params["scaling_factor"]
-            # all_predics.append(pred_output.double())
-            # all_targets.append(valuesToPredict.double())
-            print(f"pred_output.shape: {pred_output.shape}")
 
             if is_inference and is_classification:
                 logits_list.append(pred_output)
                 subject_id_list.append(subject.get("subject_id")[0])
 
-            if params["save_output"]:
+            if params["save_output"] or is_inference:
                 outputToWrite += (
                     str(epoch)
                     + ","
@@ -203,7 +212,6 @@ def validate_network(
 
             output_prediction = 0  # this is used for regression/classification
             current_patch = 0
-            is_segmentation = True
             for patches_batch in patch_loader:
                 if params["verbose"]:
                     print(
@@ -227,22 +235,29 @@ def validate_network(
                     .float()
                     .to(params["device"])
                 )
-                if "value_keys" in params:
-                    is_segmentation = False
+
+                # calculate metrics if ground truth is present
+                label = None
+                if params["problem_type"] != "segmentation":
                     label = label_ground_truth
                 else:
                     label = patches_batch["label"][torchio.DATA]
-                label = label.to(params["device"])
-                if params["verbose"]:
-                    print(
-                        "=== Validation shapes : label:",
-                        label.shape,
-                        ", image:",
-                        image.shape,
-                        flush=True,
-                    )
 
-                result = step(model, image, label, params)
+                if label is not None:
+                    label = label.to(params["device"])
+                    if params["verbose"]:
+                        print(
+                            "=== Validation shapes : label:",
+                            label.shape,
+                            ", image:",
+                            image.shape,
+                            flush=True,
+                        )
+
+                if is_inference:
+                    result = step(model, image, None, params, train=False)
+                else:
+                    result = step(model, image, label, params, train=True)
 
                 # get the current attention map and add it to its aggregator
                 if params["medcam_enabled"]:
@@ -253,7 +268,7 @@ def validate_network(
                 else:
                     _, _, output = result
 
-                if is_segmentation:
+                if params["problem_type"] == "segmentation":
                     aggregator.add_batch(
                         output.detach().cpu(), patches_batch[torchio.LOCATION]
                     )
@@ -265,19 +280,16 @@ def validate_network(
                         output_prediction += output
 
             # save outputs
-            if is_segmentation:
+            if params["problem_type"] == "segmentation":
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
-                label_ground_truth = label_ground_truth.unsqueeze(0).to(torch.float32)
                 if params["save_output"]:
                     img_for_metadata = torchio.Image(
-                        type=subject["label"]["type"],
-                        tensor=subject["label"]["data"].squeeze(0),
-                        affine=subject["label"]["affine"].squeeze(0),
+                        type=subject["1"]["type"],
+                        tensor=subject["1"]["data"].squeeze(0),
+                        affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
-                    ext = get_filename_extension_sanitized(
-                        subject["path_to_metadata"][0]
-                    )
+                    ext = get_filename_extension_sanitized(subject["1"]["path"][0])
                     pred_mask = output_prediction.numpy()
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
@@ -296,9 +308,7 @@ def validate_network(
                     result_image.CopyInformation(img_for_metadata)
 
                     # cast as the same data type
-                    result_image = sitk.Cast(
-                        result_image, img_for_metadata.GetPixelID()
-                    )
+                    result_image = sitk.Cast(result_image, sitk.sitkUInt16)
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         resampler = torchio.transforms.Resample(
@@ -326,7 +336,7 @@ def validate_network(
                     )
 
             # get the final attention map and save it
-            if params["medcam_enabled"]:
+            if params["medcam_enabled"] and params["model"]["type"] == "torch":
                 attention_map = attention_map_aggregator.get_output_tensor()
                 for i, n in enumerate(attention_map):
                     model.save_attention_map(
@@ -339,68 +349,80 @@ def validate_network(
                 subject_id_list.append(subject.get("subject_id")[0])
 
             # we cast to float32 because float16 was causing nan
-            final_loss, final_metric = get_loss_and_metrics(
-                image,
-                label_ground_truth,
-                output_prediction.to(torch.float32),
-                params,
-            )
-            if params["verbose"]:
-                print(
-                    "Full image " + mode + ":: Loss: ",
-                    final_loss,
-                    "; Metric: ",
-                    final_metric,
-                    flush=True,
+            if label_ground_truth is not None:
+                # this is for RGB label
+                if label_ground_truth.shape[0] == 3:
+                    label_ground_truth = label_ground_truth[0, ...].unsqueeze(0)
+                # we always want the ground truth to be in the same format as the prediction
+                label_ground_truth = label_ground_truth.unsqueeze(0)
+                if label_ground_truth.shape[-1] == 1:
+                    label_ground_truth = label_ground_truth.squeeze(-1)
+                final_loss, final_metric = get_loss_and_metrics(
+                    image,
+                    label_ground_truth,
+                    output_prediction.to(torch.float32),
+                    params,
                 )
+                if params["verbose"]:
+                    print(
+                        "Full image " + mode + ":: Loss: ",
+                        final_loss,
+                        "; Metric: ",
+                        final_metric,
+                        flush=True,
+                    )
 
-            # # Non network validing related
-            # loss.cpu().data.item()
-            total_epoch_valid_loss += final_loss.cpu().item()
-            for metric in final_metric.keys():
-                if isinstance(total_epoch_valid_metric[metric], list):
-                    total_epoch_valid_metric[metric].append(final_metric[metric])
-                else:
-                    total_epoch_valid_metric[metric] += final_metric[metric]
+                # # Non network validing related
+                # loss.cpu().data.item()
+                total_epoch_valid_loss += final_loss.cpu().item()
+                for metric in final_metric.keys():
+                    if isinstance(total_epoch_valid_metric[metric], list):
+                        total_epoch_valid_metric[metric].append(final_metric[metric])
+                    else:
+                        total_epoch_valid_metric[metric] += final_metric[metric]
 
-        # For printing information at halftime during an epoch
-        if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
-            (batch_idx + 1) < len(valid_dataloader)
-        ):
-            print(
-                "\nHalf-Epoch Average " + mode + " loss : ",
-                total_epoch_valid_loss / (batch_idx + 1),
-            )
-            for metric in params["metrics"]:
-                if isinstance(total_epoch_valid_metric[metric], list):
-                    to_print = (
-                        np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
-                    ).tolist()
-                else:
-                    to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+        if label_ground_truth is not None:
+            # For printing information at halftime during an epoch
+            if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
+                (batch_idx + 1) < len(valid_dataloader)
+            ):
                 print(
-                    "Half-Epoch Average " + mode + " " + metric + " : ",
-                    to_print,
+                    "\nHalf-Epoch Average " + mode + " loss : ",
+                    total_epoch_valid_loss / (batch_idx + 1),
                 )
+                for metric in params["metrics"]:
+                    if isinstance(total_epoch_valid_metric[metric], list):
+                        to_print = (
+                            np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
+                        ).tolist()
+                    else:
+                        to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+                    print(
+                        "Half-Epoch Average " + mode + " " + metric + " : ",
+                        to_print,
+                    )
 
-    if params["medcam_enabled"]:
+    if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
         params["medcam_enabled"] = False
 
-    average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
-    print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
-    for metric in params["metrics"]:
-        if isinstance(total_epoch_valid_metric[metric], list):
-            to_print = (
-                np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
-            ).tolist()
-        else:
-            to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
-        average_epoch_valid_metric[metric] = to_print
-        print(
-            "     Epoch Final   " + mode + " " + metric + " : ",
-            average_epoch_valid_metric[metric],
-        )
+    if label_ground_truth is not None:
+        average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
+        print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
+        for metric in params["metrics"]:
+            if isinstance(total_epoch_valid_metric[metric], list):
+                to_print = (
+                    np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
+                ).tolist()
+            else:
+                to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
+            average_epoch_valid_metric[metric] = to_print
+            print(
+                "     Epoch Final   " + mode + " " + metric + " : ",
+                average_epoch_valid_metric[metric],
+            )
+    else:
+        average_epoch_valid_loss, average_epoch_valid_metric = 0, {}
 
     if scheduler is not None:
         if params["scheduler"]["type"] in [
@@ -425,11 +447,15 @@ def validate_network(
             logits_df.SubjectID = subject_id_list
             logits_df[class_list] = logit_tensor
 
-            logits_df.to_csv(
-                os.path.join(current_fold_dir, "logits.csv"), index=False, sep=","
-            )
+            logits_file = os.path.join(current_fold_dir, "logits.csv")
+            if os.path.isfile(logits_file):
+                logits_file = os.path.join(
+                    current_fold_dir, "logits_" + get_unique_timestamp() + ".csv"
+                )
+            logits_df.to_csv(logits_file, index=False, sep=",")
 
         if "value_keys" in params:
+            file = open(file_to_write, "w")
             file.write(outputToWrite)
             file.close()
 
