@@ -1,9 +1,10 @@
-from GANDLF.compute import inference_loop
 import os
-import numpy as np
+import pandas as pd
 import torch
 import torch.nn.functional as F
-import pandas as pd
+
+from GANDLF.compute import inference_loop
+from GANDLF.utils import get_unique_timestamp
 
 
 def InferenceManager(dataframe, outputDir, parameters, device):
@@ -74,10 +75,14 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         averaged_probs_df.PredictedClass = [
             class_list[a] for a in averaged_probs.argmax(1)
         ]
-        averaged_probs_df.to_csv(
-            os.path.join(
-                outputDir, "final_predictions_with_averaged_probabilities.csv"
-            ),
-            index=False,
-            sep=",",
+        filepath_to_save = os.path.join(
+            outputDir, "final_preds_and_avg_probs.csv"
         )
+        if os.path.isfile(filepath_to_save):
+            filepath_to_save = os.path.join(
+                outputDir,
+                "final_preds_and_avg_probs"
+                + get_unique_timestamp()
+                + ".csv",
+            )
+        averaged_probs_df.to_csv(filepath_to_save, index=False)
