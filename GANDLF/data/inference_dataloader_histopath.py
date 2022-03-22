@@ -130,7 +130,7 @@ class InferTumorSegDataset(Dataset):
             as_array=True,
         )
 
-        # this is to ensure that channels come at the end
+        # this is to ensure that channels come at the beginning
         patch = patch.transpose([2, 0, 1])
         # this is to ensure that we always have a z-stack before applying any torchio transforms
         patch = np.expand_dims(patch, axis=-1)
