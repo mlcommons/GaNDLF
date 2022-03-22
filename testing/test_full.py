@@ -621,7 +621,28 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
         resume=False,
         reset=True,
     )
+    ## this is to test if inference can run without having ground truth column
+    training_data.drop("ValueToPredict", axis=1, inplace=True)
+    training_data.drop("Label", axis=1, inplace=True)
+    temp_infer_csv = os.path.join(outputDir, "temp_infer_csv.csv")
+    training_data.to_csv(temp_infer_csv, index=False)
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
     parameters["output_dir"] = outputDir  # this is in inference mode
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["final_layer"] = "logits"
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
     InferenceManager(
         dataframe=training_data,
         outputDir=outputDir,
