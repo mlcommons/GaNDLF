@@ -76,10 +76,14 @@ def InferenceManager(dataframe, outputDir, parameters, device):
             outputDir, "final_predictions_with_averaged_probabilities.csv"
         )
         if os.path.isfile(filepath_to_save):
+            timestamp = str(datetime.now()).replace(" ", "_")
+            timestamp = timestamp.replace("-", "")
+            timestamp = timestamp.replace(":", "")
+            timestamp = timestamp.replace(".", "")
             filepath_to_save = os.path.join(
                 outputDir,
                 "final_predictions_with_averaged_probabilities"
-                + str(datetime.now()).replace(" ", "_")
+                + timestamp
                 + ".csv",
             )
 
