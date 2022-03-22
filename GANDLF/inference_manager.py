@@ -75,14 +75,10 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         averaged_probs_df.PredictedClass = [
             class_list[a] for a in averaged_probs.argmax(1)
         ]
-        filepath_to_save = os.path.join(
-            outputDir, "final_preds_and_avg_probs.csv"
-        )
+        filepath_to_save = os.path.join(outputDir, "final_preds_and_avg_probs.csv")
         if os.path.isfile(filepath_to_save):
             filepath_to_save = os.path.join(
                 outputDir,
-                "final_preds_and_avg_probs"
-                + get_unique_timestamp()
-                + ".csv",
+                "final_preds_and_avg_probs" + get_unique_timestamp() + ".csv",
             )
         averaged_probs_df.to_csv(filepath_to_save, index=False)
