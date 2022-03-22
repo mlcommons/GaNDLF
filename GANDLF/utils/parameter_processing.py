@@ -50,6 +50,7 @@ def find_problem_type(parameters, model_final_layer):
         "classification_but_not_softmax",
         "logits",
         "classification_without_softmax",
+        "classification_with_sigmoid",
     ]
     headersFromCSV = parameters["headers"]
     class_list_exist = "class_list" in parameters["model"]
