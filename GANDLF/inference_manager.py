@@ -1,6 +1,6 @@
 from GANDLF.compute import inference_loop
 import os
-import numpy as np
+from datetime import datetime
 import torch
 import torch.nn.functional as F
 import pandas as pd
@@ -71,10 +71,20 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         averaged_probs_df.PredictedClass = [
             class_list[a] for a in averaged_probs.argmax(1)
         ]
+
+        filepath_to_save = os.path.join(
+            outputDir, "final_predictions_with_averaged_probabilities.csv"
+        )
+        if os.path.isfile(filepath_to_save):
+            filepath_to_save = os.path.join(
+                outputDir,
+                "final_predictions_with_averaged_probabilities"
+                + str(datetime.now()).replace(" ", "_")
+                + ".csv",
+            )
+
         averaged_probs_df.to_csv(
-            os.path.join(
-                outputDir, "final_predictions_with_averaged_probabilities.csv"
-            ),
+            filepath_to_save,
             index=False,
             sep=",",
         )
