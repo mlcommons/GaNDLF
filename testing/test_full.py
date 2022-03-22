@@ -627,20 +627,16 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     temp_infer_csv = os.path.join(outputDir, "temp_infer_csv.csv")
     training_data.to_csv(temp_infer_csv, index=False)
     # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
+    training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
+    parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["final_layer"] = "logits"
-
-    # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_3d_rad_classification.csv"
-    )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
