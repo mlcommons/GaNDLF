@@ -44,7 +44,7 @@ class imagenet_vgg19(ModelBase):
         self,
         parameters,
     ) -> None:
-        super(imagenet_vgg19, self).__init__()
+        super(imagenet_vgg19, self).__init__(parameters)
         self.model = create_torchvision_model(
             "vgg19", pretrained=True, num_classes=self.n_classes
         )
