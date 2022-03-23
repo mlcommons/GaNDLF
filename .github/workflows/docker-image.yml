@@ -31,8 +31,8 @@ jobs:
             dockertag: cuda113
           - platform: CPU
             dockertag: cpu
-          - platform: ROCm
-            dockertag: rocm
+#          - platform: ROCm
+#            dockertag: rocm
 
     steps:
     - name: Check out the repository
@@ -76,7 +76,6 @@ jobs:
     # https://github.com/docker/metadata-action
     - name: Extract Docker metadata
       id: meta
-      if: github.event_name != 'pull_request'
       uses: docker/metadata-action@v3
       with:
         images: docker.io/cbica/gandlf, ghcr.io/cbica/gandlf # Push to both registries

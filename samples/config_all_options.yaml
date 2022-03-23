@@ -205,10 +205,11 @@ data_augmentation:
       'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
     }, 
   }
-# ## post-processing steps
+# ## post-processing steps - only applied before output labels are saved
 # data_postprocessing:
 #   {
 #     'fill_holes', # this will fill holes in the image
+#     'mapping': {0: 0, 1: 1, 2: 4}, # this will map the labels to a new set of labels, useful to convert labels from combinatorial training (i.e., combined segmentation labels)
 #   }
 ## parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
