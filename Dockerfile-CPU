@@ -9,6 +9,7 @@ RUN python3.7 -m pip install --upgrade pip
 RUN python3.7 -m pip install torch==1.10.0+cpu torchvision==0.11.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
 COPY . /GaNDLF
 WORKDIR /GaNDLF
+RUN python3.7 -m pip install --upgrade pip && python3.7 -m pip install openvino-dev && python3.7 -m pip install torch==1.8.2+cpu torchvision==0.9.2+cpu torchaudio===0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 RUN python3.7 -m pip install -e .
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
 # If a user calls "docker run gandlf:[tag] gandlf_anonymize", it will resolve to running "python gandlf_anonymize" instead.
