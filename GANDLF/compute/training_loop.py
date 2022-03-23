@@ -328,9 +328,10 @@ def training_loop(
     if params["weighted_loss"]:
         # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
         if params["problem_type"] == "classification":
-            params["weights"] = get_class_imbalance_weights_classification(
-                training_data, params
-            )
+            (
+                params["weights"],
+                params["class_weights"],
+            ) = get_class_imbalance_weights_classification(training_data, params)
         elif params["problem_type"] == "segmentation":
             print("Calculating weights for loss")
             # Set up the dataloader for penalty calculation
@@ -340,6 +341,7 @@ def training_loop(
                 train=False,
                 loader_type="penalty",
             )
+
             penalty_loader = DataLoader(
                 penalty_data,
                 batch_size=1,
@@ -347,9 +349,10 @@ def training_loop(
                 pin_memory=False,
             )
 
-            params["weights"] = get_class_imbalance_weights_segmentation(
-                penalty_loader, params
-            )
+            (
+                params["weights"],
+                params["class_weights"],
+            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
             del penalty_data, penalty_loader
         else:
             params["weights"], params["class_weights"] = None, None
