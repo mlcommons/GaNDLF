@@ -1159,7 +1159,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
     parameters["model"]["onnx_export"] = False
-    parameters["data_postprocessing"]["mapping"] = {0:0, 1:1}
+    parameters["data_postprocessing"]["mapping"] = {0: 0, 1: 1}
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     sanitize_outputDir()
