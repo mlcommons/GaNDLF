@@ -1410,7 +1410,7 @@ def test_one_hot_logic():
     parameters = {"post_processing": {"mapping": {0: 0, 1: 1, 2: 5}}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
-    ).numpy()
+    )
 
     for key, value in parameters["post_processing"]["mapping"].items():
         comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
