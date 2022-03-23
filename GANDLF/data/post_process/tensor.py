@@ -8,6 +8,7 @@ def get_mapped_label(input, params):
     Args:
         input (torch.Tensor): The input label.
         params (dict): The parameters dict.
+
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
