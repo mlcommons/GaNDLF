@@ -16,7 +16,7 @@ from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
-from GANDLF.post_process import torch_morphological, fill_holes, get_mapped_label
+from GANDLF.data.post_process import torch_morphological, fill_holes, get_mapped_label
 from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"

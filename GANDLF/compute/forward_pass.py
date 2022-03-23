@@ -13,7 +13,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     resample_image,
 )
-from GANDLF.post_process import fill_holes, get_mapped_label
+from GANDLF.data.post_process import fill_holes, get_mapped_label
 from .step import step
 from .loss_and_metric import get_loss_and_metrics
 
