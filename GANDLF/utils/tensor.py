@@ -220,7 +220,7 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device
 
 
-def get_class_imbalance_weights_classification(training_df, parameters):
+def get_class_imbalance_weights_classification(training_df, params):
     """
     This function calculates the penalty used for loss functions in multi-class problems.
     It looks at the column "valuesToPredict" and identifies unique classes, fetches the class distribution
@@ -239,6 +239,8 @@ def get_class_imbalance_weights_classification(training_df, parameters):
     print("Unique labels available : ", training_df["ValueToPredict"].unique())
     class_count = training_df["ValueToPredict"].value_counts().to_dict()
     total_count = len(training_df)
+    for i in range(params["model"]["num_classes"]):
+        penalty_dict[i] = 0
 
     penalty_dict = {}
     print("Unique labels available : ", training_df["ValueToPredict"].unique())
