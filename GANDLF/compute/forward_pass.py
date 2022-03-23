@@ -11,6 +11,7 @@ from GANDLF.utils import (
     get_unique_timestamp,
     get_filename_extension_sanitized,
     reverse_one_hot,
+    resample_image,
 )
 from GANDLF.post_process import fill_holes, get_mapped_label
 from .step import step
@@ -314,11 +315,11 @@ def validate_network(
                     result_image = sitk.Cast(result_image, sitk.sitkUInt16)
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
-                        resampler = torchio.transforms.Resample(
+                        result_image = resample_image(
+                            result_image,
                             img_for_metadata.GetSpacing(),
-                            interpolator=sitk.NearestNeighbor,
+                            interpolator=sitk.sitkNearestNeighbor,
                         )
-                        result_image = resampler(result_image)
                     sitk.WriteImage(
                         result_image,
                         os.path.join(
