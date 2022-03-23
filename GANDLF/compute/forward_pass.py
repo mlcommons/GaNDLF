@@ -13,7 +13,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     resample_image,
 )
-from GANDLF.data.post_process import fill_holes, get_mapped_label
+from GANDLF.data.post_process import global_postprocessing_dict
 from .step import step
 from .loss_and_metric import get_loss_and_metrics
 
@@ -297,12 +297,12 @@ def validate_network(
                         pred_mask[0], params["model"]["class_list"]
                     )
                     pred_mask = np.swapaxes(pred_mask, 0, 2)
-                    # perform numpy-specific postprocessing here
-                    if "fill_holes" in params["data_postprocessing"]:
-                        pred_mask = fill_holes(pred_mask)
 
-                    # perform mapping if requested
-                    pred_mask = get_mapped_label(pred_mask, params)
+                    # perform numpy-specific postprocessing here
+                    for postprocessor in params["data_postprocessing"]:
+                        pred_mask = global_postprocessing_dict[postprocessor](
+                            pred_mask, params
+                        )
 
                     ## special case for 2D
                     if image.shape[-1] > 1:
