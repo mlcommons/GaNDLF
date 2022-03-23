@@ -222,17 +222,22 @@ def training_loop(
     # Fetch the model according to params mentioned in the configuration file
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
-    print("Training data columns  : ", training_data.columns)
+    training_data_copy = training_data.copy()
+    validation_data_copy = validation_data.copy()
+
+    print("Training data copy columns  : ", training_data_copy.columns)
+    print("Training data columns:", training_data.columns)
 
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(
-        training_data, params, train=True, loader_type="train"
+        training_data_copy, params, train=True, loader_type="train"
     )
 
-    print("Training data columns  : ", training_data.columns)
+    print("Training data copy columns  : ", training_data_copy.columns)
+    print("Training data columns : ", training_data.columns)
 
     validation_data_for_torch = ImagesFromDataFrame(
-        validation_data, params, train=False, loader_type="validation"
+        validation_data_copy, params, train=False, loader_type="validation"
     )
 
     testingDataDefined = True
