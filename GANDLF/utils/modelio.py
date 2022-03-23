@@ -2,6 +2,8 @@ import os, hashlib, pkg_resources, subprocess
 from time import gmtime, strftime
 import torch
 
+from .generic import get_unique_timestamp
+
 # these are the base keys for the model dictionary to save
 model_dict_base = {
     "epoch": 0,
@@ -30,7 +32,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     model_dimension = params["model"]["dimension"]
     input_shape = params["patch_size"]
 
-    model_dict["timestamp"] = strftime("%Y%m%d%H%M%S", gmtime())
+    model_dict["timestamp"] = get_unique_timestamp()
     model_dict["timestamp_hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
     ).hexdigest()
