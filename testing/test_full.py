@@ -16,7 +16,7 @@ from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
-from GANDLF.post_process import torch_morphological, fill_holes
+from GANDLF.data.post_process import torch_morphological, fill_holes, get_mapped_label
 from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"
@@ -1191,6 +1191,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["save_training"] = True
+    parameters["save_output"] = True
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
@@ -1198,6 +1199,8 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
     parameters["model"]["onnx_export"] = False
+    parameters["data_postprocessing"]["mapping"] = {0: 0, 1: 1}
+    parameters["data_postprocessing"]["fill_holes"] = True
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     sanitize_outputDir()
@@ -1383,7 +1386,7 @@ def test_model_patch_divisibility():
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    training_data, parameters["headers"] = parseTrainingCSV(
+    _, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
     parameters["model"]["architecture"] = "unet"
@@ -1446,6 +1449,15 @@ def test_one_hot_logic():
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
+
+    parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    )
+
+    for key, value in parameters["data_postprocessing"]["mapping"].items():
+        comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
+        assert comparison.all(), "Arrays at {}:{} are not equal".format(key, value)
 
     print("passed")
 
