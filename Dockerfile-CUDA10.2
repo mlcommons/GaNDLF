@@ -15,3 +15,12 @@ RUN python3 -m pip install -e .
 # CMD is inherently overridden by args to "docker run", entrypoint is constant.
 ENTRYPOINT python3
 CMD gandlf_run
+
+# The below force the container commands to run as a nonroot user with UID > 10000.
+# This greatly reduces UID collision probability between container and host, helping prevent privilege escalation attacks.
+# As a side benefit this also decreases the likelihood that users on a cluster won't be able to access their files.
+# See https://github.com/hexops/dockerfile as a best practices guide.
+RUN addgroup --gid 10001 --system nonroot \
+ && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
+ 
+USER nonroot
