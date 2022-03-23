@@ -204,7 +204,7 @@ def parseConfig(config_file_path, version_check_flag=True):
 
             # special case for accuracy, precision, and recall; which could be dicts
             ## need to find a better way to do this
-            if "accuracy" in comparison_string:
+            if comparison_string == "accuracy":
                 if comparison_string != "classification_accuracy":
                     temp_dict["accuracy"] = initialize_key(
                         temp_dict["accuracy"], "average", "weighted"
