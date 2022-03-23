@@ -14,12 +14,12 @@ def get_mapped_label(input, params):
     if torch.is_tensor(input):
         input = input.numpy()
 
-    if "post_processing" not in params:
+    if "data_postprocessing" not in params:
         return input
-    if "mapping" not in params["post_processing"]:
+    if "mapping" not in params["data_postprocessing"]:
         return input
 
-    mapping = params["post_processing"]["mapping"]
+    mapping = params["data_postprocessing"]["mapping"]
 
     output = np.zeros(input.shape)
 
