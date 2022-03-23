@@ -11,7 +11,7 @@ def get_mapped_label(input, params):
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
-    if isinstance(input, torch.tensor):
+    if torch.is_tensor(input):
         input = input.numpy()
 
     if "post_processing" not in params:
