@@ -229,6 +229,8 @@ def training_loop(
         training_data, params, train=True, loader_type="train"
     )
 
+    print("Training data columns  : ", training_data.columns)
+
     validation_data_for_torch = ImagesFromDataFrame(
         validation_data, params, train=False, loader_type="validation"
     )
@@ -314,6 +316,8 @@ def training_loop(
     model, params["model"]["amp"], device = send_model_to_device(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
+
+    print("Training data columns  : ", training_data.columns)
 
     # Calculate the weights here
     if params["weighted_loss"]:
