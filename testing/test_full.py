@@ -16,7 +16,7 @@ from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
-from GANDLF.post_process import torch_morphological, fill_holes
+from GANDLF.post_process import torch_morphological, fill_holes, get_mapped_label
 from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"
@@ -1406,6 +1406,15 @@ def test_one_hot_logic():
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
+
+    parameters = {"post_processing": {"mapping": {0: 0, 1: 1, 2: 5}}}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    ).numpy()
+
+    for key, value in parameters["post_processing"]["mapping"].items():
+        comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
+        assert comparison.all(), "Arrays at {}:{} are not equal".format(key, value)
 
     print("passed")
 
