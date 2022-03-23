@@ -55,6 +55,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     )
     inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
 
+    # ensure outputs are saved properly
+    parameters["save_output"] = True
+
     if parameters["model"]["type"] == "torch":
         # Loading the weights into the model
         main_dict = outputDir
