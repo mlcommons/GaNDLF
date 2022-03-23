@@ -25,8 +25,11 @@ git clone https://github.com/CBICA/GaNDLF.git
 cd GaNDLF
 conda create -n venv_gandlf python=3.7 -y
 conda activate venv_gandlf
-conda install -c conda-forge mamba -y # [OPTIONAL] mamba allows for faster dependency solving
-mamba install -c pytorch pytorch torchvision -y # 1.8.0 installs cuda 10.2 by default, personalize based on your system via https://pytorch.org/get-started/locally
+### PyTorch installation - https://pytorch.org/get-started/locally
+## CUDA 10.2
+conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch-lts -y
+## CUDA 11.1
+# conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch-lts -c conda-forge -y
 pip install openvino-dev # [OPTIONAL] to generate optimized models for inference
 pip install -e .
 
