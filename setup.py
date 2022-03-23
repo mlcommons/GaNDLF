@@ -53,7 +53,7 @@ requirements = [
     "numpy==1.21.0",
     "scipy",
     "SimpleITK!=2.0.*",
-    "torch>=1.7",
+    "torch==1.8.2",
     "torchvision",
     "tqdm",
     "torchio==0.18.57",
