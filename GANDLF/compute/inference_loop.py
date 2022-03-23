@@ -67,8 +67,11 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                     "The specified model was not found: {0}.".format(file_to_check)
                 )
 
-        main_dict = torch.load(file_to_check, map_location=torch.device(device))
+        main_dict = torch.load(file_to_check)
         model.load_state_dict(main_dict["model_state_dict"])
+        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
+            model, parameters["model"]["amp"], device, optimizer=None
+        )
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
         main_dict = outputDir
