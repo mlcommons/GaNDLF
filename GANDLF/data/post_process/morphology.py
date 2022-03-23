@@ -50,12 +50,13 @@ def torch_morphological(input_image, kernel_size=1, mode="dilation"):
     return output_image
 
 
-def fill_holes(input_image):
+def fill_holes(input_image, params):
     """
     This function fills holes in masks.
 
     Args:
         input_image (torch.Tensor): The input image.
+        params (dict): The parameters dict; unused.
 
     Returns:
         torch.Tensor: The output image after morphological operations.
