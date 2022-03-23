@@ -11,19 +11,20 @@ def get_mapped_label(input, params):
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
+    input_arr = input
     if torch.is_tensor(input):
-        input = input.numpy()
+        input_arr = input.numpy()
 
     if "data_postprocessing" not in params:
-        return input
+        return input_arr
     if "mapping" not in params["data_postprocessing"]:
-        return input
+        return input_arr
 
     mapping = params["data_postprocessing"]["mapping"]
 
-    output = np.zeros(input.shape)
+    output = np.zeros(input_arr.shape)
 
     for key, value in mapping.items():
-        output[input == key] = value
+        output[input_arr == key] = value
 
     return output
