@@ -235,32 +235,27 @@ def get_class_imbalance_weights_classification(training_df, params):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    print("Training Data Columns : ", training_df.columns)
-    print("Unique labels available : ", training_df["ValueToPredict"].unique())
     class_count = training_df["ValueToPredict"].value_counts().to_dict()
     total_count = len(training_df)
-    for i in range(params["model"]["num_classes"]):
-        penalty_dict[i] = 0
 
-    penalty_dict = {}
-    print("Unique labels available : ", training_df["ValueToPredict"].unique())
-
-    print("Calculating weights for each class.")
+    penalty_dict, weight_dict = {}, {}
+    for i in range(params["num_classes"]):
+        penalty_dict[i], weight_dict[i] = 0, 0
 
     for label in class_count.keys():
-        penalty_dict[label] = (
-            (total_count) / (len(class_count.keys())) * class_count[label]
-        )
+        weight_dict[label] = class_count[label] / total_count
 
-    label_sum = 0
     for label in class_count.keys():
-        label_sum += penalty_dict[label]
+        penalty_dict[label] = total_count / class_count[label]
 
-    print("Normalizing weights!")
+    penalty_sum = np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+
+    print("Normalizing penalty dict for each class")
+
     for label in class_count.keys():
-        penalty_dict[label] = penalty_dict[label] / label_sum
+        penalty_dict[label] = penalty_dict[label] / penalty_sum
 
-    return penalty_dict
+    return weight_dict, penalty_dict
 
 
 def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
@@ -327,7 +322,7 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
         for key, val in penalty.items()
     }
 
-    return penalty_dict
+    return weights_dict, penalty_dict
 
 
 def get_linear_interpolation_mode(dimensionality):
