@@ -354,8 +354,8 @@ def training_loop(
                 params["class_weights"],
             ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
             del penalty_data, penalty_loader
-        else:
-            params["weights"], params["class_weights"] = None, None
+    else:
+        params["weights"], params["class_weights"] = None, None
 
     if "medcam" in params:
         model = medcam.inject(
