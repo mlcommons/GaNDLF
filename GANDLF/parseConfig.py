@@ -122,6 +122,11 @@ def parseConfig(config_file_path, version_check_flag=True):
         if len(params["patch_size"]) == 2:  # 2d check
             # ensuring same size during torchio processing
             params["patch_size"].append(1)
+            if "dimension" not in params["model"]:
+                params["model"]["dimension"] = 2
+        elif len(params["patch_size"]) == 3:  # 2d check
+            if "dimension" not in params["model"]:
+                params["model"]["dimension"] = 3
     else:
         sys.exit(
             "The 'patch_size' parameter needs to be present in the configuration file"
@@ -199,7 +204,7 @@ def parseConfig(config_file_path, version_check_flag=True):
 
             # special case for accuracy, precision, and recall; which could be dicts
             ## need to find a better way to do this
-            if "accuracy" in comparison_string:
+            if comparison_string == "accuracy":
                 if comparison_string != "classification_accuracy":
                     temp_dict["accuracy"] = initialize_key(
                         temp_dict["accuracy"], "average", "weighted"
@@ -482,6 +487,10 @@ def parseConfig(config_file_path, version_check_flag=True):
         if not ("norm_type" in params["model"]):
             print("Using default 'norm_type' in 'model': batch")
             params["model"]["norm_type"] = "batch"
+
+        # initialize model type for processing: if not defined, default to torch
+        if not ("type" in params["model"]):
+            params["model"]["type"] = "torch"
 
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")

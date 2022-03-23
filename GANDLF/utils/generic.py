@@ -57,6 +57,17 @@ def get_date_time():
     return now
 
 
+def get_unique_timestamp():
+    """
+    Get a well-parsed timestamp string to be used for unique filenames
+
+    Returns:
+        str: The date in format YYYYMMDD_HHMMSS
+    """
+    now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    return now
+
+
 def get_filename_extension_sanitized(filename):
     """
     This function returns the extension of the filename with leading and trailing characters removed.
