@@ -3,7 +3,6 @@ from .light_unet import light_unet, light_resunet
 from .unet_multilayer import unet_multilayer, resunet_multilayer
 from .light_unet_multilayer import light_unet_multilayer, light_resunet_multilayer
 from .deep_unet import deep_unet, deep_resunet
-from .deep_unet_multilayer import deep_unet_multilayer, deep_resunet_multilayer
 from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
@@ -32,19 +31,15 @@ global_models_dict = {
     "residualunet": resunet,
     "residualunet_multilayer": resunet_multilayer,
     "deepunet": deep_unet,
-    "deepunet_multilayer": deep_unet_multilayer,
     "lightunet": light_unet,
     "lightunet_multilayer": light_unet_multilayer,
     "deep_unet": deep_unet,
-    "deep_unet_multilayer": deep_unet_multilayer,
     "light_unet": light_unet,
     "light_unet_multilayer": light_unet_multilayer,
     "deepresunet": deep_resunet,
-    "deepresunet_multilayer": deep_resunet_multilayer,
     "lightresunet": light_resunet,
     "lightresunet_multilayer": light_resunet_multilayer,
     "deep_resunet": deep_resunet,
-    "deep_resunet_multilayer": deep_resunet_multilayer,
     "light_resunet": light_resunet,
     "light_resunet_multilayer": light_resunet_multilayer,
     "fcn": fcn,
