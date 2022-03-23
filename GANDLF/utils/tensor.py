@@ -239,7 +239,7 @@ def get_class_imbalance_weights_classification(training_df, params):
     total_count = len(training_df)
 
     penalty_dict, weight_dict = {}, {}
-    for i in range(params["num_classes"]):
+    for i in range(params["model"]["num_classes"]):
         penalty_dict[i], weight_dict[i] = 0, 0
 
     for label in class_count.keys():
