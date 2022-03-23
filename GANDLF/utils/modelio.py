@@ -46,7 +46,9 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     torch.save(model_dict, path)
 
     if onnx_export == False:
-        print("WARNING: Current model is not supported by ONNX/OpenVINO!")
+        if "onnx_print" not in params:
+            print("WARNING: Current model is not supported by ONNX/OpenVINO!")
+            params["onnx_print"] = True
         return
     else:
         try:
