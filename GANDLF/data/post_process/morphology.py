@@ -50,7 +50,7 @@ def torch_morphological(input_image, kernel_size=1, mode="dilation"):
     return output_image
 
 
-def fill_holes(input_image, params):
+def fill_holes(input_image, params=None):
     """
     This function fills holes in masks.
 
