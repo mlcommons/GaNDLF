@@ -20,6 +20,7 @@
 - Added automated builds of Docker images
 - Added mechanism to perform inference without having access to ground truth labels
 - Added mechanism to map output labels using post-processing before saving
+- Added mechanism to enable customized histology classification output via heatmaps
 
 ## 0.0.13
 
