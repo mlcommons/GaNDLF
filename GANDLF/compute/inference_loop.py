@@ -69,6 +69,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
             model, parameters["model"]["amp"], device, optimizer=None
         )
+        model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
         main_dict = outputDir
@@ -142,7 +143,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                     output_to_write += ",probability_" + str(n)
             output_to_write += "\n"
 
-        model.eval()
         # actual computation
         pbar = tqdm(inferenceDataFromPickle.iterrows())
         for _, row in pbar:
