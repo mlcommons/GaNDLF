@@ -166,7 +166,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             patch_size = parameters["patch_size"]
 
-            transform_requested = get_transforms_for_preprocessing(parameters, [], False, False)
+            transform_requested = get_transforms_for_preprocessing(
+                parameters, [], False, False
+            )
 
             pbar.set_description(
                 "Constructing loader for subject: " + str(subject_name)
