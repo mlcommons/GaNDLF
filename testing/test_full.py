@@ -25,7 +25,9 @@ device = "cpu"
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
     "lightunet",
+    "lightunet_multilayer",
     "unet",
+    "unet_multilayer",
     "deep_resunet",
     "fcn",
     "uinc",
@@ -1362,14 +1364,14 @@ def test_model_patch_divisibility():
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     print("passed")
@@ -1621,6 +1623,53 @@ def test_train_inference_classification_histology_2d(device):
             outputDir=modelDir,
             parameters=parameters,
             device=device,
+        )
+
+    print("passed")
+
+
+def test_unet_layerchange_2d(device):
+    # test case to up code coverage --> test decreasing allowed layers for unet
+    print("Starting 2D Rad segmentation tests for normtype")
+    # read and parse csv
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    for model in ["unet_multilayer", "lightunet_multilayer"]:
+        parameters["model"]["architecture"] = model
+        parameters["patch_size"] = [4, 4, 1]
+        parameters["model"]["dimension"] = 2
+
+        # this assertion should fail
+        with pytest.raises(BaseException) as e_info:
+            global_models_dict[parameters["model"]["architecture"]](
+                parameters=parameters
+            )
+
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["depth"] = 7
+        parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["amp"] = True
+        parameters["model"]["num_channels"] = 3
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        # loop through selected models and train for single epoch
+        parameters["model"]["norm_type"] = "batch"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        if os.path.isdir(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
