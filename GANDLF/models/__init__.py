@@ -1,5 +1,7 @@
 from .unet import unet, resunet
 from .light_unet import light_unet, light_resunet
+from .unet_multilayer import unet_multilayer, resunet_multilayer
+from .light_unet_multilayer import light_unet_multilayer, light_resunet_multilayer
 from .deep_unet import deep_unet, deep_resunet
 from .uinc import uinc
 from .fcn import fcn
@@ -29,16 +31,23 @@ from .brain_age import brainage
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {
     "unet": unet,
+    "unet_multilayer": unet_multilayer,
     "resunet": resunet,
+    "resunet_multilayer": resunet_multilayer,
     "residualunet": resunet,
+    "residualunet_multilayer": resunet_multilayer,
     "deepunet": deep_unet,
     "lightunet": light_unet,
+    "lightunet_multilayer": light_unet_multilayer,
     "deep_unet": deep_unet,
     "light_unet": light_unet,
+    "light_unet_multilayer": light_unet_multilayer,
     "deepresunet": deep_resunet,
     "lightresunet": light_resunet,
+    "lightresunet_multilayer": light_resunet_multilayer,
     "deep_resunet": deep_resunet,
     "light_resunet": light_resunet,
+    "light_resunet_multilayer": light_resunet_multilayer,
     "fcn": fcn,
     "uinc": uinc,
     "vgg": vgg19,
