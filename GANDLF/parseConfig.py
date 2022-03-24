@@ -1,5 +1,6 @@
 import sys, yaml, ast, pkg_resources
 import numpy as np
+from copy import deepcopy
 
 from .utils import version_check
 
@@ -402,9 +403,26 @@ def parseConfig(config_file_path, version_check_flag=True):
             ]
 
             resize_requested = False
+            temp_dict = deepcopy(params["data_preprocessing"])
             for key in params["data_preprocessing"]:
                 if key in ["resize", "resize_image", "resize_images", "resize_patch"]:
                     resize_requested = True
+
+                if key in ["resample_min", "resample_minimum"]:
+                    if "resolution" in params["data_preprocessing"][key]:
+                        resize_requested = True
+                        resolution_temp = np.array(
+                            params["data_preprocessing"][key]["resolution"]
+                        )
+                        if resolution_temp.size == 1:
+                            temp_dict[key]["resolution"] = np.array(
+                                [resolution_temp, resolution_temp]
+                            ).tolist()
+                    else:
+                        temp_dict.pop(key)
+
+            params["data_preprocessing"] = temp_dict
+
             if resize_requested and "resample" in params["data_preprocessing"]:
                 for key in ["resize", "resize_image", "resize_images", "resize_patch"]:
                     if key in params["data_preprocessing"]:
