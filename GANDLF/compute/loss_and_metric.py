@@ -52,8 +52,7 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         else:
             sys.exit(
                 "WARNING: Could not find the requested loss function '"
-                + params["loss_function"],
-                file=sys.stderr,
+                + params["loss_function"]
             )
 
     loss = 0
