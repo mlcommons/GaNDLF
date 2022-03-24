@@ -78,7 +78,6 @@ def test_download_data():
     if not Path(
         os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
     ).exists():
-        print("AGAIN")
         print("Downloading and extracting sample data")
         r = requests.get(urlToDownload)
         z = zipfile.ZipFile(io.BytesIO(r.content))
