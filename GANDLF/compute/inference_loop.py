@@ -185,7 +185,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             dataloader = DataLoader(
                 patient_dataset_obj,
-                batch_size=int(parameters["batch_size"]),
+                batch_size=1,
                 shuffle=False,
                 num_workers=parameters["q_num_workers"],
             )
