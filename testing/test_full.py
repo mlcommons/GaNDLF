@@ -305,6 +305,7 @@ def test_train_regression_rad_2d(device):
 
 
 def test_train_regression_rad_2d_imagenet(device):
+    print("Starting 2D Rad regression tests for imagenet models")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
@@ -323,7 +324,7 @@ def test_train_regression_rad_2d_imagenet(device):
     # loop through selected models and train for single epoch
     for model in all_models_classification:
         parameters["model"]["architecture"] = model
-        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
         TrainingManager(
