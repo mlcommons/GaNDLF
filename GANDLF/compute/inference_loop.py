@@ -49,12 +49,6 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         parameters=parameters
     )
 
-    # Setting up the inference loader
-    inferenceDataForTorch = ImagesFromDataFrame(
-        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
-    )
-    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
-
     # ensure outputs are saved properly
     parameters["save_output"] = True
 
