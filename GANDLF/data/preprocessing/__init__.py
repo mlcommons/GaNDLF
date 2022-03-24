@@ -1,5 +1,4 @@
 import numpy as np
-import torchio
 from torchio.transforms import (
     Resample,
     Compose,
@@ -97,6 +96,18 @@ global_preprocessing_dict = {
 def get_transforms_for_preprocessing(
     parameters, current_transformations, train_mode, apply_zero_crop
 ):
+    """
+    This function gets the pre-processing transformations from the parameters.
+
+    Args:
+        parameters (dict): The parameters dictionary.
+        current_transformations (list): The current transformations list.
+        train_mode (bool): Whether the data is in train mode or not.
+        apply_zero_crop (bool): Whether to apply zero crop or not.
+
+    Returns:
+        list: The list of pre-processing transformations.
+    """
 
     preprocessing = parameters["data_preprocessing"]
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well

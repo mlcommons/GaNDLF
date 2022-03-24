@@ -1,5 +1,3 @@
-from cv2 import transform
-from matplotlib import transforms
 from .forward_pass import validate_network
 import os
 from pathlib import Path
@@ -168,7 +166,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
             patch_size = parameters["patch_size"]
 
-            transform = get_transforms_for_preprocessing(parameters, [], False, False)
+            transform_requested = get_transforms_for_preprocessing(parameters, [], False, False)
 
             pbar.set_description(
                 "Constructing loader for subject: " + str(subject_name)
@@ -180,7 +178,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 stride_size=parameters["stride_size"],
                 selected_level=parameters["slide_level"],
                 mask_level=parameters["mask_level"],
-                transform=transform,
+                transform=transform_requested,
             )
 
             dataloader = DataLoader(
