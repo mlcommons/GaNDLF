@@ -225,16 +225,10 @@ def training_loop(
     training_data_copy = training_data.copy()
     validation_data_copy = validation_data.copy()
 
-    print("Training data copy columns  : ", training_data_copy.columns)
-    print("Training data columns:", training_data.columns)
-
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(
         training_data_copy, params, train=True, loader_type="train"
     )
-
-    print("Training data copy columns  : ", training_data_copy.columns)
-    print("Training data columns : ", training_data.columns)
 
     validation_data_for_torch = ImagesFromDataFrame(
         validation_data_copy, params, train=False, loader_type="validation"
@@ -324,6 +318,7 @@ def training_loop(
 
     print("Training data columns  : ", training_data.columns)
 
+    print("Calculating weights for loss")
     # Calculate the weights here
     if params["weighted_loss"]:
         # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later

@@ -250,12 +250,10 @@ def get_class_imbalance_weights_classification(training_df, params):
 
     penalty_sum = np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
 
-    print("Normalizing penalty dict for each class")
-
     for label in class_count.keys():
         penalty_dict[label] = penalty_dict[label] / penalty_sum
 
-    return weight_dict, penalty_dict
+    return penalty_dict, weight_dict
 
 
 def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
