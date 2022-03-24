@@ -1006,7 +1006,7 @@ def test_config_read():
 
     os.remove(file_config_temp)
 
-    # ensure resize_image is triggered
+    # ensure resize_patch is triggered
     parameters["data_preprocessing"].pop("resize_image")
     parameters["data_preprocessing"]["resize_patch"] = [64, 64]
 
