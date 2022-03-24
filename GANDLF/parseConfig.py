@@ -143,7 +143,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         modality = str(params["modality"])
         if modality.lower() == "rad":
             pass
-        elif modality.lower() == "path":
+        elif modality.lower() in ["path", "histo"]:
             pass
         else:
             sys.exit(
