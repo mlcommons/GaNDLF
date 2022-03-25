@@ -316,7 +316,7 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
-    print("Training data columns  : ", training_data.columns)
+    print("Calculating weights")
 
     # Calculate the weights here
     if params["weighted_loss"]:
