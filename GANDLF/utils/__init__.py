@@ -5,6 +5,7 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 from .imaging import (
     resize_image,
+    resample_image,
     perform_sanity_check_on_subject,
     write_training_patches,
 )
@@ -32,6 +33,7 @@ from .parameter_processing import (
 from .generic import (
     fix_paths,
     get_date_time,
+    get_unique_timestamp,
     get_filename_extension_sanitized,
     version_check,
 )
