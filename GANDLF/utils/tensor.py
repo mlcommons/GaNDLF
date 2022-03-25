@@ -235,7 +235,7 @@ def get_class_imbalance_weights_classification(training_df, params):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    class_count = (training_df["ValueToPredict"].lower()).value_counts().to_dict()
+    class_count = (training_df[str("ValueToPredict").lower()]).value_counts().to_dict()
     total_count = len(training_df)
 
     penalty_dict, weight_dict = {}, {}
