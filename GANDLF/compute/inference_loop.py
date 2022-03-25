@@ -22,6 +22,7 @@ from GANDLF.utils import (
     load_ov_model,
 )
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
+from GANDLF.data.preprocessing import get_transforms_for_preprocessing
 
 
 def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
@@ -46,11 +47,8 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         parameters=parameters
     )
 
-    # Setting up the inference loader
-    inferenceDataForTorch = ImagesFromDataFrame(
-        inferenceDataFromPickle, parameters, train=False, loader_type="inference"
-    )
-    inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
+    # ensure outputs are saved properly
+    parameters["save_output"] = True
 
     if parameters["model"]["type"] == "torch":
         # Loading the weights into the model
@@ -69,6 +67,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
             model, parameters["model"]["amp"], device, optimizer=None
         )
+        model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
         main_dict = outputDir
@@ -99,20 +98,19 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
 
-    # get the channel keys for concatenation later (exclude non numeric channel keys)
-    parameters = populate_channel_keys_in_params(inference_loader, parameters)
-    parameters["save_output"] = True
-
-    print("Data Samples: ", len(inference_loader.dataset), flush=True)
-    if parameters["model"]["type"] == "torch":
-        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-            model, parameters["model"]["amp"], device, optimizer=None
-        )
-
-    print("Using device:", parameters["device"], flush=True)
-
     # radiology inference
     if parameters["modality"] == "rad":
+        # Setting up the inference loader
+        inferenceDataForTorch = ImagesFromDataFrame(
+            inferenceDataFromPickle, parameters, train=False, loader_type="inference"
+        )
+        inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
+
+        # get the channel keys for concatenation later (exclude non numeric channel keys)
+        parameters = populate_channel_keys_in_params(inference_loader, parameters)
+
+        print("Data Samples: ", len(inference_loader.dataset), flush=True)
+
         average_epoch_valid_loss, average_epoch_valid_metric = validate_network(
             model, inference_loader, None, parameters, mode="inference"
         )
@@ -134,8 +132,18 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
 
+        if parameters["problem_type"] != "segmentation":
+            output_to_write = "SubjectID,x_coords,y_coords"
+            if parameters["problem_type"] == "regression":
+                output_to_write += ",output"
+            elif parameters["problem_type"] == "classification":
+                for n in range(parameters["model"]["num_classes"]):
+                    output_to_write += ",probability_" + str(n)
+            output_to_write += "\n"
+
         # actual computation
-        for _, row in inferenceDataFromPickle.iterrows():
+        pbar = tqdm(inferenceDataFromPickle.iterrows())
+        for _, row in pbar:
             subject_name = row[parameters["headers"]["subjectIDHeader"]]
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
@@ -146,10 +154,25 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             subject_dest_dir = os.path.join(outputDir, str(subject_name))
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
-            probs_map = np.zeros((level_height, level_width), dtype=np.float16)
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+            ## this can probably be made into a single multi-class probability map that functions for all workloads
+            if parameters["problem_type"] == "segmentation":
+                probs_map = np.zeros((level_height, level_width), dtype=np.float16)
+            else:
+                probs_map = np.zeros(
+                    (parameters["model"]["num_classes"], level_height, level_width),
+                    dtype=np.float16,
+                )
 
             patch_size = parameters["patch_size"]
+
+            transform_requested = get_transforms_for_preprocessing(
+                parameters, [], False, False
+            )
+
+            pbar.set_description(
+                "Constructing loader for subject: " + str(subject_name)
+            )
 
             patient_dataset_obj = InferTumorSegDataset(
                 row[parameters["headers"]["channelHeaders"]].values[0],
@@ -157,15 +180,21 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                 stride_size=parameters["stride_size"],
                 selected_level=parameters["slide_level"],
                 mask_level=parameters["mask_level"],
+                transform=transform_requested,
             )
 
             dataloader = DataLoader(
                 patient_dataset_obj,
-                batch_size=int(parameters["batch_size"]),
+                batch_size=1,
                 shuffle=False,
                 num_workers=parameters["q_num_workers"],
             )
-            for image_patches, (x_coords, y_coords) in tqdm(dataloader):
+
+            pbar.set_description(
+                "Looping over patches for subject: " + str(subject_name)
+            )
+
+            for image_patches, (x_coords, y_coords) in dataloader:
                 x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
                 if parameters["model"]["type"] == "torch":
                     if parameters["model"]["amp"]:
@@ -184,41 +213,85 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                             .numpy()
                         }
                     )[parameters["model"]["IO"][1]]
+
                 for i in range(int(output.shape[0])):
                     count_map[
                         x_coords[i] : x_coords[i] + patch_size[0],
                         y_coords[i] : y_coords[i] + patch_size[1],
                     ] += 1
-                    probs_map[
-                        x_coords[i] : x_coords[i] + patch_size[0],
-                        y_coords[i] : y_coords[i] + patch_size[1],
-                    ] += output[i][0]
-            probs_map = probs_map / count_map
+                    if parameters["problem_type"] == "segmentation":
+                        probs_map[
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += output[i][0]
+                    else:
+                        output_to_write += (
+                            str(subject_name)
+                            + ","
+                            + str(x_coords[i])
+                            + ","
+                            + str(y_coords[i])
+                        )
+                        for n in range(parameters["model"]["num_classes"]):
+                            probs_map[
+                                n,
+                                x_coords[i] : x_coords[i] + patch_size[0],
+                                y_coords[i] : y_coords[i] + patch_size[1],
+                            ] += output[i][n]
+                            output_to_write += "," + str(output[i][n])
+                        # ensure csv row terminates in new line
+                        output_to_write += "\n"
+
+            # ensure probability map is scaled
             count_map = count_map / count_map.max()
-            out = count_map * probs_map
-            count_map = np.array(count_map * 255, dtype=np.uint16)
-            out_thresh = np.array((out > 0.5) * 255, dtype=np.uint16)
-            imsave(
-                os.path.join(
+            out_probs_map = count_map * probs_map
+
+            if parameters["problem_type"] == "segmentation":
+                count_map = np.array(count_map * 255, dtype=np.uint16)
+                out_thresh = np.array((out_probs_map > 0.5) * 255, dtype=np.uint16)
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]])
+                        + "_prob.png",
+                    ),
+                    out_probs_map,
+                )
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
+                    ),
+                    out_thresh,
+                )
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]])
+                        + "_count.png",
+                    ),
+                    count_map,
+                )
+            else:
+                output_file = os.path.join(
                     subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_prob.png",
-                ),
-                out,
-            )
-            imsave(
-                os.path.join(
-                    subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
-                ),
-                out_thresh,
-            )
-            imsave(
-                os.path.join(
-                    subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
-                ),
-                count_map,
-            )
+                    "predictions.csv",
+                )
+                with open(output_file, "w") as f:
+                    f.write(output_to_write)
+
+                import cv2
+
+                for n in range(parameters["model"]["num_classes"]):
+                    file_to_write = os.path.join(
+                        subject_dest_dir, "probability_map_" + str(n) + ".png"
+                    )
+                    image = np.array(
+                        out_probs_map[n, ...] * 255 / out_probs_map[n, ...].max(),
+                        dtype=np.uint8,
+                    )
+                    heatmap = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
+                    cv2.imwrite(file_to_write, heatmap)
 
 
 if __name__ == "__main__":

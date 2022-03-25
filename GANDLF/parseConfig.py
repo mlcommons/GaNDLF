@@ -1,5 +1,6 @@
 import sys, yaml, ast, pkg_resources
 import numpy as np
+from copy import deepcopy
 
 from .utils import version_check
 
@@ -142,7 +143,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         modality = str(params["modality"])
         if modality.lower() == "rad":
             pass
-        elif modality.lower() == "path":
+        elif modality.lower() in ["path", "histo"]:
             pass
         else:
             sys.exit(
@@ -402,9 +403,26 @@ def parseConfig(config_file_path, version_check_flag=True):
             ]
 
             resize_requested = False
+            temp_dict = deepcopy(params["data_preprocessing"])
             for key in params["data_preprocessing"]:
                 if key in ["resize", "resize_image", "resize_images", "resize_patch"]:
                     resize_requested = True
+
+                if key in ["resample_min", "resample_minimum"]:
+                    if "resolution" in params["data_preprocessing"][key]:
+                        resize_requested = True
+                        resolution_temp = np.array(
+                            params["data_preprocessing"][key]["resolution"]
+                        )
+                        if resolution_temp.size == 1:
+                            temp_dict[key]["resolution"] = np.array(
+                                [resolution_temp, resolution_temp]
+                            ).tolist()
+                    else:
+                        temp_dict.pop(key)
+
+            params["data_preprocessing"] = temp_dict
+
             if resize_requested and "resample" in params["data_preprocessing"]:
                 for key in ["resize", "resize_image", "resize_images", "resize_patch"]:
                     if key in params["data_preprocessing"]:
@@ -456,7 +474,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         if "norm_type" in params["model"]:
             pass
         else:
-            print("WARNING: Initializing 'norm_type' as 'batch'")
+            print("WARNING: Initializing 'norm_type' as 'batch'", flush=True)
             params["model"]["norm_type"] = "batch"
 
         if not ("architecture" in params["model"]):
@@ -475,18 +493,17 @@ def parseConfig(config_file_path, version_check_flag=True):
             params["model"]["class_list"] = []  # ensure that this is initialized
         if not ("ignore_label_validation" in params["model"]):
             params["model"]["ignore_label_validation"] = None
-        if not ("batch_norm" in params["model"]):
-            params["model"]["batch_norm"] = False
+        if "batch_norm" in params["model"]:
+            print(
+                "WARNING: 'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead",
+                flush=True,
+            )
 
         channel_keys_to_check = ["n_channels", "channels", "model_channels"]
         for key in channel_keys_to_check:
             if key in params["model"]:
                 params["model"]["num_channels"] = params["model"][key]
                 break
-
-        if not ("norm_type" in params["model"]):
-            print("Using default 'norm_type' in 'model': batch")
-            params["model"]["norm_type"] = "batch"
 
         # initialize model type for processing: if not defined, default to torch
         if not ("type" in params["model"]):
