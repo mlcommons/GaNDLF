@@ -307,6 +307,7 @@ def test_train_regression_rad_2d(device):
 def test_train_regression_rad_2d_imagenet(device):
     print("Starting 2D Rad regression tests for imagenet models")
     # read and initialize parameters for specific data dimension
+    print("Starting 2D Rad regression tests for imagenet models")
     parameters = parseConfig(
         testingDir + "/config_regression.yaml", version_check_flag=False
     )
