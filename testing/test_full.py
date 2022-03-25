@@ -2,6 +2,7 @@ from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
+import pandas as pd
 
 from pydicom.data import get_testdata_file
 
@@ -24,7 +25,9 @@ device = "cpu"
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
     "lightunet",
+    "lightunet_multilayer",
     "unet",
+    "unet_multilayer",
     "deep_resunet",
     "fcn",
     "uinc",
@@ -45,10 +48,10 @@ all_model_type = ["torch", "openvino"]
 
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
-baseConfigDir = os.path.abspath(os.path.normpath("./samples"))
-testingDir = os.path.abspath(os.path.normpath("./testing"))
-inputDir = os.path.abspath(os.path.normpath("./testing/data"))
-outputDir = os.path.abspath(os.path.normpath("./testing/data_output"))
+testingDir = Path(__file__).parent.absolute().__str__()
+baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
+inputDir = os.path.join(testingDir, "data")
+outputDir = os.path.join(testingDir, "data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
 
 
@@ -963,7 +966,7 @@ def test_config_read():
         os.remove(file_config_temp)
 
     parameters = parseConfig(
-        os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
+        os.path.join(baseConfigDir, "config_all_options.yaml"),
         version_check_flag=False,
     )
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
@@ -1005,7 +1008,7 @@ def test_config_read():
 
     os.remove(file_config_temp)
 
-    # ensure resize_image is triggered
+    # ensure resize_patch is triggered
     parameters["data_preprocessing"].pop("resize_image")
     parameters["data_preprocessing"]["resize_patch"] = [64, 64]
 
@@ -1129,7 +1132,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     params_all_preprocessing_and_augs = parseConfig(
-        testingDir + "/../samples/config_all_options.yaml"
+        os.path.join(baseConfigDir, "config_all_options.yaml")
     )
 
     # take preprocessing and augmentations from all options
@@ -1250,7 +1253,7 @@ def test_preprocess_functions():
 def test_augmentation_functions():
     print("Starting testing augmentation functions")
     params_all_preprocessing_and_augs = parseConfig(
-        testingDir + "/../samples/config_all_options.yaml"
+        os.path.join(baseConfigDir, "config_all_options.yaml")
     )
 
     # this is for rgb augmentation
@@ -1361,14 +1364,14 @@ def test_model_patch_divisibility():
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     print("passed")
@@ -1468,7 +1471,7 @@ def test_anonymizer():
 
 
 def test_train_inference_segmentation_histology_2d(device):
-    print("Starting histology train/inference tests")
+    print("Starting histology train/inference segmentation tests")
     # overwrite previous results
     sanitize_outputDir()
     output_dir_patches = os.path.join(outputDir, "histo_patches")
@@ -1529,7 +1532,84 @@ def test_train_inference_segmentation_histology_2d(device):
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_segmentation.csv", train=False
     )
+    inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
+    InferenceManager(
+        dataframe=inference_data,
+        outputDir=modelDir,
+        parameters=parameters,
+        device=device,
+    )
 
+    print("passed")
+
+
+def test_train_inference_classification_histology_2d(device):
+    print("Starting histology train/inference classification tests")
+    # overwrite previous results
+    sanitize_outputDir()
+    output_dir_patches = os.path.join(outputDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
+    Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+    file_config_temp = os.path.join(
+        output_dir_patches, "config_patch-extraction_temp.yaml"
+    )
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters_patch = {}
+    # extracting minimal number of patches to ensure that the test does not take too long
+    parameters_patch["num_patches"] = 3
+    parameters_patch["patch_size"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_patch, file)
+
+    patch_extraction(
+        inputDir + "/train_2d_histo_classification.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
+    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    temp_df = pd.read_csv(file_for_Training)
+    temp_df.drop("Label", axis=1, inplace=True)
+    temp_df["valuetopredict"] = np.random.randint(2, size=6)
+    temp_df.to_csv(file_for_Training, index=False)
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "histo"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "densenet121"
+    parameters["model"]["norm_type"] = "none"
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
+    modelDir = os.path.join(outputDir, "modelDir")
+    if os.path.isdir(modelDir):
+        shutil.rmtree(modelDir)
+    Path(modelDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=modelDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    parameters["output_dir"] = modelDir  # this is in inference mode
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_histo_classification.csv", train=False
+    )
     for model_type in all_model_type:
         parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -2
@@ -1543,6 +1623,53 @@ def test_train_inference_segmentation_histology_2d(device):
             outputDir=modelDir,
             parameters=parameters,
             device=device,
+        )
+
+    print("passed")
+
+
+def test_unet_layerchange_2d(device):
+    # test case to up code coverage --> test decreasing allowed layers for unet
+    print("Starting 2D Rad segmentation tests for normtype")
+    # read and parse csv
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    for model in ["unet_multilayer", "lightunet_multilayer"]:
+        parameters["model"]["architecture"] = model
+        parameters["patch_size"] = [4, 4, 1]
+        parameters["model"]["dimension"] = 2
+
+        # this assertion should fail
+        with pytest.raises(BaseException) as e_info:
+            global_models_dict[parameters["model"]["architecture"]](
+                parameters=parameters
+            )
+
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["depth"] = 7
+        parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["amp"] = True
+        parameters["model"]["num_channels"] = 3
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        # loop through selected models and train for single epoch
+        parameters["model"]["norm_type"] = "batch"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        if os.path.isdir(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
         )
 
     print("passed")
