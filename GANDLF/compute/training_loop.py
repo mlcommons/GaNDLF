@@ -318,7 +318,6 @@ def training_loop(
 
     print("Training data columns  : ", training_data.columns)
 
-    print("Calculating weights for loss")
     # Calculate the weights here
     if params["weighted_loss"]:
         # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
