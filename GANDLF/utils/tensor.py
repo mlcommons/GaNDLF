@@ -235,23 +235,22 @@ def get_class_imbalance_weights_classification(training_df, params):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    class_count = (training_df[str("ValueToPredict").lower()]).value_counts().to_dict()
+    class_count = (
+        training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
+        .value_counts(ascending=False)
+        .to_list()
+    )
     total_count = len(training_df)
 
     penalty_dict, weight_dict = {}, {}
     for i in range(params["model"]["num_classes"]):
-        penalty_dict[i], weight_dict[i] = 0, 0
-
-    for label in class_count.keys():
-        weight_dict[label] = class_count[label] / total_count
-
-    for label in class_count.keys():
-        penalty_dict[label] = total_count / class_count[label]
+        weight_dict[i] = class_count[i] / total_count
+        penalty_dict[i] = total_count / class_count[i]
 
     penalty_sum = np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
 
-    for label in class_count.keys():
-        penalty_dict[label] = penalty_dict[label] / penalty_sum
+    for i in range(params["model"]["num_classes"]):
+        penalty_dict[i] /= penalty_sum
 
     return penalty_dict, weight_dict
 
