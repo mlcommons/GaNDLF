@@ -244,11 +244,14 @@ def get_class_imbalance_weights_classification(training_df, params):
 
     penalty_dict, weight_dict = {}, {}
     for i in range(params["model"]["num_classes"]):
-        weight_dict[i] = class_count[i] / total_count
-        penalty_dict[i] = 1 / weight_dict[i]
+        weight_dict[i] = (class_count[i] + sys.float_info.epsilon) / total_count
+        penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
 
     # ensure sum of penalties is always 1
-    penalty_sum = np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+    penalty_sum = (
+        np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+        + sys.float_info.epsilon
+    )
     for i in range(params["model"]["num_classes"]):
         penalty_dict[i] /= penalty_sum
 
