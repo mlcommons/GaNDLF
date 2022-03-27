@@ -220,7 +220,43 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device
 
 
-def get_class_imbalance_weights(training_data_loader, parameters):
+def get_class_imbalance_weights_classification(training_df, params):
+    """
+    This function calculates the penalty used for loss functions in multi-class problems.
+    It looks at the column "valuesToPredict" and identifies unique classes, fetches the class distribution
+    and generates the required class weights, and then generates the weights needed for loss function which
+    are inverse of the class weights generated divided by the total number of items in a single column
+
+    Args:
+        training_Df (pd.DataFrame): The training data frame.
+        parameters (dict) : The parameters passed by the user yaml.
+
+    Returns:
+        dict: The penalty weights for different classes under consideration for classification.
+
+    """
+    class_count = (training_df[str("ValueToPredict").lower()]).value_counts().to_dict()
+    total_count = len(training_df)
+
+    penalty_dict, weight_dict = {}, {}
+    for i in range(params["model"]["num_classes"]):
+        penalty_dict[i], weight_dict[i] = 0, 0
+
+    for label in class_count.keys():
+        weight_dict[label] = class_count[label] / total_count
+
+    for label in class_count.keys():
+        penalty_dict[label] = total_count / class_count[label]
+
+    penalty_sum = np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+
+    for label in class_count.keys():
+        penalty_dict[label] = penalty_dict[label] / penalty_sum
+
+    return penalty_dict, weight_dict
+
+
+def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
 
@@ -253,29 +289,18 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     for _, (subject) in enumerate(
         tqdm(penalty_loader, desc="Looping over training data for penalty calculation")
     ):
-        # segmentation needs masks to be one-hot encoded
-        if parameters["problem_type"] == "segmentation":
-            # accumulate dice weights for each label
-            mask = subject["label"][torchio.DATA]
-            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
-            for i in range(0, len(parameters["model"]["class_list"])):
-                currentNumber = torch.nonzero(
-                    one_hot_mask[:, i, ...], as_tuple=False
-                ).size(0)
-                # class-specific non-zero voxels
-                abs_dict[i] += currentNumber
-                # total number of non-zero voxels to be considered
-                total_counter += currentNumber
 
-        # for classification, the value needs to be used directly
-        elif parameters["problem_type"] == "classification":
-            # accumulate weights for each label
-            value_to_predict = subject["value_0"][0]
-            for i in range(0, len(parameters["model"]["class_list"])):
-                if value_to_predict == i:
-                    abs_dict[i] += 1
-                    # we only want to increase the counter for those subjects that are defined in the class_list
-                    total_counter += 1
+        # accumulate dice weights for each label
+        mask = subject["label"][torchio.DATA]
+        one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+        for i in range(0, len(parameters["model"]["class_list"])):
+            currentNumber = torch.nonzero(one_hot_mask[:, i, ...], as_tuple=False).size(
+                0
+            )
+            # class-specific non-zero voxels
+            abs_dict[i] += currentNumber
+            # total number of non-zero voxels to be considered
+            total_counter += currentNumber
 
     # Normalize class weights
     weights_dict = {
@@ -295,7 +320,7 @@ def get_class_imbalance_weights(training_data_loader, parameters):
         for key, val in penalty.items()
     }
 
-    return penalty_dict, weights_dict
+    return weights_dict, penalty_dict
 
 
 def get_linear_interpolation_mode(dimensionality):
