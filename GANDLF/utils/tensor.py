@@ -235,10 +235,10 @@ def get_class_imbalance_weights_classification(training_df, params):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    class_count = (
+    class_count = np.bincount(
         training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
-        .value_counts(ascending=False)
-        .to_list()
+        .to_numpy()
+        .ravel()
     )
     total_count = len(training_df)
 
