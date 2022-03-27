@@ -235,17 +235,32 @@ def get_class_imbalance_weights_classification(training_df, params):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    class_count = np.bincount(
+    predictions_array = (
         training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
         .to_numpy()
         .ravel()
     )
+    class_count = np.bincount(predictions_array)
+    classes_to_predict = np.unique(predictions_array)
     total_count = len(training_df)
-
     penalty_dict, weight_dict = {}, {}
-    for i in range(params["model"]["num_classes"]):
+
+    if len(classes_to_predict) != params["model"]["num_classes"]:
+        print(
+            "WARNING: Number of classes in the training data is not equal to the number of classes being trained for model to predict, please re-check training data labels"
+        )
+
+    # for the classes that are present in the training set, construct the weights as needed
+    for i in classes_to_predict:
         weight_dict[i] = (class_count[i] + sys.float_info.epsilon) / total_count
         penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
+
+    # this is a corner case
+    # for the classes that are requested for training but aren't present in the training set, assign largest possible penalty
+    for i in range(params["model"]["num_classes"]):
+        if i not in weight_dict:
+            weight_dict[i] = sys.float_info.epsilon
+            penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
 
     # ensure sum of penalties is always 1
     penalty_sum = (
