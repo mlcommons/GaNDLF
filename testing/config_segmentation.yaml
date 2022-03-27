@@ -47,8 +47,8 @@ optimizer: adam
 # for single fold run, use '-' before the fold number
 nested_training:
   {
-    testing: -2, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
-    validation: -2 # this controls the validation data splits for model training
+    testing: -5, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
+    validation: -5 # this controls the validation data splits for model training
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
