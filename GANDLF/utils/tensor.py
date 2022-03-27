@@ -235,23 +235,40 @@ def get_class_imbalance_weights_classification(training_df, params):
         dict: The penalty weights for different classes under consideration for classification.
 
     """
-    class_count = (training_df[str("ValueToPredict").lower()]).value_counts().to_dict()
+    predictions_array = (
+        training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
+        .to_numpy()
+        .ravel()
+    )
+    class_count = np.bincount(predictions_array)
+    classes_to_predict = np.unique(predictions_array)
     total_count = len(training_df)
-
     penalty_dict, weight_dict = {}, {}
+
+    if len(classes_to_predict) != params["model"]["num_classes"]:
+        print(
+            "WARNING: Number of classes in the training data is not equal to the number of classes being trained for model to predict, please re-check training data labels"
+        )
+
+    # for the classes that are present in the training set, construct the weights as needed
+    for i in classes_to_predict:
+        weight_dict[i] = (class_count[i] + sys.float_info.epsilon) / total_count
+        penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
+
+    # this is a corner case
+    # for the classes that are requested for training but aren't present in the training set, assign largest possible penalty
     for i in range(params["model"]["num_classes"]):
-        penalty_dict[i], weight_dict[i] = 0, 0
+        if i not in weight_dict:
+            weight_dict[i] = sys.float_info.epsilon
+            penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
 
-    for label in class_count.keys():
-        weight_dict[label] = class_count[label] / total_count
-
-    for label in class_count.keys():
-        penalty_dict[label] = total_count / class_count[label]
-
-    penalty_sum = np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
-
-    for label in class_count.keys():
-        penalty_dict[label] = penalty_dict[label] / penalty_sum
+    # ensure sum of penalties is always 1
+    penalty_sum = (
+        np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+        + sys.float_info.epsilon
+    )
+    for i in range(params["model"]["num_classes"]):
+        penalty_dict[i] /= penalty_sum
 
     return penalty_dict, weight_dict
 
@@ -320,7 +337,7 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
         for key, val in penalty.items()
     }
 
-    return weights_dict, penalty_dict
+    return penalty_dict, weights_dict
 
 
 def get_linear_interpolation_mode(dimensionality):

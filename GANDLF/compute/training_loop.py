@@ -316,10 +316,9 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
-    print("Calculating weights")
-
     # Calculate the weights here
     if params["weighted_loss"]:
+        print("Calculating weights")
         # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
         if params["problem_type"] == "classification":
             (
