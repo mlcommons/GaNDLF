@@ -319,7 +319,7 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
         for key, val in penalty.items()
     }
 
-    return weights_dict, penalty_dict
+    return penalty_dict, weights_dict
 
 
 def get_linear_interpolation_mode(dimensionality):
