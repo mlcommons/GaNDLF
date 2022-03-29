@@ -41,6 +41,12 @@ all_models_regression = [
     "resnet50",
     "efficientnetb0",
 ]
+# pre-defined regression/classification model types for testing
+all_models_classification = [
+    "imagenet_vgg16",
+    "resnet18",
+]
+
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -284,6 +290,42 @@ def test_train_regression_rad_2d(device):
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    print("passed")
+
+
+def test_train_regression_rad_2d_imagenet(device):
+    print("Starting 2D Rad regression tests for imagenet models")
+    # read and initialize parameters for specific data dimension
+    print("Starting 2D Rad regression tests for imagenet models")
+    parameters = parseConfig(
+        testingDir + "/config_regression.yaml", version_check_flag=False
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = False
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_regression.csv"
+    )
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["scaling_factor"] = 1
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    for model in all_models_classification:
+        parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
         TrainingManager(
