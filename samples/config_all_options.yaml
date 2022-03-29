@@ -60,7 +60,7 @@ patch_sampler: uniform
 #   {
 #     label:
 #       {
-#         padding_type: constant # how the label gets padded
+#         padding_type: constant # how the label gets padded, for options, see 'mode' in https://numpy.org/doc/stable/reference/generated/numpy.pad.html
 #       }
 #   }
 # If enabled, this parameter pads images and labels when label sampler is used
