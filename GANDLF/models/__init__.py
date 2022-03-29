@@ -18,7 +18,7 @@ from .efficientnet import (
     efficientnetB6,
     efficientnetB7,
 )
-from .imagenet import (
+from .imagenet_vgg import (
     imagenet_vgg11,
     imagenet_vgg11_bn,
     imagenet_vgg13,
