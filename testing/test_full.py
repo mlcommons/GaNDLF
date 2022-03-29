@@ -43,7 +43,10 @@ all_models_regression = [
 ]
 # pre-defined regression/classification model types for testing
 all_models_classification = [
+    "imagenet_vgg11",
+    "imagenet_vgg13",
     "imagenet_vgg16",
+    "imagenet_vgg19",
     "resnet18",
 ]
 
