@@ -19,9 +19,13 @@ from .efficientnet import (
     efficientnetB7,
 )
 from .imagenet import (
+    imagenet_vgg11,
+    imagenet_vgg11_bn,
+    imagenet_vgg13,
+    imagenet_vgg13_bn,
     imagenet_vgg16,
-    imagenet_vgg19,
     imagenet_vgg16_bn,
+    imagenet_vgg19,
     imagenet_vgg19_bn,
 )
 from .sdnet import SDNet
@@ -55,9 +59,13 @@ global_models_dict = {
     "vgg13": vgg13,
     "vgg16": vgg16,
     "vgg19": vgg19,
+    "imagenet_vgg11": imagenet_vgg11,
+    "imagenet_vgg11_bn": imagenet_vgg11_bn,
+    "imagenet_vgg13": imagenet_vgg13,
+    "imagenet_vgg13_bn": imagenet_vgg13_bn,
     "imagenet_vgg16": imagenet_vgg16,
-    "imagenet_vgg19": imagenet_vgg19,
     "imagenet_vgg16_bn": imagenet_vgg16_bn,
+    "imagenet_vgg19": imagenet_vgg19,
     "imagenet_vgg19_bn": imagenet_vgg19_bn,
     "densenet": densenet264,
     "densenet121": densenet121,
