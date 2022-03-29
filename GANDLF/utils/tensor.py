@@ -245,11 +245,6 @@ def get_class_imbalance_weights_classification(training_df, params):
     total_count = len(training_df)
     penalty_dict, weight_dict = {}, {}
 
-    if len(classes_to_predict) != params["model"]["num_classes"]:
-        print(
-            "WARNING: Number of classes in the training data is not equal to the number of classes being trained for model to predict, please re-check training data labels"
-        )
-
     # for the classes that are present in the training set, construct the weights as needed
     for i in classes_to_predict:
         weight_dict[i] = (class_count[i] + sys.float_info.epsilon) / total_count
@@ -257,8 +252,12 @@ def get_class_imbalance_weights_classification(training_df, params):
 
     # this is a corner case
     # for the classes that are requested for training but aren't present in the training set, assign largest possible penalty
-    for i in range(params["model"]["num_classes"]):
+    for i in params["model"]["class_list"]:
+        i = int(i)
         if i not in weight_dict:
+            print(
+                "WARNING: A class was found in 'class_list' that was not present in the training data, please re-check training data labels"
+            )
             weight_dict[i] = sys.float_info.epsilon
             penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
 
