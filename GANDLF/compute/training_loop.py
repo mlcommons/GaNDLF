@@ -15,10 +15,15 @@ from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.utils import (
     get_date_time,
     best_model_path_end,
+    send_model_to_device,
     save_model,
     load_model,
     version_check,
     write_training_patches,
+)
+from GANDLF.utils.tensor import (
+    get_class_imbalance_weights_segmentation,
+    get_class_imbalance_weights_classification,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -259,6 +264,43 @@ def training_loop(
     train_logger.write_header(mode="train")
     valid_logger.write_header(mode="valid")
     test_logger.write_header(mode="test")
+
+    model, params["model"]["amp"], device = send_model_to_device(
+        model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
+    )
+
+    # Calculate the weights here
+    if params["weighted_loss"]:
+        print("Calculating weights")
+        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
+        if params["problem_type"] == "classification":
+            (
+                params["weights"],
+                params["class_weights"],
+            ) = get_class_imbalance_weights_classification(training_data, params)
+        elif params["problem_type"] == "segmentation":
+            # Set up the dataloader for penalty calculation
+            penalty_data = ImagesFromDataFrame(
+                training_data,
+                parameters=params,
+                train=False,
+                loader_type="penalty",
+            )
+
+            penalty_loader = DataLoader(
+                penalty_data,
+                batch_size=1,
+                shuffle=True,
+                pin_memory=False,
+            )
+
+            (
+                params["weights"],
+                params["class_weights"],
+            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
+            del penalty_data, penalty_loader
+    else:
+        params["weights"], params["class_weights"] = None, None
 
     if "medcam" in params:
         model = medcam.inject(
