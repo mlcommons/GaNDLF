@@ -22,6 +22,8 @@
 - Added mechanism to map output labels using post-processing before saving
 - Added mechanism to enable customized histology classification output via heatmaps
 - ImageNet pre-trained models added
+- Added RGBA to RGB conversion for preprocessing
+- Added option to save model at every epoch
 
 ## 0.0.13
 
@@ -81,7 +83,6 @@
 - Cropping zero planes added for preprocessing
 - Normalization options added
 - Added option to save generated masks on validation and (if applicable) testing data
-- Added option to save model at every epoch
 
 ## 0.0.6
 
