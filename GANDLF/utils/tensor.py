@@ -220,7 +220,59 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device
 
 
-def get_class_imbalance_weights(training_data_loader, parameters):
+def get_class_imbalance_weights_classification(training_df, params):
+    """
+    This function calculates the penalty used for loss functions in multi-class problems.
+    It looks at the column "valuesToPredict" and identifies unique classes, fetches the class distribution
+    and generates the required class weights, and then generates the weights needed for loss function which
+    are inverse of the class weights generated divided by the total number of items in a single column
+
+    Args:
+        training_Df (pd.DataFrame): The training data frame.
+        parameters (dict) : The parameters passed by the user yaml.
+
+    Returns:
+        dict: The penalty weights for different classes under consideration for classification.
+
+    """
+    predictions_array = (
+        training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
+        .to_numpy()
+        .ravel()
+    )
+    class_count = np.bincount(predictions_array)
+    classes_to_predict = np.unique(predictions_array)
+    total_count = len(training_df)
+    penalty_dict, weight_dict = {}, {}
+
+    # for the classes that are present in the training set, construct the weights as needed
+    for i in classes_to_predict:
+        weight_dict[i] = (class_count[i] + sys.float_info.epsilon) / total_count
+        penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
+
+    # this is a corner case
+    # for the classes that are requested for training but aren't present in the training set, assign largest possible penalty
+    for i in params["model"]["class_list"]:
+        i = int(i)
+        if i not in weight_dict:
+            print(
+                "WARNING: A class was found in 'class_list' that was not present in the training data, please re-check training data labels"
+            )
+            weight_dict[i] = sys.float_info.epsilon
+            penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
+
+    # ensure sum of penalties is always 1
+    penalty_sum = (
+        np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+        + sys.float_info.epsilon
+    )
+    for i in range(params["model"]["num_classes"]):
+        penalty_dict[i] /= penalty_sum
+
+    return penalty_dict, weight_dict
+
+
+def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
 
@@ -253,29 +305,18 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     for _, (subject) in enumerate(
         tqdm(penalty_loader, desc="Looping over training data for penalty calculation")
     ):
-        # segmentation needs masks to be one-hot encoded
-        if parameters["problem_type"] == "segmentation":
-            # accumulate dice weights for each label
-            mask = subject["label"][torchio.DATA]
-            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
-            for i in range(0, len(parameters["model"]["class_list"])):
-                currentNumber = torch.nonzero(
-                    one_hot_mask[:, i, ...], as_tuple=False
-                ).size(0)
-                # class-specific non-zero voxels
-                abs_dict[i] += currentNumber
-                # total number of non-zero voxels to be considered
-                total_counter += currentNumber
 
-        # for classification, the value needs to be used directly
-        elif parameters["problem_type"] == "classification":
-            # accumulate weights for each label
-            value_to_predict = subject["value_0"][0]
-            for i in range(0, len(parameters["model"]["class_list"])):
-                if value_to_predict == i:
-                    abs_dict[i] += 1
-                    # we only want to increase the counter for those subjects that are defined in the class_list
-                    total_counter += 1
+        # accumulate dice weights for each label
+        mask = subject["label"][torchio.DATA]
+        one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+        for i in range(0, len(parameters["model"]["class_list"])):
+            currentNumber = torch.nonzero(one_hot_mask[:, i, ...], as_tuple=False).size(
+                0
+            )
+            # class-specific non-zero voxels
+            abs_dict[i] += currentNumber
+            # total number of non-zero voxels to be considered
+            total_counter += currentNumber
 
     # Normalize class weights
     weights_dict = {

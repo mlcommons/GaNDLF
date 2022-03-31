@@ -17,7 +17,11 @@
 - Adding option to resize images and resize patches separately
 - Reverse one-hot logic is now updated to output unique labels
 - Added option to resume previous training with and without parameter/data updates
-- Added autmated builds of Docker images
+- Added automated builds of Docker images
+- Added mechanism to perform inference without having access to ground truth labels
+- Added mechanism to map output labels using post-processing before saving
+- Added mechanism to enable customized histology classification output via heatmaps
+- ImageNet pre-trained models added
 
 ## 0.0.13
 
