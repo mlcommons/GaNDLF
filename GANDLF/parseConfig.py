@@ -587,6 +587,13 @@ def parseConfig(config_file_path, version_check_flag=True):
         temp_dict["type"] = params["scheduler"]
         params["scheduler"] = temp_dict
 
+    if not ("step_size" in params["scheduler"]):
+        params["scheduler"]["step_size"] = (
+            params["learning_rate"] / 5.0
+        )
+        print("WARNING: Setting default step_size to:", params["scheduler"]["step_size"])
+
+
     if isinstance(params["optimizer"], str):
         temp_dict = {}
         temp_dict["type"] = params["optimizer"]
