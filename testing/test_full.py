@@ -534,6 +534,7 @@ def test_train_resume_inference_classification_rad_3d(device):
     parameters["num_epochs"] = 2
     parameters["nested_training"]["testing"] = -5
     parameters["nested_training"]["validation"] = -5
+    parameters["model"]["save_at_every_epoch"] = True
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
