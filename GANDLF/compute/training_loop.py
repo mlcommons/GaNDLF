@@ -492,6 +492,27 @@ def training_loop(
             model.train()
             first_model_saved = True
 
+        if params["model"]["save_at_every_epoch"]:
+            save_model(
+                {
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "loss": epoch_valid_loss,
+                },
+                model,
+                params,
+                os.path.join(
+                    output_dir,
+                    params["model"]["architecture"]
+                    + "_epoch_"
+                    + str(epoch)
+                    + ".pth.tar",
+                ),
+                onnx_export=False,
+            )
+            model.train()
+
         print("Current Best epoch: ", best_train_idx)
 
         if patience > params["patience"]:
