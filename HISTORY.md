@@ -81,6 +81,7 @@
 - Cropping zero planes added for preprocessing
 - Normalization options added
 - Added option to save generated masks on validation and (if applicable) testing data
+- Added RGBA to RGB conversion for preprocessing
 
 ## 0.0.6
 
