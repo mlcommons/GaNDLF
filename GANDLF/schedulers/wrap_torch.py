@@ -136,7 +136,7 @@ def step(parameters):
     return StepLR(
         parameters["optimizer_object"],
         parameters["scheduler"]["step_size"],
-        gamma=parameters["learning_rate"],
+        gamma=parameters["scheduler"]["gamma"],
     )
 
 
