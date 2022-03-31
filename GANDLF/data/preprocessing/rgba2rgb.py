@@ -1,5 +1,4 @@
 import torch
-from typing import List
 
 import PIL.Image
 import numpy as np
