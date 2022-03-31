@@ -18,6 +18,7 @@ model:
     ignore_label_validation: 0, # this is the location of the class_list whose performance is ignore during validation metric calculation
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # num_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types from the CSV
+    # save_at_every_epoch: True, # allows you to save the model at every epoch
     
     ## densenet models have the following optional parameters:
     # growth_rate (int) - how many filters to add each layer (k in paper)
