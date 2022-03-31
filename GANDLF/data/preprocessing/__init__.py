@@ -18,6 +18,7 @@ from .normalize_rgb import (
     normalize_div_by_255_transform,
 )
 from .resample_minimum import Resample_Minimum
+from .rgba2rgb import RGBA2RGB
 
 from torchio.transforms import (
     ZNormalization,
@@ -90,6 +91,9 @@ global_preprocessing_dict = {
     "normalize_nonzero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
     "normalize_nonzero_masked": NonZeroNormalizeOnMaskedRegion(),
+    "rgba2rgb": RGBA2RGB(),
+    "rgbatorgb": RGBA2RGB(),
+    "rgba_to_rgb": RGBA2RGB(),
 }
 
 
