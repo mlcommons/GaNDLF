@@ -526,17 +526,6 @@ def test_train_resume_inference_classification_rad_3d(device):
     parameters["nested_training"]["testing"] = -5
     parameters["nested_training"]["validation"] = -5
     parameters["model"]["save_at_every_epoch"] = True
-
-    # read and parse csv
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
-
-    with open(file_config_temp, "w") as file:
-        yaml.dump(parameters, file)
-
-    parameters = parseConfig(file_config_temp, version_check_flag=False)
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
