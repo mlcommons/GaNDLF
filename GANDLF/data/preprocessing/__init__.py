@@ -18,7 +18,7 @@ from .normalize_rgb import (
     normalize_div_by_255_transform,
 )
 from .resample_minimum import Resample_Minimum
-from .rgba2rgb import RGBA2RGB
+from .rgba2rgb import rgba2rgb_transform
 
 from torchio.transforms import (
     ZNormalization,
@@ -60,7 +60,7 @@ def nonzero_voxel_mask(image):
     return image != 0
 
 
-def to_canonical_transform(parameters):
+def to_canonical_transform(parameters=None):
     return ToCanonical()
 
 
@@ -91,9 +91,9 @@ global_preprocessing_dict = {
     "normalize_nonzero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
     "normalize_nonzero_masked": NonZeroNormalizeOnMaskedRegion(),
-    "rgba2rgb": RGBA2RGB(),
-    "rgbatorgb": RGBA2RGB(),
-    "rgba_to_rgb": RGBA2RGB(),
+    "rgba2rgb": rgba2rgb_transform,
+    "rgbatorgb": rgba2rgb_transform,
+    "rgba_to_rgb": rgba2rgb_transform,
 }
 
 
@@ -113,31 +113,33 @@ def get_transforms_for_preprocessing(
         list: The list of pre-processing transformations.
     """
 
-    preprocessing = parameters["data_preprocessing"]
+    preprocessing_params_dict = parameters["data_preprocessing"]
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     normalize_to_apply = None
-    if not (preprocessing is None):
+    if not (preprocessing_params_dict is None):
         # go through preprocessing in the order they are specified
-        for preprocess in preprocessing:
+        for preprocess in preprocessing_params_dict:
             preprocess_lower = preprocess.lower()
             # special check for resample
             if preprocess_lower == "resize":
-                resize_values = generic_3d_check(preprocessing["resize"])
+                resize_values = generic_3d_check(preprocessing_params_dict["resize"])
                 current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resize_patch":
-                resize_values = generic_3d_check(preprocessing["resize_patch"])
+                resize_values = generic_3d_check(
+                    preprocessing_params_dict["resize_patch"]
+                )
                 current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resample":
-                if "resolution" in preprocessing[preprocess_lower]:
+                if "resolution" in preprocessing_params_dict[preprocess_lower]:
                     # Need to take a look here
                     resample_values = generic_3d_check(
-                        preprocessing[preprocess_lower]["resolution"]
+                        preprocessing_params_dict[preprocess_lower]["resolution"]
                     )
                     current_transformations.append(Resample(resample_values))
             elif preprocess_lower in ["resample_minimum", "resample_min"]:
-                if "resolution" in preprocessing[preprocess_lower]:
+                if "resolution" in preprocessing_params_dict[preprocess_lower]:
                     resample_values = generic_3d_check(
-                        preprocessing[preprocess_lower]["resolution"]
+                        preprocessing_params_dict[preprocess_lower]["resolution"]
                     )
                     current_transformations.append(Resample_Minimum(resample_values))
             # normalize should be applied at the end
@@ -156,7 +158,7 @@ def get_transforms_for_preprocessing(
             elif preprocess_lower in global_preprocessing_dict:
                 current_transformations.append(
                     global_preprocessing_dict[preprocess_lower](
-                        preprocessing[preprocess]
+                        preprocessing_params_dict[preprocess]
                     )
                 )
 
