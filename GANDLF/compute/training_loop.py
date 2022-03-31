@@ -274,11 +274,6 @@ def training_loop(
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
     params["optimizer_object"] = optimizer
 
-    if not ("step_size" in params["scheduler"]):
-        params["scheduler"]["step_size"] = (
-            params["training_samples_size"] / params["learning_rate"]
-        )
-
     scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
 
     # these keys contain generators, and are not needed beyond this point in params
