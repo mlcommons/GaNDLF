@@ -116,6 +116,7 @@ python gandlf_constructCSV \
   -l _seg.nii.gz # label identifier - not needed for regression/classification
   -o ./experiment_0/train_data.csv \ # output CSV to be used for training
 ```
+**Note** that this cannot be used for classification/regression tasks directly, and will need modification based on the way your data is stored.
 
 This assumes the data is in the following format:
 ```
