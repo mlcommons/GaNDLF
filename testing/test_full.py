@@ -771,9 +771,17 @@ def test_scheduler_classification_rad_2d(device):
         parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        if os.path.exists(outputDir):
-            shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
+        ## ensure parameters are parsed every single time
+        file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
+        # if found in previous run, discard.
+        if os.path.exists(file_config_temp):
+            os.remove(file_config_temp)
+
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters, file)
+
+        parameters = parseConfig(file_config_temp, version_check_flag=False)
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
