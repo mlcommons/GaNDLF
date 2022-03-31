@@ -32,3 +32,7 @@ class RGBA2RGB(IntensityTransform):
                 ).unsqueeze(0)
             image.set_data(image_data_to_set)
         return subject
+
+
+def rgba2rgb_transform(parameters=None):
+    return RGBA2RGB()
