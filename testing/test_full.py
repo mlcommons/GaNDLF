@@ -1232,6 +1232,9 @@ def test_preprocess_functions():
     print("Starting testing preprocessing functions")
     # initialize an input which has values between [-1,1]
     # checking tensor with last dimension of size 1
+    input_tensor = torch.rand(4, 256, 256, 1)
+    input_transformed = global_preprocessing_dict["rgba2rgb"](input_tensor)
+    assert input_transformed.shape[1] == 3, "Number of channels is not 3"
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
     input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
     input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
