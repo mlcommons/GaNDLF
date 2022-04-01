@@ -17,6 +17,7 @@ global_schedulers_dict = {
     "triangular": cyclic_lr_base,
     "exp_range": cyclic_lr_exp_range,
     "exp": exp,
+    "exponential": exp,
     "step": step,
     "reduce_on_plateau": reduce_on_plateau,
     "reduce-on-plateau": reduce_on_plateau,
