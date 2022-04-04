@@ -88,20 +88,29 @@ def test_download_data():
     urlToDownload = (
         "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
     )
-    # do not download data again
-    if not Path(
-        os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
-    ).exists():
-        print("Downloading and extracting sample data")
-        r = requests.get(urlToDownload)
-        z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall("./testing")
+
+    files_check = [
+        os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff"),
+        os.path.join(inputDir, "2d_rad_segmentation", "001", "image.png"),
+        os.path.join(inputDir, "3d_rad_segmentation", "001", "image.nii.gz"),
+    ]
+    # check for missing subjects so that we do not download data again
+    for file in files_check:
+        if not os.path.isfile(file):
+            print("Downloading and extracting sample data")
+            r = requests.get(urlToDownload)
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(testingDir)
+            break
+
+    print("passed")
 
 
 def test_constructTrainingCSV():
     """
     This function constructs training csv
     """
+    print("Constructing training CSVs")
     # inputDir = os.path.normpath('./testing/data')
     # delete previous csv files
     files = os.listdir(inputDir)
