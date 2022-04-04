@@ -1,22 +1,18 @@
-# Extending GaNDLF
-
 For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
 ## Table of Contents
-- [Extending GaNDLF](#extending-gandlf)
-  - [Table of Contents](#table-of-contents)
-  - [Environment](#environment)
-  - [Overall Architecture](#overall-architecture)
-  - [Dependency Management](#dependency-management)
-  - [Adding Models](#adding-models)
-  - [Adding Augmentation Transformations](#adding-augmentation-transformations)
-  - [Adding Preprocessing functionality](#adding-preprocessing-functionality)
-  - [Adding Training Functionality](#adding-training-functionality)
-  - [Adding Inference Functionality](#adding-inference-functionality)
-  - [Update Tests](#update-tests)
-  - [Run Tests](#run-tests)
-    - [Code coverage](#code-coverage)
-
+- [Table of Contents](#table-of-contents)
+- [Environment](#environment)
+- [Overall Architecture](#overall-architecture)
+- [Dependency Management](#dependency-management)
+- [Adding Models](#adding-models)
+- [Adding Augmentation Transformations](#adding-augmentation-transformations)
+- [Adding Preprocessing functionality](#adding-preprocessing-functionality)
+- [Adding Training Functionality](#adding-training-functionality)
+- [Adding Inference Functionality](#adding-inference-functionality)
+- [Update Tests](#update-tests)
+- [Run Tests](#run-tests)
+  - [Code coverage](#code-coverage)
 ## Environment
 
 Before starting to work on the code-level on GaNDLF, please get the environment ready:
