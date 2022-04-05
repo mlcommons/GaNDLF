@@ -27,6 +27,7 @@ parameter_defaults = {
     "track_memory_usage": False,  # default memory tracking
     "print_rgb_label_warning": True,  # default memory tracking
     "data_postprocessing": {},  # default data postprocessing
+    "grid_aggregator_overlap": "crop",  # default grid aggregator overlap strategy
 }
 
 ## dictionary to define string defaults for appropriate options
