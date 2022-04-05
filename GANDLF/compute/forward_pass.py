@@ -204,11 +204,13 @@ def validate_network(
                 torchio.Subject(subject_dict), params["patch_size"]
             )
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-            aggregator = torchio.inference.GridAggregator(grid_sampler)
+            aggregator = torchio.inference.GridAggregator(
+                grid_sampler, overlap_mode=params["grid_aggregator_overlap"]
+            )
 
             if params["medcam_enabled"]:
                 attention_map_aggregator = torchio.inference.GridAggregator(
-                    grid_sampler
+                    grid_sampler, overlap_mode=params["grid_aggregator_overlap"]
                 )
 
             output_prediction = 0  # this is used for regression/classification

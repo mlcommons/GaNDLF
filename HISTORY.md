@@ -24,6 +24,7 @@
 - ImageNet pre-trained models added
 - Added RGBA to RGB conversion for preprocessing
 - Added option to save model at every epoch
+- Add option to have different overlap options for final inference
 
 ## 0.0.13
 
