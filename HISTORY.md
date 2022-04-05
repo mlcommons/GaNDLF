@@ -20,6 +20,10 @@
 - Added automated builds of Docker images
 - Added mechanism to perform inference without having access to ground truth labels
 - Added mechanism to map output labels using post-processing before saving
+- Added mechanism to enable customized histology classification output via heatmaps
+- ImageNet pre-trained models added
+- Added RGBA to RGB conversion for preprocessing
+- Added option to save model at every epoch
 
 ## 0.0.13
 
