@@ -2,6 +2,7 @@ from pathlib import Path
 import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
+import pandas as pd
 
 from pydicom.data import get_testdata_file
 
@@ -24,7 +25,9 @@ device = "cpu"
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
     "lightunet",
+    "lightunet_multilayer",
     "unet",
+    "unet_multilayer",
     "deep_resunet",
     "fcn",
     "uinc",
@@ -38,6 +41,19 @@ all_models_regression = [
     "resnet50",
     "efficientnetb0",
 ]
+# pre-defined regression/classification model types for testing
+all_models_classification = [
+    "imagenet_vgg11",
+    "imagenet_vgg11_bn",
+    "imagenet_vgg13",
+    "imagenet_vgg13_bn",
+    "imagenet_vgg16",
+    "imagenet_vgg16_bn",
+    "imagenet_vgg19",
+    "imagenet_vgg19_bn",
+    "resnet18",
+]
+
 all_clip_modes = ["norm", "value", "agc"]
 all_norm_type = ["batch", "instance"]
 
@@ -45,10 +61,10 @@ all_model_type = ["torch", "openvino"]
 
 patch_size = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
-baseConfigDir = os.path.abspath(os.path.normpath("./samples"))
-testingDir = os.path.abspath(os.path.normpath("./testing"))
-inputDir = os.path.abspath(os.path.normpath("./testing/data"))
-outputDir = os.path.abspath(os.path.normpath("./testing/data_output"))
+testingDir = Path(__file__).parent.absolute().__str__()
+baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
+inputDir = os.path.join(testingDir, "data")
+outputDir = os.path.join(testingDir, "data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
 
 
@@ -72,21 +88,29 @@ def test_download_data():
     urlToDownload = (
         "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
     )
-    # do not download data again
-    if not Path(
-        os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
-    ).exists():
-        print("AGAIN")
-        print("Downloading and extracting sample data")
-        r = requests.get(urlToDownload)
-        z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall("./testing")
+
+    files_check = [
+        os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff"),
+        os.path.join(inputDir, "2d_rad_segmentation", "001", "image.png"),
+        os.path.join(inputDir, "3d_rad_segmentation", "001", "image.nii.gz"),
+    ]
+    # check for missing subjects so that we do not download data again
+    for file in files_check:
+        if not os.path.isfile(file):
+            print("Downloading and extracting sample data")
+            r = requests.get(urlToDownload)
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(testingDir)
+            break
+
+    print("passed")
 
 
 def test_constructTrainingCSV():
     """
     This function constructs training csv
     """
+    print("Constructing training CSVs")
     # inputDir = os.path.normpath('./testing/data')
     # delete previous csv files
     files = os.listdir(inputDir)
@@ -296,6 +320,42 @@ def test_train_regression_rad_2d(device):
     print("passed")
 
 
+def test_train_regression_rad_2d_imagenet(device):
+    print("Starting 2D Rad regression tests for imagenet models")
+    # read and initialize parameters for specific data dimension
+    print("Starting 2D Rad regression tests for imagenet models")
+    parameters = parseConfig(
+        testingDir + "/config_regression.yaml", version_check_flag=False
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = False
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_regression.csv"
+    )
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["scaling_factor"] = 1
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    for model in all_models_classification:
+        parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = 1
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    print("passed")
+
+
 def test_train_brainage_rad_2d(device):
     print("Starting brain age tests")
     # read and initialize parameters for specific data dimension
@@ -474,6 +534,7 @@ def test_train_resume_inference_classification_rad_3d(device):
     parameters["num_epochs"] = 2
     parameters["nested_training"]["testing"] = -5
     parameters["nested_training"]["validation"] = -5
+    parameters["model"]["save_at_every_epoch"] = True
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -699,30 +760,38 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
 def test_scheduler_classification_rad_2d(device):
     print("Starting 2D Rad segmentation tests for scheduler")
     # read and initialize parameters for specific data dimension
-    parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check_flag=False
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["dimension"] = 2
-    # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_classification.csv"
-    )
-    parameters["model"]["num_channels"] = 3
-    parameters["model"]["architecture"] = "densenet121"
-    parameters["model"]["norm_type"] = "instance"
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["onnx_export"] = False
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
+        parameters = parseConfig(
+            testingDir + "/config_classification.yaml", version_check_flag=False
+        )
+        parameters["modality"] = "rad"
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["dimension"] = 2
+        # read and parse csv
+        training_data, parameters["headers"] = parseTrainingCSV(
+            inputDir + "/train_2d_rad_classification.csv"
+        )
+        parameters["model"]["num_channels"] = 3
+        parameters["model"]["architecture"] = "densenet121"
+        parameters["model"]["norm_type"] = "instance"
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters["model"]["onnx_export"] = False
         parameters["scheduler"] = {}
         parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        if os.path.exists(outputDir):
-            shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
+        ## ensure parameters are parsed every single time
+        file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
+        # if found in previous run, discard.
+        if os.path.exists(file_config_temp):
+            os.remove(file_config_temp)
+
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters, file)
+
+        parameters = parseConfig(file_config_temp, version_check_flag=False)
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
@@ -964,7 +1033,7 @@ def test_config_read():
         os.remove(file_config_temp)
 
     parameters = parseConfig(
-        os.path.abspath(baseConfigDir + "/config_all_options.yaml"),
+        os.path.join(baseConfigDir, "config_all_options.yaml"),
         version_check_flag=False,
     )
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
@@ -1006,7 +1075,7 @@ def test_config_read():
 
     os.remove(file_config_temp)
 
-    # ensure resize_image is triggered
+    # ensure resize_patch is triggered
     parameters["data_preprocessing"].pop("resize_image")
     parameters["data_preprocessing"]["resize_patch"] = [64, 64]
 
@@ -1070,6 +1139,7 @@ def test_cli_function_preprocess():
     parameters["weighted_loss"] = True
     parameters["save_output"] = True
     parameters["data_preprocessing"]["to_canonical"] = None
+    parameters["data_preprocessing"]["rgba_to_rgb"] = None
 
     # store this separately for preprocess testing
     with open(file_config_temp, "w") as outfile:
@@ -1130,7 +1200,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     params_all_preprocessing_and_augs = parseConfig(
-        testingDir + "/../samples/config_all_options.yaml"
+        os.path.join(baseConfigDir, "config_all_options.yaml")
     )
 
     # take preprocessing and augmentations from all options
@@ -1181,6 +1251,9 @@ def test_preprocess_functions():
     print("Starting testing preprocessing functions")
     # initialize an input which has values between [-1,1]
     # checking tensor with last dimension of size 1
+    input_tensor = torch.rand(4, 256, 256, 1)
+    input_transformed = global_preprocessing_dict["rgba2rgb"]()(input_tensor)
+    assert input_transformed.shape[1] == 3, "Number of channels is not 3"
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
     input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
     input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
@@ -1251,7 +1324,7 @@ def test_preprocess_functions():
 def test_augmentation_functions():
     print("Starting testing augmentation functions")
     params_all_preprocessing_and_augs = parseConfig(
-        testingDir + "/../samples/config_all_options.yaml"
+        os.path.join(baseConfigDir, "config_all_options.yaml")
     )
 
     # this is for rgb augmentation
@@ -1469,7 +1542,7 @@ def test_anonymizer():
 
 
 def test_train_inference_segmentation_histology_2d(device):
-    print("Starting histology train/inference tests")
+    print("Starting histology train/inference segmentation tests")
     # overwrite previous results
     sanitize_outputDir()
     output_dir_patches = os.path.join(outputDir, "histo_patches")
@@ -1530,7 +1603,85 @@ def test_train_inference_segmentation_histology_2d(device):
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_segmentation.csv", train=False
     )
+    inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
+    InferenceManager(
+        dataframe=inference_data,
+        outputDir=modelDir,
+        parameters=parameters,
+        device=device,
+    )
 
+    print("passed")
+
+
+def test_train_inference_classification_histology_2d(device):
+    print("Starting histology train/inference classification tests")
+    # overwrite previous results
+    sanitize_outputDir()
+    output_dir_patches = os.path.join(outputDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
+    Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+    file_config_temp = os.path.join(
+        output_dir_patches, "config_patch-extraction_temp.yaml"
+    )
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters_patch = {}
+    # extracting minimal number of patches to ensure that the test does not take too long
+    parameters_patch["num_patches"] = 3
+    parameters_patch["patch_size"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_patch, file)
+
+    patch_extraction(
+        inputDir + "/train_2d_histo_classification.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
+    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    temp_df = pd.read_csv(file_for_Training)
+    temp_df.drop("Label", axis=1, inplace=True)
+    temp_df["valuetopredict"] = np.random.randint(2, size=6)
+    temp_df.to_csv(file_for_Training, index=False)
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "histo"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "densenet121"
+    parameters["model"]["norm_type"] = "none"
+    parameters["data_preprocessing"]["rgba2rgb"] = ""
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
+    modelDir = os.path.join(outputDir, "modelDir")
+    if os.path.isdir(modelDir):
+        shutil.rmtree(modelDir)
+    Path(modelDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=modelDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    parameters["output_dir"] = modelDir  # this is in inference mode
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_histo_classification.csv", train=False
+    )
     for model_type in all_model_type:
         parameters["nested_training"]["testing"] = 1
         parameters["nested_training"]["validation"] = -2
@@ -1560,14 +1711,16 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    for model in ["unet", "lightunet"]:
-        parameters["model"]["architecture"] = "unet"
+    for model in ["unet_multilayer", "lightunet_multilayer"]:
+        parameters["model"]["architecture"] = model
         parameters["patch_size"] = [4, 4, 1]
         parameters["model"]["dimension"] = 2
 
         # this assertion should fail
         with pytest.raises(BaseException) as e_info:
-            global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+            global_models_dict[parameters["model"]["architecture"]](
+                parameters=parameters
+            )
 
         parameters["patch_size"] = patch_size["2D"]
         parameters["model"]["depth"] = 7

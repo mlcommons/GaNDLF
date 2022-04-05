@@ -16,11 +16,14 @@ from GANDLF.utils import (
     get_date_time,
     send_model_to_device,
     populate_channel_keys_in_params,
-    get_class_imbalance_weights,
     save_model,
     load_model,
     version_check,
     write_training_patches,
+)
+from GANDLF.utils.tensor import (
+    get_class_imbalance_weights_segmentation,
+    get_class_imbalance_weights_classification,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -219,13 +222,16 @@ def training_loop(
     # Fetch the model according to params mentioned in the configuration file
     model = global_models_dict[params["model"]["architecture"]](parameters=params)
 
+    training_data_copy = training_data.copy()
+    validation_data_copy = validation_data.copy()
+
     # Set up the dataloaders
     training_data_for_torch = ImagesFromDataFrame(
-        training_data, params, train=True, loader_type="train"
+        training_data_copy, params, train=True, loader_type="train"
     )
 
     validation_data_for_torch = ImagesFromDataFrame(
-        validation_data, params, train=False, loader_type="validation"
+        validation_data_copy, params, train=False, loader_type="validation"
     )
 
     testingDataDefined = True
@@ -268,11 +274,6 @@ def training_loop(
     optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
     params["optimizer_object"] = optimizer
 
-    if not ("step_size" in params["scheduler"]):
-        params["scheduler"]["step_size"] = (
-            params["training_samples_size"] / params["learning_rate"]
-        )
-
     scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
 
     # these keys contain generators, and are not needed beyond this point in params
@@ -312,25 +313,35 @@ def training_loop(
 
     # Calculate the weights here
     if params["weighted_loss"]:
-        print("Calculating weights for loss")
-        # Set up the dataloader for penalty calculation
-        penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
-            loader_type="penalty",
-        )
-        penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
-        )
+        print("Calculating weights")
+        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
+        if params["problem_type"] == "classification":
+            (
+                params["weights"],
+                params["class_weights"],
+            ) = get_class_imbalance_weights_classification(training_data, params)
+        elif params["problem_type"] == "segmentation":
+            print("Calculating weights for loss")
+            # Set up the dataloader for penalty calculation
+            penalty_data = ImagesFromDataFrame(
+                training_data,
+                parameters=params,
+                train=False,
+                loader_type="penalty",
+            )
 
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, params
-        )
-        del penalty_data, penalty_loader
+            penalty_loader = DataLoader(
+                penalty_data,
+                batch_size=1,
+                shuffle=True,
+                pin_memory=False,
+            )
+
+            (
+                params["weights"],
+                params["class_weights"],
+            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
+            del penalty_data, penalty_loader
     else:
         params["weights"], params["class_weights"] = None, None
 
@@ -475,6 +486,27 @@ def training_loop(
             )
             model.train()
             first_model_saved = True
+
+        if params["model"]["save_at_every_epoch"]:
+            save_model(
+                {
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "loss": epoch_valid_loss,
+                },
+                model,
+                params,
+                os.path.join(
+                    output_dir,
+                    params["model"]["architecture"]
+                    + "_epoch_"
+                    + str(epoch)
+                    + ".pth.tar",
+                ),
+                onnx_export=False,
+            )
+            model.train()
 
         print("Current Best epoch: ", best_train_idx)
 

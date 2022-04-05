@@ -7,16 +7,12 @@ def CEL(out, target, params):
     if len(target.shape) > 1 and target.shape[-1] == 1:
         target = torch.squeeze(target, -1)
 
-    class_weights = None
-    if params["class_weights"]:
-        class_weights = torch.FloatTensor(list(params["class_weights"].values()))
+    weights = None
+    if params["weights"]:
+        weights = torch.FloatTensor(list(params["weights"].values()))
+        weights = weights.float().to(target.device)
 
-        # more examples you have in the training data, the smaller the weight you have in the loss
-        class_weights = 1.0 / class_weights
-
-        class_weights = class_weights.float().to(target.device)
-
-    cel = CrossEntropyLoss(weight=class_weights)
+    cel = CrossEntropyLoss(weight=weights)
     return cel(out, target)
 
 
