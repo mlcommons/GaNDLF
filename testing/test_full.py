@@ -88,20 +88,29 @@ def test_download_data():
     urlToDownload = (
         "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
     )
-    # do not download data again
-    if not Path(
-        os.getcwd() + "/testing/data/test/3d_rad_segmentation/001/image.nii.gz"
-    ).exists():
-        print("Downloading and extracting sample data")
-        r = requests.get(urlToDownload)
-        z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall("./testing")
+
+    files_check = [
+        os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff"),
+        os.path.join(inputDir, "2d_rad_segmentation", "001", "image.png"),
+        os.path.join(inputDir, "3d_rad_segmentation", "001", "image.nii.gz"),
+    ]
+    # check for missing subjects so that we do not download data again
+    for file in files_check:
+        if not os.path.isfile(file):
+            print("Downloading and extracting sample data")
+            r = requests.get(urlToDownload)
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(testingDir)
+            break
+
+    print("passed")
 
 
 def test_constructTrainingCSV():
     """
     This function constructs training csv
     """
+    print("Constructing training CSVs")
     # inputDir = os.path.normpath('./testing/data')
     # delete previous csv files
     files = os.listdir(inputDir)
@@ -525,6 +534,7 @@ def test_train_resume_inference_classification_rad_3d(device):
     parameters["num_epochs"] = 2
     parameters["nested_training"]["testing"] = -5
     parameters["nested_training"]["validation"] = -5
+    parameters["model"]["save_at_every_epoch"] = True
     TrainingManager(
         dataframe=training_data,
         outputDir=outputDir,
@@ -750,30 +760,38 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
 def test_scheduler_classification_rad_2d(device):
     print("Starting 2D Rad segmentation tests for scheduler")
     # read and initialize parameters for specific data dimension
-    parameters = parseConfig(
-        testingDir + "/config_classification.yaml", version_check_flag=False
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["dimension"] = 2
-    # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_classification.csv"
-    )
-    parameters["model"]["num_channels"] = 3
-    parameters["model"]["architecture"] = "densenet121"
-    parameters["model"]["norm_type"] = "instance"
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    parameters["model"]["onnx_export"] = False
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
+        parameters = parseConfig(
+            testingDir + "/config_classification.yaml", version_check_flag=False
+        )
+        parameters["modality"] = "rad"
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["dimension"] = 2
+        # read and parse csv
+        training_data, parameters["headers"] = parseTrainingCSV(
+            inputDir + "/train_2d_rad_classification.csv"
+        )
+        parameters["model"]["num_channels"] = 3
+        parameters["model"]["architecture"] = "densenet121"
+        parameters["model"]["norm_type"] = "instance"
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters["model"]["onnx_export"] = False
         parameters["scheduler"] = {}
         parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        if os.path.exists(outputDir):
-            shutil.rmtree(outputDir)  # overwrite previous results
-        Path(outputDir).mkdir(parents=True, exist_ok=True)
+        sanitize_outputDir()
+        ## ensure parameters are parsed every single time
+        file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
+        # if found in previous run, discard.
+        if os.path.exists(file_config_temp):
+            os.remove(file_config_temp)
+
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters, file)
+
+        parameters = parseConfig(file_config_temp, version_check_flag=False)
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
@@ -1121,6 +1139,7 @@ def test_cli_function_preprocess():
     parameters["weighted_loss"] = True
     parameters["save_output"] = True
     parameters["data_preprocessing"]["to_canonical"] = None
+    parameters["data_preprocessing"]["rgba_to_rgb"] = None
 
     # store this separately for preprocess testing
     with open(file_config_temp, "w") as outfile:
@@ -1232,6 +1251,9 @@ def test_preprocess_functions():
     print("Starting testing preprocessing functions")
     # initialize an input which has values between [-1,1]
     # checking tensor with last dimension of size 1
+    input_tensor = torch.rand(4, 256, 256, 1)
+    input_transformed = global_preprocessing_dict["rgba2rgb"]()(input_tensor)
+    assert input_transformed.shape[1] == 3, "Number of channels is not 3"
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
     input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
     input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
@@ -1640,6 +1662,7 @@ def test_train_inference_classification_histology_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
+    parameters["data_preprocessing"]["rgba2rgb"] = ""
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2

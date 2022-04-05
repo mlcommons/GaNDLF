@@ -511,6 +511,15 @@ def parseConfig(config_file_path, version_check_flag=True):
         if not ("type" in params["model"]):
             params["model"]["type"] = "torch"
 
+        # set default save strategy for model
+        if not ("save_at_every_epoch" in params["model"]):
+            params["model"]["save_at_every_epoch"] = False
+
+        if params["model"]["save_at_every_epoch"]:
+            print(
+                "WARNING: 'save_at_every_epoch' will result in TREMENDOUS storage usage; use at your own risk."
+            )
+
     else:
         sys.exit("The 'model' parameter needs to be populated as a dictionary")
 
@@ -588,6 +597,12 @@ def parseConfig(config_file_path, version_check_flag=True):
         temp_dict = {}
         temp_dict["type"] = params["scheduler"]
         params["scheduler"] = temp_dict
+
+    if not ("step_size" in params["scheduler"]):
+        params["scheduler"]["step_size"] = params["learning_rate"] / 5.0
+        print(
+            "WARNING: Setting default step_size to:", params["scheduler"]["step_size"]
+        )
 
     if isinstance(params["optimizer"], str):
         temp_dict = {}
