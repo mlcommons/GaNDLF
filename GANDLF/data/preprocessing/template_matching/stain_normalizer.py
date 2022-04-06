@@ -100,8 +100,12 @@ class StainNormalizer(TemplateNormalizeBase):
         if self.maxC_target is None:
             self.fit(self.target)
         
+        # ensure image is in the format opencv would expect
         if img.shape[-1] == 1:
-            img = np.squeeze(img, -1)
+            img = np.squeeze(img, -1)        
+        if img.shape[0] == 3:
+            img = img.transpose((1, 2, 0))
+        
         stain_matrix_source = self.extractor.get_stain_matrix(img)
         source_concentrations = self.get_concentrations(img, stain_matrix_source)
         maxC_source = np.percentile(source_concentrations, 99, axis=0).reshape((1, 2))
