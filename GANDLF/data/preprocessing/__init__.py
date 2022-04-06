@@ -17,7 +17,7 @@ from .normalize_rgb import (
     normalize_standardize_transform,
     normalize_div_by_255_transform,
 )
-from .template_normalize import histogram_matching
+from .template_matching import histogram_matching
 from .resample_minimum import Resample_Minimum
 from .rgba2rgb import rgba2rgb_transform
 
