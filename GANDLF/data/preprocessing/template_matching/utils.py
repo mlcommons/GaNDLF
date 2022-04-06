@@ -126,3 +126,43 @@ def dl_output_for_h_and_e(dictionary):
         return dictionary[[1, 0], :]
 
     return dictionary
+
+
+def h_and_e_in_right_order(v1, v2):
+    """Rearrange input vectors for H&E in correct order with H as first output.
+
+    Args:
+        v1 (:class:`numpy.ndarray`):
+            Input vector for stain extraction.
+        v2 (:class:`numpy.ndarray`):
+            Input vector for stain extraction.
+
+    Returns:
+        :class:`numpy.ndarray`:
+            Input vectors in the correct order.
+
+    """
+    if v1[0] > v2[0]:
+        return np.array([v1, v2])
+
+    return np.array([v2, v1])
+
+
+def vectors_in_correct_direction(e_vectors):
+    """Points the eigen vectors in the right direction.
+
+    Args:
+        e_vectors (:class:`numpy.ndarray`):
+            Eigen vectors.
+
+    Returns:
+        :class:`numpy.ndarray`:
+            Pointing in the correct direction.
+
+    """
+    if e_vectors[0, 0] < 0:
+        e_vectors[:, 0] *= -1
+    if e_vectors[0, 1] < 0:
+        e_vectors[:, 1] *= -1
+
+    return e_vectors
