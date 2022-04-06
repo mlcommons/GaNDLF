@@ -122,7 +122,7 @@ def stain_normalizer(parameters):
     Args:
         parameters (dict): Dictionary of parameters.
     """
-    extractor = parameters.get("extractor", "vahadane")
+    extractor = parameters.get("extractor", "ruifrok")
     target = parameters.get("target", None)
     if target is None:
         raise ValueError("Target image is required.")
