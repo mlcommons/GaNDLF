@@ -113,3 +113,20 @@ class StainNormalizer(TemplateNormalizeBase):
         trans[trans < 0] = 0
 
         return trans.reshape(img.shape).astype(np.uint8)
+
+
+def stain_normalizer(parameters):
+    """
+    This function is a wrapper for histogram matching.
+
+    Args:
+        parameters (dict): Dictionary of parameters.
+    """
+    extractor = parameters.get("extractor", "vahadane")
+    target = parameters.get("target", None)
+    if target is None:
+        raise ValueError("Target image is required.")
+    
+    return StainNormalizer(
+        target=target, extractor=extractor
+    )
