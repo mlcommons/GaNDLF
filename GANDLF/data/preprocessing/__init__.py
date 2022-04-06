@@ -153,6 +153,12 @@ def get_transforms_for_preprocessing(
                             preprocessing_params_dict[preprocess_lower]
                         )
                     )
+            # special check for stain_normalizer
+            elif preprocess_lower == "stain_normalizer":
+                if normalize_to_apply is None:
+                    normalize_to_apply = global_preprocessing_dict[preprocess_lower](
+                            preprocessing_params_dict[preprocess_lower]
+                        )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
