@@ -7,6 +7,7 @@ from .base import TemplateNormalizeBase
 from .utils import rgb2od, od2rgb
 from .stain_extractors import VahadaneExtractor, RuifrokExtractor, MacenkoExtractor
 
+
 class StainNormalizer(TemplateNormalizeBase):
     """Stain normalization base class.
 
@@ -99,13 +100,13 @@ class StainNormalizer(TemplateNormalizeBase):
         """
         if self.maxC_target is None:
             self.fit(self.target)
-        
+
         # ensure image is in the format opencv would expect
         if img.shape[-1] == 1:
-            img = np.squeeze(img, -1)        
+            img = np.squeeze(img, -1)
         if img.shape[0] == 3:
             img = img.transpose((1, 2, 0))
-        
+
         stain_matrix_source = self.extractor.get_stain_matrix(img)
         source_concentrations = self.get_concentrations(img, stain_matrix_source)
         maxC_source = np.percentile(source_concentrations, 99, axis=0).reshape((1, 2))
@@ -132,7 +133,5 @@ def stain_normalizer(parameters):
     target = parameters.get("target", None)
     if target is None:
         raise ValueError("Target image is required.")
-    
-    return StainNormalizer(
-        target=target, extractor=extractor
-    )
+
+    return StainNormalizer(target=target, extractor=extractor)
