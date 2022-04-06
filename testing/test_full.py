@@ -1254,23 +1254,6 @@ def test_preprocess_functions():
     input_tensor = torch.rand(4, 256, 256, 1)
     input_transformed = global_preprocessing_dict["rgba2rgb"]()(input_tensor)
     assert input_transformed.shape[1] == 3, "Number of channels is not 3"
-    ## stain_normalization checks
-    input_tensor = 2 * torch.rand(3, 256, 256, 1) + 10
-    training_data, _ = parseTrainingCSV(inputDir + "/train_2d_rad_segmentation.csv")
-    parameters_temp = {}
-    parameters_temp["data_preprocessing"] = {}
-    parameters_temp["data_preprocessing"]["stain_normalizer"] = {
-        "target": training_data["Channel_0"][0]
-    }
-    for extractor in ["ruifrok", "macenko", "vahadane"]:
-        parameters_temp["data_preprocessing"]["stain_normalizer"]["extractor"] = extractor
-        non_zero_normalizer = global_preprocessing_dict["stain_normalizer"](
-            parameters_temp["data_preprocessing"]["stain_normalizer"]
-        )
-        input_transformed = non_zero_normalizer(input_tensor)
-        test = 1
-
-
 
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
     input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
@@ -1307,6 +1290,21 @@ def test_preprocess_functions():
     input_transformed = non_zero_normalizer(input_tensor)
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
+
+    ## stain_normalization checks
+    input_tensor = 2 * torch.rand(3, 256, 256, 1) + 10
+    training_data, _ = parseTrainingCSV(inputDir + "/train_2d_rad_segmentation.csv")
+    parameters_temp = {}
+    parameters_temp["data_preprocessing"] = {}
+    parameters_temp["data_preprocessing"]["stain_normalizer"] = {
+        "target": training_data["Channel_0"][0]
+    }
+    for extractor in ["ruifrok", "macenko", "vahadane"]:
+        parameters_temp["data_preprocessing"]["stain_normalizer"]["extractor"] = extractor
+        non_zero_normalizer = global_preprocessing_dict["stain_normalizer"](
+            parameters_temp["data_preprocessing"]["stain_normalizer"]
+        )
+        input_transformed = non_zero_normalizer(input_tensor)
 
     ## histogram matching tests
     # histogram equalization
