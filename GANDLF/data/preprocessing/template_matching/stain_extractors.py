@@ -2,7 +2,7 @@
 import numpy as np
 from sklearn.decomposition import DictionaryLearning
 
-from .utils import get_luminosity_tissue_mask, dl_output_for_h_and_e, rgb2od, od2rgb, h_and_e_in_right_order, vectors_in_correct_direction
+from .utils import get_luminosity_tissue_mask, dl_output_for_h_and_e, rgb2od, h_and_e_in_right_order, vectors_in_correct_direction
 
 class VahadaneExtractor:
     """Vahadane stain extractor.
