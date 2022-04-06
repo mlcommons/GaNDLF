@@ -1300,7 +1300,9 @@ def test_preprocess_functions():
         "target": training_data["Channel_0"][0]
     }
     for extractor in ["ruifrok", "macenko", "vahadane"]:
-        parameters_temp["data_preprocessing"]["stain_normalizer"]["extractor"] = extractor
+        parameters_temp["data_preprocessing"]["stain_normalizer"][
+            "extractor"
+        ] = extractor
         non_zero_normalizer = global_preprocessing_dict["stain_normalizer"](
             parameters_temp["data_preprocessing"]["stain_normalizer"]
         )
