@@ -100,6 +100,8 @@ class StainNormalizer(TemplateNormalizeBase):
         if self.maxC_target is None:
             self.fit(self.target)
         
+        if img.shape[-1] == 1:
+            img = np.squeeze(img, -1)
         stain_matrix_source = self.extractor.get_stain_matrix(img)
         source_concentrations = self.get_concentrations(img, stain_matrix_source)
         maxC_source = np.percentile(source_concentrations, 99, axis=0).reshape((1, 2))
