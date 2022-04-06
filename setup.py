@@ -53,7 +53,6 @@ requirements = [
     "numpy==1.21.0",
     "scipy",
     "SimpleITK!=2.0.*",
-    "torch>=1.7",
     "torchvision",
     "tqdm",
     "torchio==0.18.57",
@@ -79,7 +78,14 @@ requirements = [
     "OpenPatchMiner==0.1.6",
     "zarr==2.10.3",
     "pydicom",
+    "onnx",
 ]
+
+# pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
+if sys.platform == "darwin":
+    requirements.append("torch==1.9.0")
+else:
+    requirements.append("torch==1.8.2")
 
 setup(
     name="GANDLF",

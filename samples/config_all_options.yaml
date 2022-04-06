@@ -17,7 +17,8 @@ model:
     # class_list: '[0,1||2||3,1||4,4]', # combinatorial training - this will construct one-hot encoded mask using logical operands between specified annotations. Note that double '|' or '&' should be passed and not single to avoid python parsing
     ignore_label_validation: 0, # this is the location of the class_list whose performance is ignore during validation metric calculation
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
-    # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
+    # num_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types from the CSV
+    # save_at_every_epoch: True, # allows you to save the model at every epoch
     
     ## densenet models have the following optional parameters:
     # growth_rate (int) - how many filters to add each layer (k in paper)
@@ -42,6 +43,8 @@ metrics:
   # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
   # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4
   # - iou # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#iou
+# this option provides the option to strategize the grid aggregation output; should be either 'crop' or 'average' - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
+grid_aggregator_overlap: average
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
@@ -60,7 +63,7 @@ patch_sampler: uniform
 #   {
 #     label:
 #       {
-#         padding_type: constant # how the label gets padded
+#         padding_type: constant # how the label gets padded, for options, see 'mode' in https://numpy.org/doc/stable/reference/generated/numpy.pad.html
 #       }
 #   }
 # If enabled, this parameter pads images and labels when label sampler is used
@@ -114,6 +117,7 @@ nested_training:
 # this constructs an order of transformations, which is applied to all images in the data loader
 # order: all_methods_as_specified_in_dict --> normalize [normalization methods always applied at the end]
 # 'to_canonical': change the image to canonical orientation, see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=canonical#torchio.transforms.ToCanonical
+# 'rgba2rgb': convert images from rgba to rgb
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
@@ -215,10 +219,11 @@ data_augmentation:
       'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
     }, 
   }
-# ## post-processing steps
+# ## post-processing steps - only applied before output labels are saved
 # data_postprocessing:
 #   {
 #     'fill_holes', # this will fill holes in the image
+#     'mapping': {0: 0, 1: 1, 2: 4}, # this will map the labels to a new set of labels, useful to convert labels from combinatorial training (i.e., combined segmentation labels)
 #   }
 ## parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training

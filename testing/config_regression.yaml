@@ -19,8 +19,9 @@ model:
   final_layer: None
   norm_type: batch
 nested_training:
-  testing: -2
-  validation: -2
+  testing: -5
+  validation: -5
+grid_aggregator_overlap: crop
 num_epochs: 1
 optimizer: adam
 parallel_compute_command: ''
