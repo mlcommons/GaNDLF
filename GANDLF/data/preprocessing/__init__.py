@@ -17,7 +17,7 @@ from .normalize_rgb import (
     normalize_standardize_transform,
     normalize_div_by_255_transform,
 )
-from .template_matching import histogram_matching
+from .template_matching import histogram_matching, stain_normalizer
 from .resample_minimum import Resample_Minimum
 from .rgba2rgb import rgba2rgb_transform
 
@@ -96,6 +96,7 @@ global_preprocessing_dict = {
     "rgbatorgb": rgba2rgb_transform,
     "rgba_to_rgb": rgba2rgb_transform,
     "histogram_matching": histogram_matching,
+    "stain_normalizer": stain_normalizer,
 }
 
 
