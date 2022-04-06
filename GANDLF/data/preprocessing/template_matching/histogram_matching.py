@@ -5,6 +5,7 @@ from torchio.data.image import ScalarImage
 
 from .base import TemplateNormalizeBase
 
+
 class HistogramMatching(TemplateNormalizeBase):
     """
     This class performs histogram matching.
