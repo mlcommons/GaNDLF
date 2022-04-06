@@ -1,5 +1,3 @@
-# Usage
-
 For any DL pipeline, the following flow needs to be performed:
 
 1. Data preparation
@@ -8,20 +6,19 @@ For any DL pipeline, the following flow needs to be performed:
 
 GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
-- [Usage](#usage)
-  - [Table of Contents](#table-of-contents)
-  - [Preparing the Data](#preparing-the-data)
-    - [Anonymize Data](#anonymize-data)
-    - [Cleanup/Harmonize Data](#cleanupharmonize-data)
-    - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
-    - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
-  - [Constructing the Data CSV](#constructing-the-data-csv)
-  - [Customize the Training](#customize-the-training)
-  - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
-  - [Plot the final results](#plot-the-final-results)
-    - [Multi-GPU systems](#multi-gpu-systems)
-  - [M3D-CAM usage](#m3d-cam-usage)
-  - [Examples](#examples)
+- [Table of Contents](#table-of-contents)
+- [Preparing the Data](#preparing-the-data)
+  - [Anonymize Data](#anonymize-data)
+  - [Cleanup/Harmonize Data](#cleanupharmonize-data)
+  - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
+  - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
+- [Constructing the Data CSV](#constructing-the-data-csv)
+- [Customize the Training](#customize-the-training)
+- [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
+- [Plot the final results](#plot-the-final-results)
+  - [Multi-GPU systems](#multi-gpu-systems)
+- [M3D-CAM usage](#m3d-cam-usage)
+- [Examples](#examples)
 
 ## Preparing the Data
 
@@ -116,6 +113,7 @@ python gandlf_constructCSV \
   -l _seg.nii.gz # label identifier - not needed for regression/classification
   -o ./experiment_0/train_data.csv \ # output CSV to be used for training
 ```
+**Note** that this cannot be used for classification/regression tasks directly, and will need modification based on the way your data is stored.
 
 This assumes the data is in the following format:
 ```
@@ -154,6 +152,10 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   - Final layer of model
   - Mixed precision
   - Class list
+  - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
+  - Model type: model used for inference, can be "torch" or "openvino"
+      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "torch"
+      - "openvino": use the OpenVINO Inference Engine for inference
 - Various training parameters:
   - Patch size
   - Number of epochs and patience parameter
