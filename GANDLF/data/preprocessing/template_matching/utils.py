@@ -89,6 +89,27 @@ def rgb2od(img):
     return np.maximum(-1 * np.log(img / 255), 1e-6)
 
 
+def od2rgb(od):
+    """Convert from optical density (OD_RGB) to RGB.
+    RGB = 255 * exp(-1*OD_RGB)
+
+    Args:
+        od (:class:`numpy.ndarray`): Optical denisty RGB image
+
+    Returns:
+        numpy.ndarray: Image RGB
+
+    Examples:
+        >>> from tiatoolbox.utils import transforms, misc
+        >>> rgb_img = misc.imread('path/to/image')
+        >>> od_img = transforms.rgb2od(rgb_img)
+        >>> rgb_img = transforms.od2rgb(od_img)
+
+    """
+    od = np.maximum(od, 1e-6)
+    return (255 * np.exp(-1 * od)).astype(np.uint8)
+
+
 def dl_output_for_h_and_e(dictionary):
     """Return correct value for H and E from dictionary learning output.
 
