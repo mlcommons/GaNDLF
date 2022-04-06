@@ -1,10 +1,11 @@
 import numpy as np
 import torch
-import SimpleITK as sitk
+import cv2
 from torchio.data.image import ScalarImage
 
 from .base import TemplateNormalizeBase
 from .utils import rgb2od, od2rgb
+from .stain_extractors import VahadaneExtractor, RuifrokExtractor, MacenkoExtractor
 
 class StainNormalizer(TemplateNormalizeBase):
     """Stain normalization base class.
@@ -28,11 +29,18 @@ class StainNormalizer(TemplateNormalizeBase):
 
     def __init__(self, extractor="vahadane", **kwargs):
         super().__init__(**kwargs)
-        self.extractor = extractor.lower()
         self.stain_matrix_target = None
         self.target_concentrations = None
         self.maxC_target = None
         self.stain_matrix_target_RGB = None
+
+        # we shall always default to vahadane
+        self.extractor_str = extractor.lower()
+        self.extractor = VahadaneExtractor()
+        if self.extractor_str == "ruifrok":
+            self.extractor = RuifrokExtractor()
+        elif self.extractor_str == "macenko":
+            self.extractor = MacenkoExtractor()
 
     @staticmethod
     def get_concentrations(img, stain_matrix):
@@ -61,7 +69,8 @@ class StainNormalizer(TemplateNormalizeBase):
               Target/reference image.
 
         """
-        target_arr = sitk.GetArrayFromImage(sitk.ReadImage(target))
+        target_arr = cv2.imread(target)
+        target_arr = cv2.cvtColor(target_arr, cv2.COLOR_BGR2RGB).astype(np.uint8)
         self.stain_matrix_target = self.extractor.get_stain_matrix(target_arr)
         self.target_concentrations = self.get_concentrations(
             target_arr, self.stain_matrix_target
