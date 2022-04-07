@@ -83,7 +83,9 @@ class VahadaneExtractor:
         # H on first row.
         dictionary = dl_output_for_h_and_e(dictionary)
 
-        return dictionary / (np.linalg.norm(dictionary, axis=1)[:, None] + sys.float_info.epsilon)
+        return dictionary / (
+            np.linalg.norm(dictionary, axis=1)[:, None] + sys.float_info.epsilon
+        )
 
 
 class RuifrokExtractor:
