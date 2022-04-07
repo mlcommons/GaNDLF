@@ -147,7 +147,14 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
             if isinstance(total_epoch_train_metric[metric], list):
-                total_epoch_train_metric[metric].append(calculated_metrics[metric])
+                if len(total_epoch_train_metric[metric]) == 0:
+                    total_epoch_train_metric[metric] = np.array(
+                        calculated_metrics[metric]
+                    )
+                else:
+                    total_epoch_train_metric[metric] += np.array(
+                        calculated_metrics[metric]
+                    )
             else:
                 total_epoch_train_metric[metric] += calculated_metrics[metric]
 
@@ -160,9 +167,9 @@ def train_network(model, train_dataloader, optimizer, params):
                 total_epoch_train_loss / (batch_idx + 1),
             )
             for metric in params["metrics"]:
-                if isinstance(total_epoch_train_metric[metric], list):
+                if isinstance(total_epoch_train_metric[metric], np.ndarray):
                     to_print = (
-                        np.array(total_epoch_train_metric[metric]) / (batch_idx + 1)
+                        total_epoch_train_metric[metric] / (batch_idx + 1)
                     ).tolist()
                 else:
                     to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
@@ -174,9 +181,9 @@ def train_network(model, train_dataloader, optimizer, params):
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
-        if isinstance(total_epoch_train_metric[metric], list):
+        if isinstance(total_epoch_train_metric[metric], np.ndarray):
             to_print = (
-                np.array(total_epoch_train_metric[metric]) / len(train_dataloader)
+                total_epoch_train_metric[metric] / len(train_dataloader)
             ).tolist()
         else:
             to_print = total_epoch_train_metric[metric] / len(train_dataloader)
