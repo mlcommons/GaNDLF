@@ -76,7 +76,7 @@ def rgb2od(img):
         img (:class:`numpy.ndarray` of type :class:`numpy.uint8`): Image RGB
 
     Returns:
-        :class:`numpy.ndarray`: Optical denisty RGB image.
+        :class:`numpy.ndarray`: Optical density RGB image.
 
     Examples:
         >>> from tiatoolbox.utils import transforms, misc
@@ -94,7 +94,7 @@ def od2rgb(od):
     RGB = 255 * exp(-1*OD_RGB)
 
     Args:
-        od (:class:`numpy.ndarray`): Optical denisty RGB image
+        od (:class:`numpy.ndarray`): Optical density RGB image
 
     Returns:
         numpy.ndarray: Image RGB
