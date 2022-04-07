@@ -89,7 +89,7 @@ class VahadaneExtractor:
 
 
 class RuifrokExtractor:
-    """Reuifrok stain extractor.
+    """Ruifrok stain extractor.
 
     Get the stain matrix as defined in:
 
