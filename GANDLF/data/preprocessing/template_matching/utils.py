@@ -27,8 +27,7 @@ def contrast_enhancer(img, low_p=2, high_p=98):
 
     """
     # check if image is not uint8
-    if not img.dtype == np.uint8:
-        raise AssertionError("Image should be uint8.")
+    assert img.dtype == np.uint8, "Image should be uint8"
     img_out = img.copy()
     p_low, p_high = np.percentile(img_out, (low_p, high_p))
     if p_low >= p_high:
@@ -62,8 +61,7 @@ def get_luminosity_tissue_mask(img, threshold):
     tissue_mask = l_lab < threshold
 
     # check it's not empty
-    if tissue_mask.sum() == 0:
-        raise ValueError("Empty tissue mask computed.")
+    assert tissue_mask.sum() != 0, "Empty tissue mask computed."
 
     return tissue_mask
 
@@ -122,10 +120,11 @@ def dl_output_for_h_and_e(dictionary):
             With correct values for H and E.
 
     """
+    return_dictionary = dictionary
     if dictionary[0, 0] < dictionary[1, 0]:
-        return dictionary[[1, 0], :]
+        return_dictionary = dictionary[[1, 0], :]
 
-    return dictionary
+    return return_dictionary
 
 
 def h_and_e_in_right_order(v1, v2):
@@ -142,10 +141,11 @@ def h_and_e_in_right_order(v1, v2):
             Input vectors in the correct order.
 
     """
+    return_arr = np.array([v2, v1])
     if v1[0] > v2[0]:
-        return np.array([v1, v2])
+        return_arr = np.array([v1, v2])
 
-    return np.array([v2, v1])
+    return return_arr
 
 
 def vectors_in_correct_direction(e_vectors):

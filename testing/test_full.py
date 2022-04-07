@@ -1310,12 +1310,12 @@ def test_preprocess_functions():
 
     ## histogram matching tests
     # histogram equalization
-    input_tensor = torch.rand(1, 256, 256, 256)
+    input_tensor = torch.rand(1, 64, 64, 64)
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {}
     non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
-        parameters_temp["data_preprocessing"]
+        parameters_temp["data_preprocessing"]["histogram_matching"]
     )
     input_transformed = non_zero_normalizer(input_tensor)
     # adaptive histogram equalization
@@ -1323,7 +1323,7 @@ def test_preprocess_functions():
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {"target": "adaptive"}
     non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
-        parameters_temp["data_preprocessing"]
+        parameters_temp["data_preprocessing"]["histogram_matching"]
     )
     input_transformed = non_zero_normalizer(input_tensor)
     # histogram matching
@@ -1334,7 +1334,7 @@ def test_preprocess_functions():
         "target": training_data["Channel_0"][0]
     }
     non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
-        parameters_temp["data_preprocessing"]
+        parameters_temp["data_preprocessing"]["histogram_matching"]
     )
     input_transformed = non_zero_normalizer(input_tensor)
 
