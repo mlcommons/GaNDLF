@@ -36,7 +36,7 @@ class HistogramMatching(TemplateNormalizeBase):
         elif os.path.exists(self.target):
             target_sitk = sitk.ReadImage(self.target, image_sitk.GetPixelID())
 
-        if self.target is "adaptive":
+        if self.target == "adaptive":
             normalized_img = sitk.AdaptiveHistogramEqualization(image_sitk)
         else:
             normalized_img = sitk.HistogramMatching(
