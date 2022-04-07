@@ -1,4 +1,5 @@
 """ adapted from https://github.com/TissueImageAnalytics/tiatoolbox/blob/master/tiatoolbox/tools/stainextract.py """
+import sys
 import numpy as np
 from sklearn.decomposition import DictionaryLearning
 
@@ -82,7 +83,7 @@ class VahadaneExtractor:
         # H on first row.
         dictionary = dl_output_for_h_and_e(dictionary)
 
-        return dictionary / np.linalg.norm(dictionary, axis=1)[:, None]
+        return dictionary / (np.linalg.norm(dictionary, axis=1)[:, None] + sys.float_info.epsilon)
 
 
 class RuifrokExtractor:
