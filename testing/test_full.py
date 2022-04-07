@@ -1310,6 +1310,7 @@ def test_preprocess_functions():
 
     ## histogram matching tests
     # histogram equalization
+    input_tensor = torch.rand(1, 256, 256, 256)
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {}
@@ -1326,7 +1327,7 @@ def test_preprocess_functions():
     )
     input_transformed = non_zero_normalizer(input_tensor)
     # histogram matching
-    training_data, _ = parseTrainingCSV(inputDir + "/train_2d_rad_segmentation.csv")
+    training_data, _ = parseTrainingCSV(inputDir + "/train_3d_rad_segmentation.csv")
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {
