@@ -33,6 +33,10 @@ all_models_segmentation = [
     "uinc",
     "msdnet",
 ]
+
+all_models_3D_only_segmentation = [
+    "UNETR",
+]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
     "densenet121",
@@ -130,6 +134,8 @@ def test_constructTrainingCSV():
         elif "2d_histo_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
+        else:
+            continue
         writeTrainingCSV(
             currentApplicationDir,
             channelsID,
@@ -266,7 +272,7 @@ def test_train_segmentation_rad_3d(device):
     parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
-    for model in all_models_segmentation:
+    for model in all_models_segmentation or all_models_3D_only_segmentation:
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -901,7 +907,7 @@ def test_normtype_train_segmentation_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for norm in ["batch", "instance"]:
-        for model in ["resunet", "unet", "fcn"]:
+        for model in ["resunet", "unet", "fcn", "unetr"]:
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
             parameters["nested_training"]["testing"] = -5
@@ -1727,6 +1733,62 @@ def test_unet_layerchange_2d(device):
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
         parameters["model"]["num_channels"] = 3
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        # loop through selected models and train for single epoch
+        parameters["model"]["norm_type"] = "batch"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        if os.path.isdir(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    print("passed")
+
+def test_unetr_3d(device):
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
+    parameters["model"]["architecture"] = "unetr"
+    parameters["patch_size"] = [4, 4, 4]
+    parameters["model"]["dimension"] = 3
+
+    # this assertion should fail
+    with pytest.raises(BaseException) as e_info:
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["dimension"] = 2
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
+
+    parameters["model"]["dimension"] = 3
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["patch_size"] = [32, 17, 29]
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
+
+    for patch in [[32,32,32], [32,16,16], [8,16,16]]:
+        parameters["patch_size"] = patch
+        parameters["model"]["depth"] = 7
+        parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["amp"] = True
+        parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
