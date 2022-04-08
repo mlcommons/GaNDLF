@@ -27,6 +27,7 @@ parameter_defaults = {
     "track_memory_usage": False,  # default memory tracking
     "print_rgb_label_warning": True,  # default memory tracking
     "data_postprocessing": {},  # default data postprocessing
+    "grid_aggregator_overlap": "crop",  # default grid aggregator overlap strategy
 }
 
 ## dictionary to define string defaults for appropriate options
@@ -455,6 +456,23 @@ def parseConfig(config_file_path, version_check_flag=True):
                             ] = sys.float_info.max
                 elif key in thresholdOrClipDict:
                     sys.exit("Use only 'threshold' or 'clip', not both")
+
+                if key == "histogram_matching":
+                    if params["data_preprocessing"][key] is not False:
+                        if not (isinstance(params["data_preprocessing"][key], dict)):
+                            params["data_preprocessing"][key] = {}
+
+                if key == "histogram_equalization":
+                    if params["data_preprocessing"][key] is not False:
+                        # if histogram equalization is enabled, call histogram_matching
+                        params["data_preprocessing"]["histogram_matching"] = {}
+
+                if key == "adaptive_histogram_equalization":
+                    if params["data_preprocessing"][key] is not False:
+                        # if histogram equalization is enabled, call histogram_matching
+                        params["data_preprocessing"]["histogram_matching"] = {
+                            "target": "adaptive"
+                        }
 
     if "model" in params:
 
