@@ -24,6 +24,8 @@
 - ImageNet pre-trained models added
 - Added RGBA to RGB conversion for preprocessing
 - Added option to save model at every epoch
+- Add option to have different overlap options for final inference
+- Added submodule to handle template-based normalization
 
 ## 0.0.13
 
