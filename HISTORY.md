@@ -25,6 +25,7 @@
 - Added RGBA to RGB conversion for preprocessing
 - Model can now be saved at every epoch
 - Different overlap options for final inference
+- Added submodule to handle template-based normalization
 - BCE with logits loss is now available for classification
 
 ## 0.0.13
