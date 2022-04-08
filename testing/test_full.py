@@ -1024,6 +1024,43 @@ def test_losses_segmentation_rad_2d(device):
     print("passed")
 
 
+def test_losses_classification_rad_2d(device):
+    print("Starting 2D Rad classification tests for losses")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # disabling amp because some losses do not support Half, yet
+    parameters["model"]["amp"] = False
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "vgg16"
+    parameters["model"]["final_layer"] = "logits"
+    parameters["model"]["onnx_export"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    for loss_type in ["cel", "bce"]:
+        parameters["loss_function"] = loss_type
+        parameters["nested_training"]["testing"] = 1
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    print("passed")
+
+
 def test_config_read():
     print("Starting testing reading configuration")
     # read and parse csv
