@@ -1,5 +1,5 @@
 import torch
-from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
+from torch.nn import MSELoss, CrossEntropyLoss, L1Loss, BCEWithLogitsLoss
 from GANDLF.utils import one_hot
 
 
@@ -14,6 +14,23 @@ def CEL(out, target, params):
 
     cel = CrossEntropyLoss(weight=weights)
     return cel(out, target)
+
+
+def BCE(out, target, params):
+    if len(target.shape) > 1 and target.shape[-1] == 1:
+        target = torch.squeeze(target, -1)
+
+    # put the target in one hot encoding
+    target_real = torch.zeros(out.shape, device=out.device)
+    target_real[0][target[0].item()] = 1
+
+    weights = None
+    if params["weights"]:
+        weights = torch.FloatTensor(list(params["weights"].values()))
+        weights = weights.float().to(target.device)
+
+    bce = BCEWithLogitsLoss(weight=weights)
+    return bce(out.float(), target_real.float())
 
 
 def CE_Logits(out, target):
