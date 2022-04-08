@@ -1800,6 +1800,7 @@ def test_unet_layerchange_2d(device):
 
     print("passed")
 
+
 def test_unetr_3d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -1813,30 +1814,26 @@ def test_unetr_3d(device):
 
     # this assertion should fail
     with pytest.raises(BaseException) as e_info:
-        global_models_dict[parameters["model"]["architecture"]](
-            parameters=parameters
-        )
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     with pytest.raises(BaseException) as e_info:
         parameters["model"]["dimension"] = 2
-        global_models_dict[parameters["model"]["architecture"]](
-            parameters=parameters
-        )
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
 
     with pytest.raises(BaseException) as e_info:
         parameters["patch_size"] = [32, 17, 29]
-        global_models_dict[parameters["model"]["architecture"]](
-            parameters=parameters
-        )
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    for patch in [[32,32,32], [32,16,16], [8,16,16]]:
+    for patch in [[32, 32, 32], [32, 16, 16], [8, 16, 16]]:
         parameters["patch_size"] = patch
         parameters["model"]["depth"] = 7
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
-        parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+        parameters["model"]["num_channels"] = len(
+            parameters["headers"]["channelHeaders"]
+        )
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
