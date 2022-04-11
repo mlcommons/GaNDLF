@@ -21,6 +21,7 @@ model:
 nested_training:
   testing: -5
   validation: -5
+grid_aggregator_overlap: crop
 num_epochs: 1
 optimizer: adam
 parallel_compute_command: ''

@@ -17,8 +17,9 @@ from .normalize_rgb import (
     normalize_standardize_transform,
     normalize_div_by_255_transform,
 )
+from .template_matching import histogram_matching, stain_normalizer
 from .resample_minimum import Resample_Minimum
-from .rgba2rgb import rgba2rgb_transform
+from .rgb_conversion import rgba2rgb_transform, rgb2rgba_transform
 
 from torchio.transforms import (
     ZNormalization,
@@ -94,6 +95,11 @@ global_preprocessing_dict = {
     "rgba2rgb": rgba2rgb_transform,
     "rgbatorgb": rgba2rgb_transform,
     "rgba_to_rgb": rgba2rgb_transform,
+    "rgb2rgba": rgb2rgba_transform,
+    "rgbtorgba": rgb2rgba_transform,
+    "rgb_to_rgba": rgb2rgba_transform,
+    "histogram_matching": histogram_matching,
+    "stain_normalizer": stain_normalizer,
 }
 
 
@@ -142,6 +148,20 @@ def get_transforms_for_preprocessing(
                         preprocessing_params_dict[preprocess_lower]["resolution"]
                     )
                     current_transformations.append(Resample_Minimum(resample_values))
+            # special check for histogram_matching
+            elif preprocess_lower == "histogram_matching":
+                if preprocessing_params_dict[preprocess_lower] is not False:
+                    current_transformations.append(
+                        global_preprocessing_dict[preprocess_lower](
+                            preprocessing_params_dict[preprocess_lower]
+                        )
+                    )
+            # special check for stain_normalizer
+            elif preprocess_lower == "stain_normalizer":
+                if normalize_to_apply is None:
+                    normalize_to_apply = global_preprocessing_dict[preprocess_lower](
+                        preprocessing_params_dict[preprocess_lower]
+                    )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
                 if normalize_to_apply is None:
