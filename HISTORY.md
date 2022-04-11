@@ -22,8 +22,10 @@
 - Added mechanism to map output labels using post-processing before saving
 - Added mechanism to enable customized histology classification output via heatmaps
 - ImageNet pre-trained models added
-- Added RGBA to RGB conversion for preprocessing
 - Added option to save model at every epoch
+- Add option to have different overlap options for final inference
+- Added submodule to handle template-based normalization
+- RGB conversion submodule added to handle alpha channel conversions
 
 ## 0.0.13
 
