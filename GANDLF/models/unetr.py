@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import math
-
+from GANDLF.utils.generic import checkPatchDimensions
 
 class _DeconvConvBlock(nn.Sequential):
     def __init__(self, in_feats, out_feats, Norm, Conv, Deconv):
@@ -204,7 +204,7 @@ class _Embedding(nn.Module):
     def __init__(self, img_size, patch_size, in_feats, embed_size, Conv):
         super().__init__()
         # self.n_patches = int(np.prod(img_size) / (patch_size**3))
-        self.n_patches = int(np.prod(np.floor([x / patch_size for x in img_size])))
+        self.n_patches = int(np.prod([i / patch_size for i in img_size]))
 
         self.pos_embed = nn.Parameter(torch.zeros(1, self.n_patches, embed_size))
         self.patch_embed = Conv(
@@ -212,7 +212,6 @@ class _Embedding(nn.Module):
             out_channels=embed_size,
             kernel_size=patch_size,
             stride=patch_size,
-            padding=0,
         )
 
     def forward(self, x):
@@ -304,12 +303,29 @@ class unetr(ModelBase):
     ):
         super(unetr, self).__init__(parameters)
 
-        if self.n_dimensions != 3:
-            sys.exit("UNETR is only defined for use in 3D images.")
+        if not ("inner_patch_size" in parameters["model"]):
+            parameters["model"]["inner_patch_size"] = parameters["patch_size"][0]
+            print("Default inner patch size set to %d." % parameters["patch_size"][0])
+        
+        if ("inner_patch_size" in parameters["model"]):
+            if np.ceil(np.log2(parameters["model"]["inner_patch_size"])) != np.floor(np.log2(parameters["model"]["inner_patch_size"])):
+                sys.exit(
+                    "The inner patch size must be a power of 2."
+                )
 
-        if not ("depth" in parameters["model"]):
-            parameters["model"]["depth"] = 4
-            print("Default depth set to 4.")
+        self.patch_size = parameters["model"]["inner_patch_size"]
+        self.depth = int(np.log2(self.patch_size))
+        patch_check = checkPatchDimensions(parameters["patch_size"], self.depth)
+
+        if patch_check != self.depth and patch_check >= 2:
+            print(
+                "The image size is not large enough for desired depth. It is expected that each dimension of the image is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
+                % patch_check
+            )
+        elif patch_check < 2:
+            sys.exit(
+                "The image size is not large enough for desired depth. It is expected that each dimension of the image is divisible by 2^i, where i is in a integer greater than or equal to 2."
+            )
 
         if not ("num_heads" in parameters["model"]):
             parameters["model"]["num_heads"] = 12
@@ -321,36 +337,24 @@ class unetr(ModelBase):
             parameters["model"]["embed_dim"] = 768
             print("Default size of embedded dimension set to 768.")
 
-        patch_check = checkImgSize(
-            parameters["patch_size"], number=parameters["model"]["depth"]
-        )
+        if self.n_dimensions == 2:
+            self.img_size = parameters["patch_size"][0:2]
+        elif self.n_dimensions == 3:
+            self.img_size = parameters["patch_size"]
 
-        if patch_check != parameters["model"]["depth"] and patch_check >= 2:
-            print(
-                "The image size is not large enough for desired depth. It is expected that each dimension of the image is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
-                % patch_check
-            )
-        elif patch_check < 2:
-            sys.exit(
-                "The image size is not large enough for desired depth. It is expected that each dimension of the image is divisible by 2^i, where i is in a integer greater than or equal to 2."
-            )
-
-        if not ("patch_size" in parameters["model"]):
-            parameters["model"]["patch_size"] = 2**patch_check
-            print("Default patch size set to %d." % 2**patch_check)
-
-        self.img_size = parameters["patch_size"]
-        self.depth = patch_check
-        self.patch_size = 2**self.depth
         self.num_layers = 3 * self.depth  # number of transformer layers
         self.out_layers = np.arange(2, self.num_layers, 3)
         self.num_heads = parameters["model"]["num_heads"]
         self.embed_size = parameters["model"]["embed_dim"]
-        self.patch_dim = [int(x / self.patch_size) for x in self.img_size]
+        self.patch_dim = [i // self.patch_size for i in self.img_size]
 
-        if [x % self.patch_size for x in self.img_size] != [0, 0, 0]:
+        if not all([i%self.patch_size == 0 for i in self.img_size]):
             sys.exit(
                 "The image size is not divisible by the patch size in at least 1 dimension. UNETR is not defined in this case."
+            )
+        if not all([self.patch_size<=i for i in self.img_size]):
+            sys.exit(
+                "The inner patch size must be smaller than the input image."
             )
 
         self.transformer = _Transformer(

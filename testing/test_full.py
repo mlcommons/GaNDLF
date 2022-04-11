@@ -32,10 +32,7 @@ all_models_segmentation = [
     "fcn",
     "uinc",
     "msdnet",
-]
-
-all_models_3D_only_segmentation = [
-    "UNETR",
+    "unetr",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
@@ -1765,7 +1762,7 @@ def test_unet_layerchange_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    for model in ["unet_multilayer", "lightunet_multilayer"]:
+    for model in ["unet_multilayer", "lightunet_multilayer", "unetr"]:
         parameters["model"]["architecture"] = model
         parameters["patch_size"] = [4, 4, 1]
         parameters["model"]["dimension"] = 2
@@ -1816,24 +1813,61 @@ def test_unetr_3d(device):
     with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
-        parameters["model"]["dimension"] = 2
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
-
     parameters["model"]["dimension"] = 3
+    parameters["patch_size"] = [32, 32, 32]
 
     with pytest.raises(BaseException) as e_info:
-        parameters["patch_size"] = [32, 17, 29]
+        parameters["model"]["inner_patch_size"] = 19
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    for patch in [[32, 32, 32], [32, 16, 16], [8, 16, 16]]:
-        parameters["patch_size"] = patch
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["inner_patch_size"] = 64
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    for patch in [32, 16, 8]:
+        parameters["model"]["inner_patch_size"] = patch
         parameters["model"]["depth"] = 7
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
         parameters["model"]["num_channels"] = len(
             parameters["headers"]["channelHeaders"]
         )
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        # loop through selected models and train for single epoch
+        parameters["model"]["norm_type"] = "batch"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        if os.path.isdir(outputDir):
+            shutil.rmtree(outputDir)  # overwrite previous results
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    print("passed")
+
+def test_unetr_2d(device):
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["model"]["architecture"] = "unetr"
+    parameters["patch_size"] = [128, 128, 1]
+    parameters["model"]["dimension"] = 2
+
+    # for patch in [32, 128, 64]:
+    for patch in [128]:
+        parameters["model"]["inner_patch_size"] = patch
+        parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["amp"] = True
+        parameters["model"]["num_channels"] = 3
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
