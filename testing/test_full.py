@@ -1851,6 +1851,7 @@ def test_unetr_3d(device):
 
     print("passed")
 
+
 def test_unetr_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False

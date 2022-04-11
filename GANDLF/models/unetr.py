@@ -7,6 +7,7 @@ import numpy as np
 import math
 from GANDLF.utils.generic import checkPatchDimensions
 
+
 class _DeconvConvBlock(nn.Sequential):
     def __init__(self, in_feats, out_feats, Norm, Conv, Deconv):
         super().__init__()
@@ -306,12 +307,12 @@ class unetr(ModelBase):
         if not ("inner_patch_size" in parameters["model"]):
             parameters["model"]["inner_patch_size"] = parameters["patch_size"][0]
             print("Default inner patch size set to %d." % parameters["patch_size"][0])
-        
-        if ("inner_patch_size" in parameters["model"]):
-            if np.ceil(np.log2(parameters["model"]["inner_patch_size"])) != np.floor(np.log2(parameters["model"]["inner_patch_size"])):
-                sys.exit(
-                    "The inner patch size must be a power of 2."
-                )
+
+        if "inner_patch_size" in parameters["model"]:
+            if np.ceil(np.log2(parameters["model"]["inner_patch_size"])) != np.floor(
+                np.log2(parameters["model"]["inner_patch_size"])
+            ):
+                sys.exit("The inner patch size must be a power of 2.")
 
         self.patch_size = parameters["model"]["inner_patch_size"]
         self.depth = int(np.log2(self.patch_size))
@@ -348,14 +349,12 @@ class unetr(ModelBase):
         self.embed_size = parameters["model"]["embed_dim"]
         self.patch_dim = [i // self.patch_size for i in self.img_size]
 
-        if not all([i%self.patch_size == 0 for i in self.img_size]):
+        if not all([i % self.patch_size == 0 for i in self.img_size]):
             sys.exit(
                 "The image size is not divisible by the patch size in at least 1 dimension. UNETR is not defined in this case."
             )
-        if not all([self.patch_size<=i for i in self.img_size]):
-            sys.exit(
-                "The inner patch size must be smaller than the input image."
-            )
+        if not all([self.patch_size <= i for i in self.img_size]):
+            sys.exit("The inner patch size must be smaller than the input image.")
 
         self.transformer = _Transformer(
             img_size=self.img_size,
