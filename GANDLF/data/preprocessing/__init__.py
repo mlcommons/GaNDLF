@@ -19,7 +19,7 @@ from .normalize_rgb import (
 )
 from .template_matching import histogram_matching, stain_normalizer
 from .resample_minimum import Resample_Minimum
-from .rgba2rgb import rgba2rgb_transform
+from .rgb_conversion import rgba2rgb_transform, rgb2rgba_transform
 
 from torchio.transforms import (
     ZNormalization,
@@ -95,6 +95,9 @@ global_preprocessing_dict = {
     "rgba2rgb": rgba2rgb_transform,
     "rgbatorgb": rgba2rgb_transform,
     "rgba_to_rgb": rgba2rgb_transform,
+    "rgb2rgba": rgb2rgba_transform,
+    "rgbtorgba": rgb2rgba_transform,
+    "rgb_to_rgba": rgb2rgba_transform,
     "histogram_matching": histogram_matching,
     "stain_normalizer": stain_normalizer,
 }
