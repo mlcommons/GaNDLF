@@ -32,7 +32,6 @@ all_models_segmentation = [
     "fcn",
     "uinc",
     "msdnet",
-    "unetr",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
@@ -1824,9 +1823,8 @@ def test_unetr_3d(device):
         parameters["model"]["inner_patch_size"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    for patch in [32, 16, 8]:
+    for patch in [32, 8]:
         parameters["model"]["inner_patch_size"] = patch
-        parameters["model"]["depth"] = 7
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
         parameters["model"]["num_channels"] = len(
@@ -1863,8 +1861,7 @@ def test_unetr_2d(device):
     parameters["patch_size"] = [128, 128, 1]
     parameters["model"]["dimension"] = 2
 
-    # for patch in [32, 128, 64]:
-    for patch in [128]:
+    for patch in [32]:
         parameters["model"]["inner_patch_size"] = patch
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
