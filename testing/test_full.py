@@ -268,7 +268,7 @@ def test_train_segmentation_rad_3d(device):
     parameters["model"]["onnx_export"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
-    for model in all_models_segmentation or all_models_3D_only_segmentation:
+    for model in all_models_segmentation:
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -1861,7 +1861,7 @@ def test_unetr_2d(device):
     parameters["patch_size"] = [128, 128, 1]
     parameters["model"]["dimension"] = 2
 
-    for patch in [32]:
+    for patch in [32, 16]:
         parameters["model"]["inner_patch_size"] = patch
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
