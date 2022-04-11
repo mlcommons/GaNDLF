@@ -18,7 +18,7 @@ class RGB2RGBA(IntensityTransform):
     def apply_transform(self, subject: Subject) -> Subject:
         for image in self.get_images(subject):
             image_data_to_set = image.data
-            # only proceed with RGBA is detected
+            # only proceed with RGB is detected
             if image_data_to_set.shape[0] == 3:
                 image_data_array = image_data_to_set.numpy()
                 if image_data_array.shape[-1] == 1:
