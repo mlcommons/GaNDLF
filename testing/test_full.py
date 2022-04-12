@@ -1802,7 +1802,7 @@ def test_unet_layerchange_2d(device):
 
 
 def test_train_segmentation_unetr_3d(device):
-    print('Testing UNETR for 3D segmentation')
+    print("Testing UNETR for 3D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1856,7 +1856,7 @@ def test_train_segmentation_unetr_3d(device):
 
 
 def test_train_segmentation_unetr_2d(device):
-    print('Testing UNETR for 2D segmentation')
+    print("Testing UNETR for 2D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
