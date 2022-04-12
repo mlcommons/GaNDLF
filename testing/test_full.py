@@ -24,14 +24,14 @@ device = "cpu"
 ## global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
-    # "lightunet",
-    # "lightunet_multilayer",
-    # "unet",
+    "lightunet",
+    "lightunet_multilayer",
+    "unet",
     "unet_multilayer",
-    # "deep_resunet",
-    # "fcn",
-    # "uinc",
-    # "msdnet",
+    "deep_resunet",
+    "fcn",
+    "uinc",
+    "msdnet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
