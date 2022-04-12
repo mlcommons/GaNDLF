@@ -274,7 +274,7 @@ class _Transformer(nn.Sequential):
             self.layers.append(layer)
 
     def forward(self, x):
-        out = ModuleList([])
+        out = []
         x = self.embed(x)
 
         for i in range(0, self.num_layers):
