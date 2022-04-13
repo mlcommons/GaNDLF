@@ -62,7 +62,6 @@ requirements = [
     "pickle5>=0.0.11",
     "setuptools",
     "seaborn",
-    "skimage==0.19.1",
     "pyyaml",
     "tiffslide",
     "scikit-image",
