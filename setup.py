@@ -59,6 +59,7 @@ requirements = [
     "pandas",
     "pylint",
     "scikit-learn>=0.23.2",
+    "scikit-image>=0.19.1",
     "pickle5>=0.0.11",
     "setuptools",
     "seaborn",
