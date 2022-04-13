@@ -65,7 +65,6 @@ requirements = [
     "seaborn",
     "pyyaml",
     "tiffslide",
-    "scikit-image",
     "matplotlib",
     "requests>=2.25.0",
     "pyvips",
