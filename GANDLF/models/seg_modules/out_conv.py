@@ -52,7 +52,7 @@ class out_conv(nn.Module):
         if not (self.final_convolution_layer == None):
             if self.final_convolution_layer == F.softmax:
                 x = self.final_convolution_layer(x, dim=1)
-            elif self.activation == 'sigmoid':
+            elif self.final_convolution_layer == torch.sigmoid:
                 x = torch.sigmoid(self.sigmoid_input_multiplier * x)
             else:
                 x = self.final_convolution_layer(x)
