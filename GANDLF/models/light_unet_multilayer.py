@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Implementation of UNet
+Implementation of Light UNet
 """
+from torch.nn import ModuleList
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
@@ -58,10 +59,10 @@ class light_unet_multilayer(ModelBase):
             network_kwargs=self.network_kwargs,
         )
 
-        self.ds = []
-        self.en = []
-        self.us = []
-        self.de = []
+        self.ds = ModuleList([])
+        self.en = ModuleList([])
+        self.us = ModuleList([])
+        self.de = ModuleList([])
 
         for _ in range(0, self.num_layers):
             self.ds.append(

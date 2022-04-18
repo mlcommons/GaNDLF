@@ -3,6 +3,7 @@ import sys
 from GANDLF.models.seg_modules.out_conv import out_conv
 import torch
 import torch.nn as nn
+from torch.nn import ModuleList
 import numpy as np
 import math
 from GANDLF.utils.generic import checkPatchDimensions
@@ -264,7 +265,7 @@ class _Transformer(nn.Sequential):
         self.out_layers = out_layers
         self.num_layers = num_layers
         self.embed = _Embedding(img_size, patch_size, in_feats, embed_size, Conv)
-        self.layers = []
+        self.layers = ModuleList([])
 
         for _ in range(0, num_layers):
             layer = _TransformerLayer(
@@ -369,8 +370,8 @@ class unetr(ModelBase):
             Norm=self.Norm,
         )
 
-        self.upsampling = []
-        self.convs = []
+        self.upsampling = ModuleList([])
+        self.convs = ModuleList([])
 
         for i in range(0, self.depth - 1):
             # add deconv blocks
