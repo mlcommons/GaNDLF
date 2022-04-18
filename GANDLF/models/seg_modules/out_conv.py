@@ -16,7 +16,7 @@ class out_conv(nn.Module):
         act_kwargs=None,
         network_kwargs=None,
         final_convolution_layer=nn.Sigmoid,
-        sigmoid_input_multiplier=1.0
+        sigmoid_input_multiplier=1.0,
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:
