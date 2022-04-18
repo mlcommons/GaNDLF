@@ -133,6 +133,16 @@ nested_training:
 # 'resize_patch' resizes the image and mask AFTER extracting the patch
 data_preprocessing:
   {
+    # 'histogram_matching':{
+    #   'target': '/path/to/target/image.nii.gz', # this is the target image to which the histogram of the current image is matched, if this not defined, histogram equalization is performed on the entire image with an equal ramp of [-1,1]
+    #   'num_hist_level': 1024, # number of histogram levels
+    #   'num_match_points': 16, # number of matching points for histogram matching
+    # },
+    # 'histogram_equalization':{ # this performs global histogram equalization using the same logic as 'histogram_matching', just without the target
+    #   'num_hist_level': 1024, # number of histogram levels
+    #   'num_match_points': 16, # number of matching points for histogram matching
+    # },
+    # 'adaptive_histogram_equalization', # this performs Power Law Adaptive Histogram Equalization using https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1AdaptiveHistogramEqualizationImageFilter.html
     'threshold':{
       'min': 10, 
       'max': 75
@@ -156,6 +166,16 @@ data_preprocessing:
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
     'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
     'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
+    ## histogram matching algorithms
+    # 'histogram_matching':{
+    #   'target': '/path/to/template.nii.gz', # if this is absent, global histogram equalization takes place
+    #   # 'target': 'adaptive', # this will perform adaptive histogram matching using https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1AdaptiveHistogramEqualizationImageFilter.html
+    # },
+    ## stain normalization algorithms
+    # 'stain_normalization':{
+    #   'target': '/path/to/target.png', # this is required
+    #   'extractor': 'vahadane', # can be either vahadane, ruifrok or macenko; defaults to ruifrok
+    # }
   }
 ## various data augmentation techniques
 # options: affine, elastic, downsample, motion, kspace, bias, blur, gaussianNoise, swap
