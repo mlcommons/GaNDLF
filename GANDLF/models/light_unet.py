@@ -157,6 +157,7 @@ class light_unet(ModelBase):
             conv=self.Conv,
             norm=self.Norm,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
     def forward(self, x):

@@ -443,6 +443,7 @@ class unetr(ModelBase):
                 norm=self.Norm,
                 conv=self.Conv,
                 final_convolution_layer=self.final_convolution_layer,
+                sigmoid_input_multiplier=self.sigmoid_input_multiplier,
             ),
         )
 
