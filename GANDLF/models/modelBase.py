@@ -45,7 +45,9 @@ class ModelBase(nn.Module):
             self.n_dimensions
         )
 
-        self.sigmoid_input_multiplier = parameters["model"].get("sigmoid_input_multiplier", 1.0)
+        self.sigmoid_input_multiplier = parameters["model"].get(
+            "sigmoid_input_multiplier", 1.0
+        )
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
