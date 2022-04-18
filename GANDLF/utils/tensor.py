@@ -5,6 +5,9 @@ import torch.nn as nn
 import torchio
 from tqdm import tqdm
 
+# global definition for both one_hot and reverse_one_hot
+special_cases_to_check = ["||"]
+
 
 def one_hot(segmask_tensor, class_list):
     """
@@ -50,16 +53,17 @@ def one_hot(segmask_tensor, class_list):
         class_idx = 0
         for _class in class_list:
             if isinstance(_class, str):
-                if "||" in _class:  # special case
-                    class_split = _class.split("||")
-                    bin_mask = segmask_array_iter == int(class_split[0])
-                    for i in range(1, len(class_split)):
-                        bin_mask = torch.logical_or(
-                            bin_mask, (segmask_array_iter == int(class_split[i]))
-                        )
-                else:
-                    # assume that it is a simple int
-                    bin_mask = segmask_array_iter == int(_class)
+                for case in special_cases_to_check:
+                    if _class == case:  # special case
+                        class_split = _class.split(case)
+                        bin_mask = segmask_array_iter == int(class_split[0])
+                        for i in range(1, len(class_split)):
+                            bin_mask = torch.logical_or(
+                                bin_mask, (segmask_array_iter == int(class_split[i]))
+                            )
+                    else:
+                        # assume that it is a simple int
+                        bin_mask = segmask_array_iter == int(_class)
             else:
                 bin_mask = segmask_array_iter == int(_class)
             bin_mask = bin_mask.long()
@@ -87,7 +91,6 @@ def reverse_one_hot(predmask_tensor, class_list):
         predmask_array = predmask_tensor.cpu().numpy()
     else:
         predmask_array = predmask_tensor
-    special_cases_to_check = ["||"]
     special_case_detected = False
 
     for _class in class_list:
