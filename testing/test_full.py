@@ -1513,7 +1513,7 @@ def test_one_hot_logic():
     comparison = random_array == img_tensor_oh_rev_array
     assert comparison.all(), "Arrays are not equal"
 
-    class_list = [0, "1||2||3", 4]
+    class_list = [0, "1||2||3", np.max(random_array)]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
 
