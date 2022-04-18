@@ -6,20 +6,20 @@ import torchio
 from tqdm import tqdm
 
 
-def one_hot(segmask_array, class_list):
+def one_hot(segmask_tensor, class_list):
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
-        segmask_array (torch.Tensor): The segmentation mask Tensor.
+        segmask_tensor (torch.Tensor): The segmentation mask Tensor.
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
     """
-    batch_size = segmask_array.shape[0]
+    batch_size = segmask_tensor.shape[0]
 
-    def_shape = segmask_array.shape
+    def_shape = segmask_tensor.shape
     if len(def_shape) == 4:
         # special case for sdnet
         batch_stack = torch.zeros(
@@ -28,7 +28,7 @@ def one_hot(segmask_array, class_list):
             def_shape[2],
             def_shape[3],
             dtype=torch.float32,
-            device=segmask_array.device,
+            device=segmask_tensor.device,
         )
     else:
         batch_stack = torch.zeros(
@@ -38,12 +38,12 @@ def one_hot(segmask_array, class_list):
             def_shape[3],
             def_shape[4],
             dtype=torch.float32,
-            device=segmask_array.device,
+            device=segmask_tensor.device,
         )
 
     for b in range(batch_size):
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
-        segmask_array_iter = segmask_array[b, 0, ...]
+        segmask_array_iter = segmask_tensor[b, 0, ...]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
 
         # this implementation allows users to combine logical operands
@@ -54,15 +54,8 @@ def one_hot(segmask_array, class_list):
                     class_split = _class.split("||")
                     bin_mask = segmask_array_iter == int(class_split[0])
                     for i in range(1, len(class_split)):
-                        bin_mask = bin_mask | (
-                            segmask_array_iter == int(class_split[i])
-                        )
-                elif "|" in _class:  # special case
-                    class_split = _class.split("|")
-                    bin_mask = segmask_array_iter == int(class_split[0])
-                    for i in range(1, len(class_split)):
-                        bin_mask = bin_mask | (
-                            segmask_array_iter == int(class_split[i])
+                        bin_mask = torch.logical_or(
+                            bin_mask, (segmask_array_iter == int(class_split[i]))
                         )
                 else:
                     # assume that it is a simple int
@@ -79,24 +72,23 @@ def one_hot(segmask_array, class_list):
     return batch_stack
 
 
-def reverse_one_hot(predmask_array, class_list):
+def reverse_one_hot(predmask_tensor, class_list):
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
     Args:
-        predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
+        predmask_tensor (torch.Tensor): The predicted segmentation mask Tensor.
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         numpy.array: The final mask as numpy array.
     """
-    if isinstance(predmask_array, torch.Tensor):
-        array_to_consider = predmask_array.cpu().numpy()
+    if isinstance(predmask_tensor, torch.Tensor):
+        predmask_array = predmask_tensor.cpu().numpy()
     else:
-        array_to_consider = predmask_array
+        predmask_array = predmask_tensor
     special_cases_to_check = ["||"]
     special_case_detected = False
-    # max_current = 0
 
     for _class in class_list:
         for case in special_cases_to_check:
@@ -104,39 +96,16 @@ def reverse_one_hot(predmask_array, class_list):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
 
-    final_mask = None
-    if special_case_detected:
-        # for this case, the output mask will be formed with the following logic:
-        # for each class in class_list
-        #   unless the class is 0, the output will be index * predmask_array at that class
-        array_to_consider_bool = array_to_consider.astype(bool)
-        for idx, i in enumerate(class_list):
-            initialize_mask = False
-            if isinstance(class_list[idx], str):
-                for case in special_cases_to_check:
-                    initialize_mask = False
-                    if case in class_list[idx]:
-                        initialize_mask = True
-                    else:
-                        if class_list[idx] != "0":
-                            initialize_mask = True
-            else:
-                if class_list[idx] != 0:
-                    initialize_mask = True
+    final_mask = np.zeros(predmask_array[0, ...].shape)
+    predmask_array_bool = predmask_array.astype(bool)
+    for idx, i in enumerate(class_list):
+        output_value = i
+        # for special case, use the index as value
+        if special_case_detected:
+            output_value = idx
 
-            if initialize_mask:
-                if final_mask is None:
-                    final_mask = idx * np.asarray(
-                        array_to_consider_bool[idx, ...], dtype=int
-                    )
-                else:
-                    final_mask[array_to_consider_bool[idx, ...]] = idx
-    else:
-        for i, _ in enumerate(class_list):
-            if final_mask is None:
-                final_mask = np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
-            else:
-                final_mask += np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
+        final_mask[predmask_array_bool[idx, ...]] = output_value
+
     return final_mask
 
 
