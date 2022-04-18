@@ -59,7 +59,8 @@ def one_hot(segmask_tensor, class_list):
                         bin_mask = segmask_array_iter == int(special_class_split[0])
                         for i in range(1, len(special_class_split)):
                             bin_mask = torch.logical_or(
-                                bin_mask, (segmask_array_iter == int(special_class_split[i]))
+                                bin_mask,
+                                (segmask_array_iter == int(special_class_split[i])),
                             )
                     else:
                         # assume that it is a simple int
