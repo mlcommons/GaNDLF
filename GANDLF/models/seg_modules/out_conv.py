@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -15,6 +16,7 @@ class out_conv(nn.Module):
         act_kwargs=None,
         network_kwargs=None,
         final_convolution_layer=nn.Sigmoid,
+        sigmoid_input_multiplier=1.0
     ):
         nn.Module.__init__(self)
         if conv_kwargs is None:
@@ -32,6 +34,7 @@ class out_conv(nn.Module):
             network_kwargs = {"res": False}
 
         self.residual = network_kwargs["res"]
+        self.sigmoid_input_multiplier = sigmoid_input_multiplier
 
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 
@@ -49,6 +52,8 @@ class out_conv(nn.Module):
         if not (self.final_convolution_layer == None):
             if self.final_convolution_layer == F.softmax:
                 x = self.final_convolution_layer(x, dim=1)
+            elif self.activation == 'sigmoid':
+                x = torch.sigmoid(self.sigmoid_input_multiplier * x)
             else:
                 x = self.final_convolution_layer(x)
         return x
