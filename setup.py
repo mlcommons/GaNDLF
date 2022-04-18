@@ -74,7 +74,7 @@ requirements = [
     "psutil",
     "medcam",
     "opencv-python",
-    "torchmetrics==0.5.1",
+    "torchmetrics==0.5.1",  # newer versions have changed api for f1 invocation
     "OpenPatchMiner==0.1.6",
     "zarr==2.10.3",
     "pydicom",
