@@ -67,11 +67,8 @@ def one_hot(segmask_tensor, class_list):
                         bin_mask = segmask_array_iter == int(_class)
             else:
                 bin_mask = segmask_array_iter == int(_class)
-            bin_mask = bin_mask.long()
-            # we always ensure the append happens in dim 0, which is blank
-            bin_mask = bin_mask.unsqueeze(0)
-
-            batch_stack[b, class_idx, ...] = bin_mask
+            # we always ensure the append happens in dim 0
+            batch_stack[b, class_idx, ...] = bin_mask.long().unsqueeze(0)
             class_idx += 1
 
     return batch_stack
