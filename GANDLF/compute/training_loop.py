@@ -1,12 +1,10 @@
 import os, time, psutil
 import torch
-from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 import torchio
 from medcam import medcam
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.data import (
     get_testing_loader,
 )
@@ -21,7 +19,6 @@ from GANDLF.utils import (
     version_check,
     write_training_patches,
 )
-from GANDLF.utils.tensor import get_class_imbalance_weights
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
