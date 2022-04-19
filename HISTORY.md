@@ -27,6 +27,7 @@
 - Added submodule to handle template-based normalization
 - RGB conversion submodule added to handle alpha channel conversions
 - Sigmoid multiplier option has been added
+- Compute objects can now be requested using developer-level functions
 
 ## 0.0.13
 
