@@ -362,6 +362,7 @@ def get_class_imbalance_weights(training_df, params):
         elif params["problem_type"] == "segmentation":
             # Set up the dataloader for penalty calculation
             from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+
             penalty_data = ImagesFromDataFrame(
                 training_df,
                 parameters=params,
