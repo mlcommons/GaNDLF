@@ -21,10 +21,7 @@ from GANDLF.utils import (
     version_check,
     write_training_patches,
 )
-from GANDLF.utils.tensor import (
-    get_class_imbalance_weights_segmentation,
-    get_class_imbalance_weights_classification,
-)
+from GANDLF.utils.tensor import get_class_imbalance_weights
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
@@ -278,38 +275,11 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
-    # Calculate the weights here
-    if params["weighted_loss"]:
-        print("Calculating weights")
-        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
-        if params["problem_type"] == "classification":
-            (
-                params["weights"],
-                params["class_weights"],
-            ) = get_class_imbalance_weights_classification(training_data, params)
-        elif params["problem_type"] == "segmentation":
-            # Set up the dataloader for penalty calculation
-            penalty_data = ImagesFromDataFrame(
-                training_data,
-                parameters=params,
-                train=False,
-                loader_type="penalty",
-            )
-
-            penalty_loader = DataLoader(
-                penalty_data,
-                batch_size=1,
-                shuffle=True,
-                pin_memory=False,
-            )
-
-            (
-                params["weights"],
-                params["class_weights"],
-            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
-            del penalty_data, penalty_loader
-    else:
-        params["weights"], params["class_weights"] = None, None
+    # get the penalty and class weights here
+    (
+        params["weights"],
+        params["class_weights"],
+    ) = get_class_imbalance_weights(training_data, params)
 
     if "medcam" in params:
         model = medcam.inject(
