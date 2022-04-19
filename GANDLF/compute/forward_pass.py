@@ -208,16 +208,22 @@ def validate_network(
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
-                torchio.Subject(subject_dict), params["patch_size"]
+                torchio.Subject(subject_dict),
+                params["patch_size"],
+                patch_overlap=params["inference_mechanism"]["patch_overlap"],
             )
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(
-                grid_sampler, overlap_mode=params["grid_aggregator_overlap"]
+                grid_sampler,
+                overlap_mode=params["inference_mechanism"]["grid_aggregator_overlap"],
             )
 
             if params["medcam_enabled"]:
                 attention_map_aggregator = torchio.inference.GridAggregator(
-                    grid_sampler, overlap_mode=params["grid_aggregator_overlap"]
+                    grid_sampler,
+                    overlap_mode=params["inference_mechanism"][
+                        "grid_aggregator_overlap"
+                    ],
                 )
 
             output_prediction = 0  # this is used for regression/classification
