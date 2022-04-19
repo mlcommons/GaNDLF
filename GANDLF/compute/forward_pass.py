@@ -402,25 +402,28 @@ def validate_network(
                         total_epoch_valid_metric[metric] += final_metric[metric]
 
         if label_ground_truth is not None:
-            # For printing information at halftime during an epoch
-            if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
-                (batch_idx + 1) < len(valid_dataloader)
-            ):
-                print(
-                    "\nHalf-Epoch Average " + mode + " loss : ",
-                    total_epoch_valid_loss / (batch_idx + 1),
-                )
-                for metric in params["metrics"]:
-                    if isinstance(total_epoch_valid_metric[metric], np.ndarray):
-                        to_print = (
-                            total_epoch_valid_metric[metric] / (batch_idx + 1)
-                        ).tolist()
-                    else:
-                        to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+            if params["verbose"]:
+                # For printing information at halftime during an epoch
+                if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
+                    (batch_idx + 1) < len(valid_dataloader)
+                ):
                     print(
-                        "Half-Epoch Average " + mode + " " + metric + " : ",
-                        to_print,
+                        "\nHalf-Epoch Average " + mode + " loss : ",
+                        total_epoch_valid_loss / (batch_idx + 1),
                     )
+                    for metric in params["metrics"]:
+                        if isinstance(total_epoch_valid_metric[metric], np.ndarray):
+                            to_print = (
+                                total_epoch_valid_metric[metric] / (batch_idx + 1)
+                            ).tolist()
+                        else:
+                            to_print = total_epoch_valid_metric[metric] / (
+                                batch_idx + 1
+                            )
+                        print(
+                            "Half-Epoch Average " + mode + " " + metric + " : ",
+                            to_print,
+                        )
 
     if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
