@@ -44,10 +44,10 @@ metrics:
   # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
   # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4
   # - iou # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#iou
-# this option provides the option to strategize the grid aggregation output; should be either 'crop' or 'average' - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
+## this customizes the inference, primarily used for segmentation outputs
 inference_mechanism: {
-  grid_aggregator_overlap: crop,
-  patch_overlap: 0,
+  grid_aggregator_overlap: crop, # this option provides the option to strategize the grid aggregation output; should be either 'crop' or 'average' - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
+  patch_overlap: 0, # amount of overlap of patches during inference, defaults to 0; see https://torchio.readthedocs.io/patches/patch_inference.html#gridsampler
 }
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
