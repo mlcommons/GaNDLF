@@ -1505,8 +1505,7 @@ def test_one_hot_logic():
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
     img_tensor = torch.from_numpy(img_array).to(torch.float16)
-    img_tensor = img_tensor.unsqueeze(0)
-    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor = img_tensor.unsqueeze(0).unsqueeze(0)
 
     class_list = [*range(0, np.max(random_array) + 1)]
     img_tensor_oh = one_hot(img_tensor, class_list)
