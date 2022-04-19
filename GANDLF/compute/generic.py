@@ -47,13 +47,10 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         parameters["training_samples_size"] = len(train_loader)
 
         # Calculate the weights here
-        if parameters["weighted_loss"]:
-            (
-                parameters["weights"],
-                parameters["class_weights"],
-            ) = get_class_imbalance_weights(train_csv, parameters)
-        else:
-            parameters["weights"], parameters["class_weights"] = None, None
+        (
+            parameters["weights"],
+            parameters["class_weights"],
+        ) = get_class_imbalance_weights(train_csv, parameters)
 
     if val_csv is not None:
         parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
