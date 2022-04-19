@@ -457,7 +457,6 @@ def training_loop(
 
     # once the training is done, optimize the best model
     if os.path.exists(best_model_path):
-
         onnx_export = True
         if params["model"]["architecture"] in ["sdnet", "brain_age"]:
             onnx_export = False
@@ -470,7 +469,7 @@ def training_loop(
             print("Optimizing best model.")
 
             try:
-                main_dict = load_model(best_model_path)
+                main_dict = load_model(best_model_path, params["device"])
                 version_check(params["version"], version_to_check=main_dict["version"])
                 model.load_state_dict(main_dict["model_state_dict"])
                 best_epoch = main_dict["epoch"]
