@@ -26,6 +26,7 @@
 - Add option to have different overlap options for final inference
 - Added submodule to handle template-based normalization
 - RGB conversion submodule added to handle alpha channel conversions
+- Sigmoid multiplier option has been added
 
 ## 0.0.13
 
