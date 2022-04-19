@@ -71,10 +71,10 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_metric[metric] = 0
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    if params["verbose"]:
-        if params["model"]["amp"]:
+    if params["model"]["amp"]:
+        scaler = GradScaler()
+        if params["verbose"]:
             print("Using Automatic mixed precision", flush=True)
-            scaler = GradScaler()
 
     # Set the model to train
     model.train()
