@@ -275,12 +275,6 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
-    # get the penalty and class weights here
-    (
-        params["weights"],
-        params["class_weights"],
-    ) = get_class_imbalance_weights(training_data, params)
-
     if "medcam" in params:
         model = medcam.inject(
             model,
