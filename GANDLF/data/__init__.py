@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 
 from .ImagesFromDataFrame import ImagesFromDataFrame
-from ..utils import get_dataframe
+from GANDLF.utils.write_parse import get_dataframe
 
 
 def get_train_loader(params):
@@ -24,29 +24,6 @@ def get_train_loader(params):
         ),
         batch_size=params["batch_size"],
         shuffle=True,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-
-
-def get_penalty_loader(params):
-    """
-    Get the penalty data loader.
-
-    Args:
-        params (dict): Dictionary of parameters.
-
-    Returns:
-        torch.utils.data.DataLoader: The penalty loader.
-    """
-    return DataLoader(
-        ImagesFromDataFrame(
-            get_dataframe(params["training_data"]),
-            params,
-            train=True,
-            loader_type="penalty",
-        ),
-        batch_size=1,
-        shuffle=False,
         pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
 
