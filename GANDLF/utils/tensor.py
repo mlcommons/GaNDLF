@@ -156,7 +156,8 @@ def send_model_to_device(model, amp, device, optimizer):
         bool: Whether automatic mixed precision is to be used or not.
         torch.device: Device type.
     """
-    if device != "cpu":
+    print("device: ", device)
+    if device == "cuda":
         if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
             sys.exit(
                 "Please set the environment variable 'CUDA_VISIBLE_DEVICES' correctly before trying to run GANDLF on GPU"
