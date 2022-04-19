@@ -4,8 +4,8 @@ from GANDLF.optimizers import get_optimizer
 from GANDLF.data import (
     get_train_loader,
     get_validation_loader,
-    ImagesFromDataFrame,
 )
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import (
     populate_channel_keys_in_params,
     populate_header_in_parameters,
