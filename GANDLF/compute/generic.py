@@ -4,7 +4,6 @@ from GANDLF.optimizers import get_optimizer
 from GANDLF.data import (
     get_train_loader,
     get_validation_loader,
-    get_penalty_loader,
     ImagesFromDataFrame,
 )
 from GANDLF.utils import (
@@ -49,14 +48,10 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
 
         # Calculate the weights here
         if parameters["weighted_loss"]:
-            print("Calculating weights for loss")
-            penalty_loader = get_penalty_loader(parameters)
-
             (
                 parameters["weights"],
                 parameters["class_weights"],
-            ) = get_class_imbalance_weights(penalty_loader, parameters)
-            del penalty_loader
+            ) = get_class_imbalance_weights(train_csv, parameters)
         else:
             parameters["weights"], parameters["class_weights"] = None, None
 
