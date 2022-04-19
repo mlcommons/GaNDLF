@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from GANDLF.utils import get_linear_interpolation_mode
+from GANDLF.utils.modelbase import get_modelbase_final_layer
 from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling3D,
     GlobalAveragePooling2D,
@@ -78,35 +79,7 @@ class ModelBase(nn.Module):
             self.Norm = self.get_norm_type(self.norm_type.lower(), self.n_dimensions)
 
     def get_final_layer(self, final_convolution_layer):
-        """
-        This function gets the final layer of the model.
-
-        Args:
-            final_convolution_layer (str): The final layer of the model as a string.
-
-        Returns:
-            Functional: sigmoid, softmax, or None
-        """
-        none_list = [
-            "none",
-            None,
-            "None",
-            "regression",
-            "classification_but_not_softmax",
-            "logits",
-            "classification_without_softmax",
-        ]
-
-        if final_convolution_layer in ["sigmoid", "sig"]:
-            final_convolution_layer = torch.sigmoid
-
-        elif final_convolution_layer in ["softmax", "soft"]:
-            final_convolution_layer = F.softmax
-
-        elif final_convolution_layer in none_list:
-            final_convolution_layer = None
-
-        return final_convolution_layer
+        return get_modelbase_final_layer(final_convolution_layer) 
 
     def get_norm_type(self, norm_type, dimensions):
         """
