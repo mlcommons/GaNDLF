@@ -29,14 +29,18 @@ def step(model, image, label, params, train=True):
 
     """
     if params["verbose"]:
-        print(torch.cuda.memory_summary())
+        if torch.cuda.is_available():
+            print(torch.cuda.memory_summay())
         print(
-            "|===========================================================================|\n|                             CPU Utilization                            |\n|"
+            "|===========================================================================|"
+        )
+        print(
+            "|                              CPU Utilization                              |"
         )
         print("Load_Percent   :", psutil.cpu_percent(interval=None))
         print("MemUtil_Percent:", psutil.virtual_memory()[2])
         print(
-            "|===========================================================================|\n|"
+            "|===========================================================================|"
         )
 
     # for the weird cases where mask is read as an RGB image, ensure only the first channel is used

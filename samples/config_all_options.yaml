@@ -12,6 +12,7 @@ model:
     architecture: resunet, # options: unet, resunet, deep_resunet, deep_unet, light_resunet, light_unet, fcn, uinc, vgg, densenet
     norm_type: batch, # options: batch, instance, or none (only for VGG); used for all networks
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
+    # sigmoid_input_multiplier: 1.0, # this is used during sigmoid, and defaults to 1.0
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
     # class_list: '[*range(0,100,1)]' # a range of values from 0 to 99 with a step of 1 will be created; customize as needed, but ensure this is defined as a string as it will be passed through 'eval' function
     # class_list: '[0,1||2||3,1||4,4]', # combinatorial training - this will construct one-hot encoded mask using logical operands between specified annotations. Note that double '|' or '&' should be passed and not single to avoid python parsing

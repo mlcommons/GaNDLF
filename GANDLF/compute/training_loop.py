@@ -73,8 +73,9 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
-        print("Using Automatic mixed precision", flush=True)
         scaler = GradScaler()
+        if params["verbose"]:
+            print("Using Automatic mixed precision", flush=True)
 
     # Set the model to train
     model.train()
@@ -159,25 +160,26 @@ def train_network(model, train_dataloader, optimizer, params):
             else:
                 total_epoch_train_metric[metric] += calculated_metrics[metric]
 
-        # For printing information at halftime during an epoch
-        if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
-            (batch_idx + 1) < len(train_dataloader)
-        ):
-            print(
-                "\nHalf-Epoch Average Train loss : ",
-                total_epoch_train_loss / (batch_idx + 1),
-            )
-            for metric in params["metrics"]:
-                if isinstance(total_epoch_train_metric[metric], np.ndarray):
-                    to_print = (
-                        total_epoch_train_metric[metric] / (batch_idx + 1)
-                    ).tolist()
-                else:
-                    to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
+        if params["verbose"]:
+            # For printing information at halftime during an epoch
+            if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
+                (batch_idx + 1) < len(train_dataloader)
+            ):
                 print(
-                    "Half-Epoch Average Train " + metric + " : ",
-                    to_print,
+                    "\nHalf-Epoch Average Train loss : ",
+                    total_epoch_train_loss / (batch_idx + 1),
                 )
+                for metric in params["metrics"]:
+                    if isinstance(total_epoch_train_metric[metric], np.ndarray):
+                        to_print = (
+                            total_epoch_train_metric[metric] / (batch_idx + 1)
+                        ).tolist()
+                    else:
+                        to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
+                    print(
+                        "Half-Epoch Average Train " + metric + " : ",
+                        to_print,
+                    )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)

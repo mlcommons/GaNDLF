@@ -111,6 +111,7 @@ class unet_multilayer(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
     def forward(self, x):
@@ -128,11 +129,9 @@ class unet_multilayer(ModelBase):
         """
         y = []
         y.append(self.ins(x))
-        print("x.device:", x.device)
 
         # [downsample --> encode] x num layers
         for i in range(0, self.num_layers):
-            print("y[i].device:", y[i].device)
             temp = self.ds[i](y[i])
             y.append(self.en[i](temp))
 
