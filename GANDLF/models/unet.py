@@ -158,6 +158,7 @@ class unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
     def forward(self, x):

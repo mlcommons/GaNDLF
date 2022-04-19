@@ -258,6 +258,7 @@ def test_train_segmentation_rad_3d(device):
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["final_layer"] = "softmax"
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
