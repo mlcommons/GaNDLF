@@ -158,6 +158,7 @@ class deep_unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
         self.out_2 = out_conv(
             input_channels=self.base_filters * 4,
@@ -166,6 +167,7 @@ class deep_unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
         self.out_1 = out_conv(
             input_channels=self.base_filters * 2,
@@ -174,6 +176,7 @@ class deep_unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
         self.out_0 = out_conv(
             input_channels=self.base_filters,
@@ -182,6 +185,7 @@ class deep_unet(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
     def forward(self, x):
