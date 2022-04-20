@@ -92,6 +92,7 @@ global_models_dict = {
     "efficientnetb7": efficientnetB7,
 }
 
+
 def get_modelbase_final_layer(final_convolution_layer):
     """
     This function gets the final layer of the model.
@@ -122,4 +123,3 @@ def get_modelbase_final_layer(final_convolution_layer):
         final_convolution_layer = None
 
     return final_convolution_layer
-

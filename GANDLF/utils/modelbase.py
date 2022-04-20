@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 
+
 def get_modelbase_final_layer(final_convolution_layer):
     """
     This function gets the final layer of the model.
@@ -31,4 +32,3 @@ def get_modelbase_final_layer(final_convolution_layer):
         final_convolution_layer = None
 
     return final_convolution_layer
-
