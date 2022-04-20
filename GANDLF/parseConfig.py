@@ -625,4 +625,22 @@ def parseConfig(config_file_path, version_check_flag=True):
         temp_dict["type"] = params["optimizer"]
         params["optimizer"] = temp_dict
 
+    # initialize defaults for inference mechanism
+    inference_mechanism = {
+        "grid_aggregator_overlap": "crop",
+        "patch_overlap": 0,
+    }
+    initialize_inference_mechanism = False
+    if not ("inference_mechanism" in params):
+        initialize_inference_mechanism = True
+    elif not (isinstance(params["inference_mechanism"], dict)):
+        initialize_inference_mechanism = True
+    else:
+        for key in inference_mechanism:
+            if not (key in params["inference_mechanism"]):
+                params["inference_mechanism"][key] = inference_mechanism[key]
+
+    if initialize_inference_mechanism:
+        params["inference_mechanism"] = inference_mechanism
+
     return params
