@@ -206,13 +206,13 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                         output = model(image_patches.float().to(parameters["device"]))
                     output = output.detach().cpu().numpy()
                 else:
-                    output = model.infer(
+                    output = model(
                         inputs={
-                            parameters["model"]["IO"][0]: image_patches.float()
+                            parameters["model"]["IO"][0][0]: image_patches.float()
                             .cpu()
                             .numpy()
                         }
-                    )[parameters["model"]["IO"][1]]
+                    )[parameters["model"]["IO"][1][0]]
 
                 for i in range(int(output.shape[0])):
                     count_map[

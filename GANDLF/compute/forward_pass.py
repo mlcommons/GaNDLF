@@ -163,9 +163,9 @@ def validate_network(
                     pred_output += model(image)
                 elif params["model"]["type"] == "openvino":
                     pred_output += torch.from_numpy(
-                        model.infer(
-                            inputs={params["model"]["IO"][0]: image.cpu().numpy()}
-                        )[params["model"]["IO"][1]]
+                        model(
+                            inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
+                        )[params["model"]["IO"][1][0]]
                     )
                 else:
                     raise Exception(
