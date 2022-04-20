@@ -79,7 +79,7 @@ class ModelBase(nn.Module):
             self.Norm = self.get_norm_type(self.norm_type.lower(), self.n_dimensions)
 
     def get_final_layer(self, final_convolution_layer):
-        return get_modelbase_final_layer(final_convolution_layer) 
+        return get_modelbase_final_layer(final_convolution_layer)
 
     def get_norm_type(self, norm_type, dimensions):
         """
