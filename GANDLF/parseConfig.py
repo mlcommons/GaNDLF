@@ -633,7 +633,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     initialize_inference_mechanism = False
     if not ("inference_mechanism" in params):
         initialize_inference_mechanism = True
-    if not (isinstance(params["inference_mechanism"], dict)):
+    elif not (isinstance(params["inference_mechanism"], dict)):
         initialize_inference_mechanism = True
     else:
         for key in inference_mechanism:
