@@ -91,4 +91,3 @@ global_models_dict = {
     "efficientnetb6": efficientnetB6,
     "efficientnetb7": efficientnetB7,
 }
-
