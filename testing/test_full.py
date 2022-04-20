@@ -1505,8 +1505,7 @@ def test_one_hot_logic():
     img = sitk.GetImageFromArray(random_array)
     img_array = sitk.GetArrayFromImage(img)
     img_tensor = torch.from_numpy(img_array).to(torch.float16)
-    img_tensor = img_tensor.unsqueeze(0)
-    img_tensor = img_tensor.unsqueeze(0)
+    img_tensor = img_tensor.unsqueeze(0).unsqueeze(0)
 
     class_list = [*range(0, np.max(random_array) + 1)]
     img_tensor_oh = one_hot(img_tensor, class_list)
@@ -1514,7 +1513,7 @@ def test_one_hot_logic():
     comparison = random_array == img_tensor_oh_rev_array
     assert comparison.all(), "Arrays are not equal"
 
-    class_list = [0, "1||2||3", 4]
+    class_list = [0, "1||2||3", np.max(random_array)]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
 
