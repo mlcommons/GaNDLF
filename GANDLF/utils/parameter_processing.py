@@ -38,7 +38,7 @@ def populate_header_in_parameters(parameters, headers):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])
 
     parameters["problem_type"] = find_problem_type(
-        parameters, get_basemodel_final_layer(parameters["model"]["final_layer"])
+        parameters, get_modelbase_final_layer(parameters["model"]["final_layer"])
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
