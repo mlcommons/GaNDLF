@@ -16,14 +16,15 @@
 - Minimum resampling resolution is now available
 - Adding option to resize images and resize patches separately
 - Reverse one-hot logic is now updated to output unique labels
-- Added option to resume previous training with and without parameter/data updates
-- Added automated builds of Docker images
-- Added mechanism to perform inference without having access to ground truth labels
-- Added mechanism to map output labels using post-processing before saving
-- Added mechanism to enable customized histology classification output via heatmaps
-- ImageNet pre-trained models added
-- Added option to save model at every epoch
-- Add option to have different overlap options for final inference
+- User can now resume previous training with and without parameter/data updates
+- Docker images are now getting built
+- Inference works without having access to ground truth labels
+- Map output labels using post-processing before saving
+- Enable customized histology classification output via heatmaps
+- Added ImageNet pre-trained models
+- Added RGBA to RGB conversion for preprocessing
+- Model can now be saved at every epoch
+- Different options for final inference
 - Added submodule to handle template-based normalization
 - RGB conversion submodule added to handle alpha channel conversions
 - Sigmoid multiplier option has been added
