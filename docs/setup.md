@@ -18,16 +18,16 @@
 
 ## Installation
 
-The instructions assume a system using NVIDA GPUs with [CUDA 10.2](https://developer.nvidia.com/cuda-toolkit-archive) (for AMD, please make the appropriate change during PyTorch installation from https://pytorch.org/get-started/locally).
+The instructions assume a system using NVIDA GPUs with [CUDA 10.2](https://developer.nvidia.com/cuda-toolkit-archive) (for AMD, please make the appropriate change during PyTorch installation from [their installation page](https://pytorch.org/get-started/locally)).
 
 ```bash
 git clone https://github.com/CBICA/GaNDLF.git
 cd GaNDLF
 conda create -n venv_gandlf python=3.7 -y
 conda activate venv_gandlf
-### PyTorch installation - https://pytorch.org/get-started/locally
+### PyTorch LTS installation - https://pytorch.org/get-started/locally
 ## CUDA 10.2
-conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch-lts -y
+# conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch-lts -y
 ## CUDA 11.1
 # conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch-lts -c conda-forge -y
 pip install openvino-dev # [OPTIONAL] to generate optimized models for inference
