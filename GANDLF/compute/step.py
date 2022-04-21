@@ -68,8 +68,8 @@ def step(model, image, label, params, train=True):
 
     if train == False and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
-            model.infer(inputs={params["model"]["IO"][0]: image.cpu().numpy()})[
-                params["model"]["IO"][1]
+            model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
+                params["model"]["IO"][1][0]
             ]
         )
         output = output.to(params["device"])
