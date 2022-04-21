@@ -16,7 +16,6 @@ import tiffslide as openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     populate_channel_keys_in_params,
-    send_model_to_device,
     get_dataframe,
     best_model_path_end,
     load_ov_model,
@@ -78,9 +77,6 @@ def inference_loop(
 
         main_dict = torch.load(file_to_check)
         model.load_state_dict(main_dict["model_state_dict"])
-        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-            model, parameters["model"]["amp"], device, optimizer=None
-        )
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
