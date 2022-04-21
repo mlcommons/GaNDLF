@@ -173,5 +173,5 @@ def load_ov_model(path, device="CPU"):
     compiled_model = core.compile_model(model=model, device_name=device.upper())
     input_layer = compiled_model.inputs
     output_layer = compiled_model.outputs
-    
+
     return compiled_model, input_layer, output_layer
