@@ -1,33 +1,28 @@
 import os, time, psutil
 import torch
-from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 import torchio
 from medcam import medcam
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data import (
+    get_testing_loader,
+)
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
-from GANDLF.models import global_models_dict
-from GANDLF.schedulers import global_schedulers_dict
-from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.utils import (
     get_date_time,
+    best_model_path_end,
     send_model_to_device,
-    populate_channel_keys_in_params,
     save_model,
     load_model,
     version_check,
     write_training_patches,
 )
-from GANDLF.utils.tensor import (
-    get_class_imbalance_weights_segmentation,
-    get_class_imbalance_weights_classification,
-)
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
+from .generic import create_pytorch_objects
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -224,71 +219,28 @@ def training_loop(
         epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
+    params["training_data"] = training_data
+    params["validation_data"] = validation_data
+    params["testing_data"] = testing_data
+    testingDataDefined = True
+    if params["testing_data"] is None:
+        # testing_data = validation_data
+        testingDataDefined = False
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
 
-    # Fetch the model according to params mentioned in the configuration file
-    model = global_models_dict[params["model"]["architecture"]](parameters=params)
-
-    training_data_copy = training_data.copy()
-    validation_data_copy = validation_data.copy()
-
-    # Set up the dataloaders
-    training_data_for_torch = ImagesFromDataFrame(
-        training_data_copy, params, train=True, loader_type="train"
-    )
-
-    validation_data_for_torch = ImagesFromDataFrame(
-        validation_data_copy, params, train=False, loader_type="validation"
-    )
-
-    testingDataDefined = True
-    if testing_data is None:
-        # testing_data = validation_data
-        testingDataDefined = False
+    (
+        model,
+        optimizer,
+        train_dataloader,
+        val_dataloader,
+        scheduler,
+        params,
+    ) = create_pytorch_objects(params, training_data, validation_data, device)
 
     if testingDataDefined:
-        test_data_for_torch = ImagesFromDataFrame(
-            testing_data, params, train=False, loader_type="testing"
-        )
-
-    train_dataloader = DataLoader(
-        training_data_for_torch,
-        batch_size=params["batch_size"],
-        shuffle=True,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-    params["training_samples_size"] = len(train_dataloader.dataset)
-
-    val_dataloader = DataLoader(
-        validation_data_for_torch,
-        batch_size=1,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-
-    if testingDataDefined:
-        test_dataloader = DataLoader(
-            test_data_for_torch,
-            batch_size=1,
-            pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-        )
-
-    # Fetch the appropriate channel keys
-    # Getting the channels for training and removing all the non numeric entries from the channels
-    params = populate_channel_keys_in_params(validation_data_for_torch, params)
-
-    # Fetch the optimizers
-    params["model_parameters"] = model.parameters()
-    optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
-    params["optimizer_object"] = optimizer
-
-    scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
-
-    # these keys contain generators, and are not needed beyond this point in params
-    generator_keys_to_remove = ["optimizer_object", "model_parameters"]
-    for key in generator_keys_to_remove:
-        params.pop(key, None)
+        test_dataloader = get_testing_loader(params)
 
     # Start training time here
     start_time = time.time()
@@ -320,40 +272,6 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
-    # Calculate the weights here
-    if params["weighted_loss"]:
-        print("Calculating weights")
-        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
-        if params["problem_type"] == "classification":
-            (
-                params["weights"],
-                params["class_weights"],
-            ) = get_class_imbalance_weights_classification(training_data, params)
-        elif params["problem_type"] == "segmentation":
-            print("Calculating weights for loss")
-            # Set up the dataloader for penalty calculation
-            penalty_data = ImagesFromDataFrame(
-                training_data,
-                parameters=params,
-                train=False,
-                loader_type="penalty",
-            )
-
-            penalty_loader = DataLoader(
-                penalty_data,
-                batch_size=1,
-                shuffle=True,
-                pin_memory=False,
-            )
-
-            (
-                params["weights"],
-                params["class_weights"],
-            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
-            del penalty_data, penalty_loader
-    else:
-        params["weights"], params["class_weights"] = None, None
-
     if "medcam" in params:
         model = medcam.inject(
             model,
@@ -373,13 +291,13 @@ def training_loop(
     patience, start_epoch = 0, 0
     first_model_saved = False
     best_model_path = os.path.join(
-        output_dir, params["model"]["architecture"] + "_best.pth.tar"
+        output_dir, params["model"]["architecture"] + best_model_path_end
     )
 
     # if previous model file is present, load it up
     if os.path.exists(best_model_path):
         try:
-            main_dict = load_model(best_model_path)
+            main_dict = load_model(best_model_path, params["device"])
             version_check(params["version"], version_to_check=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
@@ -539,7 +457,6 @@ def training_loop(
 
     # once the training is done, optimize the best model
     if os.path.exists(best_model_path):
-
         onnx_export = True
         if params["model"]["architecture"] in ["sdnet", "brain_age"]:
             onnx_export = False
@@ -552,7 +469,7 @@ def training_loop(
             print("Optimizing best model.")
 
             try:
-                main_dict = load_model(best_model_path)
+                main_dict = load_model(best_model_path, params["device"])
                 version_check(params["version"], version_to_check=main_dict["version"])
                 model.load_state_dict(main_dict["model_state_dict"])
                 best_epoch = main_dict["epoch"]
