@@ -20,7 +20,6 @@ from GANDLF.utils import (
     best_model_path_end,
     load_ov_model,
 )
-from GANDLF.models import get_model
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
@@ -54,9 +53,6 @@ def inference_loop(
         _,
         parameters,
     ) = create_pytorch_objects(parameters, device=device)
-
-    # Fetch the model according to params mentioned in the configuration file
-    model = get_model(parameters)
 
     # ensure outputs are saved properly
     parameters["save_output"] = True
