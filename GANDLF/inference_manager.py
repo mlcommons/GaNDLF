@@ -47,7 +47,7 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         parameters["current_fold_dir"] = fold_dir
         inference_loop(
             inferenceDataFromPickle=inferenceData_full,
-            outputDir=fold_dir,
+            outputDir_or_optimizedModel=fold_dir,
             device=device,
             parameters=parameters,
         )
