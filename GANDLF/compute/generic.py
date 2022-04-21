@@ -50,7 +50,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         (
             parameters["weights"],
             parameters["class_weights"],
-        ) = get_class_imbalance_weights(train_csv, parameters)
+        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
     if val_csv is not None:
         parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
