@@ -1,22 +1,19 @@
 import os, time, psutil
 import torch
-from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 import torchio
 from medcam import medcam
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data import (
+    get_testing_loader,
+)
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
-from GANDLF.models import global_models_dict
-from GANDLF.schedulers import global_schedulers_dict
-from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.utils import (
     get_date_time,
+    best_model_path_end,
     send_model_to_device,
-    populate_channel_keys_in_params,
-    get_class_imbalance_weights,
     save_model,
     load_model,
     version_check,
@@ -25,6 +22,7 @@ from GANDLF.utils import (
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
+from .generic import create_pytorch_objects
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -69,8 +67,9 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
-        print("Using Automatic mixed precision", flush=True)
         scaler = GradScaler()
+        if params["verbose"]:
+            print("Using Automatic mixed precision", flush=True)
 
     # Set the model to train
     model.train()
@@ -144,36 +143,44 @@ def train_network(model, train_dataloader, optimizer, params):
             total_epoch_train_loss += loss.detach().cpu().item()
         for metric in calculated_metrics.keys():
             if isinstance(total_epoch_train_metric[metric], list):
-                total_epoch_train_metric[metric].append(calculated_metrics[metric])
+                if len(total_epoch_train_metric[metric]) == 0:
+                    total_epoch_train_metric[metric] = np.array(
+                        calculated_metrics[metric]
+                    )
+                else:
+                    total_epoch_train_metric[metric] += np.array(
+                        calculated_metrics[metric]
+                    )
             else:
                 total_epoch_train_metric[metric] += calculated_metrics[metric]
 
-        # For printing information at halftime during an epoch
-        if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
-            (batch_idx + 1) < len(train_dataloader)
-        ):
-            print(
-                "\nHalf-Epoch Average Train loss : ",
-                total_epoch_train_loss / (batch_idx + 1),
-            )
-            for metric in params["metrics"]:
-                if isinstance(total_epoch_train_metric[metric], list):
-                    to_print = (
-                        np.array(total_epoch_train_metric[metric]) / (batch_idx + 1)
-                    ).tolist()
-                else:
-                    to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
+        if params["verbose"]:
+            # For printing information at halftime during an epoch
+            if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
+                (batch_idx + 1) < len(train_dataloader)
+            ):
                 print(
-                    "Half-Epoch Average Train " + metric + " : ",
-                    to_print,
+                    "\nHalf-Epoch Average Train loss : ",
+                    total_epoch_train_loss / (batch_idx + 1),
                 )
+                for metric in params["metrics"]:
+                    if isinstance(total_epoch_train_metric[metric], np.ndarray):
+                        to_print = (
+                            total_epoch_train_metric[metric] / (batch_idx + 1)
+                        ).tolist()
+                    else:
+                        to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
+                    print(
+                        "Half-Epoch Average Train " + metric + " : ",
+                        to_print,
+                    )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   Train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
-        if isinstance(total_epoch_train_metric[metric], list):
+        if isinstance(total_epoch_train_metric[metric], np.ndarray):
             to_print = (
-                np.array(total_epoch_train_metric[metric]) / len(train_dataloader)
+                total_epoch_train_metric[metric] / len(train_dataloader)
             ).tolist()
         else:
             to_print = total_epoch_train_metric[metric] / len(train_dataloader)
@@ -212,73 +219,28 @@ def training_loop(
         epochs = params["num_epochs"]
     params["device"] = device
     params["output_dir"] = output_dir
+    params["training_data"] = training_data
+    params["validation_data"] = validation_data
+    params["testing_data"] = testing_data
+    testingDataDefined = True
+    if params["testing_data"] is None:
+        # testing_data = validation_data
+        testingDataDefined = False
 
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
 
-    # Fetch the model according to params mentioned in the configuration file
-    model = global_models_dict[params["model"]["architecture"]](parameters=params)
-
-    # Set up the dataloaders
-    training_data_for_torch = ImagesFromDataFrame(
-        training_data, params, train=True, loader_type="train"
-    )
-
-    validation_data_for_torch = ImagesFromDataFrame(
-        validation_data, params, train=False, loader_type="validation"
-    )
-
-    testingDataDefined = True
-    if testing_data is None:
-        # testing_data = validation_data
-        testingDataDefined = False
+    (
+        model,
+        optimizer,
+        train_dataloader,
+        val_dataloader,
+        scheduler,
+        params,
+    ) = create_pytorch_objects(params, training_data, validation_data, device)
 
     if testingDataDefined:
-        test_data_for_torch = ImagesFromDataFrame(
-            testing_data, params, train=False, loader_type="testing"
-        )
-
-    train_dataloader = DataLoader(
-        training_data_for_torch,
-        batch_size=params["batch_size"],
-        shuffle=True,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-    params["training_samples_size"] = len(train_dataloader.dataset)
-
-    val_dataloader = DataLoader(
-        validation_data_for_torch,
-        batch_size=1,
-        pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-    )
-
-    if testingDataDefined:
-        test_dataloader = DataLoader(
-            test_data_for_torch,
-            batch_size=1,
-            pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
-        )
-
-    # Fetch the appropriate channel keys
-    # Getting the channels for training and removing all the non numeric entries from the channels
-    params = populate_channel_keys_in_params(validation_data_for_torch, params)
-
-    # Fetch the optimizers
-    params["model_parameters"] = model.parameters()
-    optimizer = global_optimizer_dict[params["optimizer"]["type"]](params)
-    params["optimizer_object"] = optimizer
-
-    if not ("step_size" in params["scheduler"]):
-        params["scheduler"]["step_size"] = (
-            params["training_samples_size"] / params["learning_rate"]
-        )
-
-    scheduler = global_schedulers_dict[params["scheduler"]["type"]](params)
-
-    # these keys contain generators, and are not needed beyond this point in params
-    generator_keys_to_remove = ["optimizer_object", "model_parameters"]
-    for key in generator_keys_to_remove:
-        params.pop(key, None)
+        test_dataloader = get_testing_loader(params)
 
     # Start training time here
     start_time = time.time()
@@ -310,30 +272,6 @@ def training_loop(
         model, amp=params["model"]["amp"], device=params["device"], optimizer=optimizer
     )
 
-    # Calculate the weights here
-    if params["weighted_loss"]:
-        print("Calculating weights for loss")
-        # Set up the dataloader for penalty calculation
-        penalty_data = ImagesFromDataFrame(
-            training_data,
-            parameters=params,
-            train=False,
-            loader_type="penalty",
-        )
-        penalty_loader = DataLoader(
-            penalty_data,
-            batch_size=1,
-            shuffle=True,
-            pin_memory=False,
-        )
-
-        params["weights"], params["class_weights"] = get_class_imbalance_weights(
-            penalty_loader, params
-        )
-        del penalty_data, penalty_loader
-    else:
-        params["weights"], params["class_weights"] = None, None
-
     if "medcam" in params:
         model = medcam.inject(
             model,
@@ -353,22 +291,21 @@ def training_loop(
     patience, start_epoch = 0, 0
     first_model_saved = False
     best_model_path = os.path.join(
-        output_dir, params["model"]["architecture"] + "_best.pth.tar"
+        output_dir, params["model"]["architecture"] + best_model_path_end
     )
 
     # if previous model file is present, load it up
     if os.path.exists(best_model_path):
-        print("Previous model found. Loading it up.")
         try:
-            main_dict = load_model(best_model_path)
+            main_dict = load_model(best_model_path, params["device"])
             version_check(params["version"], version_to_check=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
             best_loss = main_dict["loss"]
-            print("Previous model loaded successfully.")
-        except IOError:
-            raise IOError("Previous model could not be loaded, error: ")
+            print("Previous model successfully loaded.")
+        except RuntimeWarning:
+            RuntimeWarning("Previous model could not be loaded, initializing model")
 
     print("Using device:", device, flush=True)
 
@@ -460,6 +397,8 @@ def training_loop(
             best_loss = epoch_valid_loss
             best_train_idx = epoch
             patience = 0
+
+            model.eval()
             save_model(
                 {
                     "epoch": best_train_idx,
@@ -467,10 +406,36 @@ def training_loop(
                     "optimizer_state_dict": optimizer.state_dict(),
                     "loss": best_loss,
                 },
+                model,
+                params,
                 best_model_path,
+                onnx_export=False,
             )
+            model.train()
             first_model_saved = True
-            print("Best epoch: ", best_train_idx)
+
+        if params["model"]["save_at_every_epoch"]:
+            save_model(
+                {
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "loss": epoch_valid_loss,
+                },
+                model,
+                params,
+                os.path.join(
+                    output_dir,
+                    params["model"]["architecture"]
+                    + "_epoch_"
+                    + str(epoch)
+                    + ".pth.tar",
+                ),
+                onnx_export=False,
+            )
+            model.train()
+
+        print("Current Best epoch: ", best_train_idx)
 
         if patience > params["patience"]:
             print(
@@ -489,6 +454,41 @@ def training_loop(
         " mins",
         flush=True,
     )
+
+    # once the training is done, optimize the best model
+    if os.path.exists(best_model_path):
+        onnx_export = True
+        if params["model"]["architecture"] in ["sdnet", "brain_age"]:
+            onnx_export = False
+        elif (
+            "onnx_export" in params["model"] and params["model"]["onnx_export"] == False
+        ):
+            onnx_export = False
+
+        if onnx_export:
+            print("Optimizing best model.")
+
+            try:
+                main_dict = load_model(best_model_path, params["device"])
+                version_check(params["version"], version_to_check=main_dict["version"])
+                model.load_state_dict(main_dict["model_state_dict"])
+                best_epoch = main_dict["epoch"]
+                optimizer.load_state_dict(main_dict["optimizer_state_dict"])
+                best_loss = main_dict["loss"]
+                save_model(
+                    {
+                        "epoch": best_epoch,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "loss": best_loss,
+                    },
+                    model,
+                    params,
+                    best_model_path,
+                    onnx_export,
+                )
+            except Exception as e:
+                print("Best model could not be loaded, error: ", e)
 
 
 if __name__ == "__main__":
