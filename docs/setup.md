@@ -30,7 +30,7 @@ conda activate venv_gandlf
 # conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch-lts -y
 ## CUDA 11.1
 # conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch-lts -c conda-forge -y
-pip install openvino-dev # [OPTIONAL] to generate optimized models for inference
+pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate optimized models for inference
 pip install -e .
 
 ## alternatively you can also use:
