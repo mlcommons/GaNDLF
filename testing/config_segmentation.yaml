@@ -24,6 +24,7 @@ metrics:
   - recall: {
       average: macro,
     }
+verbose: True
 inference_mechanism: {
   grid_aggregator_overlap: average,
   patch_overlap: 0,
