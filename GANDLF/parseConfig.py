@@ -100,14 +100,16 @@ def parseConfig(config_file_path, version_check_flag=True):
     This function parses the configuration file and returns a dictionary of parameters.
 
     Args:
-        config_file_path (str): The filename of the configuration file.
+        config_file_path (Union[str, dict]): The filename of the configuration file.
         version_check_flag (bool, optional): Whether to check the version in configuration file. Defaults to True.
 
     Returns:
         dict: The parameter dictionary.
     """
-    with open(config_file_path) as f:
-        params = yaml.safe_load(f)
+    params = config_file_path
+    if not isinstance(config_file_path, dict):
+        with open(config_file_path) as f:
+            params = yaml.safe_load(f)
 
     if version_check_flag:  # this is only to be used for testing
         if not ("version" in params):

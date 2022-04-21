@@ -2,6 +2,7 @@ import os, sys
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 import torchio
 from tqdm import tqdm
 
@@ -125,7 +126,7 @@ def send_model_to_device(model, amp, device, optimizer):
         bool: Whether automatic mixed precision is to be used or not.
         torch.device: Device type.
     """
-    if device != "cpu":
+    if device == "cuda":
         if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
             sys.exit(
                 "Please set the environment variable 'CUDA_VISIBLE_DEVICES' correctly before trying to run GANDLF on GPU"
@@ -203,7 +204,6 @@ def get_class_imbalance_weights_classification(training_df, params):
 
     Returns:
         dict: The penalty weights for different classes under consideration for classification.
-
     """
     predictions_array = (
         training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
@@ -307,6 +307,53 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
     }
 
     return penalty_dict, weights_dict
+
+
+def get_class_imbalance_weights(training_df, params):
+    """
+    This is a wrapper function that calculates the penalty used for loss functions in classification/segmentation problems.
+
+    Args:
+        training_Df (pd.DataFrame): The training data frame.
+        parameters (dict) : The parameters passed by the user yaml.
+
+    Returns:
+        float, float: The penalty and class weights for different classes under consideration for classification.
+    """
+    penalty_weights, class_weights = None, None
+    if params["weighted_loss"]:
+        print("Calculating weights")
+        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
+        if params["problem_type"] == "classification":
+            (
+                penalty_weights,
+                class_weights,
+            ) = get_class_imbalance_weights_classification(training_df, params)
+        elif params["problem_type"] == "segmentation":
+            # Set up the dataloader for penalty calculation
+            from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+
+            penalty_data = ImagesFromDataFrame(
+                training_df,
+                parameters=params,
+                train=False,
+                loader_type="penalty",
+            )
+
+            penalty_loader = DataLoader(
+                penalty_data,
+                batch_size=1,
+                shuffle=True,
+                pin_memory=False,
+            )
+
+            (
+                penalty_weights,
+                class_weights,
+            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
+            del penalty_data, penalty_loader
+
+    return penalty_weights, class_weights
 
 
 def get_linear_interpolation_mode(dimensionality):
