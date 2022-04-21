@@ -1219,6 +1219,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
         inputDir + "/train_3d_rad_segmentation.csv"
     )
     parameters["modality"] = "rad"
+    parameters["verbose"] = True
     parameters["patch_size"] = patch_size["3D"]
     parameters["save_training"] = True
     parameters["save_output"] = True
