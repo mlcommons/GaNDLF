@@ -42,7 +42,7 @@ def multi_class_dice(output, label, params, per_label=False):
         if i != params["model"]["ignore_label_validation"]:
             current_dice = dice(output[:, i, ...], label[:, i, ...])
             total_dice += current_dice
-            per_label_dice.append(current_dice)
+            per_label_dice.append(current_dice.item())
             avg_counter += 1
         # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
     total_dice /= avg_counter

@@ -53,19 +53,18 @@ requirements = [
     "numpy==1.21.0",
     "scipy",
     "SimpleITK!=2.0.*",
-    "torch>=1.7",
     "torchvision",
     "tqdm",
     "torchio==0.18.57",
     "pandas",
     "pylint",
     "scikit-learn>=0.23.2",
+    "scikit-image>=0.19.1",
     "pickle5>=0.0.11",
     "setuptools",
     "seaborn",
     "pyyaml",
     "tiffslide",
-    "scikit-image",
     "matplotlib",
     "requests>=2.25.0",
     "pyvips",
@@ -75,11 +74,18 @@ requirements = [
     "psutil",
     "medcam",
     "opencv-python",
-    "torchmetrics",
+    "torchmetrics==0.5.1",  # newer versions have changed api for f1 invocation
     "OpenPatchMiner==0.1.6",
     "zarr==2.10.3",
     "pydicom",
+    "onnx",
 ]
+
+# pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
+if sys.platform == "darwin":
+    requirements.append("torch==1.9.0")
+else:
+    requirements.append("torch==1.8.2")
 
 setup(
     name="GANDLF",

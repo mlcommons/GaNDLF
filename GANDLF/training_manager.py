@@ -3,8 +3,8 @@ import os, sys, pickle, subprocess, shutil
 from sklearn.model_selection import KFold
 from pathlib import Path
 
-# from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.compute import training_loop
+from GANDLF.utils import get_dataframe
 
 
 def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
@@ -237,23 +237,11 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
             if (not os.path.exists(currentTrainingDataPickle)) or reset or resume:
                 trainingData.to_pickle(currentTrainingDataPickle)
             else:
-                if os.path.exists(currentTrainingDataPickle):
-                    print(
-                        "Using previously saved training data",
-                        currentTrainingDataPickle,
-                        flush=True,
-                    )
-                    trainingData = pd.read_pickle(currentTrainingDataPickle)
+                trainingData = get_dataframe(currentTrainingDataPickle)
             if (not os.path.exists(currentValidationDataPickle)) or reset or resume:
                 validationData.to_pickle(currentValidationDataPickle)
             else:
-                if os.path.exists(currentValidationDataPickle):
-                    print(
-                        "Using previously saved validation data",
-                        currentValidationDataPickle,
-                        flush=True,
-                    )
-                    validationData = pd.read_pickle(currentValidationDataPickle)
+                validationData = get_dataframe(currentValidationDataPickle)
 
             # parallel_compute_command is an empty string, thus no parallel computing requested
             if (not parameters["parallel_compute_command"]) or (singleFoldValidation):

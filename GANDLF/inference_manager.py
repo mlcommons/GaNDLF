@@ -1,9 +1,10 @@
-from GANDLF.compute import inference_loop
 import os
-import numpy as np
+import pandas as pd
 import torch
 import torch.nn.functional as F
-import pandas as pd
+
+from GANDLF.compute import inference_loop
+from GANDLF.utils import get_unique_timestamp
 
 
 def InferenceManager(dataframe, outputDir, parameters, device):
@@ -38,11 +39,15 @@ def InferenceManager(dataframe, outputDir, parameters, device):
     class_list = None
     is_classification = parameters["problem_type"] == "classification"
 
+    # initialize model type for processing: if not defined, default to torch
+    if not ("type" in parameters["model"]):
+        parameters["model"]["type"] = "torch"
+
     for fold_dir in fold_dirs:
         parameters["current_fold_dir"] = fold_dir
         inference_loop(
             inferenceDataFromPickle=inferenceData_full,
-            outputDir=fold_dir,
+            outputDir_or_optimizedModel=fold_dir,
             device=device,
             parameters=parameters,
         )
@@ -59,7 +64,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
                 fold_probs = F.softmax(fold_logits, dim=1)
                 probs_list.append(fold_probs)
 
-    if probs_list and is_classification:
+    # this logic should be changed if we want to do multi-fold inference for histo images
+    if (parameters["modality"] == "rad") and probs_list and is_classification:
         columns = ["SubjectID", "PredictedClass"] + parameters["model"]["class_list"]
         averaged_probs_df = pd.DataFrame(columns=columns)
         averaged_probs_df.SubjectID = dataframe[0]
@@ -70,10 +76,10 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         averaged_probs_df.PredictedClass = [
             class_list[a] for a in averaged_probs.argmax(1)
         ]
-        averaged_probs_df.to_csv(
-            os.path.join(
-                outputDir, "final_predictions_with_averaged_probabilities.csv"
-            ),
-            index=False,
-            sep=",",
-        )
+        filepath_to_save = os.path.join(outputDir, "final_preds_and_avg_probs.csv")
+        if os.path.isfile(filepath_to_save):
+            filepath_to_save = os.path.join(
+                outputDir,
+                "final_preds_and_avg_probs" + get_unique_timestamp() + ".csv",
+            )
+        averaged_probs_df.to_csv(filepath_to_save, index=False)
