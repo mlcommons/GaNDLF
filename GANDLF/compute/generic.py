@@ -7,7 +7,6 @@ from GANDLF.data import (
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import (
-    populate_channel_keys_in_params,
     populate_header_in_parameters,
     parseTrainingCSV,
     send_model_to_device,
@@ -56,18 +55,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
         # get the validation loader
         val_loader = get_validation_loader(parameters)
-
-        validation_data_for_torch = ImagesFromDataFrame(
-            parameters["validation_data"],
-            parameters,
-            train=False,
-            loader_type="populating_headers",
-        )
-        # Fetch the appropriate channel keys
-        # Getting the channels for training and removing all the non numeric entries from the channels
-        parameters = populate_channel_keys_in_params(
-            validation_data_for_torch, parameters
-        )
 
     # get the model
     model = get_model(parameters)
