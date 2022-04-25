@@ -116,7 +116,7 @@ def reverse_one_hot(predmask_tensor, class_list):
         # for special case, use the index as value
         if special_case_detected:
             output_value = idx
-            if not(zero_present):
+            if not (zero_present):
                 output_value += 1
 
         final_mask[predmask_array_bool[idx, ...]] = output_value
