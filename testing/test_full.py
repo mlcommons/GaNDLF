@@ -1543,6 +1543,7 @@ def test_one_hot_logic():
         comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
         assert comparison.all(), "Arrays at {}:{} are not equal".format(key, value)
 
+    # check the case where 0 is absent from class_list
     class_list = ["1||2||3", np.max(random_array)]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
