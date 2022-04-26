@@ -100,11 +100,28 @@ def reverse_one_hot(predmask_tensor, class_list):
 
     final_mask = np.zeros(predmask_array[0, ...].shape).astype(np.int8)
     predmask_array_bool = predmask_array >= 0.5
+
+    # in case special case is detected, if 0 is absent from
+    # class_list do not use 0 to initialize any value in final_mask
+    zero_present = False
+    if special_case_detected:
+        for _class in class_list:
+            if isinstance(_class, str):
+                if _class == "0":
+                    zero_present = True
+                    break
+            else:
+                if _class == 0:
+                    zero_present = True
+                    break
     for idx, i in enumerate(class_list):
         output_value = i
         # for special case, use the index as value
         if special_case_detected:
             output_value = idx
+            # if zero is not present, then don't use '0' as output value
+            if not (zero_present):
+                output_value += 1
 
         final_mask[predmask_array_bool[idx, ...]] = output_value
 
