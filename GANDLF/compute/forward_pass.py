@@ -256,7 +256,7 @@ def validate_network(
                 label = None
                 if params["problem_type"] != "segmentation":
                     label = label_ground_truth
-                else:
+                elif "label" in patches_batch:
                     label = patches_batch["label"][torchio.DATA]
 
                 if label is not None:
