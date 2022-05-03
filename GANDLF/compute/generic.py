@@ -42,7 +42,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             train_csv, train=True
         )
         parameters = populate_header_in_parameters(
-                parameters, headers_to_populate_train
+            parameters, headers_to_populate_train
         )
         # get the train loader
         train_loader = get_train_loader(parameters)
@@ -60,7 +60,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         )
         if headers_to_populate_train is None:
             parameters = populate_header_in_parameters(
-                    parameters, headers_to_populate_val
+                parameters, headers_to_populate_val
             )
         # get the validation loader
         val_loader = get_validation_loader(parameters)
