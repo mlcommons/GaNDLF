@@ -92,9 +92,10 @@ def ImagesFromDataFrame(
     if not (preprocessing is None):
         for key in preprocessing.keys():
             # check for different resizing keys
-            if key in ["resize_image", "resize_images"]:
+            if key in ["resize", "resize_image", "resize_images"]:
                 if not (preprocessing[key] is None):
                     resize_images_flag = True
+                    preprocessing["resize_image"] = preprocessing[key]
                     break
 
     # iterating through the dataframe
