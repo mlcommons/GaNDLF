@@ -126,41 +126,42 @@ def get_transforms_for_preprocessing(
         # go through preprocessing in the order they are specified
         for preprocess in preprocessing_params_dict:
             preprocess_lower = preprocess.lower()
-            # special check for resample
+            # special check for resize and resample
             if preprocess_lower == "resize":
-                resize_values = generic_3d_check(preprocessing_params_dict["resize"])
+                resize_values = generic_3d_check(preprocessing_params_dict[preprocess])
+                current_transformations.append(Resize(resize_values))
+            elif preprocess_lower == "resize_image":
+                resize_values = generic_3d_check(preprocessing_params_dict[preprocess])
                 current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resize_patch":
-                resize_values = generic_3d_check(
-                    preprocessing_params_dict["resize_patch"]
-                )
+                resize_values = generic_3d_check(preprocessing_params_dict[preprocess])
                 current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resample":
-                if "resolution" in preprocessing_params_dict[preprocess_lower]:
+                if "resolution" in preprocessing_params_dict[preprocess]:
                     # Need to take a look here
                     resample_values = generic_3d_check(
-                        preprocessing_params_dict[preprocess_lower]["resolution"]
+                        preprocessing_params_dict[preprocess]["resolution"]
                     )
                     current_transformations.append(Resample(resample_values))
             elif preprocess_lower in ["resample_minimum", "resample_min"]:
-                if "resolution" in preprocessing_params_dict[preprocess_lower]:
+                if "resolution" in preprocessing_params_dict[preprocess]:
                     resample_values = generic_3d_check(
-                        preprocessing_params_dict[preprocess_lower]["resolution"]
+                        preprocessing_params_dict[preprocess]["resolution"]
                     )
                     current_transformations.append(Resample_Minimum(resample_values))
             # special check for histogram_matching
             elif preprocess_lower == "histogram_matching":
-                if preprocessing_params_dict[preprocess_lower] is not False:
+                if preprocessing_params_dict[preprocess] is not False:
                     current_transformations.append(
                         global_preprocessing_dict[preprocess_lower](
-                            preprocessing_params_dict[preprocess_lower]
+                            preprocessing_params_dict[preprocess]
                         )
                     )
             # special check for stain_normalizer
             elif preprocess_lower == "stain_normalizer":
                 if normalize_to_apply is None:
                     normalize_to_apply = global_preprocessing_dict[preprocess_lower](
-                        preprocessing_params_dict[preprocess_lower]
+                        preprocessing_params_dict[preprocess]
                     )
             # normalize should be applied at the end
             elif "normalize" in preprocess_lower:
