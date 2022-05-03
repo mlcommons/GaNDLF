@@ -56,12 +56,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             val_csv, train=False
         )
         # get the validation loader
-        if train_csv is None:
-            parameters = populate_header_in_parameters(
-                parameters, headers_to_populate_val
-            )
-            print(f"parameters = {parameters}")
-
         val_loader = get_validation_loader(parameters)
 
     # populate required headers
