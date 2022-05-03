@@ -41,7 +41,9 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         parameters["training_data"], headers_to_populate_train = parseTrainingCSV(
             train_csv, train=True
         )
-        parameters = populate_header_in_parameters(parameters, headers_to_populate_train)
+        parameters = populate_header_in_parameters(
+                parameters, headers_to_populate_train
+        )
         # get the train loader
         train_loader = get_train_loader(parameters)
         parameters["training_samples_size"] = len(train_loader)
@@ -57,7 +59,9 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             val_csv, train=False
         )
         if headers_to_populate_train is None:
-            parameters = populate_header_in_parameters(parameters, headers_to_populate_val)
+            parameters = populate_header_in_parameters(
+                    parameters, headers_to_populate_val
+            )
         # get the validation loader
         val_loader = get_validation_loader(parameters)
 
