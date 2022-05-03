@@ -34,7 +34,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
     """
     # initialize train and val loaders
     train_loader, val_loader = None, None
-    headers_to_populate_train = None
+    headers_to_populate_train, headers_to_populate_val = None, None
 
     if train_csv is not None:
         # populate the data frames
@@ -56,10 +56,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             val_csv, train=False
         )
         # get the validation loader
-        if train_csv is None:
-            parameters = populate_header_in_parameters(parameters, headers_to_populate_val)
-            print(f'parameters = {parameters}')
-
         val_loader = get_validation_loader(parameters)
 
     # populate required headers
@@ -67,9 +63,8 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
     if headers_to_populate is None:
         if headers_to_populate_val is not None:
             headers_to_populate = headers_to_populate_val
-        else:
-            raise ValueError("Headers were not properly populated.")
-    parameters = populate_header_in_parameters(parameters, headers_to_populate)
+    if headers_to_populate is not None:
+        parameters = populate_header_in_parameters(parameters, headers_to_populate)
 
     # get the model
     model = get_model(parameters)
