@@ -34,6 +34,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
     """
     # initialize train and val loaders
     train_loader, val_loader = None, None
+    headers_to_populate_train = None
 
     if train_csv is not None:
         # populate the data frames
@@ -55,6 +56,10 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             val_csv, train=False
         )
         # get the validation loader
+        if train_csv is None:
+            parameters = populate_header_in_parameters(parameters, headers_to_populate_val)
+            print(f'parameters = {parameters}')
+
         val_loader = get_validation_loader(parameters)
 
     # populate required headers
@@ -79,12 +84,16 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
 
-    if not ("step_size" in parameters["scheduler"]):
-        parameters["scheduler"]["step_size"] = (
-            parameters["training_samples_size"] / parameters["learning_rate"]
-        )
+    # only need to create scheduler if training
+    if train_csv is not None:
+        if not ("step_size" in parameters["scheduler"]):
+            parameters["scheduler"]["step_size"] = (
+                parameters["training_samples_size"] / parameters["learning_rate"]
+            )
 
-    scheduler = get_scheduler(parameters)
+        scheduler = get_scheduler(parameters)
+    else:
+        scheduler = None
 
     # these keys contain generators, and are not needed beyond this point in params
     generator_keys_to_remove = ["optimizer_object", "model_parameters"]
