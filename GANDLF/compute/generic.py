@@ -65,7 +65,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         # get the validation loader
         val_loader = get_validation_loader(parameters)
 
-
     # get the model
     model = get_model(parameters)
     parameters["model_parameters"] = model.parameters()
