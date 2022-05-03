@@ -127,13 +127,7 @@ def get_transforms_for_preprocessing(
         for preprocess in preprocessing_params_dict:
             preprocess_lower = preprocess.lower()
             # special check for resize and resample
-            if preprocess_lower == "resize":
-                resize_values = generic_3d_check(preprocessing_params_dict[preprocess])
-                current_transformations.append(Resize(resize_values))
-            elif preprocess_lower == "resize_image":
-                resize_values = generic_3d_check(preprocessing_params_dict[preprocess])
-                current_transformations.append(Resize(resize_values))
-            elif preprocess_lower == "resize_patch":
+            if preprocess_lower == "resize_patch":
                 resize_values = generic_3d_check(preprocessing_params_dict[preprocess])
                 current_transformations.append(Resize(resize_values))
             elif preprocess_lower == "resample":
