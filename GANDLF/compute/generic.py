@@ -37,10 +37,9 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
 
     if train_csv is not None:
         # populate the data frames
-        parameters["training_data"], headers_train = parseTrainingCSV(
+        parameters["training_data"], headers_to_populate_train = parseTrainingCSV(
             train_csv, train=True
         )
-        parameters = populate_header_in_parameters(parameters, headers_train)
         # get the train loader
         train_loader = get_train_loader(parameters)
         parameters["training_samples_size"] = len(train_loader)
@@ -52,9 +51,21 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
     if val_csv is not None:
-        parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
+        parameters["validation_data"], headers_to_populate_val = parseTrainingCSV(
+            val_csv, train=False
+        )
         # get the validation loader
         val_loader = get_validation_loader(parameters)
+
+    # populate required headers
+    if headers_to_populate_train is not None:
+        parameters = populate_header_in_parameters(
+            parameters, headers_to_populate_train
+        )
+    elif headers_to_populate_val is not None:
+        parameters = populate_header_in_parameters(parameters, headers_to_populate_val)
+    else:
+        raise ValueError("Headers were not properly populated.")
 
     # get the model
     model = get_model(parameters)
