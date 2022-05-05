@@ -77,6 +77,9 @@ class ModelBase(nn.Module):
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
             self.GlobalAvgPool = GlobalAveragePooling3D
             self.Norm = self.get_norm_type(self.norm_type.lower(), self.n_dimensions)
+        
+        else:
+            raise ValueError("GaNDLF only supports 2D and 3D computations. {}D computations are not currently supported".format(self.n_dimensions))
 
     def get_final_layer(self, final_convolution_layer):
         return get_modelbase_final_layer(final_convolution_layer)
