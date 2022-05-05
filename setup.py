@@ -85,7 +85,7 @@ requirements = [
 if sys.platform == "darwin":
     requirements.append("torch==1.9.0")
 else:
-    requirements.append("torch==1.8.1")
+    requirements.append("torch==1.8.2")
 
 setup(
     name="GANDLF",
