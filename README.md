@@ -14,11 +14,9 @@
 
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
-<div style="text-align: center;">
-
-![All Options](./docs/images/all_options_40.png)
-
-</div>
+<p align="center">
+    ![All Options](./docs/images/all_options_40.png)
+</p>
 
 ## Why use this?
 
