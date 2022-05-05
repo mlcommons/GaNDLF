@@ -16,12 +16,10 @@ import tiffslide as openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     populate_channel_keys_in_params,
-    send_model_to_device,
     get_dataframe,
     best_model_path_end,
     load_ov_model,
 )
-from GANDLF.models import get_model
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
@@ -56,9 +54,6 @@ def inference_loop(
         parameters,
     ) = create_pytorch_objects(parameters, device=device)
 
-    # Fetch the model according to params mentioned in the configuration file
-    model = get_model(parameters)
-
     # ensure outputs are saved properly
     parameters["save_output"] = True
 
@@ -78,9 +73,6 @@ def inference_loop(
 
         main_dict = torch.load(file_to_check)
         model.load_state_dict(main_dict["model_state_dict"])
-        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-            model, parameters["model"]["amp"], device, optimizer=None
-        )
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
@@ -220,13 +212,13 @@ def inference_loop(
                         output = model(image_patches.float().to(parameters["device"]))
                     output = output.detach().cpu().numpy()
                 else:
-                    output = model.infer(
+                    output = model(
                         inputs={
-                            parameters["model"]["IO"][0]: image_patches.float()
+                            parameters["model"]["IO"][0][0]: image_patches.float()
                             .cpu()
                             .numpy()
                         }
-                    )[parameters["model"]["IO"][1]]
+                    )[parameters["model"]["IO"][1][0]]
 
                 for i in range(int(output.shape[0])):
                     count_map[

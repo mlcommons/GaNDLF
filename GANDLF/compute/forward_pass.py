@@ -163,9 +163,9 @@ def validate_network(
                     pred_output += model(image)
                 elif params["model"]["type"] == "openvino":
                     pred_output += torch.from_numpy(
-                        model.infer(
-                            inputs={params["model"]["IO"][0]: image.cpu().numpy()}
-                        )[params["model"]["IO"][1]]
+                        model(
+                            inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
+                        )[params["model"]["IO"][1][0]]
                     )
                 else:
                     raise Exception(
@@ -256,7 +256,7 @@ def validate_network(
                 label = None
                 if params["problem_type"] != "segmentation":
                     label = label_ground_truth
-                else:
+                elif "label" in patches_batch:
                     label = patches_batch["label"][torchio.DATA]
 
                 if label is not None:
