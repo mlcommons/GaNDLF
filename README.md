@@ -15,7 +15,7 @@
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
 <p align="center">
-    ![All Options](./docs/images/all_options_40.png)
+    <img width="500" src="./docs/images/all_options.png" alt="GaNDLF all options">
 </p>
 
 ## Why use this?
