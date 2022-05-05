@@ -68,33 +68,32 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
 
         parameters = populate_header_in_parameters(parameters, headers_train)
         # if we are here, it is assumed that the user wants to do training
-        TrainingManager_split(
-            dataframe_train=data_train,
-            dataframe_validation=data_validation,
-            outputDir=parameters["output_dir"],
-            parameters=parameters,
-            device=device,
-            resume=resume,
-            reset=reset,
-        )
+        if train_mode:
+            TrainingManager_split(
+                dataframe_train=data_train,
+                dataframe_validation=data_validation,
+                outputDir=parameters["output_dir"],
+                parameters=parameters,
+                device=device,
+                resume=resume,
+                reset=reset,
+            )
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=train_mode)
         parameters = populate_header_in_parameters(parameters, headers)
-
-    # # start computation - either training or inference
-    if train_mode:  # training mode
-        TrainingManager(
-            dataframe=data_full,
-            outputDir=parameters["output_dir"],
-            parameters=parameters,
-            device=device,
-            resume=resume,
-            reset=reset,
-        )
-    else:
-        InferenceManager(
-            dataframe=data_full,
-            outputDir=parameters["output_dir"],
-            parameters=parameters,
-            device=device,
-        )
+        if train_mode:
+            TrainingManager(
+                dataframe=data_full,
+                outputDir=parameters["output_dir"],
+                parameters=parameters,
+                device=device,
+                resume=resume,
+                reset=reset,
+            )
+        else:
+            InferenceManager(
+                dataframe=data_full,
+                outputDir=parameters["output_dir"],
+                parameters=parameters,
+                device=device,
+            )

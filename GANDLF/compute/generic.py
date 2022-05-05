@@ -7,7 +7,6 @@ from GANDLF.data import (
 )
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import (
-    populate_channel_keys_in_params,
     populate_header_in_parameters,
     parseTrainingCSV,
     send_model_to_device,
@@ -35,13 +34,16 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
     """
     # initialize train and val loaders
     train_loader, val_loader = None, None
+    headers_to_populate_train, headers_to_populate_val = None, None
 
     if train_csv is not None:
         # populate the data frames
-        parameters["training_data"], headers_train = parseTrainingCSV(
+        parameters["training_data"], headers_to_populate_train = parseTrainingCSV(
             train_csv, train=True
         )
-        parameters = populate_header_in_parameters(parameters, headers_train)
+        parameters = populate_header_in_parameters(
+            parameters, headers_to_populate_train
+        )
         # get the train loader
         train_loader = get_train_loader(parameters)
         parameters["training_samples_size"] = len(train_loader)
@@ -50,24 +52,18 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         (
             parameters["weights"],
             parameters["class_weights"],
-        ) = get_class_imbalance_weights(train_csv, parameters)
+        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
     if val_csv is not None:
-        parameters["validation_data"], _ = parseTrainingCSV(val_csv, train=False)
+        parameters["validation_data"], headers_to_populate_val = parseTrainingCSV(
+            val_csv, train=False
+        )
+        if headers_to_populate_train is None:
+            parameters = populate_header_in_parameters(
+                parameters, headers_to_populate_val
+            )
         # get the validation loader
         val_loader = get_validation_loader(parameters)
-
-        validation_data_for_torch = ImagesFromDataFrame(
-            parameters["validation_data"],
-            parameters,
-            train=False,
-            loader_type="populating_headers",
-        )
-        # Fetch the appropriate channel keys
-        # Getting the channels for training and removing all the non numeric entries from the channels
-        parameters = populate_channel_keys_in_params(
-            validation_data_for_torch, parameters
-        )
 
     # get the model
     model = get_model(parameters)
@@ -82,12 +78,16 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
 
-    if not ("step_size" in parameters["scheduler"]):
-        parameters["scheduler"]["step_size"] = (
-            parameters["training_samples_size"] / parameters["learning_rate"]
-        )
+    # only need to create scheduler if training
+    if train_csv is not None:
+        if not ("step_size" in parameters["scheduler"]):
+            parameters["scheduler"]["step_size"] = (
+                parameters["training_samples_size"] / parameters["learning_rate"]
+            )
 
-    scheduler = get_scheduler(parameters)
+        scheduler = get_scheduler(parameters)
+    else:
+        scheduler = None
 
     # these keys contain generators, and are not needed beyond this point in params
     generator_keys_to_remove = ["optimizer_object", "model_parameters"]
