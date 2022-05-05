@@ -14,6 +14,10 @@
 
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
+<center>
+    <img src="./docs/images/all_options_40.png">
+</center>
+
 ## Why use this?
 
 - Supports multiple
