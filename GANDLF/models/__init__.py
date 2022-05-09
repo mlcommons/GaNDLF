@@ -31,6 +31,7 @@ from .imagenet_vgg import (
 from .sdnet import SDNet
 from .MSDNet import MSDNet
 from .brain_age import brainage
+from .unetr import unetr
 
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {
@@ -52,6 +53,7 @@ global_models_dict = {
     "deep_resunet": deep_resunet,
     "light_resunet": light_resunet,
     "light_resunet_multilayer": light_resunet_multilayer,
+    "unetr": unetr,
     "fcn": fcn,
     "uinc": uinc,
     "vgg": vgg19,
@@ -89,3 +91,16 @@ global_models_dict = {
     "efficientnetb6": efficientnetB6,
     "efficientnetb7": efficientnetB7,
 }
+
+
+def get_model(params):
+    """
+    Function to get the model definition.
+
+    Args:
+        params (dict): The parameters' dictionary.
+
+    Returns:
+        model (torch.nn.Module): The model definition.
+    """
+    return global_models_dict[params["model"]["architecture"]](parameters=params)
