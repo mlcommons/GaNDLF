@@ -24,7 +24,11 @@ metrics:
   - recall: {
       average: macro,
     }
-grid_aggregator_overlap: crop
+verbose: True
+inference_mechanism: {
+  grid_aggregator_overlap: average,
+  patch_overlap: 0,
+}
 # Patch size during training - 2D patch for breast images since third dimension is not patched 
 patch_size: [128,128]
 # Number of epochs

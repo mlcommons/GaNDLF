@@ -2,6 +2,7 @@
 """
 Implementation of UNet
 """
+from torch.nn import ModuleList
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
@@ -58,10 +59,10 @@ class unet_multilayer(ModelBase):
             network_kwargs=self.network_kwargs,
         )
 
-        self.ds = []
-        self.en = []
-        self.us = []
-        self.de = []
+        self.ds = ModuleList([])
+        self.en = ModuleList([])
+        self.us = ModuleList([])
+        self.de = ModuleList([])
 
         for i_lay in range(0, self.num_layers):
             self.ds.append(
@@ -110,6 +111,7 @@ class unet_multilayer(ModelBase):
             norm=self.Norm,
             network_kwargs=self.network_kwargs,
             final_convolution_layer=self.final_convolution_layer,
+            sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
     def forward(self, x):

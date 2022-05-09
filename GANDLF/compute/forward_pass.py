@@ -163,9 +163,9 @@ def validate_network(
                     pred_output += model(image)
                 elif params["model"]["type"] == "openvino":
                     pred_output += torch.from_numpy(
-                        model.infer(
-                            inputs={params["model"]["IO"][0]: image.cpu().numpy()}
-                        )[params["model"]["IO"][1]]
+                        model(
+                            inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
+                        )[params["model"]["IO"][1][0]]
                     )
                 else:
                     raise Exception(
@@ -208,16 +208,22 @@ def validate_network(
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
-                torchio.Subject(subject_dict), params["patch_size"]
+                torchio.Subject(subject_dict),
+                params["patch_size"],
+                patch_overlap=params["inference_mechanism"]["patch_overlap"],
             )
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
             aggregator = torchio.inference.GridAggregator(
-                grid_sampler, overlap_mode=params["grid_aggregator_overlap"]
+                grid_sampler,
+                overlap_mode=params["inference_mechanism"]["grid_aggregator_overlap"],
             )
 
             if params["medcam_enabled"]:
                 attention_map_aggregator = torchio.inference.GridAggregator(
-                    grid_sampler, overlap_mode=params["grid_aggregator_overlap"]
+                    grid_sampler,
+                    overlap_mode=params["inference_mechanism"][
+                        "grid_aggregator_overlap"
+                    ],
                 )
 
             output_prediction = 0  # this is used for regression/classification
@@ -250,7 +256,7 @@ def validate_network(
                 label = None
                 if params["problem_type"] != "segmentation":
                     label = label_ground_truth
-                else:
+                elif "label" in patches_batch:
                     label = patches_batch["label"][torchio.DATA]
 
                 if label is not None:
@@ -402,25 +408,28 @@ def validate_network(
                         total_epoch_valid_metric[metric] += final_metric[metric]
 
         if label_ground_truth is not None:
-            # For printing information at halftime during an epoch
-            if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
-                (batch_idx + 1) < len(valid_dataloader)
-            ):
-                print(
-                    "\nHalf-Epoch Average " + mode + " loss : ",
-                    total_epoch_valid_loss / (batch_idx + 1),
-                )
-                for metric in params["metrics"]:
-                    if isinstance(total_epoch_valid_metric[metric], np.ndarray):
-                        to_print = (
-                            total_epoch_valid_metric[metric] / (batch_idx + 1)
-                        ).tolist()
-                    else:
-                        to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+            if params["verbose"]:
+                # For printing information at halftime during an epoch
+                if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
+                    (batch_idx + 1) < len(valid_dataloader)
+                ):
                     print(
-                        "Half-Epoch Average " + mode + " " + metric + " : ",
-                        to_print,
+                        "\nHalf-Epoch Average " + mode + " loss : ",
+                        total_epoch_valid_loss / (batch_idx + 1),
                     )
+                    for metric in params["metrics"]:
+                        if isinstance(total_epoch_valid_metric[metric], np.ndarray):
+                            to_print = (
+                                total_epoch_valid_metric[metric] / (batch_idx + 1)
+                            ).tolist()
+                        else:
+                            to_print = total_epoch_valid_metric[metric] / (
+                                batch_idx + 1
+                            )
+                        print(
+                            "Half-Epoch Average " + mode + " " + metric + " : ",
+                            to_print,
+                        )
 
     if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()

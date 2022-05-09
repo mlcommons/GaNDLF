@@ -29,14 +29,18 @@ def step(model, image, label, params, train=True):
 
     """
     if params["verbose"]:
-        print(torch.cuda.memory_summary())
+        if torch.cuda.is_available():
+            print(torch.cuda.memory_summary())
         print(
-            "|===========================================================================|\n|                             CPU Utilization                            |\n|"
+            "|===========================================================================|"
+        )
+        print(
+            "|                              CPU Utilization                              |"
         )
         print("Load_Percent   :", psutil.cpu_percent(interval=None))
         print("MemUtil_Percent:", psutil.virtual_memory()[2])
         print(
-            "|===========================================================================|\n|"
+            "|===========================================================================|"
         )
 
     # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
@@ -64,8 +68,8 @@ def step(model, image, label, params, train=True):
 
     if train == False and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
-            model.infer(inputs={params["model"]["IO"][0]: image.cpu().numpy()})[
-                params["model"]["IO"][1]
+            model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
+                params["model"]["IO"][1][0]
             ]
         )
         output = output.to(params["device"])

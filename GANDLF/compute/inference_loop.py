@@ -1,4 +1,5 @@
 from .forward_pass import validate_network
+from .generic import create_pytorch_objects
 import os
 from pathlib import Path
 
@@ -7,25 +8,26 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 import pickle, argparse, torch
 import numpy as np
-import pandas as pd
 from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
 import tiffslide as openslide
-
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.models import global_models_dict
+from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     populate_channel_keys_in_params,
-    send_model_to_device,
+    get_dataframe,
+    best_model_path_end,
     load_ov_model,
 )
+
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
 
 
-def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
+def inference_loop(
+    inferenceDataFromPickle, device, parameters, outputDir_or_optimizedModel
+):
     """
     The main training loop.
 
@@ -33,7 +35,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
         inferenceDataFromPickle (pandas.DataFrame): The data to use for inference.
         device (str): The device to perform computations on.
         parameters (dict): The parameters dictionary.
-        outputDir (str): The output directory.
+        outputDir_or_optimizedModel (str): The output directory or optimized model file.
     """
     # Defining our model here according to parameters mentioned in the configuration file
     print("Current model type : ", parameters["model"]["type"])
@@ -41,21 +43,28 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     if "num_channels" in parameters["model"]:
         print("Number of channels : ", parameters["model"]["num_channels"])
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
+    parameters["testing_data"] = inferenceDataFromPickle
 
-    # Fetch the model according to params mentioned in the configuration file
-    model = global_models_dict[parameters["model"]["architecture"]](
-        parameters=parameters
-    )
+    (
+        model,
+        _,
+        _,
+        _,
+        _,
+        parameters,
+    ) = create_pytorch_objects(parameters, device=device)
 
     # ensure outputs are saved properly
     parameters["save_output"] = True
 
+    # Loading the weights into the model
+    main_dict = None
     if parameters["model"]["type"] == "torch":
         # Loading the weights into the model
-        main_dict = outputDir
-        if os.path.isdir(outputDir):
+        if os.path.isdir(outputDir_or_optimizedModel):
             file_to_check = os.path.join(
-                outputDir, str(parameters["model"]["architecture"]) + "_best.pth.tar"
+                outputDir_or_optimizedModel,
+                str(parameters["model"]["architecture"]) + best_model_path_end,
             )
             if not os.path.isfile(file_to_check):
                 raise ValueError(
@@ -64,19 +73,17 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
 
         main_dict = torch.load(file_to_check)
         model.load_state_dict(main_dict["model_state_dict"])
-        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-            model, parameters["model"]["amp"], device, optimizer=None
-        )
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
-        main_dict = outputDir
-        if os.path.isdir(outputDir):
+        if os.path.isdir(outputDir_or_optimizedModel):
             xml_to_check = os.path.join(
-                outputDir, str(parameters["model"]["architecture"]) + "_best.xml"
+                outputDir_or_optimizedModel,
+                str(parameters["model"]["architecture"]) + "_best.xml",
             )
             bin_to_check = os.path.join(
-                outputDir, str(parameters["model"]["architecture"]) + "_best.bin"
+                outputDir_or_optimizedModel,
+                str(parameters["model"]["architecture"]) + "_best.bin",
             )
             if not os.path.isfile(xml_to_check):
                 raise ValueError(
@@ -101,10 +108,7 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
     # radiology inference
     if parameters["modality"] == "rad":
         # Setting up the inference loader
-        inferenceDataForTorch = ImagesFromDataFrame(
-            inferenceDataFromPickle, parameters, train=False, loader_type="inference"
-        )
-        inference_loader = DataLoader(inferenceDataForTorch, batch_size=1)
+        inference_loader = get_testing_loader(parameters)
 
         # get the channel keys for concatenation later (exclude non numeric channel keys)
         parameters = populate_channel_keys_in_params(inference_loader, parameters)
@@ -151,7 +155,9 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
             level_width, level_height = os_image.level_dimensions[
                 int(parameters["slide_level"])
             ]
-            subject_dest_dir = os.path.join(outputDir, str(subject_name))
+            subject_dest_dir = os.path.join(
+                outputDir_or_optimizedModel, str(subject_name)
+            )
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
@@ -206,13 +212,13 @@ def inference_loop(inferenceDataFromPickle, device, parameters, outputDir):
                         output = model(image_patches.float().to(parameters["device"]))
                     output = output.detach().cpu().numpy()
                 else:
-                    output = model.infer(
+                    output = model(
                         inputs={
-                            parameters["model"]["IO"][0]: image_patches.float()
+                            parameters["model"]["IO"][0][0]: image_patches.float()
                             .cpu()
                             .numpy()
                         }
-                    )[parameters["model"]["IO"][1]]
+                    )[parameters["model"]["IO"][1][0]]
 
                 for i in range(int(output.shape[0])):
                     count_map[
@@ -320,11 +326,11 @@ if __name__ == "__main__":
     headers = pickle.load(open(args.headers_pickle, "rb"))
     label_header = pickle.load(open(args.label_header_pickle, "rb"))
     parameters = pickle.load(open(args.parameter_pickle, "rb"))
-    inferenceDataFromPickle = pd.read_pickle(args.inference_loader_pickle)
+    inferenceDataFromPickle = get_dataframe(args.inference_loader_pickle)
 
     inference_loop(
         inferenceDataFromPickle=inferenceDataFromPickle,
         parameters=parameters,
-        outputDir=args.outputDir,
+        outputDir_or_optimizedModel=args.outputDir,
         device=args.device,
     )
