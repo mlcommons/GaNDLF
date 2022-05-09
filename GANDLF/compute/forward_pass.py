@@ -335,12 +335,19 @@ def validate_network(
                             img_for_metadata.GetSpacing(),
                             interpolator=sitk.sitkNearestNeighbor,
                         )
-                    sitk.WriteImage(
-                        result_image,
-                        os.path.join(
-                            current_output_dir, subject["subject_id"][0] + "_seg" + ext
-                        ),
+                    path_to_write = os.path.join(
+                        current_output_dir, subject["subject_id"][0] + "_seg" + ext
                     )
+                    if ext in [".jpg", ".jpeg"]:
+                        from tifffile import imwrite
+                        imwrite(
+                            path_to_write, sitk.GetArrayFromImage(result_image)
+                        )
+                    else:
+                        sitk.WriteImage(
+                            result_image,
+                            path_to_write,
+                        )
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
