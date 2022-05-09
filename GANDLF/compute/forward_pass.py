@@ -340,9 +340,7 @@ def validate_network(
                     )
                     if ext in [".jpg", ".jpeg"]:
                         from tifffile import imwrite
-                        imwrite(
-                            path_to_write, sitk.GetArrayFromImage(result_image)
-                        )
+                        imwrite(path_to_write, sitk.GetArrayFromImage(result_image))
                     else:
                         sitk.WriteImage(
                             result_image,
