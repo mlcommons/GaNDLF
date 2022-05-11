@@ -1,21 +1,18 @@
-import os, pathlib
-import torch
-from tqdm import tqdm
-import SimpleITK as sitk
+import os
+import pathlib
+
 import numpy as np
 import pandas as pd
+import SimpleITK as sitk
+import torch
 import torchio
-
-from GANDLF.utils import (
-    get_date_time,
-    get_unique_timestamp,
-    get_filename_extension_sanitized,
-    reverse_one_hot,
-    resample_image,
-)
+from GANDLF.compute.loss_and_metric import get_loss_and_metrics
+from GANDLF.compute.step import step
 from GANDLF.data.post_process import global_postprocessing_dict
-from .step import step
-from .loss_and_metric import get_loss_and_metrics
+from GANDLF.utils import (get_date_time, get_filename_extension_sanitized,
+                          get_unique_timestamp, resample_image,
+                          reverse_one_hot)
+from tqdm import tqdm
 
 
 def validate_network(
