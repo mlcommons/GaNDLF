@@ -324,7 +324,7 @@ def validate_network(
                     if jpg_detected:
                         pred_mask = pred_mask.astype(np.uint8)
                     else:
-                        pred_mask = pred_mask.astype(np.int16)
+                        pred_mask = pred_mask.astype(np.uint16)
 
                     ## special case for 2D
                     if image.shape[-1] > 1:
