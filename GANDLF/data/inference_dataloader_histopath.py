@@ -90,9 +90,26 @@ class InferTumorSegDataset(Dataset):
         ydim, xdim = self._os_image.level_dimensions[self._selected_level]
         mask = resize(mask, (xdim, ydim))
         mask = (mask > 0).astype(np.uint8)
+
+        # This is bugged because currently if mask_level is not equal to selected_level,
+        # then this logic straight up does not work
+        # You would have to scale the patch size appropriately for this to work correctly
+        # Remove all the points which are closer to the boundary of the wsi
+        # by accsesing the WSI level properties with
+        # self._os_image.level_dimensions[self._selected_level]
+        # Logic as if point + self.patch_size > wsi_dimensions
+        # The move the point by the wsi_dimensions - (patch_size + self.points)
+        # This is because the patch is not going to be extracted if it is
+        # outside the wsi
         for i in range(0, ydim - self._patch_size[0], self._stride_size[0]):
             for j in range(0, xdim - self._patch_size[1], self._stride_size[1]):
-                self._points.append([j, i])
+                if i + self._patch_size[0] > ydim:
+                    i = ydim - self._patch_size[0]
+                if j + self._patch_size[1] > xdim:
+                    j = xdim - self._patch_size[1]
+                if mask[i : i + self._patch_size[0], j : j + self._patch_size[1]].sum() > 0:
+                    self._points.append([j, i])
+
         for i in range(len(self._points)):
             point = self._points[i]
             if not np.any(
@@ -102,9 +119,11 @@ class InferTumorSegDataset(Dataset):
                 ]
             ):
                 self._points[i] = [-1, -1]
+
+
         self._points = np.array(self._points) * (2**self._mask_level)
         self._points = np.delete(
-            self._points, np.argwhere(self._points == np.array([-1, -1])), 0
+            self._points, np.argwhere(self._points == np.array([-1*(2**self._mask_level), -1*(2**self._mask_level)])), 0
         )
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
         self._mask = mask
