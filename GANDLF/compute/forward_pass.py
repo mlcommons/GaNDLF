@@ -306,6 +306,9 @@ def validate_network(
                         affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
                     ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+                    jpg_detected = False
+                    if ext in [".jpg", ".jpeg"]:
+                        jpg_detected = True
                     pred_mask = output_prediction.numpy()
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
@@ -318,6 +321,10 @@ def validate_network(
                         pred_mask = global_postprocessing_dict[postprocessor](
                             pred_mask, params
                         )
+                    if jpg_detected:
+                        pred_mask = pred_mask.astype(np.uint8)
+                    else:
+                        pred_mask = pred_mask.astype(np.int16)
 
                     ## special case for 2D
                     if image.shape[-1] > 1:
@@ -326,8 +333,6 @@ def validate_network(
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(img_for_metadata)
 
-                    # cast as the same data type
-                    result_image = sitk.Cast(result_image, sitk.sitkUInt16)
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         result_image = resample_image(
@@ -338,15 +343,10 @@ def validate_network(
                     path_to_write = os.path.join(
                         current_output_dir, subject["subject_id"][0] + "_seg" + ext
                     )
-                    if ext in [".jpg", ".jpeg"]:
-                        from tifffile import imwrite
-
-                        imwrite(path_to_write, sitk.GetArrayFromImage(result_image))
-                    else:
-                        sitk.WriteImage(
-                            result_image,
-                            path_to_write,
-                        )
+                    sitk.WriteImage(
+                        result_image,
+                        path_to_write,
+                    )
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
