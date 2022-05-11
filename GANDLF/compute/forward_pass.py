@@ -320,7 +320,7 @@ def validate_network(
                     for postprocessor in params["data_postprocessing"]:
                         pred_mask = global_postprocessing_dict[postprocessor](
                             pred_mask, params
-                        )
+                        ).numpy()
                     if jpg_detected:
                         pred_mask = pred_mask.astype(np.uint8)
                     else:
