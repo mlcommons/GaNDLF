@@ -340,12 +340,11 @@ def validate_network(
                             img_for_metadata.GetSpacing(),
                             interpolator=sitk.sitkNearestNeighbor,
                         )
-                    path_to_write = os.path.join(
-                        current_output_dir, subject["subject_id"][0] + "_seg" + ext
-                    )
                     sitk.WriteImage(
                         result_image,
-                        path_to_write,
+                        os.path.join(
+                            current_output_dir, subject["subject_id"][0] + "_seg" + ext
+                        ),
                     )
             else:
                 # final regression output
