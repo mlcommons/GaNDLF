@@ -296,7 +296,7 @@ def inference_loop(
                         out_probs_map[n, ...] * 255 / out_probs_map[n, ...].max(),
                         dtype=np.uint8,
                     )
-                    heatmap = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
+                    heatmap = cv2.applyColorMap(image, cv2.COLORMAP_JET)
                     cv2.imwrite(file_to_write, heatmap)
 
 
