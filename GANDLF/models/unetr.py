@@ -316,7 +316,13 @@ class unetr(ModelBase):
                 sys.exit("The inner patch size must be a power of 2.")
 
         self.patch_size = parameters["model"]["inner_patch_size"]
-        self.depth = int(np.log2(self.patch_size))
+
+        if not ("depth" in parameters["model"]):
+            parameters["model"]["depth"] = int(np.log2(self.patch_size))
+            print("Default depth set to 4.")
+            
+        self.depth = parameters["model"]["depth"]
+
         patch_check = checkPatchDimensions(parameters["patch_size"], self.depth)
 
         if patch_check != self.depth and patch_check >= 2:

@@ -32,6 +32,7 @@ all_models_segmentation = [
     "fcn",
     "uinc",
     "msdnet",
+    "transunet"
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
