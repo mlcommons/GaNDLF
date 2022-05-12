@@ -107,7 +107,10 @@ class InferTumorSegDataset(Dataset):
                     i = ydim - self._patch_size[0]
                 if j + self._patch_size[1] > xdim:
                     j = xdim - self._patch_size[1]
-                if mask[i : i + self._patch_size[0], j : j + self._patch_size[1]].sum() > 0:
+                if (
+                    mask[i : i + self._patch_size[0], j : j + self._patch_size[1]].sum()
+                    > 0
+                ):
                     self._points.append([j, i])
 
         for i in range(len(self._points)):
@@ -120,10 +123,16 @@ class InferTumorSegDataset(Dataset):
             ):
                 self._points[i] = [-1, -1]
 
-
         self._points = np.array(self._points) * (2**self._mask_level)
         self._points = np.delete(
-            self._points, np.argwhere(self._points == np.array([-1*(2**self._mask_level), -1*(2**self._mask_level)])), 0
+            self._points,
+            np.argwhere(
+                self._points
+                == np.array(
+                    [-1 * (2**self._mask_level), -1 * (2**self._mask_level)]
+                )
+            ),
+            0,
         )
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
         self._mask = mask

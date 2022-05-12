@@ -231,6 +231,14 @@ def inference_loop(
                                 x_coords[i] : x_coords[i] + patch_size[0],
                                 y_coords[i] : y_coords[i] + patch_size[1],
                             ] += output[i][n] # This is a temporary fix for the segmentation problem for single class
+                        output_to_write += (
+                            str(subject_name)
+                            + ","
+                            + str(x_coords[i])
+                            + ","
+                            + str(y_coords[i])
+                            + "\n"
+                        )
                     else:
                         output_to_write += (
                             str(subject_name)
@@ -320,10 +328,8 @@ def inference_loop(
                         subject_dest_dir, "seg_map_" + str(n) + ".png"
                     )
                     
-                    segmap = cv2.applyColorMap(np.array(
-                        ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255),
-                        dtype=np.uint8,
-                    )
+                    segmap = ((np.array((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255), dtype=np.uint8)
+                    
                     cv2.imwrite(file_to_write, segmap)
 
 
