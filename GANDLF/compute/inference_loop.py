@@ -136,14 +136,13 @@ def inference_loop(
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
 
-        if parameters["problem_type"] != "segmentation":
-            output_to_write = "SubjectID,x_coords,y_coords"
-            if parameters["problem_type"] == "regression":
-                output_to_write += ",output"
-            elif parameters["problem_type"] == "classification":
-                for n in range(parameters["model"]["num_classes"]):
-                    output_to_write += ",probability_" + str(n)
-            output_to_write += "\n"
+        output_to_write = "SubjectID,x_coords,y_coords"
+        if parameters["problem_type"] == "regression":
+            output_to_write += ",output"
+        elif parameters["problem_type"] == "classification":
+            for n in range(parameters["model"]["num_classes"]):
+                output_to_write += ",probability_" + str(n)
+        output_to_write += "\n"
 
         # actual computation
         pbar = tqdm(inferenceDataFromPickle.iterrows())
@@ -301,10 +300,8 @@ def inference_loop(
                         subject_dest_dir, "seg_map_" + str(n) + ".png"
                     )
                     
-                    segmap = cv2.applyColorMap(np.array(
-                        ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255),
-                        dtype=np.uint8,
-                    )
+                    segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
+                        
                     cv2.imwrite(file_to_write, segmap)
             else:
                 output_file = os.path.join(
@@ -328,7 +325,7 @@ def inference_loop(
                         subject_dest_dir, "seg_map_" + str(n) + ".png"
                     )
                     
-                    segmap = ((np.array((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255), dtype=np.uint8)
+                    segmap = (probs_map[n, ...] > 0.5).astype(np.uint8)
                     
                     cv2.imwrite(file_to_write, segmap)
 
