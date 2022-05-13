@@ -51,7 +51,7 @@ class _DecoderCUP(nn.Sequential):
 
 class transunet(ModelBase):
     """
-    This is the standard U-Net architecture : https://arxiv.org/pdf/1606.06650.pdf. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
+    This is the TransUNet architecture : https://doi.org/10.48550/arXiv.2102.04306. The 'residualConnections' flag controls residual connections The Downsampling, Encoding, Decoding modules
     are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
     and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
     """
