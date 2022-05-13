@@ -14,6 +14,10 @@
 
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
+<p align="center">
+    <img width="500" src="./docs/images/all_options.png" alt="GaNDLF all options">
+</p>
+
 ## Why use this?
 
 - Supports multiple
