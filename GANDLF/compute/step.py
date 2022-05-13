@@ -30,7 +30,7 @@ def step(model, image, label, params, train=True):
     """
     if params["verbose"]:
         if torch.cuda.is_available():
-            print(torch.cuda.memory_summay())
+            print(torch.cuda.memory_summary())
         print(
             "|===========================================================================|"
         )

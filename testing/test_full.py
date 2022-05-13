@@ -1513,7 +1513,7 @@ def test_one_hot_logic():
     comparison = random_array == img_tensor_oh_rev_array
     assert comparison.all(), "Arrays are not equal"
 
-    class_list = [0, "1||2||3", np.max(random_array)]
+    class_list = ["0", "1||2||3", np.max(random_array)]
     img_tensor_oh = one_hot(img_tensor, class_list)
     img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
 
@@ -1537,11 +1537,38 @@ def test_one_hot_logic():
     parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
-    )
+    ).numpy()
 
     for key, value in parameters["data_postprocessing"]["mapping"].items():
         comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
         assert comparison.all(), "Arrays at {}:{} are not equal".format(key, value)
+
+    # check the case where 0 is present as an int in a special case
+    class_list = [0, "1||2||3", np.max(random_array)]
+    img_tensor_oh = one_hot(img_tensor, class_list)
+    img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
+
+    # check for background
+    comparison = (random_array == 0) == (img_tensor_oh_rev_array == 0)
+    assert comparison.all(), "Arrays at '0' are not equal"
+
+    # check the case where 0 is absent from class_list
+    class_list = ["1||2||3", np.max(random_array)]
+    img_tensor_oh = one_hot(img_tensor, class_list)
+    img_tensor_oh_rev_array = reverse_one_hot(img_tensor_oh[0], class_list)
+
+    # check last foreground
+    comparison = (random_array == np.max(random_array)) == (
+        img_tensor_oh_rev_array == len(class_list)
+    )
+    assert comparison.all(), "Arrays at final foreground are not equal"
+
+    # check combined foreground
+    combined_array = np.logical_or(
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
+    )
+    comparison = combined_array == (img_tensor_oh_rev_array == 1)
+    assert comparison.all(), "Arrays at the combined foreground are not equal"
 
     print("passed")
 
