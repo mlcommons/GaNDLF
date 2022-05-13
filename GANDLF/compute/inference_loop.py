@@ -16,12 +16,10 @@ import tiffslide as openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     populate_channel_keys_in_params,
-    send_model_to_device,
     get_dataframe,
     best_model_path_end,
     load_ov_model,
 )
-from GANDLF.models import get_model
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
@@ -56,9 +54,6 @@ def inference_loop(
         parameters,
     ) = create_pytorch_objects(parameters, device=device)
 
-    # Fetch the model according to params mentioned in the configuration file
-    model = get_model(parameters)
-
     # ensure outputs are saved properly
     parameters["save_output"] = True
 
@@ -78,9 +73,6 @@ def inference_loop(
 
         main_dict = torch.load(file_to_check)
         model.load_state_dict(main_dict["model_state_dict"])
-        model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
-            model, parameters["model"]["amp"], device, optimizer=None
-        )
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
@@ -144,14 +136,13 @@ def inference_loop(
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
 
-        if parameters["problem_type"] != "segmentation":
-            output_to_write = "SubjectID,x_coords,y_coords"
-            if parameters["problem_type"] == "regression":
-                output_to_write += ",output"
-            elif parameters["problem_type"] == "classification":
-                for n in range(parameters["model"]["num_classes"]):
-                    output_to_write += ",probability_" + str(n)
-            output_to_write += "\n"
+        output_to_write = "SubjectID,x_coords,y_coords"
+        if parameters["problem_type"] == "regression":
+            output_to_write += ",output"
+        elif parameters["problem_type"] == "classification":
+            for n in range(parameters["model"]["num_classes"]):
+                output_to_write += ",probability_" + str(n)
+        output_to_write += "\n"
 
         # actual computation
         pbar = tqdm(inferenceDataFromPickle.iterrows())
@@ -220,13 +211,13 @@ def inference_loop(
                         output = model(image_patches.float().to(parameters["device"]))
                     output = output.detach().cpu().numpy()
                 else:
-                    output = model.infer(
+                    output = model(
                         inputs={
-                            parameters["model"]["IO"][0]: image_patches.float()
+                            parameters["model"]["IO"][0][0]: image_patches.float()
                             .cpu()
                             .numpy()
                         }
-                    )[parameters["model"]["IO"][1]]
+                    )[parameters["model"]["IO"][1][0]]
 
                 for i in range(int(output.shape[0])):
                     count_map[
@@ -234,10 +225,21 @@ def inference_loop(
                         y_coords[i] : y_coords[i] + patch_size[1],
                     ] += 1
                     if parameters["problem_type"] == "segmentation":
-                        probs_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += output[i][0]
+                        for n in range(parameters["model"]["num_classes"]):
+                            probs_map[
+                                x_coords[i] : x_coords[i] + patch_size[0],
+                                y_coords[i] : y_coords[i] + patch_size[1],
+                            ] += output[i][
+                                n
+                            ]  # This is a temporary fix for the segmentation problem for single class
+                        output_to_write += (
+                            str(subject_name)
+                            + ","
+                            + str(x_coords[i])
+                            + ","
+                            + str(y_coords[i])
+                            + "\n"
+                        )
                     else:
                         output_to_write += (
                             str(subject_name)
@@ -257,35 +259,55 @@ def inference_loop(
                         output_to_write += "\n"
 
             # ensure probability map is scaled
-            count_map = count_map / count_map.max()
-            out_probs_map = count_map * probs_map
+            # Updating variables to save memory
+            probs_map = np.divide(probs_map, count_map)
+
+            # Check if out_probs_map is greater than 1, print a warning
+            if np.max(probs_map) > 1:
+                # Print a warning
+                print(
+                    "Warning: Probability map is greater than 1, report the images to GANDLF developers"
+                )
+
+            count_map = np.array(count_map * 255, dtype=np.uint16)
+            imsave(
+                os.path.join(
+                    subject_dest_dir,
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
+                ),
+                count_map,
+            )
+
+            import cv2
 
             if parameters["problem_type"] == "segmentation":
-                count_map = np.array(count_map * 255, dtype=np.uint16)
-                out_thresh = np.array((out_probs_map > 0.5) * 255, dtype=np.uint16)
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        str(row[parameters["headers"]["subjectIDHeader"]])
-                        + "_prob.png",
-                    ),
-                    out_probs_map,
+                output_file = os.path.join(
+                    subject_dest_dir,
+                    "predictions.csv",
                 )
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        str(row[parameters["headers"]["subjectIDHeader"]]) + "_seg.png",
-                    ),
-                    out_thresh,
-                )
-                imsave(
-                    os.path.join(
-                        subject_dest_dir,
-                        str(row[parameters["headers"]["subjectIDHeader"]])
-                        + "_count.png",
-                    ),
-                    count_map,
-                )
+                with open(output_file, "w") as f:
+                    f.write(output_to_write)
+
+                for n in range(parameters["model"]["num_classes"]):
+                    file_to_write = os.path.join(
+                        subject_dest_dir, "probability_map_" + str(n) + ".png"
+                    )
+                    heatmap = cv2.applyColorMap(
+                        np.array(
+                            probs_map[n, ...] * 255,
+                            dtype=np.uint8,
+                        ),
+                        cv2.COLORMAP_JET,
+                    )
+                    cv2.imwrite(file_to_write, heatmap)
+
+                    file_to_write = os.path.join(
+                        subject_dest_dir, "seg_map_" + str(n) + ".png"
+                    )
+
+                    segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
+
+                    cv2.imwrite(file_to_write, segmap)
             else:
                 output_file = os.path.join(
                     subject_dest_dir,
@@ -294,18 +316,26 @@ def inference_loop(
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
 
-                import cv2
-
                 for n in range(parameters["model"]["num_classes"]):
                     file_to_write = os.path.join(
                         subject_dest_dir, "probability_map_" + str(n) + ".png"
                     )
-                    image = np.array(
-                        out_probs_map[n, ...] * 255 / out_probs_map[n, ...].max(),
-                        dtype=np.uint8,
+                    heatmap = cv2.applyColorMap(
+                        np.array(
+                            probs_map[n, ...] * 255,
+                            dtype=np.uint8,
+                        ),
+                        cv2.COLORMAP_JET,
                     )
-                    heatmap = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
                     cv2.imwrite(file_to_write, heatmap)
+
+                    file_to_write = os.path.join(
+                        subject_dest_dir, "seg_map_" + str(n) + ".png"
+                    )
+
+                    segmap = (probs_map[n, ...] > 0.5).astype(np.uint8)
+
+                    cv2.imwrite(file_to_write, segmap)
 
 
 if __name__ == "__main__":

@@ -174,11 +174,11 @@ def load_ov_model(path, device="CPU"):
     """
 
     try:
-        from openvino.inference_engine import IECore
+        from openvino import runtime as ov
     except ImportError:
         raise ImportError("OpenVINO inference engine is not configured correctly.")
 
-    ie = IECore()
+    core = ov.Core()
     if device.lower() == "cuda":
         device = "GPU"
 
@@ -188,10 +188,9 @@ def load_ov_model(path, device="CPU"):
             device_name=device,
         )
 
-    net = ie.read_network(model=path, weights=path.replace("xml", "bin"))
+    model = core.read_model(model=path, weights=path.replace("xml", "bin"))
+    compiled_model = core.compile_model(model=model, device_name=device.upper())
+    input_layer = compiled_model.inputs
+    output_layer = compiled_model.outputs
 
-    input_blob = next(iter(net.input_info))
-    out_blob = next(iter(net.outputs))
-
-    exec_net = ie.load_network(network=net, device_name=device.upper())
-    return exec_net, input_blob, out_blob
+    return compiled_model, input_layer, output_layer
