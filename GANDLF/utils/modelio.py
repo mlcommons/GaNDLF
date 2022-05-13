@@ -183,9 +183,8 @@ def load_ov_model(path, device="CPU"):
         device = "GPU"
 
     if device == "GPU":
-        ie.set_config(
-            config={"CACHE_DIR": os.path.dirname(os.path.abspath(path))},
-            device_name=device,
+        core.set_property(
+            {"CACHE_DIR": os.path.dirname(os.path.abspath(path))}
         )
 
     model = core.read_model(model=path, weights=path.replace("xml", "bin"))
