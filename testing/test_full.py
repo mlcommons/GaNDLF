@@ -1915,75 +1915,39 @@ def sanitize_outputDir():
 
 #     print("passed")
 
-# def test_transunet_3d(device):
-#     parameters = parseConfig(
-#         testingDir + "/config_segmentation.yaml", version_check_flag=False
-#     )
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_3d_rad_segmentation.csv"
-#     )
-#     parameters["model"]["architecture"] = "transunet"
-#     parameters["patch_size"] = [4, 4, 4]
-#     parameters["model"]["dimension"] = 3
-
-#     # this assertion should fail
-#     with pytest.raises(BaseException) as e_info:
-#         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
-
-#     parameters["model"]["dimension"] = 3
-#     parameters["patch_size"] = [32, 32, 32]
-
-#     # with pytest.raises(BaseException) as e_info:
-#     #     parameters["model"]["depth"] = 6
-#     #     global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
-
-#     with pytest.raises(BaseException) as e_info:
-#         parameters["model"]["depth"] = 1
-#         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
-
-#     for dep in [3]:
-#         parameters["model"]["depth"] = dep
-#         parameters["model"]["class_list"] = [0, 255]
-#         parameters["model"]["amp"] = True
-#         parameters["model"]["num_channels"] = len(
-#             parameters["headers"]["channelHeaders"]
-#         )
-#         parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#         # loop through selected models and train for single epoch
-#         parameters["model"]["norm_type"] = "batch"
-#         parameters["nested_training"]["testing"] = -5
-#         parameters["nested_training"]["validation"] = -5
-#         if os.path.isdir(outputDir):
-#             shutil.rmtree(outputDir)  # overwrite previous results
-#         sanitize_outputDir()
-#         TrainingManager(
-#             dataframe=training_data,
-#             outputDir=outputDir,
-#             parameters=parameters,
-#             device=device,
-#             resume=False,
-#             reset=True,
-#         )
-
-#     print("passed")
-
-
-def test_transunet_2d(device):
+def test_transunet_3d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
+        inputDir + "/train_3d_rad_segmentation.csv"
     )
     parameters["model"]["architecture"] = "transunet"
-    parameters["patch_size"] = [128, 128, 1]
-    parameters["model"]["dimension"] = 2
+    parameters["patch_size"] = [4, 4, 4]
+    parameters["model"]["dimension"] = 3
+
+    # this assertion should fail
+    with pytest.raises(BaseException) as e_info:
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["dimension"] = 3
+    parameters["patch_size"] = [32, 32, 32]
+
+    # with pytest.raises(BaseException) as e_info:
+    #     parameters["model"]["depth"] = 6
+    #     global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["depth"] = 1
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     for dep in [3]:
         parameters["model"]["depth"] = dep
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
-        parameters["model"]["num_channels"] = 3
+        parameters["model"]["num_channels"] = len(
+            parameters["headers"]["channelHeaders"]
+        )
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
@@ -2002,3 +1966,39 @@ def test_transunet_2d(device):
         )
 
     print("passed")
+
+
+# def test_transunet_2d(device):
+#     parameters = parseConfig(
+#         testingDir + "/config_segmentation.yaml", version_check_flag=False
+#     )
+#     training_data, parameters["headers"] = parseTrainingCSV(
+#         inputDir + "/train_2d_rad_segmentation.csv"
+#     )
+#     parameters["model"]["architecture"] = "transunet"
+#     parameters["patch_size"] = [128, 128, 1]
+#     parameters["model"]["dimension"] = 2
+
+#     for dep in [3]:
+#         parameters["model"]["depth"] = dep
+#         parameters["model"]["class_list"] = [0, 255]
+#         parameters["model"]["amp"] = True
+#         parameters["model"]["num_channels"] = 3
+#         parameters = populate_header_in_parameters(parameters, parameters["headers"])
+#         # loop through selected models and train for single epoch
+#         parameters["model"]["norm_type"] = "batch"
+#         parameters["nested_training"]["testing"] = -5
+#         parameters["nested_training"]["validation"] = -5
+#         if os.path.isdir(outputDir):
+#             shutil.rmtree(outputDir)  # overwrite previous results
+#         sanitize_outputDir()
+#         TrainingManager(
+#             dataframe=training_data,
+#             outputDir=outputDir,
+#             parameters=parameters,
+#             device=device,
+#             resume=False,
+#             reset=True,
+#         )
+
+#     print("passed")
