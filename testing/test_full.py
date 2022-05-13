@@ -3,7 +3,6 @@ import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, p
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
-import gc
 
 from pydicom.data import get_testdata_file
 
@@ -1879,8 +1878,6 @@ def test_train_segmentation_unetr_3d(device):
 
     print("passed")
 
-gc.collect()
-
 def test_train_segmentation_unetr_2d(device):
     print("38: Testing UNETR for 2D segmentation")
     parameters = parseConfig(
@@ -1917,8 +1914,6 @@ def test_train_segmentation_unetr_2d(device):
 
     print("passed")
 
-gc.collect()
-
 def test_transunet_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -1930,9 +1925,11 @@ def test_transunet_2d(device):
     parameters["patch_size"] = [128, 128, 1]
     parameters["model"]["dimension"] = 2
 
-    for dep in [3]:
+    for dep in [2]:
+        parameters["model"]["embed_dim"] = 64
         parameters["model"]["depth"] = dep
         parameters["model"]["class_list"] = [0, 255]
+        parameters["model"]["num_heads"] = 6
         parameters["model"]["amp"] = True
         parameters["model"]["num_channels"] = 3
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -1953,8 +1950,6 @@ def test_transunet_2d(device):
         )
 
     print("passed")
-
-gc.collect()
 
 def test_transunet_3d(device):
     parameters = parseConfig(
@@ -1982,7 +1977,9 @@ def test_transunet_3d(device):
         parameters["model"]["depth"] = 1
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    for dep in [3]:
+    for dep in [2]:
+        parameters["model"]["num_heads"] = 6
+        parameters["model"]["embed_dim"] = 64
         parameters["model"]["depth"] = dep
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
