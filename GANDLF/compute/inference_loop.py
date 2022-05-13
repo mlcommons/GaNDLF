@@ -229,7 +229,9 @@ def inference_loop(
                             probs_map[
                                 x_coords[i] : x_coords[i] + patch_size[0],
                                 y_coords[i] : y_coords[i] + patch_size[1],
-                            ] += output[i][n] # This is a temporary fix for the segmentation problem for single class
+                            ] += output[i][
+                                n
+                            ]  # This is a temporary fix for the segmentation problem for single class
                         output_to_write += (
                             str(subject_name)
                             + ","
@@ -263,14 +265,15 @@ def inference_loop(
             # Check if out_probs_map is greater than 1, print a warning
             if np.max(probs_map) > 1:
                 # Print a warning
-                print("Warning: Probability map is greater than 1, report the images to GANDLF developers")
+                print(
+                    "Warning: Probability map is greater than 1, report the images to GANDLF developers"
+                )
 
             count_map = np.array(count_map * 255, dtype=np.uint16)
             imsave(
                 os.path.join(
                     subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]])
-                    + "_count.png",
+                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
                 ),
                 count_map,
             )
@@ -285,23 +288,26 @@ def inference_loop(
                 )
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
-                
+
                 for n in range(parameters["model"]["num_classes"]):
                     file_to_write = os.path.join(
                         subject_dest_dir, "probability_map_" + str(n) + ".png"
                     )
-                    heatmap = cv2.applyColorMap(np.array(
-                        probs_map[n, ...] * 255,
-                        dtype=np.uint8,
-                    ), cv2.COLORMAP_JET)
+                    heatmap = cv2.applyColorMap(
+                        np.array(
+                            probs_map[n, ...] * 255,
+                            dtype=np.uint8,
+                        ),
+                        cv2.COLORMAP_JET,
+                    )
                     cv2.imwrite(file_to_write, heatmap)
 
                     file_to_write = os.path.join(
                         subject_dest_dir, "seg_map_" + str(n) + ".png"
                     )
-                    
+
                     segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
-                        
+
                     cv2.imwrite(file_to_write, segmap)
             else:
                 output_file = os.path.join(
@@ -315,18 +321,21 @@ def inference_loop(
                     file_to_write = os.path.join(
                         subject_dest_dir, "probability_map_" + str(n) + ".png"
                     )
-                    heatmap = cv2.applyColorMap(np.array(
-                        probs_map[n, ...] * 255,
-                        dtype=np.uint8,
-                    ), cv2.COLORMAP_JET)
+                    heatmap = cv2.applyColorMap(
+                        np.array(
+                            probs_map[n, ...] * 255,
+                            dtype=np.uint8,
+                        ),
+                        cv2.COLORMAP_JET,
+                    )
                     cv2.imwrite(file_to_write, heatmap)
 
                     file_to_write = os.path.join(
                         subject_dest_dir, "seg_map_" + str(n) + ".png"
                     )
-                    
+
                     segmap = (probs_map[n, ...] > 0.5).astype(np.uint8)
-                    
+
                     cv2.imwrite(file_to_write, segmap)
 
 
