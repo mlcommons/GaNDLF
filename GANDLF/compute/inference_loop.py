@@ -281,7 +281,6 @@ def inference_loop(
             import cv2
 
             if parameters["problem_type"] == "segmentation":
-                out_thresh = np.array((probs_map > 0.5) * 255, dtype=np.uint16)
                 output_file = os.path.join(
                     subject_dest_dir,
                     "predictions.csv",
