@@ -103,8 +103,10 @@ class InferTumorSegDataset(Dataset):
         # outside the wsi
         for i in range(0, ydim - self._patch_size[0], self._stride_size[0]):
             for j in range(0, xdim - self._patch_size[1], self._stride_size[1]):
+                # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
                 if i + self._patch_size[0] > ydim:
                     i = ydim - self._patch_size[0]
+                # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
                 if j + self._patch_size[1] > xdim:
                     j = xdim - self._patch_size[1]
                 if (
