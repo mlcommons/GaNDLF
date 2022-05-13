@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Implementation of UNet
+Implementation of TransUNet
 """
 from torch.nn import ModuleList
 
