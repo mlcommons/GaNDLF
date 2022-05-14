@@ -175,7 +175,7 @@ Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config
 - [Regression example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_regression.yaml)
 - [Classification example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_classification.yaml)
 
-**Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as https://yamlchecker.com/ or https://yamlvalidator.com/ **before** trying to train.
+**Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
 
 [Back To Top &uarr;](#table-of-contents)
 
