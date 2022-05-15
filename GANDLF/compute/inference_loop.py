@@ -224,6 +224,7 @@ def inference_loop(
                     for n in range(parameters["model"]["num_classes"]):
                         # This is a temporary fix for the segmentation problem for single class
                         probs_map[
+                            n,
                             x_coords[i] : x_coords[i] + patch_size[0],
                             y_coords[i] : y_coords[i] + patch_size[1],
                         ] += output[i][n]
