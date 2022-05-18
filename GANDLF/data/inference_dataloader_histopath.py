@@ -16,6 +16,8 @@ from skimage.filters import threshold_otsu, median
 from skimage.morphology import binary_closing, disk
 from scipy.ndimage import binary_fill_holes
 
+from GANDLF.OPM.opm.utils import get_patch_size_in_microns
+
 
 def tissue_mask_generation(img_rgb, rgb_min=50):
     """
@@ -70,6 +72,7 @@ class InferTumorSegDataset(Dataset):
         self._patch_size = patch_size
         if self._patch_size[-1] == 1:
             self._patch_size = self._patch_size[:-1]
+        self._patch_size = get_patch_size_in_microns(wsi_path, self._patch_size)
         self._stride_size = stride_size
         self._selected_level = selected_level
         self._mask_level = mask_level
