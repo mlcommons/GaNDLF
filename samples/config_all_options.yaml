@@ -30,6 +30,9 @@ model:
     # num_classes (int) - number of classification classes
     # final_convolution_layer (str) - the final convolutional layer to use
     # norm_type (str) - the normalization type to use
+
+    ## imagenet_unet has the following optional parameter:
+    # encoder_name (str) - the name of the encoder to use, pick from https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
   }
 ## metrics to evaluate the validation performance
 metrics:
