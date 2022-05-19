@@ -15,7 +15,7 @@ Note that if a box is left unchecked, PR merges will take longer than usual.
 -->
 - [ ] I have read the [`CONTRIBUTING`](https://github.com/CBICA/GaNDLF/blob/master/CONTRIBUTING.md) guide
 - [ ] My PR is based from the [current GaNDLF master ](https://garygregory.wordpress.com/2016/11/10/how-to-catch-up-my-git-fork-to-master/)
-- [ ] Non-breaking change (would not break existing functionality): please provide as many details as possible for any breaking change 
+- [ ] Non-breaking change (does **not** break existing functionality): provide **as many** details as possible for _any_ breaking change 
 - [ ] Function/class source code documentation added/updated
 - [ ] Code has been [blacked](https://github.com/psf/black#usage) for style consistency
 - [ ] If applicable, version information [has been updated in GANDLF/version.py](https://github.com/CBICA/GaNDLF/blob/master/GANDLF/version.py)
