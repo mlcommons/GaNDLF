@@ -28,6 +28,7 @@ from .imagenet_vgg import (
     imagenet_vgg19,
     imagenet_vgg19_bn,
 )
+from .imagenet_unet import imagenet_unet_wrapper
 from .sdnet import SDNet
 from .MSDNet import MSDNet
 from .brain_age import brainage
@@ -69,6 +70,7 @@ global_models_dict = {
     "imagenet_vgg16_bn": imagenet_vgg16_bn,
     "imagenet_vgg19": imagenet_vgg19,
     "imagenet_vgg19_bn": imagenet_vgg19_bn,
+    "imagenet_unet": imagenet_unet_wrapper,
     "densenet": densenet264,
     "densenet121": densenet121,
     "densenet169": densenet169,
