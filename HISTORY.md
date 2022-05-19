@@ -29,6 +29,7 @@
 - RGB conversion submodule added to handle alpha channel conversions
 - Sigmoid multiplier option has been added
 - Compute objects can now be requested using developer-level functions
+- ImageNet pre-trained models for UNet is now available
 
 ## 0.0.13
 
