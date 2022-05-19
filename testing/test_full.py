@@ -194,9 +194,15 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
+    parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
+    all_models_segmentation.extend(["imagenet_unet"])
+
     for model in all_models_segmentation:
+        if model == "imagenet_unet":
+            # imagenet_unet can only handle a specific patch size
+            parameters["patch_size"] = [224, 224, 1]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
