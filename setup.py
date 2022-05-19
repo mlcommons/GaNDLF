@@ -79,6 +79,7 @@ requirements = [
     "zarr==2.10.3",
     "pydicom",
     "onnx",
+    "segmentation-models-pytorch",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
