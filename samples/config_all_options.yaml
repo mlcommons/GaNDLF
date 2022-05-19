@@ -120,18 +120,18 @@ nested_training:
 ## pre-processing
 # this constructs an order of transformations, which is applied to all images in the data loader
 # order: all_methods_as_specified_in_dict --> normalize [normalization methods always applied at the end]
-# 'to_canonical': change the image to canonical orientation, see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=canonical#torchio.transforms.ToCanonical
+# 'to_canonical': change the image to canonical orientation, see https://torchio.readthedocs.io/transforms/preprocessing.html#torchio.transforms.ToCanonical
 # 'rgba2rgb': convert images from rgba to rgb
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
-# 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.ZNormalization
+# 'normalize': performs z-score normalization: https://torchio.readthedocs.io/transforms/preprocessing.html#torchio.transforms.ZNormalization
 # 'normalize_positive':perform z-score normalize but with mean and std-dev calculated on only pixels > 0 
 # 'normalize_nonZero': perform z-score normalize but with mean and std-dev calculated on only non-zero pixels
 # 'normalize_nonZero_masked': perform z-score normalize but with mean and std-dev calculated on only non-zero pixels with the stats applied on non-zero pixels
 # 'crop_external_zero_planes': crops all non-zero planes from input tensor to reduce image search space
-# 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
-# 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=ToCanonical#torchio.transforms.Resample
+# 'resample: resolution: X,Y,Z': resample the voxel resolution: https://torchio.readthedocs.io/transforms/preprocessing.html#torchio.transforms.Resample
+# 'resample: resolution: X': resample the voxel resolution in an isotropic manner: https://torchio.readthedocs.io/transforms/preprocessing.html#torchio.transforms.Resample
 # resize the image(s) and mask (this should be greater than or equal to patch_size); resize is done ONLY when resample is not defined -- WARNING: resizing images on the fly ensures that images get loaded in memory, which dramatically increases RAM usage
 # 'resize_image' resizes the image and mask BEFORE applying any another operation
 # 'resize_patch' resizes the image and mask AFTER extracting the patch
@@ -168,8 +168,8 @@ data_preprocessing:
     #'resize_image': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     #'resize_patch': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
-    'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
-    'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
+    'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html#torchio.transforms.Crop
+    'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html#croporpad
     ## histogram matching algorithms
     # 'histogram_matching':{
     #   'target': '/path/to/template.nii.gz', # if this is absent, global histogram equalization takes place
@@ -184,13 +184,13 @@ data_preprocessing:
 ## various data augmentation techniques
 # options: affine, elastic, downsample, motion, kspace, bias, blur, gaussianNoise, swap
 # keep/edit as needed
-# all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
+# all transforms: https://torchio.readthedocs.io/transforms/transforms.html
 # 'kspace': one of ghosting or spiking is picked (randomly) for augmentation
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
     default_probability: 0.5,
-    'affine':{ # for options, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomaffine#randomaffine
+    'affine':{ # for options, see https://torchio.readthedocs.io/transforms/augmentation.html#randomaffine
       'scales': [0.5, 1.5],
       'degrees': 25,
       'translation': 2,
@@ -204,9 +204,9 @@ data_augmentation:
     },
     'bias',
     'blur': {
-      'std': [0, 1] # default std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomBlur
+      'std': [0, 1] # default std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html#torchio.transforms.RandomBlur
     },
-    'noise': { # for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomNoise
+    'noise': { # for details, see https://torchio.readthedocs.io/transforms/augmentation.html#torchio.transforms.RandomNoise
       'mean': 0, # default mean
       'std': [0, 1] # default std-dev range
     },
