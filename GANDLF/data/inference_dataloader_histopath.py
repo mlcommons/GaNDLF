@@ -56,7 +56,16 @@ def tissue_mask_generation(img_rgb, rgb_min=50):
 
 
 class InferTumorSegDataset(Dataset):
-    def __init__(self, wsi_path, patch_size, stride_size, selected_level, mask_level):
+    def __init__(
+        self,
+        wsi_path,
+        patch_size,
+        stride_size,
+        selected_level,
+        mask_level,
+        transform=None,
+    ):
+        self.transform = transform
         self._wsi_path = wsi_path
         self._patch_size = patch_size
         if self._patch_size[-1] == 1:
@@ -71,16 +80,41 @@ class InferTumorSegDataset(Dataset):
     def _basic_preprocessing(self):
         mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
         extracted_image = self._os_image.read_region(
-            (0, 0), self._mask_level, (mask_xdim, mask_ydim)
-        ).convert("RGB")
+            (0, 0),
+            self._mask_level,
+            (mask_xdim, mask_ydim),
+            as_array=True,
+        )
         mask = tissue_mask_generation(extracted_image)
         del extracted_image
         ydim, xdim = self._os_image.level_dimensions[self._selected_level]
         mask = resize(mask, (xdim, ydim))
         mask = (mask > 0).astype(np.uint8)
+
+        # This is bugged because currently if mask_level is not equal to selected_level,
+        # then this logic straight up does not work
+        # You would have to scale the patch size appropriately for this to work correctly
+        # Remove all the points which are closer to the boundary of the wsi
+        # by accsesing the WSI level properties with
+        # self._os_image.level_dimensions[self._selected_level]
+        # Logic as if point + self.patch_size > wsi_dimensions
+        # The move the point by the wsi_dimensions - (patch_size + self.points)
+        # This is because the patch is not going to be extracted if it is
+        # outside the wsi
         for i in range(0, ydim - self._patch_size[0], self._stride_size[0]):
             for j in range(0, xdim - self._patch_size[1], self._stride_size[1]):
-                self._points.append([j, i])
+                # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
+                if i + self._patch_size[0] > ydim:
+                    i = ydim - self._patch_size[0]
+                # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
+                if j + self._patch_size[1] > xdim:
+                    j = xdim - self._patch_size[1]
+                if (
+                    mask[i : i + self._patch_size[0], j : j + self._patch_size[1]].sum()
+                    > 0
+                ):
+                    self._points.append([j, i])
+
         for i in range(len(self._points)):
             point = self._points[i]
             if not np.any(
@@ -90,9 +124,17 @@ class InferTumorSegDataset(Dataset):
                 ]
             ):
                 self._points[i] = [-1, -1]
-        self._points = np.array(self._points)
+
+        self._points = np.array(self._points) * (2**self._mask_level)
         self._points = np.delete(
-            self._points, np.argwhere(self._points == np.array([-1, -1])), 0
+            self._points,
+            np.argwhere(
+                self._points
+                == np.array(
+                    [-1 * (2**self._mask_level), -1 * (2**self._mask_level)]
+                )
+            ),
+            0,
         )
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
         self._mask = mask
@@ -111,13 +153,21 @@ class InferTumorSegDataset(Dataset):
             (string, int, int): The patch, x and y locations.
         """
         x_loc, y_loc = self._points[idx]
-        patch = np.array(
-            self._os_image.read_region(
-                (x_loc * self._mask_level, y_loc * self._mask_level),
-                self._selected_level,
-                (self._patch_size[0], self._patch_size[1]),
-            ).convert("RGB")
+        patch = self._os_image.read_region(
+            (x_loc, y_loc),
+            self._selected_level,
+            (self._patch_size[0], self._patch_size[1]),
+            as_array=True,
         )
-        patch = np.array(patch / 255)
+
+        # this is to ensure that channels come at the beginning
         patch = patch.transpose([2, 0, 1])
+        # this is to ensure that we always have a z-stack before applying any torchio transforms
+        patch = np.expand_dims(patch, axis=-1)
+        if self.transform is not None:
+            patch = self.transform(patch)
+
+        # remove z-stack
+        patch = patch.squeeze(-1)
+
         return patch, (x_loc, y_loc)

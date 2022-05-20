@@ -28,4 +28,4 @@ def get_mapped_label(input_tensor, params):
     for key, value in mapping.items():
         output[input_arr == key] = value
 
-    return output
+    return torch.from_numpy(output)

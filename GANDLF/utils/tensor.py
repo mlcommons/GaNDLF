@@ -2,24 +2,28 @@ import os, sys
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 import torchio
 from tqdm import tqdm
 
+# global definition for both one_hot and reverse_one_hot
+special_cases_to_check = ["||"]
 
-def one_hot(segmask_array, class_list):
+
+def one_hot(segmask_tensor, class_list):
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
-        segmask_array (torch.Tensor): The segmentation mask Tensor.
+        segmask_tensor (torch.Tensor): The segmentation mask Tensor.
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
     """
-    batch_size = segmask_array.shape[0]
+    batch_size = segmask_tensor.shape[0]
 
-    def_shape = segmask_array.shape
+    def_shape = segmask_tensor.shape
     if len(def_shape) == 4:
         # special case for sdnet
         batch_stack = torch.zeros(
@@ -28,7 +32,7 @@ def one_hot(segmask_array, class_list):
             def_shape[2],
             def_shape[3],
             dtype=torch.float32,
-            device=segmask_array.device,
+            device=segmask_tensor.device,
         )
     else:
         batch_stack = torch.zeros(
@@ -38,65 +42,55 @@ def one_hot(segmask_array, class_list):
             def_shape[3],
             def_shape[4],
             dtype=torch.float32,
-            device=segmask_array.device,
+            device=segmask_tensor.device,
         )
 
     for b in range(batch_size):
         # since the input tensor is 5D, with [batch_size, modality, x, y, z], we do not need to consider the modality dimension for labels
-        segmask_array_iter = segmask_array[b, 0, ...]
+        segmask_array_iter = segmask_tensor[b, 0, ...]
         bin_mask = segmask_array_iter == 0  # initialize bin_mask
 
         # this implementation allows users to combine logical operands
         class_idx = 0
         for _class in class_list:
             if isinstance(_class, str):
-                if "||" in _class:  # special case
-                    class_split = _class.split("||")
-                    bin_mask = segmask_array_iter == int(class_split[0])
-                    for i in range(1, len(class_split)):
-                        bin_mask = bin_mask | (
-                            segmask_array_iter == int(class_split[i])
-                        )
-                elif "|" in _class:  # special case
-                    class_split = _class.split("|")
-                    bin_mask = segmask_array_iter == int(class_split[0])
-                    for i in range(1, len(class_split)):
-                        bin_mask = bin_mask | (
-                            segmask_array_iter == int(class_split[i])
-                        )
-                else:
-                    # assume that it is a simple int
-                    bin_mask = segmask_array_iter == int(_class)
+                for case in special_cases_to_check:
+                    if case in _class:
+                        special_class_split = _class.split(case)
+                        bin_mask = segmask_array_iter == int(special_class_split[0])
+                        for i in range(1, len(special_class_split)):
+                            bin_mask = torch.logical_or(
+                                bin_mask,
+                                (segmask_array_iter == int(special_class_split[i])),
+                            )
+                    else:
+                        # assume that it is a simple int
+                        bin_mask = segmask_array_iter == int(_class)
             else:
                 bin_mask = segmask_array_iter == int(_class)
-            bin_mask = bin_mask.long()
-            # we always ensure the append happens in dim 0, which is blank
-            bin_mask = bin_mask.unsqueeze(0)
-
-            batch_stack[b, class_idx, ...] = bin_mask
+            # we always ensure the append happens in dim 0
+            batch_stack[b, class_idx, ...] = bin_mask.long().unsqueeze(0)
             class_idx += 1
 
     return batch_stack
 
 
-def reverse_one_hot(predmask_array, class_list):
+def reverse_one_hot(predmask_tensor, class_list):
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
     Args:
-        predmask_array (torch.Tensor): The predicted segmentation mask Tensor.
+        predmask_tensor (torch.Tensor): The predicted segmentation mask Tensor.
         class_list (list): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         numpy.array: The final mask as numpy array.
     """
-    if isinstance(predmask_array, torch.Tensor):
-        array_to_consider = predmask_array.cpu().numpy()
+    if isinstance(predmask_tensor, torch.Tensor):
+        predmask_array = predmask_tensor.cpu().numpy()
     else:
-        array_to_consider = predmask_array
-    special_cases_to_check = ["||"]
+        predmask_array = predmask_tensor
     special_case_detected = False
-    # max_current = 0
 
     for _class in class_list:
         for case in special_cases_to_check:
@@ -104,39 +98,33 @@ def reverse_one_hot(predmask_array, class_list):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
 
-    final_mask = None
-    if special_case_detected:
-        # for this case, the output mask will be formed with the following logic:
-        # for each class in class_list
-        #   unless the class is 0, the output will be index * predmask_array at that class
-        array_to_consider_bool = array_to_consider.astype(bool)
-        for idx, i in enumerate(class_list):
-            initialize_mask = False
-            if isinstance(class_list[idx], str):
-                for case in special_cases_to_check:
-                    initialize_mask = False
-                    if case in class_list[idx]:
-                        initialize_mask = True
-                    else:
-                        if class_list[idx] != "0":
-                            initialize_mask = True
-            else:
-                if class_list[idx] != 0:
-                    initialize_mask = True
+    final_mask = np.zeros(predmask_array[0, ...].shape).astype(np.int8)
+    predmask_array_bool = predmask_array >= 0.5
 
-            if initialize_mask:
-                if final_mask is None:
-                    final_mask = idx * np.asarray(
-                        array_to_consider_bool[idx, ...], dtype=int
-                    )
-                else:
-                    final_mask[array_to_consider_bool[idx, ...]] = idx
-    else:
-        for i, _ in enumerate(class_list):
-            if final_mask is None:
-                final_mask = np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
+    # in case special case is detected, if 0 is absent from
+    # class_list do not use 0 to initialize any value in final_mask
+    zero_present = False
+    if special_case_detected:
+        for _class in class_list:
+            if isinstance(_class, str):
+                if _class == "0":
+                    zero_present = True
+                    break
             else:
-                final_mask += np.asarray(array_to_consider[i, ...], dtype=int) * int(i)
+                if _class == 0:
+                    zero_present = True
+                    break
+    for idx, i in enumerate(class_list):
+        output_value = i
+        # for special case, use the index as value
+        if special_case_detected:
+            output_value = idx
+            # if zero is not present, then don't use '0' as output value
+            if not (zero_present):
+                output_value += 1
+
+        final_mask[predmask_array_bool[idx, ...]] = output_value
+
     return final_mask
 
 
@@ -155,7 +143,7 @@ def send_model_to_device(model, amp, device, optimizer):
         bool: Whether automatic mixed precision is to be used or not.
         torch.device: Device type.
     """
-    if device != "cpu":
+    if device == "cuda":
         if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
             sys.exit(
                 "Please set the environment variable 'CUDA_VISIBLE_DEVICES' correctly before trying to run GANDLF on GPU"
@@ -220,7 +208,58 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device
 
 
-def get_class_imbalance_weights(training_data_loader, parameters):
+def get_class_imbalance_weights_classification(training_df, params):
+    """
+    This function calculates the penalty used for loss functions in multi-class problems.
+    It looks at the column "valuesToPredict" and identifies unique classes, fetches the class distribution
+    and generates the required class weights, and then generates the weights needed for loss function which
+    are inverse of the class weights generated divided by the total number of items in a single column
+
+    Args:
+        training_Df (pd.DataFrame): The training data frame.
+        parameters (dict) : The parameters passed by the user yaml.
+
+    Returns:
+        dict: The penalty weights for different classes under consideration for classification.
+    """
+    predictions_array = (
+        training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
+        .to_numpy()
+        .ravel()
+    )
+    class_count = np.bincount(predictions_array)
+    classes_to_predict = np.unique(predictions_array)
+    total_count = len(training_df)
+    penalty_dict, weight_dict = {}, {}
+
+    # for the classes that are present in the training set, construct the weights as needed
+    for i in classes_to_predict:
+        weight_dict[i] = (class_count[i] + sys.float_info.epsilon) / total_count
+        penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
+
+    # this is a corner case
+    # for the classes that are requested for training but aren't present in the training set, assign largest possible penalty
+    for i in params["model"]["class_list"]:
+        i = int(i)
+        if i not in weight_dict:
+            print(
+                "WARNING: A class was found in 'class_list' that was not present in the training data, please re-check training data labels"
+            )
+            weight_dict[i] = sys.float_info.epsilon
+            penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]
+
+    # ensure sum of penalties is always 1
+    penalty_sum = (
+        np.fromiter(penalty_dict.values(), dtype=np.float64).sum()
+        + sys.float_info.epsilon
+    )
+    for i in range(params["model"]["num_classes"]):
+        penalty_dict[i] /= penalty_sum
+
+    return penalty_dict, weight_dict
+
+
+def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
 
@@ -253,29 +292,18 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     for _, (subject) in enumerate(
         tqdm(penalty_loader, desc="Looping over training data for penalty calculation")
     ):
-        # segmentation needs masks to be one-hot encoded
-        if parameters["problem_type"] == "segmentation":
-            # accumulate dice weights for each label
-            mask = subject["label"][torchio.DATA]
-            one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
-            for i in range(0, len(parameters["model"]["class_list"])):
-                currentNumber = torch.nonzero(
-                    one_hot_mask[:, i, ...], as_tuple=False
-                ).size(0)
-                # class-specific non-zero voxels
-                abs_dict[i] += currentNumber
-                # total number of non-zero voxels to be considered
-                total_counter += currentNumber
 
-        # for classification, the value needs to be used directly
-        elif parameters["problem_type"] == "classification":
-            # accumulate weights for each label
-            value_to_predict = subject["value_0"][0]
-            for i in range(0, len(parameters["model"]["class_list"])):
-                if value_to_predict == i:
-                    abs_dict[i] += 1
-                    # we only want to increase the counter for those subjects that are defined in the class_list
-                    total_counter += 1
+        # accumulate dice weights for each label
+        mask = subject["label"][torchio.DATA]
+        one_hot_mask = one_hot(mask, parameters["model"]["class_list"])
+        for i in range(0, len(parameters["model"]["class_list"])):
+            currentNumber = torch.nonzero(one_hot_mask[:, i, ...], as_tuple=False).size(
+                0
+            )
+            # class-specific non-zero voxels
+            abs_dict[i] += currentNumber
+            # total number of non-zero voxels to be considered
+            total_counter += currentNumber
 
     # Normalize class weights
     weights_dict = {
@@ -296,6 +324,53 @@ def get_class_imbalance_weights(training_data_loader, parameters):
     }
 
     return penalty_dict, weights_dict
+
+
+def get_class_imbalance_weights(training_df, params):
+    """
+    This is a wrapper function that calculates the penalty used for loss functions in classification/segmentation problems.
+
+    Args:
+        training_Df (pd.DataFrame): The training data frame.
+        parameters (dict) : The parameters passed by the user yaml.
+
+    Returns:
+        float, float: The penalty and class weights for different classes under consideration for classification.
+    """
+    penalty_weights, class_weights = None, None
+    if params["weighted_loss"]:
+        print("Calculating weights")
+        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
+        if params["problem_type"] == "classification":
+            (
+                penalty_weights,
+                class_weights,
+            ) = get_class_imbalance_weights_classification(training_df, params)
+        elif params["problem_type"] == "segmentation":
+            # Set up the dataloader for penalty calculation
+            from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+
+            penalty_data = ImagesFromDataFrame(
+                training_df,
+                parameters=params,
+                train=False,
+                loader_type="penalty",
+            )
+
+            penalty_loader = DataLoader(
+                penalty_data,
+                batch_size=1,
+                shuffle=True,
+                pin_memory=False,
+            )
+
+            (
+                penalty_weights,
+                class_weights,
+            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
+            del penalty_data, penalty_loader
+
+    return penalty_weights, class_weights
 
 
 def get_linear_interpolation_mode(dimensionality):

@@ -47,7 +47,7 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         parameters["current_fold_dir"] = fold_dir
         inference_loop(
             inferenceDataFromPickle=inferenceData_full,
-            outputDir=fold_dir,
+            outputDir_or_optimizedModel=fold_dir,
             device=device,
             parameters=parameters,
         )
@@ -64,7 +64,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
                 fold_probs = F.softmax(fold_logits, dim=1)
                 probs_list.append(fold_probs)
 
-    if probs_list and is_classification:
+    # this logic should be changed if we want to do multi-fold inference for histo images
+    if (parameters["modality"] == "rad") and probs_list and is_classification:
         columns = ["SubjectID", "PredictedClass"] + parameters["model"]["class_list"]
         averaged_probs_df = pd.DataFrame(columns=columns)
         averaged_probs_df.SubjectID = dataframe[0]

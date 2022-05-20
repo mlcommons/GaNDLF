@@ -1,21 +1,22 @@
-import os, pathlib
-import torch
-from tqdm import tqdm
-import SimpleITK as sitk
+import os
+import pathlib
+
 import numpy as np
 import pandas as pd
+import SimpleITK as sitk
+import torch
 import torchio
-
+from GANDLF.compute.loss_and_metric import get_loss_and_metrics
+from GANDLF.compute.step import step
+from GANDLF.data.post_process import global_postprocessing_dict
 from GANDLF.utils import (
     get_date_time,
-    get_unique_timestamp,
     get_filename_extension_sanitized,
-    reverse_one_hot,
+    get_unique_timestamp,
     resample_image,
+    reverse_one_hot,
 )
-from GANDLF.data.post_process import global_postprocessing_dict
-from .step import step
-from .loss_and_metric import get_loss_and_metrics
+from tqdm import tqdm
 
 
 def validate_network(
@@ -163,9 +164,9 @@ def validate_network(
                     pred_output += model(image)
                 elif params["model"]["type"] == "openvino":
                     pred_output += torch.from_numpy(
-                        model.infer(
-                            inputs={params["model"]["IO"][0]: image.cpu().numpy()}
-                        )[params["model"]["IO"][1]]
+                        model(
+                            inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
+                        )[params["model"]["IO"][1][0]]
                     )
                 else:
                     raise Exception(
@@ -195,20 +196,35 @@ def validate_network(
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
                 if isinstance(total_epoch_valid_metric[metric], list):
-                    total_epoch_valid_metric[metric].append(final_metric[metric])
+                    if len(total_epoch_valid_metric[metric]) == 0:
+                        total_epoch_valid_metric[metric] = np.array(
+                            final_metric[metric]
+                        )
+                    else:
+                        total_epoch_valid_metric[metric] += np.array(
+                            final_metric[metric]
+                        )
                 else:
                     total_epoch_valid_metric[metric] += final_metric[metric]
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
-                torchio.Subject(subject_dict), params["patch_size"]
+                torchio.Subject(subject_dict),
+                params["patch_size"],
+                patch_overlap=params["inference_mechanism"]["patch_overlap"],
             )
             patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
-            aggregator = torchio.inference.GridAggregator(grid_sampler)
+            aggregator = torchio.inference.GridAggregator(
+                grid_sampler,
+                overlap_mode=params["inference_mechanism"]["grid_aggregator_overlap"],
+            )
 
             if params["medcam_enabled"]:
                 attention_map_aggregator = torchio.inference.GridAggregator(
-                    grid_sampler
+                    grid_sampler,
+                    overlap_mode=params["inference_mechanism"][
+                        "grid_aggregator_overlap"
+                    ],
                 )
 
             output_prediction = 0  # this is used for regression/classification
@@ -241,7 +257,7 @@ def validate_network(
                 label = None
                 if params["problem_type"] != "segmentation":
                     label = label_ground_truth
-                else:
+                elif "label" in patches_batch:
                     label = patches_batch["label"][torchio.DATA]
 
                 if label is not None:
@@ -291,6 +307,9 @@ def validate_network(
                         affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
                     ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+                    jpg_detected = False
+                    if ext in [".jpg", ".jpeg"]:
+                        jpg_detected = True
                     pred_mask = output_prediction.numpy()
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
@@ -302,7 +321,11 @@ def validate_network(
                     for postprocessor in params["data_postprocessing"]:
                         pred_mask = global_postprocessing_dict[postprocessor](
                             pred_mask, params
-                        )
+                        ).numpy()
+                    if jpg_detected:
+                        pred_mask = pred_mask.astype(np.uint8)
+                    else:
+                        pred_mask = pred_mask.astype(np.uint16)
 
                     ## special case for 2D
                     if image.shape[-1] > 1:
@@ -311,8 +334,6 @@ def validate_network(
                         result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
                     result_image.CopyInformation(img_for_metadata)
 
-                    # cast as the same data type
-                    result_image = sitk.Cast(result_image, sitk.sitkUInt16)
                     # this handles cases that need resampling/resizing
                     if "resample" in params["data_preprocessing"]:
                         result_image = resample_image(
@@ -381,30 +402,40 @@ def validate_network(
                 total_epoch_valid_loss += final_loss.cpu().item()
                 for metric in final_metric.keys():
                     if isinstance(total_epoch_valid_metric[metric], list):
-                        total_epoch_valid_metric[metric].append(final_metric[metric])
+                        if len(total_epoch_valid_metric[metric]) == 0:
+                            total_epoch_valid_metric[metric] = np.array(
+                                final_metric[metric]
+                            )
+                        else:
+                            total_epoch_valid_metric[metric] += np.array(
+                                final_metric[metric]
+                            )
                     else:
                         total_epoch_valid_metric[metric] += final_metric[metric]
 
         if label_ground_truth is not None:
-            # For printing information at halftime during an epoch
-            if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
-                (batch_idx + 1) < len(valid_dataloader)
-            ):
-                print(
-                    "\nHalf-Epoch Average " + mode + " loss : ",
-                    total_epoch_valid_loss / (batch_idx + 1),
-                )
-                for metric in params["metrics"]:
-                    if isinstance(total_epoch_valid_metric[metric], list):
-                        to_print = (
-                            np.array(total_epoch_valid_metric[metric]) / (batch_idx + 1)
-                        ).tolist()
-                    else:
-                        to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
+            if params["verbose"]:
+                # For printing information at halftime during an epoch
+                if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
+                    (batch_idx + 1) < len(valid_dataloader)
+                ):
                     print(
-                        "Half-Epoch Average " + mode + " " + metric + " : ",
-                        to_print,
+                        "\nHalf-Epoch Average " + mode + " loss : ",
+                        total_epoch_valid_loss / (batch_idx + 1),
                     )
+                    for metric in params["metrics"]:
+                        if isinstance(total_epoch_valid_metric[metric], np.ndarray):
+                            to_print = (
+                                total_epoch_valid_metric[metric] / (batch_idx + 1)
+                            ).tolist()
+                        else:
+                            to_print = total_epoch_valid_metric[metric] / (
+                                batch_idx + 1
+                            )
+                        print(
+                            "Half-Epoch Average " + mode + " " + metric + " : ",
+                            to_print,
+                        )
 
     if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
@@ -414,9 +445,9 @@ def validate_network(
         average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
         print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
         for metric in params["metrics"]:
-            if isinstance(total_epoch_valid_metric[metric], list):
+            if isinstance(total_epoch_valid_metric[metric], np.ndarray):
                 to_print = (
-                    np.array(total_epoch_valid_metric[metric]) / len(valid_dataloader)
+                    total_epoch_valid_metric[metric] / len(valid_dataloader)
                 ).tolist()
             else:
                 to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)

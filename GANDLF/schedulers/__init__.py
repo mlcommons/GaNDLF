@@ -2,7 +2,6 @@ from .wrap_torch import (
     base_triangle,
     triangle_modified,
     cyclic_lr_base,
-    cyclic_lr_triangular2,
     cyclic_lr_exp_range,
     exp,
     step,
@@ -16,9 +15,9 @@ global_schedulers_dict = {
     "triangle": base_triangle,
     "triangle_modified": triangle_modified,
     "triangular": cyclic_lr_base,
-    "triangular2": cyclic_lr_triangular2,
     "exp_range": cyclic_lr_exp_range,
     "exp": exp,
+    "exponential": exp,
     "step": step,
     "reduce_on_plateau": reduce_on_plateau,
     "reduce-on-plateau": reduce_on_plateau,
@@ -26,3 +25,16 @@ global_schedulers_dict = {
     "reduceonplateau": reduce_on_plateau,
     "cosineannealing": cosineannealing,
 }
+
+
+def get_scheduler(params):
+    """
+    Function to get the scheduler definition.
+
+    Args:
+        params (dict): The parameters' dictionary.
+
+    Returns:
+        model (object): The scheduler definition.
+    """
+    return global_schedulers_dict[params["scheduler"]["type"]](params)

@@ -1,4 +1,4 @@
-from GANDLF.models.modelBase import ModelBase
+from GANDLF.utils.modelbase import get_modelbase_final_layer
 
 
 def populate_header_in_parameters(parameters, headers):
@@ -38,7 +38,7 @@ def populate_header_in_parameters(parameters, headers):
         parameters["model"]["num_channels"] = len(headers["channelHeaders"])
 
     parameters["problem_type"] = find_problem_type(
-        parameters, ModelBase(parameters).final_convolution_layer
+        parameters, get_modelbase_final_layer(parameters["model"]["final_layer"])
     )
 
     # if the problem type is classification/segmentation, ensure the number of classes are picked from the configuration
@@ -64,6 +64,7 @@ def find_problem_type(parameters, model_final_layer):
         "classification_but_not_softmax",
         "logits",
         "classification_without_softmax",
+        "classification_with_sigmoid",
     ]
     headersFromCSV = parameters["headers"]
     class_list_exist = "class_list" in parameters["model"]

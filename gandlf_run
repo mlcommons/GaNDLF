@@ -93,15 +93,17 @@ if __name__ == "__main__":
     for param_none_check in [args.inputdata, args.modeldir, args.train, args.config]:
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
-    
+
     if not args.train:
         # if inference mode, then no need to check for reset/resume
         args.reset, args.resume = False, False
 
     if args.reset and args.resume:
-        print("WARNING: 'reset' and 'resume' are mutually exclusive; 'resume' will be used.")
-        args.reset = False    
-    
+        print(
+            "WARNING: 'reset' and 'resume' are mutually exclusive; 'resume' will be used."
+        )
+        args.reset = False
+
     # config file should always be present
     if not (os.path.isfile(args.config)):
         sys.exit("ERROR: Configuration file not found!")
