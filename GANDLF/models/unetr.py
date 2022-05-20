@@ -317,11 +317,7 @@ class unetr(ModelBase):
 
         self.patch_size = parameters["model"]["inner_patch_size"]
 
-        if not ("depth" in parameters["model"]):
-            parameters["model"]["depth"] = int(np.log2(self.patch_size))
-            print("Default depth set to 4.")
-            
-        self.depth = parameters["model"]["depth"]
+        self.depth = int(np.log2(self.patch_size))
 
         patch_check = checkPatchDimensions(parameters["patch_size"], self.depth)
 
