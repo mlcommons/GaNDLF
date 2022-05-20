@@ -24,6 +24,7 @@ device = "cpu"
 ## global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
+    "imagenet_unet",
     "lightunet",
     "lightunet_multilayer",
     "unet",
@@ -196,13 +197,8 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["onnx_export"] = False
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    all_models_segmentation.extend(["imagenet_unet"])
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
-        if model == "imagenet_unet":
-            # imagenet_unet can only handle a specific patch size
-            parameters["patch_size"] = [224, 224, 1]
-            parameters["model"]["norm_type"] = "batch"
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -215,7 +211,6 @@ def test_train_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
-    all_models_segmentation.remove("imagenet_unet")
 
     print("passed")
 
@@ -273,6 +268,10 @@ def test_train_segmentation_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
+        if model == "imagenet_unet":
+            # imagenet_unet encoder needs to be toned down for small patch size
+            parameters["model"]["encoder_depth"] = 3
+            parameters["model"]["decoder_channels"] = (64, 32, 16)
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
