@@ -202,6 +202,7 @@ def test_train_segmentation_rad_2d(device):
         if model == "imagenet_unet":
             # imagenet_unet can only handle a specific patch size
             parameters["patch_size"] = [224, 224, 1]
+            parameters["model"]["norm_type"] = "batch"
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
