@@ -80,6 +80,7 @@ requirements = [
     "pydicom",
     "onnx",
     "segmentation-models-pytorch",
+    "ACSConv",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
