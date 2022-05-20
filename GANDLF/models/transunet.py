@@ -21,18 +21,19 @@ import numpy as np
 import math
 from .unetr import _Transformer
 
+
 class _DecoderCUP(nn.Sequential):
     def __init__(self, in_feats, out_feats, Norm, Conv, Upsample):
         super().__init__()
 
         self.conv = Conv(
-                in_channels=in_feats,
-                out_channels=out_feats,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                bias=False,
-            )
+            in_channels=in_feats,
+            out_channels=out_feats,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False,
+        )
 
         self.norm = Norm(out_feats)
         self.relu = nn.ReLU(inplace=True)
@@ -94,10 +95,14 @@ class transunet(ModelBase):
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]
-            self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+            self.upsample = nn.Upsample(
+                scale_factor=2, mode="bilinear", align_corners=True
+            )
         elif self.n_dimensions == 3:
             self.img_size = parameters["patch_size"]
-            self.upsample = nn.Upsample(scale_factor=2, mode='trilinear', align_corners=True)
+            self.upsample = nn.Upsample(
+                scale_factor=2, mode="trilinear", align_corners=True
+            )
 
         self.num_layers = 3 * self.depth  # number of transformer layers
         self.out_layers = [self.num_layers - 1]
@@ -129,11 +134,11 @@ class transunet(ModelBase):
 
             self.de.append(
                 _DecoderCUP(
-                    in_feats= 2 * self.base_filters * 2 ** (i_lay + 1),
+                    in_feats=2 * self.base_filters * 2 ** (i_lay + 1),
                     out_feats=self.base_filters * 2 ** (i_lay),
                     Conv=self.Conv,
                     Norm=self.Norm,
-                    Upsample = self.upsample, 
+                    Upsample=self.upsample,
                 )
             )
 
@@ -148,9 +153,9 @@ class transunet(ModelBase):
             )
 
         self.transformer = _Transformer(
-            img_size= [i // 2**(self.depth) for i in self.img_size],
-            patch_size= 1,
-            in_feats=self.base_filters * 2 ** self.depth,
+            img_size=[i // 2 ** (self.depth) for i in self.img_size],
+            patch_size=1,
+            in_feats=self.base_filters * 2**self.depth,
             embed_size=self.embed_size,
             num_heads=self.num_heads,
             mlp_dim=2048,
@@ -162,10 +167,10 @@ class transunet(ModelBase):
 
         self.transCUP = _DecoderCUP(
             in_feats=self.embed_size,
-            out_feats=self.base_filters * 2 ** (self.depth-1),
+            out_feats=self.base_filters * 2 ** (self.depth - 1),
             Conv=self.Conv,
             Norm=self.Norm,
-            Upsample = self.upsample,
+            Upsample=self.upsample,
         )
 
         # TODO: conv 3x3 --> ReLU --> outconv
@@ -205,7 +210,7 @@ class transunet(ModelBase):
 
         # [upsample --> encode] x num layers
         for i in range(self.depth - 1, 0, -1):
-            x = self.de[i-1](x, y[i])
+            x = self.de[i - 1](x, y[i])
 
         x = self.out(x)
         return x

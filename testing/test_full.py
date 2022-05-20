@@ -1878,6 +1878,7 @@ def test_train_segmentation_unetr_rad_3d(device):
 
     print("passed")
 
+
 def test_train_segmentation_unetr_rad_2d(device):
     print("38: Testing UNETR for 2D segmentation")
     parameters = parseConfig(
@@ -1913,6 +1914,7 @@ def test_train_segmentation_unetr_rad_2d(device):
         )
 
     print("passed")
+
 
 def test_train_segmentation_transunet_rad_2d(device):
     parameters = parseConfig(
@@ -1950,6 +1952,7 @@ def test_train_segmentation_transunet_rad_2d(device):
         )
 
     print("passed")
+
 
 def test_train_segmentation_transunet_rad_3d(device):
     parameters = parseConfig(
@@ -2004,4 +2007,3 @@ def test_train_segmentation_transunet_rad_3d(device):
         )
 
     print("passed")
-
