@@ -33,7 +33,8 @@ jobs:
         pytest --cov=. --cov-report=xml -k "generic"
         pytest --cov=. --cov-report=xml --cov-append -k "classification"
         pytest --cov=. --cov-report=xml --cov-append -k "regression"
-        pytest --cov=. --cov-report=xml --cov-append -k "segmentation"
+        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
+        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and transunet"
     - name: Upload coverage
       uses: codecov/codecov-action@v1
       with:
