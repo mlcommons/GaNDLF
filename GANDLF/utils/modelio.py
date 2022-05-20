@@ -5,7 +5,7 @@ import torch
 from .generic import get_unique_timestamp
 
 # these are the base keys for the model dictionary to save
-model_dict_base = {
+model_dict_full = {
     "epoch": 0,
     "model_state_dict": None,
     "optimizer_state_dict": None,
@@ -15,6 +15,13 @@ model_dict_base = {
     "git_hash": None,
     "version": None,
 }
+
+model_dict_required = {
+    "model_state_dict": None,
+    "optimizer_state_dict": None,
+}
+
+best_model_path_end = "_best.pth.tar"
 
 
 def save_model(model_dict, model, params, path, onnx_export=True):
@@ -114,27 +121,39 @@ def save_model(model_dict, model, params, path, onnx_export=True):
             print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
 
 
-def load_model(path):
+def load_model(path, device, full_sanity_check=True):
     """
     Load a model dictionary from a file.
 
     Args:
         path (str): The path to save the model dictionary to.
+        device (torch.device): The device to run the model on.
+        full_sanity_check (bool): Whether to run full sanity checking on model.
 
     Returns:
         dict: Model dictionary containing model parameters and metadata.
     """
-    model_dict = torch.load(path)
+    model_dict = torch.load(path, map_location=device)
 
     # check if the model dictionary is complete
-    incomplete_keys = [
-        key for key in model_dict_base.keys() if key not in model_dict.keys()
-    ]
+    if full_sanity_check:
+        incomplete_keys = [
+            key for key in model_dict_full.keys() if key not in model_dict.keys()
+        ]
+        if len(incomplete_keys) > 0:
+            raise RuntimeWarning(
+                "Model dictionary is incomplete; the following keys are missing:",
+                incomplete_keys,
+            )
 
-    if len(incomplete_keys) > 0:
-        print(
+    # check if required keys are absent, and if so raise an error
+    incomplete_required_keys = [
+        key for key in model_dict_required.keys() if key not in model_dict.keys()
+    ]
+    if len(incomplete_required_keys) > 0:
+        raise KeyError(
             "Model dictionary is incomplete; the following keys are missing:",
-            incomplete_keys,
+            incomplete_required_keys,
         )
 
     return model_dict
@@ -155,11 +174,11 @@ def load_ov_model(path, device="CPU"):
     """
 
     try:
-        from openvino.inference_engine import IECore
+        from openvino import runtime as ov
     except ImportError:
         raise ImportError("OpenVINO inference engine is not configured correctly.")
 
-    ie = IECore()
+    core = ov.Core()
     if device.lower() == "cuda":
         device = "GPU"
 
@@ -169,10 +188,9 @@ def load_ov_model(path, device="CPU"):
             device_name=device,
         )
 
-    net = ie.read_network(model=path, weights=path.replace("xml", "bin"))
+    model = core.read_model(model=path, weights=path.replace("xml", "bin"))
+    compiled_model = core.compile_model(model=model, device_name=device.upper())
+    input_layer = compiled_model.inputs
+    output_layer = compiled_model.outputs
 
-    input_blob = next(iter(net.input_info))
-    out_blob = next(iter(net.outputs))
-
-    exec_net = ie.load_network(network=net, device_name=device.upper())
-    return exec_net, input_blob, out_blob
+    return compiled_model, input_layer, output_layer

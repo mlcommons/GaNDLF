@@ -12,12 +12,14 @@ model:
     architecture: resunet, # options: unet, resunet, deep_resunet, deep_unet, light_resunet, light_unet, fcn, uinc, vgg, densenet
     norm_type: batch, # options: batch, instance, or none (only for VGG); used for all networks
     final_layer: softmax, # can be either sigmoid, softmax or none (none == regression)
+    # sigmoid_input_multiplier: 1.0, # this is used during sigmoid, and defaults to 1.0
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
     # class_list: '[*range(0,100,1)]' # a range of values from 0 to 99 with a step of 1 will be created; customize as needed, but ensure this is defined as a string as it will be passed through 'eval' function
     # class_list: '[0,1||2||3,1||4,4]', # combinatorial training - this will construct one-hot encoded mask using logical operands between specified annotations. Note that double '|' or '&' should be passed and not single to avoid python parsing
     ignore_label_validation: 0, # this is the location of the class_list whose performance is ignore during validation metric calculation
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
-    # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
+    # num_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types from the CSV
+    # save_at_every_epoch: True, # allows you to save the model at every epoch
     
     ## densenet models have the following optional parameters:
     # growth_rate (int) - how many filters to add each layer (k in paper)
@@ -42,6 +44,11 @@ metrics:
   # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
   # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4
   # - iou # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#iou
+## this customizes the inference, primarily used for segmentation outputs
+inference_mechanism: {
+  grid_aggregator_overlap: crop, # this option provides the option to strategize the grid aggregation output; should be either 'crop' or 'average' - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
+  patch_overlap: 0, # amount of overlap of patches during inference, defaults to 0; see https://torchio.readthedocs.io/patches/patch_inference.html#gridsampler
+}
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
@@ -60,7 +67,7 @@ patch_sampler: uniform
 #   {
 #     label:
 #       {
-#         padding_type: constant # how the label gets padded
+#         padding_type: constant # how the label gets padded, for options, see 'mode' in https://numpy.org/doc/stable/reference/generated/numpy.pad.html
 #       }
 #   }
 # If enabled, this parameter pads images and labels when label sampler is used
@@ -114,6 +121,7 @@ nested_training:
 # this constructs an order of transformations, which is applied to all images in the data loader
 # order: all_methods_as_specified_in_dict --> normalize [normalization methods always applied at the end]
 # 'to_canonical': change the image to canonical orientation, see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=canonical#torchio.transforms.ToCanonical
+# 'rgba2rgb': convert images from rgba to rgb
 # 'threshold': performs intensity thresholding; i.e., if x[i] < min: x[i] = 0; and if x[i] > max: x[i] = 0
 # 'clip': performs intensity clipping; i.e., if x[i] < min: x[i] = min; and if x[i] > max: x[i] = max
 # 'threshold'/'clip': if either min/max is not defined, it is taken as the minimum/maximum of the image, respectively
@@ -129,6 +137,16 @@ nested_training:
 # 'resize_patch' resizes the image and mask AFTER extracting the patch
 data_preprocessing:
   {
+    # 'histogram_matching':{
+    #   'target': '/path/to/target/image.nii.gz', # this is the target image to which the histogram of the current image is matched, if this not defined, histogram equalization is performed on the entire image with an equal ramp of [-1,1]
+    #   'num_hist_level': 1024, # number of histogram levels
+    #   'num_match_points': 16, # number of matching points for histogram matching
+    # },
+    # 'histogram_equalization':{ # this performs global histogram equalization using the same logic as 'histogram_matching', just without the target
+    #   'num_hist_level': 1024, # number of histogram levels
+    #   'num_match_points': 16, # number of matching points for histogram matching
+    # },
+    # 'adaptive_histogram_equalization', # this performs Power Law Adaptive Histogram Equalization using https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1AdaptiveHistogramEqualizationImageFilter.html
     'threshold':{
       'min': 10, 
       'max': 75
@@ -152,6 +170,16 @@ data_preprocessing:
     'crop_external_zero_planes', # this will crop all zero-valued planes across all axes
     'crop': [64,64,64], # this will crop the image by removing specified number of pixels; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#torchio.transforms.Crop
     'centercrop': [64,64,64], # this will crop the image to the specified size from the center of image; see https://torchio.readthedocs.io/transforms/preprocessing.html?highlight=crop#croporpad
+    ## histogram matching algorithms
+    # 'histogram_matching':{
+    #   'target': '/path/to/template.nii.gz', # if this is absent, global histogram equalization takes place
+    #   # 'target': 'adaptive', # this will perform adaptive histogram matching using https://simpleitk.org/doxygen/latest/html/classitk_1_1simple_1_1AdaptiveHistogramEqualizationImageFilter.html
+    # },
+    ## stain normalization algorithms
+    # 'stain_normalization':{
+    #   'target': '/path/to/target.png', # this is required
+    #   'extractor': 'vahadane', # can be either vahadane, ruifrok or macenko; defaults to ruifrok
+    # }
   }
 ## various data augmentation techniques
 # options: affine, elastic, downsample, motion, kspace, bias, blur, gaussianNoise, swap
