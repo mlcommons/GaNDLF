@@ -1917,6 +1917,7 @@ def test_train_segmentation_unetr_rad_2d(device):
 
 
 def test_train_segmentation_transunet_rad_2d(device):
+    print("39: Testing TransUNet for 2D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1955,6 +1956,7 @@ def test_train_segmentation_transunet_rad_2d(device):
 
 
 def test_train_segmentation_transunet_rad_3d(device):
+    print("39: Testing TransUNet for 3D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
