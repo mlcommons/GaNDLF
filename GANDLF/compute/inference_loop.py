@@ -161,13 +161,10 @@ def inference_loop(
 
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
             ## this can probably be made into a single multi-class probability map that functions for all workloads
-            if parameters["problem_type"] == "segmentation":
-                probs_map = np.zeros((level_height, level_width), dtype=np.float16)
-            else:
-                probs_map = np.zeros(
-                    (parameters["model"]["num_classes"], level_height, level_width),
-                    dtype=np.float16,
-                )
+            probs_map = np.zeros(
+                (parameters["model"]["num_classes"], level_height, level_width),
+                dtype=np.float16,
+            )
 
             patch_size = parameters["patch_size"]
 
@@ -224,39 +221,23 @@ def inference_loop(
                         x_coords[i] : x_coords[i] + patch_size[0],
                         y_coords[i] : y_coords[i] + patch_size[1],
                     ] += 1
-                    if parameters["problem_type"] == "segmentation":
-                        for n in range(parameters["model"]["num_classes"]):
-                            probs_map[
-                                x_coords[i] : x_coords[i] + patch_size[0],
-                                y_coords[i] : y_coords[i] + patch_size[1],
-                            ] += output[i][
-                                n
-                            ]  # This is a temporary fix for the segmentation problem for single class
-                        output_to_write += (
-                            str(subject_name)
-                            + ","
-                            + str(x_coords[i])
-                            + ","
-                            + str(y_coords[i])
-                            + "\n"
-                        )
-                    else:
-                        output_to_write += (
-                            str(subject_name)
-                            + ","
-                            + str(x_coords[i])
-                            + ","
-                            + str(y_coords[i])
-                        )
-                        for n in range(parameters["model"]["num_classes"]):
-                            probs_map[
-                                n,
-                                x_coords[i] : x_coords[i] + patch_size[0],
-                                y_coords[i] : y_coords[i] + patch_size[1],
-                            ] += output[i][n]
-                            output_to_write += "," + str(output[i][n])
-                        # ensure csv row terminates in new line
-                        output_to_write += "\n"
+                    for n in range(parameters["model"]["num_classes"]):
+                        # This is a temporary fix for the segmentation problem for single class
+                        probs_map[
+                            n,
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += output[i][n]
+                    output_to_write += (
+                        str(subject_name)
+                        + ","
+                        + str(x_coords[i])
+                        + ","
+                        + str(y_coords[i])
+                    )
+                    if parameters["problem_type"] != "segmentation":
+                        output_to_write += "," + str(output[i][n])
+                    output_to_write += "\n"
 
             # ensure probability map is scaled
             # Updating variables to save memory
