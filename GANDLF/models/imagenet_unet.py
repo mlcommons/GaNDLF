@@ -14,9 +14,7 @@ class ImageNet_UNet(ModelBase):
         # define a default encoder
         # all encoders: https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
         encoder_name = parameters["model"].get("encoder_name", "resnet34")
-        decoder_attention_type = parameters["model"].get(
-            "decoder_attention_type", "None"
-        )
+        decoder_attention_type = parameters["model"].get("decoder_attention_type", None)
         decoder_use_batchnorm = False
         if parameters["model"]["norm_type"] == "batch":
             decoder_use_batchnorm = True
