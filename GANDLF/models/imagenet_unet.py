@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # adapted from https://github.com/qubvel/segmentation_models.pytorch
 import segmentation_models_pytorch as smp
+from acsconv.converters import ACSConverter, Conv3dConverter
+
 from .modelBase import ModelBase
 
 
@@ -11,26 +13,35 @@ class ImageNet_UNet(ModelBase):
     ) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
-        assert self.n_dimensions == 2, "ImageNet_UNet only supports 2D images"
+        # assert self.n_dimensions == 2, "ImageNet_UNet only supports 2D images"
 
         # define a default encoder
         # all encoders: https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
-        encoder_name = parameters["model"].get("encoder_name", "resnet34")
-        decoder_attention_type = parameters["model"].get("decoder_attention_type", None)
         decoder_use_batchnorm = False
         if parameters["model"]["norm_type"] == "batch":
             decoder_use_batchnorm = True
-        decoder_use_batchnorm = parameters["model"].get("decoder_use_batchnorm", False)
+        decoder_use_batchnorm = parameters["model"].get(
+            "decoder_use_batchnorm", decoder_use_batchnorm
+        )
 
         self.model = smp.Unet(
-            encoder_name=encoder_name,
+            encoder_name=parameters["model"].get("encoder_name", "resnet152"),
             encoder_weights="imagenet",
             in_channels=self.n_channels,
             classes=self.n_classes,
             activation=parameters["model"]["final_layer"],
             decoder_use_batchnorm=decoder_use_batchnorm,
-            decoder_attention_type=decoder_attention_type,
+            decoder_attention_type=parameters["model"].get(
+                "decoder_attention_type", None
+            ),
+            encoder_depth=parameters["model"].get("encoder_depth", 5),
+            decoder_channels=parameters["model"].get(
+                "decoder_channels", (256, 128, 64, 32, 16)
+            ),
         )
+
+        if self.n_dimensions == 3:
+            self.model = ACSConverter(self.model).model
 
     def forward(self, x):
         return self.model(x)
