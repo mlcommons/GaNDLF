@@ -40,6 +40,9 @@ model:
     # decoder_attention_type (str) - the decoder attention type, see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
     # encoder_depth (int) - the depth of the encoder, also picked up from 'depth'
     # decoder_channels (list) - a list of numbers of channels for each decoder layer, should be same length as 'encoder_depth'
+
+    ## all 'imagenet' models can be converted to 3D using ACSConvolutions, and this takes another parameter:
+    # converter_type (str) - either acs (targets ACSConv) or conv3d (targets nn.Conv3d) or soft (targets SoftACSConv with learnable weights, default); see https://doi.org/10.1109/JBHI.2021.3049452
   }
 ## metrics to evaluate the validation performance
 metrics:
