@@ -13,10 +13,6 @@ class ImageNet_UNet(ModelBase):
     ) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
-        # assert self.n_dimensions == 2, "ImageNet_UNet only supports 2D images"
-
-        # define a default encoder
-        # all encoders: https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
         decoder_use_batchnorm = False
         if parameters["model"]["norm_type"] == "batch":
             decoder_use_batchnorm = True
