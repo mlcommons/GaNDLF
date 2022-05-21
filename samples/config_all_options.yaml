@@ -35,6 +35,8 @@ model:
     # encoder_name (str) - the name of the encoder to use, pick from https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
     # decoder_use_batchnorm (str) - whether to use batch norm or not or inplace, this will override 'norm_type', see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
     # decoder_attention_type (str) - the decoder attention type, see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
+    # encoder_depth (int) - the depth of the encoder
+    # decoder_channels (list) - a list of numbers of channels for each decoder layer, should correspond to encoder_depth
   }
 ## metrics to evaluate the validation performance
 metrics:
