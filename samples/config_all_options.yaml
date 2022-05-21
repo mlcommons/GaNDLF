@@ -31,12 +31,15 @@ model:
     # final_convolution_layer (str) - the final convolutional layer to use
     # norm_type (str) - the normalization type to use
 
+    ## unet_multilayer, unetr, transunet have the following optional parameter:
+    # depth (int) - the number of encoder/decoder layers
+
     ## imagenet_unet has the following optional parameter:
     # encoder_name (str) - the name of the encoder to use, pick from https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
     # decoder_use_batchnorm (str) - whether to use batch norm or not or inplace, this will override 'norm_type', see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
     # decoder_attention_type (str) - the decoder attention type, see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
-    # encoder_depth (int) - the depth of the encoder
-    # decoder_channels (list) - a list of numbers of channels for each decoder layer, should correspond to encoder_depth
+    # encoder_depth (int) - the depth of the encoder, also picked up from 'depth'
+    # decoder_channels (list) - a list of numbers of channels for each decoder layer, should be same length as 'encoder_depth'
   }
 ## metrics to evaluate the validation performance
 metrics:
