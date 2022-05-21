@@ -19,6 +19,8 @@ class ImageNet_UNet(ModelBase):
         decoder_use_batchnorm = parameters["model"].get(
             "decoder_use_batchnorm", decoder_use_batchnorm
         )
+        encoder_depth = parameters["model"].get("depth", 5)
+        encoder_depth = parameters["model"].get("encoder_depth", encoder_depth)
 
         self.model = smp.Unet(
             encoder_name=parameters["model"].get("encoder_name", "resnet152"),
@@ -30,7 +32,7 @@ class ImageNet_UNet(ModelBase):
             decoder_attention_type=parameters["model"].get(
                 "decoder_attention_type", None
             ),
-            encoder_depth=parameters["model"].get("encoder_depth", 5),
+            encoder_depth=encoder_depth,
             decoder_channels=parameters["model"].get(
                 "decoder_channels", (256, 128, 64, 32, 16)
             ),
