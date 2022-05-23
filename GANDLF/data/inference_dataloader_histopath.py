@@ -75,7 +75,7 @@ class InferTumorSegDataset(Dataset):
         # Fix is definitely needed
         width = self._os_image.properties["tiffslide.level[" + str(self._selected_level) + "].height"]
         height = self._os_image.properties["tiffslide.level[" + str(self._selected_level) + "].width"]
-        if not (self._selected_level == self._mask_level):
+        if self._selected_level != self._mask_level:
             mask = resize(mask, (height, width))
         mask = (mask > 0).astype(np.uint8)
 
