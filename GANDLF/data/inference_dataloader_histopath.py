@@ -115,7 +115,7 @@ class InferTumorSegDataset(Dataset):
                     mask[i : i + self._patch_size[0], j : j + self._patch_size[1]].sum()
                     > 0
                 ):
-                    self._points.append([j, i])
+                    self._points.append([i, j])
 
         for i in range(len(self._points)):
             point = self._points[i]
