@@ -20,7 +20,7 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2, dimensio
         dimensions (int, optional): The dimensionality of computations. Defaults to 2.
 
     Returns:
-        _type_: _description_
+        model (torchvision.models.model): The created model after taking output classes into account.
     """
 
     assert dimensions == 2, "ImageNet_VGG only supports 2D images"
