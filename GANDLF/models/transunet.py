@@ -83,13 +83,9 @@ class transunet(ModelBase):
 
         if not ("num_heads" in parameters["model"]):
             parameters["model"]["num_heads"] = 12
-            print(
-                "Default number of heads in multi-head self-attention (MSA) set to 12."
-            )
 
         if not ("embed_dim" in parameters["model"]):
             parameters["model"]["embed_dim"] = 768
-            print("Default size of embedded dimension set to 768.")
 
         self.depth = patch_check
 
@@ -110,10 +106,9 @@ class transunet(ModelBase):
         self.num_heads = parameters["model"]["num_heads"]
         self.embed_size = parameters["model"]["embed_dim"]
 
-        if self.embed_size % self.num_heads != 0:
-            sys.exit(
-                "The embedding dimension must be divisible by the number of self-attention heads."
-            )
+        assert (
+            self.embed_size % self.num_heads == 0
+        ), "The embedding dimension must be divisible by the number of self-attention heads"
 
         self.patch_dim = [i // 2 ** (self.depth) for i in self.img_size]
 
