@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # adapted from https://github.com/qubvel/segmentation_models.pytorch
 import segmentation_models_pytorch as smp
-from acsconv.converters import ACSConverter, Conv3dConverter, SoftACSConverter
 
 from .modelBase import ModelBase
 
@@ -39,14 +38,7 @@ class ImageNet_UNet(ModelBase):
         )
 
         if self.n_dimensions == 3:
-            converter_type = parameters["model"].get("converter_type", "soft").lower()
-            converter = SoftACSConverter
-            if converter_type == "acs":
-                converter = ACSConverter
-            elif converter_type == "conv3d":
-                converter = Conv3dConverter
-
-            self.model = converter(self.model).model
+            self.model = self.converter(self.model).model
 
     def forward(self, x):
         return self.model(x)
