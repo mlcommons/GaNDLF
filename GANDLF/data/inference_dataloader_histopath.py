@@ -100,9 +100,6 @@ class InferTumorSegDataset(Dataset):
                 # If there is anything in the mask patch, only then consider it
                 if np.any(mask[i : i + self._patch_size[0], j : j + self._patch_size[1]]):
                     self._points.append([i, j])
-                # Else, dont add it, just move on
-                else:
-                    pass
 
         self._points = np.array(self._points)
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
