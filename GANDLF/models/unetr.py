@@ -333,13 +333,9 @@ class unetr(ModelBase):
 
         if not ("num_heads" in parameters["model"]):
             parameters["model"]["num_heads"] = 12
-            print(
-                "Default number of heads in multi-head self-attention (MSA) set to 12."
-            )
 
         if not ("embed_dim" in parameters["model"]):
             parameters["model"]["embed_dim"] = 768
-            print("Default size of embedded dimension set to 768.")
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]
@@ -352,19 +348,19 @@ class unetr(ModelBase):
         self.num_heads = parameters["model"]["num_heads"]
         self.embed_size = parameters["model"]["embed_dim"]
 
-        if self.embed_size % self.num_heads != 0:
-            sys.exit(
-                "The embedding dimension must be divisible by the number of self-attention heads."
-            )
-
         self.patch_dim = [i // self.patch_size for i in self.img_size]
 
-        if not all([i % self.patch_size == 0 for i in self.img_size]):
-            sys.exit(
-                "The image size is not divisible by the patch size in at least 1 dimension. UNETR is not defined in this case."
-            )
-        if not all([self.patch_size <= i for i in self.img_size]):
-            sys.exit("The inner patch size must be smaller than the input image.")
+        assert (
+            self.embed_size % self.num_heads == 0
+        ), "The embedding dimension must be divisible by the number of self-attention heads"
+
+        assert all(
+            [i % self.patch_size == 0 for i in self.img_size]
+        ), "The image size is not divisible by the patch size in at least 1 dimension. UNETR is not defined in this case."
+
+        assert all(
+            [self.patch_size <= i for i in self.img_size]
+        ), "The inner patch size must be smaller than the input image."
 
         self.transformer = _Transformer(
             img_size=self.img_size,
