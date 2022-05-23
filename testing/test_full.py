@@ -355,7 +355,7 @@ def test_train_regression_rad_2d_imagenet(device):
     print("passed")
 
 
-def test_train_brainage_rad_2d(device):
+def test_train_regression_brainage_rad_2d(device):
     print("08: Starting brain age tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -1777,7 +1777,7 @@ def test_train_inference_classification_histology_2d(device):
     print("passed")
 
 
-def test_train_unet_layerchange_rad_2d(device):
+def test_train_segmentation_unet_layerchange_rad_2d(device):
     # test case to up code coverage --> test decreasing allowed layers for unet
     print("36: Starting 2D Rad segmentation tests for normtype")
     # read and parse csv
