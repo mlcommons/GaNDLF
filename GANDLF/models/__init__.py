@@ -32,6 +32,7 @@ from .sdnet import SDNet
 from .MSDNet import MSDNet
 from .brain_age import brainage
 from .unetr import unetr
+from .transunet import transunet
 
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {
@@ -54,6 +55,7 @@ global_models_dict = {
     "light_resunet": light_resunet,
     "light_resunet_multilayer": light_resunet_multilayer,
     "unetr": unetr,
+    "transunet": transunet,
     "fcn": fcn,
     "uinc": uinc,
     "vgg": vgg19,
