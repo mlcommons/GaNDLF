@@ -2002,9 +2002,7 @@ def test_train_segmentation_transunet_rad_3d(device):
     parameters["model"]["depth"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
-    parameters["model"]["num_channels"] = len(
-        parameters["headers"]["channelHeaders"]
-    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     parameters["model"]["norm_type"] = "batch"
