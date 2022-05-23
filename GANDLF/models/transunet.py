@@ -90,6 +90,14 @@ class transunet(ModelBase):
             parameters["model"]["embed_dim"] = 768
             print("Default size of embedded dimension set to 768.")
 
+        self.num_heads = parameters["model"]["num_heads"]
+        self.embed_size = parameters["model"]["embed_dim"]
+
+        if self.embed_size % self.num_heads != 0:
+            sys.exit(
+                "The dimension of the embedding space must be divisible by the number of self-attention heads."
+            )
+
         self.depth = patch_check
 
         if self.n_dimensions == 2:
@@ -101,8 +109,6 @@ class transunet(ModelBase):
 
         self.num_layers = 3 * self.depth  # number of transformer layers
         self.out_layers = [self.num_layers - 1]
-        self.num_heads = parameters["model"]["num_heads"]
-        self.embed_size = parameters["model"]["embed_dim"]
         self.patch_dim = [i // 2 ** (self.depth) for i in self.img_size]
 
         self.ins = in_conv(
