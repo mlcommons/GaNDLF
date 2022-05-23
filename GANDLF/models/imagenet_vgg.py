@@ -41,9 +41,8 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2, dimensio
         model = torchvision.models.vgg19(pretrained=pretrained)
     if modelname == "vgg19_bn":
         model = torchvision.models.vgg19_bn(pretrained=pretrained)
-    prev_out_features = model.classifier[3].out_features
     model.classifier[6] = nn.Linear(
-        in_features=prev_out_features, out_features=num_classes
+        in_features=model.classifier[3].out_features, out_features=num_classes
     )
     return model
 
