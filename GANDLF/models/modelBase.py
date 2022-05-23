@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from acsconv.converters import ACSConverter, Conv3dConverter, SoftACSConverter
+
 from GANDLF.utils import get_linear_interpolation_mode
 from GANDLF.utils.modelbase import get_modelbase_final_layer
 from GANDLF.models.seg_modules.average_pool import (
@@ -64,6 +66,7 @@ class ModelBase(nn.Module):
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool2d
             self.GlobalAvgPool = GlobalAveragePooling2D
             self.Norm = self.get_norm_type(self.norm_type.lower(), self.n_dimensions)
+            self.converter = None
 
         elif self.n_dimensions == 3:
             self.Conv = nn.Conv3d
@@ -77,6 +80,14 @@ class ModelBase(nn.Module):
             self.AdaptiveMaxPool = nn.AdaptiveMaxPool3d
             self.GlobalAvgPool = GlobalAveragePooling3D
             self.Norm = self.get_norm_type(self.norm_type.lower(), self.n_dimensions)
+
+            # define 2d to 3d model converters
+            converter_type = parameters["model"].get("converter_type", "soft").lower()
+            self.converter = SoftACSConverter
+            if converter_type == "acs":
+                self.converter = ACSConverter
+            elif converter_type == "conv3d":
+                self.converter = Conv3dConverter
 
         else:
             raise ValueError(
