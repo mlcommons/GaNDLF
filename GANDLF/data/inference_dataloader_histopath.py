@@ -15,9 +15,9 @@ from skimage.transform import resize
 from skimage.filters import threshold_otsu, median
 from skimage.morphology import binary_closing, disk
 from scipy.ndimage import binary_fill_holes
+from GANDLF.OPM.opm.utils import tissue_mask
 
-
-def tissue_mask_generation(img_rgb, rgb_min=50):
+def get_tissue_mask(image):
     """
     This function is used to generate tissue masks
     works for patches too i guess
@@ -29,30 +29,13 @@ def tissue_mask_generation(img_rgb, rgb_min=50):
     Returns:
         numpy.array: The tissue mask.
     """
-    img_rgb = np.array(img_rgb)
-    background_r = img_rgb[:, :, 0] > threshold_otsu(img_rgb[:, :, 0])
-    background_g = img_rgb[:, :, 1] > threshold_otsu(img_rgb[:, :, 1])
-    background_b = img_rgb[:, :, 2] > threshold_otsu(img_rgb[:, :, 2])
-    tissue_rgb = np.logical_not(background_r & background_g & background_b)
-    del background_b, background_g, background_r
+    resized_image = resize(image, (512, 512), anti_aliasing=True)
+    mask = tissue_mask(resized_image)
 
-    min_r = img_rgb[:, :, 0] > rgb_min
-    min_g = img_rgb[:, :, 1] > rgb_min
-    min_b = img_rgb[:, :, 2] > rgb_min
-    tissue_mask = tissue_rgb & min_r & min_g & min_b
-    del min_r, min_g, min_b
+    #upsample the mask to original size with nearest neighbor interpolation
+    mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode='constant')
 
-    close_kernel = np.ones((7, 7), dtype=np.uint8)
-    image_close = binary_closing(np.array(tissue_mask), close_kernel)
-    tissue_mask = binary_fill_holes(image_close)
-    del image_close, close_kernel
-
-    # Apply median filter
-    tissue_mask = median(tissue_mask, disk(7))
-    tissue_mask = np.array(tissue_mask).astype(np.uint8)
-    tissue_mask = tissue_mask > 0
-
-    return tissue_mask
+    return mask
 
 
 class InferTumorSegDataset(Dataset):
@@ -85,7 +68,7 @@ class InferTumorSegDataset(Dataset):
             (mask_xdim, mask_ydim),
             as_array=True,
         )
-        mask = tissue_mask_generation(extracted_image)
+        mask = get_tissue_mask(extracted_image)
         del extracted_image
 
         # For some reason, tiffslide x, y coordinates are flipped
@@ -114,33 +97,14 @@ class InferTumorSegDataset(Dataset):
                 # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
                 if j + self._patch_size[1] > height:
                     j = height - self._patch_size[1]
-                if (
-                    mask[i : i + self._patch_size[0], j : j + self._patch_size[1]].sum()
-                    > 0
-                ):
+                # If there is anything in the mask patch, only then consider it
+                if np.any(mask[i : i + self._patch_size[0], j : j + self._patch_size[1]]):
                     self._points.append([i, j])
+                # Else, dont add it, just move on
+                else:
+                    pass
 
-        for i in range(len(self._points)):
-            point = self._points[i]
-            if not np.any(
-                mask[
-                    point[0] : point[0] + self._patch_size[0],
-                    point[1] : point[1] + self._patch_size[1],
-                ]
-            ):
-                self._points[i] = [-1, -1]
-
-        self._points = np.array(self._points) * (2**self._mask_level)
-        self._points = np.delete(
-            self._points,
-            np.argwhere(
-                self._points
-                == np.array(
-                    [-1 * (2**self._mask_level), -1 * (2**self._mask_level)]
-                )
-            ),
-            0,
-        )
+        self._points = np.array(self._points)
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
         self._mask = mask
 
