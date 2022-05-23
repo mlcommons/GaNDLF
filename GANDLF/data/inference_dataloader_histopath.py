@@ -138,7 +138,8 @@ class InferTumorSegDataset(Dataset):
             ),
             0,
         )
-        self._points[:, [0, 1]] = self._points[:, [1, 0]]
+        ## this is not needed since we append (i,j) and not (j,i)
+        # self._points[:, [0, 1]] = self._points[:, [1, 0]]
         self._mask = mask
 
     def __len__(self):
