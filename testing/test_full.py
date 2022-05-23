@@ -1928,29 +1928,38 @@ def test_train_segmentation_transunet_rad_2d(device):
     parameters["patch_size"] = [128, 128, 1]
     parameters["model"]["dimension"] = 2
 
-    for dep in [2]:
-        parameters["model"]["embed_dim"] = 64
-        parameters["model"]["depth"] = dep
-        parameters["model"]["class_list"] = [0, 255]
+    with pytest.raises(BaseException) as e_info:
         parameters["model"]["num_heads"] = 6
-        parameters["model"]["amp"] = True
-        parameters["model"]["num_channels"] = 3
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
-        # loop through selected models and train for single epoch
-        parameters["model"]["norm_type"] = "batch"
-        parameters["nested_training"]["testing"] = -5
-        parameters["nested_training"]["validation"] = -5
-        if os.path.isdir(outputDir):
-            shutil.rmtree(outputDir)  # overwrite previous results
-        sanitize_outputDir()
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            resume=False,
-            reset=True,
-        )
+        parameters["model"]["embed_dim"] = 64
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["num_heads"] = 3
+        parameters["model"]["embed_dim"] = 50
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["embed_dim"] = 64
+    parameters["model"]["depth"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["num_heads"] = 8
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    parameters["model"]["norm_type"] = "batch"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
     print("passed")
 
@@ -1974,38 +1983,43 @@ def test_train_segmentation_transunet_rad_3d(device):
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    # with pytest.raises(BaseException) as e_info:
-    #     parameters["model"]["depth"] = 6
-    #     global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
-
     with pytest.raises(BaseException) as e_info:
         parameters["model"]["depth"] = 1
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    for dep in [2]:
+    with pytest.raises(BaseException) as e_info:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
-        parameters["model"]["depth"] = dep
-        parameters["model"]["class_list"] = [0, 255]
-        parameters["model"]["amp"] = True
-        parameters["model"]["num_channels"] = len(
-            parameters["headers"]["channelHeaders"]
-        )
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
-        # loop through selected models and train for single epoch
-        parameters["model"]["norm_type"] = "batch"
-        parameters["nested_training"]["testing"] = -5
-        parameters["nested_training"]["validation"] = -5
-        if os.path.isdir(outputDir):
-            shutil.rmtree(outputDir)  # overwrite previous results
-        sanitize_outputDir()
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            resume=False,
-            reset=True,
-        )
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["num_heads"] = 3
+        parameters["model"]["embed_dim"] = 50
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["num_heads"] = 8
+    parameters["model"]["embed_dim"] = 64
+    parameters["model"]["depth"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    parameters["model"]["norm_type"] = "batch"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
     print("passed")

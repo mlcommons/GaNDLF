@@ -348,8 +348,16 @@ class unetr(ModelBase):
 
         self.num_layers = 3 * self.depth  # number of transformer layers
         self.out_layers = np.arange(2, self.num_layers, 3)
+        
         self.num_heads = parameters["model"]["num_heads"]
         self.embed_size = parameters["model"]["embed_dim"]
+        
+        if self.embed_size % self.num_heads != 0:
+           sys.exit(
+           "The embedding dimension must be divisible by the number of self-attention heads."
+           )
+
+        
         self.patch_dim = [i // self.patch_size for i in self.img_size]
 
         if not all([i % self.patch_size == 0 for i in self.img_size]):
