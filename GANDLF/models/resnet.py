@@ -77,11 +77,11 @@ class ResNet(ModelBase):
 
         # make conv blocks
         num_features = parameters["num_init_features"]
-        offset = num_features - num_features * 2**-1
+        offset = num_features - num_features * 2 ** -1
         for i, num_lay in enumerate(block_config):
             block = blockType(
                 num_in_feats=int(num_features * 2 ** (i - 1) + offset),
-                num_out_feats=int(num_features * 2**i),
+                num_out_feats=int(num_features * 2 ** i),
                 num_layers=num_lay,
                 Norm=self.Norm,
                 Conv=self.Conv,
@@ -92,9 +92,9 @@ class ResNet(ModelBase):
 
         # final layer, fully connected -> number classes
         if blockType == _BottleNeckBlock:
-            self.classifier = nn.Linear(4 * num_features * 2**i, self.n_classes)
+            self.classifier = nn.Linear(4 * num_features * 2 ** i, self.n_classes)
         else:
-            self.classifier = nn.Linear(num_features * 2**i, self.n_classes)
+            self.classifier = nn.Linear(num_features * 2 ** i, self.n_classes)
 
         # define starting weights
         for m in self.modules():
@@ -354,7 +354,7 @@ def checkPatchDimensions(patch_size, numlay):
     else:
         # base2 = np.floor(np.log2(patch_size_to_check))
         base2 = np.array([getBase2(x) for x in patch_size_to_check])
-        remain = patch_size_to_check / 2**base2  # check that at least 1
+        remain = patch_size_to_check / 2 ** base2  # check that at least 1
 
         layers = np.where(remain == 1, base2 - 1, base2)
         return int(np.min(layers) - 1)
