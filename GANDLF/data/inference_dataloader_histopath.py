@@ -17,6 +17,7 @@ from skimage.morphology import binary_closing, disk
 from scipy.ndimage import binary_fill_holes
 from GANDLF.OPM.opm.utils import tissue_mask
 
+
 def get_tissue_mask(image):
     """
     This function is used to generate tissue masks
@@ -32,8 +33,8 @@ def get_tissue_mask(image):
     resized_image = resize(image, (512, 512), anti_aliasing=True)
     mask = tissue_mask(resized_image)
 
-    #upsample the mask to original size with nearest neighbor interpolation
-    mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode='constant')
+    # upsample the mask to original size with nearest neighbor interpolation
+    mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
 
     return mask
 
@@ -73,8 +74,12 @@ class InferTumorSegDataset(Dataset):
 
         # For some reason, tiffslide x, y coordinates are flipped
         # Fix is definitely needed
-        width = self._os_image.properties["tiffslide.level[" + str(self._selected_level) + "].height"]
-        height = self._os_image.properties["tiffslide.level[" + str(self._selected_level) + "].width"]
+        width = self._os_image.properties[
+            "tiffslide.level[" + str(self._selected_level) + "].height"
+        ]
+        height = self._os_image.properties[
+            "tiffslide.level[" + str(self._selected_level) + "].width"
+        ]
         if not (self._selected_level == self._mask_level):
             mask = resize(mask, (height, width))
         mask = (mask > 0).astype(np.uint8)
@@ -98,7 +103,9 @@ class InferTumorSegDataset(Dataset):
                 if j + self._patch_size[1] > height:
                     j = height - self._patch_size[1]
                 # If there is anything in the mask patch, only then consider it
-                if np.any(mask[i : i + self._patch_size[0], j : j + self._patch_size[1]]):
+                if np.any(
+                    mask[i : i + self._patch_size[0], j : j + self._patch_size[1]]
+                ):
                     self._points.append([i, j])
                 # Else, dont add it, just move on
                 else:
@@ -140,4 +147,3 @@ class InferTumorSegDataset(Dataset):
         patch = patch.squeeze(-1)
 
         return patch, (x_loc, y_loc)
-
