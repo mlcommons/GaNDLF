@@ -74,7 +74,7 @@ class InferTumorSegDataset(Dataset):
 
         # For some reason, tiffslide x, y coordinates are flipped
         # Fix is definitely needed
-        width, height = self._os_image.level_dimensions[str(self._selected_level)]
+        width, height = self._os_image.level_dimensions[self._selected_level]
         if not (self._selected_level == self._mask_level):
             mask = resize(mask, (height, width))
         mask = (mask > 0).astype(np.uint8)
