@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
+import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest, random
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -272,6 +272,9 @@ def test_train_segmentation_rad_3d(device):
             # imagenet_unet encoder needs to be toned down for small patch size
             parameters["model"]["encoder_depth"] = 3
             parameters["model"]["decoder_channels"] = (64, 32, 16)
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
