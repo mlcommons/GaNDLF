@@ -36,6 +36,7 @@ all_models_segmentation = [
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
+    "imagenet_unet",
     "densenet121",
     "vgg16",
     "resnet18",
@@ -420,6 +421,10 @@ def test_train_regression_rad_3d(device):
             parameters["patch_size"] = [16, 16, 16]
         else:
             parameters["patch_size"] = patch_size["3D"]
+
+        if model == "imagenet_unet":
+            parameters["model"]["depth"] = 2
+            parameters["model"]["decoder_channels"] = [32, 16]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -493,6 +498,9 @@ def test_train_classification_rad_3d(device):
             parameters["patch_size"] = [16, 16, 16]
         else:
             parameters["patch_size"] = patch_size["3D"]
+        if model == "imagenet_unet":
+            parameters["model"]["depth"] = 2
+            parameters["model"]["decoder_channels"] = [32, 16]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
