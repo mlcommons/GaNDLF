@@ -182,13 +182,14 @@ class ImageNet_UNet(ModelBase):
             classifier_head_parameters["activation"] = parameters["model"][
                 "final_layer"
             ]
+            if classifier_head_parameters["activation"] == "None":
+                classifier_head_parameters["activation"] = None
             classifier_head_parameters["dropout"] = parameters["model"].get(
                 "dropout", 0.2
             )
             classifier_head_parameters["pooling"] = parameters["model"].get(
                 "pooling", "avg"
             )
-            classifier_head_parameters["in_channels"] = self.n_channels
         else:
             classifier_head_parameters = None
 
