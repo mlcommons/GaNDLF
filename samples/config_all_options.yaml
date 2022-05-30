@@ -35,7 +35,7 @@ model:
     # depth (int) - the number of encoder/decoder layers
 
     ## imagenet_unet has the following optional parameter:
-    # encoder_name (str) - the name of the encoder to use, pick from https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/encoders/__init__.py
+    # encoder_name (str) - the name of the encoder to use, pick from https://github.com/qubvel/segmentation_models.pytorch#encoders
     # decoder_use_batchnorm (str) - whether to use batch norm or not or inplace, this will override 'norm_type', see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
     # decoder_attention_type (str) - the decoder attention type, see https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
     # encoder_depth (int) - the depth of the encoder, also picked up from 'depth'
