@@ -1644,7 +1644,8 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
-    parameters_patch["patch_size"] = [128, 128]
+    # define patches to be extracted in terms of microns
+    parameters_patch["patch_size"] = ["1000m", "1000m"]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1673,6 +1674,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = True
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
     Path(modelDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
