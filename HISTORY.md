@@ -30,6 +30,7 @@
 - Sigmoid multiplier option has been added
 - Compute objects can now be requested using developer-level functions
 - Transformer-based networks, TransUNet and UNetR are now available
+- Can do histology computation using microns
 
 ## 0.0.13
 
