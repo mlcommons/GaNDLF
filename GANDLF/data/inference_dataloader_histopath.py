@@ -7,6 +7,7 @@ Created on Fri Mar  8 20:03:35 2019
 """
 
 import os
+from turtle import width
 import numpy as np
 from torch.utils.data.dataset import Dataset
 
@@ -72,7 +73,7 @@ class InferTumorSegDataset(Dataset):
         mask = get_tissue_mask(extracted_image)
         del extracted_image
 
-        width, height = self._os_image.level_dimensions[self._selected_level]
+        height, width = self._os_image.level_dimensions[self._selected_level]
         if self._selected_level != self._mask_level:
             mask = resize(mask, (height, width))
         mask = (mask > 0).astype(np.uint8)
@@ -87,19 +88,20 @@ class InferTumorSegDataset(Dataset):
         # The move the point by the wsi_dimensions - (patch_size + self.points)
         # This is because the patch is not going to be extracted if it is
         # outside the wsi
-        for i in range(0, width - self._patch_size[0], self._stride_size[0]):
-            for j in range(0, height - self._patch_size[1], self._stride_size[1]):
+        for i in range(0, width - (self._patch_size[0]+self._stride_size[0]), self._stride_size[0]):
+            for j in range(0, height - (self._patch_size[1]+self._stride_size[1]), self._stride_size[1]):
                 # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
+                coord_width, coord_height = i, j
                 if i + self._patch_size[0] > width:
-                    i = width - self._patch_size[0]
+                    coord_width = width - self._patch_size[0]
                 # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
                 if j + self._patch_size[1] > height:
-                    j = height - self._patch_size[1]
+                    coord_height = height - self._patch_size[1]
                 # If there is anything in the mask patch, only then consider it
                 if np.any(
-                    mask[i : i + self._patch_size[0], j : j + self._patch_size[1]]
+                    mask[coord_width : coord_width + self._patch_size[0],  coord_height: coord_height + self._patch_size[1]]
                 ):
-                    self._points.append([i, j])
+                    self._points.append([coord_width, coord_height])
 
         self._points = np.array(self._points)
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
