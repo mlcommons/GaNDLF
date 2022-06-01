@@ -195,7 +195,7 @@ class ImageNet_UNet(ModelBase):
 
         self.model = Unet(
             encoder_name=parameters["model"].get("encoder_name", "resnet34"),
-            encoder_weights="imagenet",
+            encoder_weights=parameters["model"].get("encoder_weights", "imagenet"),
             in_channels=self.n_channels,
             classes=self.n_classes,
             activation=parameters["model"]["final_layer"],
