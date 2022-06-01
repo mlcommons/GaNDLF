@@ -75,7 +75,7 @@ requirements = [
     "medcam",
     "opencv-python",
     "torchmetrics==0.5.1",  # newer versions have changed api for f1 invocation
-    "OpenPatchMiner==0.1.6",
+    "OpenPatchMiner==0.1.8",
     "zarr==2.10.3",
     "pydicom",
     "onnx",
