@@ -17,11 +17,12 @@ from skimage.morphology import binary_closing, disk
 from scipy.ndimage import binary_fill_holes
 from GANDLF.OPM.opm.utils import tissue_mask
 
+from GANDLF.OPM.opm.utils import get_patch_size_in_microns
+
 
 def get_tissue_mask(image):
     """
-    This function is used to generate tissue masks
-    works for patches too i guess
+    This function is used to generate tissue masks; works for patches as well
 
     Args:
         img_rgb (numpy.array): Input image.
@@ -54,6 +55,7 @@ class InferTumorSegDataset(Dataset):
         self._patch_size = patch_size
         if self._patch_size[-1] == 1:
             self._patch_size = self._patch_size[:-1]
+        self._patch_size = get_patch_size_in_microns(wsi_path, self._patch_size)
         self._stride_size = stride_size
         self._selected_level = selected_level
         self._mask_level = mask_level
@@ -81,7 +83,7 @@ class InferTumorSegDataset(Dataset):
         # then this logic straight up does not work
         # You would have to scale the patch size appropriately for this to work correctly
         # Remove all the points which are closer to the boundary of the wsi
-        # by accsesing the WSI level properties with
+        # by accessing the WSI level properties with
         # self._os_image.level_dimensions[self._selected_level]
         # Logic as if point + self.patch_size > wsi_dimensions
         # The move the point by the wsi_dimensions - (patch_size + self.points)
