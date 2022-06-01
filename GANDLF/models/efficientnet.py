@@ -254,7 +254,7 @@ def checkPatchDimensions(patch_size, numlay):
     if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
 
-    if all([x >= 2 ** numlay and x % 2 ** numlay == 0 for x in patch_size_to_check]):
+    if all([x >= 2**numlay and x % 2**numlay == 0 for x in patch_size_to_check]):
         return numlay
     else:
         base2 = np.array(

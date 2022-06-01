@@ -286,7 +286,7 @@ class _Transformer(nn.Sequential):
 
 
 def checkImgSize(img_size, number=4):
-    if all([x >= 2 ** number for x in img_size]):
+    if all([x >= 2**number for x in img_size]):
         return number
     else:
         return int(np.min(np.floor(np.log2(img_size))))
@@ -385,7 +385,7 @@ class unetr(ModelBase):
                 "conv0",
                 _DeconvConvBlock(
                     self.embed_size,
-                    32 * 2 ** self.depth,
+                    32 * 2**self.depth,
                     self.Norm,
                     self.Conv,
                     self.ConvTranspose,
@@ -396,7 +396,7 @@ class unetr(ModelBase):
                 tempconvs.add_module(
                     "conv%d" % j,
                     _DeconvConvBlock(
-                        128 * 2 ** j,
+                        128 * 2**j,
                         128 * 2 ** (j - 1),
                         self.Norm,
                         self.Conv,
@@ -417,7 +417,7 @@ class unetr(ModelBase):
         self.upsampling.append(
             self.ConvTranspose(
                 in_channels=self.embed_size,
-                out_channels=32 * 2 ** self.depth,
+                out_channels=32 * 2**self.depth,
                 kernel_size=2,
                 stride=2,
                 padding=0,

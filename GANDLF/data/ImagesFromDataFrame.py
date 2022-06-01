@@ -3,9 +3,7 @@ import numpy as np
 
 import torch
 import torchio
-from torchio.transforms import (
-    Pad,
-)
+from torchio.transforms import Pad
 import SimpleITK as sitk
 from tqdm import tqdm
 

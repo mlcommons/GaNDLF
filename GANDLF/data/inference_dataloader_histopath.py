@@ -90,8 +90,16 @@ class InferTumorSegDataset(Dataset):
         # The move the point by the wsi_dimensions - (patch_size + self.points)
         # This is because the patch is not going to be extracted if it is
         # outside the wsi
-        for i in range(0, width - (self._patch_size[0]+self._stride_size[0]), self._stride_size[0]):
-            for j in range(0, height - (self._patch_size[1]+self._stride_size[1]), self._stride_size[1]):
+        for i in range(
+            0,
+            width - (self._patch_size[0] + self._stride_size[0]),
+            self._stride_size[0],
+        ):
+            for j in range(
+                0,
+                height - (self._patch_size[1] + self._stride_size[1]),
+                self._stride_size[1],
+            ):
                 # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
                 coord_width, coord_height = i, j
                 if i + self._patch_size[0] > width:
@@ -101,7 +109,10 @@ class InferTumorSegDataset(Dataset):
                     coord_height = height - self._patch_size[1]
                 # If there is anything in the mask patch, only then consider it
                 if np.any(
-                    mask[coord_width : coord_width + self._patch_size[0],  coord_height: coord_height + self._patch_size[1]]
+                    mask[
+                        coord_width : coord_width + self._patch_size[0],
+                        coord_height : coord_height + self._patch_size[1],
+                    ]
                 ):
                     self._points.append([coord_width, coord_height])
 
