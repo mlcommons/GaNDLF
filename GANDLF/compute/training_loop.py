@@ -5,9 +5,7 @@ import numpy as np
 import torchio
 from medcam import medcam
 
-from GANDLF.data import (
-    get_testing_loader,
-)
+from GANDLF.data import get_testing_loader
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.utils import (

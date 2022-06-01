@@ -50,7 +50,7 @@ def base_triangle(parameters):
 
     # pick defaults
     if not ("min_lr" in parameters["scheduler"]):
-        parameters["scheduler"]["min_lr"] = 10 ** -3
+        parameters["scheduler"]["min_lr"] = 10**-3
     if not ("max_lr" in parameters["scheduler"]):
         parameters["scheduler"]["max_lr"] = 1
 
