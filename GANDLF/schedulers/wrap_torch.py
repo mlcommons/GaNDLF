@@ -1,12 +1,13 @@
+import math
+
 from torch.optim.lr_scheduler import (
-    LambdaLR,
+    CosineAnnealingWarmRestarts,
     CyclicLR,
     ExponentialLR,
-    StepLR,
+    LambdaLR,
     ReduceLROnPlateau,
-    CosineAnnealingWarmRestarts,
+    StepLR,
 )
-import math
 
 
 def cyclical_lr(stepsize, min_lr, max_lr):
