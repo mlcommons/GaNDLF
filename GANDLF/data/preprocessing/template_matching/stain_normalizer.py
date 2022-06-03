@@ -1,11 +1,11 @@
+import cv2
 import numpy as np
 import torch
-import cv2
 from torchio.data.image import ScalarImage
 
 from .base import TemplateNormalizeBase
-from .utils import rgb2od, od2rgb
-from .stain_extractors import VahadaneExtractor, RuifrokExtractor, MacenkoExtractor
+from .stain_extractors import MacenkoExtractor, RuifrokExtractor, VahadaneExtractor
+from .utils import od2rgb, rgb2od
 
 
 class StainNormalizer(TemplateNormalizeBase):
