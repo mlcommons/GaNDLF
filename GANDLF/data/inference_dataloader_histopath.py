@@ -11,9 +11,6 @@ import os
 import numpy as np
 import tiffslide as openslide
 from GANDLF.OPM.opm.utils import get_patch_size_in_microns, tissue_mask
-from scipy.ndimage import binary_fill_holes
-from skimage.filters import median, threshold_otsu
-from skimage.morphology import binary_closing, disk
 from skimage.transform import resize
 from torch.utils.data.dataset import Dataset
 
