@@ -1,6 +1,6 @@
-from torchio.transforms.intensity_transform import IntensityTransform
-from torchio.data.subject import Subject
 from torchio.data.image import ScalarImage
+from torchio.data.subject import Subject
+from torchio.transforms.intensity_transform import IntensityTransform
 
 
 class TemplateNormalizeBase(IntensityTransform):
