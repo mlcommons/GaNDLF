@@ -1,20 +1,20 @@
 import numpy as np
-
 from torchio.transforms import (
     OneOf,
-    RandomMotion,
-    RandomGhosting,
-    RandomSpike,
     RandomAffine,
-    RandomElasticDeformation,
+    RandomAnisotropy,
     RandomBiasField,
     RandomBlur,
-    RandomNoise,
-    RandomSwap,
-    RandomAnisotropy,
+    RandomElasticDeformation,
     RandomFlip,
     RandomGamma,
+    RandomGhosting,
+    RandomMotion,
+    RandomNoise,
+    RandomSpike,
+    RandomSwap,
 )
+
 
 ## define helper functions to create transforms
 ## todo: ability to change interpolation type from config file
