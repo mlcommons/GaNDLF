@@ -1,6 +1,10 @@
-import sys, yaml, ast, pkg_resources
-import numpy as np
+import ast
+import sys
 from copy import deepcopy
+
+import numpy as np
+import pkg_resources
+import yaml
 
 from .utils import version_check
 
