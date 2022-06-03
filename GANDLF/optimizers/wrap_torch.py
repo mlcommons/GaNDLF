@@ -1,15 +1,16 @@
 from torch.optim import (
-    SGD,
     ASGD,
-    Rprop,
-    Adam,
-    AdamW,
-    # SparseAdam,
-    Adamax,
+    SGD,
     Adadelta,
     Adagrad,
+    Adam,
+    Adamax,
+    AdamW,
     RMSprop,
+    Rprop,
 )
+
+# from torch.optim import SparseAdam,
 
 
 def sgd(parameters):
