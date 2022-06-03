@@ -1,15 +1,16 @@
 from .wrap_torch import (
-    sgd,
-    asgd,
-    adam,
-    adamw,
-    adamax,
-    # sparseadam,
-    rprop,
     adadelta,
     adagrad,
+    adam,
+    adamax,
+    adamw,
+    asgd,
     rmsprop,
+    rprop,
+    sgd,
 )
+
+# from .wrap_torch import sparseadam
 
 global_optimizer_dict = {
     "sgd": sgd,
