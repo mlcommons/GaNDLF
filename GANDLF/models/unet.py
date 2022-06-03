@@ -3,15 +3,17 @@
 Implementation of UNet
 """
 
+import sys
+
+from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
-from GANDLF.models.seg_modules.DecodingModule import DecodingModule
-from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
-from .modelBase import ModelBase
-import sys
+from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.utils.generic import checkPatchDivisibility
+
+from .modelBase import ModelBase
 
 
 class unet(ModelBase):
