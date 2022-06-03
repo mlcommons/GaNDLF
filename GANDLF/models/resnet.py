@@ -20,7 +20,7 @@ class ResNet(ModelBase):
         self,
         parameters: dict,
         blockType,  # basic block or bottleneck
-        block_config, 
+        block_config,
     ):
         super(ResNet, self).__init__(parameters)
 
