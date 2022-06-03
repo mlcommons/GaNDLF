@@ -53,6 +53,7 @@ except Exception as error:
 
 requirements = [
     "black",
+    "isort",
     "numpy==1.21.0",
     "scipy",
     "SimpleITK!=2.0.*",
