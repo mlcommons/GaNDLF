@@ -1,21 +1,22 @@
-import os, sys, pickle
+import os
+import pickle
+import sys
 from pathlib import Path
-import numpy as np
-import SimpleITK as sitk
-import pandas as pd
 
+import numpy as np
+import pandas as pd
+import SimpleITK as sitk
+import torchio
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import (
+    get_dataframe,
     get_filename_extension_sanitized,
     parseTrainingCSV,
     populate_header_in_parameters,
-    get_dataframe,
 )
-from GANDLF.parseConfig import parseConfig
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
-import torchio
 
 
 def preprocess_and_save(
