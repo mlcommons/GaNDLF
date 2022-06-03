@@ -1,5 +1,5 @@
+from .regression import CE, CCE_Generic, CE_Logits
 from .segmentation import MCD_loss
-from .regression import CCE_Generic, CE, CE_Logits
 
 
 def DCCE(pm, gt, params):

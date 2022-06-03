@@ -1,10 +1,10 @@
 import torch
-
 from torchio.data.subject import Subject
 from torchio.transforms.preprocessing.intensity.normalization_transform import (
     NormalizationTransform,
     TypeMaskingMethod,
 )
+
 
 # adapted from https://github.com/fepegar/torchio/blob/master/torchio/transforms/preprocessing/intensity/z_normalization.py
 class NonZeroNormalizeOnMaskedRegion(NormalizationTransform):

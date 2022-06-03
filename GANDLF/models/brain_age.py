@@ -1,5 +1,6 @@
-import torch.nn as nn
 import sys
+
+import torch.nn as nn
 import torchvision
 
 

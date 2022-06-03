@@ -5,12 +5,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from GANDLF.models.seg_modules.average_pool import (
+    GlobalAveragePooling2D,
+    GlobalAveragePooling3D,
+)
 from GANDLF.utils import get_linear_interpolation_mode
 from GANDLF.utils.modelbase import get_modelbase_final_layer
-from GANDLF.models.seg_modules.average_pool import (
-    GlobalAveragePooling3D,
-    GlobalAveragePooling2D,
-)
 
 
 class ModelBase(nn.Module):

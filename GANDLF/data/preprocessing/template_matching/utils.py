@@ -1,7 +1,7 @@
 """ adapted from https://github.com/TissueImageAnalytics/tiatoolbox/blob/master/tiatoolbox/tools/stainextract.py """
+import cv2
 import numpy as np
 from skimage import exposure
-import cv2
 
 
 def contrast_enhancer(img, low_p=2, high_p=98):

@@ -367,14 +367,14 @@
 
 from __future__ import division
 
-from configparser import RawConfigParser
+import io
 import os
+import shutil
 import struct
 import sys
-import io
-import shutil
-from pathlib import Path
+from configparser import RawConfigParser
 from distutils.dir_util import copy_tree
+from pathlib import Path
 
 PROG_DESCRIPTION = """
 Delete the slide label from an MRXS, NDPI, or SVS whole-slide image.

@@ -1,9 +1,9 @@
 """
 All the metrics are to be called from here
 """
+import numpy as np
 import torch
 from sklearn.metrics import balanced_accuracy_score
-import numpy as np
 
 
 def classification_accuracy(output, label, params):

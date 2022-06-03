@@ -1,9 +1,10 @@
 import sys
-from GANDLF.losses import global_losses_dict
-from GANDLF.metrics import global_metrics_dict
+
 import torch.nn.functional as nnf
 
-from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
+from GANDLF.losses import global_losses_dict
+from GANDLF.metrics import global_metrics_dict
+from GANDLF.utils import get_linear_interpolation_mode, one_hot, reverse_one_hot
 
 
 def get_metric_output(metric_function, predicted, ground_truth, params):

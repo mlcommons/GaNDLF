@@ -1,14 +1,16 @@
 """
 All the segmentation metrics are to be called from here
 """
-import torch, numpy
-from GANDLF.losses.segmentation import dice
+import numpy
+import torch
 from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import (
-    distance_transform_edt,
     binary_erosion,
+    distance_transform_edt,
     generate_binary_structure,
 )
+
+from GANDLF.losses.segmentation import dice
 
 
 def multi_class_dice(output, label, params, per_label=False):

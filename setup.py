@@ -4,10 +4,11 @@
 
 
 import os
-from setuptools import setup, find_packages
-from setuptools.command.install import install
+
+from setuptools import find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.egg_info import egg_info
+from setuptools.command.install import install
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -36,8 +37,10 @@ class CustomEggInfoCommand(egg_info):
         git_submodule_update()
 
 
+import re
+
 # read version.py
-import sys, re
+import sys
 
 try:
     filepath = "GANDLF/version.py"
@@ -140,7 +143,8 @@ if os.name == "nt":  # proceed for windows
         print("Downloading and extracting VIPS for Windows")
         url = "https://github.com/libvips/libvips/releases/download/v8.10.2/vips-dev-w64-all-8.10.2.zip"
         zip_to_extract = "./vips.zip"
-        import urllib.request, zipfile
+        import urllib.request
+        import zipfile
 
         urllib.request.urlretrieve(url, zip_to_extract)
         z = zipfile.ZipFile(zip_to_extract)

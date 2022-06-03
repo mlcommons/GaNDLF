@@ -6,6 +6,8 @@ import pandas as pd
 import SimpleITK as sitk
 import torch
 import torchio
+from tqdm import tqdm
+
 from GANDLF.compute.loss_and_metric import get_loss_and_metrics
 from GANDLF.compute.step import step
 from GANDLF.data.post_process import global_postprocessing_dict
@@ -16,7 +18,6 @@ from GANDLF.utils import (
     resample_image,
     reverse_one_hot,
 )
-from tqdm import tqdm
 
 
 def validate_network(

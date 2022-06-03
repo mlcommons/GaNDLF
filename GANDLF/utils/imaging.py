@@ -1,4 +1,8 @@
-import os, pathlib, sys, math
+import math
+import os
+import pathlib
+import sys
+
 import numpy as np
 import SimpleITK as sitk
 import torchio

@@ -1,8 +1,10 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse
+import argparse
+import os
 from datetime import date
+
 from GANDLF.cli.patch_extraction import patch_extraction
 from GANDLF.utils import fix_paths
 

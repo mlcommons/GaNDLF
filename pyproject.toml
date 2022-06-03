@@ -1,6 +1,6 @@
 [tool.isort]
 profile = "black"
-extend-exclude = '''
+skip_glob= '''
 /(
   | testing/data
   | GANDLF/OPM

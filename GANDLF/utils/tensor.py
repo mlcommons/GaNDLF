@@ -1,9 +1,11 @@
-import os, sys
+import os
+import sys
+
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
 import torchio
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 # global definition for both one_hot and reverse_one_hot

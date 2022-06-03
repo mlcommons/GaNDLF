@@ -1,5 +1,6 @@
-import torch
 import psutil
+import torch
+
 from .loss_and_metric import get_loss_and_metrics
 
 

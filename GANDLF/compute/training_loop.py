@@ -1,25 +1,29 @@
-import os, time, psutil
-import torch
-from tqdm import tqdm
+import os
+import time
+
 import numpy as np
+import psutil
+import torch
 import torchio
 from medcam import medcam
+from tqdm import tqdm
 
 from GANDLF.data import get_testing_loader
-from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
+from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.logger import Logger
 from GANDLF.utils import (
-    get_date_time,
     best_model_path_end,
-    save_model,
+    get_date_time,
     load_model,
+    save_model,
     version_check,
     write_training_patches,
 )
-from GANDLF.logger import Logger
-from .step import step
+
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
+from .step import step
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -486,7 +490,10 @@ def training_loop(
 
 if __name__ == "__main__":
 
-    import argparse, pickle, pandas
+    import argparse
+    import pickle
+
+    import pandas
 
     torch.multiprocessing.freeze_support()
     # parse the cli arguments here

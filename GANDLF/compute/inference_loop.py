@@ -1,28 +1,32 @@
-from .forward_pass import validate_network
-from .generic import create_pytorch_objects
 import os
 from pathlib import Path
+
+from .forward_pass import validate_network
+from .generic import create_pytorch_objects
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
-import pickle, argparse, torch
-import numpy as np
-from torch.utils.data import DataLoader
-from skimage.io import imsave
-from tqdm import tqdm
-from torch.cuda.amp import autocast
-import tiffslide as openslide
-from GANDLF.data import get_testing_loader
-from GANDLF.utils import (
-    populate_channel_keys_in_params,
-    get_dataframe,
-    best_model_path_end,
-    load_ov_model,
-)
+import argparse
+import pickle
 
+import numpy as np
+import tiffslide as openslide
+import torch
+from skimage.io import imsave
+from torch.cuda.amp import autocast
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+from GANDLF.data import get_testing_loader
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
+from GANDLF.utils import (
+    best_model_path_end,
+    get_dataframe,
+    load_ov_model,
+    populate_channel_keys_in_params,
+)
 
 
 def inference_loop(

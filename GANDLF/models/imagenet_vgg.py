@@ -3,8 +3,8 @@
 Modified from https://github.com/pytorch/vision.git
 """
 
-import torchvision
 import torch.nn as nn
+import torchvision
 
 from .modelBase import ModelBase
 

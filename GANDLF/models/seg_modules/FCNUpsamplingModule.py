@@ -1,4 +1,5 @@
 import torch.nn as nn
+
 from GANDLF.models.seg_modules.Interpolate import Interpolate
 
 

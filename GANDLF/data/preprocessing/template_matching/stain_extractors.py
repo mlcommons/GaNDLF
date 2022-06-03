@@ -1,13 +1,14 @@
 """ adapted from https://github.com/TissueImageAnalytics/tiatoolbox/blob/master/tiatoolbox/tools/stainextract.py """
 import sys
+
 import numpy as np
 from sklearn.decomposition import DictionaryLearning
 
 from .utils import (
-    get_luminosity_tissue_mask,
     dl_output_for_h_and_e,
-    rgb2od,
+    get_luminosity_tissue_mask,
     h_and_e_in_right_order,
+    rgb2od,
     vectors_in_correct_direction,
 )
 

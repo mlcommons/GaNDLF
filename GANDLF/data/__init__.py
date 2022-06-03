@@ -1,8 +1,9 @@
 from torch.utils.data import DataLoader
 
-from .ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils.write_parse import get_dataframe
 from GANDLF.utils import populate_channel_keys_in_params
+from GANDLF.utils.write_parse import get_dataframe
+
+from .ImagesFromDataFrame import ImagesFromDataFrame
 
 
 def get_train_loader(params):

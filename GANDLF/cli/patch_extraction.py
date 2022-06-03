@@ -1,4 +1,5 @@
-import os, warnings
+import os
+import warnings
 from functools import partial
 from pathlib import Path
 
@@ -8,10 +9,10 @@ from PIL import Image
 from GANDLF.OPM.opm.patch_manager import PatchManager
 from GANDLF.OPM.opm.utils import (
     alpha_channel_check,
-    patch_size_check,
-    parse_config,
     generate_initial_mask,
     get_patch_size_in_microns,
+    parse_config,
+    patch_size_check,
 )
 
 

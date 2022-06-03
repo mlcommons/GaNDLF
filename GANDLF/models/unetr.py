@@ -1,12 +1,15 @@
-from .modelBase import ModelBase
+import math
 import sys
-from GANDLF.models.seg_modules.out_conv import out_conv
+
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import ModuleList
-import numpy as np
-import math
+
+from GANDLF.models.seg_modules.out_conv import out_conv
 from GANDLF.utils.generic import checkPatchDimensions
+
+from .modelBase import ModelBase
 
 
 class _DeconvConvBlock(nn.Sequential):

@@ -1,9 +1,8 @@
-import numpy as np
-
-import torch
 import nibabel as nib
-
+import numpy as np
+import torch
 from torchio.transforms import SpatialTransform
+
 
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
 def crop_image_outside_zeros(array, patch_size):

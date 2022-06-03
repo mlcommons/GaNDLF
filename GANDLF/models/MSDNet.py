@@ -3,10 +3,12 @@
 Implementation of MSDNet
 """
 
-import torch.nn.functional as F
-import torch.nn as nn
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 from GANDLF.models.seg_modules.add_conv_block import add_conv_block
+
 from .modelBase import ModelBase
 
 

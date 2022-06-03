@@ -1,7 +1,7 @@
+import SimpleITK as sitk
 import torch
 import torch.nn.functional as F
-import SimpleITK as sitk
-from scipy.ndimage.morphology import binary_fill_holes, binary_closing
+from scipy.ndimage.morphology import binary_closing, binary_fill_holes
 
 
 def torch_morphological(input_image, kernel_size=1, mode="dilation"):

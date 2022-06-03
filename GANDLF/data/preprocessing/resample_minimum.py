@@ -1,6 +1,5 @@
 import numpy as np
 import SimpleITK as sitk
-
 from torchio.transforms import Resample
 from torchio.typing import TypeTripletFloat
 

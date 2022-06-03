@@ -1,5 +1,6 @@
 import torch
-from torchmetrics import F1, Precision, Recall, IoU, Accuracy
+from torchmetrics import F1, Accuracy, IoU, Precision, Recall
+
 from GANDLF.utils.tensor import one_hot
 
 

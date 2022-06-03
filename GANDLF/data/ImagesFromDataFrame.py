@@ -1,15 +1,16 @@
 import os
-import numpy as np
 
+import numpy as np
+import SimpleITK as sitk
 import torch
 import torchio
 from torchio.transforms import Pad
-import SimpleITK as sitk
 from tqdm import tqdm
 
 from GANDLF.utils import perform_sanity_check_on_subject, resize_image
-from .preprocessing import get_transforms_for_preprocessing
+
 from .augmentation import global_augs_dict
+from .preprocessing import get_transforms_for_preprocessing
 
 global_sampler_dict = {
     "uniform": torchio.data.UniformSampler,

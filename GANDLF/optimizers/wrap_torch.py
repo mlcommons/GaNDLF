@@ -1,14 +1,13 @@
-from torch.optim import (
-    SGD,
+from torch.optim import (  # SparseAdam,
     ASGD,
-    Rprop,
-    Adam,
-    AdamW,
-    # SparseAdam,
-    Adamax,
+    SGD,
     Adadelta,
     Adagrad,
+    Adam,
+    Adamax,
+    AdamW,
     RMSprop,
+    Rprop,
 )
 
 

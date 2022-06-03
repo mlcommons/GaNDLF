@@ -1,10 +1,12 @@
-import os, pickle, sys
+import os
+import pickle
+import sys
 from pathlib import Path
 
-from GANDLF.training_manager import TrainingManager, TrainingManager_split
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.parseConfig import parseConfig
-from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
+from GANDLF.training_manager import TrainingManager, TrainingManager_split
+from GANDLF.utils import parseTrainingCSV, populate_header_in_parameters
 
 
 def main_run(data_csv, config_file, output_dir, train_mode, device, resume, reset):
