@@ -3,17 +3,19 @@
 Implementation of UNet with Inception Convolutions - UInc
 """
 
-import torch.nn.functional as F
-import torch
-from GANDLF.models.seg_modules.ResNetModule import ResNetModule
-from GANDLF.models.seg_modules.InceptionModule import InceptionModule
-from GANDLF.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
-from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
-from GANDLF.models.seg_modules.IncConv import IncConv
-from GANDLF.models.seg_modules.IncDropout import IncDropout
-from .modelBase import ModelBase
 import sys
+
+import torch
+import torch.nn.functional as F
+from GANDLF.models.seg_modules.IncConv import IncConv
+from GANDLF.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
+from GANDLF.models.seg_modules.IncDropout import IncDropout
+from GANDLF.models.seg_modules.InceptionModule import InceptionModule
+from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
+from GANDLF.models.seg_modules.ResNetModule import ResNetModule
 from GANDLF.utils.generic import checkPatchDivisibility
+
+from .modelBase import ModelBase
 
 
 class uinc(ModelBase):
