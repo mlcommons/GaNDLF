@@ -31,9 +31,9 @@ class SegmentationModel(torch.nn.Module):
     def forward(self, x):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
         features = self.encoder(x)
-        decoder_output = self.decoder(*features)
 
         if self.classification_head == None:
+            decoder_output = self.decoder(*features)
             masks = self.segmentation_head(decoder_output)
             return masks
         else:
