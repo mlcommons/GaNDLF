@@ -1,6 +1,7 @@
 import os
-import SimpleITK as sitk
+
 import numpy as np
+import SimpleITK as sitk
 from torchio.data.image import ScalarImage
 
 from .base import TemplateNormalizeBase
