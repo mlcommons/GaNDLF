@@ -1,13 +1,6 @@
-from .unet import unet, resunet
-from .light_unet import light_unet, light_resunet
-from .unet_multilayer import unet_multilayer, resunet_multilayer
-from .light_unet_multilayer import light_unet_multilayer, light_resunet_multilayer
-from .deep_unet import deep_unet, deep_resunet
-from .uinc import uinc
-from .fcn import fcn
-from .vgg import vgg11, vgg13, vgg16, vgg19
+from .brain_age import brainage
+from .deep_unet import deep_resunet, deep_unet
 from .densenet import densenet121, densenet169, densenet201, densenet264
-from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from .efficientnet import (
     efficientnetB0,
     efficientnetB1,
@@ -18,6 +11,7 @@ from .efficientnet import (
     efficientnetB6,
     efficientnetB7,
 )
+from .fcn import fcn
 from .imagenet_vgg import (
     imagenet_vgg11,
     imagenet_vgg11_bn,
@@ -28,11 +22,17 @@ from .imagenet_vgg import (
     imagenet_vgg19,
     imagenet_vgg19_bn,
 )
-from .sdnet import SDNet
+from .light_unet import light_resunet, light_unet
+from .light_unet_multilayer import light_resunet_multilayer, light_unet_multilayer
 from .MSDNet import MSDNet
-from .brain_age import brainage
-from .unetr import unetr
+from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from .sdnet import SDNet
 from .transunet import transunet
+from .uinc import uinc
+from .unet import resunet, unet
+from .unet_multilayer import resunet_multilayer, unet_multilayer
+from .unetr import unetr
+from .vgg import vgg11, vgg13, vgg16, vgg19
 
 # defining dict for models - key is the string and the value is the transform object
 global_models_dict = {
