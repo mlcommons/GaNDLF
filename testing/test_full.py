@@ -19,8 +19,7 @@ from GANDLF.anonymize import run_anonymizer
 from GANDLF.cli import main_run, patch_extraction, preprocess_and_save
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.data.post_process import (fill_holes, get_mapped_label,
-                                      torch_morphological)
+from GANDLF.data.post_process import fill_holes, get_mapped_label, torch_morphological
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.models import global_models_dict
