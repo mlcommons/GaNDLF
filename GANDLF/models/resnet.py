@@ -19,8 +19,8 @@ class ResNet(ModelBase):
     def __init__(
         self,
         parameters: dict,
-        blockType,
-        block_config,  # basic block or bottleneck
+        blockType,  # basic block or bottleneck
+        block_config, 
     ):
         super(ResNet, self).__init__(parameters)
 
