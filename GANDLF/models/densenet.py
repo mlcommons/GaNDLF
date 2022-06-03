@@ -1,10 +1,11 @@
 # adapted from https://github.com/kenshohara/3D-ResNets-PyTorch
 
 import sys
+from collections import OrderedDict
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from collections import OrderedDict
 
 from .modelBase import ModelBase
 
