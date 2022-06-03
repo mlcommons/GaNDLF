@@ -22,8 +22,8 @@ class SegmentationModel(torch.nn.Module):
     """
 
     def initialize(self):
-        init.initialize_decoder(self.decoder)
         if self.classification_head == None:
+            init.initialize_decoder(self.decoder)
             init.initialize_head(self.segmentation_head)
         else:
             init.initialize_head(self.classification_head)
@@ -126,16 +126,15 @@ class Unet(SegmentationModel):
             weights=encoder_weights,
         )
 
-        self.decoder = UnetDecoder(
-            encoder_channels=self.encoder.out_channels,
-            decoder_channels=decoder_channels,
-            n_blocks=encoder_depth,
-            use_batchnorm=decoder_use_batchnorm,
-            center=True if encoder_name.startswith("vgg") else False,
-            attention_type=decoder_attention_type,
-        )
-
         if aux_params == None:
+            self.decoder = UnetDecoder(
+                encoder_channels=self.encoder.out_channels,
+                decoder_channels=decoder_channels,
+                n_blocks=encoder_depth,
+                use_batchnorm=decoder_use_batchnorm,
+                center=True if encoder_name.startswith("vgg") else False,
+                attention_type=decoder_attention_type,
+            )
             self.segmentation_head = SegmentationHead(
                 in_channels=decoder_channels[-1],
                 out_channels=classes,
