@@ -1,6 +1,6 @@
 import torch
-from torchmetrics import F1, Precision, Recall, IoU, Accuracy
 from GANDLF.utils.tensor import one_hot
+from torchmetrics import F1, Accuracy, IoU, Precision, Recall
 
 
 def generic_function_output_with_check(predicted_classes, label, metric_function):
