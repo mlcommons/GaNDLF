@@ -1,9 +1,9 @@
-import torch
 from typing import List
 
-from torchio.transforms.intensity_transform import IntensityTransform
-from torchio.data.subject import Subject
+import torch
 from torchio.data.image import ScalarImage
+from torchio.data.subject import Subject
+from torchio.transforms.intensity_transform import IntensityTransform
 
 
 class NormalizeRGB(IntensityTransform):
