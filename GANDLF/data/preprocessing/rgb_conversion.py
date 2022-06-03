@@ -1,10 +1,8 @@
-import torch
-
-import PIL.Image
 import numpy as np
-
-from torchio.transforms.intensity_transform import IntensityTransform
+import PIL.Image
+import torch
 from torchio.data.subject import Subject
+from torchio.transforms.intensity_transform import IntensityTransform
 
 
 class RGB2RGBA(IntensityTransform):
