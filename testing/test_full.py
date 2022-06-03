@@ -1,24 +1,35 @@
+import copy
+import csv
+import io
+import os
+import random
+import shutil
+import sys
+import zipfile
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
-import SimpleITK as sitk
+
 import numpy as np
 import pandas as pd
-
-from pydicom.data import get_testdata_file
-
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import *
-from GANDLF.data.preprocessing import global_preprocessing_dict
-from GANDLF.data.augmentation import global_augs_dict
-from GANDLF.parseConfig import parseConfig
-from GANDLF.training_manager import TrainingManager
-from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
-from GANDLF.schedulers import global_schedulers_dict
-from GANDLF.optimizers import global_optimizer_dict
-from GANDLF.models import global_models_dict
-from GANDLF.data.post_process import torch_morphological, fill_holes, get_mapped_label
+import pytest
+import requests
+import SimpleITK as sitk
+import torch
+import yaml
 from GANDLF.anonymize import run_anonymizer
+from GANDLF.cli import main_run, patch_extraction, preprocess_and_save
+from GANDLF.data.augmentation import global_augs_dict
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data.post_process import (fill_holes, get_mapped_label,
+                                      torch_morphological)
+from GANDLF.data.preprocessing import global_preprocessing_dict
+from GANDLF.inference_manager import InferenceManager
+from GANDLF.models import global_models_dict
+from GANDLF.optimizers import global_optimizer_dict
+from GANDLF.parseConfig import parseConfig
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.training_manager import TrainingManager
+from GANDLF.utils import *
+from pydicom.data import get_testdata_file
 
 device = "cpu"
 ## global defines
