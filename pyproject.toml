@@ -1,4 +1,5 @@
-[tool.black]
+[tool.isort]
+profile = "black"
 extend-exclude = '''
 /(
   | testing/data
