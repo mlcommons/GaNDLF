@@ -7,18 +7,15 @@ Created on Fri Mar  8 20:03:35 2019
 """
 
 import os
-from turtle import width
+
 import numpy as np
-from torch.utils.data.dataset import Dataset
-
 import tiffslide as openslide
-from skimage.transform import resize
-from skimage.filters import threshold_otsu, median
-from skimage.morphology import binary_closing, disk
+from GANDLF.OPM.opm.utils import get_patch_size_in_microns, tissue_mask
 from scipy.ndimage import binary_fill_holes
-from GANDLF.OPM.opm.utils import tissue_mask
-
-from GANDLF.OPM.opm.utils import get_patch_size_in_microns
+from skimage.filters import median, threshold_otsu
+from skimage.morphology import binary_closing, disk
+from skimage.transform import resize
+from torch.utils.data.dataset import Dataset
 
 
 def get_tissue_mask(image):
