@@ -1,6 +1,6 @@
 import torch
-from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
 from GANDLF.utils import one_hot
+from torch.nn import CrossEntropyLoss, L1Loss, MSELoss
 
 
 def CEL(out, target, params):
