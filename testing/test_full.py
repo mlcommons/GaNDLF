@@ -499,8 +499,12 @@ def test_train_classification_rad_3d(device):
         else:
             parameters["patch_size"] = patch_size["3D"]
         if model == "imagenet_unet":
-            parameters["model"]["depth"] = 2
-            parameters["model"]["decoder_channels"] = [32, 16]
+            # patch_size_to_check = [256, 256, 256]
+            # parameters["data_preprocessing"]["resize"] = patch_size_to_check
+            # parameters["patch_size"] = patch_size_to_check
+            parameters["model"]["encoder_name"] = "efficientnet-b0"
+            parameters["model"]["depth"] = 1
+            parameters["model"]["decoder_channels"] = [64]
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
