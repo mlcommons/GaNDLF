@@ -18,12 +18,12 @@
 
 ## Installation
 
-The instructions assume a system using NVIDA GPUs with [CUDA 10.2](https://developer.nvidia.com/cuda-toolkit-archive) (for AMD, please make the appropriate change during PyTorch installation from [their installation page](https://pytorch.org/get-started/locally)).
+The instructions assume a system using NVIDIA GPUs with [CUDA 10.2](https://developer.nvidia.com/cuda-toolkit-archive) (for AMD, please make the appropriate change during PyTorch installation from [their installation page](https://pytorch.org/get-started/locally)).
 
 ```bash
 git clone https://github.com/CBICA/GaNDLF.git
 cd GaNDLF
-conda create -n venv_gandlf python=3.7 -y
+conda create -n venv_gandlf python=3.8 -y
 conda activate venv_gandlf
 ### PyTorch LTS installation - https://pytorch.org/get-started/locally
 ## CUDA 10.2
