@@ -1736,10 +1736,6 @@ def test_train_inference_classification_histology_2d(device):
     parameters["modality"] = "histo"
     parameters["patch_size"] = 128
     file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
-
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=False)
