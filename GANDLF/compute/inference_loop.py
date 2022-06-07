@@ -218,13 +218,6 @@ def inference_loop(
                         x_coords[i] : x_coords[i] + patch_size[0],
                         y_coords[i] : y_coords[i] + patch_size[1],
                     ] += 1
-                    for n in range(parameters["model"]["num_classes"]):
-                        # This is a temporary fix for the segmentation problem for single class
-                        probs_map[
-                            n,
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += output[i][n]
                     output_to_write += (
                         str(subject_name)
                         + ","
@@ -232,8 +225,15 @@ def inference_loop(
                         + ","
                         + str(y_coords[i])
                     )
-                    if parameters["problem_type"] != "segmentation":
-                        output_to_write += "," + str(output[i][n])
+                    for n in range(parameters["model"]["num_classes"]):
+                        # This is a temporary fix for the segmentation problem for single class
+                        probs_map[
+                            n,
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += output[i][n]
+                        if parameters["problem_type"] != "segmentation":
+                            output_to_write += "," + str(output[i][n])
                     output_to_write += "\n"
 
             # ensure probability map is scaled
