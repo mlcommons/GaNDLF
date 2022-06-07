@@ -606,7 +606,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     params["parallel_compute_command"] = parallel_compute_command
 
     if "opt" in params:
-        print("DeprecationWarning: 'opt' has been superceded by 'optimizer'")
+        print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]
 
     # define defaults
