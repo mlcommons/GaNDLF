@@ -123,15 +123,7 @@ def inference_loop(
         # set some defaults
         if not "slide_level" in parameters:
             parameters["slide_level"] = 0
-        if not "stride_size" in parameters:
-            parameters["stride_size"] = parameters["patch_size"]
-
-        parameters["stride_size"] = np.array(parameters["stride_size"])
-
-        if parameters["stride_size"].size == 1:
-            parameters["stride_size"] = np.append(
-                parameters["stride_size"], parameters["stride_size"]
-            )
+        parameters["stride_size"] = parameters.get("stride_size", None)
 
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
@@ -167,6 +159,9 @@ def inference_loop(
             )
 
             patch_size = parameters["patch_size"]
+            # patch size should be 2D for histology
+            if len(patch_size) == 3:
+                patch_size = patch_size[:-1]
 
             transform_requested = get_transforms_for_preprocessing(
                 parameters, [], False, False
