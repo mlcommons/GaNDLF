@@ -187,7 +187,7 @@ def inference_loop(
                 num_workers=parameters["q_num_workers"],
             )
             # update patch_size in case microns were requested
-            patch_size = patient_dataset_obj.patch_size
+            patch_size = patient_dataset_obj.get_patch_size()
 
             pbar.set_description(
                 "Looping over patches for subject: " + str(subject_name)
