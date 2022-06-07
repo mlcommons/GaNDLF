@@ -34,8 +34,8 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2):
     return model
 
 
-def apply_activation_function(activation_function, input):
-    out = input
+def apply_activation_function(activation_function, input_tensor):
+    out = input_tensor
     if not activation_function is None:
         if activation_function == F.softmax:
             out = activation_function(out, dim=1)
