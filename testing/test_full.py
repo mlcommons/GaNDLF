@@ -459,6 +459,22 @@ def test_train_classification_rad_2d(device):
             reset=True,
         )
 
+    # ensure sigmoid and softmax activations are tested for imagenet models
+    for activation_type in ["sigmoid", "softmax"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = activation_type
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
     print("passed")
 
 
