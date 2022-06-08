@@ -465,6 +465,22 @@ def test_train_classification_rad_2d(device):
             reset=True,
         )
 
+    # ensure sigmoid and softmax activations are tested for imagenet models
+    for activation_type in ["sigmoid", "softmax"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = activation_type
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
     print("passed")
 
 
@@ -1644,7 +1660,8 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
-    parameters_patch["patch_size"] = [128, 128]
+    # define patches to be extracted in terms of microns
+    parameters_patch["patch_size"] = ["1000m", "1000m"]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1673,6 +1690,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = True
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
     Path(modelDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -1738,7 +1756,11 @@ def test_train_inference_classification_histology_2d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = patch_size["2D"]
+    parameters["patch_size"] = 128
+    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
     parameters["model"]["dimension"] = 2
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)

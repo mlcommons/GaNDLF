@@ -53,7 +53,7 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
 
 - Construct a YAML configuration for OPM with a minimum of the following keys (see [OPM usage](https://github.com/CBICA/OPM/blob/master/README.md#usage) for all options):
   - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
-  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256])
+  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256]) or a string containing patch size in microns (e.g., "[100m,100m]")
   - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
 - A CSV file with the following columns:
   - `SubjectID`: the ID of the subject for the WSI

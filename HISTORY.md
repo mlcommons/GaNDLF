@@ -1,3 +1,8 @@
+## 0.0.15
+- Updated `setup.py` for `python>=3.8`
+- `stride_size` is now handled internally for histology data
+- ImageNet pre-trained models for UNet is now available
+
 ## 0.0.14
 
 - Add an option (`"save_training"`) to save training patches
@@ -30,7 +35,7 @@
 - Sigmoid multiplier option has been added
 - Compute objects can now be requested using developer-level functions
 - Transformer-based networks, TransUNet and UNetR are now available
-- ImageNet pre-trained models for UNet is now available
+- Can do histology computation using microns
 
 ## 0.0.13
 

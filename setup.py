@@ -60,7 +60,7 @@ requirements = [
     "pylint",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
-    "pickle5>=0.0.11",
+    'pickle5>=0.0.11; python_version < "3.8.0"',
     "setuptools",
     "seaborn",
     "pyyaml",
@@ -75,7 +75,7 @@ requirements = [
     "medcam",
     "opencv-python",
     "torchmetrics==0.5.1",  # newer versions have changed api for f1 invocation
-    "OpenPatchMiner==0.1.6",
+    "OpenPatchMiner==0.1.8",
     "zarr==2.10.3",
     "pydicom",
     "onnx",
