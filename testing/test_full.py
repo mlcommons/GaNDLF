@@ -473,6 +473,22 @@ def test_train_classification_rad_2d(device):
             reset=True,
         )
 
+    # ensure sigmoid and softmax activations are tested for imagenet models
+    for activation_type in ["sigmoid", "softmax"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = activation_type
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
     print("passed")
 
 
@@ -1755,7 +1771,11 @@ def test_train_inference_classification_histology_2d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = patch_size["2D"]
+    parameters["patch_size"] = 128
+    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
     parameters["model"]["dimension"] = 2
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)

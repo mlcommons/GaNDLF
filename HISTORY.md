@@ -1,3 +1,7 @@
+## 0.0.15
+- Updated `setup.py` for `python>=3.8`
+- `stride_size` is now handled internally for histology data
+
 ## 0.0.14
 
 - Add an option (`"save_training"`) to save training patches
