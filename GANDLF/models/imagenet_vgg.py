@@ -5,6 +5,7 @@ Modified from https://github.com/pytorch/vision.git
 
 import torchvision
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .modelBase import ModelBase
 
@@ -47,6 +48,16 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2, dimensio
     return model
 
 
+def apply_activation_function(activation_function, input_tensor):
+    out = input_tensor
+    if not activation_function is None:
+        if activation_function == F.softmax:
+            out = activation_function(out, dim=1)
+        else:
+            out = activation_function(out)
+    return out
+
+
 class imagenet_vgg11(ModelBase):
     def __init__(
         self,
@@ -62,7 +73,7 @@ class imagenet_vgg11(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg11_bn(ModelBase):
@@ -80,7 +91,7 @@ class imagenet_vgg11_bn(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg13(ModelBase):
@@ -98,7 +109,7 @@ class imagenet_vgg13(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg13_bn(ModelBase):
@@ -116,7 +127,7 @@ class imagenet_vgg13_bn(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg16(ModelBase):
@@ -134,7 +145,7 @@ class imagenet_vgg16(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg16_bn(ModelBase):
@@ -152,7 +163,7 @@ class imagenet_vgg16_bn(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg19(ModelBase):
@@ -170,7 +181,7 @@ class imagenet_vgg19(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
 class imagenet_vgg19_bn(ModelBase):
@@ -188,4 +199,4 @@ class imagenet_vgg19_bn(ModelBase):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
