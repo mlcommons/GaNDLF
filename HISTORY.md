@@ -1,6 +1,7 @@
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
 - `stride_size` is now handled internally for histology data
+- ImageNet pre-trained models for UNet is now available
 
 ## 0.0.14
 
@@ -35,7 +36,6 @@
 - Compute objects can now be requested using developer-level functions
 - Transformer-based networks, TransUNet and UNetR are now available
 - Can now perform histology computation using microns
-- ImageNet pre-trained models for UNet is now available
 
 ## 0.0.13
 
