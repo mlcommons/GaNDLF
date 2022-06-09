@@ -100,7 +100,6 @@ def populate_channel_keys_in_params(data_loader, parameters):
     channel_keys = []
     value_keys = []
     label_keys = []
-    print("All Keys : ", all_keys)
     for item in all_keys:
         if item.isnumeric():
             channel_keys.append(item)

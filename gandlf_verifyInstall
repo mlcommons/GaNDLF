@@ -29,17 +29,12 @@ if __name__ == "__main__":
             "GaNDLF not properly installed, please see https://cbica.github.io/GaNDLF/setup"
         )
 
+    # we always want to do submodule update to ensure any hash updates are ingested correctly
     try:
-        import GANDLF.anonymize.dicomanonymizer as anon
-
-        if anon:
-            print("GANDLF's git submodules were successfully imported.")
+        os.system("git submodule update --init --recursive")
     except:
-        try:
-            os.system("git submodule update --init --recursive")
-        except:
-            print("Git was not found, please try again.")
-        os.system("pip install -e .")
+        print("Git was not found, please try again.")
+    os.system("pip install -e .")
 
     args = parser.parse_args()
 

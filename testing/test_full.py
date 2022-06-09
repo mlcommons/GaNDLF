@@ -81,7 +81,7 @@ steps to follow to write tests:
 """
 
 
-def test_download_data():
+def test_generic_download_data():
     print("00: Downloading the sample data")
     urlToDownload = (
         "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
@@ -104,7 +104,7 @@ def test_download_data():
     print("passed")
 
 
-def test_constructTrainingCSV():
+def test_generic_constructTrainingCSV():
     print("01: Constructing training CSVs")
     # inputDir = os.path.normpath('./testing/data')
     # delete previous csv files
@@ -355,7 +355,7 @@ def test_train_regression_rad_2d_imagenet(device):
     print("passed")
 
 
-def test_train_brainage_rad_2d(device):
+def test_train_regression_brainage_rad_2d(device):
     print("08: Starting brain age tests")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -447,6 +447,22 @@ def test_train_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    # ensure sigmoid and softmax activations are tested for imagenet models
+    for activation_type in ["sigmoid", "softmax"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = activation_type
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
@@ -567,7 +583,7 @@ def test_train_resume_inference_classification_rad_3d(device):
     print("passed")
 
 
-def test_inference_optimize_classification_rad_3d(device):
+def test_train_inference_optimize_classification_rad_3d(device):
     print("13: Starting 3D Rad segmentation tests for optimization")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -608,7 +624,7 @@ def test_inference_optimize_classification_rad_3d(device):
     print("passed")
 
 
-def test_inference_optimize_segmentation_rad_2d(device):
+def test_train_inference_optimize_segmentation_rad_2d(device):
     print("14: Starting 2D Rad segmentation tests for optimization")
     # read and parse csv
     parameters = parseConfig(
@@ -652,7 +668,7 @@ def test_inference_optimize_segmentation_rad_2d(device):
     print("passed")
 
 
-def test_inference_classification_with_logits_single_fold_rad_3d(device):
+def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     print("15: Starting 3D Rad classification tests for single fold logits inference")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -714,7 +730,7 @@ def test_inference_classification_with_logits_single_fold_rad_3d(device):
     print("passed")
 
 
-def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
+def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device):
     print("16: Starting 3D Rad classification tests for multi-fold logits inference")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -756,7 +772,7 @@ def test_inference_classification_with_logits_multiple_folds_rad_3d(device):
     print("passed")
 
 
-def test_scheduler_classification_rad_2d(device):
+def test_train_scheduler_classification_rad_2d(device):
     print("17: Starting 2D Rad segmentation tests for scheduler")
     # read and initialize parameters for specific data dimension
     # loop through selected models and train for single epoch
@@ -803,7 +819,7 @@ def test_scheduler_classification_rad_2d(device):
     print("passed")
 
 
-def test_optimizer_classification_rad_2d(device):
+def test_train_optimizer_classification_rad_2d(device):
     print("18: Starting 2D Rad classification tests for optimizer")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -877,7 +893,7 @@ def test_clip_train_classification_rad_3d(device):
     print("passed")
 
 
-def test_normtype_train_segmentation_rad_3d(device):
+def test_train_normtype_segmentation_rad_3d(device):
     print("20: Starting 3D Rad segmentation tests for normtype")
     # read and initialize parameters for specific data dimension
     # read and parse csv
@@ -920,7 +936,7 @@ def test_normtype_train_segmentation_rad_3d(device):
         print("passed")
 
 
-def test_metrics_segmentation_rad_2d(device):
+def test_train_metrics_segmentation_rad_2d(device):
     print("21: Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
     parameters = parseConfig(
@@ -953,7 +969,7 @@ def test_metrics_segmentation_rad_2d(device):
     print("passed")
 
 
-def test_metrics_regression_rad_2d(device):
+def test_train_metrics_regression_rad_2d(device):
     print("22: Starting 2D Rad regression tests for metrics")
     # read and parse csv
     parameters = parseConfig(
@@ -985,7 +1001,7 @@ def test_metrics_regression_rad_2d(device):
     print("passed")
 
 
-def test_losses_segmentation_rad_2d(device):
+def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
     # read and parse csv
     parameters = parseConfig(
@@ -1023,7 +1039,7 @@ def test_losses_segmentation_rad_2d(device):
     print("passed")
 
 
-def test_config_read():
+def test_generic_config_read():
     print("24: Starting testing reading configuration")
     # read and parse csv
     file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
@@ -1117,7 +1133,7 @@ def test_config_read():
     print("passed")
 
 
-def test_cli_function_preprocess():
+def test_generic_cli_function_preprocess():
     print("25: Starting testing cli function preprocess")
     file_config = os.path.join(testingDir, "config_segmentation.yaml")
     sanitize_outputDir()
@@ -1155,7 +1171,7 @@ def test_cli_function_preprocess():
     print("passed")
 
 
-def test_cli_function_mainrun(device):
+def test_generic_cli_function_mainrun(device):
     print("26: Starting testing cli function main_run")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -1246,7 +1262,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     print("passed")
 
 
-def test_preprocess_functions():
+def test_generic_preprocess_functions():
     print("28: Starting testing preprocessing functions")
     # initialize an input which has values between [-1,1]
     # checking tensor with last dimension of size 1
@@ -1372,7 +1388,7 @@ def test_preprocess_functions():
     print("passed")
 
 
-def test_augmentation_functions():
+def test_generic_augmentation_functions():
     print("29: Starting testing augmentation functions")
     params_all_preprocessing_and_augs = parseConfig(
         os.path.join(baseConfigDir, "config_all_options.yaml")
@@ -1414,7 +1430,7 @@ def test_augmentation_functions():
     print("passed")
 
 
-def test_checkpointing_segmentation_rad_2d(device):
+def test_train_checkpointing_segmentation_rad_2d(device):
     print("30: Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
     parameters = parseConfig(
@@ -1466,7 +1482,7 @@ def test_checkpointing_segmentation_rad_2d(device):
     print("passed")
 
 
-def test_model_patch_divisibility():
+def test_generic_model_patch_divisibility():
     print("31: Starting patch divisibility tests")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -1499,7 +1515,7 @@ def test_model_patch_divisibility():
     print("passed")
 
 
-def test_one_hot_logic():
+def test_generic_one_hot_logic():
     print("32: Starting one hot logic tests")
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
@@ -1573,7 +1589,7 @@ def test_one_hot_logic():
     print("passed")
 
 
-def test_anonymizer():
+def test_generic_anonymizer():
     print("33: Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
@@ -1638,7 +1654,8 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
-    parameters_patch["patch_size"] = [128, 128]
+    # define patches to be extracted in terms of microns
+    parameters_patch["patch_size"] = ["1000m", "1000m"]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1667,6 +1684,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = True
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
     Path(modelDir).mkdir(parents=True, exist_ok=True)
     TrainingManager(
@@ -1732,7 +1750,11 @@ def test_train_inference_classification_histology_2d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = patch_size["2D"]
+    parameters["patch_size"] = 128
+    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
     parameters["model"]["dimension"] = 2
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
@@ -1777,7 +1799,7 @@ def test_train_inference_classification_histology_2d(device):
     print("passed")
 
 
-def test_unet_layerchange_2d(device):
+def test_train_segmentation_unet_layerchange_rad_2d(device):
     # test case to up code coverage --> test decreasing allowed layers for unet
     print("36: Starting 2D Rad segmentation tests for normtype")
     # read and parse csv
@@ -1824,7 +1846,7 @@ def test_unet_layerchange_2d(device):
     print("passed")
 
 
-def test_train_segmentation_unetr_3d(device):
+def test_train_segmentation_unetr_rad_3d(device):
     print("37: Testing UNETR for 3D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -1879,7 +1901,7 @@ def test_train_segmentation_unetr_3d(device):
     print("passed")
 
 
-def test_train_segmentation_unetr_2d(device):
+def test_train_segmentation_unetr_rad_2d(device):
     print("38: Testing UNETR for 2D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -1912,5 +1934,112 @@ def test_train_segmentation_unetr_2d(device):
             resume=False,
             reset=True,
         )
+
+    print("passed")
+
+
+def test_train_segmentation_transunet_rad_2d(device):
+    print("39: Testing TransUNet for 2D segmentation")
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["model"]["architecture"] = "transunet"
+    parameters["patch_size"] = [128, 128, 1]
+    parameters["model"]["dimension"] = 2
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["num_heads"] = 6
+        parameters["model"]["embed_dim"] = 64
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["num_heads"] = 3
+        parameters["model"]["embed_dim"] = 50
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["embed_dim"] = 64
+    parameters["model"]["depth"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["num_heads"] = 8
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    parameters["model"]["norm_type"] = "batch"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+
+    print("passed")
+
+
+def test_train_segmentation_transunet_rad_3d(device):
+    print("40: Testing TransUNet for 3D segmentation")
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
+    parameters["model"]["architecture"] = "transunet"
+    parameters["patch_size"] = [4, 4, 4]
+    parameters["model"]["dimension"] = 3
+
+    # this assertion should fail
+    with pytest.raises(BaseException) as e_info:
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["dimension"] = 3
+    parameters["patch_size"] = [32, 32, 32]
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["depth"] = 1
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["num_heads"] = 6
+        parameters["model"]["embed_dim"] = 64
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    with pytest.raises(BaseException) as e_info:
+        parameters["model"]["num_heads"] = 3
+        parameters["model"]["embed_dim"] = 50
+        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    parameters["model"]["num_heads"] = 8
+    parameters["model"]["embed_dim"] = 64
+    parameters["model"]["depth"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    parameters["model"]["norm_type"] = "batch"
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    if os.path.isdir(outputDir):
+        shutil.rmtree(outputDir)  # overwrite previous results
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
     print("passed")
