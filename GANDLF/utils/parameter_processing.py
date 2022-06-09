@@ -24,7 +24,7 @@ def populate_header_in_parameters(parameters, headers):
         parameters["model"]["type"] = "torch"
 
     # initialize openvino model data type for processing: if not defined, default to FP32
-    if not ("data_type" in params["model"]):
+    if not ("data_type" in parameters["model"]):
         params["model"]["data_type"] = "FP32"
 
     if parameters["model"]["type"] == "openvino" and parameters["model"][
