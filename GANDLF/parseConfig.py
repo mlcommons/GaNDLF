@@ -123,6 +123,19 @@ def parseConfig(config_file_path, version_check_flag=True):
             )
 
     if "patch_size" in params:
+        # duplicate patch size if it is an int or float
+        if isinstance(params["patch_size"], int) or isinstance(
+            params["patch_size"], float
+        ):
+            params["patch_size"] = [params["patch_size"]]
+        # in case someone decides to pass a single value list
+        if len(params["patch_size"]) == 1:
+            actual_patch_size = []
+            for _ in range(params["model"]["dimension"]):
+                actual_patch_size.append(params["patch_size"][0])
+            params["patch_size"] = actual_patch_size
+
+        # parse patch size as needed for computations
         if len(params["patch_size"]) == 2:  # 2d check
             # ensuring same size during torchio processing
             params["patch_size"].append(1)
@@ -597,7 +610,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     params["parallel_compute_command"] = parallel_compute_command
 
     if "opt" in params:
-        print("DeprecationWarning: 'opt' has been superceded by 'optimizer'")
+        print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]
 
     # define defaults
