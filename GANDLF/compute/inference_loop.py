@@ -123,15 +123,7 @@ def inference_loop(
         # set some defaults
         if not "slide_level" in parameters:
             parameters["slide_level"] = 0
-        if not "stride_size" in parameters:
-            parameters["stride_size"] = parameters["patch_size"]
-
-        parameters["stride_size"] = np.array(parameters["stride_size"])
-
-        if parameters["stride_size"].size == 1:
-            parameters["stride_size"] = np.append(
-                parameters["stride_size"], parameters["stride_size"]
-            )
+        parameters["stride_size"] = parameters.get("stride_size", None)
 
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
@@ -161,15 +153,15 @@ def inference_loop(
 
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
             ## this can probably be made into a single multi-class probability map that functions for all workloads
-            if parameters["problem_type"] == "segmentation":
-                probs_map = np.zeros((level_height, level_width), dtype=np.float16)
-            else:
-                probs_map = np.zeros(
-                    (parameters["model"]["num_classes"], level_height, level_width),
-                    dtype=np.float16,
-                )
+            probs_map = np.zeros(
+                (parameters["model"]["num_classes"], level_height, level_width),
+                dtype=np.float16,
+            )
 
             patch_size = parameters["patch_size"]
+            # patch size should be 2D for histology
+            if len(patch_size) == 3:
+                patch_size = patch_size[:-1]
 
             transform_requested = get_transforms_for_preprocessing(
                 parameters, [], False, False
@@ -194,6 +186,8 @@ def inference_loop(
                 shuffle=False,
                 num_workers=parameters["q_num_workers"],
             )
+            # update patch_size in case microns were requested
+            patch_size = patient_dataset_obj.get_patch_size()
 
             pbar.set_description(
                 "Looping over patches for subject: " + str(subject_name)
@@ -224,39 +218,23 @@ def inference_loop(
                         x_coords[i] : x_coords[i] + patch_size[0],
                         y_coords[i] : y_coords[i] + patch_size[1],
                     ] += 1
-                    if parameters["problem_type"] == "segmentation":
-                        for n in range(parameters["model"]["num_classes"]):
-                            probs_map[
-                                x_coords[i] : x_coords[i] + patch_size[0],
-                                y_coords[i] : y_coords[i] + patch_size[1],
-                            ] += output[i][
-                                n
-                            ]  # This is a temporary fix for the segmentation problem for single class
-                        output_to_write += (
-                            str(subject_name)
-                            + ","
-                            + str(x_coords[i])
-                            + ","
-                            + str(y_coords[i])
-                            + "\n"
-                        )
-                    else:
-                        output_to_write += (
-                            str(subject_name)
-                            + ","
-                            + str(x_coords[i])
-                            + ","
-                            + str(y_coords[i])
-                        )
-                        for n in range(parameters["model"]["num_classes"]):
-                            probs_map[
-                                n,
-                                x_coords[i] : x_coords[i] + patch_size[0],
-                                y_coords[i] : y_coords[i] + patch_size[1],
-                            ] += output[i][n]
+                    output_to_write += (
+                        str(subject_name)
+                        + ","
+                        + str(x_coords[i])
+                        + ","
+                        + str(y_coords[i])
+                    )
+                    for n in range(parameters["model"]["num_classes"]):
+                        # This is a temporary fix for the segmentation problem for single class
+                        probs_map[
+                            n,
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += output[i][n]
+                        if parameters["problem_type"] != "segmentation":
                             output_to_write += "," + str(output[i][n])
-                        # ensure csv row terminates in new line
-                        output_to_write += "\n"
+                    output_to_write += "\n"
 
             # ensure probability map is scaled
             # Updating variables to save memory
