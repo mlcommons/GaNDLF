@@ -529,6 +529,10 @@ def parseConfig(config_file_path, version_check_flag=True):
         if not ("type" in params["model"]):
             params["model"]["type"] = "torch"
 
+        # initialize openvino model data type for processing: if not defined, default to FP32
+        if not ("data_type" in params["model"]):
+            params["model"]["data_type"] = "FP32"
+
         # set default save strategy for model
         if not ("save_at_every_epoch" in params["model"]):
             params["model"]["save_at_every_epoch"] = False
