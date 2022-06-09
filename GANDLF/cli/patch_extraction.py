@@ -11,6 +11,7 @@ from GANDLF.OPM.opm.utils import (
     patch_size_check,
     parse_config,
     generate_initial_mask,
+    get_patch_size_in_microns,
 )
 
 
@@ -48,6 +49,8 @@ def patch_extraction(input_path, output_path, config=None):
     if "patch_size" not in cfg:
         cfg["patch_size"] = (256, 256)
 
+    original_patch_size = cfg["patch_size"]
+
     if not os.path.exists(output_path):
         Path(output_path).mkdir(parents=True, exist_ok=True)
 
@@ -62,6 +65,8 @@ def patch_extraction(input_path, output_path, config=None):
         manager.set_subjectID(sid)
         manager.set_image_header("Channel_0")
         manager.set_mask_header("Label")
+
+        cfg["patch_size"] = get_patch_size_in_microns(slide, original_patch_size)
 
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(slide, cfg["scale"])

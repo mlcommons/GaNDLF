@@ -28,9 +28,24 @@ jobs:
         $CONDA/bin/conda install -c conda-forge libvips -y
         pip3 install torch==1.8.2+cpu torchvision==0.9.2+cpu torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
         pip install -e .
-    - name: Run unit tests
+        
+    - name: Run generic unit tests
       run: |
-        pytest --cov=. --cov-report=xml
+        pytest --cov=. --cov-report=xml -k "generic"
+    - name: Run classification unit tests
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "classification"
+    - name: Run regression unit tests
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "regression"
+    - name: Run segmentation unit tests
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
+    - name: Run transunet unit tests
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "transunet"
+       
+     
     - name: Upload coverage
       uses: codecov/codecov-action@v1
       with:
