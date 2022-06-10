@@ -23,7 +23,6 @@ def populate_header_in_parameters(parameters, headers):
     if not ("type" in parameters["model"]):
         parameters["model"]["type"] = "torch"
 
-
     if parameters["model"]["type"] == "openvino" and parameters["model"][
         "architecture"
     ] in ["brain_age", "sdnet"]:
