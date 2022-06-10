@@ -37,7 +37,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     """
     num_channel = params["model"]["num_channels"]
     model_dimension = params["model"]["dimension"]
-    ov_output_data_type = params["model"]["data_type"]
+    ov_output_data_type = params["model"].get("data_type", "FP32")
     input_shape = params["patch_size"]
 
     model_dict["timestamp"] = get_unique_timestamp()
