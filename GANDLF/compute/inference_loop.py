@@ -262,7 +262,7 @@ def inference_loop(
                     "predictions.csv",
                 )
                 with open(output_file, "w") as f:
-                    f.write(                                                           )
+                    f.write(output_to_write)
 
             import cv2
 
