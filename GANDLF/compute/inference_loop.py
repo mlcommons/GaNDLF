@@ -140,8 +140,10 @@ def inference_loop(
             )
             max_defined_slide_level = os_image.level_count - 1
             parameters["slide_level"] = parameters.get("slide_level", 0)
-            if parameters["slide_level"] > max_defined_slide_level:
-                parameters["slide_level"] = max_defined_slide_level
+            parameters["slide_level"] = min(
+                parameters["slide_level"], max_defined_slide_level
+            )
+            parameters["slide_level"] = max(parameters["slide_level"], 0)
             parameters["mask_level"] = parameters.get(
                 "mask_level", parameters["slide_level"]
             )
