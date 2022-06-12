@@ -121,11 +121,7 @@ def inference_loop(
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
         # set some defaults
-        parameters["slide_level"] = parameters.get("slide_level", 0)
         parameters["stride_size"] = parameters.get("stride_size", None)
-        parameters["mask_level"] = parameters.get(
-            "mask_level", parameters["slide_level"]
-        )
 
         output_to_write = "SubjectID,x_coords,y_coords"
         if parameters["problem_type"] == "regression":
@@ -142,6 +138,13 @@ def inference_loop(
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
+            max_defined_slide_level = os_image.level_count - 1
+            parameters["slide_level"] = parameters.get("slide_level", 0)
+            if parameters["slide_level"] > max_defined_slide_level:
+                parameters["slide_level"] = max_defined_slide_level
+            parameters["mask_level"] = parameters.get(
+                "mask_level", parameters["slide_level"]
+            )
             level_width, level_height = os_image.level_dimensions[
                 int(parameters["slide_level"])
             ]
@@ -151,7 +154,7 @@ def inference_loop(
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
-            ## this can probably be made into a single multi-class probability map that functions for all workloads
+            # this can probably be made into a single multi-class probability map that functions for all workloads
             probs_map = np.zeros(
                 (parameters["model"]["num_classes"], level_height, level_width),
                 dtype=np.float16,
@@ -236,7 +239,7 @@ def inference_loop(
                     output_to_write += "\n"
 
             # ensure probability map is scaled
-            # Updating variables to save memory
+            # reusing variables to save memory
             probs_map = np.divide(probs_map, count_map)
 
             # Check if out_probs_map is greater than 1, print a warning
