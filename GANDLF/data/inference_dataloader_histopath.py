@@ -9,7 +9,7 @@ Created on Fri Mar  8 20:03:35 2019
 import os
 
 import numpy as np
-import tiffslide as openslide
+import tiffslide
 from GANDLF.OPM.opm.utils import get_patch_size_in_microns, tissue_mask
 from skimage.transform import resize
 from torch.utils.data.dataset import Dataset
@@ -48,13 +48,16 @@ class InferTumorSegDataset(Dataset):
         self.transform = transform
         self._wsi_path = wsi_path
         self._patch_size = patch_size
-        if self._patch_size[-1] == 1:
-            self._patch_size = self._patch_size[:-1]
         self._patch_size = get_patch_size_in_microns(wsi_path, self._patch_size)
         self._stride_size = stride_size
+        if self._stride_size is None:
+            self._stride_size = (
+                (np.array(self._patch_size) / 2).astype(np.int8).tolist()
+            )
+        self._stride_size = get_patch_size_in_microns(wsi_path, self._stride_size)
         self._selected_level = selected_level
         self._mask_level = mask_level
-        self._os_image = openslide.open_slide(os.path.join(self._wsi_path))
+        self._os_image = tiffslide.open_slide(os.path.join(self._wsi_path))
         self._points = []
         self._basic_preprocessing()
 
@@ -74,7 +77,7 @@ class InferTumorSegDataset(Dataset):
             mask = resize(mask, (height, width))
         mask = (mask > 0).astype(np.uint8)
 
-        # This is bugged because currently if mask_level is not equal to selected_level,
+        # This is buggy because currently if mask_level is not equal to selected_level,
         # then this logic straight up does not work
         # You would have to scale the patch size appropriately for this to work correctly
         # Remove all the points which are closer to the boundary of the wsi
@@ -113,6 +116,9 @@ class InferTumorSegDataset(Dataset):
         self._points = np.array(self._points)
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
         self._mask = mask
+
+    def get_patch_size(self):
+        return self._patch_size
 
     def __len__(self):
         return len(self._points)
