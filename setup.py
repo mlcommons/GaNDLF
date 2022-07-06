@@ -50,7 +50,7 @@ except Exception as error:
 
 requirements = [
     "black",
-    "numpy==1.21.0",
+    "numpy==1.22.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "torchvision",
@@ -60,7 +60,7 @@ requirements = [
     "pylint",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
-    "pickle5>=0.0.11",
+    'pickle5>=0.0.11; python_version < "3.8.0"',
     "setuptools",
     "seaborn",
     "pyyaml",
