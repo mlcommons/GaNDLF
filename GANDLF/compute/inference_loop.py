@@ -317,21 +317,27 @@ def inference_loop(
 
                     cv2.imwrite(file_to_write, segmap)
 
-                    # save the blended images
-                    from PIL import Image
+                    try:
+                        # save the blended images
+                        from PIL import Image
 
-                    os_image_array = os_image.read_region(
-                        (0, 0),
-                        parameters["slide_level"],
-                        (level_width, level_height),
-                        as_array=True,
-                    )
-                    blended_image = Image.blend(os_image_array, heatmap, blending_alpha)
+                        os_image_array = os_image.read_region(
+                            (0, 0),
+                            parameters["slide_level"],
+                            (level_width, level_height),
+                            as_array=True,
+                        )
+                        blended_image = Image.blend(
+                            os_image_array, heatmap, blending_alpha
+                        )
 
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "probability_map_blended_" + str(n) + ".png"
-                    )
-                    cv2.imwrite(file_to_write, blended_image)
+                        file_to_write = os.path.join(
+                            subject_dest_dir,
+                            "probability_map_blended_" + str(n) + ".png",
+                        )
+                        cv2.imwrite(file_to_write, blended_image)
+                    except:
+                        print("Could not write blended images")
 
 
 if __name__ == "__main__":
