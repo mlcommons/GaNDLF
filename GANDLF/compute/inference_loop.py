@@ -121,9 +121,9 @@ def inference_loop(
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
         # set some defaults
-        if not "slide_level" in parameters:
-            parameters["slide_level"] = 0
+        parameters["slide_level"] = int(parameters.get("slide_level", 0))
         parameters["stride_size"] = parameters.get("stride_size", None)
+        blending_alpha = float(parameters.get("blending_alpha", 0.5))
 
         if not "mask_level" in parameters:
             parameters["mask_level"] = parameters["slide_level"]
@@ -144,7 +144,7 @@ def inference_loop(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
             level_width, level_height = os_image.level_dimensions[
-                int(parameters["slide_level"])
+                parameters["slide_level"]
             ]
             subject_dest_dir = os.path.join(
                 outputDir_or_optimizedModel, str(subject_name)
@@ -295,6 +295,7 @@ def inference_loop(
                     f.write(output_to_write)
 
                 for n in range(parameters["model"]["num_classes"]):
+                    # save the prediction probability maps
                     file_to_write = os.path.join(
                         subject_dest_dir, "probability_map_" + str(n) + ".png"
                     )
@@ -307,6 +308,7 @@ def inference_loop(
                     )
                     cv2.imwrite(file_to_write, heatmap)
 
+                    # save the segmentation maps
                     file_to_write = os.path.join(
                         subject_dest_dir, "seg_map_" + str(n) + ".png"
                     )
@@ -314,6 +316,22 @@ def inference_loop(
                     segmap = (probs_map[n, ...] > 0.5).astype(np.uint8)
 
                     cv2.imwrite(file_to_write, segmap)
+
+                    # save the blended images
+                    from PIL import Image
+
+                    os_image_array = os_image.read_region(
+                        (0, 0),
+                        parameters["slide_level"],
+                        (level_width, level_height),
+                        as_array=True,
+                    )
+                    blended_image = Image.blend(os_image_array, heatmap, blending_alpha)
+
+                    file_to_write = os.path.join(
+                        subject_dest_dir, "probability_map_blended_" + str(n) + ".png"
+                    )
+                    cv2.imwrite(file_to_write, blended_image)
 
 
 if __name__ == "__main__":
