@@ -311,8 +311,8 @@ def inference_loop(
                         "probability_map_blended_" + str(n) + ".png",
                     )
                     cv2.imwrite(file_to_write, blended_image)
-                except:
-                    print("Could not write blended images")
+                except Exception as ex:
+                    print("Could not write blended images; error:", ex)
 
 
 if __name__ == "__main__":
