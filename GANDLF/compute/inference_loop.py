@@ -125,9 +125,6 @@ def inference_loop(
         parameters["stride_size"] = parameters.get("stride_size", None)
         blending_alpha = float(parameters.get("blending_alpha", 0.5))
 
-        if not "mask_level" in parameters:
-            parameters["mask_level"] = parameters["slide_level"]
-
         output_to_write = "SubjectID,x_coords,y_coords"
         if parameters["problem_type"] == "regression":
             output_to_write += ",output"
@@ -143,6 +140,15 @@ def inference_loop(
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
+            max_defined_slide_level = os_image.level_count - 1
+            parameters["slide_level"] = parameters.get("slide_level", 0)
+            parameters["slide_level"] = min(
+                parameters["slide_level"], max_defined_slide_level
+            )
+            parameters["slide_level"] = max(parameters["slide_level"], 0)
+            parameters["mask_level"] = parameters.get(
+                "mask_level", parameters["slide_level"]
+            )
             level_width, level_height = os_image.level_dimensions[
                 parameters["slide_level"]
             ]
@@ -152,7 +158,7 @@ def inference_loop(
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
-            ## this can probably be made into a single multi-class probability map that functions for all workloads
+            # this can probably be made into a single multi-class probability map that functions for all workloads
             probs_map = np.zeros(
                 (parameters["model"]["num_classes"], level_height, level_width),
                 dtype=np.float16,
@@ -237,14 +243,14 @@ def inference_loop(
                     output_to_write += "\n"
 
             # ensure probability map is scaled
-            # Updating variables to save memory
+            # reusing variables to save memory
             probs_map = np.divide(probs_map, count_map)
 
             # Check if out_probs_map is greater than 1, print a warning
             if np.max(probs_map) > 1:
                 # Print a warning
                 print(
-                    "Warning: Probability map is greater than 1, report the images to GANDLF developers"
+                    "Warning: Probability map is greater than 1, report the images to GaNDLF developers"
                 )
 
             count_map = np.array(count_map * 255, dtype=np.uint16)
@@ -256,88 +262,57 @@ def inference_loop(
                 count_map,
             )
 
+            if parameters["problem_type"] != "segmentation":
+                output_file = os.path.join(
+                    subject_dest_dir,
+                    "predictions.csv",
+                )
+                with open(output_file, "w") as f:
+                    f.write(output_to_write)
+
             import cv2
 
-            if parameters["problem_type"] == "segmentation":
-                output_file = os.path.join(
-                    subject_dest_dir,
-                    "predictions.csv",
+            for n in range(parameters["model"]["num_classes"]):
+                file_to_write = os.path.join(
+                    subject_dest_dir, "probability_map_" + str(n) + ".png"
                 )
-                with open(output_file, "w") as f:
-                    f.write(output_to_write)
-
-                for n in range(parameters["model"]["num_classes"]):
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "probability_map_" + str(n) + ".png"
-                    )
-                    heatmap = cv2.applyColorMap(
-                        np.array(
-                            probs_map[n, ...] * 255,
-                            dtype=np.uint8,
-                        ),
-                        cv2.COLORMAP_JET,
-                    )
-                    cv2.imwrite(file_to_write, heatmap)
-
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "seg_map_" + str(n) + ".png"
-                    )
-
-                    segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
-
-                    cv2.imwrite(file_to_write, segmap)
-            else:
-                output_file = os.path.join(
-                    subject_dest_dir,
-                    "predictions.csv",
+                heatmap = cv2.applyColorMap(
+                    np.array(
+                        probs_map[n, ...] * 255,
+                        dtype=np.uint8,
+                    ),
+                    cv2.COLORMAP_JET,
                 )
-                with open(output_file, "w") as f:
-                    f.write(output_to_write)
+                cv2.imwrite(file_to_write, heatmap)
 
-                for n in range(parameters["model"]["num_classes"]):
-                    # save the prediction probability maps
+                # save the segmentation maps
+                file_to_write = os.path.join(
+                    subject_dest_dir, "seg_map_" + str(n) + ".png"
+                )
+
+                segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
+
+                cv2.imwrite(file_to_write, segmap)
+
+                try:
+                    # save the blended images
+                    from PIL import Image
+
+                    os_image_array = os_image.read_region(
+                        (0, 0),
+                        parameters["slide_level"],
+                        (level_width, level_height),
+                        as_array=True,
+                    )
+                    blended_image = Image.blend(os_image_array, heatmap, blending_alpha)
+
                     file_to_write = os.path.join(
-                        subject_dest_dir, "probability_map_" + str(n) + ".png"
+                        subject_dest_dir,
+                        "probability_map_blended_" + str(n) + ".png",
                     )
-                    heatmap = cv2.applyColorMap(
-                        np.array(
-                            probs_map[n, ...] * 255,
-                            dtype=np.uint8,
-                        ),
-                        cv2.COLORMAP_JET,
-                    )
-                    cv2.imwrite(file_to_write, heatmap)
-
-                    # save the segmentation maps
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "seg_map_" + str(n) + ".png"
-                    )
-
-                    segmap = (probs_map[n, ...] > 0.5).astype(np.uint8)
-
-                    cv2.imwrite(file_to_write, segmap)
-
-                    try:
-                        # save the blended images
-                        from PIL import Image
-
-                        os_image_array = os_image.read_region(
-                            (0, 0),
-                            parameters["slide_level"],
-                            (level_width, level_height),
-                            as_array=True,
-                        )
-                        blended_image = Image.blend(
-                            os_image_array, heatmap, blending_alpha
-                        )
-
-                        file_to_write = os.path.join(
-                            subject_dest_dir,
-                            "probability_map_blended_" + str(n) + ".png",
-                        )
-                        cv2.imwrite(file_to_write, blended_image)
-                    except:
-                        print("Could not write blended images")
+                    cv2.imwrite(file_to_write, blended_image)
+                except:
+                    print("Could not write blended images")
 
 
 if __name__ == "__main__":
