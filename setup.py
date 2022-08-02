@@ -50,7 +50,7 @@ except Exception as error:
 
 requirements = [
     "black",
-    "numpy==1.21.0",
+    "numpy==1.22.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "torchvision",
