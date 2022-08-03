@@ -110,9 +110,6 @@ def inference_loop(
         # Setting up the inference loader
         inference_loader = get_testing_loader(parameters)
 
-        # get the channel keys for concatenation later (exclude non numeric channel keys)
-        parameters = populate_channel_keys_in_params(inference_loader, parameters)
-
         print("Data Samples: ", len(inference_loader.dataset), flush=True)
 
         average_epoch_valid_loss, average_epoch_valid_metric = validate_network(
