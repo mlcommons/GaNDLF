@@ -1,7 +1,9 @@
 import torch
 import torch.nn.functional as F
 import SimpleITK as sitk
-from scipy.ndimage.morphology import binary_fill_holes, binary_closing
+from skimage.measure import label
+import numpy as np
+from scipy.ndimage import binary_fill_holes, binary_closing
 
 
 def torch_morphological(input_image, kernel_size=1, mode="dilation"):
@@ -71,3 +73,26 @@ def fill_holes(input_image, params=None):
     output_array = binary_fill_holes(input_image_array_closed).astype(int)
 
     return torch.from_numpy(output_array)
+
+
+def cca(input_image, params=None):
+    """
+    This function performs connected component analysis on the input image.
+
+    Args:
+        input_image (torch.Tensor): The input image.
+        params (dict): The parameters dict; unused.
+
+    Returns:
+        torch.Tensor: The output image after morphological operations.
+    """
+    if isinstance(input_image, torch.Tensor):
+        seg = input_image.numpy()
+    elif isinstance(input_image, sitk.Image):
+        seg = sitk.GetArrayFromImage(input_image)
+    mask = seg != 0
+    lbls = label(mask, connectivity=3)
+    lbls_sizes = [np.sum(lbls == i) for i in np.unique(lbls)]
+    largest_region = np.argmax(lbls_sizes[1:]) + 1
+    seg[lbls != largest_region] = 0
+    return seg
