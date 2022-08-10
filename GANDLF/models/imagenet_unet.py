@@ -174,6 +174,12 @@ class ImageNet_UNet(ModelBase):
         )
         encoder_depth = parameters["model"].get("depth", 5)
         encoder_depth = parameters["model"].get("encoder_depth", encoder_depth)
+        parameters["encoder_weights"] = parameters["model"].get(
+            "encoder_weights", "imagenet"
+        )
+        # ensure we are able to generate non-pretrained models
+        if parameters["encoder_weights"] == "None":
+            parameters["encoder_weights"] = None
 
         if parameters["problem_type"] != "segmentation":
             classifier_head_parameters = {}
@@ -194,7 +200,7 @@ class ImageNet_UNet(ModelBase):
 
         self.model = Unet(
             encoder_name=parameters["model"].get("encoder_name", "resnet34"),
-            encoder_weights=parameters["model"].get("encoder_weights", "imagenet"),
+            encoder_weights=parameters["model"]["encoder_weights"],
             in_channels=self.n_channels,
             classes=self.n_classes,
             activation=parameters["model"]["final_layer"],
