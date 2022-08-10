@@ -121,7 +121,7 @@ def inference_loop(
         parameters["stride_size"] = parameters.get("stride_size", None)
         parameters["slide_level"] = parameters.get("slide_level", 0)
         parameters["mask_level"] = parameters.get(
-            "stride_size", parameters["slide_level"]
+            "mask_level", parameters["slide_level"]
         )
 
         output_to_write = "SubjectID,x_coords,y_coords"
