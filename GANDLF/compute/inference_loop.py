@@ -304,7 +304,9 @@ def inference_loop(
                         (level_width, level_height),
                         as_array=True,
                     )
-                    blended_image = Image.blend(os_image_array, heatmap, parameters["blending_alpha"])
+                    blended_image = Image.blend(
+                        os_image_array, heatmap, parameters["blending_alpha"]
+                    )
 
                     file_to_write = os.path.join(
                         subject_dest_dir,
