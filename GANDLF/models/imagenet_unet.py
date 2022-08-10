@@ -199,8 +199,7 @@ class ImageNet_UNet(ModelBase):
             classifier_head_parameters = None
 
         self.model = Unet(
-            # encoder_name=parameters["model"].get("encoder_name", "resnet34"),
-            encoder_name=parameters["model"].get("encoder_name", "efficientnet-b0"),
+            encoder_name=parameters["model"].get("encoder_name", "resnet34"),
             encoder_weights=parameters["model"]["encoder_weights"],
             in_channels=self.n_channels,
             classes=self.n_classes,
