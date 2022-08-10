@@ -123,6 +123,7 @@ def inference_loop(
         parameters["mask_level"] = parameters.get(
             "mask_level", parameters["slide_level"]
         )
+        parameters["blending_alpha"] = float(parameters.get("blending_alpha", 0.5))
 
         output_to_write = "SubjectID,x_coords,y_coords"
         if parameters["problem_type"] == "regression":
@@ -303,7 +304,7 @@ def inference_loop(
                         (level_width, level_height),
                         as_array=True,
                     )
-                    blended_image = Image.blend(os_image_array, heatmap, blending_alpha)
+                    blended_image = Image.blend(os_image_array, heatmap, parameters["blending_alpha"])
 
                     file_to_write = os.path.join(
                         subject_dest_dir,
