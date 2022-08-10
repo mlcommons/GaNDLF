@@ -17,7 +17,12 @@ from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
-from GANDLF.data.post_process import torch_morphological, fill_holes, get_mapped_label
+from GANDLF.data.post_process import (
+    torch_morphological,
+    fill_holes,
+    get_mapped_label,
+    cca,
+)
 from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"
@@ -1363,6 +1368,9 @@ def test_generic_preprocess_functions():
     # sitk.Image input
     input_tensor_image = sitk.GetImageFromArray(input_tensor.numpy())
     input_transformed = fill_holes(input_tensor_image)
+
+    input_tensor = torch.rand(1, 256, 256, 256) > 0.5
+    input_transformed = cca(input_tensor)
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
