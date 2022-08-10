@@ -121,9 +121,9 @@ def inference_loop(
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
         # set some defaults
-        parameters["slide_level"] = int(parameters.get("slide_level", 0))
         parameters["stride_size"] = parameters.get("stride_size", None)
-        blending_alpha = float(parameters.get("blending_alpha", 0.5))
+        parameters["slide_level"] = parameters.get("slide_level", 0)
+        parameters["mask_level"] = parameters.get("stride_size", parameters["slide_level"])
 
         output_to_write = "SubjectID,x_coords,y_coords"
         if parameters["problem_type"] == "regression":
