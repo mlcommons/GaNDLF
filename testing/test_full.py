@@ -425,6 +425,7 @@ def test_train_regression_rad_3d(device):
         if model == "imagenet_unet":
             parameters["model"]["depth"] = 2
             parameters["model"]["decoder_channels"] = [32, 16]
+            parameters["model"]["encoder_weights"] = "None"
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
