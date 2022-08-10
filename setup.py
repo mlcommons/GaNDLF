@@ -79,7 +79,7 @@ requirements = [
     "zarr==2.10.3",
     "pydicom",
     "onnx",
-    "segmentation-models-pytorch",
+    "segmentation-models-pytorch==0.3.0",
     "ACSConv",
 ]
 
