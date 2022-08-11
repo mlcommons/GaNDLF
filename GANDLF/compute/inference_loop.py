@@ -141,14 +141,10 @@ def inference_loop(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
             max_defined_slide_level = os_image.level_count - 1
-            parameters["slide_level"] = parameters.get("slide_level", 0)
             parameters["slide_level"] = min(
                 parameters["slide_level"], max_defined_slide_level
             )
             parameters["slide_level"] = max(parameters["slide_level"], 0)
-            parameters["mask_level"] = parameters.get(
-                "mask_level", parameters["slide_level"]
-            )
             level_width, level_height = os_image.level_dimensions[
                 parameters["slide_level"]
             ]
