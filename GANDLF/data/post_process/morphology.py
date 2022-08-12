@@ -93,6 +93,6 @@ def cca(input_image, params=None):
     mask = seg != 0
     labels_connected = label(mask, connectivity=3)
     labels_connected_sizes = [np.sum(lbls == i) for i in np.unique(lbls)]
-    largest_region = np.argmax(lbls_sizes[1:]) + 1
+    largest_region = np.argmax(labels_connected_sizes[1:]) + 1
     seg[lbls != largest_region] = 0
     return seg
