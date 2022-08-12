@@ -91,7 +91,7 @@ def cca(input_image, params=None):
     elif isinstance(input_image, sitk.Image):
         seg = sitk.GetArrayFromImage(input_image)
     mask = seg != 0
-    lbls = label(mask, connectivity=3)
+    labels_connected = label(mask, connectivity=3)
     lbls_sizes = [np.sum(lbls == i) for i in np.unique(lbls)]
     largest_region = np.argmax(lbls_sizes[1:]) + 1
     seg[lbls != largest_region] = 0
