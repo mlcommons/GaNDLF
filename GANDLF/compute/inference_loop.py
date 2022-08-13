@@ -1,12 +1,13 @@
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
-import os
+import os, pickle, argparse
 from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
-import pickle, argparse, torch
+import torch
+import cv2
 import numpy as np
 from torch.utils.data import DataLoader
 from skimage.io import imsave
@@ -15,7 +16,6 @@ from torch.cuda.amp import autocast
 import tiffslide as openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
-    populate_channel_keys_in_params,
     get_dataframe,
     best_model_path_end,
     load_ov_model,
@@ -23,6 +23,15 @@ from GANDLF.utils import (
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
+
+
+def applyCustomColorMap(im_gray):
+    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
+    lut = np.zeros((256, 1, 3), dtype=np.uint8)
+    lut[:, 0, 0] = np.zeros((256)).tolist()
+    lut[:, 0, 1] = np.zeros((256)).tolist()
+    lut[:, 0, 2] = np.arange(256, -1, -1).tolist()
+    return cv2.LUT(img_bgr, lut)
 
 
 def inference_loop(
@@ -266,20 +275,21 @@ def inference_loop(
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
 
-            import cv2
-
+            heatmaps = {}
             for n in range(parameters["model"]["num_classes"]):
-                file_to_write = os.path.join(
-                    subject_dest_dir, "probability_map_" + str(n) + ".png"
+                heatmap_gray = np.array(
+                    probs_map[n, ...] * 255,
+                    dtype=np.uint8,
                 )
-                heatmap = cv2.applyColorMap(
-                    np.array(
-                        probs_map[n, ...] * 255,
-                        dtype=np.uint8,
-                    ),
+                heatmaps["_" + str(n) + "_jet"] = cv2.applyColorMap(
+                    heatmap_gray,
                     cv2.COLORMAP_JET,
                 )
-                cv2.imwrite(file_to_write, heatmap)
+                heatmaps["_" + str(n) + "_turbo"] = cv2.applyColorMap(
+                    heatmap_gray,
+                    cv2.COLORMAP_TURBO,
+                )
+                heatmaps["_" + str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
 
                 # save the segmentation maps
                 file_to_write = os.path.join(
@@ -290,23 +300,30 @@ def inference_loop(
 
                 cv2.imwrite(file_to_write, segmap)
 
-                try:
-                    # save the blended images
-                    from PIL import Image
+            for key in heatmaps:
+                file_to_write = os.path.join(
+                    subject_dest_dir, "probability_map" + key + ".png"
+                )
+                cv2.imwrite(file_to_write, heatmaps[key])
 
+                try:
                     os_image_array = os_image.read_region(
                         (0, 0),
                         parameters["slide_level"],
                         (level_width, level_height),
                         as_array=True,
                     )
-                    blended_image = Image.blend(
-                        os_image_array, heatmap, parameters["blending_alpha"]
+                    blended_image = cv2.addWeighted(
+                        os_image_array,
+                        parameters["blending_alpha"],
+                        heatmaps[key],
+                        1 - parameters["blending_alpha"],
+                        0,
                     )
 
                     file_to_write = os.path.join(
                         subject_dest_dir,
-                        "probability_map_blended_" + str(n) + ".png",
+                        "probability_map_blended_" + key + ".png",
                     )
                     cv2.imwrite(file_to_write, blended_image)
                 except Exception as ex:
