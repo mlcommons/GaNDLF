@@ -52,7 +52,7 @@ class InferTumorSegDataset(Dataset):
         self._stride_size = stride_size
         if self._stride_size is None:
             self._stride_size = (
-                (np.array(self._patch_size) / 2).astype(np.int8).tolist()
+                (np.array(self._patch_size) / 2).astype(np.uint16).tolist()
             )
         self._stride_size = get_patch_size_in_microns(wsi_path, self._stride_size)
         self._selected_level = selected_level
