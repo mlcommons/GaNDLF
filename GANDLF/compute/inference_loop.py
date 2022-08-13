@@ -30,7 +30,7 @@ def applyCustomColorMap(im_gray):
     lut = np.zeros((256, 1, 3), dtype=np.uint8)
     lut[:, 0, 0] = np.zeros((256)).tolist()
     lut[:, 0, 1] = np.zeros((256)).tolist()
-    lut[:, 0, 2] = np.arange(0,256,1).tolist()
+    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
     return cv2.LUT(img_bgr, lut)
 
 
