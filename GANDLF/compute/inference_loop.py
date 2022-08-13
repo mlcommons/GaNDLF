@@ -1,12 +1,13 @@
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
-import os
+import os, pickle, argparse
 from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
-import pickle, argparse, torch
+import torch
+import cv2
 import numpy as np
 from torch.utils.data import DataLoader
 from skimage.io import imsave
@@ -15,7 +16,6 @@ from torch.cuda.amp import autocast
 import tiffslide as openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
-    populate_channel_keys_in_params,
     get_dataframe,
     best_model_path_end,
     load_ov_model,
@@ -23,6 +23,15 @@ from GANDLF.utils import (
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
+
+
+def applyCustomColorMap(im_gray):
+    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
+    lut = np.zeros((256, 1, 3), dtype=np.uint8)
+    lut[:, 0, 0] = np.zeros((256)).tolist()
+    lut[:, 0, 1] = np.zeros((256)).tolist()
+    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
+    return cv2.LUT(img_bgr, lut)
 
 
 def inference_loop(
@@ -118,12 +127,12 @@ def inference_loop(
         print(average_epoch_valid_loss, average_epoch_valid_metric)
     elif parameters["modality"] in ["path", "histo"]:
         # set some defaults
-        if not "slide_level" in parameters:
-            parameters["slide_level"] = 0
         parameters["stride_size"] = parameters.get("stride_size", None)
-
-        if not "mask_level" in parameters:
-            parameters["mask_level"] = parameters["slide_level"]
+        parameters["slide_level"] = parameters.get("slide_level", 0)
+        parameters["mask_level"] = parameters.get(
+            "mask_level", parameters["slide_level"]
+        )
+        parameters["blending_alpha"] = float(parameters.get("blending_alpha", 0.5))
 
         output_to_write = "SubjectID,x_coords,y_coords"
         if parameters["problem_type"] == "regression":
@@ -140,8 +149,13 @@ def inference_loop(
             os_image = openslide.open_slide(
                 row[parameters["headers"]["channelHeaders"]].values[0]
             )
+            max_defined_slide_level = os_image.level_count - 1
+            parameters["slide_level"] = min(
+                parameters["slide_level"], max_defined_slide_level
+            )
+            parameters["slide_level"] = max(parameters["slide_level"], 0)
             level_width, level_height = os_image.level_dimensions[
-                int(parameters["slide_level"])
+                parameters["slide_level"]
             ]
             subject_dest_dir = os.path.join(
                 outputDir_or_optimizedModel, str(subject_name)
@@ -149,7 +163,7 @@ def inference_loop(
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             count_map = np.zeros((level_height, level_width), dtype=np.uint8)
-            ## this can probably be made into a single multi-class probability map that functions for all workloads
+            # this can probably be made into a single multi-class probability map that functions for all workloads
             probs_map = np.zeros(
                 (parameters["model"]["num_classes"], level_height, level_width),
                 dtype=np.float16,
@@ -234,14 +248,14 @@ def inference_loop(
                     output_to_write += "\n"
 
             # ensure probability map is scaled
-            # Updating variables to save memory
+            # reusing variables to save memory
             probs_map = np.divide(probs_map, count_map)
 
             # Check if out_probs_map is greater than 1, print a warning
             if np.max(probs_map) > 1:
                 # Print a warning
                 print(
-                    "Warning: Probability map is greater than 1, report the images to GANDLF developers"
+                    "Warning: Probability map is greater than 1, report the images to GaNDLF developers"
                 )
 
             count_map = np.array(count_map * 255, dtype=np.uint16)
@@ -253,9 +267,7 @@ def inference_loop(
                 count_map,
             )
 
-            import cv2
-
-            if parameters["problem_type"] == "segmentation":
+            if parameters["problem_type"] != "segmentation":
                 output_file = os.path.join(
                     subject_dest_dir,
                     "predictions.csv",
@@ -263,54 +275,59 @@ def inference_loop(
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
 
-                for n in range(parameters["model"]["num_classes"]):
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "probability_map_" + str(n) + ".png"
-                    )
-                    heatmap = cv2.applyColorMap(
-                        np.array(
-                            probs_map[n, ...] * 255,
-                            dtype=np.uint8,
-                        ),
-                        cv2.COLORMAP_JET,
-                    )
-                    cv2.imwrite(file_to_write, heatmap)
-
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "seg_map_" + str(n) + ".png"
-                    )
-
-                    segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
-
-                    cv2.imwrite(file_to_write, segmap)
-            else:
-                output_file = os.path.join(
-                    subject_dest_dir,
-                    "predictions.csv",
+            heatmaps = {}
+            for n in range(parameters["model"]["num_classes"]):
+                heatmap_gray = np.array(
+                    probs_map[n, ...] * 255,
+                    dtype=np.uint8,
                 )
-                with open(output_file, "w") as f:
-                    f.write(output_to_write)
+                heatmaps["_" + str(n) + "_jet"] = cv2.applyColorMap(
+                    heatmap_gray,
+                    cv2.COLORMAP_JET,
+                )
+                heatmaps["_" + str(n) + "_turbo"] = cv2.applyColorMap(
+                    heatmap_gray,
+                    cv2.COLORMAP_TURBO,
+                )
+                heatmaps["_" + str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
 
-                for n in range(parameters["model"]["num_classes"]):
+                # save the segmentation maps
+                file_to_write = os.path.join(
+                    subject_dest_dir, "seg_map_" + str(n) + ".png"
+                )
+
+                segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
+
+                cv2.imwrite(file_to_write, segmap)
+
+            for key in heatmaps:
+                file_to_write = os.path.join(
+                    subject_dest_dir, "probability_map" + key + ".png"
+                )
+                cv2.imwrite(file_to_write, heatmaps[key])
+
+                try:
+                    os_image_array = os_image.read_region(
+                        (0, 0),
+                        parameters["slide_level"],
+                        (level_width, level_height),
+                        as_array=True,
+                    )
+                    blended_image = cv2.addWeighted(
+                        os_image_array,
+                        parameters["blending_alpha"],
+                        heatmaps[key],
+                        1 - parameters["blending_alpha"],
+                        0,
+                    )
+
                     file_to_write = os.path.join(
-                        subject_dest_dir, "probability_map_" + str(n) + ".png"
+                        subject_dest_dir,
+                        "probability_map_blended_" + key + ".png",
                     )
-                    heatmap = cv2.applyColorMap(
-                        np.array(
-                            probs_map[n, ...] * 255,
-                            dtype=np.uint8,
-                        ),
-                        cv2.COLORMAP_JET,
-                    )
-                    cv2.imwrite(file_to_write, heatmap)
-
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "seg_map_" + str(n) + ".png"
-                    )
-
-                    segmap = (probs_map[n, ...] > 0.5).astype(np.uint8)
-
-                    cv2.imwrite(file_to_write, segmap)
+                    cv2.imwrite(file_to_write, blended_image)
+                except Exception as ex:
+                    print("Could not write blended images; error:", ex)
 
 
 if __name__ == "__main__":
