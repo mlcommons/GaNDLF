@@ -1371,6 +1371,9 @@ def test_generic_preprocess_functions():
 
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
+    
+    input_tensor = torch.rand(1, 256, 256) > 0.5
+    input_transformed = cca(input_tensor, connectivity=2)
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
