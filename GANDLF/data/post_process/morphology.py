@@ -81,7 +81,7 @@ def cca(input_image, params=None):
 
     Args:
         input_image (torch.Tensor): The input image.
-        params (dict): The parameters dict; unused.
+        params (dict): The parameters dict;
 
     Returns:
         torch.Tensor: The output image after morphological operations.
@@ -91,7 +91,9 @@ def cca(input_image, params=None):
     elif isinstance(input_image, sitk.Image):
         seg = sitk.GetArrayFromImage(input_image)
     mask = seg != 0
-    labels_connected = label(mask, connectivity=3)
+
+    connectivity = 3 if (params['connectivity'] is not None) else params['connectivity']
+    labels_connected = label(mask, connectivity=connectivity)
     labels_connected_sizes = [np.sum(lbls == i) for i in np.unique(lbls)]
     largest_region = np.argmax(labels_connected_sizes[1:]) + 1
     seg[labels_connected != largest_region] = 0
