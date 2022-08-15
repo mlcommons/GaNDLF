@@ -94,7 +94,7 @@ def cca(input_image, params=None):
 
     connectivity = 3 if (params['connectivity'] is not None) else params['connectivity']
     labels_connected = label(mask, connectivity=connectivity)
-    labels_connected_sizes = [np.sum(lbls == i) for i in np.unique(lbls)]
+    labels_connected_sizes = [np.sum(labels_connected == i) for i in np.unique(labels_connected)]
     largest_region = np.argmax(labels_connected_sizes[1:]) + 1
     seg[labels_connected != largest_region] = 0
     return seg
