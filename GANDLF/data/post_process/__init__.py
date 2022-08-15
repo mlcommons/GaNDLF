@@ -1,4 +1,4 @@
-from .morphology import fill_holes, cca
+from .morphology import torch_morphological, fill_holes, cca
 
 from .tensor import get_mapped_label
 
