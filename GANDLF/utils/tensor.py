@@ -398,10 +398,30 @@ def print_model_summary(
     model, input_batch_size, input_num_channels, input_patch_size, device=None
 ):
     """
+    _summary_
     Estimates the size of PyTorch models in memory
     for a given input size
+    Args:
+        model (torch.nn.Module): The model to be summarized.
+        input_batch_size (int): The batch size of the input.
+        input_num_channels (int): The number of channels of the input.
+        input_patch_size (tuple): The patch size of the input.
+        device (torch.device, optional): The device on which the model is run. Defaults to None.
     """
     input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
     if input_size[-1] == 1:
         input_size = input_size[:-1]
-    print(summary(model, input_size, device=device))
+    stats = summary(model, input_size, device=device, verbose=0)
+
+    print("Model Summary:")
+    print("\tInput size:", stats.to_megabytes(stats.total_input))
+    print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes))
+    print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes))
+    print(
+        "\tEstimated total size:",
+        stats.to_megabytes(
+            stats.total_input + stats.total_output_bytes + stats.total_param_bytes
+        ),
+    )
+    temp_output = stats.to_readable(stats.total_mult_adds)
+    print("\tTotal # of operations:", temp_output[1], temp_output[0])
