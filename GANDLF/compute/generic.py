@@ -79,13 +79,14 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
 
-    print_model_summary(
-        model,
-        parameters["batch_size"],
-        parameters["model"]["num_channels"],
-        parameters["patch_size"],
-        parameters["device"],
-    )
+    if parameters["model"]["print_summary"]:
+        print_model_summary(
+            model,
+            parameters["batch_size"],
+            parameters["model"]["num_channels"],
+            parameters["patch_size"],
+            parameters["device"],
+        )
 
     # only need to create scheduler if training
     if train_csv is not None:
