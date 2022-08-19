@@ -981,6 +981,7 @@ def test_train_metrics_regression_rad_2d(device):
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
+    parameters["model"]["print_summary"] = True
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["norm_type"] = "instance"
     parameters["model"]["amp"] = False
