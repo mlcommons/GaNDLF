@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchio
 from tqdm import tqdm
+from torchinfo import summary
 
 # global definition for both one_hot and reverse_one_hot
 special_cases_to_check = ["||"]
@@ -391,3 +392,16 @@ def get_linear_interpolation_mode(dimensionality):
         mode = "trilinear"
 
     return mode
+
+
+def print_model_summary(
+    model, input_batch_size, input_num_channels, input_patch_size, device=None
+):
+    """
+    Estimates the size of PyTorch models in memory
+    for a given input size
+    """
+    input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
+    if input_size[-1] == 1:
+        input_size = input_size[:-1]
+    print(summary(model, input_size, device=device))
