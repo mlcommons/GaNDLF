@@ -414,14 +414,14 @@ def print_model_summary(
     stats = summary(model, input_size, device=device, verbose=0)
 
     print("Model Summary:")
-    print("\tInput size:", stats.to_megabytes(stats.total_input))
-    print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes))
-    print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes))
+    print("\tInput size:", stats.to_megabytes(stats.total_input), "MB")
+    print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes), "MB")
+    print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes), "MB")
     print(
         "\tEstimated total size:",
         stats.to_megabytes(
             stats.total_input + stats.total_output_bytes + stats.total_param_bytes
-        ),
+        ), "MB",
     )
     temp_output = stats.to_readable(stats.total_mult_adds)
     print("\tTotal # of operations:", temp_output[1], temp_output[0])
