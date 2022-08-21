@@ -421,7 +421,8 @@ def print_model_summary(
         "\tEstimated total size:",
         stats.to_megabytes(
             stats.total_input + stats.total_output_bytes + stats.total_param_bytes
-        ), "MB",
+        ),
+        "MB",
     )
     temp_output = stats.to_readable(stats.total_mult_adds)
     print("\tTotal # of operations:", temp_output[1], temp_output[0])
