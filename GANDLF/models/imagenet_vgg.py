@@ -53,8 +53,9 @@ class imagenet_vgg11(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg11", pretrained=True, num_classes=self.n_classes
+            "vgg11", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -70,8 +71,9 @@ class imagenet_vgg11_bn(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg11_bn", pretrained=True, num_classes=self.n_classes
+            "vgg11_bn", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -87,8 +89,9 @@ class imagenet_vgg13(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg13", pretrained=True, num_classes=self.n_classes
+            "vgg13", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -104,8 +107,9 @@ class imagenet_vgg13_bn(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg13_bn", pretrained=True, num_classes=self.n_classes
+            "vgg13_bn", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -121,8 +125,9 @@ class imagenet_vgg16(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg16", pretrained=True, num_classes=self.n_classes
+            "vgg16", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -138,8 +143,9 @@ class imagenet_vgg16_bn(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg16_bn", pretrained=True, num_classes=self.n_classes
+            "vgg16_bn", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -155,8 +161,9 @@ class imagenet_vgg19(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg19", pretrained=True, num_classes=self.n_classes
+            "vgg19", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
@@ -172,8 +179,9 @@ class imagenet_vgg19_bn(ModelBase):
         if self.n_dimensions != 2:
             raise ValueError("ImageNet pre-trained models only support 2D images")
 
+        pretrained = parameters["model"].get("pretrained", True)
         self.model = create_torchvision_model(
-            "vgg19_bn", pretrained=True, num_classes=self.n_classes
+            "vgg19_bn", pretrained=pretrained, num_classes=self.n_classes
         )
 
     def forward(self, x):
