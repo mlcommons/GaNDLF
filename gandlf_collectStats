@@ -76,7 +76,9 @@ def main():
 
             print("Classification task detected, generating accuracy and loss plots.")
 
-            if combinedPlots:  # check whether user wants training + validation overlayed plots
+            if (
+                combinedPlots
+            ):  # check whether user wants training + validation overlayed plots
 
                 df_training = pd.read_csv(trainingLogs)
                 df_validation = pd.read_csv(validationLogs)
