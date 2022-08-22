@@ -174,11 +174,10 @@ class ImageNet_UNet(ModelBase):
         )
         encoder_depth = parameters["model"].get("depth", 5)
         encoder_depth = parameters["model"].get("encoder_depth", encoder_depth)
-        parameters["model"]["encoder_weights"] = parameters["model"].get(
-            "encoder_weights", "imagenet"
-        )
-        # ensure we are able to generate non-pretrained models
-        if parameters["model"]["encoder_weights"] == "None":
+        parameters["model"]["pretrained"] = parameters["model"].get("pretrained", True)
+        if parameters["model"]["pretrained"]:
+            parameters["model"]["encoder_weights"] = "imagenet"
+        else:
             parameters["model"]["encoder_weights"] = None
 
         if parameters["problem_type"] != "segmentation":
