@@ -281,15 +281,15 @@ def inference_loop(
                     probs_map[n, ...] * 255,
                     dtype=np.uint8,
                 )
-                heatmaps["_" + str(n) + "_jet"] = cv2.applyColorMap(
+                heatmaps[str(n) + "_jet"] = cv2.applyColorMap(
                     heatmap_gray,
                     cv2.COLORMAP_JET,
                 )
-                heatmaps["_" + str(n) + "_turbo"] = cv2.applyColorMap(
+                heatmaps[str(n) + "_turbo"] = cv2.applyColorMap(
                     heatmap_gray,
                     cv2.COLORMAP_TURBO,
                 )
-                heatmaps["_" + str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
+                heatmaps[str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
 
                 # save the segmentation maps
                 file_to_write = os.path.join(
