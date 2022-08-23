@@ -33,7 +33,7 @@ def get_tissue_mask(image):
         mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
     except Exception as e:
         print("Entering fallback in histology inference loader because of: ", e)
-        mask = np.ones(image.shape, dtype=np.uint8)
+        mask = np.ones(image.shape, dtype=np.ubyte)
 
     return mask
 
@@ -78,7 +78,7 @@ class InferTumorSegDataset(Dataset):
         height, width = self._os_image.level_dimensions[self._selected_level]
         if self._selected_level != self._mask_level:
             mask = resize(mask, (height, width))
-        mask = (mask > 0).astype(np.uint8)
+        mask = (mask > 0).astype(np.ubyte)
 
         # This is buggy because currently if mask_level is not equal to selected_level,
         # then this logic straight up does not work
