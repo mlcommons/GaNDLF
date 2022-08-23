@@ -237,13 +237,13 @@ def training_loop(
         params,
     ) = create_pytorch_objects(params, training_data, validation_data, device)
 
-    if parameters["model"]["print_summary"]:
+    if params["model"]["print_summary"]:
         print_model_summary(
             model,
-            parameters["batch_size"],
-            parameters["model"]["num_channels"],
-            parameters["patch_size"],
-            parameters["device"],
+            params["batch_size"],
+            params["model"]["num_channels"],
+            params["patch_size"],
+            params["device"],
         )
 
     if testingDataDefined:
