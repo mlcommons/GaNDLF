@@ -173,6 +173,7 @@ def inference_loop(
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             try:
+                count_map, probs_map = None, None
                 count_map = np.zeros((level_height, level_width), dtype=np.uint8)
                 # this can probably be made into a single multi-class probability map that functions for all workloads
                 probs_map = np.zeros(
@@ -188,7 +189,6 @@ def inference_loop(
                     flush=True,
                     file=sys.stderr,
                 )
-                count_map, probs_map = None, None
 
             patch_size = parameters["patch_size"]
             # patch size should be 2D for histology
