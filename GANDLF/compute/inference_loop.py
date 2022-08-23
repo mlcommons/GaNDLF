@@ -1,6 +1,6 @@
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
-import os, pickle, argparse
+import os, pickle, argparse, sys
 from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
@@ -180,7 +180,12 @@ def inference_loop(
                     dtype=np.float16,
                 )
             except Exception as e:
-                print("Could not initialize count and probability maps: ", e)
+                print(
+                    "Could not initialize count and probability maps for subject ID:",
+                    subject_name,
+                    flush=True,
+                    file=sys.stderr,
+                )
                 count_map, probs_map = None, None
 
             patch_size = parameters["patch_size"]
