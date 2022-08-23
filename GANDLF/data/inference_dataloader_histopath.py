@@ -32,6 +32,7 @@ def get_tissue_mask(image):
         # upsample the mask to original size with nearest neighbor interpolation
         mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
     except Exception as e:
+        print("Entering fallback in histology inference loader because of: ", e)
         mask = np.ones(image.shape, dtype=np.uint8)
 
     return mask
