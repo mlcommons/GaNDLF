@@ -80,7 +80,7 @@ def inference_loop(
                     "The specified model was not found: {0}.".format(file_to_check)
                 )
 
-        main_dict = torch.load(file_to_check)
+        main_dict = torch.load(file_to_check,device=parameters["device"])
         model.load_state_dict(main_dict["model_state_dict"])
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
