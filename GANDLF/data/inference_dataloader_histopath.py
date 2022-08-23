@@ -65,20 +65,24 @@ class InferTumorSegDataset(Dataset):
         self._basic_preprocessing()
 
     def _basic_preprocessing(self):
-        mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
-        mask = get_tissue_mask(
-            self._os_image.read_region(
-                (0, 0),
-                self._mask_level,
-                (mask_xdim, mask_ydim),
-                as_array=True,
+        mask = None
+        try:
+            mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
+            mask = get_tissue_mask(
+                self._os_image.read_region(
+                    (0, 0),
+                    self._mask_level,
+                    (mask_xdim, mask_ydim),
+                    as_array=True,
+                )
             )
-        )
 
-        height, width = self._os_image.level_dimensions[self._selected_level]
-        if self._selected_level != self._mask_level:
-            mask = resize(mask, (height, width))
-        mask = (mask > 0).astype(np.ubyte)
+            height, width = self._os_image.level_dimensions[self._selected_level]
+            if self._selected_level != self._mask_level:
+                mask = resize(mask, (height, width))
+            mask = (mask > 0).astype(np.ubyte)
+        except Exception as _:
+            print("Mask could not be initialized, using entire image")
 
         # This is buggy because currently if mask_level is not equal to selected_level,
         # then this logic straight up does not work
@@ -108,12 +112,15 @@ class InferTumorSegDataset(Dataset):
                 if j + self._patch_size[1] > height:
                     coord_height = height - self._patch_size[1]
                 # If there is anything in the mask patch, only then consider it
-                if np.any(
-                    mask[
-                        coord_width : coord_width + self._patch_size[0],
-                        coord_height : coord_height + self._patch_size[1],
-                    ]
-                ):
+                if mask is not None:
+                    if np.any(
+                        mask[
+                            coord_width : coord_width + self._patch_size[0],
+                            coord_height : coord_height + self._patch_size[1],
+                        ]
+                    ):
+                        self._points.append([coord_width, coord_height])
+                else:
                     self._points.append([coord_width, coord_height])
 
         self._points = np.array(self._points)
