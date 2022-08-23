@@ -32,7 +32,7 @@ def get_tissue_mask(image):
         # upsample the mask to original size with nearest neighbor interpolation
         mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
     except Exception as e:
-        mask = np.ones(image.shape)
+        mask = np.ones(image.shape, dtype=np.uint8)
 
     return mask
 
@@ -65,14 +65,14 @@ class InferTumorSegDataset(Dataset):
 
     def _basic_preprocessing(self):
         mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
-        extracted_image = self._os_image.read_region(
-            (0, 0),
-            self._mask_level,
-            (mask_xdim, mask_ydim),
-            as_array=True,
+        mask = get_tissue_mask(
+            self._os_image.read_region(
+                (0, 0),
+                self._mask_level,
+                (mask_xdim, mask_ydim),
+                as_array=True,
+            )
         )
-        mask = get_tissue_mask(extracted_image)
-        del extracted_image
 
         height, width = self._os_image.level_dimensions[self._selected_level]
         if self._selected_level != self._mask_level:
