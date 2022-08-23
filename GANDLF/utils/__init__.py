@@ -18,6 +18,7 @@ from .tensor import (
     get_class_imbalance_weights_segmentation,
     get_class_imbalance_weights_classification,
     get_linear_interpolation_mode,
+    print_model_summary,
 )
 
 from .write_parse import (
