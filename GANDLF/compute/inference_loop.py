@@ -19,6 +19,7 @@ from GANDLF.utils import (
     get_dataframe,
     best_model_path_end,
     load_ov_model,
+    print_model_summary,
 )
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
@@ -80,7 +81,7 @@ def inference_loop(
                     "The specified model was not found: {0}.".format(file_to_check)
                 )
 
-        main_dict = torch.load(file_to_check, map_location=device)
+        main_dict = torch.load(file_to_check, map_location=parameters["device"])
         model.load_state_dict(main_dict["model_state_dict"])
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
@@ -116,6 +117,15 @@ def inference_loop(
 
     # radiology inference
     if parameters["modality"] == "rad":
+        if parameters["model"]["print_summary"]:
+            print_model_summary(
+                model,
+                parameters["batch_size"],
+                parameters["model"]["num_channels"],
+                parameters["patch_size"],
+                parameters["device"],
+            )
+
         # Setting up the inference loader
         inference_loader = get_testing_loader(parameters)
 
@@ -199,6 +209,15 @@ def inference_loop(
             )
             # update patch_size in case microns were requested
             patch_size = patient_dataset_obj.get_patch_size()
+
+            if parameters["model"]["print_summary"]:
+                print_model_summary(
+                    model,
+                    parameters["batch_size"],
+                    parameters["model"]["num_channels"],
+                    patch_size,
+                    parameters["device"],
+                )
 
             pbar.set_description(
                 "Looping over patches for subject: " + str(subject_name)

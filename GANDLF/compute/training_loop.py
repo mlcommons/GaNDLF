@@ -15,6 +15,7 @@ from GANDLF.utils import (
     load_model,
     version_check,
     write_training_patches,
+    print_model_summary,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -235,6 +236,15 @@ def training_loop(
         scheduler,
         params,
     ) = create_pytorch_objects(params, training_data, validation_data, device)
+
+    if parameters["model"]["print_summary"]:
+        print_model_summary(
+            model,
+            parameters["batch_size"],
+            parameters["model"]["num_channels"],
+            parameters["patch_size"],
+            parameters["device"],
+        )
 
     if testingDataDefined:
         test_dataloader = get_testing_loader(params)
