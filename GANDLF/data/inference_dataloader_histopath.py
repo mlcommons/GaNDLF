@@ -26,11 +26,13 @@ def get_tissue_mask(image):
     Returns:
         numpy.array: The tissue mask.
     """
-    resized_image = resize(image, (512, 512), anti_aliasing=True)
-    mask = tissue_mask(resized_image)
-
-    # upsample the mask to original size with nearest neighbor interpolation
-    mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
+    try:
+        resized_image = resize(image, (512, 512), anti_aliasing=True)
+        mask = tissue_mask(resized_image)
+        # upsample the mask to original size with nearest neighbor interpolation
+        mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
+    except Exception as e:
+        mask = np.ones(image.shape)
 
     return mask
 
