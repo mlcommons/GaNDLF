@@ -118,7 +118,6 @@ class InferTumorSegDataset(Dataset):
 
         self._points = np.array(self._points)
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
-        self._mask = mask
 
     def get_patch_size(self):
         return self._patch_size
