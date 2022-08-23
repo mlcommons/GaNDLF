@@ -62,55 +62,78 @@ class InferTumorSegDataset(Dataset):
         self._basic_preprocessing()
 
     def _basic_preprocessing(self):
-        mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
-        extracted_image = self._os_image.read_region(
-            (0, 0),
-            self._mask_level,
-            (mask_xdim, mask_ydim),
-            as_array=True,
-        )
-        mask = get_tissue_mask(extracted_image)
-        del extracted_image
+        try:
+            mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
+            extracted_image = self._os_image.read_region(
+                (0, 0),
+                self._mask_level,
+                (mask_xdim, mask_ydim),
+                as_array=True,
+            )
+            mask = get_tissue_mask(extracted_image)
+            del extracted_image
 
-        height, width = self._os_image.level_dimensions[self._selected_level]
-        if self._selected_level != self._mask_level:
-            mask = resize(mask, (height, width))
-        mask = (mask > 0).astype(np.uint8)
-
-        # This is buggy because currently if mask_level is not equal to selected_level,
-        # then this logic straight up does not work
-        # You would have to scale the patch size appropriately for this to work correctly
-        # Remove all the points which are closer to the boundary of the wsi
-        # by accessing the WSI level properties with
-        # self._os_image.level_dimensions[self._selected_level]
-        # Logic as if point + self.patch_size > wsi_dimensions
-        # The move the point by the wsi_dimensions - (patch_size + self.points)
-        # This is because the patch is not going to be extracted if it is
-        # outside the wsi
-        for i in range(
-            0,
-            width - (self._patch_size[0] + self._stride_size[0]),
-            self._stride_size[0],
-        ):
-            for j in range(
+            height, width = self._os_image.level_dimensions[self._selected_level]
+            if self._selected_level != self._mask_level:
+                mask = resize(mask, (height, width))
+            mask = (mask > 0).astype(np.uint8)
+            # This is buggy because currently if mask_level is not equal to selected_level,
+            # then this logic straight up does not work
+            # You would have to scale the patch size appropriately for this to work correctly
+            # Remove all the points which are closer to the boundary of the wsi
+            # by accessing the WSI level properties with
+            # self._os_image.level_dimensions[self._selected_level]
+            # Logic as if point + self.patch_size > wsi_dimensions
+            # The move the point by the wsi_dimensions - (patch_size + self.points)
+            # This is because the patch is not going to be extracted if it is
+            # outside the wsi
+            for i in range(
                 0,
-                height - (self._patch_size[1] + self._stride_size[1]),
-                self._stride_size[1],
+                width - (self._patch_size[0] + self._stride_size[0]),
+                self._stride_size[0],
             ):
-                # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
-                coord_width, coord_height = i, j
-                if i + self._patch_size[0] > width:
-                    coord_width = width - self._patch_size[0]
-                # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
-                if j + self._patch_size[1] > height:
-                    coord_height = height - self._patch_size[1]
-                # If there is anything in the mask patch, only then consider it
-                if np.any(
-                    mask[
-                        coord_width : coord_width + self._patch_size[0],
-                        coord_height : coord_height + self._patch_size[1],
-                    ]
+                for j in range(
+                    0,
+                    height - (self._patch_size[1] + self._stride_size[1]),
+                    self._stride_size[1],
                 ):
+                    # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
+                    coord_width, coord_height = i, j
+                    if i + self._patch_size[0] > width:
+                        coord_width = width - self._patch_size[0]
+                    # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
+                    if j + self._patch_size[1] > height:
+                        coord_height = height - self._patch_size[1]
+                    # If there is anything in the mask patch, only then consider it
+                    if np.any(
+                        mask[
+                            coord_width : coord_width + self._patch_size[0],
+                            coord_height : coord_height + self._patch_size[1],
+                        ]
+                    ):
+                        self._points.append([coord_width, coord_height])
+
+        except Exception as e:
+
+            # If mask generation fails, take run across the whole slide
+            for i in range(
+                0,
+                width - (self._patch_size[0] + self._stride_size[0]),
+                self._stride_size[0],
+            ):
+                for j in range(
+                    0,
+                    height - (self._patch_size[1] + self._stride_size[1]),
+                    self._stride_size[1],
+                ):
+                    # If point goes beyond the wsi in y_dim, then move so that we can extract the patch
+                    coord_width, coord_height = i, j
+                    if i + self._patch_size[0] > width:
+                        coord_width = width - self._patch_size[0]
+                    # If point goes beyond the wsi in x_dim, then move so that we can extract the patch
+                    if j + self._patch_size[1] > height:
+                        coord_height = height - self._patch_size[1]
+
                     self._points.append([coord_width, coord_height])
 
         self._points = np.array(self._points)
