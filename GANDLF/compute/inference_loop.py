@@ -183,6 +183,8 @@ def inference_loop(
                 print(
                     "Could not initialize count and probability maps for subject ID:",
                     subject_name,
+                    "; Error:",
+                    e,
                     flush=True,
                     file=sys.stderr,
                 )

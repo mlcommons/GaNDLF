@@ -81,8 +81,8 @@ class InferTumorSegDataset(Dataset):
             if self._selected_level != self._mask_level:
                 mask = resize(mask, (height, width))
             mask = (mask > 0).astype(np.ubyte)
-        except Exception as _:
-            print("Mask could not be initialized, using entire image")
+        except Exception as e:
+            print("Mask could not be initialized, using entire image:", e)
 
         # This is buggy because currently if mask_level is not equal to selected_level,
         # then this logic straight up does not work
