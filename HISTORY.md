@@ -3,6 +3,7 @@
 - `stride_size` is now handled internally for histology data
 - Probability maps are now saved overlaid with original WSI
 - Largest Connected Component Analsysis is now added
+- Added ability to print model size and summary at run-time
 
 ## 0.0.14
 
