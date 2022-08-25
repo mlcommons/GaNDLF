@@ -5,7 +5,6 @@ from GANDLF.data import (
     get_train_loader,
     get_validation_loader,
 )
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
