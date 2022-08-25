@@ -531,6 +531,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "WARNING: 'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead",
                 flush=True,
             )
+        params["model"]["print_summary"] = params["model"].get("print_summary", True)
 
         channel_keys_to_check = ["n_channels", "channels", "model_channels"]
         for key in channel_keys_to_check:
@@ -541,6 +542,10 @@ def parseConfig(config_file_path, version_check_flag=True):
         # initialize model type for processing: if not defined, default to torch
         if not ("type" in params["model"]):
             params["model"]["type"] = "torch"
+
+        # initialize openvino model data type for processing: if not defined, default to FP32
+        if not ("data_type" in params["model"]):
+            params["model"]["data_type"] = "FP32"
 
         # set default save strategy for model
         if not ("save_at_every_epoch" in params["model"]):

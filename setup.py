@@ -50,7 +50,7 @@ except Exception as error:
 
 requirements = [
     "black",
-    "numpy==1.21.0",
+    "numpy==1.22.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "torchvision",
@@ -79,6 +79,7 @@ requirements = [
     "zarr==2.10.3",
     "pydicom",
     "onnx",
+    "torchinfo==1.7.0",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
