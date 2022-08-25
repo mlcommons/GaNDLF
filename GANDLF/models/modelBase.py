@@ -2,7 +2,6 @@
 """All Models in GANDLF are to be derived from this base class code."""
 
 import torch.nn as nn
-import torch.nn.functional as F
 
 from GANDLF.utils import get_linear_interpolation_mode
 from GANDLF.utils.modelbase import get_modelbase_final_layer
