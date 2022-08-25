@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """All Models in GANDLF are to be derived from this base class code."""
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
