@@ -3,6 +3,7 @@
 - `stride_size` is now handled internally for histology data
 - Probability maps are now saved overlaid with original WSI
 - Added ability to print model size and summary at run-time
+- Improved error checking added for WSI inference
 
 ## 0.0.14
 
