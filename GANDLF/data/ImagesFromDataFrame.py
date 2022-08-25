@@ -180,7 +180,7 @@ def ImagesFromDataFrame(
                 )
             try:
                 perform_sanity_check_on_subject(subject, parameters)
-            except Exception as e:
+            except Exception:
                 subjects_with_error.append(subject["subject_id"])
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
