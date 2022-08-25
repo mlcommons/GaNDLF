@@ -1,5 +1,4 @@
 import os, hashlib, pkg_resources, subprocess
-from time import gmtime, strftime
 import torch
 
 from .generic import get_unique_timestamp
