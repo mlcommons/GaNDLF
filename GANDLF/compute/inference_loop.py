@@ -312,37 +312,37 @@ def inference_loop(
 
             heatmaps = {}
             if probs_map is not None:
-                for n in range(parameters["model"]["num_classes"]):
-                    heatmap_gray = np.array(
-                        probs_map[n, ...] * 255,
-                        dtype=np.uint8,
-                    )
-                    heatmaps[str(n) + "_jet"] = cv2.applyColorMap(
-                        heatmap_gray,
-                        cv2.COLORMAP_JET,
-                    )
-                    heatmaps[str(n) + "_turbo"] = cv2.applyColorMap(
-                        heatmap_gray,
-                        cv2.COLORMAP_TURBO,
-                    )
-                    heatmaps[str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
+                try:
+                    for n in range(parameters["model"]["num_classes"]):
+                        heatmap_gray = np.array(
+                            probs_map[n, ...] * 255,
+                            dtype=np.uint8,
+                        )
+                        heatmaps[str(n) + "_jet"] = cv2.applyColorMap(
+                            heatmap_gray,
+                            cv2.COLORMAP_JET,
+                        )
+                        heatmaps[str(n) + "_turbo"] = cv2.applyColorMap(
+                            heatmap_gray,
+                            cv2.COLORMAP_TURBO,
+                        )
+                        heatmaps[str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
 
-                    # save the segmentation maps
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "seg_map_" + str(n) + ".png"
-                    )
+                        # save the segmentation maps
+                        file_to_write = os.path.join(
+                            subject_dest_dir, "seg_map_" + str(n) + ".png"
+                        )
 
-                    segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
+                        segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
 
-                    cv2.imwrite(file_to_write, segmap)
+                        cv2.imwrite(file_to_write, segmap)
 
-                for key in heatmaps:
-                    file_to_write = os.path.join(
-                        subject_dest_dir, "probability_map" + key + ".png"
-                    )
-                    cv2.imwrite(file_to_write, heatmaps[key])
+                    for key in heatmaps:
+                        file_to_write = os.path.join(
+                            subject_dest_dir, "probability_map" + key + ".png"
+                        )
+                        cv2.imwrite(file_to_write, heatmaps[key])
 
-                    try:
                         os_image_array = os_image.read_region(
                             (0, 0),
                             parameters["slide_level"],
@@ -362,8 +362,8 @@ def inference_loop(
                             "probability_map_blended_" + key + ".png",
                         )
                         cv2.imwrite(file_to_write, blended_image)
-                    except Exception as ex:
-                        print("Could not write blended images; error:", ex)
+                except Exception as ex:
+                    print("Could not write heatmaps; error:", ex)
 
 
 if __name__ == "__main__":
