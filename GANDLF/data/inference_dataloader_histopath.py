@@ -26,11 +26,14 @@ def get_tissue_mask(image):
     Returns:
         numpy.array: The tissue mask.
     """
-    resized_image = resize(image, (512, 512), anti_aliasing=True)
-    mask = tissue_mask(resized_image)
-
-    # upsample the mask to original size with nearest neighbor interpolation
-    mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
+    try:
+        resized_image = resize(image, (512, 512), anti_aliasing=True)
+        mask = tissue_mask(resized_image)
+        # upsample the mask to original size with nearest neighbor interpolation
+        mask = resize(mask, (image.shape[0], image.shape[1]), order=0, mode="constant")
+    except Exception as e:
+        print("Entering fallback in histology inference loader because of: ", e)
+        mask = np.ones(image.shape, dtype=np.ubyte)
 
     return mask
 
@@ -62,21 +65,24 @@ class InferTumorSegDataset(Dataset):
         self._basic_preprocessing()
 
     def _basic_preprocessing(self):
-        mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
-        extracted_image = self._os_image.read_region(
-            (0, 0),
-            self._mask_level,
-            (mask_xdim, mask_ydim),
-            as_array=True,
-        )
-        mask = get_tissue_mask(extracted_image)
-        del extracted_image
-
+        mask = None
         height, width = self._os_image.level_dimensions[self._selected_level]
-        if self._selected_level != self._mask_level:
-            mask = resize(mask, (height, width))
-        mask = (mask > 0).astype(np.uint8)
+        try:
+            mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
+            mask = get_tissue_mask(
+                self._os_image.read_region(
+                    (0, 0),
+                    self._mask_level,
+                    (mask_xdim, mask_ydim),
+                    as_array=True,
+                )
+            )
 
+            if self._selected_level != self._mask_level:
+                mask = resize(mask, (height, width))
+            mask = (mask > 0).astype(np.ubyte)
+        except Exception as e:
+            print("Mask could not be initialized, using entire image:", e)
         # This is buggy because currently if mask_level is not equal to selected_level,
         # then this logic straight up does not work
         # You would have to scale the patch size appropriately for this to work correctly
@@ -105,17 +111,19 @@ class InferTumorSegDataset(Dataset):
                 if j + self._patch_size[1] > height:
                     coord_height = height - self._patch_size[1]
                 # If there is anything in the mask patch, only then consider it
-                if np.any(
-                    mask[
-                        coord_width : coord_width + self._patch_size[0],
-                        coord_height : coord_height + self._patch_size[1],
-                    ]
-                ):
+                if mask is not None:
+                    if np.any(
+                        mask[
+                            coord_width : coord_width + self._patch_size[0],
+                            coord_height : coord_height + self._patch_size[1],
+                        ]
+                    ):
+                        self._points.append([coord_width, coord_height])
+                else:
                     self._points.append([coord_width, coord_height])
 
         self._points = np.array(self._points)
         self._points[:, [0, 1]] = self._points[:, [1, 0]]
-        self._mask = mask
 
     def get_patch_size(self):
         return self._patch_size
