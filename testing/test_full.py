@@ -1722,7 +1722,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = True
-    parameters["model"]["print_summary"] = False
+    parameters["model"]["print_summary"] = True
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
     Path(modelDir).mkdir(parents=True, exist_ok=True)

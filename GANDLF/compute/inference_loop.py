@@ -1,6 +1,6 @@
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
-import os, pickle, argparse
+import os, pickle, argparse, sys
 from pathlib import Path
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
@@ -19,6 +19,7 @@ from GANDLF.utils import (
     get_dataframe,
     best_model_path_end,
     load_ov_model,
+    print_model_summary,
 )
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
@@ -80,7 +81,7 @@ def inference_loop(
                     "The specified model was not found: {0}.".format(file_to_check)
                 )
 
-        main_dict = torch.load(file_to_check)
+        main_dict = torch.load(file_to_check, map_location=parameters["device"])
         model.load_state_dict(main_dict["model_state_dict"])
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
@@ -116,6 +117,15 @@ def inference_loop(
 
     # radiology inference
     if parameters["modality"] == "rad":
+        if parameters["model"]["print_summary"]:
+            print_model_summary(
+                model,
+                parameters["batch_size"],
+                parameters["model"]["num_channels"],
+                parameters["patch_size"],
+                parameters["device"],
+            )
+
         # Setting up the inference loader
         inference_loader = get_testing_loader(parameters)
 
@@ -162,12 +172,23 @@ def inference_loop(
             )
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
-            count_map = np.zeros((level_height, level_width), dtype=np.uint8)
-            # this can probably be made into a single multi-class probability map that functions for all workloads
-            probs_map = np.zeros(
-                (parameters["model"]["num_classes"], level_height, level_width),
-                dtype=np.float16,
-            )
+            try:
+                count_map, probs_map = None, None
+                count_map = np.zeros((level_height, level_width), dtype=np.uint8)
+                # this can probably be made into a single multi-class probability map that functions for all workloads
+                probs_map = np.zeros(
+                    (parameters["model"]["num_classes"], level_height, level_width),
+                    dtype=np.float16,
+                )
+            except Exception as e:
+                print(
+                    "Could not initialize count and probability maps for subject ID:",
+                    subject_name,
+                    "; Error:",
+                    e,
+                    flush=True,
+                    file=sys.stderr,
+                )
 
             patch_size = parameters["patch_size"]
             # patch size should be 2D for histology
@@ -200,6 +221,15 @@ def inference_loop(
             # update patch_size in case microns were requested
             patch_size = patient_dataset_obj.get_patch_size()
 
+            if parameters["model"]["print_summary"]:
+                print_model_summary(
+                    model,
+                    parameters["batch_size"],
+                    parameters["model"]["num_channels"],
+                    patch_size,
+                    parameters["device"],
+                )
+
             pbar.set_description(
                 "Looping over patches for subject: " + str(subject_name)
             )
@@ -225,10 +255,11 @@ def inference_loop(
                     )[parameters["model"]["IO"][1][0]]
 
                 for i in range(int(output.shape[0])):
-                    count_map[
-                        x_coords[i] : x_coords[i] + patch_size[0],
-                        y_coords[i] : y_coords[i] + patch_size[1],
-                    ] += 1
+                    if count_map is not None:
+                        count_map[
+                            x_coords[i] : x_coords[i] + patch_size[0],
+                            y_coords[i] : y_coords[i] + patch_size[1],
+                        ] += 1
                     output_to_write += (
                         str(subject_name)
                         + ","
@@ -238,34 +269,38 @@ def inference_loop(
                     )
                     for n in range(parameters["model"]["num_classes"]):
                         # This is a temporary fix for the segmentation problem for single class
-                        probs_map[
-                            n,
-                            x_coords[i] : x_coords[i] + patch_size[0],
-                            y_coords[i] : y_coords[i] + patch_size[1],
-                        ] += output[i][n]
+                        if probs_map is not None:
+                            probs_map[
+                                n,
+                                x_coords[i] : x_coords[i] + patch_size[0],
+                                y_coords[i] : y_coords[i] + patch_size[1],
+                            ] += output[i][n]
                         if parameters["problem_type"] != "segmentation":
                             output_to_write += "," + str(output[i][n])
                     output_to_write += "\n"
 
             # ensure probability map is scaled
             # reusing variables to save memory
-            probs_map = np.divide(probs_map, count_map)
+            if probs_map is not None:
+                probs_map = np.divide(probs_map, count_map)
 
-            # Check if out_probs_map is greater than 1, print a warning
-            if np.max(probs_map) > 1:
-                # Print a warning
-                print(
-                    "Warning: Probability map is greater than 1, report the images to GaNDLF developers"
+                # Check if out_probs_map is greater than 1, print a warning
+                if np.max(probs_map) > 1:
+                    # Print a warning
+                    print(
+                        "Warning: Probability map is greater than 1, report the images to GaNDLF developers"
+                    )
+
+            if count_map is not None:
+                count_map = np.array(count_map * 255, dtype=np.uint16)
+                imsave(
+                    os.path.join(
+                        subject_dest_dir,
+                        str(row[parameters["headers"]["subjectIDHeader"]])
+                        + "_count.png",
+                    ),
+                    count_map,
                 )
-
-            count_map = np.array(count_map * 255, dtype=np.uint16)
-            imsave(
-                os.path.join(
-                    subject_dest_dir,
-                    str(row[parameters["headers"]["subjectIDHeader"]]) + "_count.png",
-                ),
-                count_map,
-            )
 
             if parameters["problem_type"] != "segmentation":
                 output_file = os.path.join(
@@ -276,58 +311,59 @@ def inference_loop(
                     f.write(output_to_write)
 
             heatmaps = {}
-            for n in range(parameters["model"]["num_classes"]):
-                heatmap_gray = np.array(
-                    probs_map[n, ...] * 255,
-                    dtype=np.uint8,
-                )
-                heatmaps["_" + str(n) + "_jet"] = cv2.applyColorMap(
-                    heatmap_gray,
-                    cv2.COLORMAP_JET,
-                )
-                heatmaps["_" + str(n) + "_turbo"] = cv2.applyColorMap(
-                    heatmap_gray,
-                    cv2.COLORMAP_TURBO,
-                )
-                heatmaps["_" + str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
-
-                # save the segmentation maps
-                file_to_write = os.path.join(
-                    subject_dest_dir, "seg_map_" + str(n) + ".png"
-                )
-
-                segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
-
-                cv2.imwrite(file_to_write, segmap)
-
-            for key in heatmaps:
-                file_to_write = os.path.join(
-                    subject_dest_dir, "probability_map" + key + ".png"
-                )
-                cv2.imwrite(file_to_write, heatmaps[key])
-
+            if probs_map is not None:
                 try:
-                    os_image_array = os_image.read_region(
-                        (0, 0),
-                        parameters["slide_level"],
-                        (level_width, level_height),
-                        as_array=True,
-                    )
-                    blended_image = cv2.addWeighted(
-                        os_image_array,
-                        parameters["blending_alpha"],
-                        heatmaps[key],
-                        1 - parameters["blending_alpha"],
-                        0,
-                    )
+                    for n in range(parameters["model"]["num_classes"]):
+                        heatmap_gray = np.array(
+                            probs_map[n, ...] * 255,
+                            dtype=np.uint8,
+                        )
+                        heatmaps[str(n) + "_jet"] = cv2.applyColorMap(
+                            heatmap_gray,
+                            cv2.COLORMAP_JET,
+                        )
+                        heatmaps[str(n) + "_turbo"] = cv2.applyColorMap(
+                            heatmap_gray,
+                            cv2.COLORMAP_TURBO,
+                        )
+                        heatmaps[str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
 
-                    file_to_write = os.path.join(
-                        subject_dest_dir,
-                        "probability_map_blended_" + key + ".png",
-                    )
-                    cv2.imwrite(file_to_write, blended_image)
+                        # save the segmentation maps
+                        file_to_write = os.path.join(
+                            subject_dest_dir, "seg_map_" + str(n) + ".png"
+                        )
+
+                        segmap = ((probs_map[n, ...] > 0.5).astype(np.uint8)) * 255
+
+                        cv2.imwrite(file_to_write, segmap)
+
+                    for key in heatmaps:
+                        file_to_write = os.path.join(
+                            subject_dest_dir, "probability_map" + key + ".png"
+                        )
+                        cv2.imwrite(file_to_write, heatmaps[key])
+
+                        os_image_array = os_image.read_region(
+                            (0, 0),
+                            parameters["slide_level"],
+                            (level_width, level_height),
+                            as_array=True,
+                        )
+                        blended_image = cv2.addWeighted(
+                            os_image_array,
+                            parameters["blending_alpha"],
+                            heatmaps[key],
+                            1 - parameters["blending_alpha"],
+                            0,
+                        )
+
+                        file_to_write = os.path.join(
+                            subject_dest_dir,
+                            "probability_map_blended_" + key + ".png",
+                        )
+                        cv2.imwrite(file_to_write, blended_image)
                 except Exception as ex:
-                    print("Could not write blended images; error:", ex)
+                    print("Could not write heatmaps; error:", ex)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@
 - Probability maps are now saved overlaid with original WSI
 - Largest Connected Component Analsysis is now added
 - Added ability to print model size and summary at run-time
+- Improved error checking added for WSI inference
 
 ## 0.0.14
 
