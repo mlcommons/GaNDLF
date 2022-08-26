@@ -1843,6 +1843,13 @@ def test_train_inference_classification_histology_large_2d(device):
                 parameters=parameters,
                 device=device,
             )
+            assert (
+                os.path.exists(
+                    os.path.join(modelDir, input_df["SubjectID"][0], "predictions.csv")
+                )
+                is True
+            )
+
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
 
