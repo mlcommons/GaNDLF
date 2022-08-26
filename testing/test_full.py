@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from pydicom.data import get_testdata_file
+import pyvips as pv
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
@@ -1767,8 +1768,6 @@ def test_train_inference_classification_histology_large_2d(device):
     # resize the image
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
     for _, row in input_df.iterrows():
-        import pyvips as pv
-
         img = pv.Image.new_from_file(row["Channel_0"])
         img_resize = img.resize(10)
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
