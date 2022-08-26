@@ -22,7 +22,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies and package
       run: |
-        apt-get install libvips -y
+        sudo apt-get install libvips -y
         python -m pip install --upgrade pip
         python -m pip install wheel
         python -m pip install pyvips
