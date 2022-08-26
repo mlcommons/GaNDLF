@@ -34,7 +34,10 @@ jobs:
         pytest --cov=. --cov-report=xml -k "generic"
     - name: Run classification unit tests
       run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification"
+        pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
+    - name: Run classification unit tests with histology
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
     - name: Run regression unit tests
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "regression"
@@ -44,8 +47,8 @@ jobs:
     - name: Run transunet unit tests
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "transunet"
-       
-     
+
+
     - name: Upload coverage
       uses: codecov/codecov-action@v1
       with:
