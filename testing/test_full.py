@@ -1759,7 +1759,7 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
-    parameters_patch["patch_size"] = "[100m,100m]"
+    parameters_patch["patch_size"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1793,7 +1793,7 @@ def test_train_inference_classification_histology_large_2d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = 300
+    parameters["patch_size"] = 128
     file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -1822,23 +1822,29 @@ def test_train_inference_classification_histology_large_2d(device):
         reset=True,
     )
     parameters["output_dir"] = modelDir  # this is in inference mode
+    # drop last subject
+    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
+    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification_resize.csv", train=False
     )
-    for model_type in all_model_type:
-        parameters["nested_training"]["testing"] = 1
-        parameters["nested_training"]["validation"] = -2
-        parameters["output_dir"] = modelDir  # this is in inference mode
-        inference_data, parameters["headers"] = parseTrainingCSV(
-            inputDir + "/train_2d_histo_segmentation.csv", train=False
-        )
-        parameters["model"]["type"] = model_type
-        InferenceManager(
-            dataframe=inference_data,
-            outputDir=modelDir,
-            parameters=parameters,
-            device=device,
-        )
+    with pytest.raises(Exception) as exc_info:
+        for model_type in all_model_type:
+            parameters["nested_training"]["testing"] = 1
+            parameters["nested_training"]["validation"] = -2
+            parameters["output_dir"] = modelDir  # this is in inference mode
+            inference_data, parameters["headers"] = parseTrainingCSV(
+                inputDir + "/train_2d_histo_segmentation.csv", train=False
+            )
+            parameters["model"]["type"] = model_type
+            InferenceManager(
+                dataframe=inference_data,
+                outputDir=modelDir,
+                parameters=parameters,
+                device=device,
+            )
+    exception_raised = exc_info.value
+    print("Exception raised: ", exception_raised)
 
     print("passed")
 
