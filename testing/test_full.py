@@ -196,6 +196,7 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
@@ -233,6 +234,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["model"]["num_channels"] = 1
     parameters["model"]["architecture"] = "sdnet"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -266,6 +268,7 @@ def test_train_segmentation_rad_3d(device):
     parameters["in_memory"] = True
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
@@ -310,6 +313,7 @@ def test_train_regression_rad_2d(device):
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -339,6 +343,7 @@ def test_train_regression_rad_2d_imagenet(device):
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["amp"] = False
+    parameters["model"]["print_summary"] = False
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_regression.csv"
@@ -384,6 +389,7 @@ def test_train_regression_brainage_rad_2d(device):
     parameters["scaling_factor"] = 1
     parameters["model"]["architecture"] = "brain_age"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -414,6 +420,7 @@ def test_train_regression_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -458,6 +465,7 @@ def test_train_classification_rad_2d(device):
     )
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
@@ -509,6 +517,7 @@ def test_train_classification_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         if "efficientnet" in model:
@@ -557,6 +566,7 @@ def test_train_resume_inference_classification_rad_3d(device):
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -622,6 +632,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["architecture"] = all_models_regression[0]
     parameters["model"]["onnx_export"] = True
+    parameters["model"]["print_summary"] = False
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -665,6 +676,7 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
     parameters["metrics"] = ["dice"]
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = True
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -711,6 +723,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -765,6 +778,7 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
     # necessary for n-fold cross-validation inference
     parameters["nested_training"]["validation"] = 2
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
@@ -814,6 +828,7 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters["model"]["norm_type"] = "instance"
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         parameters["model"]["onnx_export"] = False
+        parameters["model"]["print_summary"] = False
         parameters["scheduler"] = {}
         parameters["scheduler"]["type"] = scheduler
         parameters["nested_training"]["testing"] = -5
@@ -858,6 +873,7 @@ def test_train_optimizer_classification_rad_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for optimizer in global_optimizer_dict:
@@ -897,6 +913,7 @@ def test_clip_train_classification_rad_3d(device):
     parameters["model"]["architecture"] = "vgg16"
     parameters["model"]["norm_type"] = "None"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
@@ -934,6 +951,7 @@ def test_train_normtype_segmentation_rad_3d(device):
     parameters["data_postprocessing"] = {"fill_holes"}
     parameters["in_memory"] = True
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
@@ -977,6 +995,7 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -1009,6 +1028,7 @@ def test_train_metrics_regression_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "vgg11"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = True
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -1042,6 +1062,7 @@ def test_train_losses_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "resunet"
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
@@ -1095,6 +1116,7 @@ def test_generic_config_read():
     parameters["data_preprocessing"].pop("resample")
     parameters["data_preprocessing"].pop("resample_min")
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
+    parameters["model"]["print_summary"] = False
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -1169,6 +1191,7 @@ def test_generic_cli_function_preprocess():
     parameters["model"]["class_list"] = "[0, 255||125]"
     # disabling amp because some losses do not support Half, yet
     parameters["model"]["amp"] = False
+    parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "unet"
     parameters["metrics"] = ["dice"]
@@ -1210,6 +1233,7 @@ def test_generic_cli_function_mainrun(device):
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
+    parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = [
         "dice",
@@ -1267,6 +1291,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters["data_postprocessing"]["mapping"] = {0: 0, 1: 1}
     parameters["data_postprocessing"]["fill_holes"] = True
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -1479,6 +1504,7 @@ def test_train_checkpointing_segmentation_rad_2d(device):
     ]
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -1519,6 +1545,7 @@ def test_generic_model_patch_divisibility():
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
+    parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
@@ -1706,6 +1733,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = True
+    parameters["model"]["print_summary"] = True
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
     Path(modelDir).mkdir(parents=True, exist_ok=True)
@@ -1787,6 +1815,7 @@ def test_train_inference_classification_histology_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
+    parameters["model"]["print_summary"] = False
     modelDir = os.path.join(outputDir, "modelDir")
     if os.path.isdir(modelDir):
         shutil.rmtree(modelDir)
@@ -1847,6 +1876,7 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
         parameters["model"]["depth"] = 7
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
+        parameters["model"]["print_summary"] = False
         parameters["model"]["num_channels"] = 3
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         # loop through selected models and train for single epoch
@@ -1880,6 +1910,7 @@ def test_train_segmentation_unetr_rad_3d(device):
     parameters["patch_size"] = [4, 4, 4]
     parameters["model"]["dimension"] = 3
     parameters["model"]["depth"] = 2
+    parameters["model"]["print_summary"] = False
 
     # this assertion should fail
     with pytest.raises(BaseException) as e_info:
@@ -1939,6 +1970,7 @@ def test_train_segmentation_unetr_rad_2d(device):
         parameters["model"]["inner_patch_size"] = patch
         parameters["model"]["class_list"] = [0, 255]
         parameters["model"]["amp"] = True
+        parameters["model"]["print_summary"] = False
         parameters["model"]["num_channels"] = 3
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         # loop through selected models and train for single epoch
@@ -1971,6 +2003,7 @@ def test_train_segmentation_transunet_rad_2d(device):
     parameters["model"]["architecture"] = "transunet"
     parameters["patch_size"] = [128, 128, 1]
     parameters["model"]["dimension"] = 2
+    parameters["model"]["print_summary"] = False
 
     with pytest.raises(BaseException) as e_info:
         parameters["model"]["num_heads"] = 6
@@ -2019,6 +2052,7 @@ def test_train_segmentation_transunet_rad_3d(device):
     parameters["model"]["architecture"] = "transunet"
     parameters["patch_size"] = [4, 4, 4]
     parameters["model"]["dimension"] = 3
+    parameters["model"]["print_summary"] = False
 
     # this assertion should fail
     with pytest.raises(BaseException) as e_info:

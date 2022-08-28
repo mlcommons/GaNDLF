@@ -2,6 +2,8 @@
 - Updated `setup.py` for `python>=3.8`
 - `stride_size` is now handled internally for histology data
 - Probability maps are now saved overlaid with original WSI
+- Added ability to print model size and summary at run-time
+- Improved error checking added for WSI inference
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
 
