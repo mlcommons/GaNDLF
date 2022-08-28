@@ -236,10 +236,12 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
             )
             if (not os.path.exists(currentTrainingDataPickle)) or reset or resume:
                 trainingData.to_pickle(currentTrainingDataPickle)
+                trainingData.to_csv(currentTrainingDataPickle.replace(".pkl", ".csv"), index=False)
             else:
                 trainingData = get_dataframe(currentTrainingDataPickle)
             if (not os.path.exists(currentValidationDataPickle)) or reset or resume:
                 validationData.to_pickle(currentValidationDataPickle)
+                validationData.to_csv(currentValidationDataPickle.replace(".pkl", ".csv"), index=False)
             else:
                 validationData = get_dataframe(currentValidationDataPickle)
 
