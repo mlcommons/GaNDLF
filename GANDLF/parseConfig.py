@@ -167,7 +167,6 @@ def parseConfig(config_file_path, version_check_flag=True):
             )
 
     if "loss_function" in params:
-        defineDefaultLoss = False
         # check if user has passed a dict
         if isinstance(params["loss_function"], dict):  # if this is a dict
             if len(params["loss_function"]) > 0:  # only proceed if something is defined
@@ -181,22 +180,12 @@ def parseConfig(config_file_path, version_check_flag=True):
                     else:
                         # use simple string for other functions - can be extended with parameters, if needed
                         params["loss_function"] = key
-            else:
-                defineDefaultLoss = True
         else:
             # check if user has passed a single string
             if params["loss_function"] == "mse":
                 params["loss_function"] = {}
                 params["loss_function"]["mse"] = {}
                 params["loss_function"]["mse"]["reduction"] = "mean"
-    else:
-        defineDefaultLoss = True
-    if defineDefaultLoss == True:
-        loss_function = "dc"
-        print("Using default loss_function: ", loss_function)
-    else:
-        loss_function = params["loss_function"]
-    params["loss_function"] = loss_function
 
     if "metrics" in params:
         if not isinstance(params["metrics"], dict):
