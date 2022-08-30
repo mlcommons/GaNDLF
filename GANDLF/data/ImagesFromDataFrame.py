@@ -209,7 +209,7 @@ def ImagesFromDataFrame(
     transformations_list = []
 
     # augmentations are applied to the training set only
-    if train and not (augmentations == None):
+    if train and not (augmentations is None):
         for aug in augmentations:
             aug_lower = aug.lower()
             if aug_lower in global_augs_dict:
