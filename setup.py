@@ -67,7 +67,7 @@ requirements = [
     "tiffslide",
     "matplotlib",
     "requests>=2.25.0",
-    "pyvips",
+    "pyvips==2.2.1",
     "pytest",
     "coverage",
     "pytest-cov",
