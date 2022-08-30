@@ -54,7 +54,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
 
-    if onnx_export == False:
+    if not (onnx_export):
         if "onnx_print" not in params:
             print("WARNING: Current model is not supported by ONNX/OpenVINO!")
             params["onnx_print"] = True
