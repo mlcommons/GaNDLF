@@ -59,7 +59,7 @@ class EncodingModule(nn.Module):
         Returns:
             [Tensor] -- [Returns a torch Tensor]
         """
-        if self.residual == True:
+        if self.residual:
             skip = x
         x = self.act(self.in_0(x))
 
@@ -69,7 +69,7 @@ class EncodingModule(nn.Module):
         x = self.act(self.in_1(x))
 
         x = self.conv1(x)
-        if self.residual == True:
+        if self.residual:
             x = x + skip
 
         return x
