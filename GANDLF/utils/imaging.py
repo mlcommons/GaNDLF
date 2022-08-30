@@ -28,7 +28,7 @@ def resample_image(
         raise Exception("len(spacing) != " + str(img.GetDimension()))
 
     # Set Size
-    if size == None:
+    if size is None:
         inSpacing = img.GetSpacing()
         inSize = img.GetSize()
         size = [

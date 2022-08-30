@@ -173,7 +173,7 @@ def parseConfig(config_file_path, version_check_flag=True):
             if len(params["loss_function"]) > 0:  # only proceed if something is defined
                 for key in params["loss_function"]:  # iterate through all keys
                     if key == "mse":
-                        if (params["loss_function"][key] == None) or not (
+                        if (params["loss_function"][key] is None) or not (
                             "reduction" in params["loss_function"][key]
                         ):
                             params["loss_function"][key] = {}
@@ -284,7 +284,7 @@ def parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
     params = initialize_key(params, "data_augmentation", {})
-    if not (params["data_augmentation"] == None):
+    if not (params["data_augmentation"] is None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
 
             # special case for random swapping and elastic transformations - which takes a patch size for computation
@@ -407,7 +407,7 @@ def parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing", {})
-    if not (params["data_preprocessing"] == None):
+    if not (params["data_preprocessing"] is None):
         # perform this only when pre-processing is defined
         if len(params["data_preprocessing"]) > 0:
             thresholdOrClip = False
