@@ -72,11 +72,13 @@ def main():
 
         testingLogsCSV = pd.read_csv(testingLogs)
 
-        if len(testingLogsCSV) == 0:  # check for classification task
+        # check for classification task
+        if len(testingLogsCSV) == 0:
 
             print("Classification task detected, generating accuracy and loss plots.")
 
-            if combinedPlots:  # check whether user wants training + validation overlayed plots
+            # check whether user wants training + validation overlaid plots
+            if combinedPlots:
 
                 df_training = pd.read_csv(trainingLogs)
                 df_validation = pd.read_csv(validationLogs)
@@ -84,47 +86,47 @@ def main():
                 epochs = len(df_training)
 
                 fig, axes = plt.subplots(nrows=1, ncols=2)  # set plot properties
-
-                plt.subplots_adjust(
-                    wspace=0.5, hspace=0.5
-                )  # ensure spacing between plots
-
+                # ensure spacing between plots
+                plt.subplots_adjust(wspace=0.5, hspace=0.5)
+                # plot training accuracy data
                 splot = sns.lineplot(
                     data=df_training,
                     x="epoch_no",
                     y="train_balanced_accuracy",
                     ax=axes[0],
-                )  # plot training accuracy data
+                )
+                # plot validation accuracy data
                 splot = sns.lineplot(
                     data=df_validation,
                     x="epoch_no",
                     y="valid_balanced_accuracy",
                     ax=axes[0],
-                )  # plot validation accuracy data
-                splot.set(
-                    xlim=(0, epochs - 1)
-                )  # set limits for x-axis for proper visualization
-                splot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
-                splot.set(
-                    xlabel="Epoch", ylabel="Accuracy", title="Accuracy Plot"
-                )  # add labels and title to plot
-                axes[0].legend(labels=["Training", "Validation"])  # add legend to plot
+                )
+                # set limits for x-axis for proper visualization
+                splot.set(xlim=(0, epochs - 1))
+                # set limits for y-axis for proper visualization
+                splot.set(ylim=(0, 1))
+                # add labels and title to plot
+                splot.set(xlabel="Epoch", ylabel="Accuracy", title="Accuracy Plot")
+                # add legend to plot
+                axes[0].legend(labels=["Training", "Validation"])
 
+                # plot training loss data
                 splot = sns.lineplot(
                     data=df_training, x="epoch_no", y="train_loss", ax=axes[1]
-                )  # plot training loss data
+                )
+                # plot validation loss data
                 splot = sns.lineplot(
                     data=df_validation, x="epoch_no", y="valid_loss", ax=axes[1]
-                )  # plot validation loss data
-                splot.set(
-                    xlim=(0, epochs - 1)
-                )  # set limits for x-axis for proper visualization
-                splot.set(
-                    xlabel="Epoch", ylabel="Loss", title="Loss Plot"
-                )  # add labels and title to plot
-                axes[1].legend(labels=["Training", "Validation"])  # add legend to plot
-
-                plt.savefig(outputPlot, dpi=600)  # save plot
+                )
+                # set limits for x-axis for proper visualization
+                splot.set(xlim=(0, epochs - 1))
+                # add labels and title to plot
+                splot.set(xlabel="Epoch", ylabel="Loss", title="Loss Plot")
+                # add legend to plot
+                axes[1].legend(labels=["Training", "Validation"])
+                # save plot
+                plt.savefig(outputPlot, dpi=600)
 
                 print("Plots saved successfully.")
 
@@ -135,49 +137,51 @@ def main():
 
                 epochs = len(df_training)
 
-                fig, axes = plt.subplots(nrows=2, ncols=2)  # set plot properties
+                # set plot properties
+                fig, axes = plt.subplots(nrows=2, ncols=2)
 
                 plt.subplots_adjust(wspace=0.5, hspace=0.5)
-
+                # plot the data
                 splot = sns.lineplot(
                     data=df_training,
                     x="epoch_no",
                     y="train_balanced_accuracy",
                     ax=axes[0, 0],
-                )  # plot the data
+                )
                 splot.set(xlim=(0, epochs - 1))
                 splot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
+                # set labels
                 splot.set(
                     xlabel="Epoch", ylabel="Accuracy", title="Training Accuracy Plot"
-                )  # set labels
+                )
 
+                # plot the data
                 splot = sns.lineplot(
                     data=df_validation,
                     x="epoch_no",
                     y="valid_balanced_accuracy",
                     ax=axes[0, 1],
-                )  # plot the data
+                )
                 splot.set(xlim=(0, epochs - 1))
                 splot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
+                # set labels
                 splot.set(
                     xlabel="Epoch", ylabel="Accuracy", title="Validation Accuracy Plot"
-                )  # set labels
-
+                )
+                # plot the data
                 splot = sns.lineplot(
                     data=df_training, x="epoch_no", y="train_loss", ax=axes[1, 0]
-                )  # plot the data
+                )
                 splot.set(xlim=(0, epochs - 1))
-                splot.set(
-                    xlabel="Epoch", ylabel="Loss", title="Training Loss Plot"
-                )  # set labels
-
+                # set labels
+                splot.set(xlabel="Epoch", ylabel="Loss", title="Training Loss Plot")
+                # plot the data
                 splot = sns.lineplot(
                     data=df_validation, x="epoch_no", y="valid_loss", ax=axes[1, 1]
-                )  # plot the data
+                )
                 splot.set(xlim=(0, epochs - 1))
-                splot.set(
-                    xlabel="Epoch", ylabel="Loss", title="Validation Loss Plot"
-                )  # set labels
+                # set labels
+                splot.set(xlabel="Epoch", ylabel="Loss", title="Validation Loss Plot")
 
                 plt.savefig(outputPlot, dpi=600)
 
@@ -191,26 +195,19 @@ def main():
 
             # loop through output directory
             for dirs in os.listdir(inputDir):
-
                 currentTestingDir = os.path.join(inputDir, dirs)
                 if os.path.isdir(currentTestingDir):  # go in only if it is a directory
                     if "testing_" in dirs:  # ensure it is part of the testing structure
-
-                        for val in os.listdir(
-                            currentTestingDir
-                        ):  # loop through all validation directories
-
+                        # loop through all validation directories
+                        for val in os.listdir(currentTestingDir):
                             currentValidationDir = os.path.join(currentTestingDir, val)
                             if os.path.isdir(currentValidationDir):
-
-                                filesInDir = os.listdir(
-                                    currentValidationDir
-                                )  # get all files in each directory
+                                # get all files in each directory
+                                filesInDir = os.listdir(currentValidationDir)
 
                                 for i, n in enumerate(filesInDir):
                                     # when the log has been found, collect the final numbers
                                     if "trainingScores_log" in n:
-
                                         log_file = os.path.join(currentValidationDir, n)
                                         with open(log_file) as f:
                                             for line in f:
@@ -225,45 +222,42 @@ def main():
             # perform deep copy
             data_loss = data_full.copy()
             data_dice = data_full.copy()
-
+            # set the datasets that need to be plotted
             cols = [
                 "Train",
                 "Val",
                 "Testing",
-            ]  # set the datasets that need to be plotted
+            ]
             for i in cols:
 
                 del data_dice[i + "_Loss"]  # keep only dice
                 del data_loss[i + "_Dice"]  # keep only loss
-
-                data_loss.rename(
-                    columns={i + "_Loss": i}, inplace=True
-                )  # rename the columns
-                data_dice.rename(
-                    columns={i + "_Dice": i}, inplace=True
-                )  # rename the columns
-
-            fig, axes = plt.subplots(
-                nrows=1, ncols=2, constrained_layout=True
-            )  # set plot properties
-
+                # rename the columns
+                data_loss.rename(columns={i + "_Loss": i}, inplace=True)
+                # rename the columns
+                data_dice.rename(columns={i + "_Dice": i}, inplace=True)
+            # set plot properties
+            fig, axes = plt.subplots(nrows=1, ncols=2, constrained_layout=True)
+            # plot the data
             bplot = sns.boxplot(
                 data=data_dice, width=0.5, palette="colorblind", ax=axes[0]
-            )  # plot the data
-            bplot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
-            bplot.set(xlabel="Dataset", ylabel="Dice", title="Dice plot")  # set labels
-            bplot.set_xticklabels(
-                bplot.get_xticklabels(), rotation=15, ha="right"
-            )  # rotate so that everything is visible
-
+            )
+            # set limits for y-axis for proper visualization
+            bplot.set(ylim=(0, 1))
+            # set labels
+            bplot.set(xlabel="Dataset", ylabel="Dice", title="Dice plot")
+            # rotate so that everything is visible
+            bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
+            # plot the data
             bplot = sns.boxplot(
                 data=data_loss, width=0.5, palette="colorblind", ax=axes[1]
-            )  # plot the data
-            bplot.set(ylim=(0, 1))  # set limits for y-axis for proper visualization
-            bplot.set(xlabel="Dataset", ylabel="Loss", title="Loss plot")  # set labels
-            bplot.set_xticklabels(
-                bplot.get_xticklabels(), rotation=15, ha="right"
-            )  # rotate so that everything is visible
+            )
+            # set limits for y-axis for proper visualization
+            bplot.set(ylim=(0, 1))
+            # set labels
+            bplot.set(xlabel="Dataset", ylabel="Loss", title="Loss plot")
+            # rotate so that everything is visible
+            bplot.set_xticklabels(bplot.get_xticklabels(), rotation=15, ha="right")
 
             plt.savefig(outputPlot, dpi=600)
 
