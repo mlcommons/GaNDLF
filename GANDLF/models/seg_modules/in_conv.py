@@ -70,7 +70,7 @@ class in_conv(nn.Module):
             [Tensor] -- [Returns a torch Tensor]
         """
         x = self.conv0(x)
-        if self.residual == True:
+        if self.residual:
             skip = x
         x = self.act(self.in_0(x))
 
@@ -80,7 +80,7 @@ class in_conv(nn.Module):
         x = self.act(self.in_1(x))
 
         x = self.conv2(x)
-        if self.residual == True:
+        if self.residual:
             x = x + skip
 
         return x

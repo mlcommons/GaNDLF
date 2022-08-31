@@ -66,7 +66,7 @@ def step(model, image, label, params, train=True):
                 if len(label.shape) > 1:
                     label = torch.squeeze(label, -1)
 
-    if train == False and params["model"]["type"].lower() == "openvino":
+    if not (train) and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
                 params["model"]["IO"][1][0]

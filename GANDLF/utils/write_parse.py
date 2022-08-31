@@ -98,7 +98,7 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
             or ("ground_truth" in col_lower)
             or ("groundtruth" in col_lower)
         ):
-            if headers["labelHeader"] == None:
+            if headers["labelHeader"] is None:
                 headers["labelHeader"] = currentHeaderLoc
             else:
                 print(

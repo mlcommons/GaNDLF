@@ -46,14 +46,14 @@ class DecodingModule(nn.Module):
         x = torch.cat([x1, x2], dim=1)
         x = self.conv0(self.act(self.in_0(x)))
 
-        if self.residual == True:
+        if self.residual:
             skip = x
 
         x = self.conv1(self.act(self.in_1(x)))
 
         x = self.conv2(self.act(self.in_2(x)))
 
-        if self.residual == True:
+        if self.residual:
             x = x + skip
 
         return x
