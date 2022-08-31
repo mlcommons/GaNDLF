@@ -61,7 +61,7 @@ class InceptionModule(nn.Module):
         )
 
     def forward(self, x):
-        if self.residual == True:
+        if self.residual:
             skip = x
         x1 = F.leaky_relu(
             self.inst_norm(self.conv_1x1(x)),

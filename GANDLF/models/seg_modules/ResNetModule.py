@@ -39,7 +39,7 @@ class ResNetModule(nn.Module):
         )
 
     def forward(self, x):
-        if self.residual == True:
+        if self.residual:
             skip = x
         x = F.leaky_relu(
             self.inst_norm(self.conv(x)),

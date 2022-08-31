@@ -180,7 +180,7 @@ def ImagesFromDataFrame(
                 )
             try:
                 perform_sanity_check_on_subject(subject, parameters)
-            except Exception as e:
+            except Exception:
                 subjects_with_error.append(subject["subject_id"])
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
@@ -209,7 +209,7 @@ def ImagesFromDataFrame(
     transformations_list = []
 
     # augmentations are applied to the training set only
-    if train and not (augmentations == None):
+    if train and not (augmentations is None):
         for aug in augmentations:
             aug_lower = aug.lower()
             if aug_lower in global_augs_dict:
