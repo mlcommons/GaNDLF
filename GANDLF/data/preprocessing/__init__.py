@@ -1,9 +1,4 @@
 import numpy as np
-from torchio.transforms import (
-    Resample,
-    Compose,
-    Pad,
-)
 
 from .crop_zero_planes import CropExternalZeroplanes
 from .non_zero_normalize import NonZeroNormalizeOnMaskedRegion
@@ -28,6 +23,7 @@ from torchio.transforms import (
     CropOrPad,
     Resize,
     Resample,
+    Compose,
 )
 
 
