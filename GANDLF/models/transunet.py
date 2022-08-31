@@ -6,19 +6,14 @@ from torch.nn import ModuleList
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
-from GANDLF.models.seg_modules.DecodingModule import DecodingModule
-from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 import sys
 from GANDLF.utils.generic import checkPatchDimensions
-from GANDLF.models.seg_modules.Interpolate import Interpolate
 import torch
 import torch.nn as nn
 from torch.nn import ModuleList
-import numpy as np
-import math
 from .unetr import _Transformer
 
 
@@ -52,9 +47,10 @@ class _DecoderCUP(nn.Sequential):
 
 class transunet(ModelBase):
     """
-    This is the TransUNet architecture : https://doi.org/10.48550/arXiv.2102.04306. The Downsampling, Encoding modules
-    are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input channels (filters) and the output channels (filters),
-    and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
+    This is the TransUNet architecture : https://doi.org/10.48550/arXiv.2102.04306. The 'residualConnections' flag controls residual connections, the
+    Downsampling, Encoding, Decoding modules are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input
+    channels (filters) and the output channels (filters), and some other hyperparameters, which remain constant all the modules. For more details on the
+    smaller modules please have a look at the seg_modules file.
     """
 
     def __init__(
