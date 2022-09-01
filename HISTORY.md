@@ -4,6 +4,7 @@
 - Probability maps are now saved overlaid with original WSI
 - Added ability to print model size and summary at run-time
 - Improved error checking added for WSI inference
+- VIPS has been removed from dependencies
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
 
