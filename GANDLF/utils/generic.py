@@ -34,18 +34,6 @@ def checkPatchDivisibility(patch_size, number=16):
     return True
 
 
-def fix_paths(cwd):
-    """
-    This function takes the current working directory of the script (which is required for VIPS) and sets up all the paths correctly
-
-    Args:
-        cwd (str): The current working directory.
-    """
-    if os.name == "nt":  # proceed for windows
-        vipshome = os.path.join(cwd, "vips/vips-dev-8.10/bin")
-        os.environ["PATH"] = vipshome + ";" + os.environ["PATH"]
-
-
 def get_date_time():
     """
     Get a well-parsed date string
