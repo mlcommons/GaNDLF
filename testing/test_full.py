@@ -1852,6 +1852,8 @@ def test_train_inference_classification_histology_large_2d(device):
 
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
+    if os.path.exists(new_filename):
+        os.remove(new_filename)
 
     print("passed")
 
