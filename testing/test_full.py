@@ -1838,7 +1838,7 @@ def test_train_inference_classification_histology_large_2d(device):
             parameters["nested_training"]["validation"] = -2
             parameters["output_dir"] = modelDir  # this is in inference mode
             inference_data, parameters["headers"] = parseTrainingCSV(
-                inputDir + "/train_2d_histo_segmentation.csv", train=False
+                resized_inference_data_list, train=False
             )
             parameters["model"]["type"] = model_type
             InferenceManager(
@@ -1849,7 +1849,7 @@ def test_train_inference_classification_histology_large_2d(device):
             )
             assert (
                 os.path.exists(
-                    os.path.join(modelDir, input_df["SubjectID"][0], "predictions.csv")
+                    os.path.join(modelDir, str(input_df["SubjectID"][0]), "predictions.csv")
                 )
                 is True
             )
