@@ -75,7 +75,7 @@ def fill_holes(input_image, params=None):
     return torch.from_numpy(output_array)
 
 
-def cca(input_image, params=None):
+def cca(input_image):
     """
     This function performs connected component analysis on the input image.
 
@@ -92,7 +92,7 @@ def cca(input_image, params=None):
         seg = sitk.GetArrayFromImage(input_image)
     mask = seg != 0
 
-    connectivity = 3 if (params["connectivity"] is not None) else params["connectivity"]
+    connectivity = input_image.dim() - 1
     labels_connected = label(mask, connectivity=connectivity)
     labels_connected_sizes = [
         np.sum(labels_connected == i) for i in np.unique(labels_connected)
