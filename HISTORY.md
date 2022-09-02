@@ -5,6 +5,7 @@
 - Added ability to print model size and summary at run-time
 - Improved error checking added for WSI inference
 - VIPS has been removed from dependencies
+- Failed unit test cases are now recorded
 
 ## 0.0.14
 
