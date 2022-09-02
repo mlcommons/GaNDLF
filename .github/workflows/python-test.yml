@@ -8,6 +8,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md' # Only in the topmost directory
+      - 'LICENSE'
+    
 
 jobs:
   build:
