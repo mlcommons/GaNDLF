@@ -1767,6 +1767,7 @@ def test_train_inference_classification_histology_large_2d(device):
 
     # resize the image
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
+    files_to_delete = []
     for _, row in input_df.iterrows():
         img = cv2.imread(row["Channel_0"])
         dims = img.shape
@@ -1774,6 +1775,7 @@ def test_train_inference_classification_histology_large_2d(device):
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
         row["Channel_0"] = new_filename
         cv2.imwrite(new_filename, img_resize)
+        files_to_delete.append(new_filename)
 
     input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
 
@@ -1852,8 +1854,8 @@ def test_train_inference_classification_histology_large_2d(device):
 
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
-    if os.path.exists(new_filename):
-        os.remove(new_filename)
+    for file in files_to_delete:
+        os.remove(file)
 
     print("passed")
 
