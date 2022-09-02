@@ -1840,7 +1840,7 @@ def test_train_inference_classification_histology_large_2d(device):
             parameters["nested_training"]["validation"] = -2
             parameters["output_dir"] = modelDir  # this is in inference mode
             inference_data, parameters["headers"] = parseTrainingCSV(
-                resized_inference_data_list, train=False
+                inputDir + "train_2d_histo_classification.csv", train=False
             )
             parameters["model"]["type"] = model_type
             InferenceManager(
