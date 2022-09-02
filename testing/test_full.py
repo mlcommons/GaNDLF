@@ -1826,7 +1826,9 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["output_dir"] = modelDir  # this is in inference mode
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    resized_inference_data_list = os.path.join(inputDir, "train_2d_histo_classification_resize.csv")
+    resized_inference_data_list = os.path.join(
+        inputDir, "train_2d_histo_classification_resize.csv"
+    )
     input_df.to_csv(resized_inference_data_list, index=False)
     inference_data, parameters["headers"] = parseTrainingCSV(
         resized_inference_data_list, train=False
@@ -1849,7 +1851,9 @@ def test_train_inference_classification_histology_large_2d(device):
             )
             assert (
                 os.path.exists(
-                    os.path.join(modelDir, str(input_df["SubjectID"][0]), "predictions.csv")
+                    os.path.join(
+                        modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
+                    )
                 )
                 is True
             )
