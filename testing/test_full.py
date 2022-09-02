@@ -1826,10 +1826,12 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["output_dir"] = modelDir  # this is in inference mode
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
+    resized_inference_data_list = os.path.join(inputDir, "train_2d_histo_classification_resize.csv")
+    input_df.to_csv(resized_inference_data_list, index=False)
     inference_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_histo_classification_resize.csv", train=False
+        resized_inference_data_list, train=False
     )
+    files_to_delete.append(resized_inference_data_list)
     with pytest.raises(Exception) as exc_info:
         for model_type in all_model_type:
             parameters["nested_training"]["testing"] = 1
