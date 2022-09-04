@@ -192,7 +192,7 @@ def validate_network(
             final_loss, final_metric = get_loss_and_metrics(
                 image, valuesToPredict, pred_output, params
             )
-            # # Non network validing related
+            # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
                 if isinstance(total_epoch_valid_metric[metric], list):
