@@ -6,6 +6,7 @@
 - Improved error checking added for WSI inference
 - VIPS has been removed from dependencies
 - Failed unit test cases are now recorded
+- Per class accuracy has been added as a metric
 
 ## 0.0.14
 
