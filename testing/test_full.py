@@ -1411,6 +1411,22 @@ def test_generic_preprocess_functions():
         input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
         input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
 
+    # test obtaining arrays
+    input_tensor_3d = torch.rand(256, 256, 256)
+    input_array = get_array_from_image_or_tensor(input_tensor_3d)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from tensor"
+    input_image = sitk.GetImageFromArray(input_array)
+    input_array = get_array_from_image_or_tensor(input_image)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from image"
+    input_array = get_array_from_image_or_tensor(input_array)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from array"
+
+    with pytest.raises(Exception) as exc_info:
+        input_list = [0, 1]
+        input_array = get_array_from_image_or_tensor(input_list)
+    exception_raised = exc_info.value
+    print("Exception raised: ", exception_raised)
+
     print("passed")
 
 
