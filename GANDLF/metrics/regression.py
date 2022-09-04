@@ -49,7 +49,7 @@ def balanced_acc_score(output, label, params):
     )
 
 
-def per_class_accuracy(output, label, params):
+def per_label_accuracy(output, label, params):
     """
     This function computes the per class accuracy.
 
