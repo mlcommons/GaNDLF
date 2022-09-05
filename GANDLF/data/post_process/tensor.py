@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 
 def get_mapped_label(input_tensor, params):
@@ -12,14 +13,12 @@ def get_mapped_label(input_tensor, params):
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
-    input_arr = input_tensor
-    if torch.is_tensor(input_tensor):
-        input_arr = input_tensor.numpy()
+    input_arr = get_array_from_image_or_tensor(input_tensor)
 
     if "data_postprocessing" not in params:
-        return input_arr
+        return torch.from_numpy(input_arr)
     if "mapping" not in params["data_postprocessing"]:
-        return input_arr
+        return torch.from_numpy(input_arr)
 
     mapping = params["data_postprocessing"]["mapping"]
 
