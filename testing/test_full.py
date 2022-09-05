@@ -1800,7 +1800,7 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
-    parameters_patch["patch_size"] = [128, 128]
+    parameters_patch["patch_size"] = [1024, 1024]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1811,16 +1811,19 @@ def test_train_inference_classification_histology_large_2d(device):
     for _, row in input_df.iterrows():
         img = cv2.imread(row["Channel_0"])
         dims = img.shape
-        img_resize = cv2.resize(img, (dims[1] * 10, dims[0] * 10))
+        img_resize = cv2.resize(img, (dims[1] * 20, dims[0] * 20))
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
         row["Channel_0"] = new_filename
         cv2.imwrite(new_filename, img_resize)
         files_to_delete.append(new_filename)
 
-    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
+    resized_inference_data_list = os.path.join(
+        inputDir, "train_2d_histo_classification_resize.csv"
+    )
+    input_df.to_csv(resized_inference_data_list, index=False)
 
     patch_extraction(
-        inputDir + "/train_2d_histo_classification_resize.csv",
+        inputDir + "/train_2d_histo_classification.csv",
         output_dir_patches_output,
         file_config_temp,
     )
@@ -1835,7 +1838,7 @@ def test_train_inference_classification_histology_large_2d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = 128
+    parameters["patch_size"] = 1024
     file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -1866,9 +1869,6 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["output_dir"] = modelDir  # this is in inference mode
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    resized_inference_data_list = os.path.join(
-        inputDir, "train_2d_histo_classification_resize.csv"
-    )
     input_df.to_csv(resized_inference_data_list, index=False)
     inference_data, parameters["headers"] = parseTrainingCSV(
         resized_inference_data_list, train=False
@@ -1880,7 +1880,7 @@ def test_train_inference_classification_histology_large_2d(device):
             parameters["nested_training"]["validation"] = -2
             parameters["output_dir"] = modelDir  # this is in inference mode
             inference_data, parameters["headers"] = parseTrainingCSV(
-                inputDir + "train_2d_histo_classification.csv", train=False
+                resized_inference_data_list, train=False
             )
             parameters["model"]["type"] = model_type
             InferenceManager(
