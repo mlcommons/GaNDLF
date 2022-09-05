@@ -1921,15 +1921,16 @@ def test_train_inference_classification_histology_large_2d(device):
             os.path.exists(os.path.join(output_subject_dir, "predictions.csv")) is True
         )
         # the blended should not get generated because of memory constraints
-        assert (
-            os.path.exists(
-                os.path.join(
-                    output_subject_dir,
-                    "probability_map_blended_0_agni.png",
+        for predicted_class in parameters["model"]["class_list"]:
+            assert (
+                os.path.exists(
+                    os.path.join(
+                        output_subject_dir,
+                        "probability_map_blended_" + str(predicted_class) + "_agni.png",
+                    )
                 )
+                is False
             )
-            is False
-        )
         # ensure previous results are removed
         shutil.rmtree(output_subject_dir)
 
