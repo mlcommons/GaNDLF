@@ -1618,17 +1618,17 @@ def test_generic_one_hot_logic():
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
 
-    parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
-    mapped_output = get_mapped_label(
-        torch.from_numpy(img_tensor_oh_rev_array), parameters
-    ).numpy()
-
     parameters = {"data_postprocessing": {}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
     ).numpy()
 
     parameters = {}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    ).numpy()
+
+    parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
     ).numpy()
