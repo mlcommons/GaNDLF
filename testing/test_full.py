@@ -1922,6 +1922,13 @@ def test_train_inference_classification_histology_large_2d(device):
             )
             is True
         )
+        # the blended should not get generated because of memory constraints
+        assert(
+            os.path.exists(
+                os.path.join(modelDir, str(input_df["SubjectID"][0]), "probability_map_blended_0_agni.png")
+            )
+            is False
+        )
         # ensure previous results are removed
         folders_in_modelDir = os.listdir(modelDir)
         for folder in folders_in_modelDir:
