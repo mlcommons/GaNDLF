@@ -1645,6 +1645,9 @@ def test_generic_anonymizer():
 
     run_anonymizer(input_file, output_file, config_file, "rad")
 
+    # test defaults
+    run_anonymizer(input_file, output_file, None, "rad")
+
     os.remove(output_file)
 
     # test nifti conversion
@@ -1668,7 +1671,16 @@ def test_generic_anonymizer():
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
 
-    for file_to_delete in [input_folder_for_nifti, config_file_for_nifti, output_file]:
+    input_file = os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff")
+    output_file_histo = os.path.join(testingDir, "histo_anon.tiff")
+    run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
+
+    for file_to_delete in [
+        input_folder_for_nifti,
+        config_file_for_nifti,
+        output_file,
+        output_file_histo,
+    ]:
         if os.path.exists(file_to_delete):
             if os.path.isdir(file_to_delete):
                 shutil.rmtree(file_to_delete)
