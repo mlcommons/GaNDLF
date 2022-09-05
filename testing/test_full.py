@@ -1422,6 +1422,22 @@ def test_generic_preprocess_functions():
         input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
         input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
 
+    # test obtaining arrays
+    input_tensor_3d = torch.rand(256, 256, 256)
+    input_array = get_array_from_image_or_tensor(input_tensor_3d)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from tensor"
+    input_image = sitk.GetImageFromArray(input_array)
+    input_array = get_array_from_image_or_tensor(input_image)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from image"
+    input_array = get_array_from_image_or_tensor(input_array)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from array"
+
+    with pytest.raises(Exception) as exc_info:
+        input_list = [0, 1]
+        input_array = get_array_from_image_or_tensor(input_list)
+    exception_raised = exc_info.value
+    print("Exception raised: ", exception_raised)
+
     print("passed")
 
 
@@ -1778,6 +1794,7 @@ def test_train_inference_classification_histology_large_2d(device):
 
     # resize the image
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
+    files_to_delete = []
     for _, row in input_df.iterrows():
         img = cv2.imread(row["Channel_0"])
         dims = img.shape
@@ -1785,6 +1802,7 @@ def test_train_inference_classification_histology_large_2d(device):
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
         row["Channel_0"] = new_filename
         cv2.imwrite(new_filename, img_resize)
+        files_to_delete.append(new_filename)
 
     input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
 
@@ -1835,17 +1853,21 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["output_dir"] = modelDir  # this is in inference mode
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
-    inference_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_histo_classification_resize.csv", train=False
+    resized_inference_data_list = os.path.join(
+        inputDir, "train_2d_histo_classification_resize.csv"
     )
+    input_df.to_csv(resized_inference_data_list, index=False)
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        resized_inference_data_list, train=False
+    )
+    files_to_delete.append(resized_inference_data_list)
     with pytest.raises(Exception) as exc_info:
         for model_type in all_model_type:
             parameters["nested_training"]["testing"] = 1
             parameters["nested_training"]["validation"] = -2
             parameters["output_dir"] = modelDir  # this is in inference mode
             inference_data, parameters["headers"] = parseTrainingCSV(
-                inputDir + "/train_2d_histo_segmentation.csv", train=False
+                inputDir + "train_2d_histo_classification.csv", train=False
             )
             parameters["model"]["type"] = model_type
             InferenceManager(
@@ -1856,13 +1878,17 @@ def test_train_inference_classification_histology_large_2d(device):
             )
             assert (
                 os.path.exists(
-                    os.path.join(modelDir, input_df["SubjectID"][0], "predictions.csv")
+                    os.path.join(
+                        modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
+                    )
                 )
                 is True
             )
 
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
+    for file in files_to_delete:
+        os.remove(file)
 
     print("passed")
 

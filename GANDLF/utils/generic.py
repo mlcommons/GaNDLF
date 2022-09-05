@@ -1,5 +1,7 @@
 import os, datetime, sys
 import numpy as np
+import torch
+import SimpleITK as sitk
 
 
 def checkPatchDivisibility(patch_size, number=16):
@@ -150,3 +152,21 @@ def getBase2(num):
         num = num / 2
         base = base + 1
     return base
+
+
+def get_array_from_image_or_tensor(input_tensor_or_image):
+    """
+    This function returns the numpy array from a tensor or image.
+    Args:
+        input_tensor_or_image (torch.Tensor or sitk.Image): The input tensor or image.
+    Returns:
+        numpy.array: The numpy array from the tensor or image.
+    """
+    if isinstance(input_tensor_or_image, torch.Tensor):
+        return input_tensor_or_image.detach().numpy()
+    elif isinstance(input_tensor_or_image, sitk.Image):
+        return sitk.GetArrayFromImage(input_tensor_or_image)
+    elif isinstance(input_tensor_or_image, np.ndarray):
+        return input_tensor_or_image
+    else:
+        raise ValueError("Input must be a torch.Tensor or sitk.Image or np.ndarray")
