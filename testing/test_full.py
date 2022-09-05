@@ -1819,15 +1819,30 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
     files_to_delete = []
     for _, row in input_df.iterrows():
-        img = cv2.imread(row["Channel_0"])
-        dims = img.shape
-        scaling_factor = 11
-        img_resize = cv2.resize(
-            img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
-        )
+        scaling_factor = 20
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
+        try:
+            img = cv2.imread(row["Channel_0"])
+            dims = img.shape
+            img_resize = cv2.resize(
+                img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
+            )
+            cv2.imwrite(new_filename, img_resize)
+        except:
+            # this is only used in CI
+            try:
+                os.system(
+                    "vips resize "
+                    + row["Channel_0"]
+                    + " "
+                    + new_filename
+                    + " "
+                    + str(scaling_factor)
+                )
+            except:
+                print("Resize could not be done")
+                break
         row["Channel_0"] = new_filename
-        cv2.imwrite(new_filename, img_resize)
         files_to_delete.append(new_filename)
 
     resized_inference_data_list = os.path.join(
