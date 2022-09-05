@@ -364,39 +364,3 @@ def inference_loop(
                         cv2.imwrite(file_to_write, blended_image)
                 except Exception as ex:
                     print("Could not write heatmaps; error:", ex)
-
-
-if __name__ == "__main__":
-
-    # parse the cli arguments here
-    parser = argparse.ArgumentParser(description="Inference Loop of GANDLF")
-    parser.add_argument(
-        "-inference_loader_pickle",
-        type=str,
-        help="Inference loader pickle",
-        required=True,
-    )
-    parser.add_argument(
-        "-parameter_pickle", type=str, help="Parameters pickle", required=True
-    )
-    parser.add_argument(
-        "-headers_pickle", type=str, help="Header pickle", required=True
-    )
-    parser.add_argument("-outputDir", type=str, help="Output directory", required=True)
-    parser.add_argument("-device", type=str, help="Device to train on", required=True)
-
-    args = parser.parse_args()
-
-    # # write parameters to pickle - this should not change for the different folds, so keeping is independent
-    patch_size = pickle.load(open(args.patch_size_pickle, "rb"))
-    headers = pickle.load(open(args.headers_pickle, "rb"))
-    label_header = pickle.load(open(args.label_header_pickle, "rb"))
-    parameters = pickle.load(open(args.parameter_pickle, "rb"))
-    inferenceDataFromPickle = get_dataframe(args.inference_loader_pickle)
-
-    inference_loop(
-        inferenceDataFromPickle=inferenceDataFromPickle,
-        parameters=parameters,
-        outputDir_or_optimizedModel=args.outputDir,
-        device=args.device,
-    )
