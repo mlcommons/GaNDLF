@@ -1819,7 +1819,7 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
     files_to_delete = []
     for _, row in input_df.iterrows():
-        scaling_factor = 25
+        scaling_factor = 20
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
         try:
             img = cv2.imread(row["Channel_0"])
@@ -1918,9 +1918,7 @@ def test_train_inference_classification_histology_large_2d(device):
         # if 'predictions.csv' are not found, give error
         assert (
             os.path.exists(
-                os.path.join(
-                    modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
-                )
+                os.path.join(modelDir, str(input_df["SubjectID"][0]), "predictions.csv")
             )
             is True
         )
