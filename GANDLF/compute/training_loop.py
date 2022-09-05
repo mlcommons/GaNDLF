@@ -370,7 +370,7 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, scheduler, params, epoch, mode="validation"
+            model, val_dataloader, scheduler, params, epoch, mode="Validation"
         )
 
         patience += 1
@@ -381,7 +381,7 @@ def training_loop(
 
         if testingDataDefined:
             epoch_test_loss, epoch_test_metric = validate_network(
-                model, test_dataloader, scheduler, params, epoch, mode="testing"
+                model, test_dataloader, scheduler, params, epoch, mode="Testing"
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
