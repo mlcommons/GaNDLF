@@ -2246,3 +2246,40 @@ def test_train_segmentation_transunet_rad_3d(device):
     )
 
     print("passed")
+
+
+def test_train_gradient_clipping_classification_rad_2d(device):
+    print("42: Testing gradient clipping")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # ensure gradient clipping is getting tested
+    for clip_mode in ["norm", "value", "agc"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = "softmax"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        parameters["clip_mode"] = clip_mode
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+    print("passed")
