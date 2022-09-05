@@ -82,10 +82,7 @@ def cca(input_image):
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
-    if isinstance(input_image, torch.Tensor):
-        seg = input_image.numpy()
-    elif isinstance(input_image, sitk.Image):
-        seg = sitk.GetArrayFromImage(input_image)
+    seg = get_array_from_image_or_tensor(input_image)
     mask = seg != 0
 
     connectivity = input_image.dim() - 1
