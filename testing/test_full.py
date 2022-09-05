@@ -1822,7 +1822,9 @@ def test_train_inference_classification_histology_large_2d(device):
         img = cv2.imread(row["Channel_0"])
         dims = img.shape
         scaling_factor = 12
-        img_resize = cv2.resize(img, (dims[1] * scaling_factor, dims[0] * scaling_factor))
+        img_resize = cv2.resize(
+            img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
+        )
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
         row["Channel_0"] = new_filename
         cv2.imwrite(new_filename, img_resize)
