@@ -158,7 +158,7 @@ def train_network(model, train_dataloader, optimizer, params):
                 (batch_idx + 1) < len(train_dataloader)
             ):
                 print(
-                    "\nHalf-Epoch Average Train loss : ",
+                    "\nHalf-Epoch Average train loss : ",
                     total_epoch_train_loss / (batch_idx + 1),
                 )
                 for metric in params["metrics"]:
@@ -169,12 +169,12 @@ def train_network(model, train_dataloader, optimizer, params):
                     else:
                         to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
                     print(
-                        "Half-Epoch Average Train " + metric + " : ",
+                        "Half-Epoch Average train " + metric + " : ",
                         to_print,
                     )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
-    print("     Epoch Final   Train loss : ", average_epoch_train_loss)
+    print("     Epoch Final   train loss : ", average_epoch_train_loss)
     for metric in params["metrics"]:
         if isinstance(total_epoch_train_metric[metric], np.ndarray):
             to_print = (
@@ -184,7 +184,7 @@ def train_network(model, train_dataloader, optimizer, params):
             to_print = total_epoch_train_metric[metric] / len(train_dataloader)
         average_epoch_train_metric[metric] = to_print
         print(
-            "     Epoch Final   Train " + metric + " : ",
+            "     Epoch Final   train " + metric + " : ",
             average_epoch_train_metric[metric],
         )
 
@@ -370,7 +370,7 @@ def training_loop(
             model, train_dataloader, optimizer, params
         )
         epoch_valid_loss, epoch_valid_metric = validate_network(
-            model, val_dataloader, scheduler, params, epoch, mode="Validation"
+            model, val_dataloader, scheduler, params, epoch, mode="validation"
         )
 
         patience += 1
@@ -381,7 +381,7 @@ def training_loop(
 
         if testingDataDefined:
             epoch_test_loss, epoch_test_metric = validate_network(
-                model, test_dataloader, scheduler, params, epoch, mode="Testing"
+                model, test_dataloader, scheduler, params, epoch, mode="testing"
             )
             test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
