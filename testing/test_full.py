@@ -1848,7 +1848,10 @@ def test_train_inference_classification_histology_large_2d(device):
     resized_inference_data_list = os.path.join(
         inputDir, "train_2d_histo_classification_resize.csv"
     )
+    # drop last subject
+    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
     input_df.to_csv(resized_inference_data_list, index=False)
+    files_to_delete.append(resized_inference_data_list)
 
     patch_extraction(
         inputDir + "/train_2d_histo_classification.csv",
@@ -1901,32 +1904,29 @@ def test_train_inference_classification_histology_large_2d(device):
         parameters_patch["patch_size"][1] * 10,
     ]
     parameters["nested_training"]["validation"] = 1
-    # drop last subject
-    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    input_df.to_csv(resized_inference_data_list, index=False)
-    files_to_delete.append(resized_inference_data_list)
     inference_data, parameters["headers"] = parseTrainingCSV(
         resized_inference_data_list, train=False
     )
-    with pytest.raises(Exception) as exc_info:
-        for model_type in all_model_type:
-            parameters["model"]["type"] = model_type
-            InferenceManager(
-                dataframe=inference_data,
-                outputDir=modelDir,
-                parameters=parameters,
-                device=device,
-            )
-            assert (
-                os.path.exists(
-                    os.path.join(
-                        modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
-                    )
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        InferenceManager(
+            dataframe=inference_data,
+            outputDir=modelDir,
+            parameters=parameters,
+            device=device,
+        )
+        # if 'predictions.csv' are not found, give error
+        assert (
+            os.path.exists(
+                os.path.join(
+                    modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
                 )
-                is True
             )
+            is True
+        )
+        # ensure previous results are removed
+        shutil.rmtree(os.path.join(modelDir, input_df["SubjectID"][0]))
 
-    print("Exception raised: ", exc_info.value)
     for file in files_to_delete:
         os.remove(file)
 
