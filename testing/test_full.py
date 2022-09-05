@@ -1424,7 +1424,16 @@ def test_generic_preprocess_functions():
     input_tensor_2d = torch.rand(1, 3, 256, 256)
     for mode in ["dilation", "erosion", "opening", "closing"]:
         input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
+        assert len(input_transformed_3d.shape) == 5, "Output should be 5D"
         input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
+        assert len(input_transformed_2d.shape) == 4, "Output should be 4D"
+
+    # test for failure
+    with pytest.raises(Exception) as exc_info:
+        input_tensor_4d = torch.rand(1, 1, 32, 32, 32, 32)
+        input_transformed_3d = torch_morphological(input_tensor_4d)
+
+    print("Exception raised:", exc_info.value)
 
     # test obtaining arrays
     input_tensor_3d = torch.rand(256, 256, 256)
