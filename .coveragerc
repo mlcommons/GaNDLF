@@ -5,4 +5,4 @@ omit =
     ./GANDLF/OPM
     ./GANDLF/anonymize/dicomanonymizer
     ./GANDLF/anonymize/slide_anonymizer.py
-    ./GANDLF/testing/conftest.py
+    ./testing/conftest.py
