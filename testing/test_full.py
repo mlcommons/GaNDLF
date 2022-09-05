@@ -1877,21 +1877,21 @@ def test_train_inference_classification_histology_large_2d(device):
         reset=True,
     )
     parameters["output_dir"] = modelDir  # this is in inference mode
+    parameters["data_preprocessing"]["resize_patch"] = parameters_patch["patch_size"]
+    parameters["patch_size"] = [
+        parameters_patch["patch_size"][0] * 10,
+        parameters_patch["patch_size"][1] * 10,
+    ]
+    parameters["nested_training"]["validation"] = 1
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
     input_df.to_csv(resized_inference_data_list, index=False)
+    files_to_delete.append(resized_inference_data_list)
     inference_data, parameters["headers"] = parseTrainingCSV(
         resized_inference_data_list, train=False
     )
-    files_to_delete.append(resized_inference_data_list)
     with pytest.raises(Exception) as exc_info:
         for model_type in all_model_type:
-            parameters["nested_training"]["testing"] = 1
-            parameters["nested_training"]["validation"] = -2
-            parameters["output_dir"] = modelDir  # this is in inference mode
-            inference_data, parameters["headers"] = parseTrainingCSV(
-                resized_inference_data_list, train=False
-            )
             parameters["model"]["type"] = model_type
             InferenceManager(
                 dataframe=inference_data,
@@ -1908,8 +1908,7 @@ def test_train_inference_classification_histology_large_2d(device):
                 is True
             )
 
-    exception_raised = exc_info.value
-    print("Exception raised: ", exception_raised)
+    print("Exception raised: ", exc_info.value)
     for file in files_to_delete:
         os.remove(file)
 
