@@ -1800,10 +1800,17 @@ def test_train_inference_classification_histology_large_2d(device):
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
 
+    for sub in ["1", "2"]:
+        file_to_check = os.path.join(
+            inputDir, "2d_histo_segmentation", sub, "image_resize.tiff"
+        )
+        if os.path.exists(file_to_check):
+            os.remove(file_to_check)
+
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
-    parameters_patch["patch_size"] = [1024, 1024]
+    parameters_patch["patch_size"] = [128, 128]
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
@@ -1834,14 +1841,14 @@ def test_train_inference_classification_histology_large_2d(device):
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
     temp_df.drop("Label", axis=1, inplace=True)
-    temp_df["valuetopredict"] = np.random.randint(2, size=6)
+    temp_df["valuetopredict"] = np.random.randint(2, size=len(temp_df))
     temp_df.to_csv(file_for_Training, index=False)
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = 1024
+    parameters["patch_size"] = 1280
     file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -1853,6 +1860,7 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
     parameters["data_preprocessing"]["rgba2rgb"] = ""
+    parameters["data_preprocessing"]["resize_patch"] = [128, 128]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
