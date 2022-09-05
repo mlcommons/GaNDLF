@@ -36,13 +36,12 @@ jobs:
     - name: Run generic unit tests
       run: |
         pytest --cov=. --cov-report=xml -k "generic"
-        
-    - name: Run classification unit tests with histology
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
     - name: Run classification unit tests
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
+    - name: Run classification unit tests with histology
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
     - name: Run regression unit tests
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "regression"
