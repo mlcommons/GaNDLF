@@ -1821,7 +1821,7 @@ def test_train_inference_classification_histology_large_2d(device):
     for _, row in input_df.iterrows():
         img = cv2.imread(row["Channel_0"])
         dims = img.shape
-        scaling_factor = 12
+        scaling_factor = 11
         img_resize = cv2.resize(
             img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
         )
