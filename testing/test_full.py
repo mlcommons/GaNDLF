@@ -1923,7 +1923,11 @@ def test_train_inference_classification_histology_large_2d(device):
             is True
         )
         # ensure previous results are removed
-        shutil.rmtree(os.path.join(modelDir, input_df["SubjectID"][0]))
+        folders_in_modelDir = os.listdir(modelDir)
+        for folder in folders_in_modelDir:
+            current_folder = os.path.join(modelDir, folder)
+            if os.path.isdir(current_folder):
+                shutil.rmtree(current_folder)
 
     for file in files_to_delete:
         os.remove(file)
