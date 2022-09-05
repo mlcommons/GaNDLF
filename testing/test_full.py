@@ -1848,7 +1848,7 @@ def test_train_inference_classification_histology_large_2d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = 1280
+    parameters["patch_size"] = parameters_patch["patch_size"][0]
     file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -1860,7 +1860,6 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
     parameters["data_preprocessing"]["rgba2rgb"] = ""
-    parameters["data_preprocessing"]["resize_patch"] = [128, 128]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
