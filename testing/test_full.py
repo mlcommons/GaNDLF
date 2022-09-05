@@ -1916,25 +1916,22 @@ def test_train_inference_classification_histology_large_2d(device):
             device=device,
         )
         # if 'predictions.csv' are not found, give error
+        output_subject_dir = os.path.join(modelDir, str(input_df["SubjectID"][0]))
         assert (
-            os.path.exists(
-                os.path.join(modelDir, str(input_df["SubjectID"][0]), "predictions.csv")
-            )
-            is True
+            os.path.exists(os.path.join(output_subject_dir, "predictions.csv")) is True
         )
         # the blended should not get generated because of memory constraints
-        assert(
+        assert (
             os.path.exists(
-                os.path.join(modelDir, str(input_df["SubjectID"][0]), "probability_map_blended_0_agni.png")
+                os.path.join(
+                    output_subject_dir,
+                    "probability_map_blended_0_agni.png",
+                )
             )
             is False
         )
         # ensure previous results are removed
-        folders_in_modelDir = os.listdir(modelDir)
-        for folder in folders_in_modelDir:
-            current_folder = os.path.join(modelDir, folder)
-            if os.path.isdir(current_folder):
-                shutil.rmtree(current_folder)
+        shutil.rmtree(output_subject_dir)
 
     for file in files_to_delete:
         os.remove(file)
