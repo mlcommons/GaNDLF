@@ -1393,7 +1393,7 @@ def test_generic_preprocess_functions():
     input_transformed = fill_holes(input_tensor)
     # sitk.Image input
     input_tensor_image = sitk.GetImageFromArray(input_tensor.numpy())
-    input_transformed = fill_holes(input_tensor_image)
+    input_transformed = fill_holes(input_tensor_image > 0.5)
 
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
