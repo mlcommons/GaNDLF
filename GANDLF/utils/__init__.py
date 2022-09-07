@@ -34,11 +34,11 @@ from .parameter_processing import (
 )
 
 from .generic import (
-    fix_paths,
     get_date_time,
     get_unique_timestamp,
     get_filename_extension_sanitized,
     version_check,
+    get_array_from_image_or_tensor,
 )
 
 from .modelio import (

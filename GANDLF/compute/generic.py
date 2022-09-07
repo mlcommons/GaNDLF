@@ -5,13 +5,11 @@ from GANDLF.data import (
     get_train_loader,
     get_validation_loader,
 )
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     send_model_to_device,
     get_class_imbalance_weights,
-    print_model_summary,
 )
 
 
@@ -78,15 +76,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
     model, parameters["model"]["amp"], parameters["device"] = send_model_to_device(
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
-
-    if parameters["model"]["print_summary"]:
-        print_model_summary(
-            model,
-            parameters["batch_size"],
-            parameters["model"]["num_channels"],
-            parameters["patch_size"],
-            parameters["device"],
-        )
 
     # only need to create scheduler if training
     if train_csv is not None:

@@ -15,6 +15,7 @@ from GANDLF.utils import (
     load_model,
     version_check,
     write_training_patches,
+    print_model_summary,
 )
 from GANDLF.logger import Logger
 from .step import step
@@ -236,6 +237,15 @@ def training_loop(
         params,
     ) = create_pytorch_objects(params, training_data, validation_data, device)
 
+    if params["model"]["print_summary"]:
+        print_model_summary(
+            model,
+            params["batch_size"],
+            params["model"]["num_channels"],
+            params["patch_size"],
+            params["device"],
+        )
+
     if testingDataDefined:
         test_dataloader = get_testing_loader(params)
 
@@ -453,9 +463,7 @@ def training_loop(
         onnx_export = True
         if params["model"]["architecture"] in ["sdnet", "brain_age"]:
             onnx_export = False
-        elif (
-            "onnx_export" in params["model"] and params["model"]["onnx_export"] == False
-        ):
+        elif "onnx_export" in params["model"] and not (params["model"]["onnx_export"]):
             onnx_export = False
 
         if onnx_export:

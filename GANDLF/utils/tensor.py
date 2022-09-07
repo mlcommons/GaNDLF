@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 import torchio
 from tqdm import tqdm
 from torchinfo import summary
+from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 # global definition for both one_hot and reverse_one_hot
 special_cases_to_check = ["||"]
@@ -87,10 +88,7 @@ def reverse_one_hot(predmask_tensor, class_list):
     Returns:
         numpy.array: The final mask as numpy array.
     """
-    if isinstance(predmask_tensor, torch.Tensor):
-        predmask_array = predmask_tensor.cpu().numpy()
-    else:
-        predmask_array = predmask_tensor
+    predmask_array = get_array_from_image_or_tensor(predmask_tensor)
     special_case_detected = False
 
     for _class in class_list:

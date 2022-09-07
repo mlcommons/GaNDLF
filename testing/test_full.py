@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from pydicom.data import get_testdata_file
+import cv2
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
@@ -1410,6 +1411,22 @@ def test_generic_preprocess_functions():
         input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
         input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
 
+    # test obtaining arrays
+    input_tensor_3d = torch.rand(256, 256, 256)
+    input_array = get_array_from_image_or_tensor(input_tensor_3d)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from tensor"
+    input_image = sitk.GetImageFromArray(input_array)
+    input_array = get_array_from_image_or_tensor(input_image)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from image"
+    input_array = get_array_from_image_or_tensor(input_array)
+    assert isinstance(input_array, np.ndarray), "Array should be obtained from array"
+
+    with pytest.raises(Exception) as exc_info:
+        input_list = [0, 1]
+        input_array = get_array_from_image_or_tensor(input_list)
+    exception_raised = exc_info.value
+    print("Exception raised: ", exception_raised)
+
     print("passed")
 
 
@@ -1711,7 +1728,7 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["nested_training"]["validation"] = -2
     parameters["metrics"] = ["dice"]
     parameters["model"]["onnx_export"] = True
-    parameters["model"]["print_summary"] = False
+    parameters["model"]["print_summary"] = True
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
     modelDir = os.path.join(outputDir, "modelDir")
     Path(modelDir).mkdir(parents=True, exist_ok=True)
@@ -1737,8 +1754,136 @@ def test_train_inference_segmentation_histology_2d(device):
     print("passed")
 
 
+def test_train_inference_classification_histology_large_2d(device):
+    print(
+        "35: Starting histology train/inference classification tests for large images to check exception handling"
+    )
+    # overwrite previous results
+    sanitize_outputDir()
+    output_dir_patches = os.path.join(outputDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
+    Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+    file_config_temp = os.path.join(
+        output_dir_patches, "config_patch-extraction_temp.yaml"
+    )
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    parameters_patch = {}
+    # extracting minimal number of patches to ensure that the test does not take too long
+    parameters_patch["num_patches"] = 3
+    parameters_patch["patch_size"] = [128, 128]
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_patch, file)
+
+    # resize the image
+    input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
+    files_to_delete = []
+    for _, row in input_df.iterrows():
+        img = cv2.imread(row["Channel_0"])
+        dims = img.shape
+        img_resize = cv2.resize(img, (dims[1] * 10, dims[0] * 10))
+        new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
+        row["Channel_0"] = new_filename
+        cv2.imwrite(new_filename, img_resize)
+        files_to_delete.append(new_filename)
+
+    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
+
+    patch_extraction(
+        inputDir + "/train_2d_histo_classification_resize.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
+    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    temp_df = pd.read_csv(file_for_Training)
+    temp_df.drop("Label", axis=1, inplace=True)
+    temp_df["valuetopredict"] = np.random.randint(2, size=6)
+    temp_df.to_csv(file_for_Training, index=False)
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "histo"
+    parameters["patch_size"] = 128
+    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["architecture"] = "densenet121"
+    parameters["model"]["norm_type"] = "none"
+    parameters["data_preprocessing"]["rgba2rgb"] = ""
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
+    parameters["model"]["print_summary"] = False
+    modelDir = os.path.join(outputDir, "modelDir")
+    if os.path.isdir(modelDir):
+        shutil.rmtree(modelDir)
+    Path(modelDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=modelDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    parameters["output_dir"] = modelDir  # this is in inference mode
+    # drop last subject
+    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
+    resized_inference_data_list = os.path.join(
+        inputDir, "train_2d_histo_classification_resize.csv"
+    )
+    input_df.to_csv(resized_inference_data_list, index=False)
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        resized_inference_data_list, train=False
+    )
+    files_to_delete.append(resized_inference_data_list)
+    with pytest.raises(Exception) as exc_info:
+        for model_type in all_model_type:
+            parameters["nested_training"]["testing"] = 1
+            parameters["nested_training"]["validation"] = -2
+            parameters["output_dir"] = modelDir  # this is in inference mode
+            inference_data, parameters["headers"] = parseTrainingCSV(
+                inputDir + "train_2d_histo_classification.csv", train=False
+            )
+            parameters["model"]["type"] = model_type
+            InferenceManager(
+                dataframe=inference_data,
+                outputDir=modelDir,
+                parameters=parameters,
+                device=device,
+            )
+            assert (
+                os.path.exists(
+                    os.path.join(
+                        modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
+                    )
+                )
+                is True
+            )
+
+    exception_raised = exc_info.value
+    print("Exception raised: ", exception_raised)
+    for file in files_to_delete:
+        os.remove(file)
+
+    print("passed")
+
+
 def test_train_inference_classification_histology_2d(device):
-    print("35: Starting histology train/inference classification tests")
+    print("36: Starting histology train/inference classification tests")
     # overwrite previous results
     sanitize_outputDir()
     output_dir_patches = os.path.join(outputDir, "histo_patches")
@@ -1830,7 +1975,7 @@ def test_train_inference_classification_histology_2d(device):
 
 def test_train_segmentation_unet_layerchange_rad_2d(device):
     # test case to up code coverage --> test decreasing allowed layers for unet
-    print("36: Starting 2D Rad segmentation tests for normtype")
+    print("37: Starting 2D Rad segmentation tests for normtype")
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -1877,7 +2022,7 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
 
 
 def test_train_segmentation_unetr_rad_3d(device):
-    print("37: Testing UNETR for 3D segmentation")
+    print("38: Testing UNETR for 3D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1933,7 +2078,7 @@ def test_train_segmentation_unetr_rad_3d(device):
 
 
 def test_train_segmentation_unetr_rad_2d(device):
-    print("38: Testing UNETR for 2D segmentation")
+    print("39: Testing UNETR for 2D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -1971,7 +2116,7 @@ def test_train_segmentation_unetr_rad_2d(device):
 
 
 def test_train_segmentation_transunet_rad_2d(device):
-    print("39: Testing TransUNet for 2D segmentation")
+    print("40: Testing TransUNet for 2D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -2020,7 +2165,7 @@ def test_train_segmentation_transunet_rad_2d(device):
 
 
 def test_train_segmentation_transunet_rad_3d(device):
-    print("40: Testing TransUNet for 3D segmentation")
+    print("41: Testing TransUNet for 3D segmentation")
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
