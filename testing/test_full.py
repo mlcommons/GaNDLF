@@ -1227,8 +1227,23 @@ def test_generic_cli_function_mainrun(device):
     main_run(
         file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
     )
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)  # overwrite previous results
+    sanitize_outputDir()
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    # testing train/valid split
+    main_run(
+        file_data + "," + file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device,
+        resume=False,
+        reset=True,
+    )
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1409,7 +1424,16 @@ def test_generic_preprocess_functions():
     input_tensor_2d = torch.rand(1, 3, 256, 256)
     for mode in ["dilation", "erosion", "opening", "closing"]:
         input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
+        assert len(input_transformed_3d.shape) == 5, "Output should be 5D"
         input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
+        assert len(input_transformed_2d.shape) == 4, "Output should be 4D"
+
+    # test for failure
+    with pytest.raises(Exception) as exc_info:
+        input_tensor_4d = torch.rand(1, 1, 32, 32, 32, 32)
+        input_transformed_3d = torch_morphological(input_tensor_4d)
+
+    print("Exception raised:", exc_info.value)
 
     # test obtaining arrays
     input_tensor_3d = torch.rand(256, 256, 256)
@@ -1594,6 +1618,16 @@ def test_generic_one_hot_logic():
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
 
+    parameters = {"data_postprocessing": {}}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    ).numpy()
+
+    parameters = {}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    ).numpy()
+
     parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
@@ -1645,6 +1679,9 @@ def test_generic_anonymizer():
 
     run_anonymizer(input_file, output_file, config_file, "rad")
 
+    # test defaults
+    run_anonymizer(input_file, output_file, None, "rad")
+
     os.remove(output_file)
 
     # test nifti conversion
@@ -1668,7 +1705,16 @@ def test_generic_anonymizer():
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
 
-    for file_to_delete in [input_folder_for_nifti, config_file_for_nifti, output_file]:
+    input_file = os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff")
+    output_file_histo = os.path.join(testingDir, "histo_anon.tiff")
+    run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
+
+    for file_to_delete in [
+        input_folder_for_nifti,
+        config_file_for_nifti,
+        output_file,
+        output_file_histo,
+    ]:
         if os.path.exists(file_to_delete):
             if os.path.isdir(file_to_delete):
                 shutil.rmtree(file_to_delete)
@@ -1773,6 +1819,13 @@ def test_train_inference_classification_histology_large_2d(device):
     if os.path.exists(file_config_temp):
         os.remove(file_config_temp)
 
+    for sub in ["1", "2"]:
+        file_to_check = os.path.join(
+            inputDir, "2d_histo_segmentation", sub, "image_resize.tiff"
+        )
+        if os.path.exists(file_to_check):
+            os.remove(file_to_check)
+
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
@@ -1785,18 +1838,42 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
     files_to_delete = []
     for _, row in input_df.iterrows():
-        img = cv2.imread(row["Channel_0"])
-        dims = img.shape
-        img_resize = cv2.resize(img, (dims[1] * 10, dims[0] * 10))
+        scaling_factor = 20
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
+        try:
+            img = cv2.imread(row["Channel_0"])
+            dims = img.shape
+            img_resize = cv2.resize(
+                img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
+            )
+            cv2.imwrite(new_filename, img_resize)
+        except:
+            # this is only used in CI
+            try:
+                os.system(
+                    "vips resize "
+                    + row["Channel_0"]
+                    + " "
+                    + new_filename
+                    + " "
+                    + str(scaling_factor)
+                )
+            except:
+                print("Resize could not be done")
+                break
         row["Channel_0"] = new_filename
-        cv2.imwrite(new_filename, img_resize)
         files_to_delete.append(new_filename)
 
-    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
+    resized_inference_data_list = os.path.join(
+        inputDir, "train_2d_histo_classification_resize.csv"
+    )
+    # drop last subject
+    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
+    input_df.to_csv(resized_inference_data_list, index=False)
+    files_to_delete.append(resized_inference_data_list)
 
     patch_extraction(
-        inputDir + "/train_2d_histo_classification_resize.csv",
+        inputDir + "/train_2d_histo_classification.csv",
         output_dir_patches_output,
         file_config_temp,
     )
@@ -1804,14 +1881,14 @@ def test_train_inference_classification_histology_large_2d(device):
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
     temp_df.drop("Label", axis=1, inplace=True)
-    temp_df["valuetopredict"] = np.random.randint(2, size=6)
+    temp_df["valuetopredict"] = np.random.randint(2, size=len(temp_df))
     temp_df.to_csv(file_for_Training, index=False)
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = 128
+    parameters["patch_size"] = parameters_patch["patch_size"][0]
     file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
@@ -1840,42 +1917,31 @@ def test_train_inference_classification_histology_large_2d(device):
         reset=True,
     )
     parameters["output_dir"] = modelDir  # this is in inference mode
-    # drop last subject
-    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    resized_inference_data_list = os.path.join(
-        inputDir, "train_2d_histo_classification_resize.csv"
-    )
-    input_df.to_csv(resized_inference_data_list, index=False)
+    parameters["data_preprocessing"]["resize_patch"] = parameters_patch["patch_size"]
+    parameters["patch_size"] = [
+        parameters_patch["patch_size"][0] * 10,
+        parameters_patch["patch_size"][1] * 10,
+    ]
+    parameters["nested_training"]["validation"] = 1
     inference_data, parameters["headers"] = parseTrainingCSV(
         resized_inference_data_list, train=False
     )
-    files_to_delete.append(resized_inference_data_list)
-    with pytest.raises(Exception) as exc_info:
-        for model_type in all_model_type:
-            parameters["nested_training"]["testing"] = 1
-            parameters["nested_training"]["validation"] = -2
-            parameters["output_dir"] = modelDir  # this is in inference mode
-            inference_data, parameters["headers"] = parseTrainingCSV(
-                inputDir + "train_2d_histo_classification.csv", train=False
-            )
-            parameters["model"]["type"] = model_type
-            InferenceManager(
-                dataframe=inference_data,
-                outputDir=modelDir,
-                parameters=parameters,
-                device=device,
-            )
-            assert (
-                os.path.exists(
-                    os.path.join(
-                        modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
-                    )
-                )
-                is True
-            )
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        InferenceManager(
+            dataframe=inference_data,
+            outputDir=modelDir,
+            parameters=parameters,
+            device=device,
+        )
+        # if 'predictions.csv' are not found, give error
+        output_subject_dir = os.path.join(modelDir, str(input_df["SubjectID"][0]))
+        assert (
+            os.path.exists(os.path.join(output_subject_dir, "predictions.csv")) is True
+        )
+        # ensure previous results are removed
+        shutil.rmtree(output_subject_dir)
 
-    exception_raised = exc_info.value
-    print("Exception raised: ", exception_raised)
     for file in files_to_delete:
         os.remove(file)
 
@@ -2221,4 +2287,41 @@ def test_train_segmentation_transunet_rad_3d(device):
         reset=True,
     )
 
+    print("passed")
+
+
+def test_train_gradient_clipping_classification_rad_2d(device):
+    print("42: Testing gradient clipping")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # ensure gradient clipping is getting tested
+    for clip_mode in ["norm", "value", "agc"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = "softmax"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        parameters["clip_mode"] = clip_mode
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
     print("passed")
