@@ -4,6 +4,7 @@ import SimpleITK as sitk
 from skimage.measure import label
 import numpy as np
 from scipy.ndimage import binary_fill_holes, binary_closing
+from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 
 def torch_morphological(input_image, kernel_size=1, mode="dilation"):
