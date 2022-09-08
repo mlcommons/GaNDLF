@@ -5,6 +5,8 @@
 - Added ability to print model size and summary at run-time
 - Improved error checking added for WSI inference
 - VIPS has been removed from dependencies
+- Failed unit test cases are now recorded
+- Per class accuracy has been added as a metric
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
 

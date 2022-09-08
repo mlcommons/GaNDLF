@@ -56,6 +56,7 @@ metrics:
   # - accuracy # classification
   # - classification_accuracy # classification
   # - balanced_accuracy # classification ## more details https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html
+  # - per_label_accuracy # used for classification
   # - f1 # classification/segmentation
   # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
   # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4

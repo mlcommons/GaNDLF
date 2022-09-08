@@ -14,6 +14,7 @@ metrics:
     }
   - accuracy
   - balanced_accuracy
+  - per_label_accuracy
   - precision: {
       average: weighted,
     }

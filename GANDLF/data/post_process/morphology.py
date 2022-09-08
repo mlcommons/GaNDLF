@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
-import SimpleITK as sitk
 from scipy.ndimage.morphology import binary_fill_holes, binary_closing
+from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 
 def torch_morphological(input_image, kernel_size=1, mode="dilation"):
@@ -61,11 +61,7 @@ def fill_holes(input_image, params=None):
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
-    input_image_array = input_image
-    if isinstance(input_image, torch.Tensor):
-        input_image_array = input_image.numpy()
-    elif isinstance(input_image, sitk.Image):
-        input_image_array = sitk.GetArrayFromImage(input_image)
+    input_image_array = get_array_from_image_or_tensor(input_image)
     input_image_array_closed = binary_closing(input_image_array)
     # Fill the holes in binary objects
     output_array = binary_fill_holes(input_image_array_closed).astype(int)

@@ -38,6 +38,7 @@ from .generic import (
     get_unique_timestamp,
     get_filename_extension_sanitized,
     version_check,
+    get_array_from_image_or_tensor,
 )
 
 from .modelio import (
