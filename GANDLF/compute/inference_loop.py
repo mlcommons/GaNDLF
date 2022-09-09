@@ -262,9 +262,9 @@ def inference_loop(
                     output_to_write += (
                         str(subject_name)
                         + ","
-                        + str(x_coords[i])
-                        + ","
                         + str(y_coords[i])
+                        + ","
+                        + str(x_coords[i])
                     )
                     for n in range(parameters["model"]["num_classes"]):
                         # This is a temporary fix for the segmentation problem for single class
