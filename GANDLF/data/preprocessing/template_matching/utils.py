@@ -5,8 +5,9 @@ import cv2
 
 
 def contrast_enhancer(img, low_p=2, high_p=98):
-    """Enhancing contrast of the input image using intensity adjustment.
-       This method uses both image low and high percentiles.
+    """
+    Enhancing contrast of the input image using intensity adjustment.
+    This method uses both image low and high percentiles.
 
     Args:
         img (:class:`numpy.ndarray`): input image used to obtain tissue mask.
@@ -30,8 +31,7 @@ def contrast_enhancer(img, low_p=2, high_p=98):
     assert img.dtype == np.uint8, "Image should be uint8"
     img_out = img.copy()
     p_low, p_high = np.percentile(img_out, (low_p, high_p))
-    if p_low >= p_high:
-        p_low, p_high = np.min(img_out), np.max(img_out)
+    p_low, p_high = np.min(img_out), np.max(img_out)
     if p_high > p_low:
         img_out = exposure.rescale_intensity(
             img_out, in_range=(p_low, p_high), out_range=(0.0, 255.0)
