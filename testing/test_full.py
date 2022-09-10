@@ -126,8 +126,8 @@ def test_generic_constructTrainingCSV():
         elif "2d_histo_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
-        else:
-            continue
+        # else:
+        #     continue
         writeTrainingCSV(
             currentApplicationDir,
             channelsID,
@@ -815,9 +815,6 @@ def test_train_scheduler_classification_rad_2d(device):
         sanitize_outputDir()
         ## ensure parameters are parsed every single time
         file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-        # if found in previous run, discard.
-        if os.path.exists(file_config_temp):
-            os.remove(file_config_temp)
 
         with open(file_config_temp, "w") as file:
             yaml.dump(parameters, file)
@@ -1083,11 +1080,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1105,11 +1100,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1125,11 +1118,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1145,11 +1136,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1671,21 +1660,19 @@ def test_generic_anonymizer():
     print("33: Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
-    output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
-    if os.path.exists(output_file):
-        os.remove(output_file)
+    output_file = os.path.join(outputDir, "MR_small_anonymized.dcm")
 
     config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
 
     run_anonymizer(input_file, output_file, config_file, "rad")
+    assert os.path.exists(output_file), "Anonymized file does not exist"
 
     # test defaults
     run_anonymizer(input_file, output_file, None, "rad")
-
-    os.remove(output_file)
+    assert os.path.exists(output_file), "Anonymized file does not exist"
 
     # test nifti conversion
-    config_file_for_nifti = os.path.join(testingDir, "config_anonymizer_nifti.yaml")
+    config_file_for_nifti = os.path.join(outputDir, "config_anonymizer_nifti.yaml")
     with open(config_file, "r") as file_data:
         yaml_data = file_data.read()
     parameters = yaml.safe_load(yaml_data)
@@ -1694,32 +1681,23 @@ def test_generic_anonymizer():
         yaml.dump(parameters, file)
 
     # for nifti conversion, the input needs to be in a dir
-    input_folder_for_nifti = os.path.join(testingDir, "nifti_input")
+    input_folder_for_nifti = os.path.join(outputDir, "nifti_input")
     Path(input_folder_for_nifti).mkdir(parents=True, exist_ok=True)
     shutil.copyfile(input_file, os.path.join(input_folder_for_nifti, "MR_small.dcm"))
 
-    output_file = os.path.join(testingDir, "MR_small.nii.gz")
+    output_file = os.path.join(outputDir, "MR_small.nii.gz")
 
     run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti, "rad")
+    assert os.path.exists(output_file), "Anonymized file does not exist"
 
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
 
     input_file = os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff")
-    output_file_histo = os.path.join(testingDir, "histo_anon.tiff")
+    output_file_histo = os.path.join(outputDir, "histo_anon.tiff")
     run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
-
-    for file_to_delete in [
-        input_folder_for_nifti,
-        config_file_for_nifti,
-        output_file,
-        output_file_histo,
-    ]:
-        if os.path.exists(file_to_delete):
-            if os.path.isdir(file_to_delete):
-                shutil.rmtree(file_to_delete)
-            else:
-                os.remove(file_to_delete)
+    assert os.path.exists(output_file_histo), "Anonymized file does not exist"
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1838,7 +1816,7 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
     files_to_delete = []
     for _, row in input_df.iterrows():
-        scaling_factor = 20
+        scaling_factor = 10
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
         try:
             img = cv2.imread(row["Channel_0"])
