@@ -234,7 +234,7 @@ def inference_loop(
             )
 
             for image_patches, (x_coords, y_coords) in dataloader:
-                x_coords, y_coords = y_coords.numpy(), x_coords.numpy()
+                x_coords, y_coords = x_coords.numpy(), y_coords.numpy()
                 if parameters["model"]["type"] == "torch":
                     if parameters["model"]["amp"]:
                         with autocast():
@@ -256,8 +256,8 @@ def inference_loop(
                 for i in range(int(output.shape[0])):
                     if count_map is not None:
                         count_map[
-                            x_coords[i] : x_coords[i] + patch_size[0],
                             y_coords[i] : y_coords[i] + patch_size[1],
+                            x_coords[i] : x_coords[i] + patch_size[0],
                         ] += 1
                     output_to_write += (
                         str(subject_name)
@@ -271,8 +271,8 @@ def inference_loop(
                         if probs_map is not None:
                             probs_map[
                                 n,
-                                x_coords[i] : x_coords[i] + patch_size[0],
                                 y_coords[i] : y_coords[i] + patch_size[1],
+                                x_coords[i] : x_coords[i] + patch_size[0],
                             ] += output[i][n]
                         if parameters["problem_type"] != "segmentation":
                             output_to_write += "," + str(output[i][n])
