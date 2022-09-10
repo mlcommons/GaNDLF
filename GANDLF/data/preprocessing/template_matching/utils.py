@@ -31,7 +31,8 @@ def contrast_enhancer(img, low_p=2, high_p=98):
     assert img.dtype == np.uint8, "Image should be uint8"
     img_out = img.copy()
     p_low, p_high = np.percentile(img_out, (low_p, high_p))
-    p_low, p_high = np.min(img_out), np.max(img_out)
+    if p_low >= p_high:
+        p_low, p_high = np.min(img_out), np.max(img_out)
     if p_high > p_low:
         img_out = exposure.rescale_intensity(
             img_out, in_range=(p_low, p_high), out_range=(0.0, 255.0)
