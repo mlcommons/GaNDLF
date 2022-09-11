@@ -97,7 +97,7 @@ def reverse_one_hot(predmask_tensor, class_list):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
 
-    final_mask = np.zeros(predmask_array[0, ...].shape).astype(np.int8)
+    final_mask = np.zeros(predmask_array[0, ...].shape).astype(np.uint8)
     predmask_array_bool = predmask_array >= 0.5
 
     # in case special case is detected, if 0 is absent from
@@ -124,7 +124,7 @@ def reverse_one_hot(predmask_tensor, class_list):
 
         final_mask[predmask_array_bool[idx, ...]] = output_value
 
-    return final_mask.astype(np.int16)
+    return final_mask
 
 
 def send_model_to_device(model, amp, device, optimizer):
