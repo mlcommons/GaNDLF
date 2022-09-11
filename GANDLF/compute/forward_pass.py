@@ -309,9 +309,9 @@ def validate_network(
                     # perform postprocessing before reverse one-hot encoding here
                     for postprocessor in params["data_postprocessing"]:
                         for _class in range(0, params["model"]["num_classes"]):
-                            pred_mask[0, _class, ...] = postprocessor(
-                                pred_mask[0, _class, ...], params
-                            )
+                            pred_mask[0, _class, ...] = global_postprocessing_dict[
+                                postprocessor
+                            ](pred_mask[0, _class, ...], params)
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
@@ -327,7 +327,8 @@ def validate_network(
                         ).numpy()
 
                     # if jpg detected, convert to 8-bit arrays
-                    if get_filename_extension_sanitized(subject["1"]["path"][0]) in [
+                    ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+                    if ext in [
                         ".jpg",
                         ".jpeg",
                     ]:
