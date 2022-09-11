@@ -110,7 +110,8 @@ def validate_network(
         if "spacing" in subject:
             params["subject_spacing"] = subject["spacing"]
 
-        # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
+        # constructing a new dict because torchio.GridSampler requires torchio.Subject,
+        # which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
         label_present = False
