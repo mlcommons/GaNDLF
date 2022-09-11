@@ -106,10 +106,9 @@ def validate_network(
             print("== Current subject:", subject["subject_id"], flush=True)
 
         # ensure spacing is always present in params and is always subject-specific
+        params["subject_spacing"] = None
         if "spacing" in subject:
             params["subject_spacing"] = subject["spacing"]
-        else:
-            params["subject_spacing"] = None
 
         # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
@@ -306,14 +305,10 @@ def validate_network(
                         tensor=subject["1"]["data"].squeeze(0),
                         affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
-                    ext = get_filename_extension_sanitized(subject["1"]["path"][0])
-                    jpg_detected = False
-                    if ext in [".jpg", ".jpeg"]:
-                        jpg_detected = True
                     pred_mask = output_prediction.numpy()
-                    # perform numpy-specific postprocessing here
+                    # perform postprocessing before reverse one-hot encoding here
                     for postprocessor in params["data_postprocessing"]:
-                        for _class in params["model"]["class_list"]:
+                        for _class in range(0, params["model"]["num_classes"]):
                             pred_mask[0, _class, ...] = postprocessor(
                                 pred_mask[0, _class, ...], params
                             )
@@ -323,7 +318,7 @@ def validate_network(
                     )
                     pred_mask = np.swapaxes(pred_mask, 0, 2)
 
-                    # perform numpy-specific postprocessing here
+                    # perform postprocessing after reverse one-hot encoding here
                     for postprocessor in params[
                         "data_postprocessing_after_reverse_one_hot_encoding"
                     ]:
@@ -331,8 +326,11 @@ def validate_network(
                             pred_mask, params
                         ).numpy()
 
-                    pred_mask = pred_mask.astype(np.uint16)
-                    if jpg_detected:
+                    # if jpg detected, convert to 8-bit arrays
+                    if get_filename_extension_sanitized(subject["1"]["path"][0]) in [
+                        ".jpg",
+                        ".jpeg",
+                    ]:
                         pred_mask = pred_mask.astype(np.uint8)
 
                     ## special case for 2D
