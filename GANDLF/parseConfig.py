@@ -3,6 +3,7 @@ import numpy as np
 from copy import deepcopy
 
 from .utils import version_check
+from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -477,6 +478,18 @@ def parseConfig(config_file_path, version_check_flag=True):
                         params["data_preprocessing"]["histogram_matching"] = {
                             "target": "adaptive"
                         }
+
+    # this is NOT a required parameter - a user should be able to train with NO built-in post-processing
+    params = initialize_key(params, "data_postprocessing", {})
+    params = initialize_key(
+        params, "data_postprocessing_after_reverse_one_hot_encoding", {}
+    )
+    for key in params["data_postprocessing"]:
+        if key in postprocessing_after_reverse_one_hot_encoding:
+            params["data_postprocessing_after_reverse_one_hot_encoding"] = params[
+                "data_postprocessing"
+            ][key]
+            params["data_postprocessing"].pop(key)
 
     if "model" in params:
 
