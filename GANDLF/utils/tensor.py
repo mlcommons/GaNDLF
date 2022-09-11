@@ -124,7 +124,7 @@ def reverse_one_hot(predmask_tensor, class_list):
 
         final_mask[predmask_array_bool[idx, ...]] = output_value
 
-    return final_mask.astype(np.uint16)
+    return final_mask.astype(np.int16)
 
 
 def send_model_to_device(model, amp, device, optimizer):
