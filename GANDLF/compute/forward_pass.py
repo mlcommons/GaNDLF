@@ -311,6 +311,12 @@ def validate_network(
                     if ext in [".jpg", ".jpeg"]:
                         jpg_detected = True
                     pred_mask = output_prediction.numpy()
+                    # perform numpy-specific postprocessing here
+                    for postprocessor in params["data_postprocessing"]:
+                        for _class in params["model"]["class_list"]:
+                            pred_mask[0, _class, ...] = postprocessor(
+                                pred_mask[0, _class, ...], params
+                            )
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
@@ -318,14 +324,16 @@ def validate_network(
                     pred_mask = np.swapaxes(pred_mask, 0, 2)
 
                     # perform numpy-specific postprocessing here
-                    for postprocessor in params["data_postprocessing"]:
+                    for postprocessor in params[
+                        "data_postprocessing_after_reverse_one_hot_encoding"
+                    ]:
                         pred_mask = global_postprocessing_dict[postprocessor](
                             pred_mask, params
                         ).numpy()
+
+                    pred_mask = pred_mask.astype(np.uint16)
                     if jpg_detected:
                         pred_mask = pred_mask.astype(np.uint8)
-                    else:
-                        pred_mask = pred_mask.astype(np.uint16)
 
                     ## special case for 2D
                     if image.shape[-1] > 1:
