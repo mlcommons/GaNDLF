@@ -965,6 +965,7 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
+    parameters["data_postprocessing"] = {"mapping": {0: 0, 255: 1}}
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
