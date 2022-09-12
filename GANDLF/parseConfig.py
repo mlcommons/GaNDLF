@@ -484,9 +484,10 @@ def parseConfig(config_file_path, version_check_flag=True):
     params = initialize_key(
         params, "data_postprocessing_after_reverse_one_hot_encoding", {}
     )
-    for key in params["data_postprocessing"]:
+    temp_dict = deepcopy(params["data_postprocessing"])
+    for key in temp_dict:
         if key in postprocessing_after_reverse_one_hot_encoding:
-            params["data_postprocessing_after_reverse_one_hot_encoding"] = params[
+            params["data_postprocessing_after_reverse_one_hot_encoding"][key] = params[
                 "data_postprocessing"
             ][key]
             params["data_postprocessing"].pop(key)
