@@ -325,13 +325,14 @@ def validate_network(
                     ]:
                         pred_mask = global_postprocessing_dict[postprocessor](
                             pred_mask, params
-                        ).numpy()
+                        )
 
                     # if jpg detected, convert to 8-bit arrays
                     ext = get_filename_extension_sanitized(subject["1"]["path"][0])
                     if ext in [
                         ".jpg",
                         ".jpeg",
+                        ".png",
                     ]:
                         pred_mask = pred_mask.astype(np.uint8)
 
