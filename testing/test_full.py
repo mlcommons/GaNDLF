@@ -971,9 +971,6 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
@@ -991,8 +988,9 @@ def test_train_metrics_segmentation_rad_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
 
-    parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
     )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
