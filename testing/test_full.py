@@ -1409,15 +1409,15 @@ def test_generic_preprocess_functions():
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = fill_holes(input_tensor)
 
-    # CCA tests
+    ## CCA tests
+    # 3d
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
-
+    # 2d
     input_tensor = torch.rand(1, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
-    
-    # testing cca for RGB images
-    input_tensor = torch.rand(1, 3, 256, 256) > 0.5 
+    # 2d rgb
+    input_tensor = torch.rand(1, 3, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
 
     input_tensor = torch.rand(1, 256, 256, 256)
