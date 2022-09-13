@@ -149,8 +149,15 @@ def send_model_to_device(model, amp, device, optimizer):
         # # https://discuss.pytorch.org/t/cuda-visible-devices-make-gpu-disappear/21439/17?u=sarthakpati
         # ###
         if "," in dev:
-            device = torch.device("cuda")
-            model = nn.DataParallel(model, "[" + dev + "]")
+            # device = torch.device("cuda")
+            device = torch.device("cpu")
+            dev_to_pass_to_torch = [*range(len(dev.split(",")))]
+            model = nn.DataParallel(model, device_ids=dev_to_pass_to_torch)
+            # model = nn.parallel.DistributedDataParallel(
+            #     model,
+            #     device_ids=dev_to_pass_to_torch,
+            #     output_device=dev_to_pass_to_torch[0],
+            # )
         else:
             print("Device requested via CUDA_VISIBLE_DEVICES: ", dev)
             print("Total number of CUDA devices: ", torch.cuda.device_count())
