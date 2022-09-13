@@ -7,6 +7,7 @@
 - VIPS has been removed from dependencies
 - Failed unit test cases are now recorded
 - Per class accuracy has been added as a metric
+- Largest Connected Component Analysis is now added
 
 ## 0.0.14
 
