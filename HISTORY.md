@@ -7,6 +7,7 @@
 - VIPS has been removed from dependencies
 - Failed unit test cases are now recorded
 - Per class accuracy has been added as a metric
+- Dedicated rescaling preprocessing function added for increased flexibility
 
 ## 0.0.14
 
