@@ -9,3 +9,6 @@ global_postprocessing_dict = {
     "morphology": torch_morphological,
     "cca": cca,
 }
+
+# append post_processing functions that are to be be applied after reverse one-hot encoding
+postprocessing_after_reverse_one_hot_encoding = ["mapping"]

@@ -177,11 +177,24 @@ def test_generic_constructTrainingCSV():
                 i += 1
 
 
+# these are helper functions to be used in other tests
 def sanitize_outputDir():
-    print("02: Sanitizing outputDir")
+    print("02_1: Sanitizing outputDir")
     if os.path.isdir(outputDir):
         shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
+
+
+def get_temp_config_path():
+    print("02_2: Creating path for temporary config file")
+    temp_config_path = os.path.join(outputDir, "config_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(temp_config_path):
+        os.remove(temp_config_path)
+    return temp_config_path
+
+
+# these are helper functions to be used in other tests
 
 
 def test_train_segmentation_rad_2d(device):
@@ -819,7 +832,7 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
         ## ensure parameters are parsed every single time
-        file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
+        file_config_temp = get_temp_config_path()
 
         with open(file_config_temp, "w") as file:
             yaml.dump(parameters, file)
@@ -963,13 +976,11 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
+    parameters["data_postprocessing"] = {"mapping": {0: 0, 255: 1}}
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
@@ -977,6 +988,15 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
+    file_config_temp = get_temp_config_path()
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -1065,12 +1085,7 @@ def test_train_losses_segmentation_rad_2d(device):
 
 def test_generic_config_read():
     print("24: Starting testing reading configuration")
-    # read and parse csv
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
-
+    file_config_temp = get_temp_config_path()
     parameters = parseConfig(
         os.path.join(baseConfigDir, "config_all_options.yaml"),
         version_check_flag=False,
@@ -1080,6 +1095,7 @@ def test_generic_config_read():
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
 
+    # read and parse csv
     parameters = parseConfig(file_config_temp, version_check_flag=True)
 
     training_data, parameters["headers"] = parseTrainingCSV(
@@ -1154,7 +1170,7 @@ def test_generic_cli_function_preprocess():
     print("25: Starting testing cli function preprocess")
     file_config = os.path.join(testingDir, "config_segmentation.yaml")
     sanitize_outputDir()
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
+    file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     parameters = parseConfig(file_config)
@@ -1194,10 +1210,7 @@ def test_generic_cli_function_mainrun(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
@@ -1396,15 +1409,15 @@ def test_generic_preprocess_functions():
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = fill_holes(input_tensor)
 
-    # CCA tests
+    ## CCA tests
+    # 3d
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
-
+    # 2d
     input_tensor = torch.rand(1, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
-    
-    # testing cca for RGB images
-    input_tensor = torch.rand(1, 3, 256, 256) > 0.5 
+    # 2d rgb
+    input_tensor = torch.rand(1, 3, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
 
     input_tensor = torch.rand(1, 256, 256, 256)
@@ -1623,17 +1636,17 @@ def test_generic_one_hot_logic():
     parameters = {"data_postprocessing": {}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
-    ).numpy()
+    )
 
     parameters = {}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
-    ).numpy()
+    )
 
     parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
-    ).numpy()
+    )
 
     for key, value in parameters["data_postprocessing"]["mapping"].items():
         comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
@@ -1725,12 +1738,7 @@ def test_train_inference_segmentation_histology_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(
-        output_dir_patches, "config_patch-extraction_temp.yaml"
-    )
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
@@ -1803,12 +1811,7 @@ def test_train_inference_classification_histology_large_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(
-        output_dir_patches, "config_patch-extraction_temp.yaml"
-    )
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     for sub in ["1", "2"]:
         file_to_check = os.path.join(
@@ -1880,7 +1883,7 @@ def test_train_inference_classification_histology_large_2d(device):
     )
     parameters["modality"] = "histo"
     parameters["patch_size"] = parameters_patch["patch_size"][0]
-    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    file_config_temp = get_temp_config_path()
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=False)
@@ -1949,12 +1952,7 @@ def test_train_inference_classification_histology_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(
-        output_dir_patches, "config_patch-extraction_temp.yaml"
-    )
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
@@ -1981,7 +1979,7 @@ def test_train_inference_classification_histology_2d(device):
     )
     parameters["modality"] = "histo"
     parameters["patch_size"] = 128
-    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    file_config_temp = get_temp_config_path()
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=False)
