@@ -1458,6 +1458,7 @@ def test_generic_preprocess_functions():
     # try out different options
     for params in [
         {},
+        None,
         {"in_min_max": [5, 250], "out_min_max": [-1, 2]},
         {"out_min_max": [0, 1], "percentiles": [5, 95]},
     ]:
