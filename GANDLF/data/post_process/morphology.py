@@ -1,6 +1,5 @@
 import torch
 import torch.nn.functional as F
-import SimpleITK as sitk
 from skimage.measure import label
 import numpy as np
 from scipy.ndimage import binary_fill_holes, binary_closing
