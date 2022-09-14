@@ -70,7 +70,9 @@ def centercrop_transform(patch_size):
     return CropOrPad(target_shape=generic_3d_check(patch_size))
 
 
-def rescale_transform(parameters={}):
+def rescale_transform(parameters=None):
+    if parameters is None:
+        parameters = {}
     # get defaults from torchio
     rescaler = RescaleIntensity()
     rescaler.out_min_max = parameters.get("out_min_max", rescaler.out_min_max)
