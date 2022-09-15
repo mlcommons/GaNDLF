@@ -17,6 +17,7 @@ from GANDLF.utils import (
     write_training_patches,
     print_model_summary,
 )
+from GANDLF.metrics.regression import overall_stats
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network
@@ -69,6 +70,16 @@ def train_network(model, train_dataloader, optimizer, params):
         if params["verbose"]:
             print("Using Automatic mixed precision", flush=True)
 
+    # get ground truths
+    if params["problem_type"] == "classification":
+        ground_truth_array = (
+            params["training_data"][
+                params["training_data"].columns[params["headers"]["predictionHeaders"]]
+            ]
+            .to_numpy()
+            .ravel()
+        )
+        predictions_array = np.zeros_like(ground_truth_array)
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(
@@ -104,7 +115,15 @@ def train_network(model, train_dataloader, optimizer, params):
             params["subject_spacing"] = subject["spacing"]
         else:
             params["subject_spacing"] = None
-        loss, calculated_metrics, _ = step(model, image, label, params)
+        loss, calculated_metrics, output, _ = step(model, image, label, params)
+        # store predictions for classification
+        if params["problem_type"] == "classification":
+            predictions_array[
+                batch_idx
+                * params["batch_size"] : (batch_idx + 1)
+                * params["batch_size"]
+            ] = output
+
         nan_loss = torch.isnan(loss)
         second_order = (
             hasattr(optimizer, "is_second_order") and optimizer.is_second_order
@@ -175,6 +194,12 @@ def train_network(model, train_dataloader, optimizer, params):
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   train loss : ", average_epoch_train_loss)
+
+    # get overall stats for classification
+    if params["problem_type"] == "classification":
+        average_epoch_train_metric = overall_stats(
+            predictions_array, ground_truth_array, params
+        )
     for metric in params["metrics"]:
         if isinstance(total_epoch_train_metric[metric], np.ndarray):
             to_print = (
