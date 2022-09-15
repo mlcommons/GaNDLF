@@ -1466,6 +1466,24 @@ def test_generic_preprocess_functions():
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
 
+    ## image rescaling test
+    input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
+    # try out different options
+    for params in [
+        {},
+        None,
+        {"in_min_max": [5, 250], "out_min_max": [-1, 2]},
+        {"out_min_max": [0, 1], "percentiles": [5, 95]},
+    ]:
+        rescaler = global_preprocessing_dict["rescale"](params)
+        input_transformed = rescaler(input_tensor)
+        assert (
+            input_transformed.min() >= rescaler.out_min_max[0]
+        ), "Rescaling should work for min"
+        assert (
+            input_transformed.max() <= rescaler.out_min_max[1]
+        ), "Rescaling should work for max"
+
     print("passed")
 
 
