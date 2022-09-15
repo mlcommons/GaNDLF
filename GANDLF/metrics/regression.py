@@ -64,11 +64,11 @@ def per_label_accuracy(output, label, params):
     if params["problem_type"] == "classification":
         # ensure this works for multiple batches
         output_accuracy = torch.zeros(len(params["model"]["class_list"]))
-        for _output, _label in zip(output, label):
+        for output_batch, label_batch in zip(output, label):
             predicted_classes = torch.Tensor([0] * len(params["model"]["class_list"]))
             label_cpu = torch.Tensor([0] * len(params["model"]["class_list"]))
-            predicted_classes[torch.argmax(_output, 0).cpu().item()] = 1
-            label_cpu[_label.cpu().item()] = 1
+            predicted_classes[torch.argmax(output_batch, 0).cpu().item()] = 1
+            label_cpu[label_batch.cpu().item()] = 1
             output_accuracy += (predicted_classes == label_cpu).type(torch.float)
         return output_accuracy / len(output)
     else:
