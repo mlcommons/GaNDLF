@@ -18,7 +18,12 @@ from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
-from GANDLF.data.post_process import torch_morphological, fill_holes, get_mapped_label
+from GANDLF.data.post_process import (
+    torch_morphological,
+    fill_holes,
+    get_mapped_label,
+    cca,
+)
 from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"
@@ -126,8 +131,8 @@ def test_generic_constructTrainingCSV():
         elif "2d_histo_segmentation" in application_data:
             channelsID = "image"
             labelID = "mask"
-        else:
-            continue
+        # else:
+        #     continue
         writeTrainingCSV(
             currentApplicationDir,
             channelsID,
@@ -172,11 +177,24 @@ def test_generic_constructTrainingCSV():
                 i += 1
 
 
+# these are helper functions to be used in other tests
 def sanitize_outputDir():
-    print("02: Sanitizing outputDir")
+    print("02_1: Sanitizing outputDir")
     if os.path.isdir(outputDir):
         shutil.rmtree(outputDir)  # overwrite previous results
     Path(outputDir).mkdir(parents=True, exist_ok=True)
+
+
+def get_temp_config_path():
+    print("02_2: Creating path for temporary config file")
+    temp_config_path = os.path.join(outputDir, "config_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(temp_config_path):
+        os.remove(temp_config_path)
+    return temp_config_path
+
+
+# these are helper functions to be used in other tests
 
 
 def test_train_segmentation_rad_2d(device):
@@ -814,10 +832,7 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
         ## ensure parameters are parsed every single time
-        file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-        # if found in previous run, discard.
-        if os.path.exists(file_config_temp):
-            os.remove(file_config_temp)
+        file_config_temp = get_temp_config_path()
 
         with open(file_config_temp, "w") as file:
             yaml.dump(parameters, file)
@@ -961,13 +976,11 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
+    parameters["data_postprocessing"] = {"mapping": {0: 0, 255: 1}}
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
@@ -975,6 +988,15 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
+    file_config_temp = get_temp_config_path()
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -1063,12 +1085,7 @@ def test_train_losses_segmentation_rad_2d(device):
 
 def test_generic_config_read():
     print("24: Starting testing reading configuration")
-    # read and parse csv
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
-
+    file_config_temp = get_temp_config_path()
     parameters = parseConfig(
         os.path.join(baseConfigDir, "config_all_options.yaml"),
         version_check_flag=False,
@@ -1078,16 +1095,15 @@ def test_generic_config_read():
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
 
+    # read and parse csv
     parameters = parseConfig(file_config_temp, version_check_flag=True)
 
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1105,11 +1121,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1125,11 +1139,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1145,11 +1157,9 @@ def test_generic_config_read():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    if not parameters:
-        sys.exit(1)
+    assert parameters is not None, "parameters is None"
     data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
-    if not data_loader:
-        sys.exit(1)
+    assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
 
@@ -1160,7 +1170,7 @@ def test_generic_cli_function_preprocess():
     print("25: Starting testing cli function preprocess")
     file_config = os.path.join(testingDir, "config_segmentation.yaml")
     sanitize_outputDir()
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
+    file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     parameters = parseConfig(file_config)
@@ -1200,10 +1210,7 @@ def test_generic_cli_function_mainrun(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
-    file_config_temp = os.path.join(outputDir, "config_segmentation_temp.yaml")
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
@@ -1227,8 +1234,23 @@ def test_generic_cli_function_mainrun(device):
     main_run(
         file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
     )
-    if os.path.isdir(outputDir):
-        shutil.rmtree(outputDir)  # overwrite previous results
+    sanitize_outputDir()
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    # testing train/valid split
+    main_run(
+        file_data + "," + file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device,
+        resume=False,
+        reset=True,
+    )
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1383,12 +1405,20 @@ def test_generic_preprocess_functions():
     )
     input_transformed = non_zero_normalizer(input_tensor)
 
-    ## hole-filling tests
-    # tensor input
+    # fill holes
+    input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = fill_holes(input_tensor)
-    # sitk.Image input
-    input_tensor_image = sitk.GetImageFromArray(input_tensor.numpy())
-    input_transformed = fill_holes(input_tensor_image)
+
+    ## CCA tests
+    # 3d
+    input_tensor = torch.rand(1, 256, 256, 256) > 0.5
+    input_transformed = cca(input_tensor)
+    # 2d
+    input_tensor = torch.rand(1, 256, 256) > 0.5
+    input_transformed = cca(input_tensor)
+    # 2d rgb
+    input_tensor = torch.rand(1, 3, 256, 256) > 0.5
+    input_transformed = cca(input_tensor)
 
     input_tensor = torch.rand(1, 256, 256, 256)
     cropper = global_preprocessing_dict["crop_external_zero_planes"](
@@ -1409,7 +1439,16 @@ def test_generic_preprocess_functions():
     input_tensor_2d = torch.rand(1, 3, 256, 256)
     for mode in ["dilation", "erosion", "opening", "closing"]:
         input_transformed_3d = torch_morphological(input_tensor_3d, mode=mode)
+        assert len(input_transformed_3d.shape) == 5, "Output should be 5D"
         input_transformed_2d = torch_morphological(input_tensor_2d, mode=mode)
+        assert len(input_transformed_2d.shape) == 4, "Output should be 4D"
+
+    # test for failure
+    with pytest.raises(Exception) as exc_info:
+        input_tensor_4d = torch.rand(1, 1, 32, 32, 32, 32)
+        input_transformed_3d = torch_morphological(input_tensor_4d)
+
+    print("Exception raised:", exc_info.value)
 
     # test obtaining arrays
     input_tensor_3d = torch.rand(256, 256, 256)
@@ -1426,6 +1465,24 @@ def test_generic_preprocess_functions():
         input_array = get_array_from_image_or_tensor(input_list)
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
+
+    ## image rescaling test
+    input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
+    # try out different options
+    for params in [
+        {},
+        None,
+        {"in_min_max": [5, 250], "out_min_max": [-1, 2]},
+        {"out_min_max": [0, 1], "percentiles": [5, 95]},
+    ]:
+        rescaler = global_preprocessing_dict["rescale"](params)
+        input_transformed = rescaler(input_tensor)
+        assert (
+            input_transformed.min() >= rescaler.out_min_max[0]
+        ), "Rescaling should work for min"
+        assert (
+            input_transformed.max() <= rescaler.out_min_max[1]
+        ), "Rescaling should work for max"
 
     print("passed")
 
@@ -1594,10 +1651,20 @@ def test_generic_one_hot_logic():
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
 
+    parameters = {"data_postprocessing": {}}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    )
+
+    parameters = {}
+    mapped_output = get_mapped_label(
+        torch.from_numpy(img_tensor_oh_rev_array), parameters
+    )
+
     parameters = {"data_postprocessing": {"mapping": {0: 0, 1: 1, 2: 5}}}
     mapped_output = get_mapped_label(
         torch.from_numpy(img_tensor_oh_rev_array), parameters
-    ).numpy()
+    )
 
     for key, value in parameters["data_postprocessing"]["mapping"].items():
         comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
@@ -1637,18 +1704,19 @@ def test_generic_anonymizer():
     print("33: Starting anomymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
-    output_file = os.path.join(testingDir, "MR_small_anonymized.dcm")
-    if os.path.exists(output_file):
-        os.remove(output_file)
+    output_file = os.path.join(outputDir, "MR_small_anonymized.dcm")
 
     config_file = os.path.join(baseConfigDir, "config_anonymizer.yaml")
 
     run_anonymizer(input_file, output_file, config_file, "rad")
+    assert os.path.exists(output_file), "Anonymized file does not exist"
 
-    os.remove(output_file)
+    # test defaults
+    run_anonymizer(input_file, output_file, None, "rad")
+    assert os.path.exists(output_file), "Anonymized file does not exist"
 
     # test nifti conversion
-    config_file_for_nifti = os.path.join(testingDir, "config_anonymizer_nifti.yaml")
+    config_file_for_nifti = os.path.join(outputDir, "config_anonymizer_nifti.yaml")
     with open(config_file, "r") as file_data:
         yaml_data = file_data.read()
     parameters = yaml.safe_load(yaml_data)
@@ -1657,23 +1725,23 @@ def test_generic_anonymizer():
         yaml.dump(parameters, file)
 
     # for nifti conversion, the input needs to be in a dir
-    input_folder_for_nifti = os.path.join(testingDir, "nifti_input")
+    input_folder_for_nifti = os.path.join(outputDir, "nifti_input")
     Path(input_folder_for_nifti).mkdir(parents=True, exist_ok=True)
     shutil.copyfile(input_file, os.path.join(input_folder_for_nifti, "MR_small.dcm"))
 
-    output_file = os.path.join(testingDir, "MR_small.nii.gz")
+    output_file = os.path.join(outputDir, "MR_small.nii.gz")
 
     run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti, "rad")
+    assert os.path.exists(output_file), "Anonymized file does not exist"
 
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
 
-    for file_to_delete in [input_folder_for_nifti, config_file_for_nifti, output_file]:
-        if os.path.exists(file_to_delete):
-            if os.path.isdir(file_to_delete):
-                shutil.rmtree(file_to_delete)
-            else:
-                os.remove(file_to_delete)
+    input_file = os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff")
+    output_file_histo = os.path.join(outputDir, "histo_anon.tiff")
+    run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
+    assert os.path.exists(output_file_histo), "Anonymized file does not exist"
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1688,12 +1756,7 @@ def test_train_inference_segmentation_histology_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(
-        output_dir_patches, "config_patch-extraction_temp.yaml"
-    )
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
@@ -1766,12 +1829,14 @@ def test_train_inference_classification_histology_large_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(
-        output_dir_patches, "config_patch-extraction_temp.yaml"
-    )
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
+
+    for sub in ["1", "2"]:
+        file_to_check = os.path.join(
+            inputDir, "2d_histo_segmentation", sub, "image_resize.tiff"
+        )
+        if os.path.exists(file_to_check):
+            os.remove(file_to_check)
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
@@ -1785,18 +1850,42 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
     files_to_delete = []
     for _, row in input_df.iterrows():
-        img = cv2.imread(row["Channel_0"])
-        dims = img.shape
-        img_resize = cv2.resize(img, (dims[1] * 10, dims[0] * 10))
+        scaling_factor = 10
         new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
+        try:
+            img = cv2.imread(row["Channel_0"])
+            dims = img.shape
+            img_resize = cv2.resize(
+                img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
+            )
+            cv2.imwrite(new_filename, img_resize)
+        except:
+            # this is only used in CI
+            try:
+                os.system(
+                    "vips resize "
+                    + row["Channel_0"]
+                    + " "
+                    + new_filename
+                    + " "
+                    + str(scaling_factor)
+                )
+            except:
+                print("Resize could not be done")
+                break
         row["Channel_0"] = new_filename
-        cv2.imwrite(new_filename, img_resize)
         files_to_delete.append(new_filename)
 
-    input_df.to_csv(inputDir + "/train_2d_histo_classification_resize.csv", index=False)
+    resized_inference_data_list = os.path.join(
+        inputDir, "train_2d_histo_classification_resize.csv"
+    )
+    # drop last subject
+    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
+    input_df.to_csv(resized_inference_data_list, index=False)
+    files_to_delete.append(resized_inference_data_list)
 
     patch_extraction(
-        inputDir + "/train_2d_histo_classification_resize.csv",
+        inputDir + "/train_2d_histo_classification.csv",
         output_dir_patches_output,
         file_config_temp,
     )
@@ -1804,15 +1893,15 @@ def test_train_inference_classification_histology_large_2d(device):
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
     temp_df.drop("Label", axis=1, inplace=True)
-    temp_df["valuetopredict"] = np.random.randint(2, size=6)
+    temp_df["valuetopredict"] = np.random.randint(2, size=len(temp_df))
     temp_df.to_csv(file_for_Training, index=False)
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     parameters["modality"] = "histo"
-    parameters["patch_size"] = 128
-    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    parameters["patch_size"] = parameters_patch["patch_size"][0]
+    file_config_temp = get_temp_config_path()
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=False)
@@ -1840,42 +1929,31 @@ def test_train_inference_classification_histology_large_2d(device):
         reset=True,
     )
     parameters["output_dir"] = modelDir  # this is in inference mode
-    # drop last subject
-    input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
-    resized_inference_data_list = os.path.join(
-        inputDir, "train_2d_histo_classification_resize.csv"
-    )
-    input_df.to_csv(resized_inference_data_list, index=False)
+    parameters["data_preprocessing"]["resize_patch"] = parameters_patch["patch_size"]
+    parameters["patch_size"] = [
+        parameters_patch["patch_size"][0] * 10,
+        parameters_patch["patch_size"][1] * 10,
+    ]
+    parameters["nested_training"]["validation"] = 1
     inference_data, parameters["headers"] = parseTrainingCSV(
         resized_inference_data_list, train=False
     )
-    files_to_delete.append(resized_inference_data_list)
-    with pytest.raises(Exception) as exc_info:
-        for model_type in all_model_type:
-            parameters["nested_training"]["testing"] = 1
-            parameters["nested_training"]["validation"] = -2
-            parameters["output_dir"] = modelDir  # this is in inference mode
-            inference_data, parameters["headers"] = parseTrainingCSV(
-                inputDir + "train_2d_histo_classification.csv", train=False
-            )
-            parameters["model"]["type"] = model_type
-            InferenceManager(
-                dataframe=inference_data,
-                outputDir=modelDir,
-                parameters=parameters,
-                device=device,
-            )
-            assert (
-                os.path.exists(
-                    os.path.join(
-                        modelDir, str(input_df["SubjectID"][0]), "predictions.csv"
-                    )
-                )
-                is True
-            )
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        InferenceManager(
+            dataframe=inference_data,
+            outputDir=modelDir,
+            parameters=parameters,
+            device=device,
+        )
+        # if 'predictions.csv' are not found, give error
+        output_subject_dir = os.path.join(modelDir, str(input_df["SubjectID"][0]))
+        assert (
+            os.path.exists(os.path.join(output_subject_dir, "predictions.csv")) is True
+        )
+        # ensure previous results are removed
+        shutil.rmtree(output_subject_dir)
 
-    exception_raised = exc_info.value
-    print("Exception raised: ", exception_raised)
     for file in files_to_delete:
         os.remove(file)
 
@@ -1892,12 +1970,7 @@ def test_train_inference_classification_histology_2d(device):
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-    file_config_temp = os.path.join(
-        output_dir_patches, "config_patch-extraction_temp.yaml"
-    )
-    # if found in previous run, discard.
-    if os.path.exists(file_config_temp):
-        os.remove(file_config_temp)
+    file_config_temp = get_temp_config_path()
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
@@ -1924,7 +1997,7 @@ def test_train_inference_classification_histology_2d(device):
     )
     parameters["modality"] = "histo"
     parameters["patch_size"] = 128
-    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    file_config_temp = get_temp_config_path()
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters, file)
     parameters = parseConfig(file_config_temp, version_check_flag=False)
@@ -2221,4 +2294,41 @@ def test_train_segmentation_transunet_rad_3d(device):
         reset=True,
     )
 
+    print("passed")
+
+
+def test_train_gradient_clipping_classification_rad_2d(device):
+    print("42: Testing gradient clipping")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # ensure gradient clipping is getting tested
+    for clip_mode in ["norm", "value", "agc"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = "softmax"
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        parameters["clip_mode"] = clip_mode
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
     print("passed")
