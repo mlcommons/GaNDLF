@@ -1,6 +1,8 @@
 import torch
 import torch.nn.functional as F
-from scipy.ndimage.morphology import binary_fill_holes, binary_closing
+from skimage.measure import label
+import numpy as np
+from scipy.ndimage import binary_fill_holes, binary_closing
 from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 
@@ -67,3 +69,27 @@ def fill_holes(input_image, params=None):
     output_array = binary_fill_holes(input_image_array_closed).astype(int)
 
     return torch.from_numpy(output_array)
+
+
+def cca(input_image):
+    """
+    This function performs connected component analysis on the input image.
+
+    Args:
+        input_image (torch.Tensor): The input image.
+        params (dict): The parameters dict;
+
+    Returns:
+        torch.Tensor: The output image after morphological operations.
+    """
+    seg = get_array_from_image_or_tensor(input_image)
+    mask = seg != 0
+
+    connectivity = input_image.dim() - 1
+    labels_connected = label(mask, connectivity=connectivity)
+    labels_connected_sizes = [
+        np.sum(labels_connected == i) for i in np.unique(labels_connected)
+    ]
+    largest_region = np.argmax(labels_connected_sizes[1:]) + 1
+    seg[labels_connected != largest_region] = 0
+    return seg
