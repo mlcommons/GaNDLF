@@ -40,12 +40,18 @@ class light_unet_multilayer(ModelBase):
 
         if patch_check != parameters["model"]["depth"] and patch_check >= 2:
             print(
-                "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
+                """
+                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
+                where i is in a integer greater than or equal to 2. Only the first %d layers will run.
+                """
                 % patch_check
             )
         elif patch_check < 2:
             sys.exit(
-                "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
+                """
+                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
+                where i is in a integer greater than or equal to 2. 
+                """
             )
 
         self.num_layers = patch_check
