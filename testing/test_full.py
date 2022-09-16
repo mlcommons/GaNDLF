@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest, random
+import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -298,6 +298,9 @@ def test_train_segmentation_rad_3d(device):
             parameters["model"]["final_layer"] = random.choice(
                 ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
             )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -452,6 +455,12 @@ def test_train_regression_rad_3d(device):
             parameters["model"]["depth"] = 2
             parameters["model"]["decoder_channels"] = [32, 16]
             parameters["model"]["encoder_weights"] = "None"
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -550,6 +559,12 @@ def test_train_classification_rad_3d(device):
             parameters["model"]["encoder_name"] = "efficientnet-b0"
             parameters["model"]["depth"] = 1
             parameters["model"]["decoder_channels"] = [64]
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
