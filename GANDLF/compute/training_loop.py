@@ -212,6 +212,7 @@ def train_network(model, train_dataloader, optimizer, params):
         else:
             to_print = total_epoch_train_metric[metric] / len(train_dataloader)
         average_epoch_train_metric[metric] = to_print
+    for metric in average_epoch_train_metric.keys():
         print(
             "     Epoch Final   train " + metric + " : ",
             average_epoch_train_metric[metric],
