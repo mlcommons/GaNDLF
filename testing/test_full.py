@@ -220,6 +220,16 @@ def test_train_segmentation_rad_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
+        if model == "imagenet_unet":
+            # imagenet_unet encoder needs to be toned down for small patch size
+            parameters["model"]["encoder_depth"] = 3
+            parameters["model"]["decoder_channels"] = (64, 32, 16)
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
