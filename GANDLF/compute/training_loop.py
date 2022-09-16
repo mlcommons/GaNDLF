@@ -16,6 +16,7 @@ from GANDLF.utils import (
     version_check,
     write_training_patches,
     print_model_summary,
+    get_ground_truths_and_predictions_tensor,
 )
 from GANDLF.metrics import overall_stats
 from GANDLF.logger import Logger
@@ -72,14 +73,10 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # get ground truths
     if params["problem_type"] == "classification":
-        ground_truth_array = torch.from_numpy(
-            params["training_data"][
-                params["training_data"].columns[params["headers"]["predictionHeaders"]]
-            ]
-            .to_numpy()
-            .ravel()
-        ).type(torch.int)
-        predictions_array = torch.zeros_like(ground_truth_array)
+        (
+            ground_truth_array,
+            predictions_array,
+        ) = get_ground_truths_and_predictions_tensor(params, "training_data")
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(

@@ -15,6 +15,7 @@ from GANDLF.utils import (
     get_unique_timestamp,
     resample_image,
     reverse_one_hot,
+    get_ground_truths_and_predictions_tensor,
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
@@ -102,16 +103,10 @@ def validate_network(
 
     # get ground truths for classification problem, validation set
     if is_classification and mode == "validation":
-        ground_truth_array = torch.from_numpy(
-            params["validation_data"][
-                params["validation_data"].columns[
-                    params["headers"]["predictionHeaders"]
-                ]
-            ]
-            .to_numpy()
-            .ravel()
-        ).type(torch.int)
-        predictions_array = torch.zeros_like(ground_truth_array)
+        (
+            ground_truth_array,
+            predictions_array,
+        ) = get_ground_truths_and_predictions_tensor(params, "validation_data")
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
