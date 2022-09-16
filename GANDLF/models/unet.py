@@ -5,7 +5,6 @@ Implementation of UNet
 
 import sys
 
-from torch import nn
 from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule

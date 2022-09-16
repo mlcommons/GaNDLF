@@ -4,7 +4,6 @@ from typing import Optional, Union, List
 import torch
 
 from segmentation_models_pytorch.base import (
-    SegmentationModel,
     SegmentationHead,
     ClassificationHead,
 )
@@ -17,12 +16,13 @@ from .modelBase import ModelBase
 
 class SegmentationModel(torch.nn.Module):
     """
-    This has been adapted from its original implementation in https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/base/model.py
+    This has been adapted from its original implementation in
+    https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/base/model.py
 
     """
 
     def initialize(self):
-        if self.classification_head == None:
+        if self.classification_head is None:
             init.initialize_decoder(self.decoder)
             init.initialize_head(self.segmentation_head)
         else:
@@ -32,7 +32,7 @@ class SegmentationModel(torch.nn.Module):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
         features = self.encoder(x)
 
-        if self.classification_head == None:
+        if self.classification_head is None:
             decoder_output = self.decoder(*features)
             masks = self.segmentation_head(decoder_output)
             return masks
@@ -61,7 +61,8 @@ class SegmentationModel(torch.nn.Module):
 
 class Unet(SegmentationModel):
     """
-    This has been adapted from its original implementation in https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
+    This has been adapted from its original implementation in
+    https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
 
     Unet_ is a fully convolution neural network for image semantic segmentation. Consist of *encoder*
     and *decoder* parts connected with *skip connections*. Encoder extract features of different spatial
@@ -126,7 +127,7 @@ class Unet(SegmentationModel):
             weights=encoder_weights,
         )
 
-        if aux_params == None:
+        if aux_params is None:
             self.decoder = UnetDecoder(
                 encoder_channels=self.encoder.out_channels,
                 decoder_channels=decoder_channels,
