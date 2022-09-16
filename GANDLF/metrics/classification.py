@@ -1,6 +1,26 @@
 import torchmetrics as tm
 
 
+def get_output_from_calculator(predictions, ground_truth, calculator):
+    """
+    Helper function to get the output from a calculator.
+
+    Args:
+        predictions (torch.Tensor): The output of the model.
+        ground_truth (torch.Tensor): The ground truth labels.
+        calculator (torchmetrics.Metric): The calculator to use.
+
+    Returns:
+        float: The output from the calculator.
+    """
+    temp_output = calculator(predictions, ground_truth)
+    if temp_output.dim() > 0:
+        temp_output = temp_output.cpu().tolist()
+    else:
+        temp_output = temp_output.cpu().item()
+    return temp_output
+
+
 def overall_stats(predictions, ground_truth, params):
     """
     Generates a dictionary of metrics calculated on the overall predictions and ground truths.
@@ -49,12 +69,9 @@ def overall_stats(predictions, ground_truth, params):
             # ),
         }
         for metric_name, calculator in calculators.items():
-            temp_output = calculator(predictions, ground_truth)
-            if temp_output.dim() > 0:
-                temp_output = temp_output.cpu().tolist()
-            else:
-                temp_output = temp_output.cpu().item()
-            output_metrics[f"{metric_name}_{average_type}"] = temp_output
+            output_metrics[
+                f"{metric_name}_{average_type}"
+            ] = get_output_from_calculator(predictions, ground_truth, calculator)
     # metrics that do not have any "average" parameter
     calculators = {
         "auc": tm.AUC(reorder=True),
@@ -62,11 +79,8 @@ def overall_stats(predictions, ground_truth, params):
         # "roc": tm.ROC(num_classes=params["model"]["num_classes"]),
     }
     for metric_name, calculator in calculators.items():
-        temp_output = calculator(predictions, ground_truth)
-        if temp_output.dim() > 0:
-            temp_output = temp_output.cpu().tolist()
-        else:
-            temp_output = temp_output.cpu().item()
-        output_metrics[metric_name] = temp_output
+        output_metrics[metric_name] = get_output_from_calculator(
+            predictions, ground_truth, calculator
+        )
 
     return output_metrics
