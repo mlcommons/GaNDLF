@@ -17,7 +17,7 @@ from GANDLF.utils import (
     write_training_patches,
     print_model_summary,
 )
-from GANDLF.metrics.regression import overall_stats
+from GANDLF.metrics import overall_stats
 from GANDLF.logger import Logger
 from .step import step
 from .forward_pass import validate_network

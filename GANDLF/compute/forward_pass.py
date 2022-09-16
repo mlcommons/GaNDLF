@@ -16,7 +16,7 @@ from GANDLF.utils import (
     resample_image,
     reverse_one_hot,
 )
-from GANDLF.metrics.regression import overall_stats
+from GANDLF.metrics import overall_stats
 from tqdm import tqdm
 
 
