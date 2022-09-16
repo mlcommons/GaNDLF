@@ -72,14 +72,14 @@ def train_network(model, train_dataloader, optimizer, params):
 
     # get ground truths
     if params["problem_type"] == "classification":
-        ground_truth_array = (
+        ground_truth_array = torch.from_numpy(
             params["training_data"][
                 params["training_data"].columns[params["headers"]["predictionHeaders"]]
             ]
             .to_numpy()
             .ravel()
-        )
-        predictions_array = np.zeros_like(ground_truth_array)
+        ).type(torch.int)
+        predictions_array = torch.zeros_like(ground_truth_array)
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(
@@ -118,11 +118,10 @@ def train_network(model, train_dataloader, optimizer, params):
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if params["problem_type"] == "classification":
-            predictions_array[
-                batch_idx
-                * params["batch_size"] : (batch_idx + 1)
-                * params["batch_size"]
-            ] = output
+            for i in range(params["batch_size"]):
+                predictions_array[batch_idx * params["batch_size"] + i] = (
+                    torch.argmax(output[i], 0).cpu().item()
+                )
 
         nan_loss = torch.isnan(loss)
         second_order = (
