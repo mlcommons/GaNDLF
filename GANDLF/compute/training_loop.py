@@ -118,10 +118,15 @@ def train_network(model, train_dataloader, optimizer, params):
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if params["problem_type"] == "classification":
-            for i in range(params["batch_size"]):
-                predictions_array[batch_idx * params["batch_size"] + i] = (
-                    torch.argmax(output[i], 0).cpu().item()
-                )
+            # for i in range(params["batch_size"]):
+            #     predictions_array[batch_idx * params["batch_size"] + i] = (
+            #         torch.argmax(output[i], 0).cpu().item()
+            #     )
+            predictions_array[
+                batch_idx
+                * params["batch_size"] : (batch_idx + 1)
+                * params["batch_size"]
+            ] = (torch.argmax(output[0], 0).cpu().item())
 
         nan_loss = torch.isnan(loss)
         second_order = (
