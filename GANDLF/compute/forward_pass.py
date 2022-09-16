@@ -207,7 +207,7 @@ def validate_network(
                 image, valuesToPredict, pred_output, params
             )
 
-            if is_classification:
+            if is_classification and mode == "validation":
                 predictions_array[batch_idx] = pred_output.max().item()
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
@@ -376,7 +376,7 @@ def validate_network(
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
-                if is_classification:
+                if is_classification and mode == "validation":
                     predictions_array[batch_idx] = output_prediction
                 if params["save_output"]:
                     outputToWrite += (
@@ -473,7 +473,7 @@ def validate_network(
         average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
         print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
         # get overall stats for classification
-        if is_classification:
+        if is_classification and mode == "validation":
             average_epoch_valid_metric = overall_stats(
                 predictions_array, ground_truth_array, params
             )
@@ -485,6 +485,7 @@ def validate_network(
             else:
                 to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
             average_epoch_valid_metric[metric] = to_print
+        for metric in average_epoch_valid_metric.keys():
             print(
                 "     Epoch Final   " + mode + " " + metric + " : ",
                 average_epoch_valid_metric[metric],
