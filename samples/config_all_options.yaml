@@ -198,6 +198,12 @@ data_preprocessing:
     #   'target': '/path/to/target.png', # this is required
     #   'extractor': 'vahadane', # can be either vahadane, ruifrok or macenko; defaults to ruifrok
     # }
+    ## rescale image
+    # 'rescale':{
+    #   'in_min_max': [15,125], # desired output intensity range, defaults to min/max of image
+    #   'out_min_max': [0,1], # desired output intensity range, defaults to [0,1]
+    #   'percentiles': [5,95], # percentile values of the input image that will be mapped to the output range, defaults to [0,100]
+    # }
   }
 ## various data augmentation techniques
 # options: affine, elastic, downsample, motion, kspace, bias, blur, gaussianNoise, swap
