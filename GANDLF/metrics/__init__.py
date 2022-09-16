@@ -12,6 +12,7 @@ from .segmentation import (
 )
 from .regression import classification_accuracy, balanced_acc_score, per_label_accuracy
 from .generic import recall_score, precision_score, iou_score, f1_score, accuracy
+from .classification import overall_stats
 
 
 # global defines for the metrics
