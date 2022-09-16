@@ -80,7 +80,7 @@ requirements = [
     "onnx",
     "torchinfo==1.7.0",
     "segmentation-models-pytorch==0.3.0",
-    "ACSConv",
+    "ACSConv==0.1.1",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
