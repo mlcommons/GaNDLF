@@ -35,5 +35,5 @@ global_metrics_dict = {
     "recall": recall_score,
     "iou": iou_score,
     "balanced_accuracy": balanced_acc_score,
-    "per_label_accuracy": per_label_accuracy,
+    "per_label_one_hot_accuracy": per_label_accuracy,
 }
