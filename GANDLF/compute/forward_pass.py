@@ -208,7 +208,9 @@ def validate_network(
             )
 
             if is_classification and mode == "validation":
-                predictions_array[batch_idx] = pred_output.max().item()
+                predictions_array[batch_idx] = (
+                    torch.argmax(pred_output[0], 0).cpu().item()
+                )
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
@@ -377,7 +379,9 @@ def validate_network(
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
                 if is_classification and mode == "validation":
-                    predictions_array[batch_idx] = output_prediction
+                    predictions_array[batch_idx] = (
+                        torch.argmax(output_prediction[0], 0).cpu().item()
+                    )
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
