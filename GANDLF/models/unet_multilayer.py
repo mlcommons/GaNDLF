@@ -122,13 +122,13 @@ class unet_multilayer(ModelBase):
         )
 
         if "converter_type" in parameters["model"]:
-            self.ins = self.converter(self.ins)
-            self.out = self.converter(self.out)
+            self.ins = self.converter(self.ins).model
+            self.out = self.converter(self.out).model
             for i_lay in range(0, self.num_layers):
-                self.ds[i_lay] = self.converter(self.ds[i_lay])
-                self.us[i_lay] = self.converter(self.us[i_lay])
-                self.de[i_lay] = self.converter(self.de[i_lay])
-                self.en[i_lay] = self.converter(self.en[i_lay])
+                self.ds[i_lay] = self.converter(self.ds[i_lay]).model
+                self.us[i_lay] = self.converter(self.us[i_lay]).model
+                self.de[i_lay] = self.converter(self.de[i_lay]).model
+                self.en[i_lay] = self.converter(self.en[i_lay]).model
 
     def forward(self, x):
         """

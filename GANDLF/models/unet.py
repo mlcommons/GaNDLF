@@ -164,24 +164,24 @@ class unet(ModelBase):
         )
 
         if "converter_type" in parameters["model"]:
-            self.ins = self.converter(self.ins)
-            self.ds_0 = self.converter(self.ds_0)
-            self.en_1 = self.converter(self.en_1)
-            self.ds_1 = self.converter(self.ds_1)
-            self.en_2 = self.converter(self.en_2)
-            self.ds_2 = self.converter(self.ds_2)
-            self.en_3 = self.converter(self.en_3)
-            self.ds_3 = self.converter(self.ds_3)
-            self.en_4 = self.converter(self.en_4)
-            self.us_3 = self.converter(self.us_3)
-            self.de_3 = self.converter(self.de_3)
-            self.us_2 = self.converter(self.us_2)
-            self.de_2 = self.converter(self.de_2)
-            self.us_1 = self.converter(self.us_1)
-            self.de_1 = self.converter(self.de_1)
-            self.us_0 = self.converter(self.us_0)
-            self.de_0 = self.converter(self.de_0)
-            self.out = self.converter(self.out)
+            self.ins = self.converter(self.ins).model
+            self.ds_0 = self.converter(self.ds_0).model
+            self.en_1 = self.converter(self.en_1).model
+            self.ds_1 = self.converter(self.ds_1).model
+            self.en_2 = self.converter(self.en_2).model
+            self.ds_2 = self.converter(self.ds_2).model
+            self.en_3 = self.converter(self.en_3).model
+            self.ds_3 = self.converter(self.ds_3).model
+            self.en_4 = self.converter(self.en_4).model
+            self.us_3 = self.converter(self.us_3).model
+            self.de_3 = self.converter(self.de_3).model
+            self.us_2 = self.converter(self.us_2).model
+            self.de_2 = self.converter(self.de_2).model
+            self.us_1 = self.converter(self.us_1).model
+            self.de_1 = self.converter(self.de_1).model
+            self.us_0 = self.converter(self.us_0).model
+            self.de_0 = self.converter(self.de_0).model
+            self.out = self.converter(self.out).model
 
     def forward(self, x):
         """
