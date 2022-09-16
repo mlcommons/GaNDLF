@@ -2369,3 +2369,43 @@ def test_train_gradient_clipping_classification_rad_2d(device):
             reset=True,
         )
     print("passed")
+
+
+def test_train_segmentation_unet_conversion_rad_3d(device):
+    print("43: Starting 3D Rad segmentation tests for unet with ACS conversion")
+    # read and parse csv
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["final_layer"] = "softmax"
+    parameters["model"]["amp"] = True
+    parameters["in_memory"] = True
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    for model in ["unet", "unet_multilayer", "lightunet_multilayer"]:
+        parameters["model"]["converter_type"] = random.choice(["acs", "soft", "conv3d"])
+        parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
+    print("passed")
