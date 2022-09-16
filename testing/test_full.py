@@ -2398,6 +2398,7 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
     parameters["model"]["final_layer"] = "softmax"
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
+    parameters["verbose"] = False
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
