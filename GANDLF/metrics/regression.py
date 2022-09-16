@@ -118,8 +118,11 @@ def overall_stats(predictions, ground_truth, params):
             ),
         }
         for metric_name, calculator in calculators.items():
-            output_metrics[f"{metric_name}_{average_type}"] = calculator(
-                predictions, ground_truth
-            )
+            temp_output = calculator(predictions, ground_truth)
+            if temp_output.dim() > 0:
+                temp_output = temp_output.cpu().tolist()
+            else:
+                temp_output = temp_output.cpu().item()
+            output_metrics[f"{metric_name}_{average_type}"] = temp_output
 
     return output_metrics
