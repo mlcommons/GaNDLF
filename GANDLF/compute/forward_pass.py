@@ -102,7 +102,7 @@ def validate_network(
 
     # get ground truths for classification problem, validation set
     if is_classification and mode == "validation":
-        ground_truth_array = (
+        ground_truth_array = torch.from_numpy(
             params["validation_data"][
                 params["validation_data"].columns[
                     params["headers"]["predictionHeaders"]
@@ -110,8 +110,8 @@ def validate_network(
             ]
             .to_numpy()
             .ravel()
-        )
-        predictions_array = np.zeros_like(ground_truth_array)
+        ).type(torch.int)
+        predictions_array = torch.zeros_like(ground_truth_array)
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
