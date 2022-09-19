@@ -465,9 +465,6 @@ def test_train_regression_rad_3d(device):
             parameters["model"]["depth"] = 2
             parameters["model"]["decoder_channels"] = [32, 16]
             parameters["model"]["encoder_weights"] = "None"
-            parameters["model"]["final_layer"] = random.choice(
-                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
-            )
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
@@ -507,6 +504,18 @@ def test_train_classification_rad_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
+
+        if model == "imagenet_unet":
+            parameters["model"]["depth"] = 2
+            parameters["model"]["decoder_channels"] = [32, 16]
+            parameters["model"]["encoder_weights"] = "None"
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -563,9 +572,6 @@ def test_train_classification_rad_3d(device):
         else:
             parameters["patch_size"] = patch_size["3D"]
         if model == "imagenet_unet":
-            # patch_size_to_check = [256, 256, 256]
-            # parameters["data_preprocessing"]["resize"] = patch_size_to_check
-            # parameters["patch_size"] = patch_size_to_check
             parameters["model"]["encoder_name"] = "efficientnet-b0"
             parameters["model"]["depth"] = 1
             parameters["model"]["decoder_channels"] = [64]
