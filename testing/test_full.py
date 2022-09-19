@@ -504,11 +504,6 @@ def test_train_classification_rad_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
-        if "efficientnet" in model:
-            parameters["patch_size"] = [16, 16, 16]
-        else:
-            parameters["patch_size"] = patch_size["3D"]
-
         if model == "imagenet_unet":
             parameters["model"]["depth"] = 2
             parameters["model"]["decoder_channels"] = [32, 16]
