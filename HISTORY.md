@@ -9,6 +9,7 @@
 - Per class accuracy has been added as a metric
 - Dedicated rescaling preprocessing function added for increased flexibility
 - Largest Connected Component Analysis is now added
+- Included metrics using overall predictions and ground truths
 
 ## 0.0.14
 
