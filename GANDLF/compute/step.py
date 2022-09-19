@@ -80,6 +80,7 @@ def step(model, image, label, params, train=True):
         else:
             output = model(image)
 
+    attention_map = None
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
@@ -97,7 +98,4 @@ def step(model, image, label, params, train=True):
         if "medcam_enabled" in params and params["medcam_enabled"]:
             attention_map = torch.unsqueeze(attention_map, -1)
 
-    if not ("medcam_enabled" in params and params["medcam_enabled"]):
-        return loss, metric_output, output
-    else:
-        return loss, metric_output, output, attention_map
+    return loss, metric_output, output, attention_map

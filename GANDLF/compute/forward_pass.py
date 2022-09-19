@@ -15,7 +15,9 @@ from GANDLF.utils import (
     get_unique_timestamp,
     resample_image,
     reverse_one_hot,
+    get_ground_truths_and_predictions_tensor,
 )
+from GANDLF.metrics import overall_stats
 from tqdm import tqdm
 
 
@@ -98,6 +100,13 @@ def validate_network(
                     current_output_dir,
                     "output_predictions_" + get_unique_timestamp() + ".csv",
                 )
+
+    # get ground truths for classification problem, validation set
+    if is_classification and mode == "validation":
+        (
+            ground_truth_array,
+            predictions_array,
+        ) = get_ground_truths_and_predictions_tensor(params, "validation_data")
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
@@ -192,6 +201,11 @@ def validate_network(
             final_loss, final_metric = get_loss_and_metrics(
                 image, valuesToPredict, pred_output, params
             )
+
+            if is_classification and mode == "validation":
+                predictions_array[batch_idx] = (
+                    torch.argmax(pred_output[0], 0).cpu().item()
+                )
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
@@ -283,7 +297,7 @@ def validate_network(
                         attention_map, patches_batch[torchio.LOCATION]
                     )
                 else:
-                    _, _, output = result
+                    _, _, output, _ = result
 
                 if params["problem_type"] == "segmentation":
                     aggregator.add_batch(
@@ -359,6 +373,10 @@ def validate_network(
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
+                if is_classification and mode == "validation":
+                    predictions_array[batch_idx] = (
+                        torch.argmax(output_prediction[0], 0).cpu().item()
+                    )
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
@@ -453,6 +471,11 @@ def validate_network(
     if label_ground_truth is not None:
         average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
         print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
+        # get overall stats for classification
+        if is_classification and mode == "validation":
+            average_epoch_valid_metric = overall_stats(
+                predictions_array, ground_truth_array, params
+            )
         for metric in params["metrics"]:
             if isinstance(total_epoch_valid_metric[metric], np.ndarray):
                 to_print = (
@@ -461,6 +484,7 @@ def validate_network(
             else:
                 to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
             average_epoch_valid_metric[metric] = to_print
+        for metric in average_epoch_valid_metric.keys():
             print(
                 "     Epoch Final   " + mode + " " + metric + " : ",
                 average_epoch_valid_metric[metric],
