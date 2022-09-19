@@ -14,7 +14,7 @@ metrics:
     }
   - accuracy
   - balanced_accuracy
-  - per_label_accuracy
+  - per_label_one_hot_accuracy
   - precision: {
       average: weighted,
     }
@@ -53,7 +53,7 @@ save_output: false
 scaling_factor: 1
 scheduler: triangle
 version:
-  maximum: 0.0.15
+  maximum: 0.0.16
   minimum: 0.0.14
 weighted_loss: True
 which_model: resunet
