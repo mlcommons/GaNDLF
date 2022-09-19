@@ -419,3 +419,26 @@ def print_model_summary(
     )
     temp_output = stats.to_readable(stats.total_mult_adds)
     print("\tTotal # of operations:", temp_output[1], temp_output[0])
+
+
+def get_ground_truths_and_predictions_tensor(params, loader_type):
+    """
+    This function is used to get the ground truths and predictions for a given loader type.
+
+    Args:
+        params (dict): The parameters passed by the user yaml.
+        loader_type (str): The loader type for which the ground truths and predictions are to be returned.
+
+    Returns:
+        torch.Tensor, torch.Tensor: The ground truths and base predictions for the given loader type.
+    """
+    ground_truth_array = torch.from_numpy(
+        params[loader_type][
+            params[loader_type].columns[params["headers"]["predictionHeaders"]]
+        ]
+        .to_numpy()
+        .ravel()
+    ).type(torch.int)
+    predictions_array = torch.zeros_like(ground_truth_array)
+
+    return ground_truth_array, predictions_array

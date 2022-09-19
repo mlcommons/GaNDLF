@@ -19,6 +19,7 @@ from .tensor import (
     get_class_imbalance_weights_classification,
     get_linear_interpolation_mode,
     print_model_summary,
+    get_ground_truths_and_predictions_tensor,
 )
 
 from .write_parse import (

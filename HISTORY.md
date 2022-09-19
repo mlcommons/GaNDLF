@@ -1,3 +1,7 @@
+## 0.0.16- 
+- ImageNet pre-trained models for UNet with variable encoders is now available
+- ACS/Soft conversion is available for ImageNet-pretrained UNet
+
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
 - `stride_size` is now handled internally for histology data
@@ -9,8 +13,7 @@
 - Per class accuracy has been added as a metric
 - Dedicated rescaling preprocessing function added for increased flexibility
 - Largest Connected Component Analysis is now added
-- ImageNet pre-trained models for UNet with variable encoders is now available
-- ACS/Soft conversion is available for ImageNet-pretrained UNet
+- Included metrics using overall predictions and ground truths
 
 ## 0.0.14
 
