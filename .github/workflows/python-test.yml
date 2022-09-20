@@ -8,6 +8,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md' # Only in the topmost directory
+      - 'LICENSE'
+    
 
 jobs:
   build:
@@ -16,25 +21,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.7
+    - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: 3.8
     - name: Install dependencies and package
       run: |
+        sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
+        python -m pip install wheel
         python -m pip install openvino-dev==2022.1.0
-        python -m pip install torch==1.8.2+cu102 torchvision==0.9.2+cu102 torchaudio===0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
-        $CONDA/bin/conda install -c conda-forge libvips -y
         pip3 install torch==1.8.2+cpu torchvision==0.9.2+cpu torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
         pip install -e .
-        
     - name: Run generic unit tests
       run: |
-        pytest --cov=. --cov-report=xml -k "generic"
+        pytest --cov=. --cov-report=xml -k "generic"        
+    - name: Run classification unit tests with histology
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
     - name: Run classification unit tests
       run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification"
+        pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
     - name: Run regression unit tests
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "regression"
@@ -44,8 +51,8 @@ jobs:
     - name: Run transunet unit tests
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "transunet"
-       
-     
+
+
     - name: Upload coverage
       uses: codecov/codecov-action@v1
       with:

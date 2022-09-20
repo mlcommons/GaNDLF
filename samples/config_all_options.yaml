@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.15,
-    maximum: 0.0.15 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.0.16,
+    maximum: 0.0.16 # this should NOT be made a variable, but should be tested after every tag is created
   }
 ## Choose the model parameters here
 model:
@@ -20,6 +20,7 @@ model:
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # num_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types from the CSV
     # save_at_every_epoch: True, # allows you to save the model at every epoch
+    # print_summary: True, # prints the summary of the model before training; defaults to True
     
     ## densenet models have the following optional parameters:
     # growth_rate (int) - how many filters to add each layer (k in paper)
@@ -40,6 +41,7 @@ metrics:
   # - accuracy # classification
   # - classification_accuracy # classification
   # - balanced_accuracy # classification ## more details https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html
+  # - per_label_accuracy # used for classification
   # - f1 # classification/segmentation
   # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
   # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4
@@ -179,6 +181,12 @@ data_preprocessing:
     # 'stain_normalization':{
     #   'target': '/path/to/target.png', # this is required
     #   'extractor': 'vahadane', # can be either vahadane, ruifrok or macenko; defaults to ruifrok
+    # }
+    ## rescale image
+    # 'rescale':{
+    #   'in_min_max': [15,125], # desired output intensity range, defaults to min/max of image
+    #   'out_min_max': [0,1], # desired output intensity range, defaults to [0,1]
+    #   'percentiles': [5,95], # percentile values of the input image that will be mapped to the output range, defaults to [0,100]
     # }
   }
 ## various data augmentation techniques

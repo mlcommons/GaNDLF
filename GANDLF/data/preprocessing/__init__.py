@@ -1,9 +1,4 @@
 import numpy as np
-from torchio.transforms import (
-    Resample,
-    Compose,
-    Pad,
-)
 
 from .crop_zero_planes import CropExternalZeroplanes
 from .non_zero_normalize import NonZeroNormalizeOnMaskedRegion
@@ -28,6 +23,8 @@ from torchio.transforms import (
     CropOrPad,
     Resize,
     Resample,
+    Compose,
+    RescaleIntensity,
 )
 
 
@@ -73,6 +70,17 @@ def centercrop_transform(patch_size):
     return CropOrPad(target_shape=generic_3d_check(patch_size))
 
 
+def rescale_transform(parameters=None):
+    if parameters is None:
+        parameters = {}
+    # get defaults from torchio
+    rescaler = RescaleIntensity()
+    rescaler.out_min_max = parameters.get("out_min_max", rescaler.out_min_max)
+    rescaler.percentiles = parameters.get("percentiles", rescaler.percentiles)
+    rescaler.in_min_max = parameters.get("in_min_max", None)
+    return rescaler
+
+
 # defining dict for pre-processing - key is the string and the value is the transform object
 global_preprocessing_dict = {
     "to_canonical": to_canonical_transform,
@@ -92,6 +100,7 @@ global_preprocessing_dict = {
     "normalize_nonzero": ZNormalization(masking_method=nonzero_voxel_mask),
     "normalize_nonZero_masked": NonZeroNormalizeOnMaskedRegion(),
     "normalize_nonzero_masked": NonZeroNormalizeOnMaskedRegion(),
+    "rescale": rescale_transform,
     "rgba2rgb": rgba2rgb_transform,
     "rgbatorgb": rgba2rgb_transform,
     "rgba_to_rgb": rgba2rgb_transform,

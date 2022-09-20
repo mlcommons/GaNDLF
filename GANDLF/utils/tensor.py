@@ -5,6 +5,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchio
 from tqdm import tqdm
+from torchinfo import summary
+from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 # global definition for both one_hot and reverse_one_hot
 special_cases_to_check = ["||"]
@@ -86,10 +88,7 @@ def reverse_one_hot(predmask_tensor, class_list):
     Returns:
         numpy.array: The final mask as numpy array.
     """
-    if isinstance(predmask_tensor, torch.Tensor):
-        predmask_array = predmask_tensor.cpu().numpy()
-    else:
-        predmask_array = predmask_tensor
+    predmask_array = get_array_from_image_or_tensor(predmask_tensor)
     special_case_detected = False
 
     for _class in class_list:
@@ -97,23 +96,18 @@ def reverse_one_hot(predmask_tensor, class_list):
             if isinstance(_class, str):
                 if case in _class:  # check if any of the special cases are present
                     special_case_detected = True
+                    break
 
-    final_mask = np.zeros(predmask_array[0, ...].shape).astype(np.int8)
+    final_mask = np.zeros(predmask_array[0, ...].shape).astype(np.int16)
     predmask_array_bool = predmask_array >= 0.5
 
-    # in case special case is detected, if 0 is absent from
-    # class_list do not use 0 to initialize any value in final_mask
+    # for special case, do not use '0' to initialize any value in final_mask in case it is absent
     zero_present = False
     if special_case_detected:
         for _class in class_list:
-            if isinstance(_class, str):
-                if _class == "0":
-                    zero_present = True
-                    break
-            else:
-                if _class == 0:
-                    zero_present = True
-                    break
+            if (_class == "0") or (_class == 0):
+                zero_present = True
+                break
     for idx, i in enumerate(class_list):
         output_value = i
         # for special case, use the index as value
@@ -391,3 +385,60 @@ def get_linear_interpolation_mode(dimensionality):
         mode = "trilinear"
 
     return mode
+
+
+def print_model_summary(
+    model, input_batch_size, input_num_channels, input_patch_size, device=None
+):
+    """
+    _summary_
+    Estimates the size of PyTorch models in memory
+    for a given input size
+    Args:
+        model (torch.nn.Module): The model to be summarized.
+        input_batch_size (int): The batch size of the input.
+        input_num_channels (int): The number of channels of the input.
+        input_patch_size (tuple): The patch size of the input.
+        device (torch.device, optional): The device on which the model is run. Defaults to None.
+    """
+    input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
+    if input_size[-1] == 1:
+        input_size = input_size[:-1]
+    stats = summary(model, input_size, device=device, verbose=0)
+
+    print("Model Summary:")
+    print("\tInput size:", stats.to_megabytes(stats.total_input), "MB")
+    print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes), "MB")
+    print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes), "MB")
+    print(
+        "\tEstimated total size:",
+        stats.to_megabytes(
+            stats.total_input + stats.total_output_bytes + stats.total_param_bytes
+        ),
+        "MB",
+    )
+    temp_output = stats.to_readable(stats.total_mult_adds)
+    print("\tTotal # of operations:", temp_output[1], temp_output[0])
+
+
+def get_ground_truths_and_predictions_tensor(params, loader_type):
+    """
+    This function is used to get the ground truths and predictions for a given loader type.
+
+    Args:
+        params (dict): The parameters passed by the user yaml.
+        loader_type (str): The loader type for which the ground truths and predictions are to be returned.
+
+    Returns:
+        torch.Tensor, torch.Tensor: The ground truths and base predictions for the given loader type.
+    """
+    ground_truth_array = torch.from_numpy(
+        params[loader_type][
+            params[loader_type].columns[params["headers"]["predictionHeaders"]]
+        ]
+        .to_numpy()
+        .ravel()
+    ).type(torch.int)
+    predictions_array = torch.zeros_like(ground_truth_array)
+
+    return ground_truth_array, predictions_array

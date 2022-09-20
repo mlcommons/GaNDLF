@@ -66,7 +66,7 @@ def step(model, image, label, params, train=True):
                 if len(label.shape) > 1:
                     label = torch.squeeze(label, -1)
 
-    if train == False and params["model"]["type"].lower() == "openvino":
+    if not (train) and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
                 params["model"]["IO"][1][0]
@@ -80,6 +80,7 @@ def step(model, image, label, params, train=True):
         else:
             output = model(image)
 
+    attention_map = None
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
@@ -97,7 +98,4 @@ def step(model, image, label, params, train=True):
         if "medcam_enabled" in params and params["medcam_enabled"]:
             attention_map = torch.unsqueeze(attention_map, -1)
 
-    if not ("medcam_enabled" in params and params["medcam_enabled"]):
-        return loss, metric_output, output
-    else:
-        return loss, metric_output, output, attention_map
+    return loss, metric_output, output, attention_map
