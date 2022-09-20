@@ -15,7 +15,9 @@ from GANDLF.utils import (
     get_unique_timestamp,
     resample_image,
     reverse_one_hot,
+    get_ground_truths_and_predictions_tensor,
 )
+from GANDLF.metrics import overall_stats
 from tqdm import tqdm
 
 
@@ -99,6 +101,13 @@ def validate_network(
                     "output_predictions_" + get_unique_timestamp() + ".csv",
                 )
 
+    # get ground truths for classification problem, validation set
+    if is_classification and mode == "validation":
+        (
+            ground_truth_array,
+            predictions_array,
+        ) = get_ground_truths_and_predictions_tensor(params, "validation_data")
+
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
@@ -106,12 +115,12 @@ def validate_network(
             print("== Current subject:", subject["subject_id"], flush=True)
 
         # ensure spacing is always present in params and is always subject-specific
+        params["subject_spacing"] = None
         if "spacing" in subject:
             params["subject_spacing"] = subject["spacing"]
-        else:
-            params["subject_spacing"] = None
 
-        # constructing a new dict because torchio.GridSampler requires torchio.Subject, which requires torchio.Image to be present in initial dict, which the loader does not provide
+        # constructing a new dict because torchio.GridSampler requires torchio.Subject,
+        # which requires torchio.Image to be present in initial dict, which the loader does not provide
         subject_dict = {}
         label_ground_truth = None
         label_present = False
@@ -192,7 +201,12 @@ def validate_network(
             final_loss, final_metric = get_loss_and_metrics(
                 image, valuesToPredict, pred_output, params
             )
-            # # Non network validing related
+
+            if is_classification and mode == "validation":
+                predictions_array[batch_idx] = (
+                    torch.argmax(pred_output[0], 0).cpu().item()
+                )
+            # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric in final_metric.keys():
                 if isinstance(total_epoch_valid_metric[metric], list):
@@ -283,7 +297,7 @@ def validate_network(
                         attention_map, patches_batch[torchio.LOCATION]
                     )
                 else:
-                    _, _, output = result
+                    _, _, output, _ = result
 
                 if params["problem_type"] == "segmentation":
                     aggregator.add_batch(
@@ -306,26 +320,35 @@ def validate_network(
                         tensor=subject["1"]["data"].squeeze(0),
                         affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
-                    ext = get_filename_extension_sanitized(subject["1"]["path"][0])
-                    jpg_detected = False
-                    if ext in [".jpg", ".jpeg"]:
-                        jpg_detected = True
                     pred_mask = output_prediction.numpy()
+                    # perform postprocessing before reverse one-hot encoding here
+                    for postprocessor in params["data_postprocessing"]:
+                        for _class in range(0, params["model"]["num_classes"]):
+                            pred_mask[0, _class, ...] = global_postprocessing_dict[
+                                postprocessor
+                            ](pred_mask[0, _class, ...], params)
                     # '0' because validation/testing dataloader always has batch size of '1'
                     pred_mask = reverse_one_hot(
                         pred_mask[0], params["model"]["class_list"]
                     )
                     pred_mask = np.swapaxes(pred_mask, 0, 2)
 
-                    # perform numpy-specific postprocessing here
-                    for postprocessor in params["data_postprocessing"]:
+                    # perform postprocessing after reverse one-hot encoding here
+                    for postprocessor in params[
+                        "data_postprocessing_after_reverse_one_hot_encoding"
+                    ]:
                         pred_mask = global_postprocessing_dict[postprocessor](
                             pred_mask, params
-                        ).numpy()
-                    if jpg_detected:
+                        )
+
+                    # if jpg detected, convert to 8-bit arrays
+                    ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+                    if ext in [
+                        ".jpg",
+                        ".jpeg",
+                        ".png",
+                    ]:
                         pred_mask = pred_mask.astype(np.uint8)
-                    else:
-                        pred_mask = pred_mask.astype(np.uint16)
 
                     ## special case for 2D
                     if image.shape[-1] > 1:
@@ -350,6 +373,10 @@ def validate_network(
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
+                if is_classification and mode == "validation":
+                    predictions_array[batch_idx] = (
+                        torch.argmax(output_prediction[0], 0).cpu().item()
+                    )
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
@@ -444,6 +471,11 @@ def validate_network(
     if label_ground_truth is not None:
         average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
         print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
+        # get overall stats for classification
+        if is_classification and mode == "validation":
+            average_epoch_valid_metric = overall_stats(
+                predictions_array, ground_truth_array, params
+            )
         for metric in params["metrics"]:
             if isinstance(total_epoch_valid_metric[metric], np.ndarray):
                 to_print = (
@@ -452,6 +484,7 @@ def validate_network(
             else:
                 to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
             average_epoch_valid_metric[metric] = to_print
+        for metric in average_epoch_valid_metric.keys():
             print(
                 "     Epoch Final   " + mode + " " + metric + " : ",
                 average_epoch_valid_metric[metric],

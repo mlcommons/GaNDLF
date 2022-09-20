@@ -1,5 +1,4 @@
 import os, hashlib, pkg_resources, subprocess
-from time import gmtime, strftime
 import torch
 
 from .generic import get_unique_timestamp
@@ -37,6 +36,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     """
     num_channel = params["model"]["num_channels"]
     model_dimension = params["model"]["dimension"]
+    ov_output_data_type = params["model"].get("data_type", "FP32")
     input_shape = params["patch_size"]
 
     model_dict["timestamp"] = get_unique_timestamp()
@@ -54,7 +54,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
         model_dict["git_hash"] = None
     torch.save(model_dict, path)
 
-    if onnx_export == False:
+    if not (onnx_export):
         if "onnx_print" not in params:
             print("WARNING: Current model is not supported by ONNX/OpenVINO!")
             params["onnx_print"] = True
@@ -99,6 +99,8 @@ def save_model(model_dict, model, params, path, onnx_export=True):
                         "[1,{0},{1},{2}]".format(
                             num_channel, input_shape[0], input_shape[1]
                         ),
+                        "--data_type",
+                        "{0}".format(ov_output_data_type),
                         "--output_dir",
                         "{0}".format(ov_output_dir),
                     ],
@@ -113,6 +115,8 @@ def save_model(model_dict, model, params, path, onnx_export=True):
                         "[1,{0},{1},{2},{3}]".format(
                             num_channel, input_shape[0], input_shape[1], input_shape[2]
                         ),
+                        "--data_type",
+                        "{0}".format(ov_output_data_type),
                         "--output_dir",
                         "{0}".format(ov_output_dir),
                     ],

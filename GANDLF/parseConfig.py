@@ -3,6 +3,7 @@ import numpy as np
 from copy import deepcopy
 
 from .utils import version_check
+from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -167,13 +168,12 @@ def parseConfig(config_file_path, version_check_flag=True):
             )
 
     if "loss_function" in params:
-        defineDefaultLoss = False
         # check if user has passed a dict
         if isinstance(params["loss_function"], dict):  # if this is a dict
             if len(params["loss_function"]) > 0:  # only proceed if something is defined
                 for key in params["loss_function"]:  # iterate through all keys
                     if key == "mse":
-                        if (params["loss_function"][key] == None) or not (
+                        if (params["loss_function"][key] is None) or not (
                             "reduction" in params["loss_function"][key]
                         ):
                             params["loss_function"][key] = {}
@@ -181,22 +181,12 @@ def parseConfig(config_file_path, version_check_flag=True):
                     else:
                         # use simple string for other functions - can be extended with parameters, if needed
                         params["loss_function"] = key
-            else:
-                defineDefaultLoss = True
         else:
             # check if user has passed a single string
             if params["loss_function"] == "mse":
                 params["loss_function"] = {}
                 params["loss_function"]["mse"] = {}
                 params["loss_function"]["mse"]["reduction"] = "mean"
-    else:
-        defineDefaultLoss = True
-    if defineDefaultLoss == True:
-        loss_function = "dc"
-        print("Using default loss_function: ", loss_function)
-    else:
-        loss_function = params["loss_function"]
-    params["loss_function"] = loss_function
 
     if "metrics" in params:
         if not isinstance(params["metrics"], dict):
@@ -284,7 +274,7 @@ def parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
     params = initialize_key(params, "data_augmentation", {})
-    if not (params["data_augmentation"] == None):
+    if not (params["data_augmentation"] is None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
 
             # special case for random swapping and elastic transformations - which takes a patch size for computation
@@ -407,7 +397,7 @@ def parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing", {})
-    if not (params["data_preprocessing"] == None):
+    if not (params["data_preprocessing"] is None):
         # perform this only when pre-processing is defined
         if len(params["data_preprocessing"]) > 0:
             thresholdOrClip = False
@@ -489,6 +479,19 @@ def parseConfig(config_file_path, version_check_flag=True):
                             "target": "adaptive"
                         }
 
+    # this is NOT a required parameter - a user should be able to train with NO built-in post-processing
+    params = initialize_key(params, "data_postprocessing", {})
+    params = initialize_key(
+        params, "data_postprocessing_after_reverse_one_hot_encoding", {}
+    )
+    temp_dict = deepcopy(params["data_postprocessing"])
+    for key in temp_dict:
+        if key in postprocessing_after_reverse_one_hot_encoding:
+            params["data_postprocessing_after_reverse_one_hot_encoding"][key] = params[
+                "data_postprocessing"
+            ][key]
+            params["data_postprocessing"].pop(key)
+
     if "model" in params:
 
         if not (isinstance(params["model"], dict)):
@@ -531,6 +534,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "WARNING: 'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead",
                 flush=True,
             )
+        params["model"]["print_summary"] = params["model"].get("print_summary", True)
 
         channel_keys_to_check = ["n_channels", "channels", "model_channels"]
         for key in channel_keys_to_check:
@@ -541,6 +545,10 @@ def parseConfig(config_file_path, version_check_flag=True):
         # initialize model type for processing: if not defined, default to torch
         if not ("type" in params["model"]):
             params["model"]["type"] = "torch"
+
+        # initialize openvino model data type for processing: if not defined, default to FP32
+        if not ("data_type" in params["model"]):
+            params["model"]["data_type"] = "FP32"
 
         # set default save strategy for model
         if not ("save_at_every_epoch" in params["model"]):

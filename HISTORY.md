@@ -1,6 +1,18 @@
+## 0.0.16
+- 
+
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
 - `stride_size` is now handled internally for histology data
+- Probability maps are now saved overlaid with original WSI
+- Added ability to print model size and summary at run-time
+- Improved error checking added for WSI inference
+- VIPS has been removed from dependencies
+- Failed unit test cases are now recorded
+- Per class accuracy has been added as a metric
+- Dedicated rescaling preprocessing function added for increased flexibility
+- Largest Connected Component Analysis is now added
+- Included metrics using overall predictions and ground truths
 
 ## 0.0.14
 

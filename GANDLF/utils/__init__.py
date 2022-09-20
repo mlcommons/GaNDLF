@@ -18,6 +18,8 @@ from .tensor import (
     get_class_imbalance_weights_segmentation,
     get_class_imbalance_weights_classification,
     get_linear_interpolation_mode,
+    print_model_summary,
+    get_ground_truths_and_predictions_tensor,
 )
 
 from .write_parse import (
@@ -33,11 +35,11 @@ from .parameter_processing import (
 )
 
 from .generic import (
-    fix_paths,
     get_date_time,
     get_unique_timestamp,
     get_filename_extension_sanitized,
     version_check,
+    get_array_from_image_or_tensor,
 )
 
 from .modelio import (
