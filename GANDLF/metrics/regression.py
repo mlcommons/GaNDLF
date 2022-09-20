@@ -62,10 +62,14 @@ def per_label_accuracy(output, label, params):
         torch.Tensor: The per class accuracy.
     """
     if params["problem_type"] == "classification":
-        predicted_classes = np.array([0] * len(params["model"]["class_list"]))
-        label_cpu = np.array([0] * len(params["model"]["class_list"]))
-        predicted_classes[torch.argmax(output, 1).cpu().item()] = 1
-        label_cpu[label.cpu().item()] = 1
-        return torch.from_numpy((predicted_classes == label_cpu).astype(float))
+        # ensure this works for multiple batches
+        output_accuracy = torch.zeros(len(params["model"]["class_list"]))
+        for output_batch, label_batch in zip(output, label):
+            predicted_classes = torch.Tensor([0] * len(params["model"]["class_list"]))
+            label_cpu = torch.Tensor([0] * len(params["model"]["class_list"]))
+            predicted_classes[torch.argmax(output_batch, 0).cpu().item()] = 1
+            label_cpu[label_batch.cpu().item()] = 1
+            output_accuracy += (predicted_classes == label_cpu).type(torch.float)
+        return output_accuracy / len(output)
     else:
         return balanced_acc_score(output, label, params)
