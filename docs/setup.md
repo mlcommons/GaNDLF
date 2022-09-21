@@ -26,10 +26,12 @@ cd GaNDLF
 conda create -n venv_gandlf python=3.8 -y
 conda activate venv_gandlf
 ### PyTorch LTS installation - https://pytorch.org/get-started/locally
+## CUDA 11.3
+# pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
 ## CUDA 10.2
-# pip3 install torch==1.8.2+cu102 torchvision==0.9.2+cu102 torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
-## CUDA 11.1
-# pip3 install torch==1.8.2+cu111 torchvision==0.9.2+cu111 torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
+# pip install torch==1.11.0+cu102 torchvision==0.12.0+cu102 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu102
+## CPU-only
+# pip install torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
 pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate optimized models for inference
 pip install -e .
 

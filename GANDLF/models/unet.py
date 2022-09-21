@@ -3,14 +3,15 @@
 Implementation of UNet
 """
 
+import sys
+
+from .modelBase import ModelBase
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
-from .modelBase import ModelBase
-import sys
 from GANDLF.utils.generic import checkPatchDivisibility
 
 
@@ -161,6 +162,26 @@ class unet(ModelBase):
             final_convolution_layer=self.final_convolution_layer,
             sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
+
+        if "converter_type" in parameters["model"]:
+            self.ins = self.converter(self.ins).model
+            self.ds_0 = self.converter(self.ds_0).model
+            self.en_1 = self.converter(self.en_1).model
+            self.ds_1 = self.converter(self.ds_1).model
+            self.en_2 = self.converter(self.en_2).model
+            self.ds_2 = self.converter(self.ds_2).model
+            self.en_3 = self.converter(self.en_3).model
+            self.ds_3 = self.converter(self.ds_3).model
+            self.en_4 = self.converter(self.en_4).model
+            self.us_3 = self.converter(self.us_3).model
+            self.de_3 = self.converter(self.de_3).model
+            self.us_2 = self.converter(self.us_2).model
+            self.de_2 = self.converter(self.de_2).model
+            self.us_1 = self.converter(self.us_1).model
+            self.de_1 = self.converter(self.de_1).model
+            self.us_0 = self.converter(self.us_0).model
+            self.de_0 = self.converter(self.de_0).model
+            self.out = self.converter(self.out).model
 
     def forward(self, x):
         """

@@ -40,12 +40,18 @@ class light_unet_multilayer(ModelBase):
 
         if patch_check != parameters["model"]["depth"] and patch_check >= 2:
             print(
-                "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
+                """
+                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
+                where i is in a integer greater than or equal to 2. Only the first %d layers will run.
+                """
                 % patch_check
             )
         elif patch_check < 2:
             sys.exit(
-                "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
+                """
+                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
+                where i is in a integer greater than or equal to 2. 
+                """
             )
 
         self.num_layers = patch_check
@@ -113,6 +119,15 @@ class light_unet_multilayer(ModelBase):
             final_convolution_layer=self.final_convolution_layer,
             sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
+
+        if "converter_type" in parameters["model"]:
+            self.ins = self.converter(self.ins).model
+            self.out = self.converter(self.out).model
+            for i_lay in range(0, self.num_layers):
+                self.ds[i_lay] = self.converter(self.ds[i_lay]).model
+                self.us[i_lay] = self.converter(self.us[i_lay]).model
+                self.de[i_lay] = self.converter(self.de[i_lay]).model
+                self.en[i_lay] = self.converter(self.en[i_lay]).model
 
     def forward(self, x):
         """
