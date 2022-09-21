@@ -205,7 +205,7 @@ def send_model_to_device(model, amp, device, optimizer):
         amp = False
         print("Since Device is CPU, Mixed Precision Training is set to False")
 
-    return model, amp, device
+    return model, amp, device, dev
 
 
 def get_class_imbalance_weights_classification(training_df, params):
