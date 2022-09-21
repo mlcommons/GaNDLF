@@ -152,6 +152,11 @@ def send_model_to_device(model, amp, device, optimizer):
             device = torch.device("cuda")
             dev_to_pass_to_torch = [*range(len(dev.split(",")))]
             model = nn.DataParallel(model, device_ids=dev_to_pass_to_torch)
+            # model = nn.parallel.DistributedDataParallel(
+            #     model,
+            #     device_ids=dev_to_pass_to_torch,
+            #     output_device=dev_to_pass_to_torch[0],
+            # )
         else:
             print("Device requested via CUDA_VISIBLE_DEVICES: ", dev)
             print("Total number of CUDA devices: ", torch.cuda.device_count())
