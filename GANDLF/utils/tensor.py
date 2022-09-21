@@ -152,6 +152,7 @@ def send_model_to_device(model, amp, device, optimizer):
             device = torch.device("cuda")
             dev_to_pass_to_torch = [*range(len(dev.split(",")))]
             model = nn.DataParallel(model, device_ids=dev_to_pass_to_torch)
+            ## this is the new api, but it is a bit finicky and needs further testing
             # model = nn.parallel.DistributedDataParallel(
             #     model,
             #     device_ids=dev_to_pass_to_torch,
