@@ -12,7 +12,8 @@ from .segmentation import (
 )
 from .regression import classification_accuracy, balanced_acc_score, per_label_accuracy
 from .generic import recall_score, precision_score, iou_score, f1_score, accuracy
-from .classification import overall_stats
+import GANDLF.metrics.classification as classification
+import GANDLF.metrics.regression as regression
 
 
 # global defines for the metrics
@@ -38,3 +39,25 @@ global_metrics_dict = {
     "balanced_accuracy": balanced_acc_score,
     "per_label_one_hot_accuracy": per_label_accuracy,
 }
+
+
+def overall_stats(predictions, ground_truth, params):
+    """
+    Generates a dictionary of metrics calculated on the overall predictions and ground truths.
+
+    Args:
+        predictions (torch.Tensor): The output of the model.
+        ground_truth (torch.Tensor): The ground truth labels.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        dict: A dictionary of metrics.
+    """
+    assert len(predictions) == len(
+        ground_truth
+    ), "Predictions and ground truth must be of same length"
+
+    if params["problem_type"] == "classification":
+        return classification.overall_stats(predictions, ground_truth, params)
+    elif params["problem_type"] == "regression":
+        return regression.overall_stats(predictions, ground_truth, params)

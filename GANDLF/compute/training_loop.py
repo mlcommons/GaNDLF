@@ -59,6 +59,9 @@ def train_network(model, train_dataloader, optimizer, params):
     total_epoch_train_loss = 0
     total_epoch_train_metric = {}
     average_epoch_train_metric = {}
+    calculate_overall_metrics = (params["problem_type"] == "classification") or (
+        params["problem_type"] == "regression"
+    )
 
     for metric in params["metrics"]:
         if "per_label" in metric:
@@ -73,7 +76,7 @@ def train_network(model, train_dataloader, optimizer, params):
             print("Using Automatic mixed precision", flush=True)
 
     # get ground truths
-    if params["problem_type"] == "classification":
+    if calculate_overall_metrics:
         (
             ground_truth_array,
             predictions_array,
@@ -115,7 +118,7 @@ def train_network(model, train_dataloader, optimizer, params):
             params["subject_spacing"] = None
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
-        if params["problem_type"] == "classification":
+        if calculate_overall_metrics:
             predictions_array[
                 batch_idx
                 * params["batch_size"] : (batch_idx + 1)
@@ -194,7 +197,7 @@ def train_network(model, train_dataloader, optimizer, params):
     print("     Epoch Final   train loss : ", average_epoch_train_loss)
 
     # get overall stats for classification
-    if params["problem_type"] == "classification":
+    if calculate_overall_metrics:
         average_epoch_train_metric = overall_stats(
             predictions_array, ground_truth_array, params
         )
