@@ -208,6 +208,25 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device, dev
 
 
+def get_model_dict(model, device_id):
+    """
+    This function returns the model dictionary
+
+    Args:
+        model (torch.nn.Module): The model for which the dictionary is to be returned.
+        device_id (Union[str, list]): The device id as string or list.
+
+    Returns:
+        dict: The model dictionary.
+    """
+    if isinstance(device_id, list) or ("," in device_id):
+        model_dict = model.module.state_dict()
+    else:
+        model_dict = model.state_dict()
+
+    return model_dict
+
+
 def get_class_imbalance_weights_classification(training_df, params):
     """
     This function calculates the penalty used for loss functions in multi-class problems.
