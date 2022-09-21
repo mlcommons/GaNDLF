@@ -426,7 +426,7 @@ def training_loop(
 
             model.eval()
 
-            if "," in params["device_id"]:
+            if isinstance(params["device_id"], list) and "," in params["device_id"]:
                 model_dict = model.module.state_dict()
             else:
                 model_dict = model.state_dict()
@@ -448,7 +448,7 @@ def training_loop(
 
         if params["model"]["save_at_every_epoch"]:
 
-            if "," in params["device_id"]:
+            if isinstance(params["device_id"], list) and "," in params["device_id"]:
                 model_dict = model.module.state_dict()
             else:
                 model_dict = model.state_dict()
