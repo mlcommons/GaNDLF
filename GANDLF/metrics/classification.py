@@ -1,24 +1,5 @@
 import torchmetrics as tm
-
-
-def get_output_from_calculator(predictions, ground_truth, calculator):
-    """
-    Helper function to get the output from a calculator.
-
-    Args:
-        predictions (torch.Tensor): The output of the model.
-        ground_truth (torch.Tensor): The ground truth labels.
-        calculator (torchmetrics.Metric): The calculator to use.
-
-    Returns:
-        float: The output from the calculator.
-    """
-    temp_output = calculator(predictions, ground_truth)
-    if temp_output.dim() > 0:
-        temp_output = temp_output.cpu().tolist()
-    else:
-        temp_output = temp_output.cpu().item()
-    return temp_output
+from ..utils import get_output_from_calculator
 
 
 def overall_stats(predictions, ground_truth, params):
@@ -35,10 +16,7 @@ def overall_stats(predictions, ground_truth, params):
     """
     assert (
         params["problem_type"] == "classification"
-    ), "Only classification is supported for overall stats"
-    assert len(predictions) == len(
-        ground_truth
-    ), "Predictions and ground truth must be of same length"
+    ), "Only classification is supported for these stats"
 
     output_metrics = {}
 

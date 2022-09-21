@@ -63,6 +63,10 @@ def validate_network(
     logits_list = []
     subject_id_list = []
     is_classification = params.get("problem_type") == "classification"
+    calculate_overall_metrics = (
+        (params["problem_type"] == "classification")
+        or (params["problem_type"] == "regression")
+    ) and mode == "validation"
     is_inference = mode == "inference"
 
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
@@ -102,7 +106,7 @@ def validate_network(
                 )
 
     # get ground truths for classification problem, validation set
-    if is_classification and mode == "validation":
+    if calculate_overall_metrics:
         (
             ground_truth_array,
             predictions_array,
@@ -202,7 +206,7 @@ def validate_network(
                 image, valuesToPredict, pred_output, params
             )
 
-            if is_classification and mode == "validation":
+            if calculate_overall_metrics:
                 predictions_array[batch_idx] = (
                     torch.argmax(pred_output[0], 0).cpu().item()
                 )
@@ -373,7 +377,7 @@ def validate_network(
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
-                if is_classification and mode == "validation":
+                if calculate_overall_metrics:
                     predictions_array[batch_idx] = (
                         torch.argmax(output_prediction[0], 0).cpu().item()
                     )
@@ -472,7 +476,7 @@ def validate_network(
         average_epoch_valid_loss = total_epoch_valid_loss / len(valid_dataloader)
         print("     Epoch Final   " + mode + " loss : ", average_epoch_valid_loss)
         # get overall stats for classification
-        if is_classification and mode == "validation":
+        if calculate_overall_metrics:
             average_epoch_valid_metric = overall_stats(
                 predictions_array, ground_truth_array, params
             )

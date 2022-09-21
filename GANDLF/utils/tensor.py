@@ -442,3 +442,23 @@ def get_ground_truths_and_predictions_tensor(params, loader_type):
     predictions_array = torch.zeros_like(ground_truth_array)
 
     return ground_truth_array, predictions_array
+
+
+def get_output_from_calculator(predictions, ground_truth, calculator):
+    """
+    Helper function to get the output from a calculator.
+
+    Args:
+        predictions (torch.Tensor): The output of the model.
+        ground_truth (torch.Tensor): The ground truth labels.
+        calculator (torchmetrics.Metric): The calculator to use.
+
+    Returns:
+        float: The output from the calculator.
+    """
+    temp_output = calculator(predictions, ground_truth)
+    if temp_output.dim() > 0:
+        temp_output = temp_output.cpu().tolist()
+    else:
+        temp_output = temp_output.cpu().item()
+    return temp_output
