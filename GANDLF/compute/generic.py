@@ -74,10 +74,10 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
 
     # send model to correct device
     (
-            model, 
-            parameters["model"]["amp"], 
-            parameters["device"], 
-            parameters["device_id"],
+        model, 
+        parameters["model"]["amp"], 
+        parameters["device"], 
+        parameters["device_id"],
     ) = send_model_to_device(
         model, amp=parameters["model"]["amp"], device=device, optimizer=optimizer
     )
