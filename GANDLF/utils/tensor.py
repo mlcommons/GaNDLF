@@ -220,7 +220,11 @@ def get_model_dict(model, device_id):
     Returns:
         dict: The model dictionary.
     """
-    if isinstance(device_id, list) or ("," in device_id):
+    multi_gpu_flag = True if isinstance(device_id, list) else False
+    if isinstance(device_id, str):
+        if "," in device_id:
+            multi_gpu_flag = True
+    if multi_gpu_flag:
         model_dict = model.module.state_dict()
     else:
         model_dict = model.state_dict()
