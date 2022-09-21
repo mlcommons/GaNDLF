@@ -1,5 +1,6 @@
-## 0.0.16
-- 
+## 0.0.16- 
+- ImageNet pre-trained models for UNet with variable encoders is now available
+- ACS/Soft conversion is available for ImageNet-pretrained UNet
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
@@ -46,7 +47,7 @@
 - Sigmoid multiplier option has been added
 - Compute objects can now be requested using developer-level functions
 - Transformer-based networks, TransUNet and UNetR are now available
-- Can do histology computation using microns
+- Can now perform histology computation using microns
 
 ## 0.0.13
 
