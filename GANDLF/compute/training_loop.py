@@ -425,6 +425,12 @@ def training_loop(
             patience = 0
 
             model.eval()
+
+            if isinstance(params["device_id"], list) and "," in params["device_id"]:
+                model_dict = model.module.state_dict()
+            else:
+                model_dict = model.state_dict()
+
             save_model(
                 {
                     "epoch": best_train_idx,
@@ -441,6 +447,12 @@ def training_loop(
             first_model_saved = True
 
         if params["model"]["save_at_every_epoch"]:
+
+            if isinstance(params["device_id"], list) and "," in params["device_id"]:
+                model_dict = model.module.state_dict()
+            else:
+                model_dict = model.state_dict()
+
             save_model(
                 {
                     "epoch": epoch,
