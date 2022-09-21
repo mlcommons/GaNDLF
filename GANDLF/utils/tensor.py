@@ -434,21 +434,24 @@ def print_model_summary(
     input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
     if input_size[-1] == 1:
         input_size = input_size[:-1]
-    stats = summary(model, input_size, device=device, verbose=0)
+    try:
+        stats = summary(model, input_size, device=device, verbose=0)
 
-    print("Model Summary:")
-    print("\tInput size:", stats.to_megabytes(stats.total_input), "MB")
-    print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes), "MB")
-    print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes), "MB")
-    print(
-        "\tEstimated total size:",
-        stats.to_megabytes(
-            stats.total_input + stats.total_output_bytes + stats.total_param_bytes
-        ),
-        "MB",
-    )
-    temp_output = stats.to_readable(stats.total_mult_adds)
-    print("\tTotal # of operations:", temp_output[1], temp_output[0])
+        print("Model Summary:")
+        print("\tInput size:", stats.to_megabytes(stats.total_input), "MB")
+        print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes), "MB")
+        print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes), "MB")
+        print(
+            "\tEstimated total size:",
+            stats.to_megabytes(
+                stats.total_input + stats.total_output_bytes + stats.total_param_bytes
+            ),
+            "MB",
+        )
+        temp_output = stats.to_readable(stats.total_mult_adds)
+        print("\tTotal # of operations:", temp_output[1], temp_output[0])
+    except Exception as e:
+        print("Failed to generate model summary with error: ", e)
 
 
 def get_ground_truths_and_predictions_tensor(params, loader_type):
