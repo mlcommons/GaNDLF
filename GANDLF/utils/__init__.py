@@ -20,6 +20,7 @@ from .tensor import (
     get_linear_interpolation_mode,
     print_model_summary,
     get_ground_truths_and_predictions_tensor,
+    get_output_from_calculator,
 )
 
 from .write_parse import (
