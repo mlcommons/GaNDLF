@@ -38,6 +38,7 @@ all_models_segmentation = [
     "fcn",
     "uinc",
     "msdnet",
+    "imagenet_unet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
@@ -46,6 +47,7 @@ all_models_regression = [
     "resnet18",
     "resnet50",
     "efficientnetb0",
+    "imagenet_unet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_classification = [
@@ -214,9 +216,20 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
+    parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
+        if model == "imagenet_unet":
+            # imagenet_unet encoder needs to be toned down for small patch size
+            parameters["model"]["encoder_depth"] = 3
+            parameters["model"]["decoder_channels"] = (64, 32, 16)
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -288,6 +301,16 @@ def test_train_segmentation_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
+        if model == "imagenet_unet":
+            # imagenet_unet encoder needs to be toned down for small patch size
+            parameters["model"]["encoder_depth"] = 3
+            parameters["model"]["decoder_channels"] = (64, 32, 16)
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -437,6 +460,14 @@ def test_train_regression_rad_3d(device):
             parameters["patch_size"] = [16, 16, 16]
         else:
             parameters["patch_size"] = patch_size["3D"]
+
+        if model == "imagenet_unet":
+            parameters["model"]["depth"] = 2
+            parameters["model"]["decoder_channels"] = [32, 16]
+            parameters["model"]["encoder_weights"] = "None"
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -473,6 +504,13 @@ def test_train_classification_rad_2d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in all_models_regression:
+        if model == "imagenet_unet":
+            parameters["model"]["depth"] = 2
+            parameters["model"]["decoder_channels"] = [32, 16]
+            parameters["model"]["encoder_weights"] = "None"
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -528,6 +566,16 @@ def test_train_classification_rad_3d(device):
             parameters["patch_size"] = [16, 16, 16]
         else:
             parameters["patch_size"] = patch_size["3D"]
+        if model == "imagenet_unet":
+            parameters["model"]["encoder_name"] = "efficientnet-b0"
+            parameters["model"]["depth"] = 1
+            parameters["model"]["decoder_channels"] = [64]
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -2331,4 +2379,45 @@ def test_train_gradient_clipping_classification_rad_2d(device):
             resume=False,
             reset=True,
         )
+    print("passed")
+
+
+def test_train_segmentation_unet_conversion_rad_3d(device):
+    print("43: Starting 3D Rad segmentation tests for unet with ACS conversion")
+    # read and parse csv
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    parameters["model"]["class_list"] = [0, 1]
+    parameters["model"]["final_layer"] = "softmax"
+    parameters["model"]["amp"] = True
+    parameters["in_memory"] = True
+    parameters["verbose"] = False
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    for model in ["unet", "unet_multilayer", "lightunet_multilayer"]:
+        parameters["model"]["converter_type"] = random.choice(["acs", "soft", "conv3d"])
+        parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
+
     print("passed")

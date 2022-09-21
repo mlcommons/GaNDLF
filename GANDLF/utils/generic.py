@@ -163,7 +163,7 @@ def get_array_from_image_or_tensor(input_tensor_or_image):
         numpy.array: The numpy array from the tensor or image.
     """
     if isinstance(input_tensor_or_image, torch.Tensor):
-        return input_tensor_or_image.detach().numpy()
+        return input_tensor_or_image.detach().cpu().numpy()
     elif isinstance(input_tensor_or_image, sitk.Image):
         return sitk.GetArrayFromImage(input_tensor_or_image)
     elif isinstance(input_tensor_or_image, np.ndarray):
