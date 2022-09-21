@@ -150,7 +150,8 @@ def send_model_to_device(model, amp, device, optimizer):
         # ###
         if "," in dev:
             device = torch.device("cuda")
-            model = nn.DataParallel(model, "[" + dev + "]")
+            dev_to_pass_to_torch = [*range(len(dev.split(",")))]
+            model = nn.DataParallel(model, device_ids=dev_to_pass_to_torch)
         else:
             print("Device requested via CUDA_VISIBLE_DEVICES: ", dev)
             print("Total number of CUDA devices: ", torch.cuda.device_count())
@@ -199,7 +200,7 @@ def send_model_to_device(model, amp, device, optimizer):
         amp = False
         print("Since Device is CPU, Mixed Precision Training is set to False")
 
-    return model, amp, device
+    return model, amp, device, dev
 
 
 def get_class_imbalance_weights_classification(training_df, params):
