@@ -55,7 +55,7 @@ requirements = [
     "SimpleITK!=2.0.*",
     "torchvision",
     "tqdm",
-    "torchio==0.18.57",
+    "torchio==0.18.75",
     "pandas",
     "pylint",
     "scikit-learn>=0.23.2",
@@ -79,13 +79,15 @@ requirements = [
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
+    "segmentation-models-pytorch==0.3.0",
+    "ACSConv==0.1.1",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
 if sys.platform == "darwin":
-    requirements.append("torch==1.9.0")
+    requirements.append("torch==1.11.0")
 else:
-    requirements.append("torch==1.8.2")
+    requirements.append("torch==1.11.0")
 
 setup(
     name="GANDLF",
