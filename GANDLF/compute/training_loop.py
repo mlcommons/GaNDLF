@@ -17,6 +17,7 @@ from GANDLF.utils import (
     write_training_patches,
     print_model_summary,
     get_ground_truths_and_predictions_tensor,
+    get_model_dict,
 )
 from GANDLF.metrics import overall_stats
 from GANDLF.logger import Logger
@@ -421,6 +422,8 @@ def training_loop(
             flush=True,
         )
 
+        model_dict = get_model_dict(model, params["device_id"])
+
         # Start to check for loss
         if not (first_model_saved) or (epoch_valid_loss <= torch.tensor(best_loss)):
             best_loss = epoch_valid_loss
@@ -428,10 +431,11 @@ def training_loop(
             patience = 0
 
             model.eval()
+
             save_model(
                 {
                     "epoch": best_train_idx,
-                    "model_state_dict": model.state_dict(),
+                    "model_state_dict": model_dict,
                     "optimizer_state_dict": optimizer.state_dict(),
                     "loss": best_loss,
                 },
@@ -444,10 +448,11 @@ def training_loop(
             first_model_saved = True
 
         if params["model"]["save_at_every_epoch"]:
+
             save_model(
                 {
                     "epoch": epoch,
-                    "model_state_dict": model.state_dict(),
+                    "model_state_dict": model_dict,
                     "optimizer_state_dict": optimizer.state_dict(),
                     "loss": epoch_valid_loss,
                 },

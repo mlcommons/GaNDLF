@@ -150,7 +150,14 @@ def send_model_to_device(model, amp, device, optimizer):
         # ###
         if "," in dev:
             device = torch.device("cuda")
-            model = nn.DataParallel(model, "[" + dev + "]")
+            dev_to_pass_to_torch = [*range(len(dev.split(",")))]
+            model = nn.DataParallel(model, device_ids=dev_to_pass_to_torch)
+            ## this is the new api, but it is a bit finicky and needs further testing
+            # model = nn.parallel.DistributedDataParallel(
+            #     model,
+            #     device_ids=dev_to_pass_to_torch,
+            #     output_device=dev_to_pass_to_torch[0],
+            # )
         else:
             print("Device requested via CUDA_VISIBLE_DEVICES: ", dev)
             print("Total number of CUDA devices: ", torch.cuda.device_count())
@@ -199,7 +206,30 @@ def send_model_to_device(model, amp, device, optimizer):
         amp = False
         print("Since Device is CPU, Mixed Precision Training is set to False")
 
-    return model, amp, device
+    return model, amp, device, dev
+
+
+def get_model_dict(model, device_id):
+    """
+    This function returns the model dictionary
+
+    Args:
+        model (torch.nn.Module): The model for which the dictionary is to be returned.
+        device_id (Union[str, list]): The device id as string or list.
+
+    Returns:
+        dict: The model dictionary.
+    """
+    multi_gpu_flag = True if isinstance(device_id, list) else False
+    if isinstance(device_id, str):
+        if "," in device_id:
+            multi_gpu_flag = True
+    if multi_gpu_flag:
+        model_dict = model.module.state_dict()
+    else:
+        model_dict = model.state_dict()
+
+    return model_dict
 
 
 def get_class_imbalance_weights_classification(training_df, params):
@@ -404,21 +434,24 @@ def print_model_summary(
     input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
     if input_size[-1] == 1:
         input_size = input_size[:-1]
-    stats = summary(model, input_size, device=device, verbose=0)
+    try:
+        stats = summary(model, input_size, device=device, verbose=0)
 
-    print("Model Summary:")
-    print("\tInput size:", stats.to_megabytes(stats.total_input), "MB")
-    print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes), "MB")
-    print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes), "MB")
-    print(
-        "\tEstimated total size:",
-        stats.to_megabytes(
-            stats.total_input + stats.total_output_bytes + stats.total_param_bytes
-        ),
-        "MB",
-    )
-    temp_output = stats.to_readable(stats.total_mult_adds)
-    print("\tTotal # of operations:", temp_output[1], temp_output[0])
+        print("Model Summary:")
+        print("\tInput size:", stats.to_megabytes(stats.total_input), "MB")
+        print("\tOutput size:", stats.to_megabytes(stats.total_output_bytes), "MB")
+        print("\tParameters size:", stats.to_megabytes(stats.total_param_bytes), "MB")
+        print(
+            "\tEstimated total size:",
+            stats.to_megabytes(
+                stats.total_input + stats.total_output_bytes + stats.total_param_bytes
+            ),
+            "MB",
+        )
+        temp_output = stats.to_readable(stats.total_mult_adds)
+        print("\tTotal # of operations:", temp_output[1], temp_output[0])
+    except Exception as e:
+        print("Failed to generate model summary with error: ", e)
 
 
 def get_ground_truths_and_predictions_tensor(params, loader_type):

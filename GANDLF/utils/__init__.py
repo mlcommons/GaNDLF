@@ -14,6 +14,7 @@ from .tensor import (
     one_hot,
     reverse_one_hot,
     send_model_to_device,
+    get_model_dict,
     get_class_imbalance_weights,
     get_class_imbalance_weights_segmentation,
     get_class_imbalance_weights_classification,

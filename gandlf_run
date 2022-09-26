@@ -35,7 +35,7 @@ if __name__ == "__main__":
         "--inputdata",
         metavar="",
         type=str,
-        help="Data CSV file that is used for training/inference; can also take comma-separated training-validatation pre-split CSVs",
+        help="Data CSV file that is used for training/inference; can also take comma-separated training-validation pre-split CSVs",
     )
     parser.add_argument(
         "-t",
