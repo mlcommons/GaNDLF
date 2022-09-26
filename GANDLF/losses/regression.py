@@ -1,6 +1,8 @@
 import torch
-from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
+import torch.nn as nn
+import torch.nn.functional as F
 from GANDLF.utils import one_hot
+from torch.nn import CrossEntropyLoss, L1Loss, MSELoss
 
 
 def CEL(out, target, params):
@@ -198,3 +200,20 @@ def MSE_loss(inp, target, params):
         acc_mse_loss /= inp.shape[1]
 
     return acc_mse_loss
+
+
+def LabelSmoothingCrossEntropy(input, target, params):
+    smoothing = 0.1 if params is None else params["loss_function"]["label_smoothing"]
+    confidence = 1.0 - smoothing
+    assert smoothing <= 1.0
+    logprobs = F.log_softmax(input, dim=-1)
+    nll_loss = -logprobs.gather(dim=-1, index=target.unsqueeze(1))
+    nll_loss = nll_loss.squeeze(1)
+    smooth_loss = -logprobs.mean(dim=-1)
+    loss = confidence * nll_loss + smoothing * smooth_loss
+    return loss.mean()
+
+
+def SoftTargetCrossEntropy(input, target, params):
+    loss = torch.sum(-target * F.log_softmax(input, dim=-1), dim=-1)
+    return loss.mean()
