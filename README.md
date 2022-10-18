@@ -71,7 +71,7 @@ Please see the [contributing guide](./CONTRIBUTING.md) for more information.
 
 ## Disclaimer
 - The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.
-- This code (excluding dependent libraries) is governed by the license provided in the LICENSE file [(Apache License, Version 2.0)](https://www.apache.org/licenses/LICENSE-2.0.txt) unless otherwise specified.
+- This code (excluding dependent libraries) is governed by [the Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt) provided in the [LICENSE file](./LICENSE) unless otherwise specified.
 
 ## Contact
 For more information or any support, please post on the [Discussions](https://github.com/mlcommons/GaNDLF/discussions) section.
