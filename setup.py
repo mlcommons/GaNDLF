@@ -57,7 +57,6 @@ requirements = [
     "tqdm",
     "torchio==0.18.75",
     "pandas",
-    "pylint",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
     'pickle5>=0.0.11; python_version < "3.8.0"',
