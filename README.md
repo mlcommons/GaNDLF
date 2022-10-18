@@ -57,12 +57,12 @@ Please cite the following article for GaNDLF ([full PDF](https://arxiv.org/abs/2
 
 GaNDLF has extensive documentation and it is arranged in the following manner:
 
-- [Home](https://cbica.github.io/GaNDLF/)
-- [Installation](https://cbica.github.io/GaNDLF/setup)
-- [Usage](https://cbica.github.io/GaNDLF/usage)
-- [Extension](https://cbica.github.io/GaNDLF/extending)
-- [Frequently Asked Questions](https://cbica.github.io/GaNDLF/faq)
-- [Acknowledgements](https://cbica.github.io/GaNDLF/acknowledgements)
+- [Home](https://mlcommons.github.io/GaNDLF/)
+- [Installation](https://mlcommons.github.io/GaNDLF/setup)
+- [Usage](https://mlcommons.github.io/GaNDLF/usage)
+- [Extension](https://mlcommons.github.io/GaNDLF/extending)
+- [Frequently Asked Questions](https://mlcommons.github.io/GaNDLF/faq)
+- [Acknowledgements](https://mlcommons.github.io/GaNDLF/acknowledgements)
 
 
 ## Contributing
