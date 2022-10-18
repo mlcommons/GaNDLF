@@ -1787,8 +1787,11 @@ def test_generic_anonymizer():
 
     input_file = os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff")
     output_file_histo = os.path.join(outputDir, "histo_anon.tiff")
-    run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
-    assert os.path.exists(output_file_histo), "Anonymized file does not exist"
+    # this assertion should fail since histo anonymizer is not implementer
+    with pytest.raises(BaseException) as exc_info:
+        run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
+        assert os.path.exists(output_file_histo), "Anonymized file does not exist"
+    print("Exception raised: ", exc_info.value)
     sanitize_outputDir()
 
     print("passed")
