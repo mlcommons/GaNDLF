@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
-LABEL github="https://github.com/CBICA/GaNDLF"
-LABEL docs="https://cbica.github.io/GaNDLF/"
+LABEL github="https://github.com/mlcommons/GaNDLF"
+LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
 
 # Install fresh Python and dependencies for build-from-source
