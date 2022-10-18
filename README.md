@@ -1,13 +1,13 @@
 # GaNDLF
 
 <p align="center">
-  <a href="https://github.com/CBICA/GaNDLF/actions/workflows/python-test.yml" alt="Build Status"><img src="https://github.com/CBICA/GaNDLF/actions/workflows/python-test.yml/badge.svg" /></a>
-  <a href="https://github.com/CBICA/GaNDLF/actions/workflows/codeql-analysis.yml" alt="Code Analysis"><img src="https://github.com/CBICA/GaNDLF/workflows/CodeQL/badge.svg" /></a>
-  <a href="https://hub.docker.com/repository/docker/cbica/gandlf" alt="Docker CI"><img src="https://github.com/CBICA/GaNDLF/actions/workflows/docker-image.yml/badge.svg" /></a>
-  <a href="https://codecov.io/gh/CBICA/GaNDLF" alt="Code Coverage"><img src="https://codecov.io/gh/CBICA/GaNDLF/branch/master/graph/badge.svg?token=4I54XEI3WE" /></a>
-  <a href="https://www.codacy.com/gh/CBICA/GaNDLF/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CBICA/GaNDLF&amp;utm_campaign=Badge_Grade"><img alt="Codacy" src="https://app.codacy.com/project/badge/Grade/8f8b77f62ad843709534e4ed66ad0b5a"></a><br>
+  <a href="https://github.com/mlcommons/GaNDLF/actions/workflows/python-test.yml" alt="Build Status"><img src="https://github.com/mlcommons/GaNDLF/actions/workflows/python-test.yml/badge.svg" /></a>
+  <a href="https://github.com/mlcommons/GaNDLF/actions/workflows/codeql-analysis.yml" alt="Code Analysis"><img src="https://github.com/mlcommons/GaNDLF/workflows/CodeQL/badge.svg" /></a>
+  <a href="https://hub.docker.com/repository/docker/cbica/gandlf" alt="Docker CI"><img src="https://github.com/mlcommons/GaNDLF/actions/workflows/docker-image.yml/badge.svg" /></a>
+  <a href="https://codecov.io/gh/mlcommons/GaNDLF" alt="Code Coverage"><img src="https://codecov.io/gh/mlcommons/GaNDLF/branch/master/graph/badge.svg?token=4I54XEI3WE" /></a>
+  <a href="https://www.codacy.com/gh/mlcommons/GaNDLF/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mlcommons/GaNDLF&amp;utm_campaign=Badge_Grade"><img alt="Codacy" src="https://app.codacy.com/project/badge/Grade/8f8b77f62ad843709534e4ed66ad0b5a"></a><br>
   <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://img.shields.io/conda/vn/conda-forge/gandlf" /></a>
-  <a href="https://github.com/CBICA/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-blue" /></a>
+  <a href="https://github.com/mlcommons/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-blue" /></a>
   <a href="https://arxiv.org/abs/2103.01006" alt="Citation"><img src="https://img.shields.io/badge/Cite-citation-lightblue" /></a>
   <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/Code%20Style-black-000000.svg"></a>
 </p>
@@ -71,7 +71,7 @@ Please see the [contributing guide](./CONTRIBUTING.md) for more information.
 
 ## Disclaimer
 - The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.
-- This code (excluding dependent libraries) is governed by the license provided in https://www.med.upenn.edu/cbica/software-agreement.html unless otherwise specified.
+- This code (excluding dependent libraries) is governed by the license provided in the LICENSE file [(Apache License, Version 2.0)](https://www.apache.org/licenses/LICENSE-2.0.txt) unless otherwise specified.
 
 ## Contact
-For more information or any support, please post on the [Discussions](https://github.com/CBICA/GaNDLF/discussions) section or contact <a href="mailto:gandlf@cbica.upenn.edu">CBICA Software</a>.
+For more information or any support, please post on the [Discussions](https://github.com/mlcommons/GaNDLF/discussions) section or contact <a href="mailto:gandlf@cbica.upenn.edu">CBICA Software</a>.
