@@ -74,4 +74,4 @@ Please see the [contributing guide](./CONTRIBUTING.md) for more information.
 - This code (excluding dependent libraries) is governed by the license provided in the LICENSE file [(Apache License, Version 2.0)](https://www.apache.org/licenses/LICENSE-2.0.txt) unless otherwise specified.
 
 ## Contact
-For more information or any support, please post on the [Discussions](https://github.com/mlcommons/GaNDLF/discussions) section or contact <a href="mailto:gandlf@cbica.upenn.edu">CBICA Software</a>.
+For more information or any support, please post on the [Discussions](https://github.com/mlcommons/GaNDLF/discussions) section.
