@@ -1,7 +1,7 @@
 # NOTE: ROCm is NOT supported by PyTorch LTS (1.8.2)
 FROM rocm/pytorch:rocm4.5.2_ubuntu18.04_py3.8_pytorch_1.10.0
-LABEL github="https://github.com/CBICA/GaNDLF"
-LABEL docs="https://cbica.github.io/GaNDLF/"
+LABEL github="https://github.com/mlcommons/GaNDLF"
+LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
 
 # Quick start instructions on using Docker with ROCm: https://github.com/RadeonOpenCompute/ROCm-docker/blob/master/quick-start.md
