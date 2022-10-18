@@ -78,7 +78,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v3
       with:
-        images: docker.io/cbica/gandlf, ghcr.io/cbica/gandlf # Push to both registries
+        images: docker.io/cbica/gandlf, ghcr.io/mlcommons/gandlf # Push to both registries
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=true
           suffix=-${{ matrix.dockertag }},onlatest=true
