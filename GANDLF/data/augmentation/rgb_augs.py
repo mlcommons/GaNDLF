@@ -5,6 +5,7 @@ from torchio import Subject
 from torchio.transforms import IntensityTransform
 from torchio.transforms.augmentation import RandomTransform
 from torchvision.transforms import ColorJitter
+from GANDLF.utils.exceptions import InvalidRangeError
 
 
 def colorjitter_transform(parameters):
