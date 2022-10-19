@@ -1,11 +1,12 @@
 from typing import Tuple, Union
 
 import numpy as np
+from GANDLF.utils.exceptions import InvalidRangeError
+from skimage.color import hed2rgb, rgb2hed
 from torchio import Subject
 from torchio.transforms import IntensityTransform
 from torchio.transforms.augmentation import RandomTransform
 from torchvision.transforms import ColorJitter
-from GANDLF.utils.exceptions import InvalidRangeError
 
 
 def colorjitter_transform(parameters):
@@ -301,7 +302,7 @@ class HedColorAugmenter(ColorAugmenterBase):
 
         if self._cutoff_range[0] <= patch_mean <= self._cutoff_range[1]:
             # Convert the image patch to HED color coding.
-            patch_hed = skimage.color.rgb2hed(rgb=patch)
+            patch_hed = rgb2hed(rgb=patch)
 
             # Augment the Haematoxylin channel.
             if self._sigmas[0] != 0.0:
@@ -325,7 +326,7 @@ class HedColorAugmenter(ColorAugmenterBase):
                 patch_hed[:, :, 2] += self._biases[2]
 
             # Convert back to RGB color coding.
-            patch_rgb = skimage.color.hed2rgb(hed=patch_hed)
+            patch_rgb = hed2rgb(hed=patch_hed)
             patch_transformed = np.clip(a=patch_rgb, a_min=0.0, a_max=1.0)
 
             # Convert back to integral data type if the input was also integral.
