@@ -1,9 +1,10 @@
-from torchvision.transforms import ColorJitter
 from typing import Tuple, Union
-from torchio.transforms.augmentation import RandomTransform
-from torchio.transforms import IntensityTransform
-from torchio import Subject
+
 import numpy as np
+from torchio import Subject
+from torchio.transforms import IntensityTransform
+from torchio.transforms.augmentation import RandomTransform
+from torchvision.transforms import ColorJitter
 
 
 def colorjitter_transform(parameters):
