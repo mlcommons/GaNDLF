@@ -1,5 +1,5 @@
 """
-Exceptions for pahtology errors in GANDLF
+Exceptions for histology errors in GANDLF
 """
 
 
