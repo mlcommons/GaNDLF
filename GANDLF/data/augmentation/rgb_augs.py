@@ -106,6 +106,12 @@ class HedColorAugmenter(ColorAugmenterBase):
         cutoff_range,
     ):
         """
+
+        The following code is derived and inspired from the following sources:
+        https://github.com/sebastianffx/stainlib
+
+        and it is covered under MIT license.
+
         Initialize the object. For each channel the augmented value is calculated as value = value * sigma + bias
         Args:
             haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.1, 0.1).
