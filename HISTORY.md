@@ -1,4 +1,5 @@
 ## 0.0.16- 
+- HED based transform for RGB specific augmentations for H&E images
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
 
