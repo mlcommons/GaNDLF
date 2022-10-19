@@ -353,6 +353,70 @@ def parseConfig(config_file_path, version_check_flag=True):
                     params["data_augmentation"]["colorjitter"], "hue", [-0.5, 0.5]
                 )
 
+            # Special case for hed_transform
+            if "hed_transform" in params["data_augmentation"]:
+                params["data_augmentation"]["hed_transform"] = initialize_key(
+                    params["data_augmentation"], "hed_transform", {}
+                )
+                for key in [
+                    "haematoxylin_bias_range",
+                    "eosin_bias_range",
+                    "dab_bias_range",
+                    "haematoxylin_sigma_range",
+                    "eosin_sigma_range",
+                    "dab_sigma_range",
+                ]:
+                    params["data_augmentation"]["hed_transform"] = initialize_key(
+                        params["data_augmentation"]["hed_transform"], key, [-0.1, 0.1]
+                    )
+                params["data_augmentation"]["hed_transform"] = initialize_key(
+                    params["data_augmentation"]["hed_transform"],
+                    "cutoff_range",
+                    [0.05, 0.95],
+                )
+
+            if "hed_transform_light" in params["data_augmentation"]:
+                params["data_augmentation"]["hed_transform"] = initialize_key(
+                    params["data_augmentation"], "hed_transform", {}
+                )
+                for key in [
+                    "haematoxylin_bias_range",
+                    "eosin_bias_range",
+                    "dab_bias_range",
+                    "haematoxylin_sigma_range",
+                    "eosin_sigma_range",
+                    "dab_sigma_range",
+                ]:
+                    params["data_augmentation"]["hed_transform"] = initialize_key(
+                        params["data_augmentation"]["hed_transform"], key, [-0.03, 0.03]
+                    )
+                params["data_augmentation"]["hed_transform"] = initialize_key(
+                    params["data_augmentation"]["hed_transform"],
+                    "cutoff_range",
+                    [0.05, 0.95],
+                )
+
+            if "hed_transform_heavy" in params["data_augmentation"]:
+                params["data_augmentation"]["hed_transform"] = initialize_key(
+                    params["data_augmentation"], "hed_transform", {}
+                )
+                for key in [
+                    "haematoxylin_bias_range",
+                    "eosin_bias_range",
+                    "dab_bias_range",
+                    "haematoxylin_sigma_range",
+                    "eosin_sigma_range",
+                    "dab_sigma_range",
+                ]:
+                    params["data_augmentation"]["hed_transform"] = initialize_key(
+                        params["data_augmentation"]["hed_transform"], key, [-0.95, 0.95]
+                    )
+                params["data_augmentation"]["hed_transform"] = initialize_key(
+                    params["data_augmentation"]["hed_transform"],
+                    "cutoff_range",
+                    [0.05, 0.95],
+                )
+
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
