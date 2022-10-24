@@ -87,7 +87,7 @@ This will save the processed data in `./experiment_0/output_dir/` with a new dat
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
 
 ```csv
 SubjectID,Channel_0,Channel_1,...,Channel_X,Label
@@ -102,7 +102,7 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
 - `ValueToPredict` is used for regression/classification models
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
-The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
+The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
 
 ```bash
 # continue from previous shell
@@ -169,11 +169,11 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   - Testing 
   - Validation 
 
-Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config_all_options.yaml) for detailed guide and comments.
+Please see a [sample](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) for detailed guide and comments.
 
-- [Segmentation example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
-- [Regression example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_regression.yaml)
-- [Classification example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_classification.yaml)
+- [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
+- [Regression example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml)
+- [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
 
 **Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
 
@@ -201,7 +201,7 @@ python gandlf_run \
 
 ## Plot the final results
 
-After the testing/validation training is finished, GaNDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/CBICA/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
+After the testing/validation training is finished, GaNDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
 
 ```bash
 # continue from previous shell
@@ -216,7 +216,7 @@ python gandlf_collectStats \
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
 
-For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
+For an example how this is set, see [sge_wrapper](https://github.com/mlcommons/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -250,5 +250,5 @@ Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 ## Examples
 
-- Example data can be found in [the main repo](https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
-- Configurations can be found in [the main repo](https://github.com/CBICA/GaNDLF/tree/master/testing).
+- Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
+- Configurations can be found in [the main repo](https://github.com/mlcommons/GaNDLF/tree/master/testing).
