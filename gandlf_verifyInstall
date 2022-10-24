@@ -2,18 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import os, argparse
-from datetime import date
+
+from GANDLF.cli import copyrightMessage
 
 
 # main function
 if __name__ == "__main__":
-    copyrightMessage = (
-        "Contact: software@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
-    )
-
     parser = argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
