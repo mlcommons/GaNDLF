@@ -20,7 +20,7 @@ if __name__ == "__main__":
         print("GaNDLF installed version:", gf.__version__)
     except:
         raise Exception(
-            "GaNDLF not properly installed, please see https://cbica.github.io/GaNDLF/setup"
+            "GaNDLF not properly installed, please see https://mlcommons.github.io/GaNDLF/setup"
         )
 
     # we always want to do submodule update to ensure any hash updates are ingested correctly
@@ -32,4 +32,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    print("GaNDLF is ready. See https://cbica.github.io/GaNDLF/usage")
+    print("GaNDLF is ready. See https://mlcommons.github.io/GaNDLF/usage")
