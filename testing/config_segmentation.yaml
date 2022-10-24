@@ -108,7 +108,7 @@ data_postprocessing:
 # this gets passed before the training_loop, so ensure enough memory is provided along with other parameters
 # that your HPC would expect
 # ${outputDir} will be changed to the outputDir you pass in CLI + '/${fold_number}'
-#parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=80G -pe threaded 6 /cbica/home/patis/projects/deep-sage-experiments/brats/sge_wrapper /cbica/home/patis/projects/GANDLF_master/venv/bin/python '
+#parallel_compute_command: <insert parallel command here>
 
 q_max_length: 1
 
