@@ -91,7 +91,7 @@ else:
 setup(
     name="GANDLF",
     version=__version__,
-    author="Jose Agraz, Vinayak Ahluwalia, Bhakti Baheti, Spyridon Bakas, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Orhun Güley, Ibrahim Ethem Hamamci, Sarthak Pati, Micah Sheller, Juliia Skobleva, Siddhesh Thakur, Spiros Thermos",  # alphabetical order
+    author="MLCommons",
     author_email="gandlf@mlcommons.org",
     python_requires=">=3.7",
     packages=find_packages(),
@@ -118,16 +118,17 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering :: Medical Science Apps",
     ],
     description=(
         "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
     ),
     install_requires=requirements,
-    license="BSD-3-Clause License",
+    license="Apache-2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
     include_package_data=True,
-    keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging",
+    keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
     zip_safe=False,
 )
