@@ -54,7 +54,7 @@ jobs:
     
     
     # Below steps are for GitHub Packages integration, metadata and signing
-    # See https://github.com/CBICA/GaNDLF/new/master?filename=.github%2Fworkflows%2Fdocker-publish.yml&workflow_template=docker-publish
+    # See https://github.com/mlcommons/GaNDLF/new/master?filename=.github%2Fworkflows%2Fdocker-publish.yml&workflow_template=docker-publish
     
     # Install the cosign tool except on PR
     # https://github.com/sigstore/cosign-installer
