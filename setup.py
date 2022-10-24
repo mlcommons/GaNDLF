@@ -82,7 +82,7 @@ requirements = [
     "ACSConv==0.1.1",
 ]
 
-# pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
+# pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389
 if sys.platform == "darwin":
     requirements.append("torch==1.11.0")
 else:
