@@ -28,4 +28,4 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmen
 GaNDLF developers can be reached via the following ways:
 
 - [GitHub Discussions](https://github.com/mlcommons/GaNDLF/discussions)
-- [Email](mailto:gandlf@cbica.upenn.edu)
+- [Email](mailto:gandlf@mlcommons.org)

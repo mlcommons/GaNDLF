@@ -17,4 +17,4 @@ Please report any vulnerabilities that can be publicly shared via [GitHub Issues
 
 ## Reporting a PRIVATE Vulnerability
 
-Please report any vulnerabilities that cannot be publicly shared via [email](mailto:gandlf@cbica.upenn.edu).
+Please report any vulnerabilities that cannot be publicly shared via [email](mailto:gandlf@mlcommons.org).
