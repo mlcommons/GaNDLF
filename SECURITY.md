@@ -13,7 +13,7 @@ currently being supported with security updates.
 
 ## Reporting a PUBLIC Vulnerability
 
-Please report any vulnerabilities that can be publicly shared via [GitHub Issues](https://github.com/CBICA/GaNDLF/issues/new/choose).
+Please report any vulnerabilities that can be publicly shared via [GitHub Issues](https://github.com/mlcommons/GaNDLF/issues/new/choose).
 
 ## Reporting a PRIVATE Vulnerability
 
