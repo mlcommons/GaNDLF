@@ -18,7 +18,7 @@ from GANDLF.utils.generic import checkPatchDivisibility
 
 class uinc(ModelBase):
     """
-    This is the implementation of the following paper: https://arxiv.org/abs/1907.02110. 
+    This is the implementation of the following paper: https://arxiv.org/abs/1907.02110.
     Please look at the seg_module files (towards the end), to get  a better sense of
     the Inception Module implemented. The res parameter is for the addition of the initial feature
     map with the final feature map after performance of the convolution. For the decoding module,
