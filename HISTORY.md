@@ -1,6 +1,7 @@
-## 0.0.16- 
+## 0.0.16
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
+- Updated links, copyright and email to MLCommons
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
