@@ -8,7 +8,7 @@ assignees: ''
 ---
 <!-- By proceeding, you acknowledge that you have 
 taken a look at the FAQ section in the documentation:
-https://cbica.github.io/GaNDLF/faq
+https://mlcommons.github.io/GaNDLF/faq
 -->
 
 **GaNDLF Version**

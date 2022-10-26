@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "GANDLF"
-copyright_str = "2020, CBICA, UPenn"
-author = "CBICA, UPenn"
+copyright_str = "2022, MLCommons"
+author = "MLCommons"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.3.NR"

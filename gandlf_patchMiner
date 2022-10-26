@@ -1,19 +1,13 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse
-from datetime import date
+import argparse
 from GANDLF.cli.patch_extraction import patch_extraction
+
+from GANDLF.cli import copyrightMessage
 
 
 if __name__ == "__main__":
-    copyrightMessage = (
-        "Contact: software@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
-    )
-
     parser = argparse.ArgumentParser(
         prog="GANDLF_PatchMiner",
         formatter_class=argparse.RawTextHelpFormatter,

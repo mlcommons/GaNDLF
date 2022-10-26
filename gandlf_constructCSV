@@ -5,15 +5,10 @@ import os, argparse, sys
 from datetime import date
 from GANDLF.utils import writeTrainingCSV
 
+from GANDLF.cli import copyrightMessage
+
 
 def main():
-    copyrightMessage = (
-        "Contact: software@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
-    )
-
     parser = argparse.ArgumentParser(
         prog="GANDLF_ConstructCSV",
         formatter_class=argparse.RawTextHelpFormatter,
