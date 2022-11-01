@@ -15,6 +15,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Constructing the Data CSV](#constructing-the-data-csv)
 - [Customize the Training](#customize-the-training)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
+- [Parallelize the Training](#parallelize-the-training)
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
@@ -195,6 +196,15 @@ python gandlf_run \
   -t True \ # True == train, False == inference
   -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
 ```
+
+[Back To Top &uarr;](#table-of-contents)
+
+
+## Parallelize the Training
+
+GaNDLF allows multi-GPU training relatively easily. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` and pass `-d cuda` to the `gandlf_run` script.
+
+Distributed training is a more difficult problem to address, since there are multiple ways to configure a high-performance computing cluster (SLURM, OpenHPC, Kubernetes, and so on). Owing to this discrepancy, we have ensured that GaNDLF allows multiple training jobs to be submitted in relatively straightforward manner using the command line inference of each site’s configuration. Simply populate the `paralle_compute_command` in the configuration with the specific command to run before the training job, and GaNDLF will use this string to submit the training job. 
 
 [Back To Top &uarr;](#table-of-contents)
 
