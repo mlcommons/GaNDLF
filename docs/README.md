@@ -2,9 +2,7 @@ The website for GaNDLF; start with [index.md](./index.md).
 
 ## Flowchart
 
-### Code 
-
-Visualize using https://mermaid-js.github.io/mermaid-live-editor/
+Visualized using https://mermaid-js.github.io/mermaid-live-editor/
 
 ```mermaid
 graph TD;
