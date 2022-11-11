@@ -2,14 +2,12 @@ The website for GaNDLF; start with [index.md](./index.md).
 
 ## Flowchart
 
-### Code 
-
-Visualize using https://mermaid-js.github.io/mermaid-live-editor/
+Visualized using https://mermaid-js.github.io/mermaid-live-editor/
 
 ```mermaid
 graph TD;
-    Training_Data-->CSV_List;
-    CSV_List-->Command_Line_API;
+    CSV_File-->Data_to_Process;
+    Data_to_Process-->Command_Line_API;
     Config_YAML-->Model_Configuration
     Config_YAML-->Training_Configuration
     Config_YAML-->Data_Configuration
