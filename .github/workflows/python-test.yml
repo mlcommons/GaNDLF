@@ -8,10 +8,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-    paths-ignore:
-      - 'docs/**'
-      - '*.md' # Only in the topmost directory
-      - 'LICENSE'
     
 
 jobs:
@@ -21,11 +17,32 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
+    # Use changed-files-specific action to collect file changes.
+    # The following commented condition applied to a step will run that step only if non-docs files have changed.
+    # It should be applied to all functionality-related steps.
+    # if: steps.changed-files-specific.outputs.only_modified == 'false'
+    - name: Detect and screen file changes
+      id: changed-files-specific
+      uses: tj-actions/changed-files@v34
+      with:
+          files: |
+            docs/**
+            *.md
+            LICENSE
+
+    - name: Summarize docs and non-docs modifications
+      run: |
+        echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
+        echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
+    
     - name: Set up Python 3.8
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
     - name: Install dependencies and package
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
@@ -34,26 +51,33 @@ jobs:
         pip install torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
         pip install -e .
     - name: Run generic unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml -k "generic"        
     - name: Run classification unit tests with histology
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
     - name: Run classification unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
     - name: Run regression unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "regression"
     - name: Run segmentation unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
     - name: Run transunet unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "transunet"
 
 
     - name: Upload coverage
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
