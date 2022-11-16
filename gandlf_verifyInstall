@@ -1,9 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse
-
-from GANDLF.cli import copyrightMessage
+import os, argparse, sys
 
 
 # main function
@@ -11,7 +9,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Verify GaNDLF installation.\n\n" + copyrightMessage,
+        description="Verify GaNDLF installation.",
     )
 
     try:
@@ -26,9 +24,9 @@ if __name__ == "__main__":
     # we always want to do submodule update to ensure any hash updates are ingested correctly
     try:
         os.system("git submodule update --init --recursive")
+        os.system(f"{sys.executable} -m pip install -e .")
     except:
         print("Git was not found, please try again.")
-    os.system("pip install -e .")
 
     args = parser.parse_args()
 
