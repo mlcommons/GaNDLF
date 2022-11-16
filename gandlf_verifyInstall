@@ -3,15 +3,13 @@
 
 import os, argparse
 
-from GANDLF.cli import copyrightMessage
-
 
 # main function
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Verify GaNDLF installation.\n\n" + copyrightMessage,
+        description="Verify GaNDLF installation.",
     )
 
     try:
