@@ -63,8 +63,8 @@ class RandomBlurEnhanced(RandomTransform, IntensityTransform):
         return std
 
     def calculate_std_ranges(self, image: torch.Tensor) -> tuple:
-        std_ranges = self.std_ranges
+        std_ranges = self.std_original
         if self.std_original is None:
             # calculate the default std range based on 1.5% of the input image std - https://github.com/mlcommons/GaNDLF/issues/518
-            std_ranges = (0, 0.015 * torch.std(image).item())
+            std_ranges = (0, 0.015 * torch.std(image.data).item())
         return self.parse_params(std_ranges, None, "std", min_constraint=0)
