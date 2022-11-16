@@ -324,7 +324,7 @@ def parseConfig(config_file_path, version_check_flag=True):
             for std_aug in ["blur", "noise"]:
                 if std_aug in params["data_augmentation"]:
                     params["data_augmentation"][std_aug] = initialize_key(
-                        params["data_augmentation"][std_aug], "std", [0, 1]
+                        params["data_augmentation"][std_aug], "std", None
                     )
 
             # special case for random noise - which takes a mean range
