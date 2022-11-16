@@ -31,7 +31,7 @@ def checkPatchDivisibility(patch_size, number=16):
     # adding check to address https://github.com/mlcommons/GaNDLF/issues/53
     # there is quite possibly a better way to do this
     unique = np.unique(patch_size_to_check)
-    if (unique.shape[0] == 1) and (unique[0] <= number):
+    if (unique.shape[0] == 1) and (unique[0] < number):
         return False
     return True
 
