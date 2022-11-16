@@ -4,6 +4,8 @@ For any DL pipeline, the following flow needs to be performed:
 2. Split data into training, validation, and testing
 3. Customize the training parameters
 
+A detailed data flow diagram is presented in https://github.com/mlcommons/GaNDLF/blob/master/docs/README.md#flowchart
+
 GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
