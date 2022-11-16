@@ -84,20 +84,10 @@ def bias(parameters):
 
 
 def blur(parameters):
-    return RandomBlur(std=parameters["std"], p=parameters["probability"])
-
-
-def blur_2(parameters):
     return RandomBlurEnhanced(std=parameters["std"], p=parameters["probability"])
 
 
 def noise(parameters):
-    return RandomNoise(
-        mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
-    )
-
-
-def noise_2(parameters):
     return RandomNoiseEnhanced(
         mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
     )
