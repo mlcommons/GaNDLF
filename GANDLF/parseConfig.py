@@ -321,16 +321,21 @@ def parseConfig(config_file_path, version_check_flag=True):
                 )
 
             # special case for random blur/noise - which takes a std-dev range
-            for std_aug in ["blur", "noise"]:
+            for std_aug in ["blur", "noise_var"]:
+                if std_aug in params["data_augmentation"]:
+                    params["data_augmentation"][std_aug] = initialize_key(
+                        params["data_augmentation"][std_aug], "std", None
+                    )
+            for std_aug in ["noise"]:
                 if std_aug in params["data_augmentation"]:
                     params["data_augmentation"][std_aug] = initialize_key(
                         params["data_augmentation"][std_aug], "std", [0, 1]
                     )
 
             # special case for random noise - which takes a mean range
-            if "noise" in params["data_augmentation"]:
-                params["data_augmentation"]["noise"] = initialize_key(
-                    params["data_augmentation"]["noise"], "mean", 0
+            for mean_aug in ["noise", "noise_var"]:
+                params["data_augmentation"][mean_aug] = initialize_key(
+                    params["data_augmentation"][mean_aug], "mean", 0
                 )
 
             # special case for augmentations that need axis defined
