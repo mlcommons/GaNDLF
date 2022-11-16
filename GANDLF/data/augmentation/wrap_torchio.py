@@ -8,9 +8,8 @@ from torchio.transforms import (
     RandomAffine,
     RandomElasticDeformation,
     RandomBiasField,
-    RandomBlur,
-    RandomNoise,
     RandomSwap,
+    RandomNoise,
     RandomAnisotropy,
     RandomFlip,
     RandomGamma,
@@ -88,6 +87,12 @@ def blur(parameters):
 
 
 def noise(parameters):
+    return RandomNoise(
+        mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
+    )
+
+
+def noise_var(parameters):
     return RandomNoiseEnhanced(
         mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
     )
