@@ -1,5 +1,4 @@
 import argparse
-
 from GANDLF.cli import config_generator, copyrightMessage
 
 
