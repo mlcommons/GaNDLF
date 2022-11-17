@@ -108,6 +108,7 @@ setup(
         "gandlf_preprocess",
         "gandlf_anonymizer",
         "gandlf_verifyInstall",
+        "gandlf_configGenerator",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

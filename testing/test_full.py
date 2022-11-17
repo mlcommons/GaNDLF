@@ -14,7 +14,7 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction
+from GANDLF.cli import main_run, preprocess_and_save, patch_extraction, config_generator
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -2422,5 +2422,45 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    print("passed")
+
+
+def test_generic_cli_function_configgenerator():
+    print("44: Starting testing cli function for config generator")
+    base_config_path = os.path.join(baseConfigDir, "config_all_options.yaml")
+    generator_config_path = os.path.join(
+        baseConfigDir, "config_generator_sample_strategy.yaml"
+    )
+    sanitize_outputDir()
+    config_generator(base_config_path, generator_config_path, outputDir)
+    all_files = os.listdir(outputDir)
+    assert len(all_files) == 72, "config generator did not generate all files"
+
+    for file in all_files:
+        parameters = None
+        with suppress_stdout_stderr():
+            parameters = parseConfig(
+                os.path.join(outputDir, file), version_check_flag=False
+            )
+        assert parameters, "config generator did not generate valid config files"
+    sanitize_outputDir()
+
+    with open(generator_config_path, "r") as f:
+        generator_config = yaml.load(f, Loader=yaml.FullLoader)
+    generator_config["second_level_dict_that_should_fail"] = {
+        "key_1": {"key_2": "value"}
+    }
+
+    file_config_temp = get_temp_config_path()
+    with open(file_config_temp, "w") as file:
+        yaml.dump(generator_config, file)
+
+    # test for failure
+    with pytest.raises(Exception) as exc_info:
+        config_generator(base_config_path, file_config_temp, outputDir)
+    sanitize_outputDir()
+
+    print("Exception raised:", exc_info.value)
 
     print("passed")
