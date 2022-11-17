@@ -2433,18 +2433,18 @@ def test_generic_cli_function_configgenerator():
         baseConfigDir, "config_generator_sample_strategy.yaml"
     )
     sanitize_outputDir()
-    # config_generator(base_config_path, generator_config_path, outputDir)
-    # all_files = os.listdir(outputDir)
-    # assert len(all_files) == 72, "config generator did not generate all files"
+    config_generator(base_config_path, generator_config_path, outputDir)
+    all_files = os.listdir(outputDir)
+    assert len(all_files) == 72, "config generator did not generate all files"
 
-    # for file in all_files:
-    #     parameters = None
-    #     with suppress_stdout_stderr():
-    #         parameters = parseConfig(
-    #             os.path.join(outputDir, file), version_check_flag=False
-    #         )
-    #     assert parameters, "config generator did not generate valid config files"
-    # sanitize_outputDir()
+    for file in all_files:
+        parameters = None
+        with suppress_stdout_stderr():
+            parameters = parseConfig(
+                os.path.join(outputDir, file), version_check_flag=False
+            )
+        assert parameters, "config generator did not generate valid config files"
+    sanitize_outputDir()
 
     with open(generator_config_path, "r") as f:
         generator_config = yaml.load(f, Loader=yaml.FullLoader)
@@ -2459,6 +2459,7 @@ def test_generic_cli_function_configgenerator():
     # test for failure
     with pytest.raises(Exception) as exc_info:
         config_generator(base_config_path, file_config_temp, outputDir)
+    sanitize_outputDir()
 
     print("Exception raised:", exc_info.value)
 
