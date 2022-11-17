@@ -191,8 +191,8 @@ Please see a [sample](https://github.com/mlcommons/GaNDLF/blob/master/samples/co
 ```bash
 python gandlf_configGenerator \
   # -h, --help         show help message and exit
-  -s ./samples/config_generator_strategy.yaml \ # strategy file
   -c ./samples/config_all_options.yaml \ # baseline configuration
+  -s ./samples/config_generator_strategy.yaml \ # strategy file
   -o ./all_experiments/ # output directory
 ```
 
