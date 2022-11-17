@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 from GANDLF.cli import copyrightMessage
 
+
 def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_CollectStats",
