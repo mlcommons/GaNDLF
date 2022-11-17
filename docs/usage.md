@@ -14,6 +14,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
 - [Constructing the Data CSV](#constructing-the-data-csv)
 - [Customize the Training](#customize-the-training)
+  - [Running multiple experiments](#running-multiple-experiments)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
 - [Parallelize the Training](#parallelize-the-training)
 - [Plot the final results](#plot-the-final-results)
@@ -177,6 +178,23 @@ Please see a [sample](https://github.com/mlcommons/GaNDLF/blob/master/samples/co
 - [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
 
 **Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
+
+[Back To Top &uarr;](#table-of-contents)
+
+### Running multiple experiments
+
+- The `gandlf_configGenerator` script can be used to generate a grid of configurations for hyperparameter tuning. 
+- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_strategy.yaml).
+- Provide a baseline configuration.
+- Run the following command:
+  
+```bash
+python gandlf_configGenerator \
+  # -h, --help         show help message and exit
+  -s ./samples/config_generator_strategy.yaml \ # strategy file
+  -c ./samples/config_all_options.yaml \ # baseline configuration
+  -o ./all_experiments/ # output directory
+```
 
 [Back To Top &uarr;](#table-of-contents)
 
