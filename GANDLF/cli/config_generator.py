@@ -38,19 +38,24 @@ def generate_new_configs_from_key_and_value(
         # dicts require a bit more effort
         elif isinstance(value, dict):
             for k, v in value.items():
-                if not configs_to_return:
-                    # first round of configs
-                    configs_to_return = generate_new_configs_from_key_and_value(
-                        base_config, k, v, key
-                    )
-                else:
-                    # subsequent rounds of configs
-                    temp_configs_to_return = []
-                    for config in configs_to_return:
-                        temp_configs_to_return.extend(
-                            generate_new_configs_from_key_and_value(config, k, v, key)
+                if not isinstance(v, dict):
+                    if not configs_to_return:
+                        # first round of configs
+                        configs_to_return = generate_new_configs_from_key_and_value(
+                            base_config, k, v, key
                         )
-                    configs_to_return.extend(temp_configs_to_return)
+                    else:
+                        # subsequent rounds of configs
+                        temp_configs_to_return = []
+                        for config in configs_to_return:
+                            temp_configs_to_return.extend(
+                                generate_new_configs_from_key_and_value(
+                                    config, k, v, key
+                                )
+                            )
+                        configs_to_return.extend(temp_configs_to_return)
+                else:
+                    raise NotImplementedError("Nested dicts are not supported yet.")
     return configs_to_return
 
 
