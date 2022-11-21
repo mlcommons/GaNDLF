@@ -82,7 +82,7 @@ requirements = [
     "ACSConv==0.1.1",
 ]
 
-# pytorch doesn't have LTS support on OSX - https://github.com/CBICA/GaNDLF/issues/389
+# pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389
 if sys.platform == "darwin":
     requirements.append("torch==1.11.0")
 else:
@@ -91,8 +91,8 @@ else:
 setup(
     name="GANDLF",
     version=__version__,
-    author="Jose Agraz, Vinayak Ahluwalia, Bhakti Baheti, Spyridon Bakas, Ujjwal Baid, Megh Bhalerao, Brandon Edwards, Karol Gotkowski, Caleb Grenko, Orhun Güley, Ibrahim Ethem Hamamci, Sarthak Pati, Micah Sheller, Juliia Skobleva, Siddhesh Thakur, Spiros Thermos",  # alphabetical order
-    author_email="software@cbica.upenn.edu",
+    author="MLCommons",
+    author_email="gandlf@mlcommons.org",
     python_requires=">=3.7",
     packages=find_packages(),
     cmdclass={  # this ensures git_submodule_update is called during install
@@ -108,6 +108,7 @@ setup(
         "gandlf_preprocess",
         "gandlf_anonymizer",
         "gandlf_verifyInstall",
+        "gandlf_configGenerator",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -118,16 +119,17 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering :: Medical Science Apps",
     ],
     description=(
         "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
     ),
     install_requires=requirements,
-    license="BSD-3-Clause License",
+    license="Apache-2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
     include_package_data=True,
-    keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging",
+    keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
     zip_safe=False,
 )

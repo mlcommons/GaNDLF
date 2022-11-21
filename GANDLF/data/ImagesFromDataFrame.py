@@ -171,7 +171,7 @@ def ImagesFromDataFrame(
             # Initializing the subject object using the dict
             subject = torchio.Subject(subject_dict)
             # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
-            # this is causing memory usage to explode, see https://github.com/CBICA/GaNDLF/issues/128
+            # this is causing memory usage to explode, see https://github.com/mlcommons/GaNDLF/issues/128
             if parameters["verbose"]:
                 print(
                     "Checking consistency of images in subject '"

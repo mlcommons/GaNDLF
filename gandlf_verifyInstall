@@ -1,23 +1,15 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse
-from datetime import date
+import os, argparse, sys
 
 
 # main function
 if __name__ == "__main__":
-    copyrightMessage = (
-        "Contact: software@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
-    )
-
     parser = argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Verify GaNDLF installation.\n\n" + copyrightMessage,
+        description="Verify GaNDLF installation.",
     )
 
     try:
@@ -26,16 +18,16 @@ if __name__ == "__main__":
         print("GaNDLF installed version:", gf.__version__)
     except:
         raise Exception(
-            "GaNDLF not properly installed, please see https://cbica.github.io/GaNDLF/setup"
+            "GaNDLF not properly installed, please see https://mlcommons.github.io/GaNDLF/setup"
         )
 
     # we always want to do submodule update to ensure any hash updates are ingested correctly
     try:
         os.system("git submodule update --init --recursive")
+        os.system(f"{sys.executable} -m pip install -e .")
     except:
         print("Git was not found, please try again.")
-    os.system("pip install -e .")
 
     args = parser.parse_args()
 
-    print("GaNDLF is ready. See https://cbica.github.io/GaNDLF/usage")
+    print("GaNDLF is ready. See https://mlcommons.github.io/GaNDLF/usage")

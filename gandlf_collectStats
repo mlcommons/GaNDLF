@@ -2,29 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import argparse
-import subprocess
-import pathlib
 import ast
 from pathlib import Path
-from datetime import date
-import numpy as np
 import pandas as pd
 from io import StringIO
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from GANDLF.cli import copyrightMessage
+
 
 def main():
-    copyrightMessage = (
-        "Contact: software@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved."
-    )
-
     parser = argparse.ArgumentParser(
         prog="GANDLF_CollectStats",
         formatter_class=argparse.RawTextHelpFormatter,

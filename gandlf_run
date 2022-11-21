@@ -4,19 +4,11 @@
 from __future__ import print_function, division
 import os, argparse, ast, sys
 
-from datetime import date
-
 from GANDLF import version
-from GANDLF.cli import main_run
+from GANDLF.cli import main_run, copyrightMessage
 
 
 if __name__ == "__main__":
-    copyrightMessage = (
-        "Contact: gandlf@cbica.upenn.edu\n\n"
-        + "This program is NOT FDA/CE approved and NOT intended for clinical use.\nCopyright (c) "
-        + str(date.today().year)
-        + " University of Pennsylvania. All rights reserved.\n\nCitation: https://arxiv.org/abs/2103.01006"
-    )
     parser = argparse.ArgumentParser(
         prog="GANDLF",
         formatter_class=argparse.RawTextHelpFormatter,

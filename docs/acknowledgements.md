@@ -27,7 +27,7 @@ This file records the following pieces of information:
 
 ## People
 
-- [All coders and developers of GaNDLF](https://github.com/CBICA/GaNDLF/graphs/contributors)
+- [All coders and developers of GaNDLF](https://github.com/mlcommons/GaNDLF/graphs/contributors)
 
 - Supervisors:
   - [Aimilia Gastounioti](https://www.med.upenn.edu/cbica/sbia/aimiliag.html)

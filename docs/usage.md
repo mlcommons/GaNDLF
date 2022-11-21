@@ -4,6 +4,8 @@ For any DL pipeline, the following flow needs to be performed:
 2. Split data into training, validation, and testing
 3. Customize the training parameters
 
+A detailed data flow diagram is presented in https://github.com/mlcommons/GaNDLF/blob/master/docs/README.md#flowchart
+
 GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -14,7 +16,9 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
 - [Constructing the Data CSV](#constructing-the-data-csv)
 - [Customize the Training](#customize-the-training)
+  - [Running multiple experiments](#running-multiple-experiments)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
+- [Parallelize the Training](#parallelize-the-training)
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
@@ -87,7 +91,7 @@ This will save the processed data in `./experiment_0/output_dir/` with a new dat
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/CBICA/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
 
 ```csv
 SubjectID,Channel_0,Channel_1,...,Channel_X,Label
@@ -102,7 +106,7 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
 - `ValueToPredict` is used for regression/classification models
 - Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
 
-The [gandlf_constructCSV](https://github.com/CBICA/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
+The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
 
 ```bash
 # continue from previous shell
@@ -169,13 +173,30 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   - Testing 
   - Validation 
 
-Please see a [sample](https://github.com/CBICA/GaNDLF/blob/master/samples/config_all_options.yaml) for detailed guide and comments.
+Please see a [sample](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) for detailed guide and comments.
 
-- [Segmentation example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
-- [Regression example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_regression.yaml)
-- [Classification example](https://github.com/CBICA/GaNDLF/blob/master/samples/config_classification.yaml)
+- [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
+- [Regression example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml)
+- [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
 
 **Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
+
+[Back To Top &uarr;](#table-of-contents)
+
+### Running multiple experiments
+
+- The `gandlf_configGenerator` script can be used to generate a grid of configurations for hyperparameter tuning. 
+- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_strategy.yaml).
+- Provide a baseline configuration.
+- Run the following command:
+  
+```bash
+python gandlf_configGenerator \
+  # -h, --help         show help message and exit
+  -c ./samples/config_all_options.yaml \ # baseline configuration
+  -s ./samples/config_generator_strategy.yaml \ # strategy file
+  -o ./all_experiments/ # output directory
+```
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -199,9 +220,18 @@ python gandlf_run \
 [Back To Top &uarr;](#table-of-contents)
 
 
+## Parallelize the Training
+
+GaNDLF allows multi-GPU training relatively easily. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` and pass `-d cuda` to the `gandlf_run` script.
+
+Distributed training is a more difficult problem to address, since there are multiple ways to configure a high-performance computing cluster (SLURM, OpenHPC, Kubernetes, and so on). Owing to this discrepancy, we have ensured that GaNDLF allows multiple training jobs to be submitted in relatively straightforward manner using the command line inference of each site’s configuration. Simply populate the `paralle_compute_command` in the configuration with the specific command to run before the training job, and GaNDLF will use this string to submit the training job. 
+
+[Back To Top &uarr;](#table-of-contents)
+
+
 ## Plot the final results
 
-After the testing/validation training is finished, GaNDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/CBICA/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
+After the testing/validation training is finished, GaNDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
 
 ```bash
 # continue from previous shell
@@ -216,7 +246,7 @@ python gandlf_collectStats \
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
 
-For an example how this is set, see [sge_wrapper](https://github.com/CBICA/GaNDLF/blob/master/samples/sge_wrapper).
+For an example how this is set, see [sge_wrapper](https://github.com/mlcommons/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -250,5 +280,5 @@ Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 ## Examples
 
-- Example data can be found in [the main repo](https://github.com/CBICA/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
-- Configurations can be found in [the main repo](https://github.com/CBICA/GaNDLF/tree/master/testing).
+- Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
+- Configurations can be found in [the main repo](https://github.com/mlcommons/GaNDLF/tree/master/testing).

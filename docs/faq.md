@@ -14,31 +14,31 @@ This page contains answers to frequently asked questions about GaNDLF.
 
 ### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
 
-This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://cbica.github.io/GaNDLF/setup) properly.
+This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Where do I start?
 
-The [usage](https://cbica.github.io/GaNDLF/usage) guide is fairly comprehensive and provides a good starting point. If you have any questions, please feel free to [post a support request](https://github.com/CBICA/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+The [usage](https://mlcommons.github.io/GaNDLF/usage) guide is fairly comprehensive and provides a good starting point. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Why is GaNDLF not working?
 
-Verify that [the installation](https://cbica.github.io/GaNDLF/setup) has been done correctly by running `python ./gandlf_verifyInstall` after activating the correct virtual environment. If you are still having issues, please feel free to [post a support request](https://github.com/CBICA/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has been done correctly by running `python ./gandlf_verifyInstall` after activating the correct virtual environment. If you are still having issues, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Which parts of a GaNDLF configuration are customizable?
 
-Virtually all of it! For more details, please see the [usage](https://cbica.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/CBICA/GaNDLF/tree/master/samples). All available options are documented in the [config_all_options.yaml file](https://github.com/CBICA/GaNDLF/blob/master/samples/config_all_options.yaml).
+Virtually all of it! For more details, please see the [usage](https://mlcommons.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/mlcommons/GaNDLF/tree/master/samples). All available options are documented in the [config_all_options.yaml file](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml).
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Can I run GaNDLF on a high performance computing (HPC) cluster?
 
-YES, we have run GaNDLF on an SGE cluster to great success. Please [post a question](https://github.com/CBICA/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=) with more details such as the type of scheduler, and so on, and we will do our best to address it.
+YES, we have run GaNDLF on an SGE cluster to great success. Please [post a question](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=) with more details such as the type of scheduler, and so on, and we will do our best to address it.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -56,12 +56,12 @@ GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
 
 ### How can I update GaNDLF?
 
-If you have performed `git clone` [during installation](https://cbica.github.io/GaNDLF/setup), then you will need to do `git pull` to get the latest master of GaNDLF. Follow this up with `pip install -e .` after activating the appropriate virtual environment to ensure the updates get passed through.
+If you have performed `git clone` [during installation](https://mlcommons.github.io/GaNDLF/setup), then you will need to do `git pull` to get the latest master of GaNDLF. Follow this up with `pip install -e .` after activating the appropriate virtual environment to ensure the updates get passed through.
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### What I have another question?
 
-Please [post a support request](https://github.com/CBICA/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
+Please [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
 
 [Back To Top &uarr;](#table-of-contents)

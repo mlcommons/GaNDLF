@@ -18,11 +18,11 @@ from GANDLF.utils.generic import checkPatchDivisibility
 
 class uinc(ModelBase):
     """
-    This is the implementation of the following paper: https://arxiv.org/abs/1907.02110
-    (from CBICA). Please look at the seg_module files (towards the end), to get  a better sense of
+    This is the implementation of the following paper: https://arxiv.org/abs/1907.02110.
+    Please look at the seg_module files (towards the end), to get  a better sense of
     the Inception Module implemented. The res parameter is for the addition of the initial feature
     map with the final feature map after performance of the convolution. For the decoding module,
-    not the initial input but the input after the first convolution is addded to the final output
+    not the initial input but the input after the first convolution is added to the final output
     since the initial input and the final one do not have the same dimensions.
     """
 
@@ -32,19 +32,16 @@ class uinc(ModelBase):
     ):
         super(uinc, self).__init__(parameters)
 
-        if not (checkPatchDivisibility(parameters["patch_size"])):
-            sys.exit(
-                "The patch size is not divisible by 16, which is required for",
-                parameters["model"]["architecture"],
-            )
+        assert checkPatchDivisibility(parameters["patch_size"]) == True, (
+            "The patch size is not divisible by 16, which is required for "
+            + parameters["model"]["architecture"]
+        )
 
-        if parameters["model"]["base_filters"] % 4 != 0:
-            sys.exit(
-                "The 'base_filters' should be divisible by '4'"
-                + "' for the '"
-                + parameters["model"]["architecture"]
-                + "' architecture"
-            )
+        assert parameters["model"]["base_filters"] % 4 == 0, (
+            "The 'base_filters' should be divisible by '4'"
+            + " for "
+            + parameters["model"]["architecture"]
+        )
 
         self.conv0_1x1 = IncConv(
             self.n_channels,

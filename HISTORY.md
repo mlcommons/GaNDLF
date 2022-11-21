@@ -1,7 +1,9 @@
-## 0.0.16- 
-- HED based transform for RGB specific augmentations for H&E images
+## 0.0.16
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
+- Updated links, copyright and email to MLCommons
+- Allowing provision for user to generate multiple configurations for experimentation
+- HED based transform for RGB specific augmentations for H&E images
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`

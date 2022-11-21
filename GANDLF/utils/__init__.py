@@ -42,6 +42,7 @@ from .generic import (
     get_filename_extension_sanitized,
     version_check,
     get_array_from_image_or_tensor,
+    suppress_stdout_stderr,
 )
 
 from .modelio import (

@@ -1,5 +1,5 @@
 ### Description
-Link to the paper (CBICA): https://arxiv.org/pdf/1907.02110.pdf. 
+Link to the paper: https://arxiv.org/pdf/1907.02110.pdf. 
 
 This folder contains the smaller modules that are integrated to form the larger Inc U Net arch.
 

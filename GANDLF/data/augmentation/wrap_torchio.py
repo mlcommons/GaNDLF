@@ -8,13 +8,14 @@ from torchio.transforms import (
     RandomAffine,
     RandomElasticDeformation,
     RandomBiasField,
-    RandomBlur,
-    RandomNoise,
     RandomSwap,
+    RandomNoise,
     RandomAnisotropy,
     RandomFlip,
     RandomGamma,
 )
+from .blur_enhanced import RandomBlurEnhanced
+from .noise_enhanced import RandomNoiseEnhanced
 
 ## define helper functions to create transforms
 ## todo: ability to change interpolation type from config file
@@ -82,11 +83,17 @@ def bias(parameters):
 
 
 def blur(parameters):
-    return RandomBlur(std=parameters["std"], p=parameters["probability"])
+    return RandomBlurEnhanced(std=parameters["std"], p=parameters["probability"])
 
 
 def noise(parameters):
     return RandomNoise(
+        mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
+    )
+
+
+def noise_var(parameters):
+    return RandomNoiseEnhanced(
         mean=parameters["mean"], std=parameters["std"], p=parameters["probability"]
     )
 

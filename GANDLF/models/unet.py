@@ -31,11 +31,10 @@ class unet(ModelBase):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
 
-        if not (checkPatchDivisibility(parameters["patch_size"])):
-            sys.exit(
-                "The patch size is not divisible by 16, which is required for",
-                parameters["model"]["architecture"],
-            )
+        assert checkPatchDivisibility(parameters["patch_size"]) == True, (
+            "The patch size is not divisible by 16, which is required for "
+            + parameters["model"]["architecture"]
+        )
 
         self.ins = in_conv(
             input_channels=self.n_channels,

@@ -2,6 +2,16 @@ import os, datetime, sys
 import numpy as np
 import torch
 import SimpleITK as sitk
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from os import devnull
+
+
+@contextmanager
+def suppress_stdout_stderr():
+    """A context manager that redirects stdout and stderr to devnull"""
+    with open(devnull, "w") as fnull:
+        with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
+            yield (err, out)
 
 
 def checkPatchDivisibility(patch_size, number=16):
@@ -28,10 +38,10 @@ def checkPatchDivisibility(patch_size, number=16):
     if np.count_nonzero(np.remainder(patch_size_to_check, number)) > 0:
         return False
 
-    # adding check to address https://github.com/CBICA/GaNDLF/issues/53
+    # adding check to address https://github.com/mlcommons/GaNDLF/issues/53
     # there is quite possibly a better way to do this
     unique = np.unique(patch_size_to_check)
-    if (unique.shape[0] == 1) and (unique[0] <= number):
+    if (unique.shape[0] == 1) and (unique[0] < number):
         return False
     return True
 
