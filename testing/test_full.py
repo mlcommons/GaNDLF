@@ -63,7 +63,7 @@ all_models_classification = [
 ]
 
 all_clip_modes = ["norm", "value", "agc"]
-all_norm_type = ["batch", "instance"]
+all_norm_types = ["batch", "instance"]
 
 all_model_type = ["torch", "openvino"]
 
@@ -996,8 +996,20 @@ def test_train_normtype_segmentation_rad_3d(device):
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
+
+    # these should raise exceptions
+    for norm_type in ["none", None]:
+        parameters["model"]["norm_type"] = norm_type
+        file_config_temp = get_temp_config_path()
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters, file)
+        with pytest.raises(Exception) as exc_info:
+            parameters = parseConfig(file_config_temp, version_check_flag=False)
+
+        print("Exception raised:", exc_info.value)
+
     # loop through selected models and train for single epoch
-    for norm in ["batch", "instance"]:
+    for norm in all_norm_types:
         for model in ["resunet", "unet", "fcn", "unetr"]:
             parameters["model"]["architecture"] = model
             parameters["model"]["norm_type"] = norm
