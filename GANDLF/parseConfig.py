@@ -513,7 +513,14 @@ def parseConfig(config_file_path, version_check_flag=True):
             params["model"]["amp"] = False
 
         if "norm_type" in params["model"]:
-            pass
+            if (
+                params["model"]["norm_type"] == None
+                or params["model"]["norm_type"].lower() == "none"
+            ):
+                if not ("vgg" in params["model"]["architecture"]):
+                    raise ValueError(
+                        "Normalization type cannot be 'None' for non-VGG architectures"
+                    )
         else:
             print("WARNING: Initializing 'norm_type' as 'batch'", flush=True)
             params["model"]["norm_type"] = "batch"
