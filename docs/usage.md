@@ -186,7 +186,7 @@ Please see a [sample](https://github.com/mlcommons/GaNDLF/blob/master/samples/co
 ### Running multiple experiments
 
 - The `gandlf_configGenerator` script can be used to generate a grid of configurations for hyperparameter tuning. 
-- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_strategy.yaml).
+- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
 - Provide a baseline configuration.
 - Run the following command:
   
