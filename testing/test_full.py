@@ -845,7 +845,7 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
         dataframe=training_data,
-        outputDir=outputDir,
+        outputDir=outputDir + "," + outputDir,
         parameters=parameters,
         device=device,
     )
