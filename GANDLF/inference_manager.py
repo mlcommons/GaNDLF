@@ -70,7 +70,7 @@ def InferenceManager(dataframe, outputDir, parameters, device):
                     fold_probs = F.softmax(fold_logits, dim=1)
                     probs_list.append(fold_probs)
 
-        if is_classification and is_logits_dir_exist:
+        if is_classification and (n_folds > 1):
             probs_list = torch.stack(probs_list)
             averaged_probs_list.append(torch.mean(probs_list, 0))
 
