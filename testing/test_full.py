@@ -1234,9 +1234,13 @@ def test_generic_cli_function_preprocess():
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
     input_data_df = pd.read_csv(file_data)
     # add random metadata to ensure it gets preserved
-    input_data_df["metadata_test_0"]= input_data_df.shape[0]*["test"]
-    input_data_df["metadata_test_1"]=np.random.rand(input_data_df.shape[0])
-    
+    input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
+    input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
+    input_data_df["metadata_test_int"] = np.random.randint(
+        0, 100, input_data_df.shape[0]
+    )
+    temp_csv = os.path.join(outputDir, "temp.csv")
+    input_data_df.to_csv(temp_csv)
 
     parameters = parseConfig(file_config)
     parameters["modality"] = "rad"
@@ -1259,14 +1263,18 @@ def test_generic_cli_function_preprocess():
     with open(file_config_temp, "w") as outfile:
         yaml.dump(parameters, outfile, default_flow_style=False)
 
-    preprocess_and_save(file_data, file_config_temp, outputDir)
+    preprocess_and_save(temp_csv, file_config_temp, outputDir)
     training_data, parameters["headers"] = parseTrainingCSV(
         outputDir + "/data_processed.csv"
     )
 
     # check that the length of training data is what we expect
-    assert len(training_data) == input_data_df.shape[0], "Number of subjects in dataframe is not same as that of input dataframe"
-    assert len(training_data.columns) == len(input_data_df.columns), "Number of columns in output dataframe is not same as that of input dataframe"
+    assert (
+        len(training_data) == input_data_df.shape[0]
+    ), "Number of subjects in dataframe is not same as that of input dataframe"
+    assert (
+        len(training_data.columns) == len(input_data_df.columns) + 1
+    ), "Number of columns in output dataframe is not same as that of input dataframe"  # the +1 is for the added index column
     sanitize_outputDir()
 
     ## regression/classification preprocess
@@ -1278,7 +1286,6 @@ def test_generic_cli_function_preprocess():
     parameters["model"]["amp"] = False
     # read and parse csv
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
     parameters["scaling_factor"] = 1
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
@@ -1287,24 +1294,30 @@ def test_generic_cli_function_preprocess():
     file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
     input_data_df = pd.read_csv(file_data)
     # add random metadata to ensure it gets preserved
-    input_data_df["metadata_test_0"]= input_data_df.shape[0]*["test"]
-    input_data_df["metadata_test_1"]=np.random.rand(input_data_df.shape[0])
-    
+    input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
+    input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
+    input_data_df["metadata_test_int"] = np.random.randint(
+        0, 100, input_data_df.shape[0]
+    )
+    input_data_df.to_csv(temp_csv)
 
     # store this separately for preprocess testing
     with open(file_config_temp, "w") as outfile:
         yaml.dump(parameters, outfile, default_flow_style=False)
 
-    preprocess_and_save(file_data, file_config_temp, outputDir)
+    preprocess_and_save(temp_csv, file_config_temp, outputDir)
     training_data, parameters["headers"] = parseTrainingCSV(
         outputDir + "/data_processed.csv"
     )
 
     # check that the length of training data is what we expect
-    assert len(training_data) == input_data_df.shape[0], "Number of subjects in dataframe is not same as that of input dataframe"
-    assert len(training_data.columns) == len(input_data_df.columns), "Number of columns in output dataframe is not same as that of input dataframe"
+    assert (
+        len(training_data) == input_data_df.shape[0]
+    ), "Number of subjects in dataframe is not same as that of input dataframe"
+    assert (
+        len(training_data.columns) == len(input_data_df.columns) + 1
+    ), "Number of columns in output dataframe is not same as that of input dataframe"  # the +1 is for the added index column
     sanitize_outputDir()
-
 
     print("passed")
 
