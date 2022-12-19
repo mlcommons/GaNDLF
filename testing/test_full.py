@@ -1232,6 +1232,11 @@ def test_generic_cli_function_preprocess():
     sanitize_outputDir()
     file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
+    input_data_df = pd.read_csv(file_data)
+    # add random metadata to ensure it gets preserved
+    input_data_df["metadata_test_0"]= input_data_df.shape[0]*["test"]
+    input_data_df["metadata_test_1"]=np.random.rand(input_data_df.shape[0])
+    
 
     parameters = parseConfig(file_config)
     parameters["modality"] = "rad"
@@ -1260,7 +1265,46 @@ def test_generic_cli_function_preprocess():
     )
 
     # check that the length of training data is what we expect
-    assert len(training_data) == 10, "Number of rows in dataframe is not 10"
+    assert len(training_data) == input_data_df.shape[0], "Number of subjects in dataframe is not same as that of input dataframe"
+    assert len(training_data.columns) == len(input_data_df.columns), "Number of columns in output dataframe is not same as that of input dataframe"
+    sanitize_outputDir()
+
+    ## regression/classification preprocess
+    file_config = os.path.join(testingDir, "config_regression.yaml")
+    parameters = parseConfig(file_config)
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = False
+    # read and parse csv
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["scaling_factor"] = 1
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["data_preprocessing"]["to_canonical"] = None
+    parameters["data_preprocessing"]["rgba_to_rgb"] = None
+    file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
+    input_data_df = pd.read_csv(file_data)
+    # add random metadata to ensure it gets preserved
+    input_data_df["metadata_test_0"]= input_data_df.shape[0]*["test"]
+    input_data_df["metadata_test_1"]=np.random.rand(input_data_df.shape[0])
+    
+
+    # store this separately for preprocess testing
+    with open(file_config_temp, "w") as outfile:
+        yaml.dump(parameters, outfile, default_flow_style=False)
+
+    preprocess_and_save(file_data, file_config_temp, outputDir)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        outputDir + "/data_processed.csv"
+    )
+
+    # check that the length of training data is what we expect
+    assert len(training_data) == input_data_df.shape[0], "Number of subjects in dataframe is not same as that of input dataframe"
+    assert len(training_data.columns) == len(input_data_df.columns), "Number of columns in output dataframe is not same as that of input dataframe"
+    sanitize_outputDir()
+
 
     print("passed")
 
