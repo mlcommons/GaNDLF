@@ -52,7 +52,7 @@ requirements = [
     "black",
     "numpy==1.22.0",
     "scipy",
-    "SimpleITK!=2.0.*",    
+    "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
     "torchvision",
     "tqdm",
