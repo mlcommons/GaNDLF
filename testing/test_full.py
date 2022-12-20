@@ -2478,19 +2478,20 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     for model in ["unet", "unet_multilayer", "lightunet_multilayer"]:
-        parameters["model"]["converter_type"] = random.choice(["acs", "soft", "conv3d"])
-        parameters["model"]["architecture"] = model
-        parameters["nested_training"]["testing"] = -5
-        parameters["nested_training"]["validation"] = -5
-        sanitize_outputDir()
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            resume=False,
-            reset=True,
-        )
+        for converter_type in ["acs", "soft", "conv3d"]:
+            parameters["model"]["converter_type"] = converter_type
+            parameters["model"]["architecture"] = model
+            parameters["nested_training"]["testing"] = -5
+            parameters["nested_training"]["validation"] = -5
+            sanitize_outputDir()
+            TrainingManager(
+                dataframe=training_data,
+                outputDir=outputDir,
+                parameters=parameters,
+                device=device,
+                resume=False,
+                reset=True,
+            )
 
     print("passed")
 
