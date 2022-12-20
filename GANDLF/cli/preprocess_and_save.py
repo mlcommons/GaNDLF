@@ -69,11 +69,6 @@ def preprocess_and_save(
     base_df = get_dataframe(data_csv)
     # ensure csv only contains lower case columns
     base_df.columns = base_df.columns.str.lower()
-    # only store the column names
-    output_columns_to_write = base_df.to_dict()
-    for key in output_columns_to_write.keys():
-        output_columns_to_write[key] = []
-
     # keep a record of the keys which contains only images
     keys_with_images = parameters["headers"]["channelHeaders"]
     keys_with_images = [str(x) for x in keys_with_images]
@@ -99,10 +94,10 @@ def preprocess_and_save(
         tqdm(dataloader_for_processing, desc="Looping over data")
     ):
         # initialize the current_output_dir
-        current_output_dir = os.path.join(output_dir, str(subject["subject_id"][0]))
+        current_output_dir = os.path.abspath(
+            os.path.join(output_dir, str(subject["subject_id"][0]))
+        )
         Path(current_output_dir).mkdir(parents=True, exist_ok=True)
-
-        output_columns_to_write["subjectid"].append(subject["subject_id"][0])
 
         subject_dict_to_write, subject_process = {}, {}
 
@@ -154,29 +149,27 @@ def preprocess_and_save(
                     subject_dict_to_write["label"] = patch["label"]
 
         # write new images
-        common_ext = get_filename_extension_sanitized(subject["1"]["path"][0])
+        common_ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
         # in cases where the original image has a file format that does not support
         # RGB floats, use the "vtk" format
         if common_ext in [".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"]:
             common_ext = ".vtk"
 
-        if subject["1"]["path"][0] != "":
-            image_for_info_copy = sitk.ReadImage(subject["1"]["path"][0])
-        else:
-            image_for_info_copy = subject_dict_to_write["1"].as_sitk()
-        correct_spacing_for_info_copy = subject["spacing"][0].tolist()
-        for channel in parameters["headers"]["channelHeaders"]:
+        image_for_info_copy = subject_dict_to_write[
+            str(parameters["headers"]["channelHeaders"][0])
+        ].as_sitk()
+        for index, channel in enumerate(parameters["headers"]["channelHeaders"]):
             image_file = Path(
                 os.path.join(
                     current_output_dir,
-                    subject["subject_id"][0] + "_" + str(channel) + common_ext,
+                    subject["subject_id"][0] + "_" + str(index) + common_ext,
                 )
             ).as_posix()
-            output_columns_to_write["channel_" + str(channel - 1)].append(image_file)
+            base_df["channel_" + str(index)] = image_file
             image_to_write = subject_dict_to_write[str(channel)].as_sitk()
             image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
             image_to_write.SetDirection(image_for_info_copy.GetDirection())
-            image_to_write.SetSpacing(correct_spacing_for_info_copy)
+            image_to_write.SetSpacing(image_for_info_copy.GetSpacing())
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
@@ -194,11 +187,11 @@ def preprocess_and_save(
                     current_output_dir, subject["subject_id"][0] + "_label" + common_ext
                 )
             ).as_posix()
-            output_columns_to_write["label"].append(image_file)
+            base_df["label"] = image_file
             image_to_write = subject_dict_to_write["label"].as_sitk()
             image_to_write.SetOrigin(image_for_info_copy.GetOrigin())
             image_to_write.SetDirection(image_for_info_copy.GetDirection())
-            image_to_write.SetSpacing(correct_spacing_for_info_copy)
+            image_to_write.SetSpacing(image_for_info_copy.GetSpacing())
             if not os.path.isfile(image_file):
                 try:
                     sitk.WriteImage(image_to_write, image_file)
@@ -212,16 +205,12 @@ def preprocess_and_save(
         # ensure prediction headers are getting saved, as well
         if len(parameters["headers"]["predictionHeaders"]) > 1:
             for key in parameters["headers"]["predictionHeaders"]:
-                output_columns_to_write["valuetopredict_" + str(key)].append(
-                    str(subject["value_" + str(key)].numpy()[0])
+                base_df["valuetopredict_" + str(key)] = str(
+                    subject["value_" + str(key)].numpy()[0]
                 )
         elif len(parameters["headers"]["predictionHeaders"]) == 1:
-            output_columns_to_write["valuetopredict"].append(
-                str(subject["value_0"].numpy()[0])
-            )
+            base_df["valuetopredict"] = str(subject["value_0"].numpy()[0])
 
     path_for_csv = Path(os.path.join(output_dir, "data_processed.csv")).as_posix()
     print("Writing final csv for subsequent training: ", path_for_csv)
-    pd.DataFrame.from_dict(data=output_columns_to_write).to_csv(
-        path_for_csv, header=True, index=False
-    )
+    base_df.to_csv(path_for_csv, header=True, index=False)
