@@ -47,6 +47,8 @@ from .generic import (
 
 from .modelio import (
     best_model_path_end,
+    latest_model_path_end,
+    initial_model_path_end,
     load_model,
     load_ov_model,
     save_model,
