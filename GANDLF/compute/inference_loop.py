@@ -17,6 +17,7 @@ import tiffslide as openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     best_model_path_end,
+    latest_model_path_end,
     load_ov_model,
     print_model_summary,
 )
@@ -71,16 +72,26 @@ def inference_loop(
     if parameters["model"]["type"] == "torch":
         # Loading the weights into the model
         if os.path.isdir(outputDir_or_optimizedModel):
-            file_to_check = os.path.join(
-                outputDir_or_optimizedModel,
-                str(parameters["model"]["architecture"]) + best_model_path_end,
-            )
-            if not os.path.isfile(file_to_check):
-                raise ValueError(
-                    "The specified model was not found: {0}.".format(file_to_check)
-                )
+            files_to_check = [
+                os.path.join(
+                    outputDir_or_optimizedModel,
+                    str(parameters["model"]["architecture"]) + best_model_path_end,
+                ),
+                os.path.join(
+                    outputDir_or_optimizedModel,
+                    str(parameters["model"]["architecture"]) + latest_model_path_end,
+                ),
+            ]
 
-        main_dict = torch.load(file_to_check, map_location=parameters["device"])
+            file_to_load = None
+            for best_file in files_to_check:
+                if os.path.isfile(best_file):
+                    file_to_load = best_file
+                    break
+
+            assert file_to_load != None, "The 'best_file' was not found"
+
+        main_dict = torch.load(file_to_load, map_location=parameters["device"])
         model.load_state_dict(main_dict["model_state_dict"])
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":

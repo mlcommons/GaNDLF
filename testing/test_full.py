@@ -114,7 +114,6 @@ def test_generic_download_data():
 
 def test_generic_constructTrainingCSV():
     print("01: Constructing training CSVs")
-    # inputDir = os.path.normpath('./testing/data')
     # delete previous csv files
     files = os.listdir(inputDir)
     for item in files:

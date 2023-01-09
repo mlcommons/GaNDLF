@@ -11,6 +11,8 @@ from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.utils import (
     get_date_time,
     best_model_path_end,
+    latest_model_path_end,
+    initial_model_path_end,
     save_model,
     load_model,
     version_check,
@@ -320,14 +322,37 @@ def training_loop(
     best_loss = 1e7
     patience, start_epoch = 0, 0
     first_model_saved = False
-    best_model_path = os.path.join(
-        output_dir, params["model"]["architecture"] + best_model_path_end
-    )
+    model_paths = {
+        "best": os.path.join(
+            output_dir, params["model"]["architecture"] + best_model_path_end
+        ),
+        "initial": os.path.join(
+            output_dir, params["model"]["architecture"] + initial_model_path_end
+        ),
+        "latest": os.path.join(
+            output_dir, params["model"]["architecture"] + latest_model_path_end
+        ),
+    }
+
+    if not os.path.exists(model_paths["initial"]):
+        save_model(
+            {
+                "epoch": 0,
+                "model_state_dict": get_model_dict(model, params["device_id"]),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "loss": best_loss,
+            },
+            model,
+            params,
+            model_paths["initial"],
+            onnx_export=False,
+        )
+        print("Initial model saved.")
 
     # if previous model file is present, load it up
-    if os.path.exists(best_model_path):
+    if os.path.exists(model_paths["best"]):
         try:
-            main_dict = load_model(best_model_path, params["device"])
+            main_dict = load_model(model_paths["best"], params["device"])
             version_check(params["version"], version_to_check=main_dict["version"])
             model.load_state_dict(main_dict["model_state_dict"])
             start_epoch = main_dict["epoch"]
@@ -441,14 +466,13 @@ def training_loop(
                 },
                 model,
                 params,
-                best_model_path,
+                model_paths["best"],
                 onnx_export=False,
             )
             model.train()
             first_model_saved = True
 
         if params["model"]["save_at_every_epoch"]:
-
             save_model(
                 {
                     "epoch": epoch,
@@ -469,6 +493,22 @@ def training_loop(
             )
             model.train()
 
+        # save the latest model
+        if os.path.exists(model_paths["latest"]):
+            os.remove(model_paths["latest"])
+            save_model(
+                {
+                    "epoch": 0,
+                    "model_state_dict": model_dict,
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "loss": best_loss,
+                },
+                model,
+                params,
+                model_paths["latest"],
+                onnx_export=False,
+            )
+            print("Latest model saved.")
         print("Current Best epoch: ", best_train_idx)
 
         if patience > params["patience"]:
@@ -490,7 +530,7 @@ def training_loop(
     )
 
     # once the training is done, optimize the best model
-    if os.path.exists(best_model_path):
+    if os.path.exists(model_paths["best"]):
         onnx_export = True
         if params["model"]["architecture"] in ["sdnet", "brain_age"]:
             onnx_export = False
@@ -501,7 +541,7 @@ def training_loop(
             print("Optimizing best model.")
 
             try:
-                main_dict = load_model(best_model_path, params["device"])
+                main_dict = load_model(model_paths["best"], params["device"])
                 version_check(params["version"], version_to_check=main_dict["version"])
                 model.load_state_dict(main_dict["model_state_dict"])
                 best_epoch = main_dict["epoch"]
@@ -516,7 +556,7 @@ def training_loop(
                     },
                     model,
                     params,
-                    best_model_path,
+                    model_paths["best"],
                     onnx_export,
                 )
             except Exception as e:
