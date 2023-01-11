@@ -20,7 +20,7 @@ docker:
   # Docker file name within docker build context, default is `Dockerfile`.
   build_file: "Dockerfile-CUDA10.2"
   # Always build the image (As of Jan 11 2023, docker runner seems to fail instead of fallback if image doesn't exist).
-  build_strategy: always
+  build_strategy: auto
   # TODO: check these args
   gpu_args: '--device cuda'
   cpu_args: '--device cpu'
