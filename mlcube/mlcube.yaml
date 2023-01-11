@@ -14,7 +14,7 @@ platform:
 
 docker:
   # Image name.
-  image: mlcommons/gandlf:0.0.1
+  # image: mlcommons/gandlf:0.0.1
   # Docker build context relative to $MLCUBE_ROOT. Default is `build`.
   build_context: "../../"
   # Docker file name within docker build context, default is `Dockerfile`.
