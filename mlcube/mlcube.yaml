@@ -25,11 +25,11 @@ tasks:
     entrypoint: python3.8 gandlf_run
     parameters:
       inputs: {
-        train: True
-        inputdata: {type: "file", default: "data.csv"}
-        config: {type: "file", default: "config.yml"}
-        modeldir: data/model
-        device: {type: "str", default: "cpu"}
+        train: True,
+        inputdata: {type: "file", default: "data.csv"},
+        config: {type: "file", default: "config.yml"},
+        modeldir: data/model,
+        device: {type: "str", default: "cpu"},
         #reset: {type: "str", default: "True"}
         #parameters_file: {type: file, default: parameters.yaml}
       }
@@ -40,11 +40,11 @@ tasks:
     entrypoint: python3.8 gandlf_run
     parameters:
       inputs: {
-        train: False
-        inputdata: {type: "file", default: "data.csv"}
-        config: {type: "file", default: "config.yml"}
-        modeldir: data/model
-        device: {type: "str", default: "cpu"}
+        train: False,
+        inputdata: {type: "file", default: "data.csv"},
+        config: {type: "file", default: "config.yml"},
+        modeldir: data/model,
+        device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
       #outputs: {output_path: {type: "file", default: "results.yaml"}}
