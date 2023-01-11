@@ -5,6 +5,7 @@ authors:
 
 platform:
   accelerator_count: 0
+  # Some other sample platform requirement parameters
   #  accelerator_maker: NVIDIA
   #  accelerator_model: A100-80GB
   #  host_memory_gb: 40
@@ -18,10 +19,11 @@ docker:
   build_context: "../../"
   # Docker file name within docker build context, default is `Dockerfile`.
   build_file: "../../Dockerfile-CUDA10.2"
-  build_strategy: auto
+  # Always build the image (As of Jan 11 2023, docker runner seems to fail instead of fallback if image doesn't exist).
+  build_strategy: always
   # TODO: check these args
-  gpu_args: ''
-  cpu_args: ''
+  gpu_args: '--device cuda'
+  cpu_args: '--device cpu'
 
 tasks:
   training:
