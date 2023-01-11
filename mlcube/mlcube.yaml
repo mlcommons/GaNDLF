@@ -1,0 +1,55 @@
+name: MLCommons GaNDLF Generic MLCube
+description: MLCommons GaNDLF MLCube, containing functionality for model training, inference and data construction.
+authors: 
+ - {name: "MLCommons Medical Working Group"}
+
+platform:
+  accelerator_count: 0
+
+docker:
+  # Image name.
+  image: mlcommons/gandlf-cpu:0.0.1
+  # Docker build context relative to $MLCUBE_ROOT. Default is `build`.
+  build_context: "../../"
+  # Docker file name within docker build context, default is `Dockerfile`.
+  build_file: "Dockerfile-CPU"
+
+tasks:
+  training:
+  # Trains a new model, creating a model directory, or resumes training on an existing model.
+    entrypoint: python3.8 gandlf_run
+    parameters:
+      inputs: {
+        train: "True"
+        inputdata: {type: "file", default: "data.csv"}
+        config: {type: "file", default: "config.yml"}
+        modeldir: data/model
+        device: {type: "str", default: "cpu"}
+        #reset: {type: "str", default: "True"}
+        #parameters_file: {type: file, default: parameters.yaml}
+      }
+      #outputs: {output_path: {type
+      
+  inference:
+  # Runs inference on some existing model given new data
+    entrypoint: python3.8 gandlf_run
+    parameters:
+      inputs: {
+        train: "False"
+        inputdata: {type: "file", default: "data.csv"}
+        config: {type: "file", default: "config.yml"}
+        modeldir: data/model
+        device: {type: "str", default: "cpu"}
+        #parameters_file: {type: file, default: parameters.yaml}
+      }
+      #outputs: {output_path: {type: "file", default: "results.yaml"}}
+  
+  construct_csv:
+  # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
+  # This needs to be changed to allow labelID and channelID params, but for now this is OK.
+    entrypoint: python3.8 gandlf_constructCSV
+    parameters:
+      inputs: {
+        inputDir: data/
+      }
+      outputs: {output_path: {type: "file", default: "data.csv"}}
