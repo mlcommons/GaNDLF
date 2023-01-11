@@ -5,6 +5,11 @@ authors:
 
 platform:
   accelerator_count: 0
+  #  accelerator_maker: NVIDIA
+  #  accelerator_model: A100-80GB
+  #  host_memory_gb: 40
+  #  need_internet_access: True
+  #  host_disk_space_gb: 100
 
 docker:
   # Image name.
@@ -20,7 +25,7 @@ tasks:
     entrypoint: python3.8 gandlf_run
     parameters:
       inputs: {
-        train: "True"
+        train: True
         inputdata: {type: "file", default: "data.csv"}
         config: {type: "file", default: "config.yml"}
         modeldir: data/model
@@ -35,7 +40,7 @@ tasks:
     entrypoint: python3.8 gandlf_run
     parameters:
       inputs: {
-        train: "False"
+        train: False
         inputdata: {type: "file", default: "data.csv"}
         config: {type: "file", default: "config.yml"}
         modeldir: data/model
