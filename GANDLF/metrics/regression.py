@@ -89,7 +89,7 @@ def overall_stats(predictions, ground_truth, params):
     Returns:
         dict: A dictionary of metrics.
     """
-    predictions = predictions.type(torch.float)
+    predictions = predictions.type(torch.float) * params["scaling_factor"]
     ground_truth = ground_truth.type(torch.float)
     assert (
         params["problem_type"] == "regression"
