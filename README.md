@@ -64,10 +64,13 @@ GaNDLF has extensive documentation and it is arranged in the following manner:
 - [Frequently Asked Questions](https://mlcommons.github.io/GaNDLF/faq)
 - [Acknowledgements](https://mlcommons.github.io/GaNDLF/acknowledgements)
 
-
 ## Contributing
 
 Please see the [contributing guide](./CONTRIBUTING.md) for more information.
+
+### Weekly Meeting
+
+The GaNDLF development team hosts a weekly meeting to discuss feature additions, issues, and general future directions. If you are interested to join, please <a href="mailto:gandlf@mlcommons.org?subject=Meeting Request">send us an email</a>!
 
 ## Disclaimer
 - The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.
