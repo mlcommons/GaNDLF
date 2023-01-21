@@ -193,12 +193,13 @@ def validate_network(
                 subject_id_list.append(subject.get("subject_id")[0])
 
             if params["save_output"] or is_inference:
+                # we divide by scaling factor here because we multiply by it during loss/metric calculation
                 outputToWrite += (
                     str(epoch)
                     + ","
                     + subject["subject_id"][0]
                     + ","
-                    + str(pred_output.cpu().max().item() * params["scaling_factor"])
+                    + str(pred_output.cpu().max().item() / params["scaling_factor"])
                     + "\n"
                 )
             final_loss, final_metric = get_loss_and_metrics(
