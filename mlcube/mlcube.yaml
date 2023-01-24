@@ -67,4 +67,6 @@ tasks:
       inputs: {
         inputDir: data/
       }
-      outputs: {output_path: {type: "file", default: "data.csv"}}
+      outputs: {
+        outputFile: {type: "file", default: "data.csv"}
+        }
