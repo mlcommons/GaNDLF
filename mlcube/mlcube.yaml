@@ -21,20 +21,21 @@ docker:
   build_file: "Dockerfile-CUDA10.2"
   # Always build the image (As of Jan 11 2023, docker runner seems to fail instead of fallback if image doesn't exist).
   build_strategy: auto
-  # TODO: check these args
-  gpu_args: '--device cuda'
-  cpu_args: '--device cpu'
+
 
 tasks:
   training:
   # Trains a new model, creating a model directory, or resumes training on an existing model.
-    entrypoint: "python3.8 gandlf_run --train True"
+    entrypoint: "python3.8 gandlf_run --train True --device cpu"
+    # TODO: check these args
+    #gpu_args: '--device cuda'
+    #cpu_args: '--device cpu'
     parameters:
       inputs: {
         #train: {type: "string", default: "True"},
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
-        modeldir: model/,
+        modeldir: {type: "directory", default: "model/"},
         #device: {type: "str", default: "cpu"},
         #reset: {type: "str", default: "True"}
         #parameters_file: {type: file, default: parameters.yaml}
@@ -43,13 +44,16 @@ tasks:
       
   inference:
   # Runs inference on some existing model given new data
-    entrypoint: "python3.8 gandlf_run --train False"
+    entrypoint: "python3.8 gandlf_run --train False --device cpu"
+    # TODO: check these args
+    #gpu_args: '--device cuda'
+    #cpu_args: '--device cpu'
     parameters:
       inputs: {
         #train: {type: "string", default: "False"},
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
-        modeldir: model/,
+        modeldir: {type: "directory", default: "model/"},
         #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
