@@ -64,9 +64,9 @@ tasks:
     entrypoint: "python3.8 gandlf_constructCSV"
     parameters:
       inputs: {
-        inputDir: data/
-        channelsID: {type: "file", default: "channelIDs.yml"}
-        labelID: {type: "file", default: "labelID.yml"}
+        inputDir: data/,
+        channelsID: {type: "file", default: "channelIDs.yml"},
+        labelID: {type: "file", default: "labelID.yml"},
       }
       outputs: {
         outputFile: {type: "file", default: "data.csv"}
