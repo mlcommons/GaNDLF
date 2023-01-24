@@ -34,8 +34,8 @@ tasks:
         train: "True",
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
-        modeldir: data/model,
-        device: {type: "str", default: "cpu"},
+        modeldir: model/,
+        #device: {type: "str", default: "cpu"},
         #reset: {type: "str", default: "True"}
         #parameters_file: {type: file, default: parameters.yaml}
       }
@@ -49,8 +49,8 @@ tasks:
         train: "False",
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
-        modeldir: data/model,
-        device: {type: "str", default: "cpu"},
+        modeldir: model/,
+        #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
       #outputs: {output_path: {type: "file", default: "results.yaml"}}
