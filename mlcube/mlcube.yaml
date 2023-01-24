@@ -31,7 +31,7 @@ tasks:
     entrypoint: python3.8 gandlf_run
     parameters:
       inputs: {
-        train: {type: "str", default: "True"},
+        train: {type: "string", default: "True"},
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
         modeldir: model/,
@@ -46,7 +46,7 @@ tasks:
     entrypoint: python3.8 gandlf_run
     parameters:
       inputs: {
-        train: {type: "str", default: "False"},
+        train: {type: "string", default: "False"},
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
         modeldir: model/,
