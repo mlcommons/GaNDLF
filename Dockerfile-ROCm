@@ -7,6 +7,7 @@ LABEL version=1.0
 # Quick start instructions on using Docker with ROCm: https://github.com/RadeonOpenCompute/ROCm-docker/blob/master/quick-start.md
 
 # The base image contains ROCm, python 3.8 and pytorch already, no need to install those
+RUN apt-get update && apt-get install -y python3-opencv
 RUN python3 -m pip install --upgrade pip
 RUN python3.8 -m pip install torch==1.11.0+rocm4.5.2 torchvision==0.12.0+rocm4.5.2 torchaudio==0.11.0 --extra-index-url  https://download.pytorch.org/whl/rocm4.5.2
 COPY . /GaNDLF
