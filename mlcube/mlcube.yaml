@@ -28,7 +28,7 @@ docker:
 tasks:
   training:
   # Trains a new model, creating a model directory, or resumes training on an existing model.
-    entrypoint: python3.8 gandlf_run --train True
+    entrypoint: "python3.8 gandlf_run --train True"
     parameters:
       inputs: {
         #train: {type: "string", default: "True"},
@@ -43,7 +43,7 @@ tasks:
       
   inference:
   # Runs inference on some existing model given new data
-    entrypoint: python3.8 gandlf_run --train False
+    entrypoint: "python3.8 gandlf_run --train False"
     parameters:
       inputs: {
         #train: {type: "string", default: "False"},
@@ -58,7 +58,7 @@ tasks:
   construct_csv:
   # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
   # This needs to be changed to allow labelID and channelID params, but for now this is OK.
-    entrypoint: python3.8 gandlf_constructCSV
+    entrypoint: "python3.8 gandlf_constructCSV"
     parameters:
       inputs: {
         inputDir: data/
