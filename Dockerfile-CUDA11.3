@@ -7,12 +7,12 @@ LABEL version=1.0
 # Note that to do this on a Windows host you need experimental feature "CUDA on WSL" -- not yet stable.
 
 # Explicitly install python3.8 (this uses 11.1 for now, as PyTorch LTS 1.8.2 is built against it)
-RUN apt-get update && apt-get install -y python3.8 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.8-dev libffi-dev python3-opencv
+RUN apt-get update && apt-get install -y python3.8 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.8-dev libffi-dev
 RUN python3.8 -m pip install --upgrade pip
 RUN python3.8 -m pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN python3.8 -m pip install openvino-dev==2022.1.0
+RUN python3.8 -m pip install openvino-dev==2022.1.0 opencv-python-headless
 RUN python3.8 -m pip install -e .
 
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
