@@ -66,7 +66,6 @@ tasks:
       inputs: {
         inputDir: {type: "directory", default: "data/"},
         channelsID: {type: "file", default: "channelIDs.yml"},
-        labelID: {type: "file", default: "labelID.yml"},
       }
       outputs: {
         outputFile: {type: "file", default: "data.csv"}

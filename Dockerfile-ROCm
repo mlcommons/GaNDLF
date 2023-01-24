@@ -25,7 +25,7 @@ CMD gandlf_run
 # This greatly reduces UID collision probability between container and host, helping prevent privilege escalation attacks.
 # As a side benefit this also decreases the likelihood that users on a cluster won't be able to access their files.
 # See https://github.com/hexops/dockerfile as a best practices guide.
-RUN addgroup --gid 10001 --system nonroot \
- && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
- 
-USER nonroot
+#RUN addgroup --gid 10001 --system nonroot \
+# && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
+# 
+#USER nonroot

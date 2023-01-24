@@ -67,18 +67,15 @@ def main():
     if channelsID.endswith(".yml") or channelsID.endswith(".yaml"):
         if os.path.isfile(channelsID):
             with open(channelsID, 'r') as f:
-                channelsID = yaml.safe_load(f)
+                content = yaml.safe_load(f)
+                channelsID = content["channels"]
                 if isinstance(channelsID, list):
                     channelsID = ",".join(channelsID)
-
-                
-    if labelID is not None:
-        if labelID.endswith(".yml") or labelID.endswith(".yaml"):
-            if os.path.isfile(labelID):
-                with open(labelID, 'r') as f:
-                    labelID = yaml.safe_load(f)
+                    
+                if "label" in content:
+                    labelID = content["label"]
                     if isinstance(labelID, list):
-                        labelID = ",".join(labelID)
+                        channelsID = ",".join(channelsID)
 
     writeTrainingCSV(inputDir,channelsID, labelID, outputFile)
 
