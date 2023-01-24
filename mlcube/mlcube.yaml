@@ -61,11 +61,12 @@ tasks:
   
   construct_csv:
   # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
-  # This needs to be changed to allow labelID and channelID params, but for now this is OK.
     entrypoint: "python3.8 gandlf_constructCSV"
     parameters:
       inputs: {
         inputDir: data/
+        channelsID: {type: "file", default: "channelIDs.yml"}
+        labelID: {type: "file", default: "labelID.yml"}
       }
       outputs: {
         outputFile: {type: "file", default: "data.csv"}

@@ -7,6 +7,8 @@ from GANDLF.utils import writeTrainingCSV
 
 from GANDLF.cli import copyrightMessage
 
+import yaml
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -57,8 +59,23 @@ def main():
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
+    channelsID = args.channelsID
+    labelID = args.labelID
+    
+    # Do some special handling for if users pass a yml file for channel/label IDs
+    # This is used for MLCube functionality because MLCube does not support plain string inputs.
+    if channelsID.endswith(".yml") or channelsID.endswith(".yaml"):
+        if os.path.isfile(channelsID):
+            with open(channelsID, 'r') as f:
+                channelsID = ",".join(yaml.safe_load(f))
+                
+    if labelID is not None:
+        if labelID.endswith(".yml") or labelID.endswith(".yaml"):
+            if os.path.isfile(labelID):
+                with open(labelID, 'r') as f:
+                    labelID = yaml.safe_load(f)
 
-    writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
+    writeTrainingCSV(inputDir,channelsID, labelID, outputFile)
 
 
 # main function
