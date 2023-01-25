@@ -181,7 +181,7 @@ def ImagesFromDataFrame(
                 )
             try:
                 perform_sanity_check_on_subject(subject, parameters)
-            except Exception as e:
+            except Exception as exception:
                 subjects_with_error.append(subject["subject_id"])
                 print(
                     "Subject '"
