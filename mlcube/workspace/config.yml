@@ -52,11 +52,11 @@ optimizer: adam
 # performs randomized k-fold cross-validation
 # split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
-#nested_training:
-#  {
-#    testing: 5, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
-#    validation: 5 # this controls the validation data splits for model training
-#  }
+nested_training:
+  {
+    testing: 1, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
+    validation: -1 # this controls the validation data splits for model training
+  }
 ## pre-processing
 # this constructs an order of transformations, which is applied to all images in the data loader
 # order: resize --> threshold/clip --> resample --> normalize
