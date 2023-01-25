@@ -36,7 +36,7 @@ tasks:
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
         modeldir: {type: "directory", default: "model/"},
-        datadir: {type: "directory", default: "data/"}, # dummy input to cause data to be mounted properly
+        extra: {type: "directory", default: "data/"}, # dummy input to cause data to be mounted properly
         #device: {type: "str", default: "cpu"},
         #reset: {type: "str", default: "True"}
         #parameters_file: {type: file, default: parameters.yaml}
@@ -55,7 +55,7 @@ tasks:
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
         modeldir: {type: "directory", default: "model/"}, # Using "file" instead of directory to mount inside workspace
-        datadir: {type: "directory", default: "data/"}, # dummy input to cause data to be mounted properly
+        extra: {type: "directory", default: "data/"}, # dummy input to cause data to be mounted properly
         #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }

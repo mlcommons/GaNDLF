@@ -75,8 +75,16 @@ if __name__ == "__main__":
         version="%(prog)s v{}".format(version) + "\n\n" + copyrightMessage,
         help="Show program's version number and exit.",
     )
+    
+    # This is a dummy argument that exists to trigger MLCube mounting requirements.
+    parser.add_argument(
+        "-ext",
+        "--extra",
+        help=argparse.SUPPRESS 
+    )
 
     args = parser.parse_args()
+    
 
     # check for required parameters - this is needed here to keep the cli clean
     for param_none_check in [args.inputdata, args.modeldir, args.train, args.config]:
