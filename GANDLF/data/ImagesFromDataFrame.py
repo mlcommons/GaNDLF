@@ -181,13 +181,14 @@ def ImagesFromDataFrame(
                 )
             try:
                 perform_sanity_check_on_subject(subject, parameters)
-            except Exception:
+            except Exception as e:
                 subjects_with_error.append(subject["subject_id"])
                 print(
                     "Subject '"
                     + "' could not be loaded due to the following exception:"
                     )
-                traceback.print_exc()
+                print("Exception: {}".format(type(exception).__name__))
+                print("Exception message: {}".format(exception))
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
