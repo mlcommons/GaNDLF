@@ -34,9 +34,10 @@ tasks:
       inputs: {
         #train: {type: "string", default: "True"},
         inputdata: {type: "file", default: "data.csv"},
+        # Do NOT change the position of the "extra" parameter! It is relevant due to MLCube mounting rules.
+        extra: {type: "directory", default: "data/"}, # dummy input to cause data to be mounted properly in a consistent location
         config: {type: "file", default: "config.yml"},
         modeldir: {type: "directory", default: "model/"},
-        #extra: {type: "file", default: "data/"}, # dummy input to cause data to be mounted properly in a consistent location
         #device: {type: "str", default: "cpu"},
         #reset: {type: "str", default: "True"}
         #parameters_file: {type: file, default: parameters.yaml}
@@ -53,9 +54,10 @@ tasks:
       inputs: {
         #train: {type: "string", default: "False"},
         inputdata: {type: "file", default: "data.csv"},
+        # Do NOT change the position of the "extra" parameter! It is relevant due to MLCube mounting rules.
+        extra: {type: "directory", default: "data/"}, # dummy input to cause data to be mounted properly in a consistent location
         config: {type: "file", default: "config.yml"},
         modeldir: {type: "directory", default: "model/"},
-        #extra: {type: "file", default: "data/"}, # dummy input to cause data to be mounted properly  in a consistent location
         #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
@@ -66,8 +68,9 @@ tasks:
     entrypoint: "python3.8 gandlf_constructCSV"
     parameters:
       inputs: {
-        inputDir: {type: "file", default: "data/"}, # Using "file" instead of "directory" to ensure consistent mount location
         channelsID: {type: "file", default: "channelIDs.yml"},
+        # Do NOT change the position of the inputDir parameter! It is relevant due to MLCube mounting rules.
+        inputDir: {type: "directory", default: "data/"}, # Using "file" instead of "directory" to ensure consistent mount location
       }
       outputs: {
         outputFile: {type: "file", default: "data.csv"}
