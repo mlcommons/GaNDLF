@@ -1,4 +1,5 @@
 import os
+import traceback
 import numpy as np
 
 import torch
@@ -182,6 +183,11 @@ def ImagesFromDataFrame(
                 perform_sanity_check_on_subject(subject, parameters)
             except Exception:
                 subjects_with_error.append(subject["subject_id"])
+                print(
+                    "Subject '"
+                    + "' could not be loaded due to the following exception:"
+                    )
+                traceback.print_exc()
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
