@@ -36,7 +36,7 @@ tasks:
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
         modeldir: {type: "directory", default: "model/"},
-        extra: {type: "file", default: "data/"}, # dummy input to cause data to be mounted properly in a consistent location
+        #extra: {type: "file", default: "data/"}, # dummy input to cause data to be mounted properly in a consistent location
         #device: {type: "str", default: "cpu"},
         #reset: {type: "str", default: "True"}
         #parameters_file: {type: file, default: parameters.yaml}
@@ -55,7 +55,7 @@ tasks:
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
         modeldir: {type: "directory", default: "model/"},
-        extra: {type: "file", default: "data/"}, # dummy input to cause data to be mounted properly  in a consistent location
+        #extra: {type: "file", default: "data/"}, # dummy input to cause data to be mounted properly  in a consistent location
         #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
