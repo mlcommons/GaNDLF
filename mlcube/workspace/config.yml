@@ -54,8 +54,9 @@ optimizer: adam
 # for single fold run, use '-' before the fold number
 nested_training:
   {
-    #testing: 1, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
+    testing: -1, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
     validation: -1 # this controls the validation data splits for model training
+    training: -1
   }
 ## pre-processing
 # this constructs an order of transformations, which is applied to all images in the data loader
