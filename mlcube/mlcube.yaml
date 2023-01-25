@@ -53,7 +53,7 @@ tasks:
         #train: {type: "string", default: "False"},
         inputdata: {type: "file", default: "data.csv"},
         config: {type: "file", default: "config.yml"},
-        modeldir: {type: "directory", default: "model/"},
+        modeldir: {type: "file", default: "model/"}, # Using "file" instead of directory to mount inside workspace
         #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
@@ -64,7 +64,7 @@ tasks:
     entrypoint: "python3.8 gandlf_constructCSV"
     parameters:
       inputs: {
-        inputDir: {type: "directory", default: "data/"},
+        inputDir: {type: "file", default: "data/"}, # Using "file" instead of directory to mount inside workspace
         channelsID: {type: "file", default: "channelIDs.yml"},
       }
       outputs: {
