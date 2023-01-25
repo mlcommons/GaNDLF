@@ -55,7 +55,7 @@ optimizer: adam
 
 nested_training:
   {
-    testing: -1, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
+    testing: 2, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
     validation: -10 # this controls the validation data splits for model training
   }
 
