@@ -4,6 +4,7 @@ version:
     minimum: 0.0.16,
     maximum: 0.0.16 # this should NOT be made a variable, but should be tested after every tag is created
   }
+verbose: True
 # Choose the model parameters here
 model:
   {
