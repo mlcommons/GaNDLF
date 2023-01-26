@@ -67,6 +67,15 @@ if __name__ == "__main__":
         type=ast.literal_eval,
         help="Resume previous training by only keeping model dict in 'modeldir'",
     )
+    
+    parser.add_argument(
+        "-o",
+        "--outputdir",
+        metavar="",
+        type=str,
+        help="Path to an optional secondary output location. Useful for backups. " +
+            "If training, 'modeldir' is always updated.",
+    )
 
     parser.add_argument(
         "-v",
@@ -77,9 +86,10 @@ if __name__ == "__main__":
     )
     
     # This is a dummy argument that exists to trigger MLCube mounting requirements.
+    # Do not remove.
     parser.add_argument(
-        "-ext",
-        "--extra",
+        "-rawinput",
+        "--rawinput",
         help=argparse.SUPPRESS 
     )
 
@@ -113,6 +123,7 @@ if __name__ == "__main__":
         args.device,
         args.resume,
         args.reset,
+        args.outputdir
     )
 
     print("Finished.")

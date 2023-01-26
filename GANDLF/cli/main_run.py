@@ -1,5 +1,6 @@
 import os, pickle, sys
 from pathlib import Path
+import shutil
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
 from GANDLF.inference_manager import InferenceManager
@@ -7,7 +8,7 @@ from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
 
 
-def main_run(data_csv, config_file, output_dir, train_mode, device, resume, reset):
+def main_run(data_csv, config_file, output_dir, train_mode, device, resume, reset, second_output_dir=""):
     """
     Main function that runs the training and inference.
 
@@ -45,12 +46,18 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
                     )
 
     parameters["output_dir"] = output_dir
+    if second_output_dir:
+        parameters["second_output_dir"] = second_output_dir
+    
 
     if "-1" in device:
         device = "cpu"
 
     if train_mode:  # train mode
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
+        if second_output_dir:
+            Path(parameters["second_output_dir"]).mkdir(parents=True, exist_ok=True)
+    
 
     # parse training CSV
     if "," in file_data_full:

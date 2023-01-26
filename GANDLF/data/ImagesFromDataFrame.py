@@ -184,7 +184,7 @@ def ImagesFromDataFrame(
             except Exception as exception:
                 subjects_with_error.append(subject["subject_id"])
                 print(
-                    "Subject '"
+                    "Subject '" + subject["subject_id"]
                     + "' could not be loaded due to the following exception:"
                     )
                 print("Exception: {}".format(type(exception).__name__))

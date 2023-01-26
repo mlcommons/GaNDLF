@@ -21,7 +21,9 @@ def InferenceManager(dataframe, outputDir, parameters, device):
         parameters["class_weights"] = None  # no need for class weights for inference
 
     n_folds = parameters["nested_training"]["validation"]
-
+    
+    if parameters["second_output_dir"]:
+        outputDir = outputDir + "," + parameters["second_output_dir"]
     outputDir_split = [outputDir]
     if "," in outputDir:
         outputDir_split = outputDir.split(",")

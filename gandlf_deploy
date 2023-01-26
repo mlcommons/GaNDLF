@@ -1,0 +1,71 @@
+import argparse
+import os, sys 
+from GANDLF.cli import deploy_targets, run_deployment, recover_config, copyrightMessage
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_Deploy",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate frozen/deployable versions of trained GaNDLF models.\n\n"
+        + copyrightMessage,
+    )
+
+    parser.add_argument(
+        "-m",
+        "--model",
+        metavar="",
+        type=str,
+        help="Path to the model directory you wish to deploy.",
+        required=True,
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        metavar="",
+        type=str,
+        default="",
+        help="Optional path to an alternative config file to be embedded with the model. If blank/default, we use the previous config from the model instead.",
+    )
+    parser.add_argument(
+        "-t",
+        "--target",
+        metavar="",
+        type=str,
+        help="The target platform. Valid inputs are: " + ', '.join(deploy_targets) + " .",
+        required=True,
+    )
+    parser.add_argument(
+        "-r",
+        "--mlcube-root",
+        metavar="",
+        type=str,
+        default=os.path.dirname(os.path.realpath(__file__)) + "/mlcube",
+        help="Path to an alternative MLCUBE_ROOT directory to use as a template. The source repository contains an example (which is also the default) at {GaNDLF_ROOT}/mlcube .",
+    )
+    parser.add_argument(
+        "-o",
+        "--outputdir",
+        metavar="",
+        type=str,
+        help="Output directory path. For MLCube builds, generates an MLCube directory to be distributed with your MLCube.",
+        required=True,
+    )
+
+    args = parser.parse_args()
+    
+    if not os.path.exists(args.outputdir):
+        os.makedirs(args.outputdir, exist_ok=True)
+    
+    if not args.config:
+        if not recover_config(args.model, args.outputdir+"/original_config.yml"):
+            print("Error: No config was specified but automatic config extraction failed.")
+            sys.exit(1)
+        
+        config_to_use = args.outputdir+"/original_config.yml"
+    else:
+        config_to_use = args.config
+    
+    if not run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcubedir):
+        print("Deployment to the target platform failed.")
+        sys.exit(1)

@@ -26,3 +26,6 @@ CMD gandlf_run
 # && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
 # 
 #USER nonroot
+
+# Prepare the container for possible model embedding later.
+RUN mkdir /embedded_model
