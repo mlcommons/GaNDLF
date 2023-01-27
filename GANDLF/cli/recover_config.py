@@ -25,7 +25,9 @@ def recover_config(modelDir, outputFile):
                 'training_data',
                 'validation_data',
                 'testing_data',
-                'device'
+                'device',
+                'subject_spacing', 
+                ' 
             ]
             for entry in removable_entries:
                 if entry in parameters:
