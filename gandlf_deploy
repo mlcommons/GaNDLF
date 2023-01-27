@@ -66,6 +66,6 @@ if __name__ == "__main__":
     else:
         config_to_use = args.config
     
-    if not run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcubedir):
+    if not run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcube_root):
         print("Deployment to the target platform failed.")
         sys.exit(1)
