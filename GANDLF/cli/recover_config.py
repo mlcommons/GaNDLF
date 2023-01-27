@@ -19,6 +19,7 @@ def recover_config(modelDir, outputFile):
             os.makedirs(os.path.dirname(outputFile), exist_ok=True)
             
             # Remove a few problematic objects from the output
+            # These cannot be safe_dumped to YAML (or present other problems)
             removable_entries = [
                 'output_dir',
                 'second_output_dir',
@@ -26,7 +27,9 @@ def recover_config(modelDir, outputFile):
                 'validation_data',
                 'testing_data',
                 'device',
-                'subject_spacing', 
+                'subject_spacing',
+                'weights',
+                'class_weights'
             ]
             print(parameters)
             for entry in removable_entries:
