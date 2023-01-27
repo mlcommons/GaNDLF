@@ -97,13 +97,14 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
 
     print("Running MLCube configuration with the following command:")
     print(command_to_run)
+    print("If this is your first GaNDLF deployment, this may take longer than usual while image layers are built.")
     
     if os.system(command_to_run) > 0:
         print("Error: mlcube_docker configuration failed. Check output for more details.")
         return False
         
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
-    container = docker_client.containers.create(docker_tag)
+    container = docker_client.containers.create(docker_image)
     
     print("Attempting to embed the model...")
     
