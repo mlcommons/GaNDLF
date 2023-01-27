@@ -84,9 +84,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Run the mlcube_docker configuration process, forcing build from local repo
     gandlf_root = os.path.realpath(os.path.dirname(__file__) + "/../../")
     # Requires mlcube_docker python package to be installed with scripts available
-    command_to_run = "mlcube_docker configure --platform=docker  -Pdocker.build_strategy=always"
-        + " --mlcube=" + os.path.realpath(mlcubedir)
-        + " -Pdocker.build_context=" + gandlf_root
+    command_to_run = "mlcube_docker configure --platform=docker  -Pdocker.build_strategy=always" + " --mlcube=" + os.path.realpath(mlcubedir) + " -Pdocker.build_context=" + gandlf_root
     
     if os.system(command_to_run) > 0:
         print("Error: mlcube_docker configuration failed. Check output for more details.")
