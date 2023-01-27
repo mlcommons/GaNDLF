@@ -85,11 +85,11 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Change entrypoints to point specifically to the embedded model
     mlcube_config["tasks"]["training"]["entrypoint"] = (
         mlcube_config["tasks"]["training"]["entrypoint"]
-        + " --modelDir /embedded_model/"
+        + " --modeldir /embedded_model/"
     )
     mlcube_config["tasks"]["inference"]["entrypoint"] = (
         mlcube_config["tasks"]["inference"]["entrypoint"]
-        + " --modelDir /embedded_model/"
+        + " --modeldir /embedded_model/"
     )
 
     # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
