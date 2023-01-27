@@ -40,7 +40,11 @@ def recover_config(modelDir, outputFile):
 
             with open(outputFile, "w") as f:
                 print(parameters)
-                f.write(yaml.safe_dump(parameters, sort_keys=False, default_flow_style=False))
+                f.write(
+                    yaml.safe_dump(
+                        parameters, sort_keys=False, default_flow_style=False
+                    )
+                )
 
     print(f"Config written to {outputFile}.")
     return True
