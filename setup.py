@@ -113,7 +113,7 @@ setup(
         "gandlf_verifyInstall",
         "gandlf_configGenerator",
         "gandlf_recoverConfig",
-        "gandlf_deploy"
+        "gandlf_deploy",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

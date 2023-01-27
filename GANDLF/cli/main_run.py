@@ -8,7 +8,16 @@ from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
 
 
-def main_run(data_csv, config_file, output_dir, train_mode, device, resume, reset, second_output_dir=""):
+def main_run(
+    data_csv,
+    config_file,
+    output_dir,
+    train_mode,
+    device,
+    resume,
+    reset,
+    second_output_dir="",
+):
     """
     Main function that runs the training and inference.
 
@@ -46,9 +55,8 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
                     )
 
     parameters["output_dir"] = output_dir
-    if second_output_dir: # only placed in params if not empty string
+    if second_output_dir:  # only placed in params if not empty string
         parameters["second_output_dir"] = second_output_dir
-    
 
     if "-1" in device:
         device = "cpu"
@@ -57,7 +65,6 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
         if second_output_dir:
             Path(parameters["second_output_dir"]).mkdir(parents=True, exist_ok=True)
-    
 
     # parse training CSV
     if "," in file_data_full:
