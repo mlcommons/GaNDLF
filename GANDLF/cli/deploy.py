@@ -32,7 +32,7 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
         print(f"Error: the config file {configfile} does not exist.")
         return False
     
-    if target.tolower() == 'docker':
+    if target.lower() == 'docker':
         if not deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
             print("Error: Something went wrong during platform-specific deployment.")
             return False
