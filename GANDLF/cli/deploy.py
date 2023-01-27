@@ -75,7 +75,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     
     mlcube_config["docker"]["build_strategy"] = "auto"
     
-    with open(output_mlcube_config_path, "w" as f:
+    with open(output_mlcube_config_path, "w") as f:
         f.write(yaml.dump(mlcube_config, default_flow_style=False))
     
     # This tag will be modified later by our deployment mechanism
