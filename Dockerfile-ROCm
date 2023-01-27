@@ -9,11 +9,13 @@ LABEL version=1.0
 # The base image contains ROCm, python 3.8 and pytorch already, no need to install those
 RUN python3 -m pip install --upgrade pip
 RUN python3.8 -m pip install torch==1.11.0+rocm4.5.2 torchvision==0.12.0+rocm4.5.2 torchaudio==0.11.0 --extra-index-url  https://download.pytorch.org/whl/rocm4.5.2
-COPY . /GaNDLF
-WORKDIR /GaNDLF
 RUN python3 -m pip install --upgrade pip && python3 -m pip install openvino-dev==2022.1.0 opencv-python-headless
 RUN apt-get update && apt-get install -y libgl1
+
+COPY . /GaNDLF
+WORKDIR /GaNDLF
 RUN python3 -m pip install -e .
+
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
 # If a user calls "docker run gandlf:[tag] gandlf_anonymize", it will resolve to running "python gandlf_anonymize" instead.
 # CMD is inherently overridden by args to "docker run", entrypoint is constant.
