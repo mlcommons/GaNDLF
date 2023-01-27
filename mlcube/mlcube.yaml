@@ -84,7 +84,7 @@ tasks:
         #device: {type: "str", default: "cpu"},
         #parameters_file: {type: file, default: parameters.yaml}
       }
-      #outputs: {output_path: {type: "file", default: "results.yaml"}}
+      outputs: {outputdir: {type: "directory", default: "inference_results"}}
 
 # There are two construct_csv tasks below to make it more convenient for users to specify inference and training datasets.
 
