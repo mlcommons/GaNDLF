@@ -175,12 +175,12 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     print(
         f"The updated container was committed successfully. It is available under Docker as: {docker_image} ."
     )
-    print("You may now push this image (e.g. to Docker Hub) as normal.")
     print(
         f"This image should be distributed with the MLCube directory created at {outputdir}."
     )
+    print("You may now push this image (e.g. to Docker Hub) as normal. By doing so, the user will need only the MLCube directory in order to pull and run the image.")
     print(
-        f"To run this container as an MLCube, you should invoke the MLCube runner with --mlcube={outputdir} ."
+        f"To run this container as an MLCube, you (or the end-user) should invoke the MLCube runner with --mlcube={outputdir} ."
     )
     print(
         "Otherwise, it will function as a standard docker image of GaNDLF, but with embedded model/config files."
