@@ -137,7 +137,11 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     container.commit(repository=docker_repo, tag=docker_tag)
     
     print(f"The updated container was committed successfully. It is available under Docker as: {docker_image} .")
-    
+    print("You may now push this image (e.g. to Docker Hub) as normal.")
+    print(f"This image should be distributed with the MLCube directory created at {outputdir}.")
+    print(f"To run this container as an MLCube, you should invoke the MLCube runner with --mlcube={outputdir} .")
+    print("Otherwise, it will function as a standard docker image of GaNDLF, but with embedded model/config files.")
+    print("Deployment finished successfully!")
     return True
     
     
