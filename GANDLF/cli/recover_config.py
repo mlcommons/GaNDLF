@@ -15,7 +15,7 @@ def recover_config(modelDir, outputFile):
         with open(pickle_location, "rb") as handle:
             parameters = pickle.load(handle)
             os.makedirs(os.path.dirname(outputFile), exist_ok=True)
-            with open(args.outputFile, 'w') as f:
+            with open(outputFile, 'w') as f:
                 f.write(yaml.dump(parameters), default_flow_style=False)
     
     print(f"Config written to {outputFile}.")
