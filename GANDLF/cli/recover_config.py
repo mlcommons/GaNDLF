@@ -30,7 +30,7 @@ def recover_config(modelDir, outputFile):
             ]
             for param in parameters:
                 print(f"For param: {param} :")
-                res = yaml.safe_dump( {parameters[param]} )
+                res = yaml.safe_dump( {"this": parameters[param]} )
             #for entry in removable_entries:
             #    if entry in parameters:
             #        del parameters[entry]
