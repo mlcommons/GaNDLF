@@ -16,10 +16,10 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
         print(f"Error: The deployment target {target} is not a valid target.")
         return False
         
-    if not os.path.exists(args.outputdir):
-        os.makedirs(args.outputdir, exist_ok=True)
+    if not os.path.exists(outputdir):
+        os.makedirs(outputdir, exist_ok=True)
         
-    if os.path.isfile(args.outputdir):
+    if os.path.isfile(outputdir):
         print(f"Error: Output location {args.outputdir} exists but is a file, not a directory.")
         return False
     if not os.path.exists(modeldir):
