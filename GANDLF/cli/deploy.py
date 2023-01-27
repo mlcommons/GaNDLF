@@ -48,7 +48,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
         print("Error: This does not appear to be a valid MLCube directory.")
         return False
     
-    os.makedirs(args.outputdir+"/workspace", exist_ok=True)
+    os.makedirs(outputdir+"/workspace", exist_ok=True)
     shutil.copytree(mlcubedir+"/workspace", outputdir+"/workspace", dirs_exist_ok=True)
     shutil.copyfile(config, outputdir+"/workspace/config.yml")
     
