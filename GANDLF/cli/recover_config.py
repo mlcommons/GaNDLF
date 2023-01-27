@@ -27,7 +27,6 @@ def recover_config(modelDir, outputFile):
                 'testing_data',
                 'device',
                 'subject_spacing', 
-                ' 
             ]
             for entry in removable_entries:
                 if entry in parameters:
