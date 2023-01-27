@@ -95,15 +95,16 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
     # In either case, the embedded model will not change persistently.
     # The output in workspace will be the result of resuming training with new data on the embedded model.
-    mlcube_config["tasks"]["training_from_reset"] = copy.deepcopy(
-        mlcube_config["tasks"]["training"]
-    )
-    mlcube_config["tasks"]["training_from_reset"]["entrypoint"] = (
-        mlcube_config["tasks"]["training_from_reset"]["entrypoint"] + " --reset True"
-    )
-    mlcube_config["tasks"]["training"]["entrypoint"] = (
-        mlcube_config["tasks"]["training"]["entrypoint"] + " --resume True"
-    )
+    # This is currently disabled -- "reset" and "resume" seem to behave strangely in these conditions.
+    #mlcube_config["tasks"]["training_from_reset"] = copy.deepcopy(
+    #    mlcube_config["tasks"]["training"]
+    #)
+    #mlcube_config["tasks"]["training_from_reset"]["entrypoint"] = (
+    #    mlcube_config["tasks"]["training_from_reset"]["entrypoint"] + " --reset True"
+    #)
+    #mlcube_config["tasks"]["training"]["entrypoint"] = (
+    #    mlcube_config["tasks"]["training"]["entrypoint"] + " --resume True"
+    #)
 
     mlcube_config["docker"]["build_strategy"] = "auto"
 
