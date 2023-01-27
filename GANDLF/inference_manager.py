@@ -22,7 +22,7 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
     n_folds = parameters["nested_training"]["validation"]
     
-    if parameters["second_output_dir"]:
+    if parameters.has_key("second_output_dir"):
         outputDir = outputDir + "," + parameters["second_output_dir"]
     outputDir_split = [outputDir]
     if "," in outputDir:

@@ -81,7 +81,8 @@ requirements = [
     "torchinfo==1.7.0",
     "segmentation-models-pytorch==0.3.0",
     "ACSConv==0.1.1",
-    "mlcube_docker"
+    "docker",
+    "mlcube_docker",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389

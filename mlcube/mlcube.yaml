@@ -9,7 +9,7 @@
 name: MLCommons GaNDLF Generic MLCube
 description: MLCommons GaNDLF MLCube, containing functionality for model training, inference and data construction.
 authors: 
- - {name: "MLCommons Medical Working Group"}
+ - {name: "MLCommons Medical Working Group", email: "medical@mlcommons.org", org: "MLCommons" }
 
 ## Specifies hardware and software requirements.
 platform:
@@ -31,6 +31,11 @@ docker:
   build_context: "../"
   # Docker file name within docker build context. Any "Dockerfile-*" in the GaNDLF source repo is valid.
   build_file: "Dockerfile-CUDA10.2"
+  
+  # These settings should be set by global MLCube configuration, generally not per-deployment.
+  # However, some sane defaults (for Docker >19.03) are here:
+  # env_args: CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
+  # gpu_args: --gpus all
   
 
 singularity:
