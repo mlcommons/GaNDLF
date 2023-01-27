@@ -28,9 +28,12 @@ def recover_config(modelDir, outputFile):
                 'device',
                 'subject_spacing', 
             ]
-            for entry in removable_entries:
-                if entry in parameters:
-                    del parameters[entry]
+            for param in parameters:
+                print(f"For param: {param} :")
+                res = yaml.safe_dump( {parameters[param]} )
+            #for entry in removable_entries:
+            #    if entry in parameters:
+            #        del parameters[entry]
             with open(outputFile, 'w') as f:
                 print(parameters)
                 f.write(yaml.safe_dump(parameters, default_flow_style=False))
