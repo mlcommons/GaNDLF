@@ -14,7 +14,14 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction, config_generator, run_deployment, recover_config
+from GANDLF.cli import (
+    main_run,
+    preprocess_and_save,
+    patch_extraction,
+    config_generator,
+    run_deployment,
+    recover_config,
+)
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -2536,11 +2543,11 @@ def test_generic_cli_function_configgenerator():
 
     print("passed")
 
+
 def test_generic_cli_function_recoverconfig():
     print("45: Testing cli function for recover_config")
     # Train, then recover a config and see if it exists/is valid YAML
-    
-    
+
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -2568,21 +2575,21 @@ def test_generic_cli_function_recoverconfig():
         reset=True,
     )
     output_config_path = get_temp_config_path()
-    assert recover_config(outputDir, output_config_path), "recover_config returned false"
+    assert recover_config(
+        outputDir, output_config_path
+    ), "recover_config returned false"
     assert os.path.exists(output_config_path), "Didn't create a config file"
-    
-    new_params = parseConfig(
-                output_config_path, version_check_flag=False
-            )
+
+    new_params = parseConfig(output_config_path, version_check_flag=False)
     assert new_params, "Created YAML could not be parsed by parseConfig"
-    
+
     print("passed")
-    
+
+
 def test_generic_deploy_docker():
     print("46: Testing deployment of a model to Docker")
     # Train, then try deploying that model (requires an installed Docker engine)
 
-    
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -2609,8 +2616,14 @@ def test_generic_deploy_docker():
         resume=False,
         reset=True,
     )
-    
-    result = run_deployment(outputDir, testingDir + "/config_segmentation.yaml", "docker", deploymentOutputDir, os.path.join(gandlfRootDir, "mlcube"))
-    
+
+    result = run_deployment(
+        outputDir,
+        testingDir + "/config_segmentation.yaml",
+        "docker",
+        deploymentOutputDir,
+        os.path.join(gandlfRootDir, "mlcube"),
+    )
+
     assert result, "run_deployment returned false"
     print("passed")
