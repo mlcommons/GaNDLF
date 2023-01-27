@@ -66,12 +66,20 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     #del mlcube_config["tasks"]["training"]["parameters"]["inputs"]["config"]
     #del mlcube_config["tasks"]["inference"]["parameters"]["inputs"]["config"]
     
+    # Change output so that each task always places secondary output in the workspace
     mlcube_config["tasks"]["training"]["parameters"]["outputs"]["outputdir"] = {"type": "directory", "default":"/model"}
     mlcube_config["tasks"]["inference"]["parameters"]["outputs"]["outputdir"] = {"type": "directory", "default":"/inference"}
     
-    mlcube_config["tasks"]["training"]["entrypoint"] = mlcube_config["tasks"]["training"]["entrypoint"] + " --modelDir /embedded_model/"
-    
+    # Change entrypoints to point specifically to the embedded model
+    mlcube_config["tasks"]["training"]["entrypoint"] = mlcube_config["tasks"]["training"]["entrypoint"] + " --modelDir /embedded_model/" 
     mlcube_config["tasks"]["inference"]["entrypoint"] = mlcube_config["tasks"]["inference"]["entrypoint"] + " --modelDir /embedded_model/"
+    
+    # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
+    # In either case, the embedded model will not change persistently. 
+    # The output in workspace will be the result of resuming training with new data on the embedded model.
+    mlcube_config["tasks"]["training_from_reset"] = mlcube_config["tasks"]["training"]
+    mlcube_config["tasks"]["training_from_reset"]["entrypoint"] = mlcube_config["tasks"]["training_from_reset"]["entrypoint"] + " --reset True"
+    mlcube_config["tasks"]["training"]["entrypoint"] = mlcube_config["tasks"]["training"]["entrypoint"] + " --resume True"
     
     mlcube_config["docker"]["build_strategy"] = "auto"
     

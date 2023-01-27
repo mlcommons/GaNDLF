@@ -2,6 +2,8 @@ import yaml
 import pickle
 import os
 
+
+
 def recover_config(modelDir, outputFile):
     if not os.path.exists(modelDir):
         print("The model directory does not appear to exist. Please check parameters.")
@@ -15,9 +17,22 @@ def recover_config(modelDir, outputFile):
         with open(pickle_location, "rb") as handle:
             parameters = pickle.load(handle)
             os.makedirs(os.path.dirname(outputFile), exist_ok=True)
+            
+            # Remove a few problematic objects from the output
+            removable_entries = [
+                'output_dir',
+                'second_output_dir',
+                'training_data',
+                'validation_data',
+                'testing_data',
+                'device'
+            ]
+            for entry in removable_entries:
+                if entry in parameters:
+                    del parameters[entry]
             with open(outputFile, 'w') as f:
                 print(parameters)
-                f.write(yaml.dump(parameters, default_flow_style=False))
+                f.write(yaml.safe_dump(parameters, default_flow_style=False))
     
     print(f"Config written to {outputFile}.")
     return True
