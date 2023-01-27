@@ -126,5 +126,5 @@ tasks:
         mlcube: True, # dummy arg that extractConfig will detect for this case
       }
       outputs: {
-        outputFile: {type: "file", default: "recovered_config.yml",
+        outputFile: {type: "file", default: "recovered_config.yml"},
       }
