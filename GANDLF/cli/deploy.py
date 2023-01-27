@@ -42,6 +42,7 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
 def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Set up docker client for any future calls
     docker_client = docker.from_env()
+    print("Connected to the docker service.")
     
     mlcube_config_file = mlcubedir+"/mlcube.yaml"
     if not os.path.exists(mlcube_config_file):
@@ -51,7 +52,6 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     os.makedirs(outputdir+"/workspace", exist_ok=True)
     shutil.copytree(mlcubedir+"/workspace", outputdir+"/workspace", dirs_exist_ok=True)
     shutil.copyfile(config, outputdir+"/workspace/config.yml")
-    
     
     
     # First grab the existing the mlcube config then modify for the embedded-model image.
@@ -94,6 +94,9 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Requires mlcube_docker python package to be installed with scripts available
     command_to_run = "mlcube_docker configure --platform=docker  -Pdocker.build_strategy=always" + " --mlcube=" + os.path.realpath(mlcubedir) + " -Pdocker.build_context=" + gandlf_root
     
+    print("Running MLCube configuration with the following command:")
+    print(command_to_run)
+    
     if os.system(command_to_run) > 0:
         print("Error: mlcube_docker configuration failed. Check output for more details.")
         return False
@@ -101,6 +104,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
     container = docker_client.containers.create(docker_tag)
     
+    print("Attempting to embed the model...")
     
     # Tarball the modeldir, config.yml and mlcube.yaml into memory, insert into container
     modeldir_file_io = io.BytesIO()
