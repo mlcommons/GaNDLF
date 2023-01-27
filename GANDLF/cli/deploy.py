@@ -4,6 +4,7 @@ import yaml
 import docker
 import tarfile
 import io
+import copy
 
 deploy_targets = [
     "docker",
@@ -94,7 +95,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
     # In either case, the embedded model will not change persistently.
     # The output in workspace will be the result of resuming training with new data on the embedded model.
-    mlcube_config["tasks"]["training_from_reset"] = mlcube_config["tasks"]["training"]
+    mlcube_config["tasks"]["training_from_reset"] = copy.deepcopy(mlcube_config["tasks"]["training"])
     mlcube_config["tasks"]["training_from_reset"]["entrypoint"] = (
         mlcube_config["tasks"]["training_from_reset"]["entrypoint"] + " --reset True"
     )
@@ -105,7 +106,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     mlcube_config["docker"]["build_strategy"] = "auto"
 
     with open(output_mlcube_config_path, "w") as f:
-        f.write(yaml.dump(mlcube_config, default_flow_style=False))
+        f.write(yaml.dump(mlcube_config, sort_keys=False, default_flow_style=False))
 
     # This tag will be modified later by our deployment mechanism
     docker_image = mlcube_config["docker"]["image"]
