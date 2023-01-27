@@ -61,8 +61,8 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     
     output_mlcube_config_path = outputdir+"/mlcube.yaml"
     
-    del mlcube_config["tasks"]["training"]["parameters"]["outputs"]["modelDir"]
-    del mlcube_config["tasks"]["inference"]["parameters"]["inputs"]["modelDir"]
+    del mlcube_config["tasks"]["training"]["parameters"]["outputs"]["modeldir"]
+    del mlcube_config["tasks"]["inference"]["parameters"]["inputs"]["modeldir"]
     #del mlcube_config["tasks"]["training"]["parameters"]["inputs"]["config"]
     #del mlcube_config["tasks"]["inference"]["parameters"]["inputs"]["config"]
     
