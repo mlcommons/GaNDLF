@@ -28,7 +28,7 @@ def recover_config(modelDir, outputFile):
                 'device',
                 'subject_spacing', 
             ]
-
+            print(parameters)
             for entry in removable_entries:
                 if entry in parameters:
                     del parameters[entry]
