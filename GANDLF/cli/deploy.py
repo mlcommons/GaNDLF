@@ -29,7 +29,7 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
         print(f"Error: The model path {modeldir} exists but is not a directory.")
         return False
     if not os.path.exists(configfile):
-        print(f"Error: the config file {configfile} does not exist."
+        print(f"Error: the config file {configfile} does not exist.")
         return False
     
     if target.tolower() == 'docker':
