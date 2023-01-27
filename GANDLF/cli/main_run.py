@@ -46,7 +46,7 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
                     )
 
     parameters["output_dir"] = output_dir
-    if second_output_dir:
+    if second_output_dir: # only placed in params if not empty string
         parameters["second_output_dir"] = second_output_dir
     
 

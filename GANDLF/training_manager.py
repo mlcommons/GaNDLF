@@ -304,7 +304,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
         currentTestingFold += 1  # go to next fold
     
     # End by copying all results, if requested
-    if parameters.has_key("second_output_dir"):
+    if "second_output_dir" in parameters:
         shutil.copytree(Path(outputDir), Path(parameters["second_output_dir"]), dirs_exist_ok=True)
 
 
