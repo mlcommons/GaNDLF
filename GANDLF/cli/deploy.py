@@ -33,7 +33,7 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
         return False
     
     if target.lower() == 'docker':
-        if not deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
+        if not deploy_docker_mlcube(modeldir, configfile, outputdir, mlcubedir):
             print("Error: Something went wrong during platform-specific deployment.")
             return False
     
