@@ -123,7 +123,7 @@ tasks:
     entrypoint: "python3.8 gandlf_recoverConfig"
     parameters: 
       inputs: {
-        mlcube: True, # dummy arg that extractConfig will detect for this case
+        mlcube: "x", # dummy arg that extractConfig will detect for this case
       }
       outputs: {
         outputFile: {type: "file", default: "recovered_config.yml"},
