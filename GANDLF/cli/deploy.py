@@ -75,11 +75,11 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     # Change output so that each task always places secondary output in the workspace
     mlcube_config["tasks"]["training"]["parameters"]["outputs"]["outputdir"] = {
         "type": "directory",
-        "default": "/model",
+        "default": "model/",
     }
     mlcube_config["tasks"]["inference"]["parameters"]["outputs"]["outputdir"] = {
         "type": "directory",
-        "default": "/inference",
+        "default": "inference/",
     }
 
     # Change entrypoints to point specifically to the embedded model
