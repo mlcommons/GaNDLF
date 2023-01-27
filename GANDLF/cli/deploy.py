@@ -178,7 +178,9 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     print(
         f"This image should be distributed with the MLCube directory created at {outputdir}."
     )
-    print("You may now push this image (e.g. to Docker Hub) as normal. By doing so, the user will need only the MLCube directory in order to pull and run the image.")
+    print(
+        "You may now push this image (e.g. to Docker Hub) as normal. By doing so, the user will need only the MLCube directory in order to pull and run the image."
+    )
     print(
         f"To run this container as an MLCube, you (or the end-user) should invoke the MLCube runner with --mlcube={outputdir} ."
     )
