@@ -496,19 +496,19 @@ def training_loop(
         # save the latest model
         if os.path.exists(model_paths["latest"]):
             os.remove(model_paths["latest"])
-            save_model(
-                {
-                    "epoch": 0,
-                    "model_state_dict": model_dict,
-                    "optimizer_state_dict": optimizer.state_dict(),
-                    "loss": best_loss,
-                },
-                model,
-                params,
-                model_paths["latest"],
-                onnx_export=False,
-            )
-            print("Latest model saved.")
+        save_model(
+            {
+                "epoch": 0,
+                "model_state_dict": model_dict,
+                "optimizer_state_dict": optimizer.state_dict(),
+                "loss": best_loss,
+            },
+            model,
+            params,
+            model_paths["latest"],
+            onnx_export=False,
+        )
+        print("Latest model saved.")
         print("Current Best epoch: ", best_train_idx)
 
         if patience > params["patience"]:
