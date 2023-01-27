@@ -14,7 +14,7 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction, config_generator
+from GANDLF.cli import main_run, preprocess_and_save, patch_extraction, config_generator, run_deployment, recover_config
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -74,6 +74,8 @@ baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
 inputDir = os.path.join(testingDir, "data")
 outputDir = os.path.join(testingDir, "data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
+deploymentOutputDir = os.path.join(outputDir, "mlcube")
+gandlfRootDir = Path(__file__).parent.parent.absolute().__str__()
 
 
 """
@@ -2532,4 +2534,83 @@ def test_generic_cli_function_configgenerator():
 
     print("Exception raised:", exc_info.value)
 
+    print("passed")
+
+def test_generic_cli_function_recoverconfig():
+    print("45: Testing cli function for recover_config")
+    # Train, then recover a config and see if it exists/is valid YAML
+    
+    
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    # patch_size is custom for sdnet
+    parameters["patch_size"] = [224, 224, 1]
+    parameters["batch_size"] = 2
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["num_channels"] = 1
+    parameters["model"]["architecture"] = "sdnet"
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    output_config_path = get_temp_config_path()
+    assert recover_config(outputDir, output_config_path), "recover_config returned false"
+    assert os.path.exists(output_config_path), "Didn't create a config file"
+    
+    new_params = parseConfig(
+                output_config_path, version_check_flag=False
+            )
+    assert new_params, "Created YAML could not be parsed by parseConfig"
+    
+    print("passed")
+    
+def test_generic_deploy_docker():
+    print("46: Testing deployment of a model to Docker")
+    # Train, then try deploying that model (requires an installed Docker engine)
+
+    
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    # patch_size is custom for sdnet
+    parameters["patch_size"] = [224, 224, 1]
+    parameters["batch_size"] = 2
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["num_channels"] = 1
+    parameters["model"]["architecture"] = "sdnet"
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    
+    result = run_deployment(outputDir, testingDir + "/config_segmentation.yaml", "docker", deploymentOutputDir, os.path.join(gandlfRootDir, "mlcube"))
+    
+    assert result, "run_deployment returned false"
     print("passed")

@@ -49,7 +49,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     print("Connected to the docker service.")
 
     mlcube_config_file = mlcubedir + "/mlcube.yaml"
-    if not os.path.exists(mlcube_config_file):
+    if not (os.path.exists(mlcubedir) and os.path.exists(mlcube_config_file)):
         print("Error: This does not appear to be a valid MLCube directory.")
         return False
 
