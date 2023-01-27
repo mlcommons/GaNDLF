@@ -19,7 +19,8 @@ def recover_config(modelDir, outputFile):
             os.makedirs(os.path.dirname(outputFile), exist_ok=True)
             
             # Remove a few problematic objects from the output
-            # These cannot be safe_dumped to YAML (or present other problems)
+            # These cannot be safe_dumped to YAML (or present other problems).
+            # To avoid this, try to use primitives and don't use integers as dict keys.
             removable_entries = [
                 'output_dir',
                 'second_output_dir',
@@ -31,14 +32,11 @@ def recover_config(modelDir, outputFile):
                 'weights',
                 'class_weights'
             ]
-            print(parameters)
+
             for entry in removable_entries:
                 if entry in parameters:
                     del parameters[entry]
-                    
-            for param in parameters:
-                print(f"For param: {param} :")
-                res = yaml.safe_dump( {"this": parameters[param]} )
+                
                 
             with open(outputFile, 'w') as f:
                 print(parameters)
