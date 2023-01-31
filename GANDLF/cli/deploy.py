@@ -31,15 +31,11 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
         modeldir
     ), f"The model path {modeldir} exists but is not a directory."
 
-    assert os.path.exists(
-        configfile
-    ), f"The config file {configfile} does not exist."
+    assert os.path.exists(configfile), f"The config file {configfile} does not exist."
 
     if target.lower() == "docker":
         result = deploy_docker_mlcube(modeldir, configfile, outputdir, mlcubedir)
-        assert (
-            result
-        ), "Something went wrong during platform-specific deployment."
+        assert result, "Something went wrong during platform-specific deployment."
 
     return True
 
