@@ -58,14 +58,11 @@ if __name__ == "__main__":
         os.makedirs(args.outputdir, exist_ok=True)
     
     if not args.config:
-        if not recover_config(args.model, args.outputdir+"/original_config.yml"):
-            print("Error: No config was specified but automatic config extraction failed.")
-            sys.exit(1)
-        
+        result = recover_config(args.model, args.outputdir+"/original_config.yml"):
+        assert result, "Error: No config was specified but automatic config extraction failed."
         config_to_use = args.outputdir+"/original_config.yml"
     else:
         config_to_use = args.config
     
-    if not run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcube_root):
-        print("Deployment to the target platform failed.")
-        sys.exit(1)
+    result = run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcube_root):
+    assert result, "Deployment to the target platform failed."

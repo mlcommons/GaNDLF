@@ -14,32 +14,22 @@ deploy_targets = [
 
 
 def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
-    if target not in deploy_targets:
-        print(f"Error: The deployment target {target} is not a valid target.")
-        return False
+    assert target in deploy_targets, f"Error: The deployment target {target} is not a valid target."
 
     if not os.path.exists(outputdir):
         os.makedirs(outputdir, exist_ok=True)
 
-    if os.path.isfile(outputdir):
-        print(
-            f"Error: Output location {args.outputdir} exists but is a file, not a directory."
-        )
-        return False
-    if not os.path.exists(modeldir):
-        print(f"Error: The model path {modeldir} does not exist.")
-        return False
-    if not os.path.isdir(modeldir):
-        print(f"Error: The model path {modeldir} exists but is not a directory.")
-        return False
-    if not os.path.exists(configfile):
-        print(f"Error: the config file {configfile} does not exist.")
-        return False
+    assert os.path.isfile(outputdir), f"Error: Output location {outputdir} exists but is a file, not a directory."
+
+    assert os.path.exists(modeldir), f"Error: The model path {modeldir} does not exist."
+
+    assert os.path.isdir(modeldir), f"Error: The model path {modeldir} exists but is not a directory."
+
+    assert os.path.exists(configfile), f"Error: the config file {configfile} does not exist."
 
     if target.lower() == "docker":
-        if not deploy_docker_mlcube(modeldir, configfile, outputdir, mlcubedir):
-            print("Error: Something went wrong during platform-specific deployment.")
-            return False
+        result = deploy_docker_mlcube(modeldir, configfile, outputdir, mlcubedir)
+        assert result, "Error: Something went wrong during platform-specific deployment."
 
     return True
 
@@ -50,9 +40,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     print("Connected to the docker service.")
 
     mlcube_config_file = mlcubedir + "/mlcube.yaml"
-    if not (os.path.exists(mlcubedir) and os.path.exists(mlcube_config_file)):
-        print("Error: This does not appear to be a valid MLCube directory.")
-        return False
+    assert (os.path.exists(mlcubedir) and os.path.exists(mlcube_config_file)), "Error: This does not appear to be a valid MLCube directory."
 
     os.makedirs(outputdir + "/workspace", exist_ok=True)
     shutil.copytree(
@@ -132,11 +120,8 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
         "If this is your first GaNDLF deployment, this may take longer than usual while image layers are built."
     )
 
-    if os.system(command_to_run) > 0:
-        print(
-            "Error: mlcube_docker configuration failed. Check output for more details."
-        )
-        return False
+    assert os.system(command_to_run) == 0, "Error: mlcube_docker configuration failed. Check output for more details."
+
 
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
     container = docker_client.containers.create(docker_image)
@@ -194,5 +179,5 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
 
 ## TODO!
 ## If implemented, even users who can't install singularity/docker/python could run frozen models.
-def deploy_onefile(modeldir, config, outputdir):
-    raise NotImplementedError
+#def deploy_onefile(modeldir, config, outputdir):
+#    raise NotImplementedError

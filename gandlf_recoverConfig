@@ -47,8 +47,7 @@ if __name__ == "__main__":
     else:
         search_dir = args.modeldir
         
-    if not recover_config(search_dir, args.outputFile):
-        print("Config file recovery failed.")
-        sys.exit(1)
+    result = recover_config(search_dir, args.outputFile):
+    assert result, "Config file recovery failed."
         
     
