@@ -16,30 +16,30 @@ deploy_targets = [
 def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
     assert (
         target in deploy_targets
-    ), f"Error: The deployment target {target} is not a valid target."
+    ), f"The deployment target {target} is not a valid target."
 
     if not os.path.exists(outputdir):
         os.makedirs(outputdir, exist_ok=True)
 
     assert os.path.isfile(
         outputdir
-    ), f"Error: Output location {outputdir} exists but is a file, not a directory."
+    ), f"Output location {outputdir} exists but is a file, not a directory."
 
     assert os.path.exists(modeldir), f"Error: The model path {modeldir} does not exist."
 
     assert os.path.isdir(
         modeldir
-    ), f"Error: The model path {modeldir} exists but is not a directory."
+    ), f"The model path {modeldir} exists but is not a directory."
 
     assert os.path.exists(
         configfile
-    ), f"Error: the config file {configfile} does not exist."
+    ), f"The config file {configfile} does not exist."
 
     if target.lower() == "docker":
         result = deploy_docker_mlcube(modeldir, configfile, outputdir, mlcubedir)
         assert (
             result
-        ), "Error: Something went wrong during platform-specific deployment."
+        ), "Something went wrong during platform-specific deployment."
 
     return True
 
@@ -52,7 +52,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
     mlcube_config_file = mlcubedir + "/mlcube.yaml"
     assert os.path.exists(mlcubedir) and os.path.exists(
         mlcube_config_file
-    ), "Error: This does not appear to be a valid MLCube directory."
+    ), "MLCube Directory: This does not appear to be a valid MLCube directory."
 
     os.makedirs(outputdir + "/workspace", exist_ok=True)
     shutil.copytree(
@@ -134,7 +134,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
 
     assert (
         os.system(command_to_run) == 0
-    ), "Error: mlcube_docker configuration failed. Check output for more details."
+    ), "mlcube_docker configuration failed. Check output for more details."
 
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
     container = docker_client.containers.create(docker_image)
