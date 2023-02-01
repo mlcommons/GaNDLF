@@ -22,7 +22,7 @@ def recover_config(modelDir, outputFile):
         # To avoid this, try to use primitives and don't use integers as dict keys.
         removable_entries = [
             "output_dir",
-            "second_output_dir",
+            "model_dir_embedded",
             "training_data",
             "validation_data",
             "testing_data",

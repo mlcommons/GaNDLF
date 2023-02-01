@@ -22,8 +22,8 @@ def InferenceManager(dataframe, outputDir, parameters, device):
 
     n_folds = parameters["nested_training"]["validation"]
 
-    if "second_output_dir" in parameters:
-        outputDir = outputDir + "," + parameters["second_output_dir"]
+    if "model_dir_embedded" in parameters:
+        outputDir = outputDir + "," + parameters["model_dir_embedded"]
     outputDir_split = [outputDir]
     if "," in outputDir:
         outputDir_split = outputDir.split(",")

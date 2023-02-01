@@ -16,7 +16,7 @@ def main_run(
     device,
     resume,
     reset,
-    second_output_dir="",
+    model_dir_embedded="",
 ):
     """
     Main function that runs the training and inference.
@@ -55,9 +55,9 @@ def main_run(
                     )
 
     parameters["output_dir"] = output_dir
-    if second_output_dir:  # only placed in params if not empty string
-        parameters["second_output_dir"] = second_output_dir
-        Path(parameters["second_output_dir"]).mkdir(parents=True, exist_ok=True)
+    if model_dir_embedded:  # only placed in params if not empty string
+        parameters["model_dir_embedded"] = model_dir_embedded
+        Path(parameters["model_dir_embedded"]).mkdir(parents=True, exist_ok=True)
 
     if "-1" in device:
         device = "cpu"
