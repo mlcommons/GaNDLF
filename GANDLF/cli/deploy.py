@@ -23,7 +23,7 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
         target (str): The target to deploy to.
         outputdir (str): The path to the output directory.
         mlcubedir (str): The path to the mlcube directory.
-        
+
     Returns:
         bool: True if the deployment was successful, False otherwise.
     """
