@@ -188,5 +188,12 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
 
 ## TODO!
 ## If implemented, even users who can't install singularity/docker/python could run frozen models.
+## https://nuitka.net/ (Nuitka) can generate one-file binaries from python scripts, and can include additional files in the bundled self-extracting filesystem.
+## https://pyinstaller.org/en/stable/ (PyInstaller) can do the same, albeit with a different approach.
+## By bundling both GaNDLF and the required model/config files in one executable, we could have true drag-and-drop deployment of GaNDLF models.
+## This is ideal, because then not even docker / singularity engines are needed.
+## However, both of the above have occasional problems with certain packages (such as SimpleITK or Torch).
+## In both cases, deployments need to be done on the corresponding platform/architecture, including separate CUDA/Torch versions.
+## To implement this will need a lot of experimentation with each compiler/freezer and our own packages.
 # def deploy_onefile(modeldir, config, outputdir):
 #    raise NotImplementedError
