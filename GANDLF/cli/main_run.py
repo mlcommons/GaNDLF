@@ -57,14 +57,13 @@ def main_run(
     parameters["output_dir"] = output_dir
     if second_output_dir:  # only placed in params if not empty string
         parameters["second_output_dir"] = second_output_dir
+        Path(parameters["second_output_dir"]).mkdir(parents=True, exist_ok=True)
 
     if "-1" in device:
         device = "cpu"
 
     if train_mode:  # train mode
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
-        if second_output_dir:
-            Path(parameters["second_output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
     if "," in file_data_full:
