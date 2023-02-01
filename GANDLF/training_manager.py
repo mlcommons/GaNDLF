@@ -80,7 +80,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
     # start the kFold train for testing
     for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
-
         # ensure the validation fold is initialized per-testing split
         currentValidationFold = 0
 
@@ -186,7 +185,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
         for train_index, val_index in kf_validation.split(
             current_training_subject_indeces_full
         ):
-
             # the output of the current fold is only needed if multi-fold training is happening
             if singleFoldValidation:
                 currentValOutputFolder = currentOutputFolder

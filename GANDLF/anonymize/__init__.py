@@ -32,7 +32,6 @@ def run_anonymizer(
         parameters = yaml.safe_load(yaml_data)
 
     if "rad" in parameters["modality"]:
-
         # initialize defaults
         if "delete_private_tags" not in parameters:
             parameters["delete_private_tags"] = True

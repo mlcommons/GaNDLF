@@ -276,7 +276,6 @@ def parseConfig(config_file_path, version_check_flag=True):
     params = initialize_key(params, "data_augmentation", {})
     if not (params["data_augmentation"] is None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
-
             # special case for random swapping and elastic transformations - which takes a patch size for computation
             for key in ["swap", "elastic"]:
                 if key in params["data_augmentation"]:
@@ -499,7 +498,6 @@ def parseConfig(config_file_path, version_check_flag=True):
             params["data_postprocessing"].pop(key)
 
     if "model" in params:
-
         if not (isinstance(params["model"], dict)):
             sys.exit("The 'model' parameter needs to be populated as a dictionary")
         elif len(params["model"]) == 0:  # only proceed if something is defined
