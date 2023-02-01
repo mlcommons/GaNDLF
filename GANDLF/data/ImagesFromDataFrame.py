@@ -187,10 +187,11 @@ def ImagesFromDataFrame(
                 print(
                     "Subject '"
                     + subject["subject_id"]
-                    + "' could not be loaded due to the following exception:"
+                    + "' could not be loaded due to the following exception: {}".format(
+                        type(exception).__name__
+                    )
+                    + "; message: {}".format(exception)
                 )
-                print("Exception: {}".format(type(exception).__name__))
-                print("Exception message: {}".format(exception))
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:
