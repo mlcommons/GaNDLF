@@ -81,7 +81,6 @@ baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
 inputDir = os.path.join(testingDir, "data")
 outputDir = os.path.join(testingDir, "data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
-deploymentOutputDir = os.path.join(outputDir, "mlcube")
 gandlfRootDir = Path(__file__).parent.parent.absolute().__str__()
 
 
@@ -2590,6 +2589,7 @@ def test_generic_deploy_docker():
     print("46: Testing deployment of a model to Docker")
     # Train, then try deploying that model (requires an installed Docker engine)
 
+    deploymentOutputDir = os.path.join(outputDir, "mlcube")
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False

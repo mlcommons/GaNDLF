@@ -21,7 +21,7 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
     if not os.path.exists(outputdir):
         os.makedirs(outputdir, exist_ok=True)
 
-    assert os.path.isfile(
+    assert not os.path.isfile(
         outputdir
     ), f"Output location {outputdir} exists but is a file, not a directory."
 
