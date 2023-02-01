@@ -33,8 +33,7 @@ def recover_config(modelDir, outputFile):
         ]
 
         for entry in removable_entries:
-            if entry in parameters:
-                del parameters[entry]
+            parameters. Pop(entry, None)
 
         with open(outputFile, "w") as f:
             print(parameters)
