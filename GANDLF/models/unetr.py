@@ -123,7 +123,6 @@ class _UpsampleBlock(nn.Sequential):
         )
 
     def forward(self, x):
-
         x = self.conv1(x)
         x = self.norm1(x)
         x = self.relu1(x)
@@ -150,7 +149,6 @@ class _MLP(nn.Sequential):
         self.add_module("gelu2", nn.GELU())
 
     def forward(self, x):
-
         x = self.norm(x)
         x = self.linear1(x)
         x = self.gelu1(x)
@@ -183,7 +181,6 @@ class _MSA(nn.Module):
         return x.permute(0, 2, 1, 3)
 
     def forward(self, x):
-
         query = self.reshape(self.query(x))
         key = self.reshape(self.key(x))
         value = self.reshape(self.value(x))
