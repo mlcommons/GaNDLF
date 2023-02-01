@@ -54,6 +54,15 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
 
 
 def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
+    """
+    Deploy the docker mlcube of the model.
+
+    Args:
+        modeldir (str): The path to the model directory.
+        config (str): The path to the configuration file.
+        outputdir (str): The path to the output directory.
+        mlcubedir (str): The path to the mlcube directory.
+    """
     # Set up docker client for any future calls
     docker_client = docker.from_env()
     print("Connected to the docker service.")
