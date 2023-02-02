@@ -13,7 +13,7 @@ RUN python3.8 -m pip install openvino-dev==2022.1.0 opencv-python-headless mlcub
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
 RUN python3.8 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
-    && python 3.8 -m pip install -r ./requirements.txt
+    && python3.8 -m pip install -r ./requirements.txt
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
