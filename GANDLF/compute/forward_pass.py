@@ -187,19 +187,19 @@ def validate_network(
                     )
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
-            pred_output /= params["scaling_factor"]
 
             if is_inference and is_classification:
                 logits_list.append(pred_output)
                 subject_id_list.append(subject.get("subject_id")[0])
 
             if params["save_output"] or is_inference:
+                # we divide by scaling factor here because we multiply by it during loss/metric calculation
                 outputToWrite += (
                     str(epoch)
                     + ","
                     + subject["subject_id"][0]
                     + ","
-                    + str(pred_output.cpu().max().item())
+                    + str(pred_output.cpu().max().item() / params["scaling_factor"])
                     + "\n"
                 )
             final_loss, final_metric = get_loss_and_metrics(
