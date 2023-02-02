@@ -70,7 +70,7 @@ if __name__ == "__main__":
         os.makedirs(args.outputdir, exist_ok=True)
     
     if not args.config:
-        result = recover_config(args.model, args.outputdir+"/original_config.yml"):
+        result = recover_config(args.model, args.outputdir+"/original_config.yml")
         assert result, "Error: No config was specified but automatic config extraction failed."
         config_to_use = args.outputdir+"/original_config.yml"
     else:
