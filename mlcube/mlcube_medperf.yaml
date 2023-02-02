@@ -34,9 +34,9 @@ docker:
   
   # These settings should usually be set by global MLCube configuration, generally not per-deployment.
   # However, some sane defaults (for Docker >19.03) are here:
-  env_args:
-    CUDA_VISIBLE_DEVICES: "${CUDA_VISIBLE_DEVICES}"
-  gpu_args: --gpus all
+  #env_args:
+  #  CUDA_VISIBLE_DEVICES: "${oc.env:CUDA_VISIBLE_DEVICES}"
+  #gpu_args: --gpus all
   
 
 singularity:
