@@ -49,23 +49,32 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
     if "-1" in device:
         device = "cpu"
 
-    if train_mode:  # train mode
+    if train_mode:
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
     if "," in file_data_full:
         # training and validation pre-split
         data_full = None
-        both_csvs = file_data_full.split(",")
-        data_train, headers_train = parseTrainingCSV(both_csvs[0], train=train_mode)
+        all_csvs = file_data_full.split(",")
+        data_train, headers_train = parseTrainingCSV(all_csvs[0], train=train_mode)
         data_validation, headers_validation = parseTrainingCSV(
-            both_csvs[1], train=train_mode
+            all_csvs[1], train=train_mode
         )
+        assert (
+            headers_train == headers_validation
+        ), "The training and validation CSVs do not have the same header information."
 
-        if headers_train != headers_validation:
-            sys.exit(
-                "The training and validation CSVs do not have the same header information."
+        # testing data is present
+        data_testing = None
+        headers_testing = headers_train
+        if len(all_csvs) == 3:
+            data_testing, headers_testing = parseTrainingCSV(
+                all_csvs[2], train=train_mode
             )
+        assert (
+            headers_train == headers_testing
+        ), "The training and testing CSVs do not have the same header information."
 
         parameters = populate_header_in_parameters(parameters, headers_train)
         # if we are here, it is assumed that the user wants to do training
@@ -73,6 +82,7 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
             TrainingManager_split(
                 dataframe_train=data_train,
                 dataframe_validation=data_validation,
+                dataframe_testing=data_testing,
                 outputDir=parameters["output_dir"],
                 parameters=parameters,
                 device=device,

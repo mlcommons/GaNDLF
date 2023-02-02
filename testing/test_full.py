@@ -1367,6 +1367,21 @@ def test_generic_cli_function_mainrun(device):
     )
     sanitize_outputDir()
 
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    # testing train/valid/test split
+    main_run(
+        file_data + "," + file_data + "," + file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device,
+        resume=False,
+        reset=True,
+    )
+    sanitize_outputDir()
+
     print("passed")
 
 

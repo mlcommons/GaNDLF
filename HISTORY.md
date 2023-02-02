@@ -5,6 +5,7 @@
 - Allowing provision for user to generate multiple configurations for experimentation
 - Added ability to combine classification inference results from different architectures
 - Added ability to save `initial` and `latest` models in addition to `best`
+- Added ability to specify testing data csv in main cli
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
