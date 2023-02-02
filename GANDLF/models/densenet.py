@@ -110,7 +110,6 @@ class DenseNet(ModelBase):
         parameters: dict,
         block_config=(6, 12, 24, 16),
     ):
-
         super(DenseNet, self).__init__(parameters)
 
         # defining some defaults

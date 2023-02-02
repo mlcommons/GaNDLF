@@ -84,7 +84,6 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
             hue=hue,
         )
         for _, image in self.get_images_dict(subject).items():
-
             # proceed with processing only if the image is RGB
             if image.data.shape[-1] == 1:
                 temp = image.data

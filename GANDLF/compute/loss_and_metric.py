@@ -81,7 +81,6 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         ground_truth_prev = ground_truth.detach()
         for i, _ in enumerate(predicted):
             if ground_truth_prev[0].shape != predicted[i][0].shape:
-
                 # we get the expected shape of resampled ground truth
                 expected_shape = reverse_one_hot(
                     predicted[i][0].detach(), params["model"]["class_list"]
