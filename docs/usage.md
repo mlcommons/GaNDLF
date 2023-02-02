@@ -349,8 +349,8 @@ docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandl
 ## MLCubes
 
 GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/).
-This involves distributing an "mlcube.yaml" file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/) to automatically configure your GaNDLF image.
-The configured image can then be run with the same runner, which will perform many aspects of configuring your container for you.
+This involves distributing an "mlcube.yaml" file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/).
+The runner will perform many aspects of configuring your container for you.
 
 Currently, only the mlcube_docker runner is supported.
 
