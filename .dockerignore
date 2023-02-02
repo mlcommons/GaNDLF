@@ -1,3 +1,10 @@
+.git
+.github
+.gitignore
+.gitattributes
+docs
+samples
+testing
 venv/*
 *venv*
 __pycache__

@@ -44,7 +44,7 @@ if __name__ == "__main__":
         metavar="",
         type=str,
         default=os.path.dirname(os.path.realpath(__file__)) + "/mlcube",
-        help="Path to an alternative MLCUBE_ROOT directory to use as a template. The source repository contains an example (which is also the default) at {GaNDLF_ROOT}/mlcube .",
+        help="Path to an alternative MLCUBE_ROOT directory to use as a template (or a path to a specific mlcube YAML configuration file, in which case we will use the parent directory). The source repository contains an example (which is also the default) at {GaNDLF_ROOT}/mlcube .",
     )
     parser.add_argument(
         "-o",
@@ -54,6 +54,15 @@ if __name__ == "__main__":
         help="Output directory path. For MLCube builds, generates an MLCube directory to be distributed with your MLCube.",
         required=True,
     )
+    parser.add_argument(
+        "-g",
+        "--requires-gpu",
+        metavar="",
+        type=ast.literal_eval,
+        help="True if the model requires a GPU by default, False otherwise.",
+        default=True,
+    )
+        
 
     args = parser.parse_args()
     
@@ -67,5 +76,5 @@ if __name__ == "__main__":
     else:
         config_to_use = args.config
     
-    result = run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcube_root):
+    result = run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcube_root, args.requires_gpu):
     assert result, "Deployment to the target platform failed."

@@ -2623,6 +2623,7 @@ def test_generic_deploy_docker():
         "docker",
         deploymentOutputDir,
         os.path.join(gandlfRootDir, "mlcube"),
+        requires_gpu=True,
     )
 
     assert result, "run_deployment returned false"

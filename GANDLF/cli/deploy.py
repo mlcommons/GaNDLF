@@ -13,7 +13,7 @@ deploy_targets = [
 ]
 
 
-def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
+def run_deployment(modeldir, configfile, target, outputdir, mlcubedir, requires_gpu):
     """
     Run the deployment of the model.
 
@@ -47,13 +47,15 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir):
     assert os.path.exists(configfile), f"The config file {configfile} does not exist."
 
     if target.lower() == "docker":
-        result = deploy_docker_mlcube(modeldir, configfile, outputdir, mlcubedir)
+        result = deploy_docker_mlcube(
+            modeldir, configfile, outputdir, mlcubedir, requires_gpu
+        )
         assert result, "Something went wrong during platform-specific deployment."
 
     return True
 
 
-def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
+def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     """
     Deploy the docker mlcube of the model.
 
@@ -85,30 +87,47 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir):
 
     output_mlcube_config_path = outputdir + "/mlcube.yaml"
 
-    del mlcube_config["tasks"]["training"]["parameters"]["outputs"]["modeldir"]
-    del mlcube_config["tasks"]["inference"]["parameters"]["inputs"]["modeldir"]
-    # del mlcube_config["tasks"]["training"]["parameters"]["inputs"]["config"]
-    # del mlcube_config["tasks"]["inference"]["parameters"]["inputs"]["config"]
+    del mlcube_config["tasks"]["train"]["parameters"]["outputs"]["modeldir"]
+    del mlcube_config["tasks"]["infer"]["parameters"]["inputs"]["modeldir"]
+    del mlcube_config["tasks"]["train"]["parameters"]["inputs"]["config"]
+    # Currently disabled because we've decided exposing config-on-inference complicates the MLCube use case.
+    # del mlcube_config["tasks"]["infer"]["parameters"]["inputs"]["config"]
 
     # Change output so that each task always places secondary output in the workspace
-    mlcube_config["tasks"]["training"]["parameters"]["outputs"]["outputdir"] = {
+    mlcube_config["tasks"]["train"]["parameters"]["outputs"]["outputdir"] = {
         "type": "directory",
         "default": "model/",
     }
-    mlcube_config["tasks"]["inference"]["parameters"]["outputs"]["outputdir"] = {
+    mlcube_config["tasks"]["infer"]["parameters"]["outputs"]["outputdir"] = {
         "type": "directory",
         "default": "inference/",
     }
 
-    # Change entrypoints to point specifically to the embedded model
-    mlcube_config["tasks"]["training"]["entrypoint"] = (
-        mlcube_config["tasks"]["training"]["entrypoint"]
+    # Change entrypoints to point specifically to the embedded model and config
+    mlcube_config["tasks"]["train"]["entrypoint"] = (
+        mlcube_config["tasks"]["train"]["entrypoint"]
         + " --modeldir /embedded_model/"
+        + " --config /embedded_config.yml"
     )
-    mlcube_config["tasks"]["inference"]["entrypoint"] = (
-        mlcube_config["tasks"]["inference"]["entrypoint"]
+    mlcube_config["tasks"]["infer"]["entrypoint"] = (
+        mlcube_config["tasks"]["infer"]["entrypoint"]
         + " --modeldir /embedded_model/"
+        + " --config /embedded_config.yml"
     )
+
+    # Change some configuration if GPU is required by default
+    if requires_gpu:
+        mlcube_config["platform"]["accelerator_count"] = 1
+        mlcube_config["tasks"]["train"]["entrypoint"] = mlcube_config["tasks"]["train"][
+            "entrypoint"
+        ] = mlcube_config["tasks"]["train"]["entrypoint"].replace(
+            "--device cpu", "--device cuda"
+        )
+        mlcube_config["tasks"]["infer"]["entrypoint"] = mlcube_config["tasks"]["infer"][
+            "entrypoint"
+        ] = mlcube_config["tasks"]["infer"]["entrypoint"].replace(
+            "--device cpu", "--device cuda"
+        )
 
     # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
     # In either case, the embedded model will not change persistently.

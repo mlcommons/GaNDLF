@@ -53,11 +53,11 @@ tasks:
     entrypoint: "python3.8 gandlf_run --train True --device cpu"
     parameters:
       inputs: {
-        # Path to a data csv such as that constructed by the "construct_csv" task.
-        data_path: {type: "directory", default: "data/"},
         # Do NOT change the position of the "rawinput" parameter! It is relevant due to MLCube mounting rules.
         # Path to a directory with subjects for inference. "inputdata" above determines which files are used.
         rawinput: {type: "directory", default: "data/"},
+        # Path to a data csv such as that constructed by the "construct_csv" task.
+        data_path: {type: "directory", default: "data/"},
         # Path to a GaNDLF config file. See samples for more examples.
         parameters_file: {type: "file", default: "config.yml"},
       }
@@ -72,13 +72,13 @@ tasks:
     entrypoint: "python3.8 gandlf_run --train False --device cpu"
     parameters:
       inputs: {
-        # Path to a data csv such as that constructed by the "construct_csv" task.
-        data_path: {type: "directory", default: "inference_data/"},
         # Do NOT change the position of the "rawinput" parameter! It is relevant due to MLCube mounting rules.
-        # Path to a directory with subjects for inference. "inputdata" above determines which files are used.
-        rawinput: {type: "directory", default: "inference_data/"},
+        # Path to a directory with subjects for inference. "inputdata" below determines which files are used.
+        rawinput: {type: "directory", default: "data/"},
+        # Path to a data csv such as that constructed by the "construct_csv" task.
+        data_path: {type: "directory", default: "data/"},
         # Path to a GaNDLF config file. See samples for more examples.
-        parameters_file: {type: "file", default: "config.yml"},
+        #parameters_file: {type: "file", default: "config.yml"},
         # Path to a model directory. Not used if deploying an embedded model.
         modeldir: {type: "directory", default: "additional_files/model/"},
         #device: {type: "str", default: "cpu"},
@@ -88,36 +88,21 @@ tasks:
 
 # There are two construct_csv tasks below to make it more convenient for users to specify inference and training datasets.
 
-  construct_training_csv:
+  construct_csv:
   # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
     entrypoint: "python3.8 gandlf_constructCSV"
     parameters:
       inputs: {
-        # Path to a file containing identifying strings for each channel (and label, if performing segmentation).
-        channelsID: {type: "file", default: "channelIDs.yml"},
         # Do NOT change the position of the inputDir parameter! It is relevant due to MLCube mounting rules.
         # Path to a directory containing input data. Each subject should be a subdirectory, with consistent filenaming conventions.
-        inputDir: {type: "directory", default: "training_data/"},
+        inputDir: {type: "directory", default: "data/"},
+        # Path to a file containing identifying strings for each channel (and label, if performing segmentation).
+        channelsID: {type: "file", default: "channelIDs.yml"},
       }
       outputs: {
-        outputFile: {type: "file", default: "training_data.csv"}
+        outputFile: {type: "file", default: "data.csv"}
         }
     
-  construct_inference_csv:
-  # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
-    entrypoint: "python3.8 gandlf_constructCSV"
-    parameters:
-      inputs: {
-        # Path to a file containing identifying strings for each channel (and label, if performing segmentation).
-        channelsID: {type: "file", default: "channelIDs.yml"},
-        # Do NOT change the position of the inputDir parameter! It is relevant due to MLCube mounting rules.
-        # Path to a directory containing input data. Each subject should be a subdirectory, with consistent filenaming conventions.
-        inputDir: {type: "directory", default: "inference_data/"},
-      }
-      outputs: {
-        outputFile: {type: "file", default: "inference_data.csv"}
-        }
-        
   recover_config:
   # Extracts the config file from the embedded model (if any) in the MLCube.
     entrypoint: "python3.8 gandlf_recoverConfig"

@@ -12,6 +12,11 @@ RUN python3.8 -m pip install torch==1.11.0+rocm4.5.2 torchvision==0.12.0+rocm4.5
 RUN python3 -m pip install --upgrade pip && python3 -m pip install openvino-dev==2022.1.0 opencv-python-headless mlcube_docker
 RUN apt-get update && apt-get install -y libgl1
 
+# Do some dependency installation separately here to make layer caching more efficient
+COPY ./setup.py ./setup.py
+RUN python3.8 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
+    && pip install -r ./requirements.txt
+
 COPY . /GaNDLF
 WORKDIR /GaNDLF
 RUN python3 -m pip install -e .
