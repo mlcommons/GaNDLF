@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import ast
 import os, sys 
 from GANDLF.cli import deploy_targets, run_deployment, recover_config, copyrightMessage
 
