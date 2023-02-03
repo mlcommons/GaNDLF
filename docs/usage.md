@@ -144,16 +144,32 @@ Notes:
 
 ## Customize the Training
 
-GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
+GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. The following is a list of the available samples:
 
-- Model
-  - Architecture
-    - Segmentation: unet, resunet, uinc, fcn
+- [Sample showing all the available options](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml)
+- [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
+- [Regression example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml)
+- [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
+
+Some important sections of the configuration file are explained below:
+
+- `model`
+  - `architecture`: Defines the model architecture (aka "network topology") to be used for training. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/__init__.py). Some examples are:
+    - Segmentation:
+      - [Standardized 4-layer UNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unet.py) with (`resunet`) and without (`unet`) residual connections, as described in [this paper](https://doi.org/10.1007/978-3-030-46643-5_21).
+      - [Multi-layer UNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unet_multilayer.py) with (`resunet_multilayer`) and without (`unet_multilayer`) residual connections - this is a more general version of the standard UNet, where the number of layers can be specified by the user.
+      - [UNet with Inception Blocks](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/uinc.py) (`uinc`) is a variant of UNet with inception blocks, as described in [this paper](https://doi.org/10.48550/arXiv.1907.02110).
+      - [UNetR](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unetr.py) (`unetr`) is a variant of UNet with transformers, as described in [this paper](https://doi.org/10.1109/WACV51458.2022.00181).
+      - [TransUNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/transunet.py) (`transunet`) is a variant of UNet with transformers, as described in [this paper](https://doi.org/10.48550/arXiv.2102.04306).
+      - And many more.
     - Classification/Regression: 
-      - DenseNet configurations: densenet121, densenet161, densenet169, densenet201, densenet264 
-      - VGG configurations: vgg11, vgg13, vgg16, vgg19
-  - Dimensionality of computations 
-  - Final layer of model
+      - [VGG configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/vgg.py) (`vgg11`, `vgg13`, `vgg16`, `vgg19`), as described in [this paper](https://doi.org/10.48550/arXiv.1409.1556). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
+      - [VGG configurations initialized with weights trained on ImageNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/imagenet_vgg.py) (`imagenet_vgg11`, `imagenet_vgg13`, `imagenet_vgg16`, `imagenet_vgg19`), as described in [this paper](https://doi.org/10.48550/arXiv.1409.1556).
+      - [DenseNet configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/densenet.py) (`densenet121`, `densenet161`, `densenet169`, `densenet201`, `densenet264`), as described in [this paper](https://doi.org/10.48550/arXiv.1404.1869). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
+      - [ResNet configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/resnet.py) (`resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`), as described in [this paper](https://doi.org/10.48550/arXiv.1512.03385). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
+      - And many more.
+  - `dimension`: Defines the dimensionality of convolutions, this is usually the same dimension as the input image, unless specialized processing is done to convert images to a different dimensionality (usually not recommended). For example, 2D images can be stacked to form a "pseudo" 3D image, and 3D images can be processed as "slices" as 2D images.
+  - `final_layer`: The final layer of model that will be used to generate the final prediction. Unless otherwise specified, it can be either `softmax` or `sigmoid` or `none` (only used for regression tasks).
   - Mixed precision
   - Class list
   - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
