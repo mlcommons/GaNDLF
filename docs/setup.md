@@ -6,7 +6,7 @@
 - Knowledge of [managing python environments](https://docs.python.org/3/tutorial/venv.html); instructions below assume knowledge of the [conda management system](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
 - Windows: [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools)
 
-Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This needs different prerequisites. See the "Docker Installation" section below for more information. 
+Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This needs different prerequisites. See the [Docker Installation](#docker-installation) section below for more information. 
 
 ## Optional Requirements
 
