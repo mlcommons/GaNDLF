@@ -85,7 +85,7 @@ Just specify the Dockerfile for your preferred GPU-compute platform (or CPU):
 ```bash
 git clone https://github.com/mlcommons/GaNDLF.git
 cd GaNDLF
-docker build -t gandlf:myversion -f Dockerfile-CPU .
+docker build -t gandlf:myversion -f Dockerfile-CPU . # change to appropriate version of CUDA for the target platform
 ```
 
 
