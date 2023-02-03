@@ -1651,7 +1651,6 @@ def test_generic_augmentation_functions():
         aug_lower = aug.lower()
         output_tensor = None
         if aug_lower in global_augs_dict:
-            print(aug_lower)
             output_tensor = global_augs_dict[aug](
                 params_all_preprocessing_and_augs["data_augmentation"][aug_lower]
             )(input_tensor)
