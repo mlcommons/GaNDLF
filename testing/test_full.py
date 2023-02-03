@@ -1651,11 +1651,17 @@ def test_generic_augmentation_functions():
         aug_lower = aug.lower()
         output_tensor = None
         if aug_lower in global_augs_dict:
-            print(aug_lower)
             output_tensor = global_augs_dict[aug](
                 params_all_preprocessing_and_augs["data_augmentation"][aug_lower]
             )(input_tensor)
             assert output_tensor != None, "Augmentation should work"
+
+    # additional test for elastic
+    params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
+    for key_to_pop in ["num_control_points", "max_displacement", "locked_borders"]:
+        params_elastic.pop(key_to_pop, None)
+    output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
+    assert output_tensor != None, "Augmentation for base elastic transform should work"
 
     print("passed")
 

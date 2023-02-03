@@ -23,6 +23,7 @@ metrics:
       reduction: sum,
     }
     
+modality: rad
 model:
   amp: false
   architecture: vgg16
