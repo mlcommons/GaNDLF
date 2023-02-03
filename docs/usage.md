@@ -173,6 +173,7 @@ Some important sections of the configuration file are explained below:
   - `class_list`: The list of classes that will be used for training. This is expected to be a list of integers. 
     - For example, for a segmentation task, this can be a list of integers `[0, 1, 2, 4]` for the BraTS training case for all labels (background, necrosis, edema, and enhancing tumor). Additionally, different labels can be combined to perform "combinatorial training", such as `[0, 1||4, 1||2||4, 4]`, for the BraTS training to train on background, tumor core, whole tumor, and enhancing, respectively.
     - For a classification task, this can be a list of integers `[0, 1]`. 
+  - `ignore_label_validation`: This is the location of the label in `class_list` whose performance is to be ignored during metric calculation for validation/testing data
   - Mixed precision
   - Class list
   - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
