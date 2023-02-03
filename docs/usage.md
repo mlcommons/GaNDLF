@@ -192,6 +192,10 @@ Some important sections of the configuration file are explained below:
   - Metrics calculated per cohort (these are automatically calculated for classification and regression):
     - Classification: accuracy, precision, recall, f1, for the entire cohort ("global"), per classified class ("per_class"), per classified class averaged ("per_class_average"), per classified class weighted/balanced ("per_class_weighted")
     - Regression: mean absolute error, pearson and spearman coefficients, calculated as mean, sum, or standard.
+- `patch_size`: The size of the patch to be used for training. This is expected to be a list of integers, with the length of the list being the same as the dimensionality of the input image. For example, for a 2D image, this can be `[128, 128]`, and for a 3D image, this can be `[128, 128, 128]`.
+- `patch_sampler`: The sampler to be used for patch sampling. This can be one of `uniform` (the entire input image has equal weight on contributing a valid patch) or `label` (only the regions that have a valid ground truth segmentation label can contribute a patch). `label` sampler usually requires padding of the image to ensure blank patches are not inadvertently sampled; this can be controlled by the `enable_padding` parameter.
+
+
 - Various training parameters:
   - Patch size
   - Number of epochs and patience parameter
