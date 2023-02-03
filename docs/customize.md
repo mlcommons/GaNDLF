@@ -1,7 +1,17 @@
 
 This file contains mid-level information regarding various parameters that can be leveraged to customize the training/inference in GaNDLF.
 
-- `model`
+## Table of Contents
+- [Table of Contents](#table-of-contents)
+- [Model](#model)
+- [Loss function](#loss-function)
+- [Metrics](#metrics)
+- [Patching Strategy](#patching-strategy)
+
+
+## Model
+
+- Defined under the global key `model` in the config file
   - `architecture`: Defines the model architecture (aka "network topology") to be used for training. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/__init__.py). Some examples are:
     - Segmentation:
       - [Standardized 4-layer UNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unet.py) with (`resunet`) and without (`unet`) residual connections, as described in [this paper](https://doi.org/10.1007/978-3-030-46643-5_21).
@@ -30,19 +40,37 @@ This file contains mid-level information regarding various parameters that can b
       - `drop_rate`: dropout rate after each dense layer
     - `unet_multilayer` and other networks that support multiple layers:
       - `depth`: the number of encoder/decoder (or other types of) layers
-- `loss_function`: The parameter using which the model is trained. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/losses/__init__.py). Some examples are:
+
+[Back To Top &uarr;](#table-of-contents)
+
+## Loss function
+
+- Defined in the `loss_function` parameter of the model configuration.
+- This parameter controls the function which the model is trained. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/losses/__init__.py). Some examples are:
   - Segmentation: dice (`dice` or `dc`), dice and cross entropy (`dcce`)
   - Classification/regression: mean squared error (`mse`)
   - And many more.
-- `metrics`: The metrics to be used for model evaluation for the training/validation/testing datasets. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/metrics/__init__.py). Most of these metrics are calculated using [TorchMetrics](https://torchmetrics.readthedocs.io/). Some examples are:
+
+[Back To Top &uarr;](#table-of-contents)
+
+## Metrics
+
+- Defined in the `metrics` parameter of the model configuration.
+- This parameter controls the metrics to be used for model evaluation for the training/validation/testing datasets. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/metrics/__init__.py). Most of these metrics are calculated using [TorchMetrics](https://torchmetrics.readthedocs.io/). Some examples are:
   - Segmentation: dice (`dice` and `dice_per_label`), hausdorff distances (`hausdorff` or `hausdorff100` and `hausdorff100_per_label`), hausdorff distances including on the 95th percentile of distances (`hausdorff95` and `hausdorff95_per_label`)  - 
   - Classification/regression: mean squared error (`mse`) calculated per sample
   - Metrics calculated per cohort (these are automatically calculated for classification and regression):
     - Classification: accuracy, precision, recall, f1, for the entire cohort ("global"), per classified class ("per_class"), per classified class averaged ("per_class_average"), per classified class weighted/balanced ("per_class_weighted")
     - Regression: mean absolute error, pearson and spearman coefficients, calculated as mean, sum, or standard.
-- Patching strategy (defined as global keys in the config file):
-  - `patch_size`: The size of the patch to be used for training. This is expected to be a list of integers, with the length of the list being the same as the dimensionality of the input image. For example, for a 2D image, this can be `[128, 128]`, and for a 3D image, this can be `[128, 128, 128]`.
-  - `patch_sampler`: The sampler to be used for patch sampling during training. This can be one of `uniform` (the entire input image has equal weight on contributing a valid patch) or `label` (only the regions that have a valid ground truth segmentation label can contribute a patch). `label` sampler usually requires padding of the image to ensure blank patches are not inadvertently sampled; this can be controlled by the `enable_padding` parameter.
-  - `inference_mechanism`
-    - `grid_aggregator_overlap`: this option provides the option to strategize the grid aggregation output; should be either `crop` or `average` - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
-    - `patch_overlap`: the amount of overlap of patches during inference in terms of pixels, defaults to `0`; see https://torchio.readthedocs.io/patches/patch_inference.html#gridsampler for details
+
+[Back To Top &uarr;](#table-of-contents)
+
+## Patching Strategy
+
+- `patch_size`: The size of the patch to be used for training. This is expected to be a list of integers, with the length of the list being the same as the dimensionality of the input image. For example, for a 2D image, this can be `[128, 128]`, and for a 3D image, this can be `[128, 128, 128]`.
+- `patch_sampler`: The sampler to be used for patch sampling during training. This can be one of `uniform` (the entire input image has equal weight on contributing a valid patch) or `label` (only the regions that have a valid ground truth segmentation label can contribute a patch). `label` sampler usually requires padding of the image to ensure blank patches are not inadvertently sampled; this can be controlled by the `enable_padding` parameter.
+- `inference_mechanism`
+  - `grid_aggregator_overlap`: this option provides the option to strategize the grid aggregation output; should be either `crop` or `average` - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
+  - `patch_overlap`: the amount of overlap of patches during inference in terms of pixels, defaults to `0`; see https://torchio.readthedocs.io/patches/patch_inference.html#gridsampler for details.
+
+[Back To Top &uarr;](#table-of-contents)
