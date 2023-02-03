@@ -169,12 +169,19 @@ Some important sections of the configuration file are explained below:
       - [ResNet configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/resnet.py) (`resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`), as described in [this paper](https://doi.org/10.48550/arXiv.1512.03385). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
       - And many more.
   - `dimension`: Defines the dimensionality of convolutions, this is usually the same dimension as the input image, unless specialized processing is done to convert images to a different dimensionality (usually not recommended). For example, 2D images can be stacked to form a "pseudo" 3D image, and 3D images can be processed as "slices" as 2D images.
-  - `final_layer`: The final layer of model that will be used to generate the final prediction. Unless otherwise specified, it can be either `softmax` or `sigmoid` or `none` (only used for regression tasks).
+  - `final_layer`: The final layer of model that will be used to generate the final prediction. Unless otherwise specified, it can be one of `softmax` or `sigmoid` or `logits` or `none` (the latter 2 are only used for regression tasks).
   - `class_list`: The list of classes that will be used for training. This is expected to be a list of integers. 
     - For example, for a segmentation task, this can be a list of integers `[0, 1, 2, 4]` for the BraTS training case for all labels (background, necrosis, edema, and enhancing tumor). Additionally, different labels can be combined to perform "combinatorial training", such as `[0, 1||4, 1||2||4, 4]`, for the BraTS training to train on background, tumor core, whole tumor, and enhancing, respectively.
     - For a classification task, this can be a list of integers `[0, 1]`. 
   - `ignore_label_validation`: This is the location of the label in `class_list` whose performance is to be ignored during metric calculation for validation/testing data
-  - Mixed precision
+  - `norm_type`: The type of normalization to be used. This can be either `batch` or `instance` or `group` or `none`. 
+    - `batch` normalization is the most common type of normalization, and is used in most of the models. 
+    - `instance` normalization is used in some segmentation models, such as [UNetR](
+  - Various other options specific to architectures, such as (but not limited to):
+    - `densenet` models: 
+      - `growth_rate`: how many filters to add each layer (k in paper)
+      - `bn_size`:  multiplicative factor for number of bottle neck layers # (i.e. bn_size * k features in the bottleneck layer)
+      - `drop_rate`: dropout rate after each dense layer
   - Class list
   - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
   - Model type: model used for inference, can be "torch" or "openvino"
