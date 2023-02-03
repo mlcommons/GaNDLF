@@ -180,11 +180,8 @@ Some important sections of the configuration file are explained below:
       - `growth_rate`: how many filters to add each layer (k in paper)
       - `bn_size`:  multiplicative factor for number of bottle neck layers # (i.e. bn_size * k features in the bottleneck layer)
       - `drop_rate`: dropout rate after each dense layer
-  - Class list
-  - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
-  - Model type: model used for inference, can be "torch" or "openvino"
-      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "torch"
-      - "openvino": use the OpenVINO Inference Engine for inference
+    - `unet_multilayer` and other networks that support multiple layers:
+      - `depth`: the number of encoder/decoder (or other types of) layers
 - Various training parameters:
   - Patch size
   - Number of epochs and patience parameter
