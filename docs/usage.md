@@ -23,6 +23,10 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
 - [Examples](#examples)
+- [Running with Docker](#running-with-docker)
+  - [Mounting Input and Output](#mounting-input-and-output)
+  - [Enabling GPUs](#enabling-gpus)
+- [MLCubes](#mlcubes)
 
 ## Preparing the Data
 
@@ -256,3 +260,72 @@ Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 - Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
 - Configurations can be found in [the main repo](https://github.com/mlcommons/GaNDLF/tree/master/testing).
+
+## Running with Docker
+
+Usage of GaNDLF remains generally the same even from Docker, but there are a few extra considerations.
+
+Once you have pulled the GaNDLF image, it will have a tag, like "cbica/gandlf:latest-cpu". 
+Run the following command to list your images and ensure GaNDLF is present:
+```bash
+docker image ls
+```
+You can invoke "docker run" with the appropriate tag to run GaNDLF:
+```bash
+docker run -it --rm --name gandlf cbica/gandlf:latest-cpu [gandlf command and parameters go here!]
+```
+Remember that arguments/options for *Docker itself* go *before* the image tag, while the command and arguments for GaNDLF go *after* the image tag.
+For more details and options, see the [Docker run documentation](https://docs.docker.com/engine/reference/commandline/run/).
+
+However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons.
+To fix this, we need to use mounts. 
+
+### Mounting Input and Output
+
+The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and folders.
+Generally, it is useful to mount at least input folder (as readonly) and an output folder.
+See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
+
+For example, you might run:
+```bash
+docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu [command and args go here]
+```
+
+Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine.
+So you will need to give paths relative to the mount point *destination*.
+Additionally, any paths used internally by GaNDLF will refer to locations inside the container.
+This means that data CSVs produced by the gandlf_constructCSV script will need to be made from the container and with input in the same locations. Expanding on our last example:
+
+```bash
+docker run -it --rm --name dataprep --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu gandlf_constructCSV --inputDir /input/data --outputFile /output/data.csv --channelsID _t1.nii.gz --labelID _seg.nii.gz
+```
+The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a ValueToPredict column).
+Then, we can reference the same file when running again:
+
+```bash
+docker run -it --rm --name training --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu gandlf_run --train True --config /input/config.yml --inputdata /output/data.csv --modeldir /output/model
+```
+
+### Enabling GPUs
+
+Some special arguments need to be passed to Docker to enable it to use your GPU.
+With Docker version > 19.03 You can pass the "--gpus all" parameter to "docker run" to expose all GPUs to the container.
+See the [NVIDIA Docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#gpu-enumeration) for more details.
+
+If using CUDA, GaNDLF also expects the environment variable CUDA_VISIBLE_DEVICES to be set.
+To use the same settings as your host machine, simply add "-e CUDA_VISIBLE_DEVICES" to your docker run command.
+
+For example:
+```bash
+docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf_run --device cuda [...]
+```
+
+## MLCubes
+
+GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/).
+This involves distributing an "mlcube.yaml" file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/).
+The runner will perform many aspects of configuring your container for you.
+
+Currently, only the mlcube_docker runner is supported.
+
+See the [MLCube documentation](https://mlcommons.github.io/mlcube/) for more details.
