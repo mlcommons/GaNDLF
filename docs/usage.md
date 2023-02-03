@@ -174,9 +174,7 @@ Some important sections of the configuration file are explained below:
     - For example, for a segmentation task, this can be a list of integers `[0, 1, 2, 4]` for the BraTS training case for all labels (background, necrosis, edema, and enhancing tumor). Additionally, different labels can be combined to perform "combinatorial training", such as `[0, 1||4, 1||2||4, 4]`, for the BraTS training to train on background, tumor core, whole tumor, and enhancing, respectively.
     - For a classification task, this can be a list of integers `[0, 1]`. 
   - `ignore_label_validation`: This is the location of the label in `class_list` whose performance is to be ignored during metric calculation for validation/testing data
-  - `norm_type`: The type of normalization to be used. This can be either `batch` or `instance` or `group` or `none`. 
-    - `batch` normalization is the most common type of normalization, and is used in most of the models. 
-    - `instance` normalization is used in some segmentation models, such as [UNetR](
+  - `norm_type`: The type of normalization to be used. This can be either `batch` or `instance` or `none`.
   - Various other options specific to architectures, such as (but not limited to):
     - `densenet` models: 
       - `growth_rate`: how many filters to add each layer (k in paper)
