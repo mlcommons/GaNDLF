@@ -9,6 +9,7 @@ This file contains mid-level information regarding various parameters that can b
 - [Patching Strategy](#patching-strategy)
 - [Data Preprocessing](#data-preprocessing)
 - [Data Augmentation](#data-augmentation)
+- [Training Parameters](#training-parameters)
 
 
 ## Model
@@ -48,6 +49,7 @@ This file contains mid-level information regarding various parameters that can b
 ## Loss function
 
 - Defined in the `loss_function` parameter of the model configuration.
+- By passing `weighted_loss: True`, the loss function will be weighted by the inverse of the class frequency.
 - This parameter controls the function which the model is trained. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/losses/__init__.py). Some examples are:
   - Segmentation: dice (`dice` or `dc`), dice and cross entropy (`dcce`)
   - Classification/regression: mean squared error (`mse`)
@@ -110,9 +112,45 @@ This file contains mid-level information regarding various parameters that can b
 - All options can contain a `probability` sub-parameter, which defines the probability of the augmentation being applied to the image. When present, this will supersede the `default_probability` parameter.
 - All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/data/augmentation/__init__.py). Some of the most important examples are:
   - **Radiology-specific augmentations**
-    - `kspace`: one of either `ghosting` or `spiking` is picked for augmentation
+    - `kspace`: one of either `ghosting` or `spiking` is picked for augmentation.
+      - `bias`: applies a random bias field artefact to the input image using [this function](https://torchio.readthedocs.io/transforms/augmentation.html#randombiasfield).
   - **RGB-specific augmentations**
-    - `colorjitter`: 
+    - `colorjitter`: applies the [ColorJitter](https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html) transform from PyTorch, has sub-parameters `brightness`, `contrast`, `saturation`, and `hue`.
+  - **General-purpose augmentations**
+    - _Spatial transforms_: they only change the resolution (and thereby, the shape) of the input image, and only apply interpolation to the intensities for consistency
+      - `affine`: applies a random affine transformation to the input image; for details, see [this page](https://torchio.readthedocs.io/transforms/augmentation.html#randomaffine); has sub-parameters `scales` (defining the scaling ranges), `degrees` (defining the rotation ranges), and `translation` (defining the translation ranges in **real-world coordinates**, which is usually in _mm_)
+      - `elastic`: applies a random elastic deformation to the input image; for details, see [this page](https://torchio.readthedocs.io/transforms/augmentation.html#randomelasticdeformation); has sub-parameters `num_control_points` (defining the number of control points), `locked_borders` (defining the number of locked borders), `max_displacement` (defining the maximum displacement of the control points), `num_control_points` (defining the number of control points), and `locked_borders` (defining the number of locked borders).
+      - `flip`: applies a random flip to the input image; for details, see [this page](https://torchio.readthedocs.io/transforms/augmentation.html#randomflip); has sub-parameter `axes` (defining the axes to flip).
+      - `rotate`: applies a random rotation by 90 degrees (`rotate_90`) or 180 degrees (`rotate_180`), has sub-parameter `axes` (defining the axes to rotate).
+      - `swap`: applies a random swap , has sub-parameter `patch_size` (defining the patch size to swap), and `num_iterations` (number of iterations that 2 patches will be swapped).
+    - _Intensity transforms_: they change the intensity of the input image, but never the actual resolution or shape.
+      - `motion`: applies a random motion blur to the input image using [this function](https://torchio.readthedocs.io/transforms/augmentation.html#randommotion).
+      - `blur`: applies a random Gaussian blur to the input image using [this function](https://torchio.readthedocs.io/transforms/augmentation.html#randomblur)l has sub-parameter `std` (defines the standard deviation range).
+      - `noise`: applies a random noise to the input image using [this function](https://torchio.readthedocs.io/transforms/augmentation.html#randomnoise); has sub-parameters `std` (defines the standard deviation range) and `mean` (defines the mean of the noise to be added).
+      - `noise_var`: applies a random noise to the input image, however, the with default `std = [0, 0.015 * std(image)]`.
+      - `anisotropic`: applies random anisotropic transform to input image using [this function](https://torchio.readthedocs.io/transforms/augmentation.html#randomanisotropy). This changes the resolution and brings it back to its original resolution, thus applying "real-world" interpolation to images.
 
+[Back To Top &uarr;](#table-of-contents)
+
+## Training Parameters
+
+- These are various parameters that control the overall training process.
+- `verbose`: generate verbose messages on console; generally used for debugging.
+- `batch_size`: defines the batch size to be used for training.
+- `in_memory`: this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements.
+- `num_epochs`: defines the number of epochs to train for.
+- `patience`: defines the number of epochs to wait for improvement before early stopping.
+- `learning_rate`: defines the learning rate to be used for training.
+- `scheduler`: defines the learning rate scheduler to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/schedulers/__init__.py); can take the following sub-parameters:
+  - `type`: `triangle`, `triangle_modified`, `exp`, `step`, `reduce-on-plateau`, `cosineannealing`, `triangular`, `triangular2`, `exp_range`
+  - `min_lr`: defines the minimum learning rate to be used for training.
+  - `max_lr`: defines the maximum learning rate to be used for training.
+- `optimizer`: defines the optimizer to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/optimizers/__init__.py).
+- `nested_training`: defines the number of folds to use nested training, takes `testing` and `validation` as sub-parameters, with integer values defining the number of folds to use.
+- **Queue configuration**: this defines how the queue for the input to the model is to be designed **after** the [patching strategy](#patching-strategy) has been applied, and more details are [here](https://torchio.readthedocs.io/data/patch_training.html?#queue). This takes the following sub-parameters:
+  - `q_max_length`: his determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches.
+  - `q_samples_per_volume`: this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower.
+  - `q_num_workers`: this determines the number subprocesses to use for data loading; '0' means main process is used, scale this according to available CPU resources.
+  - `q_verbose`: used to debug the queue
 
 [Back To Top &uarr;](#table-of-contents)
