@@ -80,7 +80,7 @@ This file contains mid-level information regarding various parameters that can b
 ## Data Preprocessing
 
 - Defined in the `data_preprocessing` parameter of the model configuration.
-- This parameter controls the various preprocessing functions that are applied to the **entire image** before the [patching strategy](#patching-strategy) is applied.
+- This parameter controls the various preprocessing functions that are applied to the **entire image** **_before_** the [patching strategy](#patching-strategy) is applied.
 - All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/data/preprocessing/__init__.py). Some of the most important examples are:
   - **Intensity harmonization**: GaNDLF provides multiple normalization and rescaling options to ensure intensity-level harmonization of the entire cohort. Some examples include:
     - `normalize`: simple Z-score normalization
@@ -105,7 +105,7 @@ This file contains mid-level information regarding various parameters that can b
 ## Data Augmentation
 
 - Defined in the `data_augmentation` parameter of the model configuration.
-- This parameter controls the various augmentation functions that are applied to the **entire image** before the [patching strategy](#patching-strategy) is applied.
+- This parameter controls the various augmentation functions that are applied to the **entire image** **_before_** the [patching strategy](#patching-strategy) is applied.
 - These should be defined in cognition of the task at hand (for example, RGB augmentations will not work for MRI/CT and other similar radiology images).
 - All options can contain a `probability` sub-parameter, which defines the probability of the augmentation being applied to the image. When present, this will supersede the `default_probability` parameter.
 - All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/data/augmentation/__init__.py). Some of the most important examples are:
