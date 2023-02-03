@@ -7,6 +7,8 @@ This file contains mid-level information regarding various parameters that can b
 - [Loss function](#loss-function)
 - [Metrics](#metrics)
 - [Patching Strategy](#patching-strategy)
+- [Data Preprocessing](#data-preprocessing)
+- [Data Augmentation](#data-augmentation)
 
 
 ## Model
@@ -72,5 +74,37 @@ This file contains mid-level information regarding various parameters that can b
 - `inference_mechanism`
   - `grid_aggregator_overlap`: this option provides the option to strategize the grid aggregation output; should be either `crop` or `average` - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
   - `patch_overlap`: the amount of overlap of patches during inference in terms of pixels, defaults to `0`; see https://torchio.readthedocs.io/patches/patch_inference.html#gridsampler for details.
+
+[Back To Top &uarr;](#table-of-contents)
+
+## Data Preprocessing
+
+- Defined in the `data_preprocessing` parameter of the model configuration.
+- This parameter controls the various preprocessing functions that are applied to the **entire image** before the [patching strategy](#patching-strategy) is applied.
+- All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/data/preprocessing/__init__.py). Some of the most important ones are:
+- **Intensity harmonization**: GaNDLF provides multiple normalization and rescaling options to ensure intensity-level harmonization of the entire cohort. Some examples include:
+  - `normalize`: simple Z-score normalization
+  - `normalize_positive`: this performs z-score normalization only on `pixels > 0`
+  - `normalize_nonZero`: this performs z-score normalization only on `pixels != 0`
+  - `normalize_nonZero_masked`: this performs z-score normalization only on the region defined by the ground truth annotation
+  - `rescale`: simple min-max rescaling, sub-parameters include `in_min_max`, `out_min_max`, `percentiles`; this option is useful to discard outliers in the intensity distribution
+  - Template-based normalization: These options take a target image as input (defined by the `target` sub-parameter) and perform different matching strategies to match input image(s) to this target.
+    - `histogram_matching`: this performs histogram matching as defined by [this paper](https://doi.org/10.1109/42.836373). 
+      - If the `target` image is absent, this will perform global histogram equalization.
+      - If `target` is `adaptive`, this will perform [adaptive histogram equalization](https://doi.org/10.1109/83.841534).
+    - `stain_normalization`: these are normalization techniques specifically designed for histology images; the different options include `vahadane`, `macenko`, or `ruifrok`, under the `extractor` sub-parameter. Always needs a `target` image to work.
+- **Resolution harmonization**: GaNDLF provides multiple resampling options to ensure resolution-level harmonization of the entire cohort. Some examples include:
+  - `resample`: resamples the image to the specified by the `resolution` sub-parameter
+  - `resample_min`: resamples the image to the maximum spacing defined by the `resolution` sub-parameter; this is useful in cohorts that have varying resolutions, but the user wants to resample to the minimum resolution for consistency
+  - `resize_image`: **NOT RECOMMENDED**; resizes the image to the specified size
+  - `resize_patch`: **NOT RECOMMENDED**; resizes the [extracted patch](#patching-strategy) to the specified size
+- And many more.
+
+[Back To Top &uarr;](#table-of-contents)
+
+## Data Augmentation
+
+- Defined in the `data_augmentation` parameter of the model configuration.
+
 
 [Back To Top &uarr;](#table-of-contents)
