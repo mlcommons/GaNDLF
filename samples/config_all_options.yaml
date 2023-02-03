@@ -238,7 +238,7 @@ data_augmentation:
       'mean': 0, # default mean
       'std': [0, 1] # default std-dev range
     },
-    noise_var, # this is a gaussian noise, and can take 'std' and 'mean' as a sub-parameter, however, the default 'std' is [0, 0.015 * std(image)]
+    noise_var, # this is a random noise, and can take 'std' and 'mean' as a sub-parameter, however, the default 'std' is [0, 0.015 * std(image)]
     'gamma',
     'swap':{
       'patch_size': 15, # patch size for swapping; if a single number if provided, the same number is used for all axes
