@@ -1,0 +1,44 @@
+
+This file contains mid-level information regarding various parameters that can be leveraged to customize the training/inference in GaNDLF.
+
+- `model`
+  - `architecture`: Defines the model architecture (aka "network topology") to be used for training. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/__init__.py). Some examples are:
+    - Segmentation:
+      - [Standardized 4-layer UNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unet.py) with (`resunet`) and without (`unet`) residual connections, as described in [this paper](https://doi.org/10.1007/978-3-030-46643-5_21).
+      - [Multi-layer UNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unet_multilayer.py) with (`resunet_multilayer`) and without (`unet_multilayer`) residual connections - this is a more general version of the standard UNet, where the number of layers can be specified by the user.
+      - [UNet with Inception Blocks](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/uinc.py) (`uinc`) is a variant of UNet with inception blocks, as described in [this paper](https://doi.org/10.48550/arXiv.1907.02110).
+      - [UNetR](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/unetr.py) (`unetr`) is a variant of UNet with transformers, as described in [this paper](https://doi.org/10.1109/WACV51458.2022.00181).
+      - [TransUNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/transunet.py) (`transunet`) is a variant of UNet with transformers, as described in [this paper](https://doi.org/10.48550/arXiv.2102.04306).
+      - And many more.
+    - Classification/Regression: 
+      - [VGG configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/vgg.py) (`vgg11`, `vgg13`, `vgg16`, `vgg19`), as described in [this paper](https://doi.org/10.48550/arXiv.1409.1556). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
+      - [VGG configurations initialized with weights trained on ImageNet](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/imagenet_vgg.py) (`imagenet_vgg11`, `imagenet_vgg13`, `imagenet_vgg16`, `imagenet_vgg19`), as described in [this paper](https://doi.org/10.48550/arXiv.1409.1556).
+      - [DenseNet configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/densenet.py) (`densenet121`, `densenet161`, `densenet169`, `densenet201`, `densenet264`), as described in [this paper](https://doi.org/10.48550/arXiv.1404.1869). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
+      - [ResNet configurations](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/resnet.py) (`resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`), as described in [this paper](https://doi.org/10.48550/arXiv.1512.03385). Our implementation allows true 3D computations (as opposed to 2D+1D convolutions).
+      - And many more.
+  - `dimension`: Defines the dimensionality of convolutions, this is usually the same dimension as the input image, unless specialized processing is done to convert images to a different dimensionality (usually not recommended). For example, 2D images can be stacked to form a "pseudo" 3D image, and 3D images can be processed as "slices" as 2D images.
+  - `final_layer`: The final layer of model that will be used to generate the final prediction. Unless otherwise specified, it can be one of `softmax` or `sigmoid` or `logits` or `none` (the latter 2 are only used for regression tasks).
+  - `class_list`: The list of classes that will be used for training. This is expected to be a list of integers. 
+    - For example, for a segmentation task, this can be a list of integers `[0, 1, 2, 4]` for the BraTS training case for all labels (background, necrosis, edema, and enhancing tumor). Additionally, different labels can be combined to perform "combinatorial training", such as `[0, 1||4, 1||2||4, 4]`, for the BraTS training to train on background, tumor core, whole tumor, and enhancing, respectively.
+    - For a classification task, this can be a list of integers `[0, 1]`. 
+  - `ignore_label_validation`: This is the location of the label in `class_list` whose performance is to be ignored during metric calculation for validation/testing data
+  - `norm_type`: The type of normalization to be used. This can be either `batch` or `instance` or `none`.
+  - Various other options specific to architectures, such as (but not limited to):
+    - `densenet` models: 
+      - `growth_rate`: how many filters to add each layer (k in paper)
+      - `bn_size`:  multiplicative factor for number of bottle neck layers # (i.e. bn_size * k features in the bottleneck layer)
+      - `drop_rate`: dropout rate after each dense layer
+    - `unet_multilayer` and other networks that support multiple layers:
+      - `depth`: the number of encoder/decoder (or other types of) layers
+- `loss_function`: The parameter using which the model is trained. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/losses/__init__.py). Some examples are:
+  - Segmentation: dice (`dice` or `dc`), dice and cross entropy (`dcce`)
+  - Classification/regression: mean squared error (`mse`)
+  - And many more.
+- `metrics`: The metrics to be used for model evaluation for the training/validation/testing datasets. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/metrics/__init__.py). Most of these metrics are calculated using [TorchMetrics](https://torchmetrics.readthedocs.io/). Some examples are:
+  - Segmentation: dice (`dice` and `dice_per_label`), hausdorff distances (`hausdorff` or `hausdorff100` and `hausdorff100_per_label`), hausdorff distances including on the 95th percentile of distances (`hausdorff95` and `hausdorff95_per_label`)  - 
+  - Classification/regression: mean squared error (`mse`) calculated per sample
+  - Metrics calculated per cohort (these are automatically calculated for classification and regression):
+    - Classification: accuracy, precision, recall, f1, for the entire cohort ("global"), per classified class ("per_class"), per classified class averaged ("per_class_average"), per classified class weighted/balanced ("per_class_weighted")
+    - Regression: mean absolute error, pearson and spearman coefficients, calculated as mean, sum, or standard.
+- `patch_size`: The size of the patch to be used for training. This is expected to be a list of integers, with the length of the list being the same as the dimensionality of the input image. For example, for a 2D image, this can be `[128, 128]`, and for a 3D image, this can be `[128, 128, 128]`.
+- `patch_sampler`: The sampler to be used for patch sampling. This can be one of `uniform` (the entire input image has equal weight on contributing a valid patch) or `label` (only the regions that have a valid ground truth segmentation label can contribute a patch). `label` sampler usually requires padding of the image to ensure blank patches are not inadvertently sampled; this can be controlled by the `enable_padding` parameter.
