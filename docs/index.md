@@ -19,6 +19,7 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmen
 
 - [Application Setup](./setup.md)
 - [Usage](./usage.md)
+  - [Customize the training and inference](./customize.md)
 - [Extending GaNDLF](./extending.md)
 - [FAQ](./faq.md)
 - [Acknowledgements](./acknowledgements.md)

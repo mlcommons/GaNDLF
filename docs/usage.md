@@ -148,42 +148,16 @@ Notes:
 
 ## Customize the Training
 
-GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process, such as:
+GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. The following is a list of the available samples:
 
-- Model
-  - Architecture
-    - Segmentation: unet, resunet, uinc, fcn
-    - Classification/Regression: 
-      - DenseNet configurations: densenet121, densenet161, densenet169, densenet201, densenet264 
-      - VGG configurations: vgg11, vgg13, vgg16, vgg19
-  - Dimensionality of computations 
-  - Final layer of model
-  - Mixed precision
-  - Class list
-  - onnx_export: Bool variable. To state whether the final PyTorch model will be export to onnx model
-  - Model type: model used for inference, can be "torch" or "openvino"
-      - "torch": use the learned Torch model for inference. If this parameter is not provided, it will default to be "torch"
-      - "openvino": use the OpenVINO Inference Engine for inference
-- Various training parameters:
-  - Patch size
-  - Number of epochs and patience parameter
-  - Learning rate
-  - Scheduler 
-  - Loss function
-  - Optimizer
-- Data Augmentation
-- Data preprocessing
-- Nested data splits
-  - Testing 
-  - Validation 
-
-Please see a [sample](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) for detailed guide and comments.
-
+- [Sample showing all the available options](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml)
 - [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
 - [Regression example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml)
 - [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
 
-**Note**: Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
+**Notes**: 
+- More details on the configuration options are available in the [customization page](customize.md).
+- Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
 
 [Back To Top &uarr;](#table-of-contents)
 

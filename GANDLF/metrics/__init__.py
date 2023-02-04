@@ -24,6 +24,7 @@ global_metrics_dict = {
     "mse": MSE_loss,
     "hd95": hd95,
     "hd95_per_label": hd95_per_label,
+    "hausdorff95_per_label": hd95_per_label,
     "hausdorff95": hd95,
     "hd100": hd100,
     "hd100_per_label": hd100_per_label,
