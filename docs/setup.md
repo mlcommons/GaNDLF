@@ -52,15 +52,15 @@ We provide containerized versions of GaNDLF, allowing you to run GaNDLF without 
 
 First, install the Docker Engine by following the instructions for your platform at https://www.docker.com/get-started/.
 
-GaNDLF is available from [Docker Hub](https://hub.docker.com/repository/docker/cbica/gandlf).
+GaNDLF is available from [GitHub Package Registry](https://github.com/mlcommons/GaNDLF/pkgs/container/gandlf).
 Several platform versions are available, including CUDA 10.2, CUDA 11.3, and CPU-only. Choose the one that best matches your system and drivers.
 For example, if you want to get the bleeding-edge GaNDLF version, and you have CUDA Toolkit v10.2, run the following command:
 
 ```bash
-docker pull cbica/gandlf:latest-cuda102
+docker pull ghcr.io/mlcommons/gandlf:latest-cuda113
 ```
 
-This will download the GaNDLF image onto your machine. See the usage page for details on how to run GaNDLF in this "dockerized" form.
+This will download the GaNDLF image onto your machine. See the [usage page](https://mlcommons.github.io/GaNDLF/usage#running-with-docker) for details on how to run GaNDLF in this "dockerized" form.
 
 ### Enable GPU usage from Docker (optional, Linux only)
 
