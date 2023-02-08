@@ -2,6 +2,7 @@ import os, sys, pathlib
 import pandas as pd
 from .handle_collisions import handle_collisions
 
+
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     """
     This function writes the CSV file based on the input directory, channelsID + labelsID strings
