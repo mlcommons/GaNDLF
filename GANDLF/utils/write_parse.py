@@ -1,6 +1,6 @@
 import os, sys, pathlib
 import pandas as pd
-
+from .handle_collisions import handle_collisions
 
 def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
     """
