@@ -2113,7 +2113,7 @@ def test_train_inference_classification_histology_large_2d(device):
                         "predictions.csv not found",
                     )
     # ensure previous results are removed
-    shutil.rmtree(output_subject_dir)
+    sanitize_outputDir()
 
     for file in files_to_delete:
         os.remove(file)
