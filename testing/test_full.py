@@ -651,9 +651,17 @@ def test_train_resume_inference_classification_rad_3d(device):
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
         dataframe=training_data,
-        outputDir=outputDir,
+        modelDir=outputDir,
         parameters=parameters,
         device=device,
+    )
+    # test the case where outputDir is explicitly provided to InferenceManager
+    InferenceManager(
+        dataframe=training_data,
+        modelDir=outputDir,
+        parameters=parameters,
+        device=device,
+        outputDir=os.path.join(outputDir, get_unique_timestamp()),
     )
 
     print("passed")
@@ -693,7 +701,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
         parameters["output_dir"] = outputDir  # this is in inference mode
         InferenceManager(
             dataframe=training_data,
-            outputDir=outputDir,
+            modelDir=outputDir,
             parameters=parameters,
             device=device,
         )
@@ -738,7 +746,7 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
         parameters["output_dir"] = outputDir  # this is in inference mode
         InferenceManager(
             dataframe=training_data,
-            outputDir=outputDir,
+            modelDir=outputDir,
             parameters=parameters,
             device=device,
         )
@@ -801,7 +809,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["model"]["onnx_export"] = False
     InferenceManager(
         dataframe=training_data,
-        outputDir=outputDir,
+        modelDir=outputDir,
         parameters=parameters,
         device=device,
     )
@@ -844,7 +852,7 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
     parameters["output_dir"] = outputDir  # this is in inference mode
     InferenceManager(
         dataframe=training_data,
-        outputDir=outputDir + "," + outputDir,
+        modelDir=outputDir + "," + outputDir,
         parameters=parameters,
         device=device,
     )
@@ -1949,7 +1957,7 @@ def test_train_inference_segmentation_histology_2d(device):
     inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
     InferenceManager(
         dataframe=inference_data,
-        outputDir=modelDir,
+        modelDir=modelDir,
         parameters=parameters,
         device=device,
     )
@@ -2082,7 +2090,7 @@ def test_train_inference_classification_histology_large_2d(device):
         parameters["model"]["type"] = model_type
         InferenceManager(
             dataframe=inference_data,
-            outputDir=modelDir,
+            modelDir=modelDir,
             parameters=parameters,
             device=device,
         )
@@ -2178,7 +2186,7 @@ def test_train_inference_classification_histology_2d(device):
         parameters["model"]["type"] = model_type
         InferenceManager(
             dataframe=inference_data,
-            outputDir=modelDir,
+            modelDir=modelDir,
             parameters=parameters,
             device=device,
         )
