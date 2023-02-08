@@ -139,9 +139,4 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                     metric_output[metric] = get_metric_output(
                         metric_function, predicted, ground_truth, params
                     )
-        else:
-            print(
-                "WARNING: Could not find the requested metric '" + metric,
-                file=sys.stderr,
-            )
     return loss, metric_output
