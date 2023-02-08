@@ -305,8 +305,9 @@ def training_loop(
         )
         # original number of classes are restored
         params["model"]["num_classes"] = org_num_classes
-    for metric in overall_metrics:
-        params["metrics"][metric] = 0
+    if calculate_overall_metrics:
+        for metric in overall_metrics:
+            params["metrics"][metric] = 0
 
     # Setup a few loggers for tracking
     train_logger = Logger(
