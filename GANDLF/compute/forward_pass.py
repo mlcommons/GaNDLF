@@ -371,9 +371,7 @@ def validate_network(
                     # Create the subject directory if it doesn't exist in the
                     # current_output_dir directory
                     os.makedirs(
-                        os.path.join(
-                            current_output_dir, "testing"
-                        ),
+                        os.path.join(current_output_dir, "testing"),
                         exist_ok=True,
                     )
                     os.makedirs(
@@ -384,7 +382,10 @@ def validate_network(
                     )
 
                     path_to_save = os.path.join(
-                        current_output_dir, "testing", subject["subject_id"][0], subject["subject_id"][0] + "_seg" + ext
+                        current_output_dir,
+                        "testing",
+                        subject["subject_id"][0],
+                        subject["subject_id"][0] + "_seg" + ext,
                     )
 
                     sitk.WriteImage(
