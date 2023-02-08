@@ -19,7 +19,7 @@ def handle_collisions(df, output_path):
 
     # Loop through each row in the original dataframe
     for i, row in df.iterrows():
-        subjectid = row["subjectid"]
+        subjectid = row["SubjectID"]
 
         # If the subjectid has not been seen before, add it to the dictionary
         if subjectid not in subjectid_counts:
@@ -31,10 +31,10 @@ def handle_collisions(df, output_path):
 
         # Update the subjectid in the new dataframe
         new_subjectid = f"{subjectid}_v{subjectid_counts[subjectid]}"
-        new_df.at[i, "subjectid"] = new_subjectid
+        new_df.at[i, "SubjectID"] = new_subjectid
 
     # Write the colliding subjectids to the collision.csv file
-    pd.DataFrame({"subjectid": collisions}).to_csv(collision_path, index=False)
+    pd.DataFrame({"SubjectID": collisions}).to_csv(collision_path, index=False)
 
     # Write the updated dataframe to the new_test_mapping.csv file
     new_df.to_csv(mapping_path, index=False)
