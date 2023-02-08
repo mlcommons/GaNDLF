@@ -300,7 +300,7 @@ def training_loop(
         params["model"]["num_classes"] = 3
         overall_metrics = overall_stats(
             torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int32),
-            torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int64),
+            torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int32),
             params,
         )
         # original number of classes are restored
