@@ -102,6 +102,7 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
                 reset=reset,
             )
         else:
+            data_full, headers = parseTestingCSV(file_data_full, parameters["output_dir"])
             InferenceManager(
                 dataframe=data_full,
                 outputDir=parameters["output_dir"],

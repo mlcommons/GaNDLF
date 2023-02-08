@@ -109,6 +109,79 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
     return data_full, headers
 
 
+def parseTestingCSV(inputTrainingCSVFile, output_dir):
+    """
+    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+
+    Args:
+        inputTrainingCSVFile (str): The input data CSV file which contains all training data.
+        train (bool, optional): Whether performing training. Defaults to True.
+
+    Returns:
+        pandas.DataFrame: The full dataset for computation.
+        dict: The dictionary containing all relevant CSV headers.
+    """
+    ## read training dataset into data frame
+    data_full = get_dataframe(inputTrainingCSVFile)
+
+    # find actual header locations for input channel and label
+    # the user might put the label first and the channels afterwards
+    # or might do it completely randomly
+    headers = {}
+    headers["channelHeaders"] = []
+    headers["predictionHeaders"] = []
+    headers["labelHeader"] = None
+    headers["subjectIDHeader"] = None
+
+    collision_status, data_full = handle_collisions(data_full, output_dir)
+
+    # If collisions are True, raise a warning that some patients with colliding subject_id were found
+    # and a new mapping_csv was created to be used and write the location of the new mapping_csv
+    # and the collision_csv to the user
+    if collision_status:
+        print(
+            """WARNING: Some patients with colliding subject_id were found.
+            A new mapping_csv was created to be used and a collision_csv was created
+            to be used to map the old subject_id to the new subject_id.
+            The location of the updated_test_mapping.csv and the collision.csv are: """
+            + output_dir,
+            file=sys.stderr,
+        )
+
+    for col in data_full.columns:
+        # add appropriate headers to read here, as needed
+        col_lower = col.lower()
+        currentHeaderLoc = data_full.columns.get_loc(col)
+        if (
+            ("channel" in col_lower)
+            or ("modality" in col_lower)
+            or ("image" in col_lower)
+        ):
+            headers["channelHeaders"].append(currentHeaderLoc)
+        elif "valuetopredict" in col_lower:
+            headers["predictionHeaders"].append(currentHeaderLoc)
+        elif (
+            ("subject" in col_lower) or ("patient" in col_lower) or ("pid" in col_lower)
+        ):
+            headers["subjectIDHeader"] = currentHeaderLoc
+        elif (
+            ("label" in col_lower)
+            or ("mask" in col_lower)
+            or ("segmentation" in col_lower)
+            or ("ground_truth" in col_lower)
+            or ("groundtruth" in col_lower)
+        ):
+            if headers["labelHeader"] is None:
+                headers["labelHeader"] = currentHeaderLoc
+            else:
+                print(
+                    "WARNING: Multiple label headers found in training CSV, only the first one will be used",
+                    file=sys.stderr,
+                )
+
+    return data_full, headers
+
+
 def get_dataframe(input_file):
     """
     This function parses the input and returns a data frame

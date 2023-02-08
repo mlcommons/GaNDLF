@@ -1,9 +1,13 @@
 import pandas as pd
 
-def handle_collisions(df, collision_path, mapping_path):
+def handle_collisions(df, output_path):
     # Create a dictionary to store the count of each subjectid
     subjectid_counts = {}
     
+    # Create the path to the collision.csv file and mapping.csv file
+    collision_path = os.path.join(output_path, "collision.csv")
+    mapping_path = os.path.join(output_path, "updated_test_mapping.csv")
+
     # Create a list to store the colliding subjectids
     collisions = []
     
@@ -32,4 +36,6 @@ def handle_collisions(df, collision_path, mapping_path):
     # Write the updated dataframe to the new_test_mapping.csv file
     new_df.to_csv(mapping_path, index=False)
 
-    return new_df
+    collisions_found = len(collisions) > 0
+
+    return collisions_found, new_df
