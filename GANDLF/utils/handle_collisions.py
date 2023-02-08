@@ -28,10 +28,9 @@ def handle_collisions(df, output_path):
             # If the subjectid has been seen before, increment the count and add it to the collisions list
             subjectid_counts[subjectid] += 1
             collisions.append(subjectid)
-
-        # Update the subjectid in the new dataframe
-        new_subjectid = f"{subjectid}_v{subjectid_counts[subjectid]}"
-        new_df.at[i, "SubjectID"] = new_subjectid
+            # Update the subjectid in the new dataframe
+            new_subjectid = f"{subjectid}_v{subjectid_counts[subjectid]}"
+            new_df.at[i, "SubjectID"] = new_subjectid
 
     # Write the colliding subjectids to the collision.csv file
     pd.DataFrame({"SubjectID": collisions}).to_csv(collision_path, index=False)
