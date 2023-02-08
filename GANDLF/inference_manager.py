@@ -32,7 +32,7 @@ def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
             "Output directory not provided, creating a new directory with a unique timestamp: ",
             outputDir,
         )
-    Path.mkdir(outputDir, parents=True, exist_ok=True)
+    Path(outputDir).mkdir(parents=True, exist_ok=True)
 
     # # initialize parameters for inference
     if not ("weights" in parameters):
