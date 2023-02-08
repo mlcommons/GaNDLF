@@ -1,4 +1,4 @@
-import os, pickle, sys
+import os, pickle
 from pathlib import Path
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
@@ -7,21 +7,24 @@ from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
 
 
-def main_run(data_csv, config_file, output_dir, train_mode, device, resume, reset):
+def main_run(
+    data_csv, config_file, model_dir, train_mode, device, resume, reset, output_dir=None
+):
     """
     Main function that runs the training and inference.
 
     Args:
         data_csv (str): The CSV file of the training data.
         config_file (str): The YAML file of the training configuration.
-        output_dir (str): The output directory.
+        model_dir (str): The model directory; for training, model is written out here, and for inference, trained model is expected here.
         train_mode (bool): Whether to train or infer.
         device (str): The device type.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
+        output_dir (str): The output directory for the inference session.
 
-    Raises:
-        ValueError: Parameter check from previous run.
+    Returns:
+        None
     """
     file_data_full = data_csv
     model_parameters = config_file
@@ -30,7 +33,7 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
     parameters["device_id"] = -1
     # in case the data being passed is already processed, check if the previous parameters exists,
     # and if it does, compare the two and if they are the same, ensure no preprocess is done.
-    model_parameters_prev = os.path.join(os.path.dirname(output_dir), "parameters.pkl")
+    model_parameters_prev = os.path.join(os.path.dirname(model_dir), "parameters.pkl")
     if train_mode:
         if not (reset) or not (resume):
             print(
@@ -39,18 +42,14 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
             )
             if os.path.exists(model_parameters_prev):
                 parameters_prev = pickle.load(open(model_parameters_prev, "rb"))
-                if parameters != parameters_prev:
-                    raise ValueError(
-                        "The parameters are not the same as the ones stored in the previous run, please re-check."
-                    )
-
-    parameters["output_dir"] = output_dir
+                assert (
+                    parameters == parameters_prev
+                ), "The parameters are not the same as the ones stored in the previous run, please re-check."
+        parameters["output_dir"] = model_dir
+        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     if "-1" in device:
         device = "cpu"
-
-    if train_mode:
-        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # parse training CSV
     if "," in file_data_full:
@@ -104,7 +103,8 @@ def main_run(data_csv, config_file, output_dir, train_mode, device, resume, rese
         else:
             InferenceManager(
                 dataframe=data_full,
-                outputDir=parameters["output_dir"],
+                modelDir=model_dir,
+                outputDir=output_dir,
                 parameters=parameters,
                 device=device,
             )
