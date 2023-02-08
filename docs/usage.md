@@ -256,6 +256,8 @@ All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 
+[Back To Top &uarr;](#table-of-contents)
+
 ## Deployment
 
 You can deploy models trained with GaNDLF into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF.
@@ -266,8 +268,8 @@ This allows your algorithm to be used in a consistent manner with other machine 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration.
 This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
-To deploy a model, simply run "gandlf_deploy" after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images.
-This will create the image and, for MLCubes, generate an MLCube directory complete with an mlcube.yaml file and workspace directory copied from a template. 
+To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images.
+This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
 python gandlf_deploy \
@@ -277,7 +279,6 @@ python gandlf_deploy \
   --target docker # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
-```
 ## Examples
 
 - Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
