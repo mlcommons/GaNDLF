@@ -372,24 +372,20 @@ def validate_network(
                     # current_output_dir directory
                     os.makedirs(
                         os.path.join(
-                            current_output_dir, subject["subject_id"][0]
+                            current_output_dir, "testing"
+                        ),
+                        exist_ok=True,
+                    )
+                    os.makedirs(
+                        os.path.join(
+                            current_output_dir, "testing", subject["subject_id"][0]
                         ),
                         exist_ok=True,
                     )
 
-                    # Now if the subject directory exists, save the image
-                    # as the count of the number of images in the directory
-                    # added by 1 with the extension of the original image
-                    # (e.g. subject_id_seg_1.nii.gz, 2.nii.gz, etc.)
-                    count = len(os.listdir(os.path.join(current_output_dir, subject["subject_id"][0])))
-                    if count > 0:
-                        path_to_save = os.path.join(
-                            current_output_dir, subject["subject_id"][0], subject["subject_id"][0] + "_v" + str(count + 1) + "_seg" + ext
-                        )
-                    else:
-                        path_to_save = os.path.join(
-                            current_output_dir, subject["subject_id"][0], subject["subject_id"][0] + "_seg" + ext
-                        )
+                    path_to_save = os.path.join(
+                        current_output_dir, "testing", subject["subject_id"][0], subject["subject_id"][0] + "_seg" + ext
+                    )
 
                     sitk.WriteImage(
                         result_image,
