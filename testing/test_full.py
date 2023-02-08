@@ -2094,13 +2094,26 @@ def test_train_inference_classification_histology_large_2d(device):
             parameters=parameters,
             device=device,
         )
-        # if 'predictions.csv' are not found, give error
-        output_subject_dir = os.path.join(modelDir, str(input_df["SubjectID"][0]))
-        assert (
-            os.path.exists(os.path.join(output_subject_dir, "predictions.csv")) is True
-        )
-        # ensure previous results are removed
-        shutil.rmtree(output_subject_dir)
+        all_folders_in_modelDir = os.listdir(modelDir)
+        for folder in all_folders_in_modelDir:
+            output_subject_dir = os.path.join(modelDir, folder)
+            if os.path.isdir(output_subject_dir):
+                # check in the default outputDir that's created - this is based on a unique timestamp
+                if folder != "output_validation":
+                    # if 'predictions.csv' are not found, give error
+                    assert (
+                        os.path.exists(
+                            os.path.join(
+                                output_subject_dir,
+                                str(input_df["SubjectID"][0]),
+                                "predictions.csv",
+                            )
+                        )
+                        is True,
+                        "predictions.csv not found",
+                    )
+    # ensure previous results are removed
+    shutil.rmtree(output_subject_dir)
 
     for file in files_to_delete:
         os.remove(file)
