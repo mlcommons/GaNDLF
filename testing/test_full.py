@@ -1,30 +1,41 @@
+import copy
+import csv
+import io
+import os
+import random
+import shutil
+import sys
+import zipfile
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
-import SimpleITK as sitk
+
+import cv2
 import numpy as np
 import pandas as pd
-
+import pytest
+import requests
+import SimpleITK as sitk
+import torch
+import yaml
 from pydicom.data import get_testdata_file
-import cv2
 
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import *
-from GANDLF.data.preprocessing import global_preprocessing_dict
+from GANDLF.anonymize import run_anonymizer
+from GANDLF.cli import config_generator, main_run, patch_extraction, preprocess_and_save
 from GANDLF.data.augmentation import global_augs_dict
-from GANDLF.parseConfig import parseConfig
-from GANDLF.training_manager import TrainingManager
-from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction, config_generator
-from GANDLF.schedulers import global_schedulers_dict
-from GANDLF.optimizers import global_optimizer_dict
-from GANDLF.models import global_models_dict
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.data.post_process import (
-    torch_morphological,
+    cca,
     fill_holes,
     get_mapped_label,
-    cca,
+    torch_morphological,
 )
-from GANDLF.anonymize import run_anonymizer
+from GANDLF.data.preprocessing import global_preprocessing_dict
+from GANDLF.inference_manager import InferenceManager
+from GANDLF.models import global_models_dict
+from GANDLF.optimizers import global_optimizer_dict
+from GANDLF.parseConfig import parseConfig
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.training_manager import TrainingManager
+from GANDLF.utils import *
 
 device = "cpu"
 ## global defines
@@ -656,6 +667,9 @@ def test_train_resume_inference_classification_rad_3d(device):
         device=device,
     )
     # test the case where outputDir is explicitly provided to InferenceManager
+    collision_status, training_data = parseTestingCSV(
+        training_data, parameters["output_dir"]
+    )
     InferenceManager(
         dataframe=training_data,
         modelDir=outputDir,
