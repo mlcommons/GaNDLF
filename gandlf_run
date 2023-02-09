@@ -39,7 +39,7 @@ if __name__ == "__main__":
         "--train",
         metavar="",
         type=ast.literal_eval,
-        help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-output'",
+        help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-modeldir'",
     )
     parser.add_argument(
         "-m",
@@ -47,6 +47,13 @@ if __name__ == "__main__":
         metavar="",
         type=str,
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
+    )
+    parser.add_argument(
+        "-o",
+        "--outputdir",
+        metavar="",
+        type=str,
+        help="Location to save the output of the inference session, does not apply to training",
     )
     parser.add_argument(
         "-d",
@@ -137,7 +144,7 @@ if __name__ == "__main__":
         args.device,
         args.resume,
         args.reset,
-        args.outputdir
+        args.outputdir,
     )
 
     print("Finished.")

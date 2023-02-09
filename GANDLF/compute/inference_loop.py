@@ -36,7 +36,7 @@ def applyCustomColorMap(im_gray):
 
 
 def inference_loop(
-    inferenceDataFromPickle, device, parameters, outputDir_or_optimizedModel
+    inferenceDataFromPickle, device, parameters, modelDir, outputDir=None
 ):
     """
     The main training loop.
@@ -45,7 +45,8 @@ def inference_loop(
         inferenceDataFromPickle (pandas.DataFrame): The data to use for inference.
         device (str): The device to perform computations on.
         parameters (dict): The parameters dictionary.
-        outputDir_or_optimizedModel (str): The output directory or optimized model file.
+        modelDir (str): The path to the directory containing the model to be used for inference.
+        outputDir (str): The path to the directory where the output of the inference session will be stored.
     """
     # Defining our model here according to parameters mentioned in the configuration file
     print("Current model type : ", parameters["model"]["type"])
@@ -71,14 +72,14 @@ def inference_loop(
     main_dict = None
     if parameters["model"]["type"] == "torch":
         # Loading the weights into the model
-        if os.path.isdir(outputDir_or_optimizedModel):
+        if os.path.isdir(modelDir):
             files_to_check = [
                 os.path.join(
-                    outputDir_or_optimizedModel,
+                    modelDir,
                     str(parameters["model"]["architecture"]) + best_model_path_end,
                 ),
                 os.path.join(
-                    outputDir_or_optimizedModel,
+                    modelDir,
                     str(parameters["model"]["architecture"]) + latest_model_path_end,
                 ),
             ]
@@ -96,13 +97,13 @@ def inference_loop(
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model
-        if os.path.isdir(outputDir_or_optimizedModel):
+        if os.path.isdir(modelDir):
             xml_to_check = os.path.join(
-                outputDir_or_optimizedModel,
+                modelDir,
                 str(parameters["model"]["architecture"]) + "_best.xml",
             )
             bin_to_check = os.path.join(
-                outputDir_or_optimizedModel,
+                modelDir,
                 str(parameters["model"]["architecture"]) + "_best.bin",
             )
             if not os.path.isfile(xml_to_check):
@@ -177,9 +178,7 @@ def inference_loop(
             level_width, level_height = os_image.level_dimensions[
                 parameters["slide_level"]
             ]
-            subject_dest_dir = os.path.join(
-                outputDir_or_optimizedModel, str(subject_name)
-            )
+            subject_dest_dir = os.path.join(outputDir, str(subject_name))
             Path(subject_dest_dir).mkdir(parents=True, exist_ok=True)
 
             try:
