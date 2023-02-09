@@ -287,6 +287,28 @@ def training_loop(
     # datetime object containing current date and time
     print("Initializing training at :", get_date_time(), flush=True)
 
+    calculate_overall_metrics = (params["problem_type"] == "classification") or (
+        params["problem_type"] == "regression"
+    )
+
+    # get the overall metrics that are calculated automatically for classification/regression problems
+    if params["problem_type"] == "regression":
+        overall_metrics = overall_stats(torch.Tensor([1]), torch.Tensor([1]), params)
+    elif params["problem_type"] == "classification":
+        # this is just used to generate the headers for the overall stats
+        org_num_classes = params["model"]["num_classes"]
+        params["model"]["num_classes"] = 3
+        overall_metrics = overall_stats(
+            torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int32),
+            torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int32),
+            params,
+        )
+        # original number of classes are restored
+        params["model"]["num_classes"] = org_num_classes
+    if calculate_overall_metrics:
+        for metric in overall_metrics:
+            params["metrics"][metric] = 0
+
     # Setup a few loggers for tracking
     train_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_training.csv"),
