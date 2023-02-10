@@ -79,7 +79,7 @@ if __name__ == "__main__":
         "--output_path",
         metavar="",
         type=str,
-        help="Location to save the output of the inference session, or to back up a model when training.",
+        help="Location to save the output of the inference session. Not used for training.",
     )
 
     parser.add_argument(
