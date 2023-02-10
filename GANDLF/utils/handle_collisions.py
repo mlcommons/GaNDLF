@@ -30,7 +30,7 @@ def handle_collisions(df, output_path):
             collisions.append(subjectid)
             # Update the subjectid in the new dataframe
             new_subjectid = f"{subjectid}_v{subjectid_counts[subjectid]}"
-            new_df.at[i, "SubjectID"] = new_subjectid
+            new_df.at[i, subject_id_column_name] = new_subjectid
 
     # Write the colliding subjectids to the collision.csv file
     pd.DataFrame({"SubjectID": collisions}).to_csv(collision_path, index=False)
