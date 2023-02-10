@@ -13,7 +13,9 @@ def handle_collisions(df, output_path):
     for col in df.columns:
         currentHeaderLoc = df.columns.get_loc(col)
         col_lower = col.lower()
-        if ("subject" in col_lower) or ("patient" in col_lower) or ("pid" in col_lower):
+        if (
+            ("subject" in col_lower) or ("patient" in col_lower) or ("pid" in col_lower)
+        ):
             subject_id_column_name = currentHeaderLoc
         else:
             raise ValueError("SubjectID not found in the header of the csv file")
@@ -44,9 +46,7 @@ def handle_collisions(df, output_path):
             new_df.at[i, subject_id_column_name] = new_subjectid
 
     # Write the colliding subjectids to the collision.csv file
-    pd.DataFrame({subject_id_column_name: collisions}).to_csv(
-        collision_path, index=False
-    )
+    pd.DataFrame({subject_id_column_name: collisions}).to_csv(collision_path, index=False)
 
     # Write the updated dataframe to the new_test_mapping.csv file
     new_df.to_csv(mapping_path, index=False)
