@@ -87,22 +87,15 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
 
     output_mlcube_config_path = outputdir + "/mlcube.yaml"
 
-    del mlcube_config["tasks"]["train"]["parameters"]["outputs"]["modeldir"]
-    del mlcube_config["tasks"]["infer"]["parameters"]["inputs"]["modeldir"]
-    del mlcube_config["tasks"]["train"]["parameters"]["inputs"]["config"]
+    old_train_output_modeldir = mlcube_config["tasks"]["train"]["parameters"]["outputs"].pop("modeldir", None)
+    old_infer_input_modeldir = mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("modeldir", None)
+    old_train_input_config = mlcube_config["tasks"]["train"]["parameters"]["inputs"].pop("config", None)
     # Currently disabled because we've decided exposing config-on-inference complicates the MLCube use case.
-    # del mlcube_config["tasks"]["infer"]["parameters"]["inputs"]["config"]
+    # mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("config", None)
 
     # Change output so that each task always places secondary output in the workspace
-    mlcube_config["tasks"]["train"]["parameters"]["outputs"]["outputdir"] = {
-        "type": "directory",
-        "default": "model/",
-    }
-    mlcube_config["tasks"]["infer"]["parameters"]["outputs"]["outputdir"] = {
-        "type": "directory",
-        "default": "inference/",
-    }
-
+    mlcube_config["tasks"]["train"]["parameters"]["outputs"]["output_path"] = old_train_output_modeldir
+    
     # Change entrypoints to point specifically to the embedded model and config
     mlcube_config["tasks"]["train"]["entrypoint"] = (
         mlcube_config["tasks"]["train"]["entrypoint"]

@@ -157,8 +157,6 @@ def convert_relative_paths_in_dataframe(input_dataframe, headers, path_root):
         # Whenever this happens, we cannot get a csv file location,
         # but at this point the data has already been loaded from a CSV previously.
         return input_dataframe
-    print("DEBUG: BEFORE_PATH_CONVERSION")
-    print(input_dataframe)
     for column in input_dataframe.columns:
         loc = input_dataframe.columns.get_loc(column)
         if (loc == headers["labelHeader"]) or (loc in headers["channelHeaders"]):
@@ -167,13 +165,9 @@ def convert_relative_paths_in_dataframe(input_dataframe, headers, path_root):
                 this_path = pathlib.Path(entry)
                 start_path = pathlib.Path(path_root)
                 if start_path.is_file():
-                    print(
-                        f"start_path: {start_path} is a file, parent: {start_path.parent}"
-                    )
                     start_path = start_path.parent
                 if not this_path.is_absolute():
                     input_dataframe.loc[index, column] = str(
                         start_path.joinpath(this_path)
                     )
-    print(input_dataframe)
     return input_dataframe

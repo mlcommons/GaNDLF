@@ -1303,7 +1303,8 @@ def test_generic_cli_function_preprocess():
     sanitize_outputDir()
     file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
-    input_data_df = pd.read_csv(file_data)
+
+    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1363,7 +1364,7 @@ def test_generic_cli_function_preprocess():
     parameters["data_preprocessing"]["to_canonical"] = None
     parameters["data_preprocessing"]["rgba_to_rgb"] = None
     file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
-    input_data_df = pd.read_csv(file_data)
+    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -2695,15 +2696,6 @@ def test_generic_deploy_docker():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    # patch_size is custom for sdnet
-    parameters["patch_size"] = [224, 224, 1]
-    parameters["batch_size"] = 2
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["class_list"] = [0, 255]
-    parameters["model"]["num_channels"] = 1
-    parameters["model"]["architecture"] = "sdnet"
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
