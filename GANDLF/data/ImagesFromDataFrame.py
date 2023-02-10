@@ -1,5 +1,4 @@
 import os
-import traceback
 import numpy as np
 
 import torch
