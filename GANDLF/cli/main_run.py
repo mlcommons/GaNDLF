@@ -1,6 +1,5 @@
 import os, pickle
 from pathlib import Path
-import shutil
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
 from GANDLF.inference_manager import InferenceManager
