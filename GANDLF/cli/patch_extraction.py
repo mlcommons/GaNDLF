@@ -12,6 +12,8 @@ from GANDLF.OPM.opm.utils import (
     parse_config,
     generate_initial_mask,
     get_patch_size_in_microns,
+)
+from GANDLF.utils import (
     parseTrainingCSV,
 )
 
