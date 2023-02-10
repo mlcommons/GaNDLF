@@ -2696,7 +2696,7 @@ def test_generic_deploy_docker():
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    
+
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["2D"]
     parameters["model"]["dimension"] = 2
@@ -2706,7 +2706,7 @@ def test_generic_deploy_docker():
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
-    
+
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
