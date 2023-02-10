@@ -120,7 +120,7 @@ def ImagesFromDataFrame(
             # store image spacing information if not present
             if "spacing" not in subject_dict:
                 file_reader = sitk.ImageFileReader()
-                file_reader.SetFileName(dataframe[channel][patient])
+                file_reader.SetFileName(str(dataframe[channel][patient]))
                 file_reader.ReadImageInformation()
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 

@@ -49,13 +49,6 @@ if __name__ == "__main__":
         help="Training: Output directory to save intermediate files and model weights; inference: location of previous training session output",
     )
     parser.add_argument(
-        "-o",
-        "--outputdir",
-        metavar="",
-        type=str,
-        help="Location to save the output of the inference session, does not apply to training",
-    )
-    parser.add_argument(
         "-d",
         "--device",
         default="cuda",
@@ -86,8 +79,7 @@ if __name__ == "__main__":
         "--output_path",
         metavar="",
         type=str,
-        help="Path to an optional secondary output location. Useful for backups. " +
-        "If training, 'modeldir' is always updated.",
+        help="Location to save the output of the inference session, or to back up a model when training.",
     )
 
     parser.add_argument(
