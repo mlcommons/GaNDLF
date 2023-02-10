@@ -2060,7 +2060,7 @@ def test_train_inference_classification_histology_large_2d(device):
         yaml.dump(parameters_patch, file)
 
     # resize the image
-    input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
+    input_df, input_headers = parseTrainingCSV(inputDir + "/train_2d_histo_classification.csv", train=False)
     files_to_delete = []
     for _, row in input_df.iterrows():
         scaling_factor = 10

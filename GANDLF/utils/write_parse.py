@@ -133,7 +133,7 @@ def get_dataframe(input_file):
         if input_file.endswith(".pkl"):
             return pd.read_pickle(input_file)
         elif input_file.endswith(".csv"):
-            return pd.read_csv(input_file, dtype=str)
+            return pd.read_csv(input_file)
     elif isinstance(input_file, pd.DataFrame):
         return input_file
 
