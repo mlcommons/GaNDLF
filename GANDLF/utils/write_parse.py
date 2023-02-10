@@ -38,9 +38,12 @@ def writeTrainingCSV(
                         os.path.join(currentSubjectDir, n)
                     ).as_posix()
                     if relativizePathsToOutput:
-                        #commonRoot = os.path.commonpath(currentFile, outputFile)
+                        # commonRoot = os.path.commonpath(currentFile, outputFile)
                         currentFile = (
-                            pathlib.Path(currentFile).resolve().relative_to(pathlib.Path(outputFile).resolve().parent).as_posix()
+                            pathlib.Path(currentFile)
+                            .resolve()
+                            .relative_to(pathlib.Path(outputFile).resolve().parent)
+                            .as_posix()
                         )
                     if channel in n:
                         allImageFiles += currentFile + ","
