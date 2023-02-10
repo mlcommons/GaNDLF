@@ -142,12 +142,69 @@ def test_generic_constructTrainingCSV():
             labelID = "mask"
         # else:
         #     continue
+        outputFile = inputDir + "/train_" + application_data + ".csv"
+        # Test with various combinations of relative/absolute paths
+        # Absolute input/output
         writeTrainingCSV(
             currentApplicationDir,
             channelsID,
             labelID,
-            inputDir + "/train_" + application_data + ".csv",
+            outputFile,
+            relativizePathsToOutput=False
         )
+        writeTrainingCSV(
+            currentApplicationDir,
+            channelsID,
+            labelID,
+            outputFile,
+            relativizePathsToOutput=True
+        )
+        # Relative input, absolute output
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            outputFile,
+            relativizePathsToOutput=False
+        )
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            outputFile,
+            relativizePathsToOutput=True
+        )
+        # Absolute input, relative output
+        writeTrainingCSV(
+            currentApplicationDir,
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=False
+        )
+        writeTrainingCSV(
+            currentApplicationDir,
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=True
+        )
+        # Relative input/output
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=False
+        )
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=True
+        )
+        
 
         # write regression and classification files
         application_data_regression = application_data.replace(
@@ -2670,3 +2727,5 @@ def test_generic_deploy_docker():
 
     assert result, "run_deployment returned false"
     print("passed")
+    
+

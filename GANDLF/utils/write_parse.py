@@ -2,7 +2,9 @@ import os, sys, pathlib
 import pandas as pd
 
 
-def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
+def writeTrainingCSV(
+    inputDir, channelsID, labelID, outputFile, relativizePathsToOutput=False
+):
     """
     This function writes the CSV file based on the input directory, channelsID + labelsID strings
 
@@ -35,6 +37,11 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
                     currentFile = pathlib.Path(
                         os.path.join(currentSubjectDir, n)
                     ).as_posix()
+                    if relativizePathsToOutput:
+                        #commonRoot = os.path.commonpath(currentFile, outputFile)
+                        currentFile = (
+                            pathlib.Path(currentFile).resolve().relative_to(pathlib.Path(outputFile).resolve().parent).as_posix()
+                        )
                     if channel in n:
                         allImageFiles += currentFile + ","
                     elif labelID is not None:

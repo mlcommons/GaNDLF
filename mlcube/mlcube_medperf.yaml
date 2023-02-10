@@ -91,7 +91,7 @@ tasks:
 
   construct_csv:
   # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
-    entrypoint: "python3.8 gandlf_constructCSV"
+    entrypoint: "python3.8 gandlf_constructCSV --relativizePaths True"
     parameters:
       inputs: {
         # Do NOT change the position of the inputDir parameter! It is relevant due to MLCube mounting rules.

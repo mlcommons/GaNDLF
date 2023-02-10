@@ -301,12 +301,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
             break
         currentTestingFold += 1  # go to next fold
 
-    # End by copying all results, if requested
-    if "model_dir_embedded" in parameters:
-        shutil.copytree(
-            Path(outputDir), Path(parameters["model_dir_embedded"]), dirs_exist_ok=True
-        )
-
 
 def TrainingManager_split(
     dataframe_train,
