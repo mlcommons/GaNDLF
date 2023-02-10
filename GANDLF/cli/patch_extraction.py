@@ -12,11 +12,12 @@ from GANDLF.OPM.opm.utils import (
     parse_config,
     generate_initial_mask,
     get_patch_size_in_microns,
+    parseTrainingCSV,
 )
 
 
 def parse_gandlf_csv(fpath):
-    df = pd.read_csv(fpath, dtype=str)
+    df, headers = parseTrainingCSV(fpath, train=False)
     df = df.drop_duplicates()
     for _, row in df.iterrows():
         if "Label" in row:
