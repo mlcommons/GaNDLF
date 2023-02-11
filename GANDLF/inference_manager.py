@@ -33,7 +33,7 @@ def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
             outputDir,
         )
     Path(outputDir).mkdir(parents=True, exist_ok=True)
-    
+
     params["output_dir"] = outputDir
 
     # # initialize parameters for inference
