@@ -2112,17 +2112,13 @@ def test_train_inference_classification_histology_large_2d(device):
                 # check in the default outputDir that's created - this is based on a unique timestamp
                 if folder != "output_validation":
                     # if 'predictions.csv' are not found, give error
-                    assert (
-                        os.path.exists(
-                            os.path.join(
-                                output_subject_dir,
-                                str(input_df["SubjectID"][0]),
-                                "predictions.csv",
-                            )
+                    assert os.path.exists(
+                        os.path.join(
+                            output_subject_dir,
+                            str(input_df["SubjectID"][0]),
+                            "predictions.csv",
                         )
-                        is True,
-                        "predictions.csv not found",
-                    )
+                    ), "predictions.csv not found"
     # ensure previous results are removed
     sanitize_outputDir()
 
