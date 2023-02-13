@@ -13,6 +13,25 @@ from scipy.ndimage.morphology import (
 )
 
 
+def _convert_tensor_to_int_label_array(input_tensor):
+    """
+    This function converts a tensor of labels to a numpy array of labels.
+
+    Args:
+        input_tensor (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+
+    Returns:
+        numpy.ndarray: The numpy array of labels.
+    """
+    result_array = input_tensor.detach().cpu().numpy()
+    if result_array.shape[-1] == 1:
+        result_array = result_array.squeeze(-1)
+    # ensure that we are dealing with a binary array
+    result_array[result_array < 0.5] = 0
+    result_array[result_array >= 0.5] = 1
+    return result_array.astype(np.int64)
+
+
 def multi_class_dice(output, label, params, per_label=False):
     """
     This function computes a multi-class dice.
@@ -106,18 +125,53 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     return sds
 
 
-def hd_generic(inp, target, params, percentile=95, per_label=False):
+def _nsd_base(a_to_b, b_to_a, threshold):
     """
-    Generic Hausdorff Distance calculation
-    Computes the Hausdorff Distance (HD) between the binary objects in two
-    images. Compared to the Hausdorff Distance, this metric is slightly more stable to small outliers and is
-    commonly used in Biomedical Segmentation challenges.
+    This implementation differs from the official surface dice implementation! These two are not comparable!!!!!
+    The normalized surface dice is symmetric, so it should not matter whether a or b is the reference image
+    This implementation natively supports 2D and 3D images.
+
+    Args:
+        a_to_b (np.ndarray): Surface distances from a to b
+        b_to_a (np.ndarray): Surface distances from b to a
+        threshold (float): distances below this threshold will be counted as true positives. Threshold is in mm, not voxels!
+
+    Returns:
+        float: the normalized surface dice between a and b
+    """
+    if isinstance(a_to_b, int):
+        return 0
+    if isinstance(b_to_a, int):
+        return 0
+    numel_a = len(a_to_b)
+    numel_b = len(b_to_a)
+    tp_a = np.sum(a_to_b <= threshold) / numel_a
+    tp_b = np.sum(b_to_a <= threshold) / numel_b
+    fp = np.sum(a_to_b > threshold) / numel_a
+    fn = np.sum(b_to_a > threshold) / numel_b
+    dc = (tp_a + tp_b) / (tp_a + tp_b + fp + fn + sys.float_info.min)
+    return dc
+
+
+def _calculator_generic(
+    inp,
+    target,
+    params,
+    percentile=95,
+    surface_dice=False,
+    threshold=None,
+    per_label=False,
+):
+    """
+    Generic Surface Dice (SD)/Hausdorff (HD) Distance calculation from 2 tensors. Compared to the standard Hausdorff Distance, this metric is slightly more stable to small outliers and is commonly used in Biomedical Segmentation challenges.
 
     Args:
         inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
-        percentile (int, optional): The percentile of surface distances to include during Hausdorff calculation. Defaults to 95.
+        percentile (int, optional): The percentile of surface distances to include during HD calculation. Defaults to 95.
+        surface_dice (bool, optional): Whether the SD needs to be calculated or not. Defaults to False.
+        threshold (float): distances below this threshold will be counted as true positives for SD defined in mm. Defaults to 0.1 of voxel resolution.
         per_label (bool, optional): Whether the hausdorff needs to be calculated per label or not. Defaults to False.
 
     Returns:
@@ -126,20 +180,16 @@ def hd_generic(inp, target, params, percentile=95, per_label=False):
     See also:
         :func:`hd`
     """
-    result_array = inp.detach().cpu().numpy()
-    target_array = target.detach().cpu().numpy()
-    if result_array.shape[-1] == 1:
-        result_array = result_array.squeeze(-1)
-    if target_array.shape[-1] == 1:
-        target_array = target_array.squeeze(-1)
-    # ensure that we are dealing with a binary array
-    result_array[result_array < 0.5] = 0
-    result_array[result_array >= 0.5] = 1
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
 
     hd = 0
     avg_counter = 0
     hd_per_label = []
     for b in range(0, result_array.shape[0]):
+        if threshold is None:
+            threshold = min(params["subject_spacing"][0] / 10)
+
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
                 hd1 = __surface_distances(
@@ -152,7 +202,10 @@ def hd_generic(inp, target, params, percentile=95, per_label=False):
                     result_array[b, i, ...],
                     params["subject_spacing"][b],
                 )
-                current_hd = np.percentile(np.hstack((hd1, hd2)), percentile)
+                if surface_dice:
+                    current_hd = _nsd_base(hd1, hd2, threshold)
+                else:
+                    current_hd = np.percentile(np.hstack((hd1, hd2)), percentile)
                 hd += current_hd
                 hd_per_label.append(current_hd)
                 avg_counter += 1
@@ -164,16 +217,16 @@ def hd_generic(inp, target, params, percentile=95, per_label=False):
 
 
 def hd95(inp, target, params):
-    return hd_generic(inp, target, params, 95)
+    return _calculator_generic(inp, target, params, 95)
 
 
 def hd95_per_label(inp, target, params):
-    return hd_generic(inp, target, params, 95, True)
+    return _calculator_generic(inp, target, params, 95, True)
 
 
 def hd100(inp, target, params):
-    return hd_generic(inp, target, params, 100)
+    return _calculator_generic(inp, target, params, 100)
 
 
 def hd100_per_label(inp, target, params):
-    return hd_generic(inp, target, params, 100, True)
+    return _calculator_generic(inp, target, params, 100, True)
