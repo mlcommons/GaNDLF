@@ -185,9 +185,6 @@ def _calculator_generic(
     avg_counter = 0
     hd_per_label = []
     for b in range(0, result_array.shape[0]):
-        if threshold is None:
-            threshold = min(params["subject_spacing"][0])
-
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
                 hd1 = __surface_distances(
@@ -201,6 +198,8 @@ def _calculator_generic(
                     params["subject_spacing"][b],
                 )
                 if surface_dice:
+                    # ensure threshold always at least 1
+                    threshold = max(min(params["subject_spacing"][0]), 1).item()
                     current_hd = _nsd_base(hd1, hd2, threshold)
                 else:
                     current_hd = np.percentile(np.hstack((hd1, hd2)), percentile)
@@ -231,8 +230,8 @@ def hd100_per_label(inp, target, params):
 
 
 def nsd(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=100)
+    return _calculator_generic(inp, target, params, percentile=100, surface_dice=True)
 
 
 def nsd_per_label(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=100, per_label=True)
+    return _calculator_generic(inp, target, params, percentile=100, per_label=True, surface_dice=True)
