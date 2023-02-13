@@ -50,7 +50,7 @@ except Exception as error:
 
 requirements = [
     "black",
-    "numpy==1.22.0",
+    "torch==1.13.1" "numpy==1.22.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
@@ -82,12 +82,6 @@ requirements = [
     "segmentation-models-pytorch==0.3.0",
     "ACSConv==0.1.1",
 ]
-
-# pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389
-if sys.platform == "darwin":
-    requirements.append("torch==1.11.0")
-else:
-    requirements.append("torch==1.11.0")
 
 setup(
     name="GANDLF",
