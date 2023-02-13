@@ -34,6 +34,8 @@ def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
         )
     Path(outputDir).mkdir(parents=True, exist_ok=True)
 
+    parameters["output_dir"] = outputDir
+
     # # initialize parameters for inference
     if not ("weights" in parameters):
         parameters["weights"] = None  # no need for loss weights for inference
