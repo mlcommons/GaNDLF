@@ -175,6 +175,7 @@ def hd_generic(inp, target, params, percentile=95, per_label=False):
                 hd1 = __surface_distances(
                     result_array[b, i, ...],
                     target_array[b, i, ...],
+                    params["subject_spacing"][b],
                 )
                 hd2 = __surface_distances(
                     target_array[b, i, ...],
