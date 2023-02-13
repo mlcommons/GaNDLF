@@ -234,4 +234,6 @@ def nsd(inp, target, params):
 
 
 def nsd_per_label(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=100, per_label=True, surface_dice=True)
+    return _calculator_generic(
+        inp, target, params, percentile=100, per_label=True, surface_dice=True
+    )
