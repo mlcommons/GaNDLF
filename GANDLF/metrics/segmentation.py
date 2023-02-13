@@ -159,7 +159,6 @@ def _calculator_generic(
     params,
     percentile=95,
     surface_dice=False,
-    threshold=None,
     per_label=False,
 ):
     """
@@ -171,7 +170,6 @@ def _calculator_generic(
         params (dict): The parameter dictionary containing training and data information.
         percentile (int, optional): The percentile of surface distances to include during HD calculation. Defaults to 95.
         surface_dice (bool, optional): Whether the SD needs to be calculated or not. Defaults to False.
-        threshold (float): distances below this threshold will be counted as true positives for SD defined in mm. Defaults to 0.1 of voxel resolution.
         per_label (bool, optional): Whether the hausdorff needs to be calculated per label or not. Defaults to False.
 
     Returns:
@@ -188,7 +186,7 @@ def _calculator_generic(
     hd_per_label = []
     for b in range(0, result_array.shape[0]):
         if threshold is None:
-            threshold = min(params["subject_spacing"][0] / 10)
+            threshold = min(params["subject_spacing"][0])
 
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
@@ -217,16 +215,24 @@ def _calculator_generic(
 
 
 def hd95(inp, target, params):
-    return _calculator_generic(inp, target, params, 95)
+    return _calculator_generic(inp, target, params, percentile=95)
 
 
 def hd95_per_label(inp, target, params):
-    return _calculator_generic(inp, target, params, 95, True)
+    return _calculator_generic(inp, target, params, percentile=95, per_label=True)
 
 
 def hd100(inp, target, params):
-    return _calculator_generic(inp, target, params, 100)
+    return _calculator_generic(inp, target, params, percentile=100)
 
 
 def hd100_per_label(inp, target, params):
-    return _calculator_generic(inp, target, params, 100, True)
+    return _calculator_generic(inp, target, params, percentile=100, per_label=True)
+
+
+def nsd(inp, target, params):
+    return _calculator_generic(inp, target, params, percentile=100)
+
+
+def nsd_per_label(inp, target, params):
+    return _calculator_generic(inp, target, params, percentile=100, per_label=True)
