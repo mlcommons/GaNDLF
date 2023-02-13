@@ -268,6 +268,9 @@ def parseConfig(config_file_path, version_check_flag=True):
                 temp_dict[comparison_string] = initialize_key(
                     temp_dict[comparison_string], "connectivity", 1
                 )
+                temp_dict[comparison_string] = initialize_key(
+                    temp_dict[comparison_string], "threshold", None
+                )
 
         params["metrics"] = temp_dict
 
