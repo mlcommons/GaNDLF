@@ -42,6 +42,19 @@ global_metrics_dict = {
 }
 
 
+# global define for the metrics that use surface distances, and hence require "connectivity" to be defined
+surface_distance_ids = [
+    "hd95",
+    "hd95_per_label",
+    "hausdorff95_per_label",
+    "hausdorff95",
+    "hd100",
+    "hd100_per_label",
+    "hausdorff",
+    "hausdorff100",
+]
+
+
 def overall_stats(predictions, ground_truth, params):
     """
     Generates a dictionary of metrics calculated on the overall predictions and ground truths.
