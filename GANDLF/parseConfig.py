@@ -195,7 +195,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         # initialize metrics dict
         for metric in params["metrics"]:
             # assigning a new variable because some metrics can be dicts, and we want to get the first key
-            comparison_string = metric.lower()
+            comparison_string = metric
             if isinstance(metric, dict):
                 comparison_string = list(metric.keys())[0]
             # these metrics always need to be dicts
