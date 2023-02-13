@@ -2,7 +2,9 @@ import os, sys, pathlib
 import pandas as pd
 
 
-def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
+def writeTrainingCSV(
+    inputDir, channelsID, labelID, outputFile, relativizePathsToOutput=False
+):
     """
     This function writes the CSV file based on the input directory, channelsID + labelsID strings
 
@@ -35,6 +37,14 @@ def writeTrainingCSV(inputDir, channelsID, labelID, outputFile):
                     currentFile = pathlib.Path(
                         os.path.join(currentSubjectDir, n)
                     ).as_posix()
+                    if relativizePathsToOutput:
+                        # commonRoot = os.path.commonpath(currentFile, outputFile)
+                        currentFile = (
+                            pathlib.Path(currentFile)
+                            .resolve()
+                            .relative_to(pathlib.Path(outputFile).resolve().parent)
+                            .as_posix()
+                        )
                     if channel in n:
                         allImageFiles += currentFile + ","
                     elif labelID is not None:
@@ -105,7 +115,7 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True):
                     "WARNING: Multiple label headers found in training CSV, only the first one will be used",
                     file=sys.stderr,
                 )
-
+    convert_relative_paths_in_dataframe(data_full, headers, inputTrainingCSVFile)
     return data_full, headers
 
 
@@ -126,3 +136,38 @@ def get_dataframe(input_file):
             return pd.read_csv(input_file)
     elif isinstance(input_file, pd.DataFrame):
         return input_file
+
+
+def convert_relative_paths_in_dataframe(input_dataframe, headers, path_root):
+    """
+    This function takes a dataframe containing paths and a root path (usually to a data CSV file).
+    These paths are combined with that root to create an absolute path.
+    This allows data to be found relative to the data.csv even if the working directory is in a different location.
+
+    This should only be used when loading, not when saving a CSV.
+    Args:
+        input_dataframe (pd.DataFrame): The dataframe to be operated on (this is also modified).
+        headers (dict): headers created from parseTrainingCSV (used for identifying fields to interpret as paths)
+        path_root (str): A "root path" to which data is to be relatively found. Usually a data CSV.
+
+    Returns:
+        pandas.DataFrame: The dataset but with paths relativized.
+    """
+    if isinstance(path_root, pd.DataFrame):
+        # Whenever this happens, we cannot get a csv file location,
+        # but at this point the data has already been loaded from a CSV previously.
+        return input_dataframe
+    for column in input_dataframe.columns:
+        loc = input_dataframe.columns.get_loc(column)
+        if (loc == headers["labelHeader"]) or (loc in headers["channelHeaders"]):
+            # These entries can be considered as paths to files
+            for index, entry in enumerate(input_dataframe[column]):
+                this_path = pathlib.Path(entry)
+                start_path = pathlib.Path(path_root)
+                if start_path.is_file():
+                    start_path = start_path.parent
+                if not this_path.is_absolute():
+                    input_dataframe.loc[index, column] = str(
+                        start_path.joinpath(this_path)
+                    )
+    return input_dataframe
