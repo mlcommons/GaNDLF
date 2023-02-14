@@ -1115,7 +1115,12 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95",
+        "normalized_surface_dice",
+    ]
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
@@ -1763,6 +1768,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "hausdorff95",
         "hd95_per_label",
         "hd100_per_label",
+        "normalized_surface_dice",
+        "normalized_surface_dice_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
@@ -1809,7 +1816,11 @@ def test_generic_model_patch_divisibility():
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95" "normalized_surface_dice_per_label",
+    ]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
@@ -2168,17 +2179,13 @@ def test_train_inference_classification_histology_large_2d(device):
                 # check in the default outputDir that's created - this is based on a unique timestamp
                 if folder != "output_validation":
                     # if 'predictions.csv' are not found, give error
-                    assert (
-                        os.path.exists(
-                            os.path.join(
-                                output_subject_dir,
-                                str(input_df["SubjectID"][0]),
-                                "predictions.csv",
-                            )
+                    assert os.path.exists(
+                        os.path.join(
+                            output_subject_dir,
+                            str(input_df["SubjectID"][0]),
+                            "predictions.csv",
                         )
-                        is True,
-                        "predictions.csv not found",
-                    )
+                    ), "predictions.csv not found"
     # ensure previous results are removed
     sanitize_outputDir()
 
