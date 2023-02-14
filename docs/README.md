@@ -31,6 +31,7 @@ graph TD;
     Optimizer[[Optimizer]]-->Optimized_Model;
     Save_Model-->Optimized_Model;
     Optimized_Model-->Inference;
+    Optimized_Model-->Deploy
 ```
 
 ### Presentation of GaNDLF's capabilities
