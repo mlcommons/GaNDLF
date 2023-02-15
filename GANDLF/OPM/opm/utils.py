@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from skimage.filters.rank import maximum
 from skimage.filters import gaussian
@@ -225,6 +226,23 @@ def parse_config(config_file):
     return config
 
 
+def is_mask_too_big(mask):
+    """
+    Function that returns a boolean value indicating whether the mask is too big to make processing slow.
+
+    Args:
+        mask (np.ndarray): The valid mask.
+
+    Returns:
+        bool: True if the mask is too big, False otherwise.
+    """
+
+    if sys.getsizeof(mask) > 16 * (1024**2):
+        return True
+    else:
+        return False
+
+
 def generate_initial_mask(slide_path, scale):
     """
     Helper method to generate random coordinates within a slide
@@ -245,7 +263,14 @@ def generate_initial_mask(slide_path, scale):
         slide_dims[1] / slide_thumbnail.shape[0],
     )
 
-    return tissue_mask(slide_thumbnail), real_scale
+    valid_mask = tissue_mask(slide_thumbnail)
+
+    if is_mask_too_big(valid_mask):
+        print(
+            "Calculated tissue mask is too big; considering increasing the scale for faster processing."
+        )
+
+    return valid_mask, real_scale
 
 
 def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=False):
