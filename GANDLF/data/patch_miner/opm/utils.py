@@ -88,11 +88,12 @@ def map_values(image, dictionary):
     return template
 
 
-def display_overlay(image, mask):
-    overlay = image.copy()
-    overlay[~mask] = (overlay[~mask] // 1.5).astype(np.uint8)
-    plt.imshow(overlay)
-    plt.show()
+## commented because this is GUI and is not used in the code
+# def display_overlay(image, mask):
+#     overlay = image.copy()
+#     overlay[~mask] = (overlay[~mask] // 1.5).astype(np.uint8)
+#     plt.imshow(overlay)
+#     plt.show()
 
 
 def hue_range_mask(image, min_hue, max_hue, sat_min=0.05):
