@@ -11,6 +11,7 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
+from GANDLF.data.patch_miner.opm.utils import generate_initial_mask
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -2071,36 +2072,47 @@ def test_train_inference_classification_histology_large_2d(device):
         yaml.dump(parameters_patch, file)
 
     # resize the image
-    input_df, input_headers = parseTrainingCSV(
+    input_df, _ = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
     )
     files_to_delete = []
-    for _, row in input_df.iterrows():
-        scaling_factor = 10
-        new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
+
+    def resize_for_ci(filename, scale):
+        """
+        Helper function to resize images in CI
+
+        Args:
+            filename (str): Filename of the image to be resized
+            scale (float): Scale factor to resize the image
+
+        Returns:
+            str: Filename of the resized image
+        """
+        new_filename = filename.replace(".tiff", "_resize.tiff")
         try:
-            img = cv2.imread(row["Channel_0"])
+            img = cv2.imread(filename)
             dims = img.shape
-            img_resize = cv2.resize(
-                img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
-            )
+            img_resize = cv2.resize(img, (dims[1] * scale, dims[0] * scale))
             cv2.imwrite(new_filename, img_resize)
         except:
             # this is only used in CI
             try:
                 os.system(
-                    "vips resize "
-                    + row["Channel_0"]
-                    + " "
-                    + new_filename
-                    + " "
-                    + str(scaling_factor)
+                    "vips resize " + filename + " " + new_filename + " " + str(scale)
                 )
             except:
                 print("Resize could not be done")
-                break
-        row["Channel_0"] = new_filename
+        return new_filename
+
+    for _, row in input_df.iterrows():
+        # ensure opm mask size check is triggered
+        _, _ = generate_initial_mask(resize_for_ci(row["Channel_0"], scale=2), 1)
+
+        # try to break resizer
+        new_filename = resize_for_ci(row["Channel_0"], scale=10)
         files_to_delete.append(new_filename)
+        # we do not need the last subject
+        break
 
     resized_inference_data_list = os.path.join(
         inputDir, "train_2d_histo_classification_resize.csv"
