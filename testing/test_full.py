@@ -1985,7 +1985,8 @@ def test_train_inference_segmentation_histology_2d(device):
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 3
+    parameters_patch["num_patches"] = 10
+    parameters_patch["read_type"] = "sequential"
     # define patches to be extracted in terms of microns
     parameters_patch["patch_size"] = ["1000m", "1000m"]
 
@@ -2071,6 +2072,12 @@ def test_train_inference_classification_histology_large_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
 
+    patch_extraction(
+        inputDir + "/train_2d_histo_classification.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
     # resize the image
     input_df, _ = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
@@ -2121,12 +2128,6 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
     input_df.to_csv(resized_inference_data_list, index=False)
     files_to_delete.append(resized_inference_data_list)
-
-    patch_extraction(
-        inputDir + "/train_2d_histo_classification.csv",
-        output_dir_patches_output,
-        file_config_temp,
-    )
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
