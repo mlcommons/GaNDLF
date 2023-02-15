@@ -80,8 +80,7 @@ class Patch:
         @return: str
         """
         path = Path(self._slide_path)
-        if create_dir:
-            Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
+        Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
         return os.path.join(
             out_dir,
             self.subfolder,
