@@ -81,16 +81,6 @@ class PatchManager:
         self.mined_mask = np.zeros_like(mask)
         self.valid_mask_scale = scale
 
-        if sys.getsizeof(self.valid_mask) > 16 * (1024**2):
-            print(
-                "Warning: large mask detected. Consider editing the config to use a larger scale for faster mining"
-            )
-            print(
-                "Valid mask size (in Mb): {}".format(
-                    sys.getsizeof(self.valid_mask) / (1024**2)
-                )
-            )
-
     def add_patch(self, patch, overlap_factor, patch_size):
         """
         Add patch to manager and take care of self.mined_mask update so it doesn't pull the same patch twice.
