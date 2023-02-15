@@ -6,9 +6,18 @@ import os
 from pathlib import Path
 from zarr.core import Array
 
+
 class Patch:
-    def __init__(self, slide_path: str, slide_object: Array, manager, coordinates, level: int,
-                 size: tuple, output_suffix: str = "_patch@{}:{}.png") -> None:
+    def __init__(
+        self,
+        slide_path: str,
+        slide_object: Array,
+        manager,
+        coordinates,
+        level: int,
+        size: tuple,
+        output_suffix: str = "_patch@{}:{}.png",
+    ) -> None:
         """
         Init for Patch.
         @param slide_path: Path to slide. Used primarily for generating patch filenames.
@@ -33,19 +42,25 @@ class Patch:
         Read patch from self.slide_object given this patch's coordinates, level, and size.
         @return: PIL object of RGBA patch image.
         """
-        return np.asarray(self.slide_object.read_region((self.coordinates[1], self.coordinates[0]), self.level, self.size))
+        return np.asarray(
+            self.slide_object.read_region(
+                (self.coordinates[1], self.coordinates[0]), self.level, self.size
+            )
+        )
 
     def copy(self):
         """
         Return a copy of the current patch.
         @return: new Patch object with same attributes as this one.
         """
-        return Patch(slide_path=self._slide_path,
-                     slide_object=self.slide_object,
-                     manager=self.manager,
-                     coordinates=self.coordinates,
-                     level=self.level,
-                     size=self.size)
+        return Patch(
+            slide_path=self._slide_path,
+            slide_object=self.slide_object,
+            manager=self.manager,
+            coordinates=self.coordinates,
+            level=self.level,
+            size=self.size,
+        )
 
     def set_slide(self, slide_path):
         """
@@ -67,9 +82,21 @@ class Patch:
         path = Path(self._slide_path)
         if create_dir:
             Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
-        return os.path.join(out_dir, self.subfolder, path.name.split(path.suffix)[0] + self.output_suffix.format(self.coordinates[0], self.coordinates[1]))
+        return os.path.join(
+            out_dir,
+            self.subfolder,
+            path.name.split(path.suffix)[0]
+            + self.output_suffix.format(self.coordinates[0], self.coordinates[1]),
+        )
 
-    def save(self, out_dir, save=True, check_if_valid=True, process_method=None, value_map=None):
+    def save(
+        self,
+        out_dir,
+        save=True,
+        check_if_valid=True,
+        process_method=None,
+        value_map=None,
+    ):
         """
         Save patch.
         @param out_dir: Output directory for saving the patch. Supplied by patch_manager.py
@@ -100,17 +127,10 @@ class Patch:
                 if isinstance(value_map, dict):
                     patch = self.read_patch()[:, :, 0]
                     patch = map_values(patch, value_map)
-                    imsave(
-                        fname=self.get_patch_path(out_dir),
-                        arr=patch
-                    )
+                    imsave(fname=self.get_patch_path(out_dir), arr=patch)
                 elif value_map is None:
                     patch = self.read_patch()
-                    imsave(
-                        fname=self.get_patch_path(out_dir),
-                        arr=patch
-                    )
-
+                    imsave(fname=self.get_patch_path(out_dir), arr=patch)
 
             return [True, self, process_method(patch)]
 

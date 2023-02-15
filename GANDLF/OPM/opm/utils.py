@@ -284,7 +284,9 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
             raise ValueError(
                 "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
             )
-    elif isinstance(patch_size_from_config, list) or isinstance(patch_size_from_config, tuple):
+    elif isinstance(patch_size_from_config, list) or isinstance(
+        patch_size_from_config, tuple
+    ):
         patch_size = patch_size_from_config
     else:
         raise ValueError("Patch size must be a list or string.")
@@ -304,16 +306,24 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 input_slide = tiffslide.open_slide(input_slide_path)
                 metadata = input_slide.properties
                 if i == 0:
-                    for property in [tiffslide.PROPERTY_NAME_MPP_X, "tiff.XResolution", "XResolution"]:
+                    for property in [
+                        tiffslide.PROPERTY_NAME_MPP_X,
+                        "tiff.XResolution",
+                        "XResolution",
+                    ]:
                         if property in metadata:
                             magnification = metadata[property]
                             magnification_prev = magnification
-                            break                        
+                            break
                 elif i == 1:
-                    for property in [tiffslide.PROPERTY_NAME_MPP_Y, "tiff.YResolution", "YResolution"]:
+                    for property in [
+                        tiffslide.PROPERTY_NAME_MPP_Y,
+                        "tiff.YResolution",
+                        "YResolution",
+                    ]:
                         if property in metadata:
                             magnification = metadata[property]
-                            break 
+                            break
                     if magnification == -1:
                         # if y-axis data is missing, use x-axis data
                         magnification = magnification_prev
