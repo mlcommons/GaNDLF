@@ -117,57 +117,61 @@ def tissue_mask(image):
     return final_mask
 
 
-def basic_pen_mask(image, pen_size_threshold, pen_mask_expansion):
-    green_mask = np.bitwise_and(
-        image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
-        > MIN_COLOR_DIFFERENCE,
-    )
+### unused function because pen_size_threshold and pen_mask_expansion are not defined
+# def basic_pen_mask(image, pen_size_threshold, pen_mask_expansion):
+#     green_mask = np.bitwise_and(
+#         image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
+#         image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+#         > MIN_COLOR_DIFFERENCE,
+#     )
 
-    blue_mask = np.bitwise_and(
-        image[:, :, RGB_BLUE_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
-        > MIN_COLOR_DIFFERENCE,
-    )
+#     blue_mask = np.bitwise_and(
+#         image[:, :, RGB_BLUE_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
+#         image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+#         > MIN_COLOR_DIFFERENCE,
+#     )
 
-    masked_pen = np.bitwise_or(green_mask, blue_mask)
-    new_mask_image = remove_small_objects(masked_pen, pen_size_threshold)
+#     masked_pen = np.bitwise_or(green_mask, blue_mask)
+#     new_mask_image = remove_small_objects(masked_pen, pen_size_threshold)
 
-    return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(
-        bool
-    )
-
-
-def basic_hsv_mask(image):
-    """
-    Mask based on low saturation and value (gray-black colors)
-    :param image: RGB numpy image
-    :return: image mask, True pixels are gray-black.
-    """
-    hsv_image = rgb2hsv(image)
-    return np.bitwise_or(
-        hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
-        hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL,
-    )
+#     return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(
+#         bool
+#     )
 
 
-def hybrid_mask(image):
-    return ~np.bitwise_or(basic_hsv_mask(image), basic_pen_mask(image))
+### unused function
+# def basic_hsv_mask(image):
+#     """
+#     Mask based on low saturation and value (gray-black colors)
+#     :param image: RGB numpy image
+#     :return: image mask, True pixels are gray-black.
+#     """
+#     hsv_image = rgb2hsv(image)
+#     return np.bitwise_or(
+#         hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
+#         hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL,
+#     )
 
 
-def trim_mask(image, mask, background_value=0, mask_func=hybrid_mask):
-    """
-    Set the values of single-channel image to 0 if outside of whitespace.
-    :param image: RGB numpy image
-    :param mask: Mask to be trimmed
-    :param background_value: Value to set in mask.
-    :param mask_func: Func which takes `image` as a parameter. Returns a binary mask, `True` will be background.
-    :return: `mask` with excess trimmed off
-    """
-    mask_copy = mask.copy()
-    masked_image = mask_func(image)
-    mask_copy[masked_image] = background_value
-    return mask_copy
+### unused function because pen_size_threshold and pen_mask_expansion are not defined
+# def hybrid_mask(image, pen_size_threshold, pen_mask_expansion):
+#     return ~np.bitwise_or(basic_hsv_mask(image), basic_pen_mask(image, pen_size_threshold, pen_mask_expansion))
+
+
+### unused function because pen_size_threshold and pen_mask_expansion are not defined
+# def trim_mask(image, mask, pen_size_threshold, pen_mask_expansion, background_value=0, mask_func=hybrid_mask):
+#     """
+#     Set the values of single-channel image to 0 if outside of whitespace.
+#     :param image: RGB numpy image
+#     :param mask: Mask to be trimmed
+#     :param background_value: Value to set in mask.
+#     :param mask_func: Func which takes `image` as a parameter. Returns a binary mask, `True` will be background.
+#     :return: `mask` with excess trimmed off
+#     """
+#     mask_copy = mask.copy()
+#     masked_image = mask_func(image)
+#     mask_copy[masked_image] = background_value
+#     return mask_copy
 
 
 def patch_size_check(img, patch_height, patch_width):
