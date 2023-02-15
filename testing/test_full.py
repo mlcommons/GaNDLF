@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
+import requests, zipfile, io, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -11,7 +11,11 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
-from GANDLF.data.patch_miner.opm.utils import generate_initial_mask
+from GANDLF.data.patch_miner.opm.utils import (
+    generate_initial_mask,
+    alpha_rgb_2d_channel_check,
+    get_patch_size_in_microns,
+)
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -1694,6 +1698,33 @@ def test_generic_preprocess_functions():
             input_transformed.max() <= rescaler.out_min_max[1]
         ), "Rescaling should work for max"
 
+    # tests for histology alpha check
+    input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for 4D tensors"
+    input_tensor = torch.randint(0, 256, (64, 64, 64))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for 3D images"
+    input_tensor = torch.randint(0, 256, (64, 64, 4))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for generic 4D images"
+    input_tensor = torch.randint(0, 256, (64, 64))
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for grayscale 2D images"
+    input_tensor = torch.randint(0, 256, (64, 64, 3))
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for RGB images"
+    input_tensor = torch.randint(0, 256, (64, 64, 4))
+    input_tensor[:, :, 3] = 255
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for RGBA images"
+
     print("passed")
 
 
@@ -2115,6 +2146,15 @@ def test_train_inference_classification_histology_large_2d(device):
     for _, row in input_df.iterrows():
         # ensure opm mask size check is triggered
         _, _ = generate_initial_mask(resize_for_ci(row["Channel_0"], scale=2), 1)
+
+        for patch_size in [
+            [128, 128],
+            "[100m,100m]",
+            "[100mx100m]",
+            "[100mX100m]",
+            "[100m*100m]",
+        ]:
+            _ = get_patch_size_in_microns(row["Channel_0"], patch_size)
 
         # try to break resizer
         new_filename = resize_for_ci(row["Channel_0"], scale=10)
