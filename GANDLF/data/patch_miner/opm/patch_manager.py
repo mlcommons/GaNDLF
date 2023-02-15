@@ -216,7 +216,9 @@ class PatchManager:
                 print("%i indices left " % num_indices, end="\r")
                 # Find index of coordinates to select for patch
 
-                assert read_type in ["random", "sequential"], "Unrecognized read type %s" % read_type
+                assert read_type in ["random", "sequential"], (
+                    "Unrecognized read type %s" % read_type
+                )
                 if read_type == "random":
                     choice = np.random.choice(num_indices, 1)
                 elif read_type == "sequential":
