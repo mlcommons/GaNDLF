@@ -76,6 +76,9 @@ requirements = [
     "ACSConv==0.1.1",
     "docker",
     "dicom-anonymizer",
+    "twine",
+    "zarr",
+    "keyring",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389
