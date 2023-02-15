@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from GANDLF.OPM.opm.patch_manager import PatchManager
-from GANDLF.OPM.opm.utils import (
+from GANDLF.data.patch_miner.opm.patch_manager import PatchManager
+from GANDLF.data.patch_miner.opm.utils import (
     alpha_channel_check,
     patch_size_check,
     parse_config,
@@ -19,7 +19,7 @@ from GANDLF.utils import (
 
 
 def parse_gandlf_csv(fpath):
-    df, headers = parseTrainingCSV(fpath, train=False)
+    df, _ = parseTrainingCSV(fpath, train=False)
     df = df.drop_duplicates()
     for _, row in df.iterrows():
         if "Label" in row:
