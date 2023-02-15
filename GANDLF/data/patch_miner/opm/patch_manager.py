@@ -235,8 +235,7 @@ class PatchManager:
                 )
                 return self.add_patch(patch, overlap_factor, patch_size)
             except Exception as e:
-                print("Exception thrown when adding next patch:")
-                print(e)
+                print("Exception thrown when adding next patch:", e)
                 return False
 
     def remove_patch(self, patch):
@@ -296,10 +295,9 @@ class PatchManager:
         save = config["save_patches"]
         value_map = config["value_map"]
 
-        if output_csv is None:
-            print("Creating output csv")
-            csv_filename = os.path.join(self.output_dir, "list.csv")
-        else:
+        csv_filename = os.path.join(self.output_dir, "list.csv")
+
+        if output_csv is not None:
             csv_filename = output_csv
 
         try:
@@ -310,8 +308,7 @@ class PatchManager:
         except pd.errors.EmptyDataError as e:
             output_df = pd.DataFrame()
 
-        if n_patches == -1:
-            n_patches = np.Inf
+        n_patches = np.Inf if n_patches == -1 else n_patches
 
         n_completed = 0
         saturated = False
@@ -386,8 +383,7 @@ class PatchManager:
                 try:
                     successful_indices = np.argwhere(np_slide_futures[:, 0]).ravel()
                 except Exception as e:
-                    print(e)
-                    print("Setting successful indices to []")
+                    print("Error:", e, "Setting successful indices to []")
                     successful_indices = []
 
             # Find all successfully saved patches, copy and extract from label map.
