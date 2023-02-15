@@ -183,12 +183,12 @@ def patch_size_check(img, patch_height, patch_width):
         return True
 
 
-def alpha_channel_check(img):
+def alpha_rgb_2d_channel_check(img):
     img = np.asarray(img)
     # If the image has three dimensions AND there is no alpha_channel...
     if len(img.shape) == 3 and img.shape[-1] == 3:
         return True
-    # If the image has three dimensions AND ther IS an alpha channel...
+    # If the image has three dimensions AND there IS an alpha channel...
     elif len(img.shape) == 3 and img.shape[-1] == 4:
         alpha_channel = img[:, :, 3]
 
