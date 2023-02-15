@@ -146,10 +146,8 @@ class PatchManager:
                     max(valid_start_y, 0) : self.height_bound_check(valid_end_y),
                 ] = False
             else:
-                # If the user is okay with 100% overlap, just remove the single pixel of the coordinate.
-                self.valid_mask[
-                    valid_start_x, valid_start_y
-                ] = False  # Change only the starting index
+                # If the user is okay with 100% overlap, just remove the single pixel of the coordinate and change only the starting index
+                self.valid_mask[valid_start_x, valid_start_y] = False
 
             mined_start_x = int(
                 round((patch.coordinates[0]) / self.valid_mask_scale[0])
@@ -217,14 +215,12 @@ class PatchManager:
                 num_indices = len(indices.ravel()) // 2
                 print("%i indices left " % num_indices, end="\r")
                 # Find index of coordinates to select for patch
+
+                assert read_type in ["random", "sequential"], "Unrecognized read type %s" % read_type
                 if read_type == "random":
                     choice = np.random.choice(num_indices, 1)
                 elif read_type == "sequential":
                     choice = 0
-                else:
-                    choice = -1
-                    print("Unrecognized read type %s" % read_type)
-                    exit(1)
 
                 coordinates = np.array([x_values[choice], y_values[choice]]).ravel()
 
