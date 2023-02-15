@@ -14,6 +14,7 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.patch_miner.opm.utils import (
     generate_initial_mask,
     alpha_rgb_2d_channel_check,
+    get_nonzero_percent,
     get_patch_size_in_microns,
 )
 from GANDLF.parseConfig import parseConfig
@@ -1700,6 +1701,7 @@ def test_generic_preprocess_functions():
 
     # tests for histology alpha check
     input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
+    _ = get_nonzero_percent(input_tensor)
     assert not (
         alpha_rgb_2d_channel_check(input_tensor)
     ), "Alpha channel check should work for 4D tensors"
