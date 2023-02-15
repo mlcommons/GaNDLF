@@ -10,7 +10,7 @@ overlap_factor : 0.0  # Portion of patches that are allowed to overlap (0->1); d
 
 # Misc
 # white_color : 250 ## unused in the code right now
-scale       : 16 # scale at which operations such as tissue mask calculation happens; defaults to 16
+scale       : 16 # scale at which operations such as tissue mask calculation happens - larger scale -> coarser mask -> faster computations; defaults to 16
 patch_size  : !!python/list [256, 256] # if defined as str and "m" is present, it is processed as microns
 # patch_size: "[50m,50m]" # this will process patches in terms of [50x50] microns by taking "mpp" into account
 num_workers : 1 # number of threads to use during computation; defaults to 1
