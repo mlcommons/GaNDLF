@@ -41,7 +41,7 @@ class PatchManager:
 
     def set_slide_path(self, filename):
         self.img_path = filename
-        self.img_path = self.convert_to_tiff(self.img_path, self.output_dir, "img")
+        self.img_path = convert_to_tiff(self.img_path, self.output_dir, "img")
         self.slide_object = tiffslide.open_slide(self.img_path)
         self.slide_dims = self.slide_object.dimensions
 
@@ -50,7 +50,7 @@ class PatchManager:
         Add associated label map to Patch Manager.
         @param path: path to label map.
         """
-        self.label_map = self.convert_to_tiff(path, "mask")
+        self.label_map = convert_to_tiff(path, self.output_dir, "mask")
         self.label_map_object = tiffslide.open_slide(self.label_map)
 
         assert all(
