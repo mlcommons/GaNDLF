@@ -39,15 +39,13 @@ if __name__ == "__main__":
         help="Path to an output file where the config will be written.",
     )
 
-
     args = parser.parse_args()
-    
+
     if args.mlcube:
         search_dir = "/embedded_model/"
     else:
         search_dir = args.modeldir
-        
-    result = recover_config(search_dir, args.outputFile):
-    assert result, "Config file recovery failed."
-        
-    
+
+    assert recover_config(search_dir, args.outputFile), "Config file recovery failed."
+
+    print("Finished.")

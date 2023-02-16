@@ -3,7 +3,7 @@
 
 import argparse
 import ast
-import os, sys 
+import os, sys
 from GANDLF.cli import deploy_targets, run_deployment, recover_config, copyrightMessage
 
 
@@ -36,7 +36,9 @@ if __name__ == "__main__":
         "--target",
         metavar="",
         type=str,
-        help="The target platform. Valid inputs are: " + ', '.join(deploy_targets) + " .",
+        help="The target platform. Valid inputs are: "
+        + ", ".join(deploy_targets)
+        + " .",
         required=True,
     )
     parser.add_argument(
@@ -63,19 +65,27 @@ if __name__ == "__main__":
         help="True if the model requires a GPU by default, False otherwise.",
         default=True,
     )
-        
 
     args = parser.parse_args()
-    
+
     if not os.path.exists(args.outputdir):
         os.makedirs(args.outputdir, exist_ok=True)
-    
+
     if not args.config:
-        result = recover_config(args.model, args.outputdir+"/original_config.yml")
-        assert result, "Error: No config was specified but automatic config extraction failed."
-        config_to_use = args.outputdir+"/original_config.yml"
+        result = recover_config(args.model, args.outputdir + "/original_config.yml")
+        assert (
+            result
+        ), "Error: No config was specified but automatic config extraction failed."
+        config_to_use = args.outputdir + "/original_config.yml"
     else:
         config_to_use = args.config
-    
-    result = run_deployment(args.model, config_to_use, args.target, args.outputdir, args.mlcube_root, args.requires_gpu)
+
+    result = run_deployment(
+        args.model,
+        config_to_use,
+        args.target,
+        args.outputdir,
+        args.mlcube_root,
+        args.requires_gpu,
+    )
     assert result, "Deployment to the target platform failed."
