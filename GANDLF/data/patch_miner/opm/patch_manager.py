@@ -451,82 +451,83 @@ class PatchManager:
 
         print("Done!")
 
-    def save_predefined_patches(
-        self,
-        patch_coord_csv,
-        config,
-        x_coord_col="PatchCoordinatesX",
-        y_coord_col="PatchCoordinatesY",
-    ):
-        """
+    ### commenting out functionality for now, will be ported to a separate script
+    # def save_predefined_patches(
+    #     self,
+    #     patch_coord_csv,
+    #     config,
+    #     x_coord_col="PatchCoordinatesX",
+    #     y_coord_col="PatchCoordinatesY",
+    # ):
+    #     """
 
-        @param output_directory:
-        @param patch_coord_csv:
-        @param value_map:
-        @param n_jobs:
-        @return:
-        """
+    #     @param output_directory:
+    #     @param patch_coord_csv:
+    #     @param value_map:
+    #     @param n_jobs:
+    #     @return:
+    #     """
 
-        value_map = config["value_map"]
-        patch_size = config["patch_size"]
-        n_jobs = config["num_workers"]
+    #     value_map = config["value_map"]
+    #     patch_size = config["patch_size"]
+    #     n_jobs = config["num_workers"]
 
-        output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
-        Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
-        # Todo, port to pandas or something more sophisticated?
-        input_df = pd.read_csv(patch_coord_csv)
-        for idx, row in input_df.iterrows():
-            x, y = row[x_coord_col], row[y_coord_col]
-            patch = Patch(
-                self.img_path,
-                self.slide_object,
-                self,
-                [y, x],
-                0,
-                patch_size,
-                "_patch_{}-{}.png",
-            )
-            self.patches.append(patch)
+    #     output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
+    #     Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
+    #     # Todo, port to pandas or something more sophisticated?
+    #     input_df = pd.read_csv(patch_coord_csv)
+    #     for idx, row in input_df.iterrows():
+    #         x, y = row[x_coord_col], row[y_coord_col]
+    #         patch = Patch(
+    #             self.img_path,
+    #             self.slide_object,
+    #             self,
+    #             [y, x],
+    #             0,
+    #             patch_size,
+    #             "_patch_{}-{}.png",
+    #         )
+    #         self.patches.append(patch)
 
-            if self.label_map is not None:
-                lm_patch = self.pull_from_label_map(patch)
-                self.label_map_patches.append(lm_patch)
+    #         if self.label_map is not None:
+    #             lm_patch = self.pull_from_label_map(patch)
+    #             self.label_map_patches.append(lm_patch)
 
-        _save_patch_partial = partial(
-            _save_patch,
-            output_directory=output_dir_slide_folder,
-            save=True,
-            check_if_valid=False,
-        )
+    #     _save_patch_partial = partial(
+    #         _save_patch,
+    #         output_directory=output_dir_slide_folder,
+    #         save=True,
+    #         check_if_valid=False,
+    #     )
 
-        print("Saving slide patches:")
-        with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
-            list(
-                tqdm(
-                    executor.map(_save_patch_partial, self.patches),
-                    total=len(self.patches),
-                    unit="pchs",
-                )
-            )
+    #     print("Saving slide patches:")
+    #     with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
+    #         list(
+    #             tqdm(
+    #                 executor.map(_save_patch_partial, self.patches),
+    #                 total=len(self.patches),
+    #                 unit="pchs",
+    #             )
+    #         )
 
-        if self.label_map is not None:
-            print("Saving label maps:")
-            _lm_save_patch_partial = partial(
-                _save_patch,
-                output_directory=output_dir_slide_folder,
-                save=True,
-                check_if_valid=False,
-                patch_processor=get_patch_class_proportions,
-                value_map=value_map,
-            )
-            with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
-                list(
-                    tqdm(
-                        executor.map(_lm_save_patch_partial, self.label_map_patches),
-                        total=len(self.label_map_patches),
-                        unit="pchs",
-                    )
-                )
+    #     if self.label_map is not None:
+    #         print("Saving label maps:")
+    #         _lm_save_patch_partial = partial(
+    #             _save_patch,
+    #             output_directory=output_dir_slide_folder,
+    #             save=True,
+    #             check_if_valid=False,
+    #             patch_processor=get_patch_class_proportions,
+    #             value_map=value_map,
+    #         )
+    #         with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
+    #             list(
+    #                 tqdm(
+    #                     executor.map(_lm_save_patch_partial, self.label_map_patches),
+    #                     total=len(self.label_map_patches),
+    #                     unit="pchs",
+    #                 )
+    #             )
 
     def pull_from_label_map(self, slide_patch):
         """
