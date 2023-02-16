@@ -16,6 +16,7 @@ from GANDLF.data.patch_miner.opm.utils import (
     alpha_rgb_2d_channel_check,
     get_nonzero_percent,
     get_patch_size_in_microns,
+    convert_to_tiff,
 )
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
@@ -1726,6 +1727,11 @@ def test_generic_preprocess_functions():
     assert alpha_rgb_2d_channel_check(
         input_tensor
     ), "Alpha channel check should work for RGBA images"
+    input_array = torch.randint(0, 256, (64, 64, 3)).numpy()
+    temp_filename = os.path.join(outputDir, "temp.png")
+    cv2.imwrite(temp_filename, input_array)
+    temp_filename_tiff = convert_to_tiff(temp_filename, outputDir)
+    assert os.path.exists(temp_filename_tiff), "Tiff file should be created"
 
     print("passed")
 
