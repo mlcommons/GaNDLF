@@ -1,9 +1,13 @@
-import sys
+import sys, os
+from pathlib import Path
 import numpy as np
-from skimage.filters.rank import maximum
+import skimage.io
+
+# from skimage.filters.rank import maximum
 from skimage.filters import gaussian
-from skimage.morphology.footprints import disk
-from skimage.morphology import remove_small_objects, remove_small_holes
+
+# from skimage.morphology.footprints import disk
+from skimage.morphology import remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
 import yaml
@@ -39,6 +43,23 @@ def print_sorted_dict(dictionary):
     output_str += "}"
 
     return output_str
+
+
+def convert_to_tiff(filename, output_dir, img_type="converted"):
+    base, ext = os.path.splitext(filename)
+    # for png or jpg images, write image back to tiff
+    if ext in [".png", ".jpg", ".jpeg"]:
+        converted_img_path = os.path.join(output_dir, "tiff_converted")
+        Path(converted_img_path).mkdir(parents=True, exist_ok=True)
+        temp_file = os.path.join(
+            converted_img_path,
+            os.path.basename(base) + "_" + img_type + ".tiff",
+        )
+        temp_img = skimage.io.imread(filename)
+        skimage.io.imsave(temp_file, temp_img)
+        return temp_file
+    else:
+        return filename
 
 
 def pass_method(*args):

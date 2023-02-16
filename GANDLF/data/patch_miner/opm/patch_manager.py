@@ -1,14 +1,12 @@
-import sys
 import concurrent.futures
 import os
 from functools import partial
 from .patch import Patch
-from .utils import get_patch_class_proportions
+from .utils import get_patch_class_proportions, convert_to_tiff
 from tiffslide import open_slide
 import numpy as np
 from tqdm import tqdm
 from pathlib import Path
-import skimage.io
 import pandas as pd
 import tiffslide
 
@@ -37,29 +35,13 @@ class PatchManager:
         self.mask_header = "LabelMapPatchPath"
         Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-    def convert_to_tiff(self, filename, img_type):
-        base, ext = os.path.splitext(filename)
-        # for png or jpg images, write image back to tiff
-        if ext in [".png", ".jpg", ".jpeg"]:
-            self.converted_img_path = os.path.join(self.output_dir, "tiff_converted")
-            Path(self.converted_img_path).mkdir(parents=True, exist_ok=True)
-            temp_file = os.path.join(
-                self.converted_img_path,
-                os.path.basename(base) + "_" + img_type + ".tiff",
-            )
-            temp_img = skimage.io.imread(filename)
-            skimage.io.imsave(temp_file, temp_img)
-            return temp_file
-        else:
-            return filename
-
     def set_subjectID(self, subjectID):
         self.subjectID = str(subjectID)
         self.save_subjectID = True
 
     def set_slide_path(self, filename):
         self.img_path = filename
-        self.img_path = self.convert_to_tiff(self.img_path, "img")
+        self.img_path = self.convert_to_tiff(self.img_path, self.output_dir, "img")
         self.slide_object = tiffslide.open_slide(self.img_path)
         self.slide_dims = self.slide_object.dimensions
 
