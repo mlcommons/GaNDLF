@@ -17,6 +17,7 @@ class PatchManager:
         Initialization for PatchManager
         @param filename: name of main WSI.
         """
+        self.output_dir = output_dir
         self.set_slide_path(filename)
         self.patches = list()
         self.slide_folder = Path(filename).stem
@@ -30,7 +31,6 @@ class PatchManager:
         self.label_map_patches = list()
         self.subjectID = None
         self.save_subjectID = False
-        self.output_dir = output_dir
         self.image_header = "SlidePatchPath"
         self.mask_header = "LabelMapPatchPath"
         Path(output_dir).mkdir(parents=True, exist_ok=True)
