@@ -198,10 +198,11 @@ def tissue_mask(image):
 def patch_size_check(img, patch_height, patch_width):
     img = np.asarray(img)
 
-    if img.shape[0] != patch_height or img.shape[1] != patch_width:
-        return False
-    else:
-        return True
+    return_val = False
+    if not (img.shape[0] != patch_height or img.shape[1] != patch_width):
+        return_val = True
+
+    return return_val
 
 
 def alpha_rgb_2d_channel_check(img):
