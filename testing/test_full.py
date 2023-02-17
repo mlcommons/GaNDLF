@@ -2266,22 +2266,26 @@ def test_train_inference_classification_histology_2d(device):
         shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
-    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
     file_config_temp = get_temp_config_path()
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 3
     parameters_patch["patch_size"] = [128, 128]
 
-    with open(file_config_temp, "w") as file:
-        yaml.dump(parameters_patch, file)
+    for num_patches in [-1, 3]:
+        parameters_patch["num_patches"] = num_patches
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters_patch, file)
 
-    patch_extraction(
-        inputDir + "/train_2d_histo_classification.csv",
-        output_dir_patches_output,
-        file_config_temp,
-    )
+        if os.path.exists(output_dir_patches_output):
+            shutil.rmtree(output_dir_patches_output)
+        # this ensures that the output directory for num_patches=3 is preserved
+        Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+        patch_extraction(
+            inputDir + "/train_2d_histo_classification.csv",
+            output_dir_patches_output,
+            file_config_temp,
+        )
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
