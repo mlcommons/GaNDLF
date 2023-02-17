@@ -245,6 +245,14 @@ class PatchManager:
     def set_mask_header(self, mask_header):
         self.mask_header = mask_header
 
+    def _is_patch_extraction_done(self, n_patches, n_completed):
+        # If the quota is not met, assume the slide is saturated
+        slide_saturation_message = "Slide has reached saturation, and no more non-overlapping patches to be found; try 'read_type: sequential' in config for greater mining efficiency."
+        if len(self.patches) != n_patches - n_completed:
+            print(slide_saturation_message)
+            return True
+        return False
+
     def mine_patches(self, config, output_csv=None):
         """
         Main loop of the program. This generates patch locations and attempts to save them until the slide is either
@@ -309,19 +317,9 @@ class PatchManager:
                     ):
                         print("\nCould not add new patch, breaking.")
                         break
-                else:
-                    print(
-                        ""
-                    )  # Fixes spacing in case it breaks. Inelegant but I'll fix later
 
                 # If the quota is not met, assume the slide is saturated
-                if len(self.patches) != n_patches - n_completed:
-                    print(
-                        "Slide has reached saturation: No more non-overlapping patches to be found.\n"
-                        "Change SHOW_MINED in config.py to True to see patch locations.\n"
-                        "Alternatively, change READ_TYPE to 'sequential' for greater mining efficiency."
-                    )
-                    saturated = True
+                saturated = self._is_patch_extraction_done(n_patches, n_completed)
             # If there is no patch quota given, add patches until saturation.
             else:
                 while True:
@@ -333,13 +331,7 @@ class PatchManager:
                         print("\nCould not add new patch, breaking.")
                         break
 
-                if len(self.patches) != n_patches - n_completed:
-                    print(
-                        "Slide has reached saturation: No more non-overlapping patches to be found.\n"
-                        "Change SHOW_MINED in config.py to True to see patch locations.\n"
-                        "Alternatively, change READ_TYPE to 'sequential' for greater mining efficiency."
-                    )
-                    saturated = True
+                saturated = self._is_patch_extraction_done(n_patches, n_completed)
 
             # Save patches
             output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
