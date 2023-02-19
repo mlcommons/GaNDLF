@@ -234,21 +234,14 @@ def parse_config(config_file):
     """
     config = yaml.load(open(config_file), Loader=yaml.FullLoader)
 
-    # initialize defaults
-    if not ("scale" in config):
-        config["scale"] = 16
-    if not ("num_patches" in config):
-        config["num_patches"] = -1
-    if not ("num_workers" in config):
-        config["num_workers"] = 1
-    if not ("save_patches" in config):
-        config["save_patches"] = True
-    if not ("value_map" in config):
-        config["value_map"] = None
-    if not ("read_type" in config):
-        config["read_type"] = "random"
-    if not ("overlap_factor" in config):
-        config["overlap_factor"] = 0.0
+    # initialize defaults if not specified
+    config["scale"] = config.get("scale", 16)
+    config["num_patches"] = config.get("num_patches", -1)
+    config["num_workers"] = config.get("num_workers", 1)
+    config["save_patches"] = config.get("save_patches", True)
+    config["value_map"] = config.get("value_map", None)
+    config["read_type"] = config.get("read_type", "random")
+    config["overlap_factor"] = config.get("overlap_factor", 0.0)
 
     return config
 
