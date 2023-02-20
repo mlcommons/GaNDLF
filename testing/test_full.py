@@ -2709,8 +2709,7 @@ def test_generic_cli_function_configgenerator():
         assert parameters, "config generator did not generate valid config files"
     sanitize_outputDir()
 
-    with open(generator_config_path, "r") as f:
-        generator_config = yaml.load(f, Loader=yaml.FullLoader)
+    generator_config = yaml.safe_load(open(generator_config_path, "r"))
     generator_config["second_level_dict_that_should_fail"] = {
         "key_1": {"key_2": "value"}
     }
