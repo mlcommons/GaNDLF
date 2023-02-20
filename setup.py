@@ -3,7 +3,7 @@
 """The setup script."""
 
 
-import os, sys
+import os, sys, re
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
@@ -39,9 +39,6 @@ class CustomEggInfoCommand(egg_info):
         egg_info.run(self)
         git_submodule_update()
 
-
-# read version.py
-import sys, re
 
 try:
     filepath = "GANDLF/version.py"
