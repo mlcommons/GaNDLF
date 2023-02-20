@@ -340,7 +340,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
         device=device,
         resume=False,
         reset=True,
-    )    
+    )
     sanitize_outputDir()
 
     print("passed")
