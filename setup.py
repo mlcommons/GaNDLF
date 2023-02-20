@@ -96,7 +96,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">=3.7",
+        python_requires=">=3.8",
         packages=find_packages(),
         cmdclass={  # this ensures git_submodule_update is called during install
             "install": CustomInstallCommand,
