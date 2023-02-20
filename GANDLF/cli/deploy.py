@@ -4,6 +4,7 @@ import yaml
 import docker
 import tarfile
 import io
+
 # import copy
 
 deploy_targets = [
@@ -90,12 +91,8 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     old_train_output_modeldir = mlcube_config["tasks"]["train"]["parameters"][
         "outputs"
     ].pop("modeldir", None)
-    old_infer_input_modeldir = mlcube_config["tasks"]["infer"]["parameters"][
-        "inputs"
-    ].pop("modeldir", None)
-    old_train_input_config = mlcube_config["tasks"]["train"]["parameters"][
-        "inputs"
-    ].pop("config", None)
+    mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("modeldir", None)
+    mlcube_config["tasks"]["train"]["parameters"]["inputs"].pop("config", None)
     # Currently disabled because we've decided exposing config-on-inference complicates the MLCube use case.
     # mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("config", None)
 
