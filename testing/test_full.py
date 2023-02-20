@@ -2085,8 +2085,9 @@ def test_train_inference_classification_histology_large_2d(device):
                 img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
             )
             cv2.imwrite(new_filename, img_resize)
-        except:
+        except Exception as ex1:
             # this is only used in CI
+            print("Trying vips:", ex1)
             try:
                 os.system(
                     "vips resize "
@@ -2096,8 +2097,8 @@ def test_train_inference_classification_histology_large_2d(device):
                     + " "
                     + str(scaling_factor)
                 )
-            except:
-                print("Resize could not be done")
+            except Exception as ex2:
+                print("Resize could not be done:", ex2)
                 break
         row["Channel_0"] = new_filename
         files_to_delete.append(new_filename)
