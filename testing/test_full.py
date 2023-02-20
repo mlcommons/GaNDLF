@@ -121,6 +121,8 @@ def test_generic_download_data():
             z.extractall(testingDir)
             break
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -310,6 +312,8 @@ def test_train_segmentation_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -341,6 +345,7 @@ def test_train_segmentation_sdnet_rad_2d(device):
         resume=False,
         reset=True,
     )
+    sanitize_outputDir()
 
     print("passed")
 
@@ -391,6 +396,8 @@ def test_train_segmentation_rad_3d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -429,6 +436,8 @@ def test_train_regression_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -466,6 +475,8 @@ def test_train_regression_rad_2d_imagenet(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -499,6 +510,8 @@ def test_train_regression_brainage_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -547,6 +560,8 @@ def test_train_regression_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -607,6 +622,8 @@ def test_train_classification_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -655,6 +672,8 @@ def test_train_classification_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -735,6 +754,8 @@ def test_train_resume_inference_classification_rad_3d(device):
         outputDir=os.path.join(outputDir, get_unique_timestamp()),
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -776,6 +797,8 @@ def test_train_inference_optimize_classification_rad_3d(device):
             parameters=parameters,
             device=device,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -821,6 +844,8 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
             parameters=parameters,
             device=device,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -885,6 +910,8 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
         device=device,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -927,6 +954,8 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
         parameters=parameters,
         device=device,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -973,6 +1002,8 @@ def test_train_scheduler_classification_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1013,6 +1044,8 @@ def test_train_optimizer_classification_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1049,6 +1082,8 @@ def test_clip_train_classification_rad_3d(device):
             resume=False,
             reset=True,
         )
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1105,7 +1140,9 @@ def test_train_normtype_segmentation_rad_3d(device):
                 reset=True,
             )
 
-        print("passed")
+        sanitize_outputDir()
+
+    print("passed")
 
 
 def test_train_metrics_segmentation_rad_2d(device):
@@ -1151,6 +1188,8 @@ def test_train_metrics_segmentation_rad_2d(device):
         reset=True,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1183,6 +1222,8 @@ def test_train_metrics_regression_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1222,6 +1263,8 @@ def test_train_losses_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1305,6 +1348,8 @@ def test_generic_config_read():
     assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1523,6 +1568,8 @@ def test_dataloader_construction_train_segmentation_3d(device):
         reset=True,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1700,6 +1747,8 @@ def test_generic_preprocess_functions():
             input_transformed.max() <= rescaler.out_min_max[1]
         ), "Rescaling should work for max"
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1747,6 +1796,8 @@ def test_generic_augmentation_functions():
         params_elastic.pop(key_to_pop, None)
     output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
     assert output_tensor != None, "Augmentation for base elastic transform should work"
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1803,6 +1854,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         reset=False,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1840,6 +1893,8 @@ def test_generic_model_patch_divisibility():
     # this assertion should fail
     with pytest.raises(BaseException) as e_info:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1924,6 +1979,8 @@ def test_generic_one_hot_logic():
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2044,6 +2101,8 @@ def test_train_inference_segmentation_histology_2d(device):
         parameters=parameters,
         device=device,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2199,6 +2258,8 @@ def test_train_inference_classification_histology_large_2d(device):
     for file in files_to_delete:
         os.remove(file)
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2285,6 +2346,8 @@ def test_train_inference_classification_histology_2d(device):
             device=device,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2332,6 +2395,8 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2389,6 +2454,8 @@ def test_train_segmentation_unetr_rad_3d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2426,6 +2493,8 @@ def test_train_segmentation_unetr_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2475,6 +2544,8 @@ def test_train_segmentation_transunet_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2536,6 +2607,8 @@ def test_train_segmentation_transunet_rad_3d(device):
         reset=True,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2573,6 +2646,8 @@ def test_train_gradient_clipping_classification_rad_2d(device):
             resume=False,
             reset=True,
         )
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2615,6 +2690,8 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
                 reset=True,
             )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2654,6 +2731,8 @@ def test_generic_cli_function_configgenerator():
     sanitize_outputDir()
 
     print("Exception raised:", exc_info.value)
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2696,6 +2775,8 @@ def test_generic_cli_function_recoverconfig():
 
     new_params = parseConfig(output_config_path, version_check_flag=False)
     assert new_params, "Created YAML could not be parsed by parseConfig"
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2744,4 +2825,6 @@ def test_generic_deploy_docker():
     )
 
     assert result, "run_deployment returned false"
+    sanitize_outputDir()
+
     print("passed")
