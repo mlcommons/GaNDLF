@@ -1309,7 +1309,7 @@ def test_generic_cli_function_preprocess():
     file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
-    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
+    input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1369,7 +1369,7 @@ def test_generic_cli_function_preprocess():
     parameters["data_preprocessing"]["to_canonical"] = None
     parameters["data_preprocessing"]["rgba_to_rgb"] = None
     file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
-    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
+    input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -2071,7 +2071,7 @@ def test_train_inference_classification_histology_large_2d(device):
         yaml.dump(parameters_patch, file)
 
     # resize the image
-    input_df, input_headers = parseTrainingCSV(
+    input_df, _ = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
     )
     files_to_delete = []
