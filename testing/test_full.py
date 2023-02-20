@@ -1824,14 +1824,14 @@ def test_generic_model_patch_divisibility():
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     print("passed")
@@ -2298,7 +2298,7 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
         parameters["model"]["dimension"] = 2
 
         # this assertion should fail
-        with pytest.raises(BaseException) as e_info:
+        with pytest.raises(BaseException) as _:
             global_models_dict[parameters["model"]["architecture"]](
                 parameters=parameters
             )
@@ -2344,17 +2344,17 @@ def test_train_segmentation_unetr_rad_3d(device):
     parameters["model"]["print_summary"] = False
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 19
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
@@ -2436,12 +2436,12 @@ def test_train_segmentation_transunet_rad_2d(device):
     parameters["model"]["dimension"] = 2
     parameters["model"]["print_summary"] = False
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
@@ -2486,22 +2486,22 @@ def test_train_segmentation_transunet_rad_3d(device):
     parameters["model"]["print_summary"] = False
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["depth"] = 1
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
