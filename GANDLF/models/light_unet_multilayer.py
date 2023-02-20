@@ -11,8 +11,6 @@ from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
-import sys
-from GANDLF.utils.generic import checkPatchDimensions
 
 
 class light_unet_multilayer(ModelBase):
@@ -28,33 +26,9 @@ class light_unet_multilayer(ModelBase):
         self.network_kwargs = {"res": residualConnections}
         super(light_unet_multilayer, self).__init__(parameters)
 
-        # self.network_kwargs = {"res": False}
+        parameters["model"]["depth"] = parameters["model"].get("depth", 4)
 
-        if not ("depth" in parameters["model"]):
-            parameters["model"]["depth"] = 4
-            print("Default depth set to 4.")
-
-        patch_check = checkPatchDimensions(
-            parameters["patch_size"], numlay=parameters["model"]["depth"]
-        )
-
-        if patch_check != parameters["model"]["depth"] and patch_check >= 2:
-            print(
-                """
-                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
-                where i is in a integer greater than or equal to 2. Only the first %d layers will run.
-                """
-                % patch_check
-            )
-        elif patch_check < 2:
-            sys.exit(
-                """
-                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
-                where i is in a integer greater than or equal to 2. 
-                """
-            )
-
-        self.num_layers = patch_check
+        self.depth = self.model_depth_check(parameters)
 
         self.ins = in_conv(
             input_channels=self.n_channels,
@@ -70,7 +44,7 @@ class light_unet_multilayer(ModelBase):
         self.us = ModuleList([])
         self.de = ModuleList([])
 
-        for _ in range(0, self.num_layers):
+        for _ in range(0, self.depth):
             self.ds.append(
                 DownsamplingModule(
                     input_channels=self.base_filters,
@@ -123,7 +97,7 @@ class light_unet_multilayer(ModelBase):
         if "converter_type" in parameters["model"]:
             self.ins = self.converter(self.ins).model
             self.out = self.converter(self.out).model
-            for i_lay in range(0, self.num_layers):
+            for i_lay in range(0, self.depth):
                 self.ds[i_lay] = self.converter(self.ds[i_lay]).model
                 self.us[i_lay] = self.converter(self.us[i_lay]).model
                 self.de[i_lay] = self.converter(self.de[i_lay]).model
@@ -146,14 +120,14 @@ class light_unet_multilayer(ModelBase):
         y.append(self.ins(x))
 
         # [downsample --> encode] x num layers
-        for i in range(0, self.num_layers):
+        for i in range(0, self.depth):
             temp = self.ds[i](y[i])
             y.append(self.en[i](temp))
 
         x = y[-1]
 
         # [upsample --> encode] x num layers
-        for i in range(self.num_layers - 1, -1, -1):
+        for i in range(self.depth - 1, -1, -1):
             x = self.us[i](x)
             x = self.de[i](x, y[i])
 

@@ -6,6 +6,7 @@ import torch.nn as nn
 from acsconv.converters import ACSConverter, Conv3dConverter, SoftACSConverter
 
 from GANDLF.utils import get_linear_interpolation_mode
+from GANDLF.utils.generic import checkPatchDimensions
 from GANDLF.utils.modelbase import get_modelbase_final_layer
 from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling3D,
@@ -124,3 +125,28 @@ class ModelBase(nn.Module):
                 norm_type = None
 
         return norm_type
+
+    def model_depth_check(self, parameters):
+        """
+        This function checks if the patch size is large enough for the model.
+
+        Args:
+            parameters (dict): The entire set of parameters for the model.
+
+        Returns:
+            int: The model depth to use.
+
+        Raises:
+            AssertionError: If the patch size is not large enough for the model.
+        """
+        model_depth = checkPatchDimensions(
+            parameters["patch_size"], numlay=parameters["model"]["depth"]
+        )
+
+        common_msg = "The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
+        assert model_depth >= 2, common_msg
+
+        if model_depth != parameters["model"]["depth"] and model_depth >= 2:
+            print(common_msg + " Only the first %d layers will run." % model_depth)
+
+        return model_depth
