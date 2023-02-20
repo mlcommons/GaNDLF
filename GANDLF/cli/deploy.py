@@ -4,7 +4,7 @@ import yaml
 import docker
 import tarfile
 import io
-import copy
+# import copy
 
 deploy_targets = [
     "docker",
