@@ -9,10 +9,18 @@ LABEL version=1.0
 # The base image contains ROCm, python 3.8 and pytorch already, no need to install those
 RUN python3 -m pip install --upgrade pip
 RUN python3.8 -m pip install torch==1.11.0+rocm4.5.2 torchvision==0.12.0+rocm4.5.2 torchaudio==0.11.0 --extra-index-url  https://download.pytorch.org/whl/rocm4.5.2
+RUN python3 -m pip install --upgrade pip && python3 -m pip install openvino-dev==2022.1.0 opencv-python-headless mlcube_docker
+RUN apt-get update && apt-get install -y libgl1
+
+# Do some dependency installation separately here to make layer caching more efficient
+COPY ./setup.py ./setup.py
+RUN python3.8 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
+    && python3.8 -m pip install -r ./requirements.txt
+
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN python3 -m pip install --upgrade pip && python3 -m pip install openvino-dev==2022.1.0
 RUN python3 -m pip install -e .
+
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
 # If a user calls "docker run gandlf:[tag] gandlf_anonymize", it will resolve to running "python gandlf_anonymize" instead.
 # CMD is inherently overridden by args to "docker run", entrypoint is constant.
@@ -24,7 +32,10 @@ CMD gandlf_run
 # This greatly reduces UID collision probability between container and host, helping prevent privilege escalation attacks.
 # As a side benefit this also decreases the likelihood that users on a cluster won't be able to access their files.
 # See https://github.com/hexops/dockerfile as a best practices guide.
-RUN addgroup --gid 10001 --system nonroot \
- && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
- 
-USER nonroot
+#RUN addgroup --gid 10001 --system nonroot \
+# && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
+# 
+#USER nonroot
+
+# Prepare the container for possible model embedding later.
+RUN mkdir /embedded_model

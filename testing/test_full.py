@@ -14,7 +14,14 @@ from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import main_run, preprocess_and_save, patch_extraction, config_generator
+from GANDLF.cli import (
+    main_run,
+    preprocess_and_save,
+    patch_extraction,
+    config_generator,
+    run_deployment,
+    recover_config,
+)
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -74,6 +81,7 @@ baseConfigDir = os.path.join(testingDir, os.pardir, "samples")
 inputDir = os.path.join(testingDir, "data")
 outputDir = os.path.join(testingDir, "data_output")
 Path(outputDir).mkdir(parents=True, exist_ok=True)
+gandlfRootDir = Path(__file__).parent.parent.absolute().__str__()
 
 
 """
@@ -134,11 +142,67 @@ def test_generic_constructTrainingCSV():
             labelID = "mask"
         # else:
         #     continue
+        outputFile = inputDir + "/train_" + application_data + ".csv"
+        # Test with various combinations of relative/absolute paths
+        # Absolute input/output
         writeTrainingCSV(
             currentApplicationDir,
             channelsID,
             labelID,
-            inputDir + "/train_" + application_data + ".csv",
+            outputFile,
+            relativizePathsToOutput=False,
+        )
+        writeTrainingCSV(
+            currentApplicationDir,
+            channelsID,
+            labelID,
+            outputFile,
+            relativizePathsToOutput=True,
+        )
+        # Relative input, absolute output
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            outputFile,
+            relativizePathsToOutput=False,
+        )
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            outputFile,
+            relativizePathsToOutput=True,
+        )
+        # Absolute input, relative output
+        writeTrainingCSV(
+            currentApplicationDir,
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=False,
+        )
+        writeTrainingCSV(
+            currentApplicationDir,
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=True,
+        )
+        # Relative input/output
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=False,
+        )
+        writeTrainingCSV(
+            os.path.relpath(currentApplicationDir, os.getcwd()),
+            channelsID,
+            labelID,
+            os.path.relpath(outputFile, os.getcwd()),
+            relativizePathsToOutput=True,
         )
 
         # write regression and classification files
@@ -1051,7 +1115,12 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95",
+        "normalized_surface_dice",
+    ]
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
@@ -1239,7 +1308,8 @@ def test_generic_cli_function_preprocess():
     sanitize_outputDir()
     file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
-    input_data_df = pd.read_csv(file_data)
+
+    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1299,7 +1369,7 @@ def test_generic_cli_function_preprocess():
     parameters["data_preprocessing"]["to_canonical"] = None
     parameters["data_preprocessing"]["rgba_to_rgb"] = None
     file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
-    input_data_df = pd.read_csv(file_data)
+    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1698,6 +1768,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "hausdorff95",
         "hd95_per_label",
         "hd100_per_label",
+        "normalized_surface_dice",
+        "normalized_surface_dice_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
@@ -1744,7 +1816,11 @@ def test_generic_model_patch_divisibility():
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95" "normalized_surface_dice_per_label",
+    ]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
@@ -1995,7 +2071,9 @@ def test_train_inference_classification_histology_large_2d(device):
         yaml.dump(parameters_patch, file)
 
     # resize the image
-    input_df = pd.read_csv(inputDir + "/train_2d_histo_classification.csv")
+    input_df, input_headers = parseTrainingCSV(
+        inputDir + "/train_2d_histo_classification.csv", train=False
+    )
     files_to_delete = []
     for _, row in input_df.iterrows():
         scaling_factor = 10
@@ -2101,17 +2179,13 @@ def test_train_inference_classification_histology_large_2d(device):
                 # check in the default outputDir that's created - this is based on a unique timestamp
                 if folder != "output_validation":
                     # if 'predictions.csv' are not found, give error
-                    assert (
-                        os.path.exists(
-                            os.path.join(
-                                output_subject_dir,
-                                str(input_df["SubjectID"][0]),
-                                "predictions.csv",
-                            )
+                    assert os.path.exists(
+                        os.path.join(
+                            output_subject_dir,
+                            str(input_df["SubjectID"][0]),
+                            "predictions.csv",
                         )
-                        is True,
-                        "predictions.csv not found",
-                    )
+                    ), "predictions.csv not found"
     # ensure previous results are removed
     sanitize_outputDir()
 
@@ -2574,4 +2648,93 @@ def test_generic_cli_function_configgenerator():
 
     print("Exception raised:", exc_info.value)
 
+    print("passed")
+
+
+def test_generic_cli_function_recoverconfig():
+    print("45: Testing cli function for recover_config")
+    # Train, then recover a config and see if it exists/is valid YAML
+
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    # patch_size is custom for sdnet
+    parameters["patch_size"] = [224, 224, 1]
+    parameters["batch_size"] = 2
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["num_channels"] = 1
+    parameters["model"]["architecture"] = "sdnet"
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    output_config_path = get_temp_config_path()
+    assert recover_config(
+        outputDir, output_config_path
+    ), "recover_config returned false"
+    assert os.path.exists(output_config_path), "Didn't create a config file"
+
+    new_params = parseConfig(output_config_path, version_check_flag=False)
+    assert new_params, "Created YAML could not be parsed by parseConfig"
+
+    print("passed")
+
+
+def test_generic_deploy_docker():
+    print("46: Testing deployment of a model to Docker")
+    # Train, then try deploying that model (requires an installed Docker engine)
+
+    deploymentOutputDir = os.path.join(outputDir, "mlcube")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["data_preprocessing"]["resize_image"] = [224, 224]
+
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+
+    result = run_deployment(
+        outputDir,
+        testingDir + "/config_segmentation.yaml",
+        "docker",
+        deploymentOutputDir,
+        os.path.join(gandlfRootDir, "mlcube"),
+        requires_gpu=True,
+    )
+
+    assert result, "run_deployment returned false"
     print("passed")

@@ -1,0 +1,11 @@
+# This file is used to provide strings that identify individual channels and/or label files.
+# The below example uses the filename ending and extension to do this.
+# It has two channels of input (t1 and t2) and one label (seg).
+# So if hello_t1.nii.gz, hello_t2.nii.gz, and hello_seg.nii.gz exist underneath workspace/data/Subject001/,
+# we will detect them as part of the subject Subject001. 
+# workspace/data/Subject001/ could contain identically or similarly named files and would be detected separately.
+channels: [
+    _t1.nii.gz,
+    _t2.nii.gz
+    ]
+label: _seg.nii.gz

@@ -13,10 +13,13 @@ from GANDLF.OPM.opm.utils import (
     generate_initial_mask,
     get_patch_size_in_microns,
 )
+from GANDLF.utils import (
+    parseTrainingCSV,
+)
 
 
 def parse_gandlf_csv(fpath):
-    df = pd.read_csv(fpath, dtype=str)
+    df, headers = parseTrainingCSV(fpath, train=False)
     df = df.drop_duplicates()
     for _, row in df.iterrows():
         if "Label" in row:
@@ -60,9 +63,9 @@ def patch_extraction(input_path, output_path, config=None):
 
     for sid, slide, label in parse_gandlf_csv(input_path):
         # Create new instance of slide manager
-        manager = PatchManager(slide, os.path.join(output_path, sid))
+        manager = PatchManager(slide, os.path.join(output_path, str(sid)))
         manager.set_label_map(label)
-        manager.set_subjectID(sid)
+        manager.set_subjectID(str(sid))
         manager.set_image_header("Channel_0")
         manager.set_mask_header("Label")
 
