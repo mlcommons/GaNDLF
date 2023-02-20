@@ -314,9 +314,9 @@ class unetr(ModelBase):
             np.log2(parameters["model"]["inner_patch_size"])
         ), "The inner patch size must be a power of 2."
 
-        self.depth = min(
-            self.model_depth_check(parameters), int(np.log2(self.patch_size))
-        )
+        self.depth = int(np.log2(self.patch_size))
+
+        _ = self.model_depth_check(parameters)
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]
