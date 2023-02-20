@@ -126,7 +126,7 @@ class ModelBase(nn.Module):
 
         return norm_type
 
-    def patch_size_check(self, parameters):
+    def model_depth_check(self, parameters):
         """
         This function checks if the patch size is large enough for the model.
 
