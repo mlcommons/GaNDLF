@@ -66,14 +66,10 @@ jobs:
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "regression"
-    - name: Run segmentation unit tests RAD
+    - name: Run segmentation unit tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and rad and not transunet"
-    - name: Run segmentation unit tests HISTO
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and histo and not transunet"
+        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
     - name: Run transunet unit tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
