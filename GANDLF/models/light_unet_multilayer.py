@@ -30,8 +30,6 @@ class light_unet_multilayer(ModelBase):
 
         self.depth = self.model_depth_check(parameters)
 
-        self.patch_size = parameters["model"]["inner_patch_size"]
-
         self.ins = in_conv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
