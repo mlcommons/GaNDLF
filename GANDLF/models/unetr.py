@@ -315,6 +315,7 @@ class unetr(ModelBase):
         ), "The inner patch size must be a power of 2."
 
         self.depth = int(np.log2(self.patch_size))
+        parameters["model"]["depth"] = self.depth
 
         _ = self.model_depth_check(parameters)
 
