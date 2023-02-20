@@ -70,23 +70,23 @@ def main():
     channelsID = args.channelsID
     labelID = args.labelID
     relativizePathsToOutput = args.relativizePaths
-    
+
     # Do some special handling for if users pass a yml file for channel/label IDs
     # This is used for MLCube functionality because MLCube does not support plain string inputs.
     if channelsID.endswith(".yml") or channelsID.endswith(".yaml"):
         if os.path.isfile(channelsID):
-            with open(channelsID, 'r') as f:
+            with open(channelsID, "r") as f:
                 content = yaml.safe_load(f)
                 channelsID = content["channels"]
                 if isinstance(channelsID, list):
                     channelsID = ",".join(channelsID)
-                    
+
                 if "label" in content:
                     labelID = content["label"]
                     if isinstance(labelID, list):
                         channelsID = ",".join(channelsID)
 
-    writeTrainingCSV(inputDir,channelsID, labelID, outputFile, relativizePathsToOutput)
+    writeTrainingCSV(inputDir, channelsID, labelID, outputFile, relativizePathsToOutput)
 
 
 # main function
