@@ -302,7 +302,9 @@ class unetr(ModelBase):
         super(unetr, self).__init__(parameters)
 
         # initialize defaults if not found
-        parameters["model"]["inner_patch_size"] = parameters["model"].get("inner_patch_size",  parameters["patch_size"][0])
+        parameters["model"]["inner_patch_size"] = parameters["model"].get(
+            "inner_patch_size", parameters["patch_size"][0]
+        )
         parameters["model"]["num_heads"] = parameters["model"].get("num_heads", 12)
         parameters["model"]["embed_dim"] = parameters["model"].get("embed_dim", 768)
 
@@ -312,7 +314,9 @@ class unetr(ModelBase):
             np.log2(parameters["model"]["inner_patch_size"])
         ), "The inner patch size must be a power of 2."
 
-        self.depth = min(self.model_depth_check(parameters), int(np.log2(self.patch_size)))
+        self.depth = min(
+            self.model_depth_check(parameters), int(np.log2(self.patch_size))
+        )
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]
