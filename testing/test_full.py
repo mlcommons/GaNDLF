@@ -313,6 +313,8 @@ def test_train_segmentation_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -344,6 +346,8 @@ def test_train_segmentation_sdnet_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -393,6 +397,8 @@ def test_train_segmentation_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -822,6 +828,8 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
             device=device,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1105,7 +1113,9 @@ def test_train_normtype_segmentation_rad_3d(device):
                 reset=True,
             )
 
-        print("passed")
+    sanitize_outputDir()
+
+    print("passed")
 
 
 def test_train_metrics_segmentation_rad_2d(device):
@@ -1150,6 +1160,8 @@ def test_train_metrics_segmentation_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1222,6 +1234,8 @@ def test_train_losses_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1522,6 +1536,8 @@ def test_dataloader_construction_train_segmentation_3d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1836,6 +1852,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         reset=False,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2078,6 +2096,8 @@ def test_train_inference_segmentation_histology_2d(device):
         parameters=parameters,
         device=device,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2392,6 +2412,8 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2448,6 +2470,8 @@ def test_train_segmentation_unetr_rad_3d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2485,6 +2509,8 @@ def test_train_segmentation_unetr_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2534,6 +2560,8 @@ def test_train_segmentation_transunet_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2594,6 +2622,8 @@ def test_train_segmentation_transunet_rad_3d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2673,6 +2703,8 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
                 resume=False,
                 reset=True,
             )
+
+    sanitize_outputDir()
 
     print("passed")
 
