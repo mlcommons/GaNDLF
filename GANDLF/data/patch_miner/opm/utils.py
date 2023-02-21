@@ -9,7 +9,7 @@ from skimage.filters import gaussian
 # from skimage.morphology.footprints import disk
 from skimage.morphology import remove_small_holes
 from skimage.color.colorconv import rgb2hsv
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import yaml
 import tiffslide
 
@@ -232,7 +232,7 @@ def parse_config(config_file):
     :param config_file: path to config file
     :return: dictionary of config values
     """
-    config = yaml.load(open(config_file), Loader=yaml.FullLoader)
+    config = yaml.safe_load(open(config_file, "r"))
 
     # initialize defaults if not specified
     config["scale"] = config.get("scale", 16)
