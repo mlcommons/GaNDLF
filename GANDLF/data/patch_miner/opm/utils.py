@@ -358,7 +358,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                         "XResolution",
                     ]:
                         if _property in metadata:
-                            magnification = metadata[property]
+                            magnification = metadata[_property]
                             magnification_prev = magnification
                             break
                 elif i == 1:
@@ -368,7 +368,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                         "YResolution",
                     ]:
                         if _property in metadata:
-                            magnification = metadata[property]
+                            magnification = metadata[_property]
                             break
                     if magnification == -1:
                         # if y-axis data is missing, use x-axis data
