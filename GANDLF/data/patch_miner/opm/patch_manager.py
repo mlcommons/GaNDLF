@@ -291,13 +291,14 @@ class PatchManager:
         if output_csv is not None:
             csv_filename = output_csv
 
+        output_df = pd.DataFrame()
         try:
             if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
                 output_df = pd.read_csv(csv_filename)
             else:
                 output_df = pd.DataFrame()
-        except pd.errors.EmptyDataError as _:
-            output_df = pd.DataFrame()
+        except pd.errors.EmptyDataError as e:
+            print(e)
 
         n_patches = np.Inf if n_patches == -1 else n_patches
 
