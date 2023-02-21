@@ -3,7 +3,6 @@ import os
 from functools import partial
 from .patch import Patch
 from .utils import get_patch_class_proportions, convert_to_tiff
-from tiffslide import open_slide
 import numpy as np
 from tqdm import tqdm
 from pathlib import Path
@@ -297,7 +296,7 @@ class PatchManager:
                 output_df = pd.read_csv(csv_filename)
             else:
                 output_df = pd.DataFrame()
-        except pd.errors.EmptyDataError as e:
+        except pd.errors.EmptyDataError as _:
             output_df = pd.DataFrame()
 
         n_patches = np.Inf if n_patches == -1 else n_patches
