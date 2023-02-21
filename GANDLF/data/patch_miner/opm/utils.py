@@ -351,22 +351,22 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 input_slide = tiffslide.open_slide(input_slide_path)
                 metadata = input_slide.properties
                 if i == 0:
-                    for property in [
+                    for _property in [
                         tiffslide.PROPERTY_NAME_MPP_X,
                         "tiff.XResolution",
                         "XResolution",
                     ]:
-                        if property in metadata:
+                        if _property in metadata:
                             magnification = metadata[property]
                             magnification_prev = magnification
                             break
                 elif i == 1:
-                    for property in [
+                    for _property in [
                         tiffslide.PROPERTY_NAME_MPP_Y,
                         "tiff.YResolution",
                         "YResolution",
                     ]:
-                        if property in metadata:
+                        if _property in metadata:
                             magnification = metadata[property]
                             break
                     if magnification == -1:
