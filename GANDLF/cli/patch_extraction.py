@@ -4,9 +4,9 @@ from pathlib import Path
 
 from PIL import Image
 
-from GANDLF.OPM.opm.patch_manager import PatchManager
-from GANDLF.OPM.opm.utils import (
-    alpha_channel_check,
+from GANDLF.data.patch_miner.opm.patch_manager import PatchManager
+from GANDLF.data.patch_miner.opm.utils import (
+    alpha_rgb_2d_channel_check,
     patch_size_check,
     parse_config,
     generate_initial_mask,
@@ -75,7 +75,7 @@ def patch_extraction(input_path, output_path, config=None):
         print("Setting valid mask...")
         manager.set_valid_mask(mask, scale)
         # Reject patch if any pixels are transparent
-        manager.add_patch_criteria(alpha_channel_check)
+        manager.add_patch_criteria(alpha_rgb_2d_channel_check)
         # Reject patch if image dimensions are not equal to PATCH_SIZE
         patch_dims_check = partial(
             patch_size_check,
