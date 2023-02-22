@@ -2,7 +2,6 @@ import os, warnings
 from functools import partial
 from pathlib import Path
 
-import pandas as pd
 from PIL import Image
 
 from GANDLF.data.patch_miner.opm.patch_manager import PatchManager

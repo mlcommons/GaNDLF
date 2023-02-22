@@ -2,7 +2,6 @@ import os, sys, pickle
 from pathlib import Path
 import numpy as np
 import SimpleITK as sitk
-import pandas as pd
 
 from GANDLF.utils import (
     get_filename_extension_sanitized,

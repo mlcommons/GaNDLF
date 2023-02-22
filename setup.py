@@ -3,7 +3,7 @@
 """The setup script."""
 
 
-import sys, re
+import os, sys, re
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
@@ -32,7 +32,6 @@ class CustomEggInfoCommand(egg_info):
         egg_info.run(self)
 
 
-# read version.py
 try:
     filepath = "GANDLF/version.py"
     version_file = open(filepath)
@@ -93,7 +92,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">=3.7",
+        python_requires=">=3.8",
         packages=find_packages(),
         cmdclass={
             "install": CustomInstallCommand,

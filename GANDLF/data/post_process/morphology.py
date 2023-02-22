@@ -63,7 +63,7 @@ def fill_holes(input_image, params=None):
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
-    input_image_array = get_array_from_image_or_tensor(input_image)
+    input_image_array = get_array_from_image_or_tensor(input_image).astype(int)
     input_image_array_closed = binary_closing(input_image_array)
     # Fill the holes in binary objects
     output_array = binary_fill_holes(input_image_array_closed).astype(int)
