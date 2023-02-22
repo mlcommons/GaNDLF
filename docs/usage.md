@@ -23,7 +23,6 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
 - [Deployment](#deployment)
-- [Examples](#examples)
 - [Running with Docker](#running-with-docker)
   - [Mounting Input and Output](#mounting-input-and-output)
   - [Enabling GPUs](#enabling-gpus)
@@ -42,6 +41,8 @@ python gandlf_anonymizer
   -o ./output_dir_or_file # output directory to save anonymized images or a single output image file
 ```
 
+[Back To Top &uarr;](#table-of-contents)
+
 ### Cleanup/Harmonize Data
 
 It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
@@ -55,6 +56,8 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 Recommended tools for tackling all aforementioned preprocessing tasks: 
 - [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
 - [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
+
+[Back To Top &uarr;](#table-of-contents)
 
 ### Offline Patch Extraction (for histology images only)
 
@@ -76,6 +79,8 @@ python gandlf_patchMiner
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
   -o ./exp_patchMiner/output_dir/ \ # output directory
 ```
+
+[Back To Top &uarr;](#table-of-contents)
 
 ### Running preprocessing before training/inference
 
@@ -256,8 +261,8 @@ The default behavior is "auto" which chooses the last convolutional layer.
 All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
-
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## Deployment
 
@@ -282,10 +287,8 @@ python gandlf_deploy \
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
 ```
 
-## Examples
+[Back To Top &uarr;](#table-of-contents)
 
-- Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
-- Configurations can be found in [the main repo](https://github.com/mlcommons/GaNDLF/tree/master/testing).
 
 ## Running with Docker
 
@@ -305,6 +308,8 @@ For more details and options, see the [Docker run documentation](https://docs.do
 
 However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons.
 To fix this, we need to use mounts. 
+
+[Back To Top &uarr;](#table-of-contents)
 
 ### Mounting Input and Output
 
@@ -332,6 +337,8 @@ Then, we can reference the same file when running again:
 docker run -it --rm --name training --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu gandlf_run --train True --config /input/config.yml --inputdata /output/data.csv --modeldir /output/model
 ```
 
+[Back To Top &uarr;](#table-of-contents)
+
 ### Enabling GPUs
 
 Some special arguments need to be passed to Docker to enable it to use your GPU.
@@ -346,6 +353,8 @@ For example:
 docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf_run --device cuda [...]
 ```
 
+[Back To Top &uarr;](#table-of-contents)
+
 ## MLCubes
 
 GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/).
@@ -355,3 +364,5 @@ The runner will perform many aspects of configuring your container for you.
 Currently, only the mlcube_docker runner is supported.
 
 See the [MLCube documentation](https://mlcommons.github.io/mlcube/) for more details.
+
+[Back To Top &uarr;](#table-of-contents)
