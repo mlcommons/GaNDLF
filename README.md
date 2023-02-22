@@ -58,6 +58,7 @@ Please cite the following article for GaNDLF ([full PDF](https://arxiv.org/abs/2
 GaNDLF has extensive documentation and it is arranged in the following manner:
 
 - [Home](https://mlcommons.github.io/GaNDLF/)
+- [Getting Started](https://mlcommons.github.io/GaNDLF/getting_started)
 - [Installation](https://mlcommons.github.io/GaNDLF/setup)
 - [Usage](https://mlcommons.github.io/GaNDLF/usage)
 - [Extension](https://mlcommons.github.io/GaNDLF/extending)
