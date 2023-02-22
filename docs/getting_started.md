@@ -53,20 +53,20 @@ The contents of the `data` directory should look like this (for brevity, this lo
 ### Segmentation using 3D Radiology Images
 
 1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should look like this:
+2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document, and the CSV should look like this:
 
     ```csv
     SubjectID,Channel_0,Label
-    001,${GANDLF_DATA}/3d_rad_segmentation/001/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/001/mask.nii.gz
-    002,${GANDLF_DATA}/3d_rad_segmentation/002/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/002/mask.nii.gz
-    003,${GANDLF_DATA}/3d_rad_segmentation/003/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/003/mask.nii.gz
-    004,${GANDLF_DATA}/3d_rad_segmentation/004/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/004/mask.nii.gz
-    005,${GANDLF_DATA}/3d_rad_segmentation/005/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/005/mask.nii.gz
-    006,${GANDLF_DATA}/3d_rad_segmentation/006/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/006/mask.nii.gz
-    007,${GANDLF_DATA}/3d_rad_segmentation/007/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/007/mask.nii.gz
-    008,${GANDLF_DATA}/3d_rad_segmentation/008/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/008/mask.nii.gz
-    009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/009/mask.nii.gz
-    010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/010/mask.nii.gz
+    001,${GANDLF_DATA_3DRAD}/001/image.nii.gz,${GANDLF_DATA_3DRAD}/001/mask.nii.gz
+    002,${GANDLF_DATA_3DRAD}/002/image.nii.gz,${GANDLF_DATA_3DRAD}/002/mask.nii.gz
+    003,${GANDLF_DATA_3DRAD}/003/image.nii.gz,${GANDLF_DATA_3DRAD}/003/mask.nii.gz
+    004,${GANDLF_DATA_3DRAD}/004/image.nii.gz,${GANDLF_DATA_3DRAD}/004/mask.nii.gz
+    005,${GANDLF_DATA_3DRAD}/005/image.nii.gz,${GANDLF_DATA_3DRAD}/005/mask.nii.gz
+    006,${GANDLF_DATA_3DRAD}/006/image.nii.gz,${GANDLF_DATA_3DRAD}/006/mask.nii.gz
+    007,${GANDLF_DATA_3DRAD}/007/image.nii.gz,${GANDLF_DATA_3DRAD}/007/mask.nii.gz
+    008,${GANDLF_DATA_3DRAD}/008/image.nii.gz,${GANDLF_DATA_3DRAD}/008/mask.nii.gz
+    009,${GANDLF_DATA_3DRAD}/009/image.nii.gz,${GANDLF_DATA_3DRAD}/009/mask.nii.gz
+    010,${GANDLF_DATA_3DRAD}/010/image.nii.gz,${GANDLF_DATA_3DRAD}/010/mask.nii.gz
     ```
 3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
@@ -114,20 +114,20 @@ The contents of the `data` directory should look like this (for brevity, this lo
 ### Classification using 3D Radiology Images
 
 1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should look like this (currently, the `Label` header is unused and ignored for classification/regression):
+2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document, and the CSV should look like this (currently, the `Label` header is unused and ignored for classification/regression):
 
     ```csv
     SubjectID,Channel_0,ValueToPredict
-    001,${GANDLF_DATA}/3d_rad_segmentation/001/image.nii.gz,0
-    002,${GANDLF_DATA}/3d_rad_segmentation/002/image.nii.gz,1
-    003,${GANDLF_DATA}/3d_rad_segmentation/003/image.nii.gz,0
-    004,${GANDLF_DATA}/3d_rad_segmentation/004/image.nii.gz,2
-    005,${GANDLF_DATA}/3d_rad_segmentation/005/image.nii.gz,0
-    006,${GANDLF_DATA}/3d_rad_segmentation/006/image.nii.gz,1
-    007,${GANDLF_DATA}/3d_rad_segmentation/007/image.nii.gz,0
-    008,${GANDLF_DATA}/3d_rad_segmentation/008/image.nii.gz,2
-    009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,0
-    010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,1
+    001,${GANDLF_DATA_3DRAD}/001/image.nii.gz,0
+    002,${GANDLF_DATA_3DRAD}/002/image.nii.gz,1
+    003,${GANDLF_DATA_3DRAD}/003/image.nii.gz,0
+    004,${GANDLF_DATA_3DRAD}/004/image.nii.gz,2
+    005,${GANDLF_DATA_3DRAD}/005/image.nii.gz,0
+    006,${GANDLF_DATA_3DRAD}/006/image.nii.gz,1
+    007,${GANDLF_DATA_3DRAD}/007/image.nii.gz,0
+    008,${GANDLF_DATA_3DRAD}/008/image.nii.gz,2
+    009,${GANDLF_DATA_3DRAD}/009/image.nii.gz,0
+    010,${GANDLF_DATA_3DRAD}/010/image.nii.gz,1
     ```
 3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_classification_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
@@ -175,20 +175,20 @@ The contents of the `data` directory should look like this (for brevity, this lo
 ### Regression using 3D Radiology Images
 
 1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should look like this (currently, the `Label` header is unused and ignored for classification/regression):
+2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document, and the CSV should look like this (currently, the `Label` header is unused and ignored for classification/regression):
 
     ```csv
     SubjectID,Channel_0,ValueToPredict
-    001,${GANDLF_DATA}/3d_rad_segmentation/001/image.nii.gz,0.4
-    002,${GANDLF_DATA}/3d_rad_segmentation/002/image.nii.gz,1.2
-    003,${GANDLF_DATA}/3d_rad_segmentation/003/image.nii.gz,0.2
-    004,${GANDLF_DATA}/3d_rad_segmentation/004/image.nii.gz,2.3
-    005,${GANDLF_DATA}/3d_rad_segmentation/005/image.nii.gz,0.4
-    006,${GANDLF_DATA}/3d_rad_segmentation/006/image.nii.gz,1.2
-    007,${GANDLF_DATA}/3d_rad_segmentation/007/image.nii.gz,0.3
-    008,${GANDLF_DATA}/3d_rad_segmentation/008/image.nii.gz,2.2
-    009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,0.1
-    010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,1.5
+    001,${GANDLF_DATA_3DRAD}/001/image.nii.gz,0.4
+    002,${GANDLF_DATA_3DRAD}/002/image.nii.gz,1.2
+    003,${GANDLF_DATA_3DRAD}/003/image.nii.gz,0.2
+    004,${GANDLF_DATA_3DRAD}/004/image.nii.gz,2.3
+    005,${GANDLF_DATA_3DRAD}/005/image.nii.gz,0.4
+    006,${GANDLF_DATA_3DRAD}/006/image.nii.gz,1.2
+    007,${GANDLF_DATA_3DRAD}/007/image.nii.gz,0.3
+    008,${GANDLF_DATA_3DRAD}/008/image.nii.gz,2.2
+    009,${GANDLF_DATA_3DRAD}/009/image.nii.gz,0.1
+    010,${GANDLF_DATA_3DRAD}/010/image.nii.gz,1.5
     ```
 3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_regression_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
