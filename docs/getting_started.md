@@ -8,6 +8,9 @@ This document will help you get started with GaNDLF using a few representative e
 - [Segmentation](#segmentation)
   - [Segmentation using 3D Radiology Images](#segmentation-using-3d-radiology-images)
   - [Segmentation using 2D Histology Images](#segmentation-using-2d-histology-images)
+- [Classification](#classification)
+  - [Classification using 3D Radiology Images](#classification-using-3d-radiology-images)
+  - [Classification (patch-level) using 2D Histology Images](#classification-patch-level-using-2d-histology-images)
 
 
 ## Installation
@@ -43,7 +46,6 @@ The contents of the `data` directory should look like this (for brevity, this lo
 [Back To Top &uarr;](#table-of-contents)
 
 
-
 ## Segmentation
 ### Segmentation using 3D Radiology Images
 
@@ -68,7 +70,6 @@ The contents of the `data` directory should look like this (for brevity, this lo
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
 
 [Back To Top &uarr;](#table-of-contents)
-
 
 ### Segmentation using 2D Histology Images
 
@@ -100,6 +101,67 @@ The contents of the `data` directory should look like this (for brevity, this lo
     2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1392-3200.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1392-3200_LM.png
     ```
 4. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
+5. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
+6. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
+
+[Back To Top &uarr;](#table-of-contents)
+
+
+## Classification
+### Classification using 3D Radiology Images
+
+1. Download and extract the [sample data](#sample-data) as described above.
+2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should look like this (currently, the `Label` header is unused and ignored for classification/regression):
+
+    ```csv
+    SubjectID,Channel_0,ValueToPredict
+    001,${GANDLF_DATA}/3d_rad_segmentation/001/image.nii.gz,0
+    002,${GANDLF_DATA}/3d_rad_segmentation/002/image.nii.gz,1
+    003,${GANDLF_DATA}/3d_rad_segmentation/003/image.nii.gz,0
+    004,${GANDLF_DATA}/3d_rad_segmentation/004/image.nii.gz,2
+    005,${GANDLF_DATA}/3d_rad_segmentation/005/image.nii.gz,0
+    006,${GANDLF_DATA}/3d_rad_segmentation/006/image.nii.gz,1
+    007,${GANDLF_DATA}/3d_rad_segmentation/007/image.nii.gz,0
+    008,${GANDLF_DATA}/3d_rad_segmentation/008/image.nii.gz,2
+    009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,0
+    010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,1
+    ```
+3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
+4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
+5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
+
+[Back To Top &uarr;](#table-of-contents)
+
+### Classification (patch-level) using 2D Histology Images
+
+1. Download and extract the [sample data](#sample-data) as described above.
+2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml).
+3. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should get generated after [the patches are extracted](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only), and should look like this (currently, the `Label` header is unused and ignored for classification/regression):
+
+    ```csv
+    SubjectID,Channel_0,ValueToPredict
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_720-3344.png,0
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_816-3488.png,0
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_960-3376.png,0
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_976-3520.png,0
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1024-3216.png,1
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1104-3360.png,1
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1168-3104.png,1
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1248-3248.png,1
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1312-3056.png,1
+    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1392-3200.png,1
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_720-3344.png,0
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_816-3488.png,0
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_960-3376.png,0
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_976-3520.png,0
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1024-3216.png,1
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1104-3360.png,1
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1168-3104.png,0
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1248-3248.png,1
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1312-3056.png,1
+    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1392-3200.png,1
+    ```
+4. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_classification_histo2d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 5. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 6. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
 
