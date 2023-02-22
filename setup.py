@@ -3,7 +3,7 @@
 """The setup script."""
 
 
-import os, sys, re
+import sys, re
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
