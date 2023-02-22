@@ -61,7 +61,7 @@ class transunet(ModelBase):
         parameters["model"]["num_heads"] = parameters["model"].get("num_heads", 12)
         parameters["model"]["embed_dim"] = parameters["model"].get("embed_dim", 768)
 
-        self.depth = self.self.model_depth_check(parameters)
+        self.depth = self.model_depth_check(parameters)
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]
