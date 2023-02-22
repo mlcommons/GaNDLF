@@ -27,12 +27,12 @@ We will use the sample data used for our extensive automated unit tests for all 
 (venv_gandlf) $> unzip ./gandlf_sample_data.zip
 # this should extract a directory called `data` in the current directory
 ```
-The contents of the `data` directory should look like this:
+The contents of the `data` directory should look like this (for brevity, this locations shall be referred to as `${GANDLF_DATA}` in the rest of the document):
 
 ```bash
 (venv_gandlf) $>  ls data
 2d_histo_segmentation    2d_rad_segmentation    3d_rad_segmentation
-# and a bunch of CSVs
+# and a bunch of CSVs which can be ignored
 ```
 
 **Note**: When using your own data, it is vital to correctly [prepare your data](https://mlcommons.github.io/GaNDLF/usage#preparing-the-data) prior to using it for any computational task (such as AI training or inference).
@@ -43,8 +43,18 @@ The contents of the `data` directory should look like this:
 ## Segmentation using 3D Radiology Images
 
 1. Download and extract the [sample data](#sample-data) as described above.
-2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data, you can following these steps:
+2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should look like this:
 
-```python
-# continue from the previous step
-```
+    ```csv
+    SubjectID,Channel_0,Label
+    001,${GANDLF_DATA}/3d_rad_segmentation/001/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/001/mask.nii.gz
+    002,${GANDLF_DATA}/3d_rad_segmentation/002/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/002/mask.nii.gz
+    003,${GANDLF_DATA}/3d_rad_segmentation/003/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/003/mask.nii.gz
+    004,${GANDLF_DATA}/3d_rad_segmentation/004/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/004/mask.nii.gz
+    005,${GANDLF_DATA}/3d_rad_segmentation/005/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/005/mask.nii.gz
+    006,${GANDLF_DATA}/3d_rad_segmentation/006/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/006/mask.nii.gz
+    007,${GANDLF_DATA}/3d_rad_segmentation/007/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/007/mask.nii.gz
+    008,${GANDLF_DATA}/3d_rad_segmentation/008/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/008/mask.nii.gz
+    009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/009/mask.nii.gz
+    010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,${GANDLF_DATA}/3d_rad_segmentation/010/mask.nii.gz
+    ```
