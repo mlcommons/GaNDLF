@@ -106,7 +106,7 @@ This will save the processed data in `./experiment_0/output_dir/` with a new dat
 
 ## Constructing the Data CSV
 
-This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
+This application can leverage multiple channels/modalities for training while using a multi-class segmentation file. The expected format is shown as an example in [samples/sample_train.csv](../samples/sample_train.csv) and needs to be structured with the following header format (which shows a CSV with `N` subjects, each having `X` channels/modalities that need to be processed):
 
 ```csv
 SubjectID,Channel_0,Channel_1,...,Channel_X,Label
@@ -163,10 +163,10 @@ Notes:
 
 GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. The following is a list of the available samples:
 
-- [Sample showing all the available options](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml)
-- [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
-- [Regression example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml)
-- [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
+- [Sample showing all the available options](../samples/config_all_options.yaml)
+- [Segmentation example](../samples/config_segmentation_brats.yaml)
+- [Regression example](../samples/config_regression.yaml)
+- [Classification example](../samples/config_classification.yaml)
 
 **Notes**: 
 - More details on the configuration options are available in the [customization page](customize.md).
@@ -177,7 +177,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 ### Running multiple experiments
 
 - The `gandlf_configGenerator` script can be used to generate a grid of configurations for hyperparameter tuning. 
-- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
+- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](../samples/config_generator_sample_strategy.yaml).
 - Provide a baseline configuration.
 - Run the following command:
   
@@ -236,8 +236,6 @@ python gandlf_collectStats \
 ### Multi-GPU systems
 
 Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
-
-For an example how this is set, see [sge_wrapper](https://github.com/mlcommons/GaNDLF/blob/master/samples/sge_wrapper).
 
 [Back To Top &uarr;](#table-of-contents)
 
