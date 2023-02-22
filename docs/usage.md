@@ -22,6 +22,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
+- [Deployment](#deployment)
 - [Examples](#examples)
 - [Running with Docker](#running-with-docker)
   - [Mounting Input and Output](#mounting-input-and-output)
@@ -279,6 +280,8 @@ python gandlf_deploy \
   --target docker # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
+```
+
 ## Examples
 
 - Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
