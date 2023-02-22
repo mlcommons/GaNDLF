@@ -92,11 +92,7 @@ if __name__ == "__main__":
 
     # This is a dummy argument that exists to trigger MLCube mounting requirements.
     # Do not remove.
-    parser.add_argument(
-        "-rawinput",
-        "--rawinput",
-        help=argparse.SUPPRESS
-    )
+    parser.add_argument("-rawinput", "--rawinput", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
     if args.modeldir is None and args.outputdir:

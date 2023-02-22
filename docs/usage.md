@@ -22,8 +22,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
-- [Examples](#examples)
-- [Running with Docker](#running-with-docker)
+- [Deployment](#deployment)
   - [Mounting Input and Output](#mounting-input-and-output)
   - [Enabling GPUs](#enabling-gpus)
 - [MLCubes](#mlcubes)
@@ -57,9 +56,9 @@ Recommended tools for tackling all aforementioned preprocessing tasks:
 
 ### Offline Patch Extraction (for histology images only)
 
-GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using [OPM](https://github.com/CBICA/OPM):
+GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using GaNDLF's integrated patch miner:
 
-- Construct a YAML configuration for OPM with a minimum of the following keys (see [OPM usage](https://github.com/CBICA/OPM/blob/master/README.md#usage) for all options):
+- Construct a YAML configuration for OPM with a minimum of the following keys:
   - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
   - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256]) or a string containing patch size in microns (e.g., "[100m,100m]")
   - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
@@ -67,6 +66,11 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
   - `SubjectID`: the ID of the subject for the WSI
   - `Channel_0`: the WSI file
   - `Label`: (optional) the label map file
+  - `value_map`: mapping RGB values in label image to integer values for training; defaults to None
+  - `read_type`: either "random" or "sequential" (latter is more efficient); defaults to "random"
+  - `pen_size_threshold`: thickness of pen strokes to be considered as a mask
+  - `min_color_difference`: color difference between tissue and pen markings
+  - `overlap_factor`: Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
 - Run the following command:
 ```bash
 python gandlf_patchMiner
