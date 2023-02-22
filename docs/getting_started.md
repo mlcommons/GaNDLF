@@ -77,31 +77,31 @@ The contents of the `data` directory should look like this (for brevity, this lo
 ### Segmentation using 2D Histology Images
 
 1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml).
+2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml). Let's assume the output will be stored in `${GANDLF_DATA}/histo_patches_output`, we can refer to this location as `${GANDLF_DATA_HISTO_PATCHES}` in the rest of the document.
 3. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should get generated after [the patches are extracted](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only), and should look like this:
 
     ```csv
     SubjectID,Channel_0,Label
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_720-3344.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_720-3344_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_816-3488.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_816-3488_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_960-3376.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_960-3376_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_976-3520.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_976-3520_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1024-3216.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_1024-3216_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1104-3360.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_1104-3360_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1168-3104.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_1168-3104_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1248-3248.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_1248-3248_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1312-3056.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_1312-3056_LM.png
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1392-3200.png,${GANDLF_DATA}/histo_patches_output/1/mask/mask_patch_1392-3200_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_720-3344.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_720-3344_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_816-3488.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_816-3488_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_960-3376.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_960-3376_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_976-3520.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_976-3520_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1024-3216.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1024-3216_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1104-3360.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1104-3360_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1168-3104.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1168-3104_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1248-3248.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1248-3248_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1312-3056.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1312-3056_LM.png
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1392-3200.png,${GANDLF_DATA}/histo_patches_output/2/mask/mask_patch_1392-3200_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_720-3344.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_720-3344_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_816-3488.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_816-3488_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_960-3376.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_960-3376_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_976-3520.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_976-3520_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1024-3216.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_1024-3216_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1104-3360.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_1104-3360_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1168-3104.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_1168-3104_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1248-3248.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_1248-3248_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1312-3056.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_1312-3056_LM.png
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1392-3200.png,${GANDLF_DATA_HISTO_PATCHES}/1/mask/mask_patch_1392-3200_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_720-3344.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_720-3344_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_816-3488.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_816-3488_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_960-3376.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_960-3376_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_976-3520.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_976-3520_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1024-3216.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_1024-3216_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1104-3360.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_1104-3360_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1168-3104.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_1168-3104_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1248-3248.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_1248-3248_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1312-3056.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_1312-3056_LM.png
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1392-3200.png,${GANDLF_DATA_HISTO_PATCHES}/2/mask/mask_patch_1392-3200_LM.png
     ```
 4. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 5. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
@@ -138,31 +138,31 @@ The contents of the `data` directory should look like this (for brevity, this lo
 ### Classification (patch-level) using 2D Histology Images
 
 1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml).
+2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml). Let's assume the output will be stored in `${GANDLF_DATA}/histo_patches_output`, we can refer to this location as `${GANDLF_DATA_HISTO_PATCHES}` in the rest of the document.
 3. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should get generated after [the patches are extracted](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only), and should look like this (currently, the `Label` header is unused and ignored for classification/regression):
 
     ```csv
     SubjectID,Channel_0,ValueToPredict
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_720-3344.png,0
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_816-3488.png,0
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_960-3376.png,0
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_976-3520.png,0
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1024-3216.png,1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1104-3360.png,1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1168-3104.png,1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1248-3248.png,1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1312-3056.png,1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1392-3200.png,1
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_720-3344.png,0
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_816-3488.png,0
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_960-3376.png,0
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_976-3520.png,0
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1024-3216.png,1
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1104-3360.png,1
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1168-3104.png,0
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1248-3248.png,1
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1312-3056.png,1
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1392-3200.png,1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_720-3344.png,0
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_816-3488.png,0
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_960-3376.png,0
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_976-3520.png,0
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1024-3216.png,1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1104-3360.png,1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1168-3104.png,1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1248-3248.png,1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1312-3056.png,1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1392-3200.png,1
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_720-3344.png,0
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_816-3488.png,0
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_960-3376.png,0
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_976-3520.png,0
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1024-3216.png,1
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1104-3360.png,1
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1168-3104.png,0
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1248-3248.png,1
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1312-3056.png,1
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1392-3200.png,1
     ```
 4. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_classification_histo2d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 5. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
@@ -199,31 +199,31 @@ The contents of the `data` directory should look like this (for brevity, this lo
 ### Regression (patch-level) using 2D Histology Images
 
 1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml).
+2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml). Let's assume the output will be stored in `${GANDLF_DATA}/histo_patches_output`, we can refer to this location as `${GANDLF_DATA_HISTO_PATCHES}` in the rest of the document.
 3. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should get generated after [the patches are extracted](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only), and should look like this (currently, the `Label` header is unused and ignored for classification/regression):
 
     ```csv
     SubjectID,Channel_0,ValueToPredict
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_720-3344.png,0.1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_816-3488.png,0.2
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_960-3376.png,0.3
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_976-3520.png,0.6
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1024-3216.png,1.5
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1104-3360.png,1.3
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1168-3104.png,1.0
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1248-3248.png,1.5
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1312-3056.png,1.1
-    1,${GANDLF_DATA}/histo_patches_output/1/image/image_patch_1392-3200.png,1.2
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_720-3344.png,0.4
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_816-3488.png,0.5
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_960-3376.png,0.2
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_976-3520.png,0.5
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1024-3216.png,1.2
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1104-3360.png,1.2
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1168-3104.png,0.2
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1248-3248.png,1.3
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1312-3056.png,1.2
-    2,${GANDLF_DATA}/histo_patches_output/2/image/image_patch_1392-3200.png,1.1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_720-3344.png,0.1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_816-3488.png,0.2
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_960-3376.png,0.3
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_976-3520.png,0.6
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1024-3216.png,1.5
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1104-3360.png,1.3
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1168-3104.png,1.0
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1248-3248.png,1.5
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1312-3056.png,1.1
+    1,${GANDLF_DATA_HISTO_PATCHES}/1/image/image_patch_1392-3200.png,1.2
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_720-3344.png,0.4
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_816-3488.png,0.5
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_960-3376.png,0.2
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_976-3520.png,0.5
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1024-3216.png,1.2
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1104-3360.png,1.2
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1168-3104.png,0.2
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1248-3248.png,1.3
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1312-3056.png,1.2
+    2,${GANDLF_DATA_HISTO_PATCHES}/2/image/image_patch_1392-3200.png,1.1
     ```
 4. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_regression_histo2d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 5. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
