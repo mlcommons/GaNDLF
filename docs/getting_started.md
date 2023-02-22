@@ -1,17 +1,13 @@
-This document will help you get started with GaNDLF using 3 representative examples using sample data:
-
-- Segmentation
-  - [3D radiology images](#segmentation-using-3d-radiology-images)
-  - [2D histology images](#segmentation-using-2d-histology-images)
-- Classification
-- Regression
+This document will help you get started with GaNDLF using a few representative examples.
 
 ## Table of Contents
+
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
 - [Sample Data](#sample-data)
-- [Segmentation using 3D Radiology Images](#segmentation-using-3d-radiology-images)
-- [Segmentation using 2D Histology Images](#segmentation-using-2d-histology-images)
+- [Segmentation](#segmentation)
+  - [Segmentation using 3D Radiology Images](#segmentation-using-3d-radiology-images)
+  - [Segmentation using 2D Histology Images](#segmentation-using-2d-histology-images)
 
 
 ## Installation
@@ -47,7 +43,9 @@ The contents of the `data` directory should look like this (for brevity, this lo
 [Back To Top &uarr;](#table-of-contents)
 
 
-## Segmentation using 3D Radiology Images
+
+## Segmentation
+### Segmentation using 3D Radiology Images
 
 1. Download and extract the [sample data](#sample-data) as described above.
 2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, it should look like this:
@@ -72,7 +70,7 @@ The contents of the `data` directory should look like this (for brevity, this lo
 [Back To Top &uarr;](#table-of-contents)
 
 
-## Segmentation using 2D Histology Images
+### Segmentation using 2D Histology Images
 
 1. Download and extract the [sample data](#sample-data) as described above.
 2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml).
