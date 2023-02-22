@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
+import requests, zipfile, io, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -1354,7 +1354,7 @@ def test_generic_cli_function_preprocess():
     file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
-    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
+    input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1414,7 +1414,7 @@ def test_generic_cli_function_preprocess():
     parameters["data_preprocessing"]["to_canonical"] = None
     parameters["data_preprocessing"]["rgba_to_rgb"] = None
     file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
-    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
+    input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1877,14 +1877,14 @@ def test_generic_model_patch_divisibility():
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     sanitize_outputDir()
@@ -2130,7 +2130,7 @@ def test_train_inference_classification_histology_large_2d(device):
         yaml.dump(parameters_patch, file)
 
     # resize the image
-    input_df, input_headers = parseTrainingCSV(
+    input_df, _ = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
     )
     files_to_delete = []
@@ -2144,8 +2144,9 @@ def test_train_inference_classification_histology_large_2d(device):
                 img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
             )
             cv2.imwrite(new_filename, img_resize)
-        except:
+        except Exception as ex1:
             # this is only used in CI
+            print("Trying vips:", ex1)
             try:
                 os.system(
                     "vips resize "
@@ -2155,8 +2156,8 @@ def test_train_inference_classification_histology_large_2d(device):
                     + " "
                     + str(scaling_factor)
                 )
-            except:
-                print("Resize could not be done")
+            except Exception as ex2:
+                print("Resize could not be done:", ex2)
                 break
         row["Channel_0"] = new_filename
         files_to_delete.append(new_filename)
@@ -2361,7 +2362,7 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
         parameters["model"]["dimension"] = 2
 
         # this assertion should fail
-        with pytest.raises(BaseException) as e_info:
+        with pytest.raises(BaseException) as _:
             global_models_dict[parameters["model"]["architecture"]](
                 parameters=parameters
             )
@@ -2409,17 +2410,17 @@ def test_train_segmentation_unetr_rad_3d(device):
     parameters["model"]["print_summary"] = False
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 19
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
@@ -2505,12 +2506,12 @@ def test_train_segmentation_transunet_rad_2d(device):
     parameters["model"]["dimension"] = 2
     parameters["model"]["print_summary"] = False
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
@@ -2557,22 +2558,22 @@ def test_train_segmentation_transunet_rad_3d(device):
     parameters["model"]["print_summary"] = False
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["depth"] = 1
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
@@ -2708,8 +2709,7 @@ def test_generic_cli_function_configgenerator():
         assert parameters, "config generator did not generate valid config files"
     sanitize_outputDir()
 
-    with open(generator_config_path, "r") as f:
-        generator_config = yaml.load(f, Loader=yaml.FullLoader)
+    generator_config = yaml.safe_load(open(generator_config_path, "r"))
     generator_config["second_level_dict_that_should_fail"] = {
         "key_1": {"key_2": "value"}
     }

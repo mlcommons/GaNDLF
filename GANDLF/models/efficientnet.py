@@ -321,20 +321,16 @@ class EfficientNet(ModelBase):
         patch_check = checkPatchDimensions(parameters["patch_size"], numlay=5)
         self.DEFAULT_BLOCKS = DEFAULT_BLOCKS
 
+        common_msg = "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
+
+        assert not (patch_check != 5 and patch_check <= 1), common_msg
+
         if patch_check != 5 and patch_check >= 2:
             downsamp = np.where(
                 np.array([x["stride"] == 2 for x in self.DEFAULT_BLOCKS])
             )[0][patch_check - 1]
             self.DEFAULT_BLOCKS = self.DEFAULT_BLOCKS[:downsamp]
-            print(
-                "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2 Only the first %d layers will run."
-                % patch_check
-            )
-
-        elif patch_check != 5 and patch_check <= 1:
-            sys.exit(
-                "The patch size is not large enough for desired number of layers. It is expected that each dimension of the patch size is divisible by 2^i, where i is in a integer greater than or equal to 2."
-            )
+            print(common_msg + " Only the first %d layers will run." % patch_check)
 
         num_out_channels = num_channels(32, scale_params["width"], 8)
         # first convolution: 3x3 conv stride 2, norm, swish

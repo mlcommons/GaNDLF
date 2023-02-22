@@ -1,7 +1,7 @@
 # adapted from https://github.com/fepegar/torchio/blob/main/src/torchio/transforms/augmentation/intensity/random_noise.py
 
 from collections import defaultdict
-from typing import Tuple, Union, Dict, Sequence
+from typing import Tuple, Union
 
 import torch
 from torchio.data.subject import Subject
