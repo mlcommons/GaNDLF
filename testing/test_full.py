@@ -1749,6 +1749,39 @@ def test_generic_preprocess_functions():
             input_transformed.max() <= rescaler.out_min_max[1]
         ), "Rescaling should work for max"
 
+    # tests for histology alpha check
+    input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
+    _ = get_nonzero_percent(input_tensor)
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for 4D tensors"
+    input_tensor = torch.randint(0, 256, (64, 64, 64))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for 3D images"
+    input_tensor = torch.randint(0, 256, (64, 64, 4))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for generic 4D images"
+    input_tensor = torch.randint(0, 256, (64, 64))
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for grayscale 2D images"
+    input_tensor = torch.randint(0, 256, (64, 64, 3))
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for RGB images"
+    input_tensor = torch.randint(0, 256, (64, 64, 4))
+    input_tensor[:, :, 3] = 255
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for RGBA images"
+    input_array = torch.randint(0, 256, (64, 64, 3)).numpy()
+    temp_filename = os.path.join(outputDir, "temp.png")
+    cv2.imwrite(temp_filename, input_array)
+    temp_filename_tiff = convert_to_tiff(temp_filename, outputDir)
+    assert os.path.exists(temp_filename_tiff), "Tiff file should be created"
+
     sanitize_outputDir()
 
     print("passed")

@@ -9,7 +9,8 @@ from skimage.filters import gaussian
 # from skimage.morphology.footprints import disk
 from skimage.morphology import remove_small_holes
 from skimage.color.colorconv import rgb2hsv
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 import yaml
 import tiffslide
 
@@ -206,6 +207,15 @@ def patch_size_check(img, patch_height, patch_width):
 
 
 def alpha_rgb_2d_channel_check(img):
+    """
+    This function checks if an image has a valid alpha channel.
+
+    Args:
+        img (np.ndarray): Input image.
+
+    Returns:
+        bool: Whether or not the image has alpha channel.
+    """
     img = np.asarray(img)
     # If the image has three dimensions AND there is no alpha_channel...
     if len(img.shape) == 3 and img.shape[-1] == 3:
@@ -232,7 +242,7 @@ def parse_config(config_file):
     :param config_file: path to config file
     :return: dictionary of config values
     """
-    config = yaml.load(open(config_file), Loader=yaml.FullLoader)
+    config = yaml.safe_load(open(config_file, "r"))
 
     # initialize defaults if not specified
     config["scale"] = config.get("scale", 16)
@@ -337,7 +347,8 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
         raise ValueError("Patch size must be a list or string.")
 
     magnification_prev = -1
-    for i in range(len(patch_size)):
+    for i, _ in enumerate(patch_size):
+        # for i in range(len(patch_size)):
         magnification = -1
         if str(patch_size[i]).isnumeric():
             return_patch_size[i] = int(patch_size[i])
@@ -351,23 +362,23 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 input_slide = tiffslide.open_slide(input_slide_path)
                 metadata = input_slide.properties
                 if i == 0:
-                    for property in [
+                    for _property in [
                         tiffslide.PROPERTY_NAME_MPP_X,
                         "tiff.XResolution",
                         "XResolution",
                     ]:
-                        if property in metadata:
-                            magnification = metadata[property]
+                        if _property in metadata:
+                            magnification = metadata[_property]
                             magnification_prev = magnification
                             break
                 elif i == 1:
-                    for property in [
+                    for _property in [
                         tiffslide.PROPERTY_NAME_MPP_Y,
                         "tiff.YResolution",
                         "YResolution",
                     ]:
-                        if property in metadata:
-                            magnification = metadata[property]
+                        if _property in metadata:
+                            magnification = metadata[_property]
                             break
                     if magnification == -1:
                         # if y-axis data is missing, use x-axis data

@@ -3,7 +3,8 @@ from .utils import pass_method, map_values
 import numpy as np
 from skimage.io import imsave
 import os
-from pathlib import Path
+
+# from pathlib import Path
 from zarr.core import Array
 
 
