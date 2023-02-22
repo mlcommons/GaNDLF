@@ -21,7 +21,7 @@ This document will help you get started with GaNDLF using a few representative e
 Please follow the [installation instructions](./setup.md) to install GaNDLF. This should end up with the shell that looks like this with the GaNDLF virtual environment activated:
 
 ```bash
-(venv_gandlf) $> ### subsequent commands goes here
+(venv_gandlf) $> ### subsequent commands go here
 ```
 
 [Back To Top &uarr;](#table-of-contents)
