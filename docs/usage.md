@@ -114,7 +114,9 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
 - `Channel` can be substituted with `Modality` or `Image`
 - `Label` can be substituted with `Mask` or `Segmentation`and is used to specify the annotation file for segmentation models
 - `ValueToPredict` is used for regression/classification models
-- Only a single `Label` header should be passed (multiple segmentation classes should be in a single file with unique label numbers)
+- Only a single `Label` or `ValueToPredict` header should be passed 
+  - Multiple segmentation classes should be in a single file with unique label numbers.
+  - Multi-label classification/regression is currently not supported.
 
 The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
 
