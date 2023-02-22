@@ -129,7 +129,7 @@ The contents of the `data` directory should look like this (for brevity, this lo
     009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,0
     010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,1
     ```
-3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_classification_histo3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
+3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_classification_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
 
@@ -190,7 +190,7 @@ The contents of the `data` directory should look like this (for brevity, this lo
     009,${GANDLF_DATA}/3d_rad_segmentation/009/image.nii.gz,0.1
     010,${GANDLF_DATA}/3d_rad_segmentation/010/image.nii.gz,1.5
     ```
-3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_regression_histo3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
+3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_regression_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
 
