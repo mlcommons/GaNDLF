@@ -3,7 +3,7 @@
 """The setup script."""
 
 
-import os, sys
+import sys, re
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
@@ -17,31 +17,20 @@ except Exception as error:
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
 
 
-def git_submodule_update():
-    ## submodule update
-    os.system("git submodule update --init --recursive")
-
-
 class CustomInstallCommand(install):
     def run(self):
         install.run(self)
-        git_submodule_update()
 
 
 class CustomDevelopCommand(develop):
     def run(self):
         develop.run(self)
-        git_submodule_update()
 
 
 class CustomEggInfoCommand(egg_info):
     def run(self):
         egg_info.run(self)
-        git_submodule_update()
 
-
-# read version.py
-import sys, re
 
 try:
     filepath = "GANDLF/version.py"
@@ -85,6 +74,10 @@ requirements = [
     "segmentation-models-pytorch==0.3.0",
     "ACSConv==0.1.1",
     "docker",
+    "dicom-anonymizer",
+    "twine",
+    "zarr",
+    "keyring",
 ]
 
 # pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389
@@ -99,9 +92,9 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">=3.7",
+        python_requires=">=3.8",
         packages=find_packages(),
-        cmdclass={  # this ensures git_submodule_update is called during install
+        cmdclass={
             "install": CustomInstallCommand,
             "develop": CustomDevelopCommand,
             "egg_info": CustomEggInfoCommand,

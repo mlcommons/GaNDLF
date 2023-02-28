@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, sys, yaml, torch, pytest
+import requests, zipfile, io, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -11,6 +11,13 @@ from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
+from GANDLF.data.patch_miner.opm.utils import (
+    generate_initial_mask,
+    alpha_rgb_2d_channel_check,
+    get_nonzero_percent,
+    get_patch_size_in_microns,
+    convert_to_tiff,
+)
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
@@ -116,6 +123,8 @@ def test_generic_download_data():
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall(testingDir)
             break
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -306,6 +315,8 @@ def test_train_segmentation_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -337,6 +348,9 @@ def test_train_segmentation_sdnet_rad_2d(device):
         resume=False,
         reset=True,
     )
+    sanitize_outputDir()
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -387,6 +401,8 @@ def test_train_segmentation_rad_3d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -425,6 +441,8 @@ def test_train_regression_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -462,6 +480,8 @@ def test_train_regression_rad_2d_imagenet(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -495,6 +515,8 @@ def test_train_regression_brainage_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -543,6 +565,8 @@ def test_train_regression_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -603,6 +627,8 @@ def test_train_classification_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -651,6 +677,8 @@ def test_train_classification_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -728,6 +756,8 @@ def test_train_resume_inference_classification_rad_3d(device):
         outputDir=os.path.join(outputDir, get_unique_timestamp()),
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -769,6 +799,8 @@ def test_train_inference_optimize_classification_rad_3d(device):
             parameters=parameters,
             device=device,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -814,6 +846,8 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
             parameters=parameters,
             device=device,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -878,6 +912,8 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
         device=device,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -920,6 +956,8 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
         parameters=parameters,
         device=device,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -966,6 +1004,8 @@ def test_train_scheduler_classification_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1006,6 +1046,8 @@ def test_train_optimizer_classification_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1042,6 +1084,8 @@ def test_clip_train_classification_rad_3d(device):
             resume=False,
             reset=True,
         )
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1098,7 +1142,9 @@ def test_train_normtype_segmentation_rad_3d(device):
                 reset=True,
             )
 
-        print("passed")
+        sanitize_outputDir()
+
+    print("passed")
 
 
 def test_train_metrics_segmentation_rad_2d(device):
@@ -1115,7 +1161,12 @@ def test_train_metrics_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["save_output"] = True
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95",
+        "normalized_surface_dice",
+    ]
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
@@ -1138,6 +1189,8 @@ def test_train_metrics_segmentation_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1171,6 +1224,8 @@ def test_train_metrics_regression_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1210,6 +1265,8 @@ def test_train_losses_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1294,6 +1351,8 @@ def test_generic_config_read():
 
     os.remove(file_config_temp)
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1304,7 +1363,7 @@ def test_generic_cli_function_preprocess():
     file_config_temp = get_temp_config_path()
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
-    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
+    input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1364,7 +1423,7 @@ def test_generic_cli_function_preprocess():
     parameters["data_preprocessing"]["to_canonical"] = None
     parameters["data_preprocessing"]["rgba_to_rgb"] = None
     file_data = os.path.join(inputDir, "train_2d_rad_regression.csv")
-    input_data_df, input_data_headers = parseTrainingCSV(file_data, train=False)
+    input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
     input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
@@ -1510,6 +1569,8 @@ def test_dataloader_construction_train_segmentation_3d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1688,6 +1749,41 @@ def test_generic_preprocess_functions():
             input_transformed.max() <= rescaler.out_min_max[1]
         ), "Rescaling should work for max"
 
+    # tests for histology alpha check
+    input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
+    _ = get_nonzero_percent(input_tensor)
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for 4D tensors"
+    input_tensor = torch.randint(0, 256, (64, 64, 64))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for 3D images"
+    input_tensor = torch.randint(0, 256, (64, 64, 4))
+    assert not (
+        alpha_rgb_2d_channel_check(input_tensor)
+    ), "Alpha channel check should work for generic 4D images"
+    input_tensor = torch.randint(0, 256, (64, 64))
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for grayscale 2D images"
+    input_tensor = torch.randint(0, 256, (64, 64, 3))
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for RGB images"
+    input_tensor = torch.randint(0, 256, (64, 64, 4))
+    input_tensor[:, :, 3] = 255
+    assert alpha_rgb_2d_channel_check(
+        input_tensor
+    ), "Alpha channel check should work for RGBA images"
+    input_array = torch.randint(0, 256, (64, 64, 3)).numpy()
+    temp_filename = os.path.join(outputDir, "temp.png")
+    cv2.imwrite(temp_filename, input_array)
+    temp_filename_tiff = convert_to_tiff(temp_filename, outputDir)
+    assert os.path.exists(temp_filename_tiff), "Tiff file should be created"
+
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1736,6 +1832,8 @@ def test_generic_augmentation_functions():
     output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
     assert output_tensor != None, "Augmentation for base elastic transform should work"
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1763,6 +1861,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "hausdorff95",
         "hd95_per_label",
         "hd100_per_label",
+        "normalized_surface_dice",
+        "normalized_surface_dice_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
@@ -1789,6 +1889,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         reset=False,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1809,19 +1911,25 @@ def test_generic_model_patch_divisibility():
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = ["dice", "hausdorff", "hausdorff95"]
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95" "normalized_surface_dice_per_label",
+    ]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -1907,6 +2015,8 @@ def test_generic_one_hot_logic():
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -1973,7 +2083,8 @@ def test_train_inference_segmentation_histology_2d(device):
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 3
+    parameters_patch["num_patches"] = 10
+    parameters_patch["read_type"] = "sequential"
     # define patches to be extracted in terms of microns
     parameters_patch["patch_size"] = ["1000m", "1000m"]
 
@@ -2027,6 +2138,8 @@ def test_train_inference_segmentation_histology_2d(device):
         device=device,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2055,41 +2168,70 @@ def test_train_inference_classification_histology_large_2d(device):
     # extracting minimal number of patches to ensure that the test does not take too long
     parameters_patch["num_patches"] = 3
     parameters_patch["patch_size"] = [128, 128]
+    parameters_patch["value_map"] = {0: 0, 255: 255}
 
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
 
+    patch_extraction(
+        inputDir + "/train_2d_histo_classification.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
     # resize the image
-    input_df, input_headers = parseTrainingCSV(
+    input_df, _ = parseTrainingCSV(
         inputDir + "/train_2d_histo_classification.csv", train=False
     )
     files_to_delete = []
-    for _, row in input_df.iterrows():
-        scaling_factor = 10
-        new_filename = row["Channel_0"].replace(".tiff", "_resize.tiff")
+
+    def resize_for_ci(filename, scale):
+        """
+        Helper function to resize images in CI
+
+        Args:
+            filename (str): Filename of the image to be resized
+            scale (float): Scale factor to resize the image
+
+        Returns:
+            str: Filename of the resized image
+        """
+        new_filename = filename.replace(".tiff", "_resize.tiff")
         try:
-            img = cv2.imread(row["Channel_0"])
+            img = cv2.imread(filename)
             dims = img.shape
-            img_resize = cv2.resize(
-                img, (dims[1] * scaling_factor, dims[0] * scaling_factor)
-            )
+            img_resize = cv2.resize(img, (dims[1] * scale, dims[0] * scale))
             cv2.imwrite(new_filename, img_resize)
-        except:
+        except Exception as ex1:
             # this is only used in CI
+            print("Trying vips:", ex1)
             try:
                 os.system(
-                    "vips resize "
-                    + row["Channel_0"]
-                    + " "
-                    + new_filename
-                    + " "
-                    + str(scaling_factor)
+                    "vips resize " + filename + " " + new_filename + " " + str(scale)
                 )
-            except:
-                print("Resize could not be done")
-                break
+            except Exception as ex2:
+                print("Resize could not be done:", ex2)
+        return new_filename
+
+    for _, row in input_df.iterrows():
+        # ensure opm mask size check is triggered
+        _, _ = generate_initial_mask(resize_for_ci(row["Channel_0"], scale=2), 1)
+
+        for patch_size in [
+            [128, 128],
+            "[100m,100m]",
+            "[100mx100m]",
+            "[100mX100m]",
+            "[100m*100m]",
+        ]:
+            _ = get_patch_size_in_microns(row["Channel_0"], patch_size)
+
+        # try to break resizer
+        new_filename = resize_for_ci(row["Channel_0"], scale=10)
         row["Channel_0"] = new_filename
         files_to_delete.append(new_filename)
+        # we do not need the last subject
+        break
 
     resized_inference_data_list = os.path.join(
         inputDir, "train_2d_histo_classification_resize.csv"
@@ -2098,12 +2240,6 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
     input_df.to_csv(resized_inference_data_list, index=False)
     files_to_delete.append(resized_inference_data_list)
-
-    patch_extraction(
-        inputDir + "/train_2d_histo_classification.csv",
-        output_dir_patches_output,
-        file_config_temp,
-    )
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
@@ -2168,22 +2304,20 @@ def test_train_inference_classification_histology_large_2d(device):
                 # check in the default outputDir that's created - this is based on a unique timestamp
                 if folder != "output_validation":
                     # if 'predictions.csv' are not found, give error
-                    assert (
-                        os.path.exists(
-                            os.path.join(
-                                output_subject_dir,
-                                str(input_df["SubjectID"][0]),
-                                "predictions.csv",
-                            )
+                    assert os.path.exists(
+                        os.path.join(
+                            output_subject_dir,
+                            str(input_df["SubjectID"][0]),
+                            "predictions.csv",
                         )
-                        is True,
-                        "predictions.csv not found",
-                    )
+                    ), "predictions.csv not found"
     # ensure previous results are removed
     sanitize_outputDir()
 
     for file in files_to_delete:
         os.remove(file)
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2197,22 +2331,26 @@ def test_train_inference_classification_histology_2d(device):
         shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
     output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
-    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
     file_config_temp = get_temp_config_path()
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
-    parameters_patch["num_patches"] = 3
     parameters_patch["patch_size"] = [128, 128]
 
-    with open(file_config_temp, "w") as file:
-        yaml.dump(parameters_patch, file)
+    for num_patches in [-1, 3]:
+        parameters_patch["num_patches"] = num_patches
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters_patch, file)
 
-    patch_extraction(
-        inputDir + "/train_2d_histo_classification.csv",
-        output_dir_patches_output,
-        file_config_temp,
-    )
+        if os.path.exists(output_dir_patches_output):
+            shutil.rmtree(output_dir_patches_output)
+        # this ensures that the output directory for num_patches=3 is preserved
+        Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+        patch_extraction(
+            inputDir + "/train_2d_histo_classification.csv",
+            output_dir_patches_output,
+            file_config_temp,
+        )
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
@@ -2271,6 +2409,8 @@ def test_train_inference_classification_histology_2d(device):
             device=device,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2291,7 +2431,7 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
         parameters["model"]["dimension"] = 2
 
         # this assertion should fail
-        with pytest.raises(BaseException) as e_info:
+        with pytest.raises(BaseException) as _:
             global_models_dict[parameters["model"]["architecture"]](
                 parameters=parameters
             )
@@ -2319,6 +2459,8 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2337,17 +2479,17 @@ def test_train_segmentation_unetr_rad_3d(device):
     parameters["model"]["print_summary"] = False
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 19
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
@@ -2374,6 +2516,8 @@ def test_train_segmentation_unetr_rad_3d(device):
             resume=False,
             reset=True,
         )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2413,6 +2557,8 @@ def test_train_segmentation_unetr_rad_2d(device):
             reset=True,
         )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2429,12 +2575,12 @@ def test_train_segmentation_transunet_rad_2d(device):
     parameters["model"]["dimension"] = 2
     parameters["model"]["print_summary"] = False
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
@@ -2462,6 +2608,8 @@ def test_train_segmentation_transunet_rad_2d(device):
         reset=True,
     )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2479,22 +2627,22 @@ def test_train_segmentation_transunet_rad_3d(device):
     parameters["model"]["print_summary"] = False
 
     # this assertion should fail
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["depth"] = 1
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
 
-    with pytest.raises(BaseException) as e_info:
+    with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
         global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
@@ -2521,6 +2669,8 @@ def test_train_segmentation_transunet_rad_3d(device):
         resume=False,
         reset=True,
     )
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2559,6 +2709,8 @@ def test_train_gradient_clipping_classification_rad_2d(device):
             resume=False,
             reset=True,
         )
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2601,6 +2753,8 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
                 reset=True,
             )
 
+    sanitize_outputDir()
+
     print("passed")
 
 
@@ -2624,8 +2778,7 @@ def test_generic_cli_function_configgenerator():
         assert parameters, "config generator did not generate valid config files"
     sanitize_outputDir()
 
-    with open(generator_config_path, "r") as f:
-        generator_config = yaml.load(f, Loader=yaml.FullLoader)
+    generator_config = yaml.safe_load(open(generator_config_path, "r"))
     generator_config["second_level_dict_that_should_fail"] = {
         "key_1": {"key_2": "value"}
     }
@@ -2640,6 +2793,8 @@ def test_generic_cli_function_configgenerator():
     sanitize_outputDir()
 
     print("Exception raised:", exc_info.value)
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2682,6 +2837,8 @@ def test_generic_cli_function_recoverconfig():
 
     new_params = parseConfig(output_config_path, version_check_flag=False)
     assert new_params, "Created YAML could not be parsed by parseConfig"
+
+    sanitize_outputDir()
 
     print("passed")
 
@@ -2730,4 +2887,6 @@ def test_generic_deploy_docker():
     )
 
     assert result, "run_deployment returned false"
+    sanitize_outputDir()
+
     print("passed")
