@@ -8,6 +8,7 @@ A detailed data flow diagram is presented in [this link](https://github.com/mlco
 
 GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
 ## Table of Contents
+
 - [Table of Contents](#table-of-contents)
 - [Preparing the Data](#preparing-the-data)
   - [Anonymize Data](#anonymize-data)
@@ -16,7 +17,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
 - [Constructing the Data CSV](#constructing-the-data-csv)
 - [Customize the Training](#customize-the-training)
-  - [Running multiple experiments](#running-multiple-experiments)
+  - [Running multiple experiments \[OPTIONAL\]](#running-multiple-experiments-optional)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
 - [Parallelize the Training](#parallelize-the-training)
 - [Plot the final results](#plot-the-final-results)
@@ -27,6 +28,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Mounting Input and Output](#mounting-input-and-output)
   - [Enabling GPUs](#enabling-gpus)
 - [MLCubes](#mlcubes)
+
 
 ## Preparing the Data
 
@@ -174,7 +176,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Running multiple experiments
+### Running multiple experiments [OPTIONAL]
 
 - The `gandlf_configGenerator` script can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
 - Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
