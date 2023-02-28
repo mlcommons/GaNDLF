@@ -337,11 +337,7 @@ docker run -it --rm --name training --volume /home/researcher/gandlf_input:/inpu
 
 #### Special Case for Training
 
-In the case where you want to train on an existing model that is inside the GaNDLF container
-(such as in an MLCube container created by GaNDLF_Deploy),
-the output will be to a location embedded inside the container.
- Because you cannot mount something into that spot without overwriting the model,
- you can instead use the built-in "docker cp" command to extract the model afterward.
+In the case where you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Because you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward.
  
 For example, you can fine-tune a model on your own data using the following commands as a starting point:
 ```bash
