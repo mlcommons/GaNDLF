@@ -19,6 +19,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Customize the Training](#customize-the-training)
   - [Running multiple experiments \[OPTIONAL\]](#running-multiple-experiments-optional)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
+  - [Special note for Inference for Histology images](#special-note-for-inference-for-histology-images)
 - [Parallelize the Training](#parallelize-the-training)
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
@@ -217,6 +218,11 @@ python gandlf_run \
   # -rt , --reset # [optional] completely resets the previous run by deleting `modeldir`
   # -rm , --resume # [optional] resume previous training by only keeping model dict in `modeldir`
 ```
+
+### Special note for Inference for Histology images
+
+- If you trying to perform inference on pre-extracted patches, please change the `modality` key in the configuration to `rad`, as this will ensure the histology-specific pipelines are not triggered.
+- However, if you are trying to perform inference on full WSIs, `modality` should be kept as `histo`.
 
 [Back To Top &uarr;](#table-of-contents)
 
