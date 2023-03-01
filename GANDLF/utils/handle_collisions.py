@@ -3,20 +3,13 @@ import os
 import pandas as pd
 
 
-def handle_collisions(df, output_path):
+def handle_collisions(df, headers, output_path):
     # Create a dictionary to store the count of each subjectid
     subjectid_counts = {}
 
     # Find the subjectid header
     # Find the subjectID header
-    subject_id_column_name = None
-    for col in df.columns:
-        currentHeaderLoc = df.columns.get_loc(col)
-        col_lower = col.lower()
-        if ("subject" in col_lower) or ("patient" in col_lower) or ("pid" in col_lower):
-            subject_id_column_name = currentHeaderLoc
-        else:
-            raise ValueError("SubjectID not found in the header of the csv file")
+    subject_id_column_name = headers["subjectIDHeader"]
 
     # Create the path to the collision.csv file and mapping.csv file
     collision_path = os.path.join(output_path, "collision.csv")
