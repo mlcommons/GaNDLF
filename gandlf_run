@@ -24,6 +24,7 @@ if __name__ == "__main__":
         "--parameters_file",
         metavar="",
         type=str,
+        required=True,
         help="The configuration file (contains all the information related to the training/inference session)",
     )
     parser.add_argument(
@@ -32,6 +33,7 @@ if __name__ == "__main__":
         "--data_path",
         metavar="",
         type=str,
+        required=True,
         help="Data CSV file that is used for training/inference; can also take comma-separated training-validation pre-split CSVs",
     )
     parser.add_argument(
@@ -39,6 +41,7 @@ if __name__ == "__main__":
         "--train",
         metavar="",
         type=ast.literal_eval,
+        required=True,
         help="True: training and False: inference; for inference, there needs to be a compatible model saved in '-modeldir'",
     )
     parser.add_argument(
@@ -54,6 +57,7 @@ if __name__ == "__main__":
         default="cuda",
         metavar="",
         type=str,
+        required=True,
         help="Device to perform requested session on 'cpu' or 'cuda'; for cuda, ensure CUDA_VISIBLE_DEVICES env var is set",
     )
     parser.add_argument(
@@ -98,10 +102,7 @@ if __name__ == "__main__":
     if args.modeldir is None and args.outputdir:
         args.modeldir = args.outputdir
 
-    # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [args.inputdata, args.modeldir, args.train, args.config]:
-        if param_none_check is None:
-            sys.exit("ERROR: Missing required parameter:", param_none_check)
+    assert args.modeldir is not None, "Missing required parameter: modeldir"
 
     if os.path.isdir(args.inputdata):
         # Is this a fine assumption to make?
