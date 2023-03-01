@@ -133,8 +133,8 @@ The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf
 python gandlf_constructCSV \
   # -h, --help         show help message and exit
   -i ./experiment_0/data_dir/ # this is the main data directory
-  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
-  -l _seg.nii.gz # label identifier - not needed for regression/classification
+  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences
+  -l _seg.nii.gz # an example label identifier - not needed for regression/classification
   -o ./experiment_0/train_data.csv \ # output CSV to be used for training
 ```
 **Note** that this cannot be used for classification/regression tasks directly, and will need modification based on the way your data is stored.
