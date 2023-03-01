@@ -743,7 +743,7 @@ def test_train_resume_inference_classification_rad_3d(device):
         device=device,
     )
     # test the case where outputDir is explicitly provided to InferenceManager
-    collision_status, training_data = parseTestingCSV(
+    collision_status, training_data, headers = parseTestingCSV(
         training_data, parameters["output_dir"]
     )
     InferenceManager(

@@ -154,7 +154,7 @@ def parseTestingCSV(inputTrainingCSVFile, output_dir):
             file=sys.stderr,
         )
 
-    return data_full, headers
+    return collision_status, data_full, headers
 
 
 def get_dataframe(input_file):
