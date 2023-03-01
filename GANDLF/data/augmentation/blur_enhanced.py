@@ -1,7 +1,7 @@
 # adapted from https://github.com/fepegar/torchio/blob/main/src/torchio/transforms/augmentation/intensity/random_blur.py
 
 from collections import defaultdict
-from typing import Union, Tuple, Dict
+from typing import Union, Tuple
 
 import torch
 import numpy as np

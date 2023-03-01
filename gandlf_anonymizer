@@ -54,7 +54,7 @@ def main():
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
     if os.path.isfile(args.config):
-        config = yaml.load(open(args.config), Loader=yaml.FullLoader)
+        config = yaml.safe_load(open(args.config, "r"))
     else:
         config = None
 

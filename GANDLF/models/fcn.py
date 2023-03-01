@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Implementation of Fully Convolutional Network - FCN 
+Implementation of Fully Convolutional Network - FCN
 """
 
 import torch.nn.functional as F

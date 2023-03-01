@@ -59,17 +59,14 @@ def main():
     testingLogs = os.path.join(inputDir, "logs_testing.csv")
 
     if os.path.exists(testingLogs):
-
         testingLogsCSV = pd.read_csv(testingLogs)
 
         # check for classification task
         if len(testingLogsCSV) == 0:
-
             print("Classification task detected, generating accuracy and loss plots.")
 
             # check whether user wants training + validation overlaid plots
             if combinedPlots:
-
                 df_training = pd.read_csv(trainingLogs)
                 df_validation = pd.read_csv(validationLogs)
 
@@ -121,7 +118,6 @@ def main():
                 print("Plots saved successfully.")
 
             else:
-
                 df_training = pd.read_csv(trainingLogs)
                 df_validation = pd.read_csv(validationLogs)
 
@@ -178,7 +174,6 @@ def main():
                 print("Plots saved successfully.")
 
         else:
-
             print("Segmentation task detected, generating dice and loss plots.")
 
             final_stats = "Epoch,Train_Loss,Train_Dice,Val_Loss,Val_Dice,Testing_Loss,Testing_Dice\n"  # the columns that need to be present in final output; epoch is always removed
@@ -219,7 +214,6 @@ def main():
                 "Testing",
             ]
             for i in cols:
-
                 del data_dice[i + "_Loss"]  # keep only dice
                 del data_loss[i + "_Dice"]  # keep only loss
                 # rename the columns

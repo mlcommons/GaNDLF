@@ -10,7 +10,7 @@ import os
 
 import numpy as np
 import tiffslide
-from GANDLF.OPM.opm.utils import get_patch_size_in_microns, tissue_mask
+from GANDLF.data.patch_miner.opm.utils import get_patch_size_in_microns, tissue_mask
 from skimage.transform import resize
 from torch.utils.data.dataset import Dataset
 

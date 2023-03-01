@@ -139,7 +139,7 @@ def parseTestingCSV(inputTrainingCSVFile, output_dir):
 
     data_full, headers = parseTrainingCSV(inputTrainingCSVFile, train=False)
 
-    collision_status, data_full = handle_collisions(data_full, output_dir)
+    collision_status, data_full = handle_collisions(data_full, headers, output_dir)
 
     # If collisions are True, raise a warning that some patients with colliding subject_id were found
     # and a new mapping_csv was created to be used and write the location of the new mapping_csv

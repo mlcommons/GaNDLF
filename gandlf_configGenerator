@@ -14,7 +14,6 @@ if __name__ == "__main__":
         "-c",
         "--config",
         metavar="",
-        default=True,
         type=str,
         help="Path to base config.",
         required=True,
@@ -38,6 +37,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if not config_generator(args.config, args.strategy, args.output):
-        print("Config generation failed.")
-        exit(1)
+    config_generator(args.config, args.strategy, args.output)
+
+    print("Finished.")
