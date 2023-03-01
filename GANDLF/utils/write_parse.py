@@ -136,8 +136,8 @@ def parseTestingCSV(inputTrainingCSVFile, output_dir):
         pandas.DataFrame: The full dataset for computation.
         dict: The dictionary containing all relevant CSV headers.
     """
-    ## read training dataset into data frame
-    data_full = get_dataframe(inputTrainingCSVFile)
+
+    data_full, headers = parseTrainingCSV(inputTrainingCSVFile, train=False)
 
     collision_status, data_full = handle_collisions(data_full, output_dir)
 
@@ -153,8 +153,6 @@ def parseTestingCSV(inputTrainingCSVFile, output_dir):
             + output_dir,
             file=sys.stderr,
         )
-
-    _, headers = parseTrainingCSV(inputTrainingCSVFile, train=False)
 
     return data_full, headers
 
