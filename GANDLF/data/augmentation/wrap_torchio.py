@@ -17,6 +17,7 @@ from torchio.transforms import (
 from .blur_enhanced import RandomBlurEnhanced
 from .noise_enhanced import RandomNoiseEnhanced
 
+
 ## define helper functions to create transforms
 ## todo: ability to change interpolation type from config file
 ## todo: ability to change the dimensionality according to the config file
@@ -48,24 +49,31 @@ def affine(parameters):
 
 
 def elastic(parameters):
-
     # define defaults
-    num_controls = 7
-    max_displacement = 7.5
-    if parameters["patch_size"] is not None:
+    parameters["num_control_points"] = parameters.get("num_control_points", None)
+    parameters["max_displacement"] = parameters.get("max_displacement", None)
+    parameters["locked_borders"] = parameters.get("locked_borders", 2)
+    assert (
+        "patch_size" in parameters
+    ), "'patch_size' must be defined for elastic deformation"
+
+    if parameters["num_control_points"] is None:
         # define the control points and swap axes for augmentation
-        num_controls = []
+        parameters["num_control_points"] = []
         for _, n in enumerate(parameters["patch_size"]):
-            num_controls.append(max(n, 5))  # always at least have 5
-        max_displacement = np.divide(num_controls, 10)
-        if num_controls[-1] == 1:
+            parameters["num_control_points"].append(max(n, 5))  # always at least have 5
+
+    if parameters["max_displacement"] is None:
+        parameters["max_displacement"] = np.divide(parameters["num_control_points"], 10)
+        if parameters["num_control_points"][-1] == 1:
             # ensure maximum displacement is never greater than patch size
-            max_displacement[-1] = 0.1
-        max_displacement = max_displacement.tolist()
+            parameters["max_displacement"][-1] = 0.1
+        parameters["max_displacement"] = parameters["max_displacement"].tolist()
 
     return RandomElasticDeformation(
-        num_control_points=num_controls,
-        max_displacement=max_displacement,
+        num_control_points=parameters["num_control_points"],
+        max_displacement=parameters["max_displacement"],
+        locked_borders=parameters["locked_borders"],
         p=parameters["probability"],
     )
 

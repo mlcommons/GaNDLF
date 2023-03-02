@@ -5,6 +5,7 @@ import nibabel as nib
 
 from torchio.transforms import SpatialTransform
 
+
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
 def crop_image_outside_zeros(array, patch_size):
     """
@@ -78,7 +79,6 @@ class CropExternalZeroplanes(SpatialTransform):
         self.args_names = ("patch_size",)
 
     def apply_transform(self, subject):
-
         # get dictionary of images
         images_dict = subject.get_images_dict(intensity_only=False)
 

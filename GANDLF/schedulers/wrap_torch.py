@@ -14,6 +14,7 @@ def cyclical_lr(stepsize, min_lr, max_lr):
     scaler = lambda x: 1
     # Lambda function to calculate the LR
     lr_lambda = lambda it: max_lr - (max_lr - min_lr) * relative(it, stepsize)
+
     # Additional function to see where on the cycle we are
     def relative(it, stepsize):
         cycle = math.floor(1 + it / (2 * stepsize))
@@ -63,7 +64,6 @@ def base_triangle(parameters):
 
 
 def triangle_modified(parameters):
-
     # pick defaults
     if not ("min_lr" in parameters["scheduler"]):
         parameters["scheduler"]["min_lr"] = 0.000001

@@ -2,15 +2,12 @@
 """
 Implementation of TransUNet
 """
-from torch.nn import ModuleList
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
-import sys
-from GANDLF.utils.generic import checkPatchDimensions
 import torch
 import torch.nn as nn
 from torch.nn import ModuleList
@@ -59,37 +56,12 @@ class transunet(ModelBase):
     ):
         super(transunet, self).__init__(parameters)
 
-        if not ("depth" in parameters["model"]):
-            parameters["model"]["depth"] = 4
-            print("Default depth set to 4.")
+        # initialize defaults if not found
+        parameters["model"]["depth"] = parameters["model"].get("depth", 4)
+        parameters["model"]["num_heads"] = parameters["model"].get("num_heads", 12)
+        parameters["model"]["embed_dim"] = parameters["model"].get("embed_dim", 768)
 
-        patch_check = checkPatchDimensions(
-            parameters["patch_size"], numlay=parameters["model"]["depth"]
-        )
-
-        if patch_check != parameters["model"]["depth"] and patch_check >= 2:
-            print(
-                """
-                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
-                where i is in a integer greater than or equal to 2. Only the first %d layers will run.
-                """
-                % patch_check
-            )
-        elif patch_check < 2:
-            sys.exit(
-                """
-                The patch size is not large enough for desired depth. It is expected that each dimension of the patch size is divisible by 2^i, 
-                where i is in a integer greater than or equal to 2.
-                """
-            )
-
-        if not ("num_heads" in parameters["model"]):
-            parameters["model"]["num_heads"] = 12
-
-        if not ("embed_dim" in parameters["model"]):
-            parameters["model"]["embed_dim"] = 768
-
-        self.depth = patch_check
+        self.depth = self.model_depth_check(parameters)
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]

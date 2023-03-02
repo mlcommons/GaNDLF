@@ -4,7 +4,6 @@ from GANDLF.utils.tensor import one_hot
 
 
 def generic_function_output_with_check(predicted_classes, label, metric_function):
-
     if torch.min(predicted_classes) < 0:
         print(
             "WARNING: Negative values detected in prediction, cannot compute torchmetrics calculations."

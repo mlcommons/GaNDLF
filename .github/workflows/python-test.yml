@@ -47,7 +47,7 @@ jobs:
         sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
         python -m pip install wheel
-        python -m pip install openvino-dev==2022.1.0
+        python -m pip install openvino-dev==2022.1.0 mlcube_docker
         pip install torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
         pip install -e .
     - name: Run generic unit tests
@@ -62,14 +62,14 @@ jobs:
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
-    - name: Run regression unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "regression"
     - name: Run segmentation unit tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
+    - name: Run regression unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "regression"
     - name: Run transunet unit tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |

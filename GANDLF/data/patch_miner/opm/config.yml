@@ -1,0 +1,26 @@
+# Label Map Value mapping - mapping RGB values in label image to integer values for training; defaults to None
+value_map     : {1: 40, 2: 80, 3: 120, 4: 200}
+
+# Saving variables: set to False for dummy run; defaults to True
+save_patches  : True
+
+# Overlap option
+read_type      : 'random'  # Change to 'sequential' for increased efficiency; defaults to "random"
+overlap_factor : 0.0  # Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
+
+# Misc
+# white_color : 250 ## unused in the code right now
+scale       : 16 # scale at which operations such as tissue mask calculation happens - larger scale -> coarser mask -> faster computations; defaults to 16
+patch_size  : !!python/list [256, 256] # if defined as str and "m" is present, it is processed as microns
+# patch_size: "[50m,50m]" # this will process patches in terms of [50x50] microns by taking "mpp" into account
+num_workers : 1 # number of threads to use during computation; defaults to 1
+num_patches : 10 # -1 to mine until exhaustion, or a + int for number of patches; defaults to -1
+
+# RGB Masking
+pen_size_threshold   : 200 # thickness of pen strokes to be considered as a mask
+min_color_difference : 30  # color difference between tissue and pen markings
+# pen_mask_threshold   : 9 ## unused in the code right now
+
+# HSV Masking
+# hsv_s_threshold : 15 ## unused in the code right now
+# hsv_v_threshold : 90 ## unused in the code right now

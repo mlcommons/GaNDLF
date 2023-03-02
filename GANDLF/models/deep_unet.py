@@ -10,7 +10,6 @@ from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.in_conv import in_conv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
-import sys
 from GANDLF.utils.generic import checkPatchDivisibility
 
 

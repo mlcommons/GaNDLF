@@ -23,6 +23,7 @@ global_sampler_dict = {
     "weightedsample": torchio.data.WeightedSampler,
 }
 
+
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(
     dataframe, parameters, train, apply_zero_crop=False, loader_type=""
@@ -118,7 +119,7 @@ def ImagesFromDataFrame(
             # store image spacing information if not present
             if "spacing" not in subject_dict:
                 file_reader = sitk.ImageFileReader()
-                file_reader.SetFileName(dataframe[channel][patient])
+                file_reader.SetFileName(str(dataframe[channel][patient]))
                 file_reader.ReadImageInformation()
                 subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
 
@@ -180,8 +181,16 @@ def ImagesFromDataFrame(
                 )
             try:
                 perform_sanity_check_on_subject(subject, parameters)
-            except Exception:
+            except Exception as exception:
                 subjects_with_error.append(subject["subject_id"])
+                print(
+                    "Subject '"
+                    + subject["subject_id"]
+                    + "' could not be loaded due to the following exception: {}".format(
+                        type(exception).__name__
+                    )
+                    + "; message: {}".format(exception)
+                )
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if "label" in sampler or "weight" in sampler:

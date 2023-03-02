@@ -5,7 +5,7 @@
   <a href="https://github.com/mlcommons/GaNDLF/actions/workflows/codeql-analysis.yml" alt="Code Analysis"><img src="https://github.com/mlcommons/GaNDLF/workflows/CodeQL/badge.svg" /></a>
   <a href="https://hub.docker.com/repository/docker/cbica/gandlf" alt="Docker CI"><img src="https://github.com/mlcommons/GaNDLF/actions/workflows/docker-image.yml/badge.svg" /></a>
   <a href="https://codecov.io/gh/mlcommons/GaNDLF" alt="Code Coverage"><img src="https://codecov.io/gh/mlcommons/GaNDLF/branch/master/graph/badge.svg?token=4I54XEI3WE" /></a>
-  <a href="https://www.codacy.com/gh/mlcommons/GaNDLF/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mlcommons/GaNDLF&amp;utm_campaign=Badge_Grade"><img alt="Codacy" src="https://app.codacy.com/project/badge/Grade/8f8b77f62ad843709534e4ed66ad0b5a"></a><br>
+  <a href="https://app.codacy.com/gh/mlcommons/GaNDLF?utm_source=github.com&utm_medium=referral&utm_content=mlcommons/GaNDLF&utm_campaign=Badge_Grade_Settings"><img alt="Codacy" src="https://api.codacy.com/project/badge/Grade/b2cf27ddce1b4907abb47a82931dcbca"></a><br>
   <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://img.shields.io/conda/vn/conda-forge/gandlf" /></a>
   <a href="https://github.com/mlcommons/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-blue" /></a>
   <a href="https://arxiv.org/abs/2103.01006" alt="Citation"><img src="https://img.shields.io/badge/Cite-citation-lightblue" /></a>
@@ -64,10 +64,13 @@ GaNDLF has extensive documentation and it is arranged in the following manner:
 - [Frequently Asked Questions](https://mlcommons.github.io/GaNDLF/faq)
 - [Acknowledgements](https://mlcommons.github.io/GaNDLF/acknowledgements)
 
-
 ## Contributing
 
 Please see the [contributing guide](./CONTRIBUTING.md) for more information.
+
+### Weekly Meeting
+
+The GaNDLF development team hosts a weekly meeting to discuss feature additions, issues, and general future directions. If you are interested to join, please <a href="mailto:gandlf@mlcommons.org?subject=Meeting Request">send us an email</a>!
 
 ## Disclaimer
 - The software has been designed for research purposes only and has neither been reviewed nor approved for clinical use by the Food and Drug Administration (FDA) or by any other federal/state agency.

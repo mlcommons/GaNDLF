@@ -5,6 +5,8 @@ from copy import deepcopy
 from .utils import version_check
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 
+from GANDLF.metrics import surface_distance_ids
+
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
     "weighted_loss": False,  # whether weighted loss is to be used or not
@@ -109,19 +111,16 @@ def parseConfig(config_file_path, version_check_flag=True):
     """
     params = config_file_path
     if not isinstance(config_file_path, dict):
-        with open(config_file_path) as f:
-            params = yaml.safe_load(f)
+        params = yaml.safe_load(open(config_file_path, "r"))
 
     if version_check_flag:  # this is only to be used for testing
-        if not ("version" in params):
-            sys.exit(
-                "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
-            )
-        else:
-            version_check(
-                params["version"],
-                version_to_check=pkg_resources.require("GANDLF")[0].version,
-            )
+        assert (
+            "version" in params
+        ), "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
+        version_check(
+            params["version"],
+            version_to_check=pkg_resources.require("GANDLF")[0].version,
+        )
 
     if "patch_size" in params:
         # duplicate patch size if it is an int or float
@@ -145,10 +144,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         elif len(params["patch_size"]) == 3:  # 2d check
             if "dimension" not in params["model"]:
                 params["model"]["dimension"] = 3
-    else:
-        sys.exit(
-            "The 'patch_size' parameter needs to be present in the configuration file"
-        )
+    assert "patch_size" in params, "Patch size needs to be defined in the config file"
 
     if "resize" in params:
         print(
@@ -156,17 +152,17 @@ def parseConfig(config_file_path, version_check_flag=True):
             file=sys.stderr,
         )
 
-    if "modality" in params:
-        modality = str(params["modality"])
-        if modality.lower() == "rad":
-            pass
-        elif modality.lower() in ["path", "histo"]:
-            pass
-        else:
-            sys.exit(
-                "The 'modality' should be set to either 'rad' or 'path'. Please check for spelling errors and it should be set to either of the two given options."
-            )
+    assert "modality" in params, "'modality' needs to be defined in the config file"
+    params["modality"] = params["modality"].lower()
+    assert params["modality"] in [
+        "rad",
+        "histo",
+        "path",
+    ], "Modality should be either 'rad' or 'path'"
 
+    assert (
+        "loss_function" in params
+    ), "'loss_function' needs to be defined in the config file"
     if "loss_function" in params:
         # check if user has passed a dict
         if isinstance(params["loss_function"], dict):  # if this is a dict
@@ -188,6 +184,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                 params["loss_function"]["mse"] = {}
                 params["loss_function"]["mse"]["reduction"] = "mean"
 
+    assert "metrics" in params, "'metrics' needs to be defined in the config file"
     if "metrics" in params:
         if not isinstance(params["metrics"], dict):
             temp_dict = {}
@@ -266,17 +263,20 @@ def parseConfig(config_file_path, version_check_flag=True):
                     temp_dict["iou"], "reduction", "elementwise_mean"
                 )
                 temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
+            elif comparison_string in surface_distance_ids:
+                temp_dict[comparison_string] = initialize_key(
+                    temp_dict[comparison_string], "connectivity", 1
+                )
+                temp_dict[comparison_string] = initialize_key(
+                    temp_dict[comparison_string], "threshold", None
+                )
 
         params["metrics"] = temp_dict
-
-    else:
-        sys.exit("The key 'metrics' needs to be defined")
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
     params = initialize_key(params, "data_augmentation", {})
     if not (params["data_augmentation"] is None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
-
             # special case for random swapping and elastic transformations - which takes a patch size for computation
             for key in ["swap", "elastic"]:
                 if key in params["data_augmentation"]:
@@ -334,9 +334,10 @@ def parseConfig(config_file_path, version_check_flag=True):
 
             # special case for random noise - which takes a mean range
             for mean_aug in ["noise", "noise_var"]:
-                params["data_augmentation"][mean_aug] = initialize_key(
-                    params["data_augmentation"][mean_aug], "mean", 0
-                )
+                if mean_aug in params["data_augmentation"]:
+                    params["data_augmentation"][mean_aug] = initialize_key(
+                        params["data_augmentation"][mean_aug], "mean", 0
+                    )
 
             # special case for augmentations that need axis defined
             for axis_aug in ["flip", "anisotropic", "rotate_90", "rotate_180"]:
@@ -562,13 +563,21 @@ def parseConfig(config_file_path, version_check_flag=True):
             params["data_postprocessing"].pop(key)
 
     if "model" in params:
-
-        if not (isinstance(params["model"], dict)):
-            sys.exit("The 'model' parameter needs to be populated as a dictionary")
-        elif len(params["model"]) == 0:  # only proceed if something is defined
-            sys.exit(
-                "The 'model' parameter needs to be populated as a dictionary and should have all properties present"
-            )
+        assert isinstance(
+            params["model"], dict
+        ), "The 'model' parameter needs to be populated as a dictionary"
+        assert (
+            len(params["model"]) > 0
+        ), "The 'model' parameter needs to be populated as a dictionary and should have all properties present"
+        assert (
+            "architecture" in params["model"]
+        ), "The 'model' parameter needs 'architecture' to be defined"
+        assert (
+            "final_layer" in params["model"]
+        ), "The 'model' parameter needs 'final_layer' to be defined"
+        assert (
+            "dimension" in params["model"]
+        ), "The 'model' parameter needs 'dimension' to be defined"
 
         if "amp" in params["model"]:
             pass
@@ -577,19 +586,18 @@ def parseConfig(config_file_path, version_check_flag=True):
             params["model"]["amp"] = False
 
         if "norm_type" in params["model"]:
-            pass
+            if (
+                params["model"]["norm_type"] == None
+                or params["model"]["norm_type"].lower() == "none"
+            ):
+                if not ("vgg" in params["model"]["architecture"]):
+                    raise ValueError(
+                        "Normalization type cannot be 'None' for non-VGG architectures"
+                    )
         else:
             print("WARNING: Initializing 'norm_type' as 'batch'", flush=True)
             params["model"]["norm_type"] = "batch"
 
-        if not ("architecture" in params["model"]):
-            sys.exit("The 'model' parameter needs 'architecture' key to be defined")
-        if not ("final_layer" in params["model"]):
-            sys.exit("The 'model' parameter needs 'final_layer' key to be defined")
-        if not ("dimension" in params["model"]):
-            sys.exit(
-                "The 'model' parameter needs 'dimension' key to be defined, which should either 2 or 3"
-            )
         if not ("base_filters" in params["model"]):
             base_filters = 32
             params["model"]["base_filters"] = base_filters
@@ -628,9 +636,6 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "WARNING: 'save_at_every_epoch' will result in TREMENDOUS storage usage; use at your own risk."
             )
 
-    else:
-        sys.exit("The 'model' parameter needs to be populated as a dictionary")
-
     if isinstance(params["model"]["class_list"], str):
         if ("||" in params["model"]["class_list"]) or (
             "&&" in params["model"]["class_list"]
@@ -652,28 +657,14 @@ def parseConfig(config_file_path, version_check_flag=True):
             except AssertionError:
                 raise AssertionError("Could not evaluate the 'class_list' in 'model'")
 
-    if "kcross_validation" in params:
-        sys.exit(
-            "'kcross_validation' is no longer used, please use 'nested_training' instead"
-        )
-
-    if not ("nested_training" in params):
-        sys.exit("The parameter 'nested_training' needs to be defined")
-    if not ("testing" in params["nested_training"]):
-        if not ("holdout" in params["nested_training"]):
-            kfolds = -5
-            print("Using default folds for testing split: ", kfolds)
-        else:
-            print(
-                "WARNING: 'holdout' should not be defined under 'nested_training', please use 'testing' instead;",
-                file=sys.stderr,
-            )
-            kfolds = params["nested_training"]["holdout"]
-        params["nested_training"]["testing"] = kfolds
-    if not ("validation" in params["nested_training"]):
-        kfolds = -5
-        print("Using default folds for validation split: ", kfolds)
-        params["nested_training"]["validation"] = kfolds
+    assert (
+        "nested_training" in params
+    ), "The parameter 'nested_training' needs to be defined"
+    # initialize defaults for nested training
+    params["nested_training"]["testing"] = params["nested_training"].get("testing", -5)
+    params["nested_training"]["validation"] = params["nested_training"].get(
+        "validation", -5
+    )
 
     parallel_compute_command = ""
     if "parallel_compute_command" in params:

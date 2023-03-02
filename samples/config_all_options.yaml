@@ -16,7 +16,7 @@ model:
     class_list: [0,1,2,4], # Set the list of labels the model should train on and predict
     # class_list: '[*range(0,100,1)]' # a range of values from 0 to 99 with a step of 1 will be created; customize as needed, but ensure this is defined as a string as it will be passed through 'eval' function
     # class_list: '[0,1||2||3,1||4,4]', # combinatorial training - this will construct one-hot encoded mask using logical operands between specified annotations. Note that double '|' or '&' should be passed and not single to avoid python parsing
-    ignore_label_validation: 0, # this is the location of the class_list whose performance is ignore during validation metric calculation
+    ignore_label_validation: 0, # this is the location of the class_list whose performance is ignored during validation metric calculation
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # num_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types from the CSV
     # save_at_every_epoch: True, # allows you to save the model at every epoch
@@ -25,12 +25,9 @@ model:
     ## densenet models have the following optional parameters:
     # growth_rate (int) - how many filters to add each layer (k in paper)
     # num_init_features (int) - the number of filters to learn in the first convolution layer
-    # bn_size (int) - multiplicative factor for number of bottle neck layers
-    # (i.e. bn_size * k features in the bottleneck layer)
+    # bn_size (int) - multiplicative factor for number of bottle neck layers (i.e. bn_size * k features in the bottleneck layer)
     # drop_rate (float) - dropout rate after each dense layer
     # num_classes (int) - number of classification classes
-    # final_convolution_layer (str) - the final convolutional layer to use
-    # norm_type (str) - the normalization type to use
 
     ## unet_multilayer, unetr, transunet have the following optional parameter:
     # depth (int) - the number of encoder/decoder layers
@@ -127,13 +124,13 @@ weighted_loss: True
 # each has their own options and functionalities, which are initialized with defaults, see GANDLF.optimizers.wrap_torch for details
 optimizer: adam
 ## this parameter controls the nested training process
-# performs randomized k-fold cross-validation
-# split is performed using sklearn's KFold method
-# for single fold run, use '-' before the fold number
+# performs randomized k-fold cross-validation, see https://en.wikipedia.org/wiki/Cross-validation_(statistics) for details
+# split is performed using sklearn's KFold method: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html
+# for train on a single fold, use '-' before the fold number to make the number of folds "negative" -- NOT recommended
 nested_training:
   {
-    testing: 5, # this controls the testing data splits for final model evaluation; use '1' if this is to be disabled
-    validation: 5 # this controls the validation data splits for model training
+    testing: 5, # this controls the number of testing data folds for final model evaluation; [NOT recommended] to disable this, use '1'
+    validation: 5 # this controls the number of validation data folds to be used for model *selection* during training (not used for back-propagation)
   }
 ## pre-processing
 # this constructs an order of transformations, which is applied to all images in the data loader
@@ -210,7 +207,7 @@ data_preprocessing:
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html
 # 'kspace': one of ghosting or spiking is picked (randomly) for augmentation
-# 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
+# 'probability' sub-parameter adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
 data_augmentation: 
   {
     default_probability: 1.0, # keeping probability 1.0 to ensure that all augmentations are applied
@@ -219,7 +216,12 @@ data_augmentation:
       'degrees': 25,
       'translation': 2,
     },
-    'elastic',
+    'elastic': # for options, see https://torchio.readthedocs.io/transforms/augmentation.html#randomelasticdeformation
+    {
+      'num_control_points': 7,
+      'max_displacement': 0.1,
+      'locked_borders': 2,
+    },
     'kspace':{
       'probability': 1
     },
@@ -227,7 +229,7 @@ data_augmentation:
       'probability': 1
     },
     'bias',
-    blur, # this is a gaussian blur, and can take 'std' as a subkey, however, the default 'std' is [0, 0.015 * std(image)]
+    blur, # this is a gaussian blur, and can take 'std' as a sub-parameter, however, the default 'std' is [0, 0.015 * std(image)]
     ## example of blur with specific std range
     # 'blur': {
     #   'std': [0, 1] # example std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html#torchio.transforms.RandomBlur
@@ -236,7 +238,7 @@ data_augmentation:
       'mean': 0, # default mean
       'std': [0, 1] # default std-dev range
     },
-    noise_var, # this is a gaussian noise, and can take 'std' and 'mean' as a subkey, however, the default 'std' is [0, 0.015 * std(image)]
+    noise_var, # this is a random noise, and can take 'std' and 'mean' as a sub-parameter, however, the default 'std' is [0, 0.015 * std(image)]
     'gamma',
     'swap':{
       'patch_size': 15, # patch size for swapping; if a single number if provided, the same number is used for all axes

@@ -21,6 +21,8 @@ model_dict_required = {
 }
 
 best_model_path_end = "_best.pth.tar"
+latest_model_path_end = "_latest.pth.tar"
+initial_model_path_end = "_initial.pth.tar"
 
 
 def save_model(model_dict, model, params, path, onnx_export=True):

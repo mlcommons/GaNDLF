@@ -1,8 +1,13 @@
 ## 0.0.16
+- Added a script "gandlf_deploy", allowing deployment of models into MLCubes (currently requires Docker)
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
 - Updated links, copyright and email to MLCommons
 - Allowing provision for user to generate multiple configurations for experimentation
+- Added ability to combine classification inference results from different architectures
+- Added ability to save `initial` and `latest` models in addition to `best`
+- Added ability to specify testing data csv in main cli
+- Normalized surface dice has been added
 - HED based transform for RGB specific augmentations for H&E images
 
 ## 0.0.15

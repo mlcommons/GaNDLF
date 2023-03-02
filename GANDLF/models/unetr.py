@@ -1,12 +1,10 @@
 from .modelBase import ModelBase
-import sys
 from GANDLF.models.seg_modules.out_conv import out_conv
 import torch
 import torch.nn as nn
 from torch.nn import ModuleList
 import numpy as np
 import math
-from GANDLF.utils.generic import checkPatchDimensions
 
 
 class _DeconvConvBlock(nn.Sequential):
@@ -123,7 +121,6 @@ class _UpsampleBlock(nn.Sequential):
         )
 
     def forward(self, x):
-
         x = self.conv1(x)
         x = self.norm1(x)
         x = self.relu1(x)
@@ -150,7 +147,6 @@ class _MLP(nn.Sequential):
         self.add_module("gelu2", nn.GELU())
 
     def forward(self, x):
-
         x = self.norm(x)
         x = self.linear1(x)
         x = self.gelu1(x)
@@ -183,7 +179,6 @@ class _MSA(nn.Module):
         return x.permute(0, 2, 1, 3)
 
     def forward(self, x):
-
         query = self.reshape(self.query(x))
         key = self.reshape(self.key(x))
         value = self.reshape(self.value(x))
@@ -306,37 +301,23 @@ class unetr(ModelBase):
     ):
         super(unetr, self).__init__(parameters)
 
-        if not ("inner_patch_size" in parameters["model"]):
-            parameters["model"]["inner_patch_size"] = parameters["patch_size"][0]
-            print("Default inner patch size set to %d." % parameters["patch_size"][0])
-
-        if "inner_patch_size" in parameters["model"]:
-            if np.ceil(np.log2(parameters["model"]["inner_patch_size"])) != np.floor(
-                np.log2(parameters["model"]["inner_patch_size"])
-            ):
-                sys.exit("The inner patch size must be a power of 2.")
+        # initialize defaults if not found
+        parameters["model"]["inner_patch_size"] = parameters["model"].get(
+            "inner_patch_size", parameters["patch_size"][0]
+        )
+        parameters["model"]["num_heads"] = parameters["model"].get("num_heads", 12)
+        parameters["model"]["embed_dim"] = parameters["model"].get("embed_dim", 768)
 
         self.patch_size = parameters["model"]["inner_patch_size"]
 
+        assert np.ceil(np.log2(parameters["model"]["inner_patch_size"])) == np.floor(
+            np.log2(parameters["model"]["inner_patch_size"])
+        ), "The inner patch size must be a power of 2."
+
         self.depth = int(np.log2(self.patch_size))
+        parameters["model"]["depth"] = self.depth
 
-        patch_check = checkPatchDimensions(parameters["patch_size"], self.depth)
-
-        if patch_check != self.depth and patch_check >= 2:
-            print(
-                "The image size is not large enough for desired depth. It is expected that each dimension of the image is divisible by 2^i, where i is in a integer greater than or equal to 2. Only the first %d layers will run."
-                % patch_check
-            )
-        elif patch_check < 2:
-            sys.exit(
-                "The image size is not large enough for desired depth. It is expected that each dimension of the image is divisible by 2^i, where i is in a integer greater than or equal to 2."
-            )
-
-        if not ("num_heads" in parameters["model"]):
-            parameters["model"]["num_heads"] = 12
-
-        if not ("embed_dim" in parameters["model"]):
-            parameters["model"]["embed_dim"] = 768
+        _ = self.model_depth_check(parameters)
 
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]

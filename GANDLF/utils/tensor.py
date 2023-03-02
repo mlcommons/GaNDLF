@@ -316,7 +316,6 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
     for _, (subject) in enumerate(
         tqdm(penalty_loader, desc="Looping over training data for penalty calculation")
     ):
-
         # accumulate dice weights for each label
         mask = subject["label"][torchio.DATA]
         one_hot_mask = one_hot(mask, parameters["model"]["class_list"])

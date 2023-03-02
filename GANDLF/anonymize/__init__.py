@@ -1,6 +1,6 @@
 import yaml
 from typing import Union
-from .dicomanonymizer.dicomanonymizer import anonymize
+from dicomanonymizer import anonymize
 from .convert_to_nifti import convert_to_nifti
 
 # from .slide_anonymizer import anonymize_slide
@@ -32,7 +32,6 @@ def run_anonymizer(
         parameters = yaml.safe_load(yaml_data)
 
     if "rad" in parameters["modality"]:
-
         # initialize defaults
         if "delete_private_tags" not in parameters:
             parameters["delete_private_tags"] = True

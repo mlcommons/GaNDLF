@@ -80,7 +80,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
     # start the kFold train for testing
     for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
-
         # ensure the validation fold is initialized per-testing split
         currentValidationFold = 0
 
@@ -186,7 +185,6 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
         for train_index, val_index in kf_validation.split(
             current_training_subject_indeces_full
         ):
-
             # the output of the current fold is only needed if multi-fold training is happening
             if singleFoldValidation:
                 currentValOutputFolder = currentOutputFolder
@@ -305,7 +303,14 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
 
 def TrainingManager_split(
-    dataframe_train, dataframe_validation, outputDir, parameters, device, resume, reset
+    dataframe_train,
+    dataframe_validation,
+    dataframe_testing,
+    outputDir,
+    parameters,
+    device,
+    resume,
+    reset,
 ):
     """
     This is the training manager that ties all the training functionality together
@@ -313,6 +318,7 @@ def TrainingManager_split(
     Args:
         dataframe_train (pandas.DataFrame): The training data from CSV.
         dataframe_validation (pandas.DataFrame): The validation data from CSV.
+        dataframe_testing (pandas.DataFrame): The testing data from CSV.
         outputDir (str): The main output directory.
         parameters (dict): The parameters dictionary.
         device (str): The device to perform computations on.
@@ -338,5 +344,5 @@ def TrainingManager_split(
         output_dir=outputDir,
         device=device,
         params=parameters,
-        testing_data=None,
+        testing_data=dataframe_testing,
     )

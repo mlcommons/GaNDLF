@@ -2,21 +2,23 @@ import os, warnings
 from functools import partial
 from pathlib import Path
 
-import pandas as pd
 from PIL import Image
 
-from GANDLF.OPM.opm.patch_manager import PatchManager
-from GANDLF.OPM.opm.utils import (
-    alpha_channel_check,
+from GANDLF.data.patch_miner.opm.patch_manager import PatchManager
+from GANDLF.data.patch_miner.opm.utils import (
+    alpha_rgb_2d_channel_check,
     patch_size_check,
     parse_config,
     generate_initial_mask,
     get_patch_size_in_microns,
 )
+from GANDLF.utils import (
+    parseTrainingCSV,
+)
 
 
 def parse_gandlf_csv(fpath):
-    df = pd.read_csv(fpath, dtype=str)
+    df, _ = parseTrainingCSV(fpath, train=False)
     df = df.drop_duplicates()
     for _, row in df.iterrows():
         if "Label" in row:
@@ -60,9 +62,9 @@ def patch_extraction(input_path, output_path, config=None):
 
     for sid, slide, label in parse_gandlf_csv(input_path):
         # Create new instance of slide manager
-        manager = PatchManager(slide, os.path.join(output_path, sid))
+        manager = PatchManager(slide, os.path.join(output_path, str(sid)))
         manager.set_label_map(label)
-        manager.set_subjectID(sid)
+        manager.set_subjectID(str(sid))
         manager.set_image_header("Channel_0")
         manager.set_mask_header("Label")
 
@@ -73,7 +75,7 @@ def patch_extraction(input_path, output_path, config=None):
         print("Setting valid mask...")
         manager.set_valid_mask(mask, scale)
         # Reject patch if any pixels are transparent
-        manager.add_patch_criteria(alpha_channel_check)
+        manager.add_patch_criteria(alpha_rgb_2d_channel_check)
         # Reject patch if image dimensions are not equal to PATCH_SIZE
         patch_dims_check = partial(
             patch_size_check,

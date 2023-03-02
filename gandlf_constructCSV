@@ -1,11 +1,13 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse, sys
+import os, argparse, sys, ast
 from datetime import date
 from GANDLF.utils import writeTrainingCSV
 
 from GANDLF.cli import copyrightMessage
+
+import yaml
 
 
 def main():
@@ -43,6 +45,14 @@ def main():
         type=str,
         help="Output CSV file",
     )
+    parser.add_argument(
+        "-r",
+        "--relativizePaths",
+        metavar="",
+        type=ast.literal_eval,
+        default=False,
+        help="If True, paths in the output data CSV will always be relative to the location of the output data CSV itself.",
+    )
 
     args = parser.parse_args()
 
@@ -57,8 +67,26 @@ def main():
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputFile)
+    channelsID = args.channelsID
+    labelID = args.labelID
+    relativizePathsToOutput = args.relativizePaths
 
-    writeTrainingCSV(inputDir, args.channelsID, args.labelID, outputFile)
+    # Do some special handling for if users pass a yml file for channel/label IDs
+    # This is used for MLCube functionality because MLCube does not support plain string inputs.
+    if channelsID.endswith(".yml") or channelsID.endswith(".yaml"):
+        if os.path.isfile(channelsID):
+            with open(channelsID, "r") as f:
+                content = yaml.safe_load(f)
+                channelsID = content["channels"]
+                if isinstance(channelsID, list):
+                    channelsID = ",".join(channelsID)
+
+                if "label" in content:
+                    labelID = content["label"]
+                    if isinstance(labelID, list):
+                        channelsID = ",".join(channelsID)
+
+    writeTrainingCSV(inputDir, channelsID, labelID, outputFile, relativizePathsToOutput)
 
 
 # main function
