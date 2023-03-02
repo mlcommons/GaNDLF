@@ -10,6 +10,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
+- [Installation](#installation)
 - [Preparing the Data](#preparing-the-data)
   - [Anonymize Data](#anonymize-data)
   - [Cleanup/Harmonize Data](#cleanupharmonize-data)
@@ -21,6 +22,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
   - [Special note for Inference for Histology images](#special-note-for-inference-for-histology-images)
 - [Parallelize the Training](#parallelize-the-training)
+- [Expected Output(s)](#expected-outputs)
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
@@ -32,13 +34,24 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [MLCubes](#mlcubes)
 
 
+## Installation
+
+Please follow the [installation instructions](./setup.md) to install GaNDLF. This should end up with the shell that looks like this with the GaNDLF virtual environment activated:
+
+```bash
+(venv_gandlf) $> ### subsequent commands go here
+```
+
+[Back To Top &uarr;](#table-of-contents)
+
+
 ## Preparing the Data
 
 ### Anonymize Data
 
 GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
 ```bash
-python gandlf_anonymizer
+(venv_gandlf) $> python gandlf_anonymizer
   # -h, --help         show help message and exit
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
@@ -82,7 +95,7 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
   - `overlap_factor`: Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
 - Run the following command:
 ```bash
-python gandlf_patchMiner
+(venv_gandlf) $> python gandlf_patchMiner
   # -h, --help         show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
@@ -96,7 +109,7 @@ python gandlf_patchMiner
 This is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements.
 ```bash
 # continue from previous shell
-python gandlf_preprocess \
+(venv_gandlf) $> python gandlf_preprocess \
   # -h, --help         show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
@@ -131,7 +144,7 @@ The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf
 
 ```bash
 # continue from previous shell
-python gandlf_constructCSV \
+(venv_gandlf) $> python gandlf_constructCSV \
   # -h, --help         show help message and exit
   -i ./experiment_0/data_dir/ # this is the main data directory
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences
@@ -185,7 +198,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 - Provide the baseline configuration which has enabled you to train a model for 1 epoch for your dataset and problem (regardless of the efficacy).
 - Run the following command:  
 ```bash
-python gandlf_configGenerator \
+(venv_gandlf) $> python gandlf_configGenerator \
   # -h, --help         show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration
   -s ./samples/config_generator_strategy.yaml \ # strategy file
@@ -207,7 +220,7 @@ learning_rate: [0.1, 0.01]
 
 ```bash
 # continue from previous shell
-python gandlf_run \
+(venv_gandlf) $> python gandlf_run \
   ## -h, --help         show help message and exit
   ## -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
@@ -232,6 +245,26 @@ python gandlf_run \
 GaNDLF allows multi-GPU training relatively easily. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` and pass `-d cuda` to the `gandlf_run` script.
 
 Distributed training is a more difficult problem to address, since there are multiple ways to configure a high-performance computing cluster (SLURM, OpenHPC, Kubernetes, and so on). Owing to this discrepancy, we have ensured that GaNDLF allows multiple training jobs to be submitted in relatively straightforward manner using the command line inference of each site’s configuration. Simply populate the `paralle_compute_command` in the configuration with the specific command to run before the training job, and GaNDLF will use this string to submit the training job. 
+
+[Back To Top &uarr;](#table-of-contents)
+
+
+## Expected Output(s)
+
+Once your model is trained, you should see the following output:
+
+```bash
+# continue from previous shell
+(venv_gandlf) $> ls ./experiment_0/model_dir/
+data_{cohort_type}.csv  # data CSV used for the different cohorts, which can be either training/validation/testing
+data_{cohort_type}.pkl  # same as above, but in pickle format
+logs_{cohort_type}.csv  # logs for the different cohorts that contain the various metrics, which can be either training/validation/testing
+{architecture_name}_best.pth.tar # the best model in native PyTorch format
+{architecture_name}_latest.pth.tar # the latest model in native PyTorch format
+{architecture_name}_initial.pth.tar # the initial model in native PyTorch format
+{architecture_name}_initial.{xml/bin} # the graph-optimized best model in ONNX format
+# other files dependent on if training/validation/testing output was enabled in configuration
+```
 
 [Back To Top &uarr;](#table-of-contents)
 
