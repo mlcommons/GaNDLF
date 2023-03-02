@@ -518,7 +518,7 @@ def training_loop(
             os.remove(model_paths["latest"])
         save_model(
             {
-                "epoch": 0,
+                "epoch": epoch,
                 "model_state_dict": model_dict,
                 "optimizer_state_dict": optimizer.state_dict(),
                 "loss": best_loss,
