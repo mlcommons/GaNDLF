@@ -23,6 +23,8 @@ GaNDLF tackles all of these and the details are split in the manner explained in
   - [Special note for Inference for Histology images](#special-note-for-inference-for-histology-images)
 - [Parallelize the Training](#parallelize-the-training)
 - [Expected Output(s)](#expected-outputs)
+  - [Training](#training)
+  - [Inference](#inference)
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
@@ -251,6 +253,8 @@ Distributed training is a more difficult problem to address, since there are mul
 
 ## Expected Output(s)
 
+### Training
+
 Once your model is trained, you should see the following output:
 
 ```bash
@@ -265,6 +269,13 @@ logs_{cohort_type}.csv  # logs for the different cohorts that contain the variou
 {architecture_name}_initial.{xml/bin} # the graph-optimized best model in ONNX format
 # other files dependent on if training/validation/testing output was enabled in configuration
 ```
+
+### Inference
+
+- The output of inference will be predictions based on the model that was trained. 
+- The predictions will be saved in the same directory as the model if `outputdir` is not passed to `gandlf_run`.
+- For segmentation, a directory will be created per subject ID in the input CSV.
+- For classification/regression, the predictions will be generated in the `outputdir` or `modeldir` as a CSV file.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -367,8 +378,8 @@ To fix this, we need to use mounts.
 
 ### Mounting Input and Output
 
-The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and folders.
-Generally, it is useful to mount at least input folder (as readonly) and an output folder.
+The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and directories.
+Generally, it is useful to mount at least input directory (as read-only) and an output directory.
 See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
 
 For example, you might run:
