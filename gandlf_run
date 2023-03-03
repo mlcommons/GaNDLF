@@ -125,15 +125,18 @@ if __name__ == "__main__":
     if not (os.path.isfile(args.config)):
         sys.exit("ERROR: Configuration file not found!")
 
-    main_run(
-        args.inputdata,
-        args.config,
-        args.modeldir,
-        args.train,
-        args.device,
-        args.resume,
-        args.reset,
-        args.outputdir,
-    )
+    try:
+        main_run(
+            args.inputdata,
+            args.config,
+            args.modeldir,
+            args.train,
+            args.device,
+            args.resume,
+            args.reset,
+            args.outputdir,
+        )
+    except Exception as e:
+        sys.exit("Error in GANDLF run:", e)
 
     print("Finished.")
