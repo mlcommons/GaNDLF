@@ -5,3 +5,4 @@ omit =
     ./GANDLF/anonymize/slide_anonymizer.py
     ./testing/conftest.py
     ./gandlf_*
+    .github/*
