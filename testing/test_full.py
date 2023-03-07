@@ -760,7 +760,11 @@ def test_train_resume_inference_classification_rad_3d(device):
     )
     # test the case where outputDir is explicitly provided to InferenceManager
     train_data_path = inputDir + "/train_3d_rad_classification.csv"
-    collision_status, training_data, headers = parseTestingCSV(
+    df = pd.read_csv(train_data_path)
+    # multiply the entries in the dataframe by duplicating all the entires
+    df = pd.concat([df] * 2, ignore_index=True)
+    df.to_csv(train_data_path, index=False)
+    _, training_data, _ = parseTestingCSV(
         train_data_path, parameters["output_dir"]
     )
     InferenceManager(
