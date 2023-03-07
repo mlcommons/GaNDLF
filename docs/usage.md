@@ -51,7 +51,7 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Thi
 
 ### Anonymize Data
 
-GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
+A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
 ```bash
 (venv_gandlf) $> python gandlf_anonymizer
   # -h, --help         show help message and exit
