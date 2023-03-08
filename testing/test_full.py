@@ -4,7 +4,6 @@ import io
 import os
 import random
 import shutil
-import sys
 import zipfile
 from pathlib import Path
 
@@ -758,27 +757,9 @@ def test_train_resume_inference_classification_rad_3d(device):
         parameters=parameters,
         device=device,
     )
-    # test the case where outputDir is explicitly provided to InferenceManager
-    train_data_path = inputDir + "/train_3d_rad_classification.csv"
-    df = pd.read_csv(train_data_path)
-    # multiply the entries in the dataframe by duplicating all the entires
-    df = pd.concat([df] * 2, ignore_index=True)
-    df.to_csv(train_data_path, index=False)
-    _, training_data, _ = parseTestingCSV(
-        train_data_path, parameters["output_dir"]
-    )
-    InferenceManager(
-        dataframe=training_data,
-        modelDir=outputDir,
-        parameters=parameters,
-        device=device,
-        outputDir=os.path.join(outputDir, get_unique_timestamp()),
-    )
-
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_train_inference_optimize_classification_rad_3d(device):
     print("13: Starting 3D Rad segmentation tests for optimization")
@@ -2906,6 +2887,59 @@ def test_generic_deploy_docker():
     )
 
     assert result, "run_deployment returned false"
+    sanitize_outputDir()
+
+    print("passed")
+
+
+def test_collision_subjectid_test_segmentation_rad_2d(device):
+    print("47: Starting 2D Rad segmentation tests for collision of subjectID in test")
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    file_config_temp = get_temp_config_path()
+
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = 1
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["print_summary"] = False
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = [
+        "dice",
+    ]
+    parameters["model"]["architecture"] = "unet"
+    outputDir = os.path.join(testingDir, "data_output")
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+
+    # test the case where outputDir is explicitly provided to InferenceManager
+    train_data_path = inputDir + "/train_2d_rad_segmentation.csv"
+    test_data_path = inputDir + "/test_2d_rad_segmentation.csv"
+    df = pd.read_csv(train_data_path)
+    temp_df = pd.read_csv(train_data_path)
+    # Concatenate the two dataframes
+    df = pd.concat([df, temp_df], ignore_index=True)
+
+    df.to_csv(test_data_path, index=False)
+    _, training_data, _ = parseTestingCSV(
+        test_data_path, outputDir
+    )
+
+    main_run(
+        train_data_path+","+train_data_path+","+test_data_path,
+        file_config_temp,
+        outputDir,
+        True,
+        device,
+        resume=False,
+        reset=True
+    )
+
     sanitize_outputDir()
 
     print("passed")
