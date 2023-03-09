@@ -9,6 +9,7 @@ import cv2
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
+from GANDLF.utils import parseTestingCSV
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.patch_miner.opm.utils import (
@@ -2916,9 +2917,11 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     df = pd.concat([df, temp_df], ignore_index=True)
 
     df.to_csv(test_data_path, index=False)
-    _, training_data, _ = parseTestingCSV(
+    _, testing_data, _ = parseTestingCSV(
         test_data_path, outputDir
     )
+    # Save testing data to a csv file
+    testing_data.to_csv(test_data_path, index=False)
 
     main_run(
         train_data_path+","+train_data_path+","+test_data_path,
