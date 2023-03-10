@@ -2927,7 +2927,7 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
         train_data_path+","+train_data_path+","+test_data_path,
         file_config_temp,
         outputDir,
-        True,
+        False,
         device,
         resume=False,
         reset=True
