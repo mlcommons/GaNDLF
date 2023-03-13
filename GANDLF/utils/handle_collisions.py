@@ -4,6 +4,14 @@ import pandas as pd
 
 
 def handle_collisions(df, headers, output_path):
+    """
+    _summary_
+
+    Args:
+        df (pandas.DataFrame): The input dataframe.
+        headers (dict): The parsed headers.
+        output_path (str): The output directory.
+    """
     # Create a dictionary to store the count of each subjectid
     subjectid_counts = {}
 
