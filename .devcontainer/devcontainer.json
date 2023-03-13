@@ -8,6 +8,9 @@
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/python": {
+			"installJupyterlab": true
+		},
 		"ghcr.io/devcontainers/features/nvidia-cuda:1": {
 			"version": 11.3
 		},
