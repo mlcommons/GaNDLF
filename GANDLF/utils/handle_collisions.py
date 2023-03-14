@@ -26,10 +26,6 @@ def handle_collisions(df, headers, output_path):
     # Create a dictionary to store the count of each subjectid
     subjectid_counts = {}
 
-    # Create the path to the collision.csv file and mapping.csv file
-    collision_path = os.path.join(output_path, "collision.csv")
-    mapping_path = os.path.join(output_path, "updated_test_mapping.csv")
-
     # Create a list to store the colliding subjectids
     collisions = []
 
@@ -51,14 +47,16 @@ def handle_collisions(df, headers, output_path):
             new_subjectid = f"{subjectid}_v{subjectid_counts[subjectid]}"
             new_df.at[i, subject_id_column_name] = new_subjectid
 
-    # Write the colliding subjectids to the collision.csv file
-    pd.DataFrame({subject_id_column_name: collisions}).to_csv(
-        collision_path, index=False
-    )
+    # Write the colliding subject IDs to the collision.csv file
+    if collisions:
+        collision_path = os.path.join(output_path, "collision.csv")
+        pd.DataFrame({subject_id_column_name: collisions}).to_csv(
+            collision_path, index=False
+        )
 
-    # Write the updated dataframe to the new_test_mapping.csv file
-    new_df.to_csv(mapping_path, index=False)
+    # Write the updated dataframe to the updated_test_mapping.csv file
+    mapping_path = os.path.join(output_path, "updated_test_mapping.csv")
+    df.to_csv(mapping_path, index=False)
 
-    collisions_found = len(collisions) > 0
-
-    return collisions_found, new_df
+    # Return a tuple indicating whether any collisions were found, and the updated dataframe
+    return len(collisions) > 0, df
