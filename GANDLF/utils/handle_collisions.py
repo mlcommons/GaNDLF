@@ -17,12 +17,14 @@ def handle_collisions(df, headers, output_path):
         headers (dict): The parsed headers.
         output_path (str): The output directory.
     """
+
+    # Find the subjectID header
+    subject_id_col = headers.get("subjectIDHeader")
+    if subject_id_col is None:
+        raise ValueError("No subject ID column found in the headers.")
+
     # Create a dictionary to store the count of each subjectid
     subjectid_counts = {}
-
-    # Find the subjectid header
-    # Find the subjectID header
-    subject_id_column_name = headers["subjectIDHeader"]
 
     # Create the path to the collision.csv file and mapping.csv file
     collision_path = os.path.join(output_path, "collision.csv")
