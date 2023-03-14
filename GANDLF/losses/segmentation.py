@@ -2,7 +2,7 @@ import torch
 
 
 # Dice scores and dice losses
-def dice(output, label):
+def dice(output, target):
     """
     This function computes a dice score between two tensors
 
@@ -10,7 +10,7 @@ def dice(output, label):
     ----------
     output : Tensor
         Output predicted generally by the network
-    label : Tensor
+    target : Tensor
         Required target label to match the output with
 
     Returns
@@ -20,10 +20,14 @@ def dice(output, label):
 
     """
     smooth = 1e-7
-    iflat = output.contiguous().view(-1)
-    tflat = label.contiguous().view(-1)
-    intersection = (iflat * tflat).sum()
-    return (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
+
+    output_flat = output.contiguous().view(-1)
+    label_flat = target.contiguous().view(-1)
+    intersection = (output_flat * label_flat).sum()
+
+    return (2.0 * intersection + smooth) / (
+        output_flat.sum() + label_flat.sum() + smooth
+    )
 
 
 def MCD(pm, gt, num_class, weights=None, ignore_class=None, loss_type=0):
