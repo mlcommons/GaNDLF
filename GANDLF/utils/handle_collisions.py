@@ -5,7 +5,12 @@ import pandas as pd
 
 def handle_collisions(df, headers, output_path):
     """
-    _summary_
+    This function takes a dataframe as input and checks if there are any pairs of subject IDs
+    that are similar to each other. If it finds any such pairs, it renames the subject IDs by
+    adding a suffix of '_v1', '_v2', or '_v3' to differentiate them. The function then creates
+    a new dataframe that can be used for inference purposes. Additionally, it writes the original
+    dataframe to disk for future reference and creates a 'collision.csv' file to inform the user
+    of any subject ID collisions that were detected during the process.
 
     Args:
         df (pandas.DataFrame): The input dataframe.
