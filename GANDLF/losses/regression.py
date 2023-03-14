@@ -171,31 +171,24 @@ def L1_loss(inp, target, params):
 def MSE(output, label, reduction="mean", scaling_factor=1):
     """
     Calculate the mean square error between the output variable from the network and the target
-
     Parameters
     ----------
     output : torch.Tensor
         The output generated usually by the network
-    target : torch.Tensor
+    label : torch.Tensor
         The label for the corresponding Tensor for which the output was generated
     reduction : string, optional
         DESCRIPTION. The default is 'mean'.
-    scaling_factor : integer, optional
+    scaling_factor : float, optional
         The scaling factor to multiply the label with
-
     Returns
     -------
     loss : torch.Tensor
         Computed Mean Squared Error loss for the output and label
-
     """
-    scaling_factor = torch.as_tensor(scaling_factor)
-    label = label.float()
-    label = label * scaling_factor
-    loss_fn = MSELoss(reduction=reduction)
-    iflat = output.contiguous().view(-1)
-    tflat = label.contiguous().view(-1)
-    loss = loss_fn(iflat, tflat)
+    scaling_factor = torch.as_tensor(scaling_factor, dtype=torch.float32)
+    label = label.float() * scaling_factor
+    loss = F.mse_loss(output, label, reduction=reduction)
     return loss
 
 
