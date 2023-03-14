@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
 from GANDLF.utils import one_hot
 
@@ -102,32 +103,25 @@ def CCE_Generic(out, target, params, CCE_Type):
 
 def L1(output, label, reduction="mean", scaling_factor=1):
     """
-    Calculate the mean square error between the output variable from the network and the target
-
+    Calculate the mean absolute error between the output variable from the network and the target
     Parameters
     ----------
     output : torch.Tensor
         The output generated usually by the network
-    target : torch.Tensor
+    label : torch.Tensor
         The label for the corresponding Tensor for which the output was generated
-    reduction : string, optional
-        DESCRIPTION. The default is 'mean'.
-    scaling_factor : integer, optional
-        The scaling factor to multiply the label with
-
+    reduction : str, optional
+        The type of reduction to apply to the output. Can be "none", "mean", or "sum". Default is "mean".
+    scaling_factor : int, optional
+        The scaling factor to multiply the label with. Default is 1.
     Returns
     -------
     loss : torch.Tensor
-        Computed Mean Squared Error loss for the output and label
-
+        The computed Mean Absolute Error (L1) loss for the output and label
     """
-    scaling_factor = torch.as_tensor(scaling_factor)
-    label = label.float()
-    label = label * scaling_factor
-    loss_fn = L1Loss(reduction=reduction)
-    iflat = output.contiguous().view(-1)
-    tflat = label.contiguous().view(-1)
-    loss = loss_fn(iflat, tflat)
+    scaling_factor = torch.as_tensor(scaling_factor, dtype=label.dtype, device=label.device)
+    label = label.float() * scaling_factor
+    loss = F.l1_loss(output, label, reduction=reduction)
     return loss
 
 
