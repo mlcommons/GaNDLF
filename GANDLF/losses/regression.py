@@ -126,40 +126,37 @@ def L1(output, label, reduction="mean", scaling_factor=1):
 
 
 def L1_loss(inp, target, params):
-    acc_mse_loss = 0
-    # if inp.shape != target.shape:
-    #     sys.exit('Input and target shapes are inconsistent')
-
-    if inp.shape[0] == 1:
+    """
+    Computes the L1 loss between the input tensor and the target tensor.
+    
+    Parameters:
+        inp (torch.Tensor): The input tensor.
+        target (torch.Tensor): The target tensor.
+        params (dict, optional): A dictionary of hyperparameters. Defaults to None.
+        
+    Returns:
+        loss (torch.Tensor): The computed L1 loss.
+    """
+    loss = 0
+    
+    # Check if the input and target shapes are consistent
+    if inp.shape != target.shape:
+        raise ValueError("Input and target shapes are inconsistent.")
+    
+    # Compute the L1 loss
+    for i in range(inp.shape[0]):
         if params is not None:
-            acc_mse_loss += L1(
-                inp,
-                target,
-                reduction=params["loss_function"]["l1"]["reduction"],
-                scaling_factor=params["scaling_factor"],
-            )
+            loss += L1(inp[:, i, ...], target[:, i, ...],
+                       reduction=params["loss_function"]["l1"]["reduction"],
+                       scaling_factor=params["scaling_factor"])
         else:
-            acc_mse_loss += L1(inp, target)
-        # for i in range(0, params["model"]["num_classes"]):
-        #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
-    else:
-        if params is not None:
-            for i in range(0, params["model"]["num_classes"]):
-                acc_mse_loss += L1(
-                    inp[:, i, ...],
-                    target[:, i, ...],
-                    reduction=params["loss_function"]["mse"]["reduction"],
-                    scaling_factor=params["scaling_factor"],
-                )
-        else:
-            for i in range(0, inp.shape[1]):
-                acc_mse_loss += L1(inp[:, i, ...], target[:, i, ...])
+            loss += L1(inp[:, i, ...], target[:, i, ...])
+    
+    # Normalize the loss by the number of classes
     if params is not None:
-        acc_mse_loss /= params["model"]["num_classes"]
-    else:
-        acc_mse_loss /= inp.shape[1]
+        loss /= inp.shape[1]
 
-    return acc_mse_loss
+    return loss
 
 
 def MSE(output, label, reduction="mean", scaling_factor=1):
