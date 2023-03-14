@@ -192,44 +192,42 @@ def MSE(output, label, reduction="mean", scaling_factor=1):
     return loss
 
 
-def MSE_loss(inp, target, params):
-    acc_mse_loss = 0
-    # if inp.shape != target.shape:
-    #     sys.exit('Input and target shapes are inconsistent')
-
+def MSE_loss(inp, target, params=None):
+    """
+    Compute the mean squared error loss for the input and target
+    
+    Parameters
+    ----------
+    inp : torch.Tensor
+        The input tensor
+    target : torch.Tensor
+        The target tensor
+    params : dict, optional
+        A dictionary of parameters. Default: None.
+        If params is not None and contains the key "loss_function", the value of 
+        "loss_function" is expected to be a dictionary with a key "mse", which 
+        can contain the key "reduction" and/or "scaling_factor". If "reduction" is 
+        not specified, the default is 'mean'. If "scaling_factor" is not specified,
+        the default is 1.
+    
+    Returns
+    -------
+    acc_mse_loss : torch.Tensor
+        Computed mean squared error loss for the input and target
+    """
     reduction = "mean"
-    if params is not None:
-        if "mse" in params["loss_function"]:
-            if isinstance(params["loss_function"]["mse"], dict):
-                reduction = params["loss_function"]["mse"]["reduction"]
+    scaling_factor = 1
+    if params is not None and "loss_function" in params:
+        mse_params = params["loss_function"].get("mse", {})
+        reduction = mse_params.get("reduction", "mean")
+        scaling_factor = mse_params.get("scaling_factor", 1)
 
     if inp.shape[0] == 1:
-        if params is not None:
-            acc_mse_loss += MSE(
-                inp,
-                target,
-                reduction=reduction,
-                scaling_factor=params["scaling_factor"],
-            )
-        else:
-            acc_mse_loss += MSE(inp, target)
-        # for i in range(0, params["model"]["num_classes"]):
-        #    acc_mse_loss += MSE(inp[i], target[i], reduction=params["loss_function"]['mse']["reduction"])
+        acc_mse_loss = MSE(inp, target, reduction=reduction, scaling_factor=scaling_factor)
     else:
-        if params is not None:
-            for i in range(0, params["model"]["num_classes"]):
-                acc_mse_loss += MSE(
-                    inp[:, i, ...],
-                    target[:, i, ...],
-                    reduction=reduction,
-                    scaling_factor=params["scaling_factor"],
-                )
-        else:
-            for i in range(0, inp.shape[1]):
-                acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...])
-    if params is not None:
-        acc_mse_loss /= params["model"]["num_classes"]
-    else:
+        acc_mse_loss = 0
+        for i in range(inp.shape[1]):
+            acc_mse_loss += MSE(inp[:, i, ...], target[:, i, ...], reduction=reduction, scaling_factor=scaling_factor)
         acc_mse_loss /= inp.shape[1]
 
     return acc_mse_loss
