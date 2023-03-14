@@ -33,10 +33,21 @@ def CEL(out, target, params):
 
 
 def CE_Logits(out, target):
-    iflat = out.contiguous().view(-1)
-    tflat = target.contiguous().view(-1)
+    """
+    Binary cross entropy loss with logits.
+
+    Args:
+        out (torch.Tensor): Output tensor from the model.
+        target (torch.Tensor): Target tensor of binary labels.
+
+    Returns:
+        torch.Tensor: Binary cross entropy loss tensor.
+    """
+    if not torch.all(target.byte() == target):
+        raise ValueError("Target tensor must be binary (0 or 1)")
+
     loss = torch.nn.BCEWithLogitsLoss()
-    loss_val = loss(iflat, tflat)
+    loss_val = loss(out.contiguous().view(-1), target.contiguous().view(-1))
     return loss_val
 
 
