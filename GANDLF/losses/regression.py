@@ -86,13 +86,17 @@ def CCE_Generic(out, target, params, CCE_Type):
 
     acc_ce_loss = 0
     target = one_hot(target, params["model"]["class_list"]).type(out.dtype)
+
     for i in range(0, len(params["model"]["class_list"])):
         curr_ce_loss = CCE_Type(out[:, i, ...], target[:, i, ...])
         if params["weights"] is not None:
             curr_ce_loss = curr_ce_loss * params["weights"][i]
         acc_ce_loss += curr_ce_loss
+
+    # Take the mean of the loss if weights are not provided.
     if params["weights"] is None:
-        acc_ce_loss /= len(params["model"]["class_list"])
+        total_loss = torch.mean(total_loss)
+
     return acc_ce_loss
 
 
