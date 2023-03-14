@@ -14,7 +14,7 @@
 		"ghcr.io/devcontainers/features/nvidia-cuda:1": {
 			"version": 11.3
 		},
-		"ghcr.io/devcontainers-contrib/features/flake8:2": {},
+		"ghcr.io/devcontainers-contrib/features/flake8:2": {}
 	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
