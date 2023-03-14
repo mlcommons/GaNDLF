@@ -117,7 +117,7 @@ def L1(prediction, target, reduction="mean", scaling_factor=1):
     reduction : str, optional
         The type of reduction to apply to the output. Can be "none", "mean", or "sum". Default is "mean".
     scaling_factor : int, optional
-        The scaling factor to multiply the prediction with. Default is 1.
+        The scaling factor to multiply the target with. Default is 1.
     Returns
     -------
     loss : torch.Tensor
