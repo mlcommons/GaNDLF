@@ -20,6 +20,8 @@
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
+	// Install some dependencies on GitHub actions
+	"onCreateCommand": "./.devcontainer/onCreateCommand.sh",
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "./.devcontainer/postCreateCommand.sh",
 	// Configure tool-specific properties.

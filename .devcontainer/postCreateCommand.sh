@@ -10,7 +10,4 @@ else
 	pip install torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
 fi
 
-pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate optimized models for inference
-pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
-pip install -e .
 python ./gandlf_verifyInstall
