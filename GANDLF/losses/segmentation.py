@@ -84,18 +84,32 @@ def MCD(predicted, target, num_class, weights=None, ignore_class=None, loss_type
     return acc_dice
 
 
-def MCD_loss(pm, gt, params):
+def MCD_loss(predicted, target, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 1)
+    return MCD(
+        predicted,
+        target,
+        len(params["model"]["class_list"]),
+        params["weights"],
+        None,
+        1,
+    )
 
 
-def MCD_log_loss(pm, gt, params):
+def MCD_log_loss(predicted, target, params):
     """
     These weights should be the penalty weights, not dice weights
     """
-    return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 2)
+    return MCD(
+        predicted,
+        target,
+        len(params["model"]["class_list"]),
+        params["weights"],
+        None,
+        2,
+    )
 
 
 def tversky_loss(predicted, target, alpha=0.5, beta=0.5, smooth=1e-7):
@@ -144,13 +158,13 @@ def tversky_loss(predicted, target, alpha=0.5, beta=0.5, smooth=1e-7):
     return loss
 
 
-def MCT_loss(inp, target, params=None):
+def MCT_loss(predicted, target, params=None):
     """
     This function calculates the Multi-Class Tversky loss between two tensors.
 
     Parameters
     ----------
-    inp : torch.Tensor
+    predicted : torch.Tensor
         predicted predicted generally by the network
     target : torch.Tensor
         Required target label to match the predicted with
@@ -165,10 +179,10 @@ def MCT_loss(inp, target, params=None):
     """
 
     acc_tv_loss = 0
-    num_classes = inp.shape[1]
+    num_classes = predicted.shape[1]
 
     for i in range(num_classes):
-        curr_loss = tversky_loss(inp[:, i, ...], target[:, i, ...])
+        curr_loss = tversky_loss(predicted[:, i, ...], target[:, i, ...])
         if params is not None and params.get("weights") is not None:
             curr_loss = curr_loss * params["weights"][i]
         acc_tv_loss += curr_loss
