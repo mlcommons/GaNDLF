@@ -144,15 +144,38 @@ def tversky_loss(output, target, alpha=0.5, beta=0.5, smooth=1e-7):
     return loss
 
 
-def MCT_loss(inp, target, params):
+def MCT_loss(inp, target, params=None):
+    """
+    This function calculates the Multi-Class Tversky loss between two tensors.
+
+    Parameters
+    ----------
+    inp : torch.Tensor
+        Output predicted generally by the network
+    target : torch.Tensor
+        Required target label to match the output with
+    params : dict, optional
+        Additional parameters for computing loss function, including weights for each class
+
+    Returns
+    -------
+    torch.Tensor
+        Computed Multi-Class Tversky Loss
+
+    """
+
     acc_tv_loss = 0
-    for i in range(0, len(params["model"]["class_list"])):
+    num_classes = inp.shape[1]
+
+    for i in range(num_classes):
         curr_loss = tversky_loss(inp[:, i, ...], target[:, i, ...])
-        if params["weights"] is not None:
+        if params is not None and params.get("weights") is not None:
             curr_loss = curr_loss * params["weights"][i]
         acc_tv_loss += curr_loss
-    if params["weights"] is None:
-        acc_tv_loss /= len(params["model"]["class_list"])
+
+    if params is not None and params.get("weights") is None:
+        acc_tv_loss /= num_classes
+
     return acc_tv_loss
 
 
