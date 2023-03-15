@@ -180,5 +180,23 @@ def MCT_loss(inp, target, params=None):
 
 
 def KullbackLeiblerDivergence(mu, logvar, params=None):
+    """
+    Calculates the Kullback-Leibler divergence between two Gaussian distributions.
+
+    Parameters
+    ----------
+    mu : torch.Tensor
+        The mean of the first Gaussian distribution
+    logvar : torch.Tensor
+        The logarithm of the variance of the first Gaussian distribution
+    params : dict, optional
+        A dictionary of optional parameters
+
+    Returns
+    -------
+    torch.Tensor
+        The computed Kullback-Leibler divergence
+
+    """
     loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
     return loss.mean()
