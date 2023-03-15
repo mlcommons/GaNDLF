@@ -98,20 +98,50 @@ def MCD_log_loss(pm, gt, params):
     return MCD(pm, gt, len(params["model"]["class_list"]), params["weights"], None, 2)
 
 
-def tversky(inp, target, alpha):
-    smooth = 1e-7
-    iflat = inp.view(-1)
-    tflat = target.view(-1)
-    intersection = (iflat * tflat).sum()
-    fps = (iflat * (1 - tflat)).sum()
-    fns = ((1 - iflat) * tflat).sum()
-    denominator = intersection + (alpha * fps) + ((1 - alpha) * fns) + smooth
-    return (intersection + smooth) / denominator
+def tversky_loss(output, target, alpha=0.5, beta=0.5, smooth=1e-7):
+    """
+    This function calculates the Tversky loss between two tensors.
 
+    Parameters
+    ----------
+    output : torch.Tensor
+        Output predicted generally by the network
+    target : torch.Tensor
+        Required target label to match the output with
+    alpha : float, optional
+        Weight of false positives
+    beta : float, optional
+        Weight of false negatives
+    smooth : float, optional
+        Smoothing factor to avoid division by zero
 
-def tversky_loss(inp, target, alpha=1):
-    tversky_val = tversky(inp, target, alpha)
-    return 1 - tversky_val
+    Returns
+    -------
+    torch.Tensor
+        Computed Tversky Loss
+
+    """
+    # Move this part later to parameter parsing, no need to check every time
+    if not 0 <= alpha <= 1:
+        raise ValueError(f"Invalid alpha value: {alpha}")
+    if not 0 <= beta <= 1:
+        raise ValueError(f"Invalid beta value: {beta}")
+    if not 0 <= alpha + beta <= 1:
+        raise ValueError(f"Invalid alpha and beta values: {alpha}, {beta}")
+
+    output_flat = output.contiguous().view(-1)
+    target_flat = target.contiguous().view(-1)
+
+    true_positives = (output_flat * target_flat).sum()
+    false_positives = ((1 - target_flat) * output_flat).sum()
+    false_negatives = (target_flat * (1 - output_flat)).sum()
+
+    numerator = true_positives
+    denominator = true_positives + alpha * false_positives + beta * false_negatives
+    score = (numerator + smooth) / (denominator + smooth)
+
+    loss = 1 - score
+    return loss
 
 
 def MCT_loss(inp, target, params):
