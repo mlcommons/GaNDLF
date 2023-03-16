@@ -12,7 +12,6 @@ from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
 from GANDLF.models.seg_modules.IncConv import IncConv
 from GANDLF.models.seg_modules.IncDropout import IncDropout
 from .modelBase import ModelBase
-import sys
 from GANDLF.utils.generic import checkPatchDivisibility
 
 

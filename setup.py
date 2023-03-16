@@ -3,41 +3,34 @@
 """The setup script."""
 
 
-import os
+import sys, re
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.egg_info import egg_info
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
-
-
-def git_submodule_update():
-    ## submodule update
-    os.system("git submodule update --init --recursive")
+try:
+    with open("README.md") as readme_file:
+        readme = readme_file.read()
+except Exception as error:
+    readme = "No README information found."
+    sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
 
 
 class CustomInstallCommand(install):
     def run(self):
         install.run(self)
-        git_submodule_update()
 
 
 class CustomDevelopCommand(develop):
     def run(self):
         develop.run(self)
-        git_submodule_update()
 
 
 class CustomEggInfoCommand(egg_info):
     def run(self):
         egg_info.run(self)
-        git_submodule_update()
 
-
-# read version.py
-import sys, re
 
 try:
     filepath = "GANDLF/version.py"
@@ -49,8 +42,9 @@ except Exception as error:
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 requirements = [
+    "torch==1.13.1",
     "black",
-    "torch==1.13.1" "numpy==1.22.0",
+    "numpy==1.22.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
@@ -60,7 +54,6 @@ requirements = [
     "pandas",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
-    'pickle5>=0.0.11; python_version < "3.8.0"',
     "setuptools",
     "seaborn",
     "pyyaml",
@@ -81,50 +74,57 @@ requirements = [
     "torchinfo==1.7.0",
     "segmentation-models-pytorch==0.3.0",
     "ACSConv==0.1.1",
+    "docker",
+    "dicom-anonymizer",
+    "twine",
+    "zarr",
+    "keyring",
 ]
 
-setup(
-    name="GANDLF",
-    version=__version__,
-    author="MLCommons",
-    author_email="gandlf@mlcommons.org",
-    python_requires=">=3.7",
-    packages=find_packages(),
-    cmdclass={  # this ensures git_submodule_update is called during install
-        "install": CustomInstallCommand,
-        "develop": CustomDevelopCommand,
-        "egg_info": CustomEggInfoCommand,
-    },
-    scripts=[
-        "gandlf_run",
-        "gandlf_constructCSV",
-        "gandlf_collectStats",
-        "gandlf_patchMiner",
-        "gandlf_preprocess",
-        "gandlf_anonymizer",
-        "gandlf_verifyInstall",
-        "gandlf_configGenerator",
-    ],
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: Apache Software License",
-        "Natural Language :: English",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Topic :: Scientific/Engineering :: Medical Science Apps",
-    ],
-    description=(
-        "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
-    ),
-    install_requires=requirements,
-    license="Apache-2.0",
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    include_package_data=True,
-    keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
-    zip_safe=False,
-)
+if __name__ == "__main__":
+    setup(
+        name="GANDLF",
+        version=__version__,
+        author="MLCommons",
+        author_email="gandlf@mlcommons.org",
+        python_requires=">=3.8",
+        packages=find_packages(),
+        cmdclass={
+            "install": CustomInstallCommand,
+            "develop": CustomDevelopCommand,
+            "egg_info": CustomEggInfoCommand,
+        },
+        scripts=[
+            "gandlf_run",
+            "gandlf_constructCSV",
+            "gandlf_collectStats",
+            "gandlf_patchMiner",
+            "gandlf_preprocess",
+            "gandlf_anonymizer",
+            "gandlf_verifyInstall",
+            "gandlf_configGenerator",
+            "gandlf_recoverConfig",
+            "gandlf_deploy",
+        ],
+        classifiers=[
+            "Development Status :: 3 - Alpha",
+            "Intended Audience :: Science/Research",
+            "License :: OSI Approved :: Apache Software License",
+            "Natural Language :: English",
+            "Operating System :: OS Independent",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Topic :: Scientific/Engineering :: Medical Science Apps",
+        ],
+        description=(
+            "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
+        ),
+        install_requires=requirements,
+        license="Apache-2.0",
+        long_description=readme,
+        long_description_content_type="text/markdown",
+        include_package_data=True,
+        keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
+        zip_safe=False,
+    )

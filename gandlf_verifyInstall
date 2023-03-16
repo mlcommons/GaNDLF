@@ -23,7 +23,6 @@ if __name__ == "__main__":
 
     # we always want to do submodule update to ensure any hash updates are ingested correctly
     try:
-        os.system("git submodule update --init --recursive")
         os.system(f"{sys.executable} -m pip install -e .")
     except:
         print("Git was not found, please try again.")

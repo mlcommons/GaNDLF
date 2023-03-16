@@ -18,6 +18,7 @@ Thank you for your interest in contributing to **GaNDLF**! To make the process a
 
 - Ensure your PR addresses an existing issue or feature request (if none exists, please open one so that it can be triaged by the admins).
 - Your PR should be initiated from a branch that either contains the issue number it fixes and/or contains as much top-level information as possible to help moderators review and merge it.
+- The branch should be from your personal fork of GaNDLF.
 - Include tests for the code changes in your PR; if code coverage gets reduced, the merge will be triaged by admins.
 - Update documentation for the added functionality (if any).
 - Fill out PR template.

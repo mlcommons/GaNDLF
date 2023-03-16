@@ -1,6 +1,6 @@
 import yaml
 from typing import Union
-from .dicomanonymizer.dicomanonymizer import anonymize
+from dicomanonymizer import anonymize
 from .convert_to_nifti import convert_to_nifti
 
 # from .slide_anonymizer import anonymize_slide

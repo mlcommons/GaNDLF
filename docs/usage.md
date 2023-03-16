@@ -22,8 +22,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
-- [Examples](#examples)
-- [Running with Docker](#running-with-docker)
+- [Deployment](#deployment)
   - [Mounting Input and Output](#mounting-input-and-output)
   - [Enabling GPUs](#enabling-gpus)
 - [MLCubes](#mlcubes)
@@ -57,9 +56,9 @@ Recommended tools for tackling all aforementioned preprocessing tasks:
 
 ### Offline Patch Extraction (for histology images only)
 
-GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using [OPM](https://github.com/CBICA/OPM):
+GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using GaNDLF's integrated patch miner:
 
-- Construct a YAML configuration for OPM with a minimum of the following keys (see [OPM usage](https://github.com/CBICA/OPM/blob/master/README.md#usage) for all options):
+- Construct a YAML configuration for OPM with a minimum of the following keys:
   - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
   - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256]) or a string containing patch size in microns (e.g., "[100m,100m]")
   - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
@@ -67,6 +66,11 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
   - `SubjectID`: the ID of the subject for the WSI
   - `Channel_0`: the WSI file
   - `Label`: (optional) the label map file
+  - `value_map`: mapping RGB values in label image to integer values for training; defaults to None
+  - `read_type`: either "random" or "sequential" (latter is more efficient); defaults to "random"
+  - `pen_size_threshold`: thickness of pen strokes to be considered as a mask
+  - `min_color_difference`: color difference between tissue and pen markings
+  - `overlap_factor`: Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
 - Run the following command:
 ```bash
 python gandlf_patchMiner
@@ -256,6 +260,31 @@ All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 
+[Back To Top &uarr;](#table-of-contents)
+
+## Deployment
+
+You can deploy models trained with GaNDLF into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF.
+Currently, Docker images are supported (which can be converted to Singularity format).
+These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/).
+This allows your algorithm to be used in a consistent manner with other machine learning tools.
+
+The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration.
+This ensures that upstream changes to GaNDLF will not break compatibility with your model.
+
+To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images.
+This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
+
+```bash
+python gandlf_deploy \
+  ## -h, --help         show help message and exit
+  -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
+  -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
+  --target docker # the target platform (--help will show all available targets)
+  --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
+  -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
+```
+
 ## Examples
 
 - Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
@@ -305,6 +334,21 @@ Then, we can reference the same file when running again:
 ```bash
 docker run -it --rm --name training --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu gandlf_run --train True --config /input/config.yml --inputdata /output/data.csv --modeldir /output/model
 ```
+
+#### Special Case for Training
+
+In the case where you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Because you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward.
+ 
+For example, you can fine-tune a model on your own data using the following commands as a starting point:
+```bash
+# Run training on your new data
+docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf_run -m /embedded_model/ [...] # Do not include "--rm" option!
+# Copy the finetuned model out of the container, to a location on the host
+docker cp gandlf_training:/embedded_model /home/researcher/extracted_model
+# Now you can remove the container to clean up
+docker rm -f gandlf_training
+```
+ 
 
 ### Enabling GPUs
 

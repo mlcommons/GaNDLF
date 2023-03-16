@@ -5,6 +5,8 @@ from copy import deepcopy
 from .utils import version_check
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 
+from GANDLF.metrics import surface_distance_ids
+
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
     "weighted_loss": False,  # whether weighted loss is to be used or not
@@ -109,8 +111,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     """
     params = config_file_path
     if not isinstance(config_file_path, dict):
-        with open(config_file_path) as f:
-            params = yaml.safe_load(f)
+        params = yaml.safe_load(open(config_file_path, "r"))
 
     if version_check_flag:  # this is only to be used for testing
         assert (
@@ -262,6 +263,13 @@ def parseConfig(config_file_path, version_check_flag=True):
                     temp_dict["iou"], "reduction", "elementwise_mean"
                 )
                 temp_dict["iou"] = initialize_key(temp_dict["iou"], "threshold", 0.5)
+            elif comparison_string in surface_distance_ids:
+                temp_dict[comparison_string] = initialize_key(
+                    temp_dict[comparison_string], "connectivity", 1
+                )
+                temp_dict[comparison_string] = initialize_key(
+                    temp_dict[comparison_string], "threshold", None
+                )
 
         params["metrics"] = temp_dict
 

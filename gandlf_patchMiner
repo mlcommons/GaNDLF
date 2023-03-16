@@ -35,7 +35,7 @@ if __name__ == "__main__":
         "--config",
         type=str,
         dest="config",
-        help="config (in YAML) for running OPM. Needs 'scale' and 'patch_size' to be defined, otherwise defaults to 16 and (256, 256), respectively.",
+        help="config (in YAML) for running the patch miner. Needs 'scale' and 'patch_size' to be defined, otherwise defaults to 16 and (256, 256), respectively.",
         required=False,
     )
 
