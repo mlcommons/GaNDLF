@@ -17,20 +17,14 @@ jobs:
 
     steps:
     - name: Free space
-      run: df -h
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@master
-      with:
-        remove-dotnet: 'true'
-        remove-haskell: 'true'
-        remove-android: 'true'
-    - uses: actions/checkout@v2
-    - name: Free space
       run: |
         sudo rm -rf /opt/ghc
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo rm -rf "$ANDROID_SDK_ROOT"
         df -h
+    - name: Checkout
+      uses: actions/checkout@v2
     
     # Use changed-files-specific action to collect file changes.
     # The following commented condition applied to a step will run that step only if non-docs files have changed.
