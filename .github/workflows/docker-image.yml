@@ -29,8 +29,8 @@ jobs:
             dockertag: cuda116
           - platform: CPU
             dockertag: cpu
-          - platform: ROCm
-            dockertag: rocm
+          # - platform: ROCm
+          #   dockertag: rocm
 
     steps:
     - name: Check out the repository
