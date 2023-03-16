@@ -26,7 +26,11 @@ jobs:
         remove-android: 'true'
     - uses: actions/checkout@v2
     - name: Free space
-        run: df -h
+        run: |
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        df -h
     
     # Use changed-files-specific action to collect file changes.
     # The following commented condition applied to a step will run that step only if non-docs files have changed.
