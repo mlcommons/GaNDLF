@@ -42,6 +42,7 @@ except Exception as error:
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 requirements = [
+    "torch==1.13.1",
     "black",
     "numpy==1.22.0",
     "scipy",
@@ -79,12 +80,6 @@ requirements = [
     "zarr",
     "keyring",
 ]
-
-# pytorch doesn't have LTS support on OSX - https://github.com/mlcommons/GaNDLF/issues/389
-if sys.platform == "darwin":
-    requirements.append("torch==1.11.0")
-else:
-    requirements.append("torch==1.11.0")
 
 if __name__ == "__main__":
     setup(
