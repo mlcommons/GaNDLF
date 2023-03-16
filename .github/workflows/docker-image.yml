@@ -103,7 +103,7 @@ jobs:
     # Run the image from the base entrypoint as a test
     - name: Test container with entrypoint
       # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
-      run: echo "Running docker.io/cbica/gandlf:${{ matrix.dockertag }}-latest ..." && docker run --rm docker.io/cbica/gandlf:${{ matrix.dockertag }}-latest
+      run: echo "Running docker.io/cbica/gandlf:latest-${{ matrix.dockertag }} ..." && docker run --rm docker.io/cbica/gandlf:latest-${{ matrix.dockertag }}
 
     # Push Docker image with Buildx (but don't push on PR)
     # https://github.com/docker/build-push-action
