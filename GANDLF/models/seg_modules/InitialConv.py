@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 
-class InConv(nn.Module):
+class InitialConv(nn.Module):
     def __init__(
         self,
         input_channels,
