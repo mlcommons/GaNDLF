@@ -133,10 +133,10 @@ def L1(prediction, target, reduction="mean", scaling_factor=1):
 
 def L1_loss(prediction, target, params):
     """
-    Computes the L1 loss between the input tensor and the target tensor.
+    Computes the L1 loss between the predictionut tensor and the target tensor.
     
     Parameters:
-        prediction (torch.Tensor): The input tensor.
+        prediction (torch.Tensor): The predictionut tensor.
         target (torch.Tensor): The target tensor.
         params (dict, optional): A dictionary of hyperparameters. Defaults to None.
         
@@ -145,25 +145,36 @@ def L1_loss(prediction, target, params):
     """
     loss = 0
 
-    # Check if the input and target shapes are consistent
-    if prediction.shape != target.shape:
-        raise ValueError("Input and target shapes are inconsistent.")
-
-    # Compute the L1 loss
-    for i in range(prediction.shape[0]):
+    if prediction.shape[0] == 1:
         if params is not None:
-            loss += L1(
-                prediction[:, i, ...],
-                target[:, i, ...],
+            acc_mse_loss += L1(
+                prediction,
+                target,
                 reduction=params["loss_function"]["l1"]["reduction"],
                 scaling_factor=params["scaling_factor"],
             )
         else:
-            loss += L1(prediction[:, i, ...], target[:, i, ...])
+            acc_mse_loss += L1(prediction, target)
+
+    # Compute the L1 loss
+    else:
+        if params is not None:
+            for i in range(0, params["model"]["num_classes"]):
+                acc_mse_loss += L1(
+                    prediction[:, i, ...],
+                    target[:, i, ...],
+                    reduction=params["loss_function"]["mse"]["reduction"],
+                    scaling_factor=params["scaling_factor"],
+                )
+        else:
+            for i in range(0, prediction.shape[1]):
+                acc_mse_loss += L1(prediction[:, i, ...], target[:, i, ...])
 
     # Normalize the loss by the number of classes
     if params is not None:
-        loss /= prediction.shape[1]
+        acc_mse_loss /= params["model"]["num_classes"]
+    else:
+        acc_mse_loss /= prediction.shape[1]
 
     return loss
 
@@ -194,12 +205,12 @@ def MSE(prediction, target, reduction="mean", scaling_factor=1):
 
 def MSE_loss(prediction, target, params=None):
     """
-    Compute the mean squared error loss for the input and target
+    Compute the mean squared error loss for the predictionut and target
     
     Parameters
     ----------
     prediction : torch.Tensor
-        The input tensor
+        The predictionut tensor
     target : torch.Tensor
         The target tensor
     params : dict, optional
@@ -213,7 +224,7 @@ def MSE_loss(prediction, target, params=None):
     Returns
     -------
     acc_mse_loss : torch.Tensor
-        Computed mean squared error loss for the input and target
+        Computed mean squared error loss for the predictionut and target
     """
     reduction = "mean"
     scaling_factor = 1
