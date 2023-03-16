@@ -267,11 +267,16 @@ Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 ## Deployment
 
-You can deploy models trained with GaNDLF into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to Singularity format). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
+You can deploy models trained with GaNDLF into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF.
+Currently, Docker images are supported (which can be converted to Singularity format).
+These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/).
+This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
-The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
+The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration.
+This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
-To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
+To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images.
+This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
 python gandlf_deploy \
@@ -297,19 +302,20 @@ Run the following command to list your images and ensure GaNDLF is present:
 ```bash
 docker image ls
 ```
-
 You can invoke "docker run" with the appropriate tag to run GaNDLF:
 ```bash
 docker run -it --rm --name gandlf cbica/gandlf:latest-cpu [gandlf command and parameters go here!]
 ```
+Remember that arguments/options for *Docker itself* go *before* the image tag, while the command and arguments for GaNDLF go *after* the image tag.
+For more details and options, see the [Docker run documentation](https://docs.docker.com/engine/reference/commandline/run/).
 
-Remember that arguments/options for *Docker itself* go *before* the image tag, while the command and arguments for GaNDLF go *after* the image tag. For more details and options, see the [Docker run documentation](https://docs.docker.com/engine/reference/commandline/run/).
-
-However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons. To fix this, we need to use mounts. 
+However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons.
+To fix this, we need to use mounts. 
 
 ### Mounting Input and Output
 
-The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and folders. Generally, it is useful to mount at least input folder (as readonly) and an output folder.
+The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and folders.
+Generally, it is useful to mount at least input folder (as readonly) and an output folder.
 See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
 
 For example, you might run:
@@ -317,14 +323,16 @@ For example, you might run:
 docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu [command and args go here]
 ```
 
-Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine. So you will need to give paths relative to the mount point *destination*.
-Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
+Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine.
+So you will need to give paths relative to the mount point *destination*.
+Additionally, any paths used internally by GaNDLF will refer to locations inside the container.
+This means that data CSVs produced by the gandlf_constructCSV script will need to be made from the container and with input in the same locations. Expanding on our last example:
 
 ```bash
 docker run -it --rm --name dataprep --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu gandlf_constructCSV --inputDir /input/data --outputFile /output/data.csv --channelsID _t1.nii.gz --labelID _seg.nii.gz
 ```
-
-The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a ValueToPredict column). Then, we can reference the same file when running again:
+The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a ValueToPredict column).
+Then, we can reference the same file when running again:
 
 ```bash
 docker run -it --rm --name training --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu gandlf_run --train True --config /input/config.yml --inputdata /output/data.csv --modeldir /output/model
