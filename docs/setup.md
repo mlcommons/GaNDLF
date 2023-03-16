@@ -29,9 +29,11 @@ conda create -n venv_gandlf python=3.8 -y
 conda activate venv_gandlf
 ### PyTorch installation - https://pytorch.org/get-started/locally
 ## CUDA 11.6
-# pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+# pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+## ROCm
+# pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
 ## CPU-only
-# python3.8 -m pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+# pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
 pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate optimized models for inference
 pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
 pip install -e .
