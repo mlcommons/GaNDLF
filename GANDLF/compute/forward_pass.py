@@ -368,11 +368,29 @@ def validate_network(
                             img_for_metadata.GetSpacing(),
                             interpolator=sitk.sitkNearestNeighbor,
                         )
+                    # Create the subject directory if it doesn't exist in the
+                    # current_output_dir directory
+                    os.makedirs(
+                        os.path.join(current_output_dir, "testing"),
+                        exist_ok=True,
+                    )
+                    os.makedirs(
+                        os.path.join(
+                            current_output_dir, "testing", subject["subject_id"][0]
+                        ),
+                        exist_ok=True,
+                    )
+
+                    path_to_save = os.path.join(
+                        current_output_dir,
+                        "testing",
+                        subject["subject_id"][0],
+                        subject["subject_id"][0] + "_seg" + ext,
+                    )
+
                     sitk.WriteImage(
                         result_image,
-                        os.path.join(
-                            current_output_dir, subject["subject_id"][0] + "_seg" + ext
-                        ),
+                        path_to_save,
                     )
             else:
                 # final regression output
