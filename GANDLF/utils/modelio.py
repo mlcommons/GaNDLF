@@ -36,10 +36,11 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
         path (str): The path to save the model dictionary to.
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
-    num_channel = params["model"]["num_channels"]
-    model_dimension = params["model"]["dimension"]
-    ov_output_data_type = params["model"].get("data_type", "FP32")
-    input_shape = params["patch_size"]
+    # check for incompatible topologies and disable onnx export
+    if params["model"]["architecture"] in ["sdnet", "brain_age"]:
+        onnx_export = False
+    elif "onnx_export" in params["model"] and not (params["model"]["onnx_export"]):
+        onnx_export = False
 
     if not (onnx_export):
         if "onnx_print" not in params:
@@ -48,6 +49,11 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
         return
     else:
         try:
+            print("Optimizing best model.")
+            num_channel = params["model"]["num_channels"]
+            model_dimension = params["model"]["dimension"]
+            ov_output_data_type = params["model"].get("data_type", "FP32")
+            input_shape = params["patch_size"]
             onnx_path = path
             if not (onnx_path.endswith(".onnx")):
                 onnx_path = onnx_path.replace("pth.tar", "onnx")
