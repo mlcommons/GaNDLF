@@ -1,5 +1,4 @@
-# NOTE: ROCm is NOT supported by PyTorch LTS (1.8.2)
-FROM rocm/pytorch:rocm4.5.2_ubuntu18.04_py3.8_pytorch_1.10.0
+FROM rocm/pytorch:rocm5.2.3_ubuntu20.04_py3.7_pytorch_1.12.1
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
