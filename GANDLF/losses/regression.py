@@ -143,7 +143,7 @@ def L1_loss(prediction, target, params):
     Returns:
         loss (torch.Tensor): The computed L1 loss.
     """
-    loss = 0
+    acc_mse_loss = 0
 
     if prediction.shape[0] == 1:
         if params is not None:
