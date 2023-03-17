@@ -4,8 +4,7 @@ from pathlib import Path
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.parseConfig import parseConfig
-from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV
-
+from GANDLF.utils import populate_header_in_parameters, parseTrainingCSV, parseTestingCSV
 
 def main_run(
     data_csv, config_file, model_dir, train_mode, device, resume, reset, output_dir=None
@@ -101,6 +100,9 @@ def main_run(
                 reset=reset,
             )
         else:
+            data_full, headers = parseTestingCSV(
+                file_data_full, parameters["output_dir"]
+            )
             InferenceManager(
                 dataframe=data_full,
                 modelDir=model_dir,
