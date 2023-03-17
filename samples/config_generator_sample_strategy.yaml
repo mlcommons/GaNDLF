@@ -1,0 +1,8 @@
+model:
+  {
+    architecture: [unet, resunet],
+    base_filters: [16, 32],
+  }
+patch_size: [[32,32,32], [64,64,64], [128,128,128]]
+learning_rate: [0.1, 0.01]
+# this does not work for fine-tuned preprocessing and augmentation (where different algorithms are customized using 2nd level dictionaries)
