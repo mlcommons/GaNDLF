@@ -93,7 +93,7 @@ jobs:
         flags: unittests
 
     # openfl tests start here
-    - name: Install and run OpenFL tests
+    - name: Run OpenFL tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         echo "Installing OpenFL"
