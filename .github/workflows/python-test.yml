@@ -91,3 +91,15 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         flags: unittests
+
+    # openfl tests start here
+    - name: Install and run OpenFL tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+      run: |
+        echo "Installing OpenFL"
+        git clone https://github.com/securefederatedai/openfl.git
+        cd openfl
+        git fetch --tags
+        git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+        pip install -e .
+
