@@ -131,7 +131,7 @@ def L1(prediction, target, reduction="mean", scaling_factor=1):
 def L1_loss(prediction, target, params):
     """
     Computes the L1 loss between the predictionut tensor and the target tensor.
-    
+
     Parameters:
         prediction (torch.Tensor): The predictionut tensor.
         target (torch.Tensor): The target tensor.
@@ -212,9 +212,9 @@ def MSE_loss(prediction, target, params=None):
         The target tensor
     params : dict, optional
         A dictionary of parameters. Default: None.
-        If params is not None and contains the key "loss_function", the value of 
-        "loss_function" is expected to be a dictionary with a key "mse", which 
-        can contain the key "reduction" and/or "scaling_factor". If "reduction" is 
+        If params is not None and contains the key "loss_function", the value of
+        "loss_function" is expected to be a dictionary with a key "mse", which
+        can contain the key "reduction" and/or "scaling_factor". If "reduction" is
         not specified, the default is 'mean'. If "scaling_factor" is not specified,
         the default is 1.
     
