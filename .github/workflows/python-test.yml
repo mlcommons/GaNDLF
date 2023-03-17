@@ -109,4 +109,7 @@ jobs:
         head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/openfl/openfl/seg_test_val.csv
         tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/openfl/openfl/seg_test_val.csv
         head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/openfl/openfl/seg_test_train.csv
+        cd /home/runner/work/openfl/openfl
+        ls -lt
+        python -m tests.github.test_fets_challenge --template fets_challenge_seg_test --fed_workspace aggregator --col1 col1 --col2 col2 --rounds-to-train 1
 
