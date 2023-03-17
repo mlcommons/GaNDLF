@@ -7,9 +7,9 @@ from GANDLF.cli import copyrightMessage, post_training_model_optimization
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="GANDLF_Deploy",
+        prog="GANDLF_OptimizeModel",
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Generate frozen/deployable versions of trained GaNDLF models.\n\n"
+        description="Generate optimized versions of trained GaNDLF models.\n\n"
         + copyrightMessage,
     )
 
