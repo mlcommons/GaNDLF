@@ -25,6 +25,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Deployment](#deployment)
 - [Running with Docker](#running-with-docker)
   - [Mounting Input and Output](#mounting-input-and-output)
+    - [Special Case for Training](#special-case-for-training)
   - [Enabling GPUs](#enabling-gpus)
 - [MLCubes](#mlcubes)
 
@@ -343,6 +344,21 @@ docker run -it --rm --name training --volume /home/researcher/gandlf_input:/inpu
 ```
 
 [Back To Top &uarr;](#table-of-contents)
+
+#### Special Case for Training
+
+In the case where you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Because you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward.
+ 
+For example, you can fine-tune a model on your own data using the following commands as a starting point:
+```bash
+# Run training on your new data
+docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf_run -m /embedded_model/ [...] # Do not include "--rm" option!
+# Copy the finetuned model out of the container, to a location on the host
+docker cp gandlf_training:/embedded_model /home/researcher/extracted_model
+# Now you can remove the container to clean up
+docker rm -f gandlf_training
+```
+ 
 
 ### Enabling GPUs
 
