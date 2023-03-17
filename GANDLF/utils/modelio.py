@@ -36,14 +36,14 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
         path (str): The path to save the model dictionary to.
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
+    onnx_export = params["model"].get("onnx_export", onnx_export)
     # check for incompatible topologies and disable onnx export
     # customized imagenet_vgg no longer supported for onnx export: https://github.com/pytorch/pytorch/issues/42653
-    if (params["model"]["architecture"] in ["sdnet", "brain_age"]) or (
-        "imagenet_vgg" in params["model"]["architecture"]
-    ):
-        onnx_export = False
-    elif "onnx_export" in params["model"] and not (params["model"]["onnx_export"]):
-        onnx_export = False
+    if onnx_export:
+        if (params["model"]["architecture"] in ["sdnet", "brain_age"]) or (
+            "imagenet_vgg" in params["model"]["architecture"]
+        ):
+            onnx_export = False
 
     if not (onnx_export):
         if "onnx_print" not in params:
