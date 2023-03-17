@@ -69,9 +69,10 @@ def MCD(predicted, target, num_class, weights=None, ignore_class=None, loss_type
         if loss_type == 1:
             currentDice = 1 - currentDice  # subtract from 1 because this is a loss
         elif loss_type == 2:
+            # negative because we want positive losses
             currentDice = -torch.log(
                 currentDice + torch.finfo(torch.float32).eps
-            )  # negative because we want positive losses
+            )  
 
         if weights is not None:
             currentDice = currentDice * weights[i]  # multiply by weight
