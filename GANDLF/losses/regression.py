@@ -176,7 +176,7 @@ def L1_loss(prediction, target, params):
     else:
         acc_mse_loss /= prediction.shape[1]
 
-    return loss
+    return acc_mse_loss
 
 
 def MSE(prediction, target, reduction="mean", scaling_factor=1):
