@@ -37,7 +37,9 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
     # check for incompatible topologies and disable onnx export
-    if params["model"]["architecture"] in ["sdnet", "brain_age"]:
+    if (params["model"]["architecture"] in ["sdnet", "brain_age"]) or (
+        "imagenet_vgg" in params["model"]["architecture"]
+    ):
         onnx_export = False
     elif "onnx_export" in params["model"] and not (params["model"]["onnx_export"]):
         onnx_export = False
