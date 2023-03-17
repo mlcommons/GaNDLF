@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import ast
-import os
 from GANDLF.cli import copyrightMessage, post_training_model_optimization
 
 
