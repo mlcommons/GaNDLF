@@ -17,7 +17,6 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmen
 
 ## Table of Contents
 
-- [Getting Started](./getting_started.md)
 - [Application Setup](./setup.md)
 - [Usage](./usage.md)
   - [Customize the training and inference](./customize.md)
