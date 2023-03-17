@@ -1,4 +1,5 @@
 ## 0.0.16
+- Added documentation for all loss functions and updated guideline
 - Added a script "gandlf_deploy", allowing deployment of models into MLCubes (currently requires Docker)
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
