@@ -23,10 +23,7 @@ def CEL(prediction, target, params):
     if params.get("weights") is not None:
         # Check that the number of classes matches the number of weights
         num_classes = len(params["weights"])
-        if prediction.shape[-1] != num_classes:
-            raise ValueError(
-                f"Number of classes {num_classes} does not match prediction shape {prediction.shape[-1]}"
-            )
+        assert prediction.shape[-1] == num_classes, f"Number of classes {num_classes} does not match prediction shape {prediction.shape[-1]}"
 
         weights = torch.FloatTensor(list(params["weights"].values()))
         weights = weights.float().to(target.device)
