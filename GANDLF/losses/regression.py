@@ -203,7 +203,7 @@ def MSE(prediction, target, reduction="mean", scaling_factor=1):
 def MSE_loss(prediction, target, params=None):
     """
     Compute the mean squared error loss for the predictionut and target
-    
+
     Parameters
     ----------
     prediction : torch.Tensor
@@ -217,7 +217,7 @@ def MSE_loss(prediction, target, params=None):
         can contain the key "reduction" and/or "scaling_factor". If "reduction" is
         not specified, the default is 'mean'. If "scaling_factor" is not specified,
         the default is 1.
-    
+
     Returns
     -------
     acc_mse_loss : torch.Tensor
