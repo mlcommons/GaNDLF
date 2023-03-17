@@ -136,12 +136,9 @@ def tversky_loss(predicted, target, alpha=0.5, beta=0.5, smooth=1e-7):
 
     """
     # Move this part later to parameter parsing, no need to check every time
-    if not 0 <= alpha <= 1:
-        raise ValueError(f"Invalid alpha value: {alpha}")
-    if not 0 <= beta <= 1:
-        raise ValueError(f"Invalid beta value: {beta}")
-    if not 0 <= alpha + beta <= 1:
-        raise ValueError(f"Invalid alpha and beta values: {alpha}, {beta}")
+    assert 0 <= alpha <= 1, f"Invalid alpha value: {alpha}"
+    assert 0 <= beta <= 1, f"Invalid beta value: {beta}"
+    assert 0 <= alpha + beta <= 1, f"Invalid alpha and beta values: {alpha}, {beta}"
 
     predicted_flat = predicted.contiguous().view(-1)
     target_flat = target.contiguous().view(-1)
