@@ -62,13 +62,13 @@ def CE(prediction, target):
     Returns:
         torch.Tensor: Binary cross entropy loss tensor.
     """
-    if not torch.all(target.byte() == target):
-        raise ValueError("Target tensor must be binary (0 or 1)")
+    assert torch.all(target.byte() == target), "Target tensor must be binary (0 or 1)"
 
     loss = torch.nn.BCELoss()
     loss_val = loss(
         prediction.contiguous().view(-1).float(), target.contiguous().view(-1).float()
     )
+
     return loss_val
 
 
