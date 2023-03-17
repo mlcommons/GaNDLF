@@ -145,6 +145,7 @@ This assumes the data is in the following format:
 
 Notes:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
+- During inference if label is not present, remove header `Label`, `ValueToPredict` from the CSV file header.   
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 
 [Back To Top &uarr;](#table-of-contents)
