@@ -22,6 +22,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
+- [Post-Training Model Optimization](#post-training-model-optimization)
 - [Deployment](#deployment)
 - [Examples](#examples)
 - [Running with Docker](#running-with-docker)
@@ -262,6 +263,22 @@ The default behavior is "auto" which chooses the last convolutional layer.
 All generated attention maps can be found in the experiment output_dir.
 Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
+
+[Back To Top &uarr;](#table-of-contents)
+
+
+## Post-Training Model Optimization
+
+If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimize` script to do so. The usage is as follows:
+
+```bash
+# continue from previous shell
+python gandlf_optimizeModel \
+  -m /path/to/trained/modelName_best.pth.tar \  # directory which contains testing and validation models
+  -c ./experiment_0/config_used_to_train.yaml  # the config file used to train the model
+```
+
+The optimized model will get generated in the model directory, with the name `modelName_optimized.onnx`.
 
 [Back To Top &uarr;](#table-of-contents)
 
