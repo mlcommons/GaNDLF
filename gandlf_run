@@ -125,14 +125,6 @@ if __name__ == "__main__":
     if not (os.path.isfile(args.config)):
         sys.exit("ERROR: Configuration file not found!")
 
-    from testing.test_full import (
-        test_train_inference_optimize_classification_rad_3d,
-        test_train_regression_brainage_rad_2d,
-    )
-
-    # test_train_regression_brainage_rad_2d("cuda")
-    test_train_inference_optimize_classification_rad_3d("cuda")
-
     try:
         main_run(
             args.inputdata,
