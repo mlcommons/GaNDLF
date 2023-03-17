@@ -136,7 +136,7 @@ def L1_loss(prediction, target, params):
         prediction (torch.Tensor): The predictionut tensor.
         target (torch.Tensor): The target tensor.
         params (dict, optional): A dictionary of hyperparameters. Defaults to None.
-        
+
     Returns:
         loss (torch.Tensor): The computed L1 loss.
     """
