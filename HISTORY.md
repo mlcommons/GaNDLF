@@ -1,5 +1,4 @@
 ## 0.0.16
-- Added documentation for all loss functions and updated guideline
 - Added a script "gandlf_deploy", allowing deployment of models into MLCubes (currently requires Docker)
 - ImageNet pre-trained models for UNet with variable encoders is now available
 - ACS/Soft conversion is available for ImageNet-pretrained UNet
@@ -9,6 +8,7 @@
 - Added ability to save `initial` and `latest` models in addition to `best`
 - Added ability to specify testing data csv in main cli
 - Normalized surface dice has been added
+- Added documentation for all loss functions and updated guideline
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
