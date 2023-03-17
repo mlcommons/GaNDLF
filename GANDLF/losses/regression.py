@@ -97,7 +97,7 @@ def CCE_Generic(prediction, target, params, CCE_Type):
 
     # Take the mean of the loss if weights are not provided.
     if params["weights"] is None:
-        total_loss = torch.mean(total_loss)
+        acc_ce_loss = torch.mean(acc_ce_loss)
 
     return acc_ce_loss
 
