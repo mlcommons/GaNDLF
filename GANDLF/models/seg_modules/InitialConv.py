@@ -69,7 +69,7 @@ class InitialConv(nn.Module):
 
         self.act = act(**act_kwargs)
 
-        if self.dropout is not None:
+        if dropout is not None:
             self.dropout = dropout(**dropout_kwargs)
 
     def forward(self, x):
