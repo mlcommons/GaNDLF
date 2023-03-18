@@ -45,9 +45,11 @@ class IncDownsamplingModule(nn.Module):
 
         nn.Module.__init__(self)
 
+        self.leakiness = leakiness
+        self.lrelu_inplace = lrelu_inplace
         # Instantiate instance normalization and 1x1 convolution layers
         self.inst_norm = InstanceNorm(
-            output_channels, affine=self.inst_norm_affine, track_running_stats=True
+            output_channels, affine=inst_norm_affine, track_running_stats=True
         )
         self.down = Conv(
             input_channels,
@@ -55,7 +57,7 @@ class IncDownsamplingModule(nn.Module):
             kernel_size=kernel_size,
             stride=2,
             padding=0,
-            bias=self.conv_bias,
+            bias=conv_bias,
         )
 
     def forward(self, x):
