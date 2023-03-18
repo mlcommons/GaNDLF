@@ -68,6 +68,7 @@ class InitialConv(nn.Module):
         self.in_1 = norm(output_channels, **norm_kwargs)
 
         self.act = act(**act_kwargs)
+        self.residual = network_kwargs["res"]
 
         if dropout is not None:
             self.dropout = dropout(**dropout_kwargs)
