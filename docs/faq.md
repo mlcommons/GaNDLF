@@ -6,6 +6,7 @@ This page contains answers to frequently asked questions about GaNDLF.
   - [Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?](#why-do-i-get-the-error-pkg_resourcesdistributionnotfound-the-gandlf-distribution-was-not-found)
   - [Why is GaNDLF not working?](#why-is-gandlf-not-working)
   - [Which parts of a GaNDLF configuration are customizable?](#which-parts-of-a-gandlf-configuration-are-customizable)
+  - [What do I do if one of the sample configurations did not give good results on my data?](#what-do-i-do-if-one-of-the-sample-configurations-did-not-give-good-results-on-my-data)
   - [Can I run GaNDLF on a high performance computing (HPC) cluster?](#can-i-run-gandlf-on-a-high-performance-computing-hpc-cluster)
   - [How can I track the per-epoch training performance?](#how-can-i-track-the-per-epoch-training-performance)
   - [How can I resume training from a previous checkpoint?](#how-can-i-resume-training-from-a-previous-checkpoint)
@@ -35,6 +36,10 @@ Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has bee
 Virtually all of it! For more details, please see the [usage](https://mlcommons.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/mlcommons/GaNDLF/tree/master/samples). All available options are documented in the [config_all_options.yaml file](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml). You can find more details in [this page](https://mlcommons.github.io/GaNDLF/customize.html).
 
 [Back To Top &uarr;](#table-of-contents)
+
+### What do I do if one of the sample configurations did not give good results on my data?
+
+The samples configurations are meant to be a starting point for your own configuration. You will need to modify the configuration to suit your data. Please see the [usage](https://mlcommons.github.io/GaNDLF/usage) guide for more information. For an easier way to perform hyperparameter tuning, take a look at our [configurations generator](https://mlcommons.github.io/GaNDLF/usage#running-multiple-experiments).
 
 ### Can I run GaNDLF on a high performance computing (HPC) cluster?
 
