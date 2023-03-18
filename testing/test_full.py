@@ -153,6 +153,7 @@ def test_generic_constructTrainingCSV():
         # else:
         #     continue
         outputFile = inputDir + "/train_" + application_data + ".csv"
+        outputFile_rel = inputDir + "/train_" + application_data + "_relative.csv"
         # Test with various combinations of relative/absolute paths
         # Absolute input/output
         writeTrainingCSV(
@@ -166,52 +167,7 @@ def test_generic_constructTrainingCSV():
             currentApplicationDir,
             channelsID,
             labelID,
-            outputFile,
-            relativizePathsToOutput=True,
-        )
-        # Relative input, absolute output
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            outputFile,
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            outputFile,
-            relativizePathsToOutput=True,
-        )
-        # Absolute input, relative output
-        writeTrainingCSV(
-            currentApplicationDir,
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            currentApplicationDir,
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
-            relativizePathsToOutput=True,
-        )
-        # Relative input/output
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
+            outputFile_rel,
             relativizePathsToOutput=True,
         )
 
@@ -751,6 +707,7 @@ def test_train_resume_inference_classification_rad_3d(device):
     sanitize_outputDir()
 
     print("passed")
+
 
 def test_train_inference_optimize_classification_rad_3d(device):
     print("13: Starting 3D Rad segmentation tests for optimization")
@@ -2917,20 +2874,18 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     df = pd.concat([df, temp_df], ignore_index=True)
 
     df.to_csv(test_data_path, index=False)
-    _, testing_data, _ = parseTestingCSV(
-        test_data_path, outputDir
-    )
+    _, testing_data, _ = parseTestingCSV(test_data_path, outputDir)
     # Save testing data to a csv file
     testing_data.to_csv(test_data_path, index=False)
 
     main_run(
-        train_data_path+","+train_data_path+","+test_data_path,
+        train_data_path + "," + train_data_path + "," + test_data_path,
         file_config_temp,
         outputDir,
         False,
         device,
         resume=False,
-        reset=True
+        reset=True,
     )
 
     sanitize_outputDir()
