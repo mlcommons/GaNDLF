@@ -38,7 +38,7 @@ class MSDNet(ModelBase):
         for i in range(num_layers):
             s = i % 10 + 1
             self.layer_list += add_conv_block(
-                self.Conv, self.BatchNorm, in_channels=current_in_channels, dilate=s
+                self.Conv, self.BatchNorm, in_channels=current_in_channels, dilation=s
             )
             current_in_channels += 1
 
