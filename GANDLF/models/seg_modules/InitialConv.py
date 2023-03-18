@@ -67,7 +67,7 @@ class InitialConv(nn.Module):
         self.in_0 = norm(output_channels, **norm_kwargs)
         self.in_1 = norm(output_channels, **norm_kwargs)
 
-        self.act = self.act(**act_kwargs)
+        self.act = act(**act_kwargs)
 
         if self.dropout is not None:
             self.dropout = dropout(**dropout_kwargs)
