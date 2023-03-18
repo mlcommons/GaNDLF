@@ -25,14 +25,12 @@ class MSDNet(ModelBase):
             nn.init.kaiming_normal_(m, m.weight.data)
 
     def __init__(
-        self,
-        parameters: dict,
-        num_layers=4,
+        self, parameters: dict, num_layers=4,
     ):
         super(MSDNet, self).__init__(parameters)
 
         self.layer_list = add_conv_block(
-            self.Conv, self.BatchNorm, in_ch=self.n_channels
+            self.Conv, self.BatchNorm, in_channels=self.n_channels
         )
 
         current_in_channels = 1
@@ -40,7 +38,7 @@ class MSDNet(ModelBase):
         for i in range(num_layers):
             s = i % 10 + 1
             self.layer_list += add_conv_block(
-                self.Conv, self.BatchNorm, in_ch=current_in_channels, dilate=s
+                self.Conv, self.BatchNorm, in_channels=current_in_channels, dilate=s
             )
             current_in_channels += 1
 
@@ -48,8 +46,8 @@ class MSDNet(ModelBase):
         self.layer_list += add_conv_block(
             self.Conv,
             self.BatchNorm,
-            in_ch=current_in_channels + self.n_channels,
-            out_ch=self.n_classes,
+            in_channels=current_in_channels + self.n_channels,
+            out_channels=self.n_classes,
             kernel_size=1,
             last=True,
         )

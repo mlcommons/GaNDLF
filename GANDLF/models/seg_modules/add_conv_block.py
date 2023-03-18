@@ -5,7 +5,13 @@ Add Conv Block for MSDNet
 
 
 def add_conv_block(
-    Conv, BatchNorm, in_channels, out_channels, kernel_size=3, dilation=1, last=False
+    Conv,
+    BatchNorm,
+    in_channels=1,
+    out_channels=1,
+    kernel_size=3,
+    dilation=1,
+    last=False,
 ):
     """
     Adds a convolution block to a neural network. A convolution block consists of a convolutional layer and a batch
