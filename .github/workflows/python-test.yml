@@ -18,6 +18,7 @@ jobs:
     steps:
     - name: Free space
       run: |
+        df -h
         sudo rm -rf /opt/ghc
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
