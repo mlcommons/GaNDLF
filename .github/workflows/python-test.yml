@@ -105,7 +105,7 @@ jobs:
         pip install -e .
         cd ..
         echo "Copying files to appropriate directories"
-        python -c "from testing.test_full import test_generic_constructTrainingCSV; test_generic_constructTrainingCSV()"
+        cp -r testing/data ./openfl
         head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
         tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
         head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_train.csv
