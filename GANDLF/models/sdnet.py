@@ -28,8 +28,8 @@ class Decoder(ModelBase):
             self.layer_list += add_conv_block(
                 self.Conv,
                 self.BatchNorm,
-                in_ch=self.base_filters,
-                out_ch=self.base_filters,
+                in_channels=self.base_filters,
+                out_channels=self.base_filters,
             )
         self.conv = self.Conv(self.base_filters, 1, 3, 1, 1)
         # Add layers to Module List
@@ -98,14 +98,14 @@ class Segmentor(ModelBase):
         self.layer_list = add_conv_block(
             self.Conv,
             self.BatchNorm,
-            in_ch=anatomy_factors,
-            out_ch=self.base_filters * 4,
+            in_channels=anatomy_factors,
+            out_channels=self.base_filters * 4,
         )
         self.layer_list += add_conv_block(
             self.Conv,
             self.BatchNorm,
-            in_ch=self.base_filters * 4,
-            out_ch=self.base_filters * 4,
+            in_channels=self.base_filters * 4,
+            out_channels=self.base_filters * 4,
         )
         self.conv = self.Conv(self.base_filters * 4, self.n_classes, 1, 1, 0)
         # Add layers to Module List

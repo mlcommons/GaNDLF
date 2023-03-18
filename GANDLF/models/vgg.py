@@ -95,12 +95,12 @@ class VGG(ModelBase):
                 layers += [self.MaxPool(kernel_size=2, stride=2)]
             else:
                 # Otherwise, add a convolutional layer with the number of channels
-                conv = self.Conv(input_channels, layer_config, kernel_size=3, padding=1)
+                conv = self.Conv(input_channels, layer, kernel_size=3, padding=1)
                 if self.norm_type in ["batch", "instance"]:
-                    layers += [conv, self.Norm(layer_config), nn.ReLU(inplace=True)]
+                    layers += [conv, self.Norm(layer), nn.ReLU(inplace=True)]
                 else:
                     layers += [conv, nn.ReLU(inplace=True)]
-                input_channels = layer_config
+                input_channels = layer
         return nn.Sequential(*layers)
 
 
