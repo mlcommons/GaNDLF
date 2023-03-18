@@ -2,8 +2,8 @@ This page contains answers to frequently asked questions about GaNDLF.
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
-  - [Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?](#why-do-i-get-the-error-pkg_resourcesdistributionnotfound-the-gandlf-distribution-was-not-found)
   - [Where do I start?](#where-do-i-start)
+  - [Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?](#why-do-i-get-the-error-pkg_resourcesdistributionnotfound-the-gandlf-distribution-was-not-found)
   - [Why is GaNDLF not working?](#why-is-gandlf-not-working)
   - [Which parts of a GaNDLF configuration are customizable?](#which-parts-of-a-gandlf-configuration-are-customizable)
   - [Can I run GaNDLF on a high performance computing (HPC) cluster?](#can-i-run-gandlf-on-a-high-performance-computing-hpc-cluster)
@@ -12,15 +12,15 @@ This page contains answers to frequently asked questions about GaNDLF.
   - [How can I update GaNDLF?](#how-can-i-update-gandlf)
   - [What I have another question?](#what-i-have-another-question)
 
-### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
+### Where do I start?
 
-This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
+The [getting started](https://mlcommons.github.io/GaNDLF/getting_started) page is a good starting point, and provides springboards into appropriate locations in the [usage page](https://mlcommons.github.io/GaNDLF/usage), which is fairly comprehensive. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Where do I start?
+### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
 
-The [usage](https://mlcommons.github.io/GaNDLF/usage) guide is fairly comprehensive and provides a good starting point. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -32,7 +32,7 @@ Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has bee
 
 ### Which parts of a GaNDLF configuration are customizable?
 
-Virtually all of it! For more details, please see the [usage](https://mlcommons.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/mlcommons/GaNDLF/tree/master/samples). All available options are documented in the [config_all_options.yaml file](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml).
+Virtually all of it! For more details, please see the [usage](https://mlcommons.github.io/GaNDLF/usage) guide and our extensive [samples](https://github.com/mlcommons/GaNDLF/tree/master/samples). All available options are documented in the [config_all_options.yaml file](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml). You can find more details in [this page](https://mlcommons.github.io/GaNDLF/customize.html).
 
 [Back To Top &uarr;](#table-of-contents)
 
