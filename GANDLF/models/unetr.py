@@ -8,6 +8,19 @@ import math
 
 
 class _DeconvConvBlock(nn.Sequential):
+    """
+    A block consisting of a transposed convolutional layer, followed by a convolutional layer, 
+    a normalization layer, and a ReLU activation function. The block is defined as a sequential 
+    module in PyTorch, making it easy to stack multiple blocks together.
+    
+    Args:
+        in_feats (int): The number of input features to the block.
+        out_feats (int): The number of output features from the block.
+        Norm (torch.nn.Module): The normalization layer to use (e.g. BatchNorm2d).
+        Conv (torch.nn.Module): The convolutional layer to use (e.g. Conv2d).
+        Deconv (torch.nn.Module): The transposed convolutional layer to use (e.g. ConvTranspose2d).
+    """
+
     def __init__(self, in_feats, out_feats, Norm, Conv, Deconv):
         super().__init__()
 
@@ -39,16 +52,41 @@ class _DeconvConvBlock(nn.Sequential):
         self.add_module("relu", nn.ReLU(inplace=True))
 
     def forward(self, x):
-        x = self.deconv(x)
-        x = self.conv(x)
-        x = self.norm(x)
-        x = self.relu(x)
+        """
+        Forward pass through the block.
+        
+        Args:
+            x (torch.Tensor): The input tensor.
+        
+        Returns:
+            torch.Tensor: The output tensor.
+        """
+        x = self.relu(self.norm(self.conv(self.deconv(x))))
 
         return x
 
 
 class _ConvBlock(nn.Sequential):
+    """
+    A block consisting of a convolutional layer followed by batch normalization and ReLU activation.
+
+    Args:
+        in_feats (int): Number of input features.
+        out_feats (int): Number of output features.
+        Norm (nn.Module): A normalization layer.
+        Conv (nn.Module): A convolutional layer.
+    """
+
     def __init__(self, in_feats, out_feats, Norm, Conv):
+        """
+        Initializes the ConvBlock.
+
+        Args:
+            in_feats (int): Number of input features.
+            out_feats (int): Number of output features.
+            Norm (nn.Module): A normalization layer.
+            Conv (nn.Module): A convolutional layer.
+        """
         super().__init__()
 
         self.add_module(
@@ -67,15 +105,29 @@ class _ConvBlock(nn.Sequential):
         self.add_module("relu", nn.ReLU(inplace=True))
 
     def forward(self, x):
-        x = self.conv(x)
-        x = self.norm(x)
-        x = self.relu(x)
+        """
+        Performs a forward pass of the ConvBlock.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, in_feats, height, width).
+
+        Returns:
+            torch.Tensor: Output tensor of shape (batch_size, out_feats, height, width).
+        """
+        x = self.relu(self.norm(self.conv(x)))
 
         return x
 
 
 class _UpsampleBlock(nn.Sequential):
     def __init__(self, in_feats, Norm, Conv, Deconv):
+        """
+        Args:
+            in_feats (int): Number of input channels.
+            Norm (nn.Module): Normalization layer constructor.
+            Conv (nn.Module): Convolutional layer constructor.
+            Deconv (nn.Module): Transposed convolutional layer constructor.
+        """
         super().__init__()
 
         self.add_module(
@@ -121,13 +173,17 @@ class _UpsampleBlock(nn.Sequential):
         )
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.norm1(x)
-        x = self.relu1(x)
+        """
+        Performs a forward pass through the upsampling block.
 
-        x = self.conv2(x)
-        x = self.norm2(x)
-        x = self.relu2(x)
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, in_feats, height, width).
+
+        Returns:
+            torch.Tensor: Output tensor of shape (batch_size, in_feats//4, 2*height, 2*width).
+        """
+        x = self.relu1(self.norm1(self.conv1(x)))
+        x = self.relu2(self.norm2(self.conv2(x)))
 
         x = self.deconv(x)
 
@@ -135,7 +191,17 @@ class _UpsampleBlock(nn.Sequential):
 
 
 class _MLP(nn.Sequential):
-    def __init__(self, in_feats, out_feats, Norm):
+    """
+    Multi-layer perceptron module that applies two linear transformations with GELU activations.
+
+    Args:
+        in_feats (int): Number of input features.
+        out_feats (int): Number of output features for the first linear transformation.
+        Norm (nn.Module): Normalization module, e.g. LayerNorm.
+
+    """
+
+    def __init__(self, in_feats, out_feats, Norm):  # Which normalization module to use?
         super().__init__()
 
         self.add_module("norm", nn.LayerNorm(in_feats))
@@ -147,17 +213,51 @@ class _MLP(nn.Sequential):
         self.add_module("gelu2", nn.GELU())
 
     def forward(self, x):
-        x = self.norm(x)
-        x = self.linear1(x)
-        x = self.gelu1(x)
+        """
+        Applies the MLP module to the input tensor.
 
-        x = self.linear2(x)
-        x = self.gelu2(x)
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, in_feats).
+
+        Returns:
+            torch.Tensor: The output tensor of shape (batch_size, in_feats).
+        """
+        x = self.gelu1(self.linear1(self.norm(x)))
+        x = self.gelu2(self.linear2(x))
 
         return x
 
 
 class _MSA(nn.Module):
+    """
+    Multi-Head Self-Attention module.
+
+    Args:
+        embed_size (int): The size of the input feature embedding.
+        num_heads (int): The number of attention heads to use.
+
+    Attributes:
+        num_heads (int): The number of attention heads used.
+        query_size (int): The size of each query vector.
+        all_heads (int): The total size of all query, key, and value vectors.
+
+        query (nn.Linear): Linear layer to project input features into query vectors.
+        key (nn.Linear): Linear layer to project input features into key vectors.
+        value (nn.Linear): Linear layer to project input features into value vectors.
+        out (nn.Linear): Linear layer to project concatenated attention head outputs.
+
+        softmax (nn.Softmax): Softmax function used to compute attention weights.
+
+    Methods:
+        reshape(x): Reshapes the input tensor to enable batch-wise matrix multiplication.
+        forward(x): Computes multi-head self-attention on input tensor.
+
+    Example:
+        >>> msa = _MSA(embed_size=256, num_heads=8)
+        >>> x = torch.randn(4, 16, 256)  # batch size = 4, sequence length = 16, embedding size = 256
+        >>> output = msa(x)  # output shape: (4, 16, 256)
+    """
+
     def __init__(self, embed_size, num_heads):
         super().__init__()
 
@@ -174,11 +274,29 @@ class _MSA(nn.Module):
         self.softmax = nn.Softmax(dim=-1)
 
     def reshape(self, x):
+        """
+        Reshapes the input tensor to enable batch-wise matrix multiplication.
+
+        Args:
+            x (torch.Tensor): The input tensor to reshape.
+
+        Returns:
+            The reshaped tensor.
+        """
         x_shape = list(x.size()[:-1]) + [self.num_heads, self.query_size]
         x = x.view(*x_shape)
         return x.permute(0, 2, 1, 3)
 
     def forward(self, x):
+        """
+        Computes multi-head self-attention on input tensor.
+
+        Args:
+            x (torch.Tensor): The input tensor of shape `(batch_size, sequence_length, embed_size)`.
+
+        Returns:
+            The output tensor of shape `(batch_size, sequence_length, embed_size)`.
+        """
         query = self.reshape(self.query(x))
         key = self.reshape(self.key(x))
         value = self.reshape(self.value(x))
@@ -186,6 +304,7 @@ class _MSA(nn.Module):
         attention_weights = self.softmax(
             torch.matmul(query, key.transpose(-1, -2)) / math.sqrt(self.query_size)
         )
+
         self_attention = torch.matmul(attention_weights, value)
         self_attention = self_attention.permute(0, 2, 1, 3).contiguous()
         self_attention = self_attention.view(
@@ -199,11 +318,25 @@ class _MSA(nn.Module):
 
 class _Embedding(nn.Module):
     def __init__(self, img_size, patch_size, in_feats, embed_size, Conv):
+        """
+        A module that creates embeddings from an image tensor.
+
+        Args:
+            img_size (tuple[int]): The size of the input image tensor (H, W, C).
+            patch_size (int): The size of each square patch that the image is divided into.
+            in_feats (int): The number of input channels in the image tensor.
+            embed_size (int): The size of the output embedding vector.
+            Conv (nn.Module): The convolutional module to use for extracting patches.
+        """
         super().__init__()
-        # self.n_patches = int(np.prod(img_size) / (patch_size**3))
+
+        # Calculate the number of patches in the image
         self.n_patches = int(np.prod([i / patch_size for i in img_size]))
 
+        # Create a learnable parameter for the positional embedding
         self.pos_embed = nn.Parameter(torch.zeros(1, self.n_patches, embed_size))
+
+        # Create a convolutional module to extract patches from the input image
         self.patch_embed = Conv(
             in_channels=in_feats,
             out_channels=embed_size,
@@ -212,10 +345,25 @@ class _Embedding(nn.Module):
         )
 
     def forward(self, x):
+        """
+        Forward pass for the _Embedding module.
+
+        Args:
+            x (torch.Tensor): An input image tensor of shape (B, C, H, W).
+
+        Returns:
+            torch.Tensor: An output tensor of shape (B, n_patches, embed_size).
+        """
+        # Extract patches from the input image
         x = self.patch_embed(x)
+
+        # Flatten the patches into a 2D matrix
         x = x.flatten(2)
+
+        # Transpose the matrix so that patches are in the first dimension
         x = x.transpose(-1, -2)
 
+        # Add the positional embedding to the flattened patches
         x = x + self.pos_embed
 
         return x
@@ -223,26 +371,93 @@ class _Embedding(nn.Module):
 
 class _TransformerLayer(nn.Module):
     def __init__(self, img_size, embed_size, num_heads, mlp_dim, Conv, Norm):
+        """
+        A module that implements a single transformer layer.
+
+        Args:
+            img_size (tuple[int]): The size of the input image tensor (H, W, C).
+            embed_size (int): The size of the embedding vector.
+            num_heads (int): The number of heads to use in the multi-head self-attention module.
+            mlp_dim (int): The size of the hidden layer in the MLP.
+            Conv (nn.Module): The convolutional module to use for extracting patches.
+            Norm (nn.Module): The normalization module to use (e.g. LayerNorm).
+        """
         super().__init__()
-        self.norm1 = nn.LayerNorm(embed_size)
+
+        # Create normalization modules and a multi-head self-attention module
+        self.norm1 = Norm(embed_size)
         self.msa = _MSA(embed_size, num_heads)
 
-        self.norm2 = nn.LayerNorm(embed_size)
-        self.mlp = _MLP(embed_size, num_heads, Norm)
+        # Create normalization modules and an MLP
+        self.norm2 = Norm(embed_size)
+        self.mlp = _MLP(embed_size, mlp_dim, Norm)
 
     def forward(self, x):
-        y = self.norm1(x)
-        y = self.msa(y)
+        """
+        Forward pass for the _TransformerLayer module.
+
+        Args:
+            x (torch.Tensor): An input tensor of shape (B, n_patches, embed_size).
+
+        Returns:
+            torch.Tensor: An output tensor of the same shape as the input.
+        """
+        # Normalize the input and apply multi-head self-attention
+        y = self.msa(self.norm1(x))
+
+        # Add the input to the output of the self-attention module
         x = x + y
 
-        y = self.norm2(x)
-        y = self.mlp(y)
+        # Normalize the output of the self
+        y = self.mlp(self.norm2(x))
+
+        # Add the input to the output of the MLP
         x = x + y
 
         return x
 
 
 class _Transformer(nn.Sequential):
+    """
+    A transformer module that consists of an embedding layer followed by a series of transformer layers.
+
+    Parameters:
+        img_size (tuple): The dimensions of the input image (height, width, depth).
+        patch_size (int): The size of the patches to be extracted from the input image.
+        in_feats (int): The number of input features.
+        embed_size (int): The size of the embedding.
+        num_heads (int): The number of attention heads to use in the multi-head attention layer.
+        mlp_dim (int): The size of the hidden layer in the feedforward network.
+        num_layers (int): The number of transformer layers to use.
+        out_layers (list): A list of indices indicating which transformer layers should output their results.
+        Conv (nn.Module): A convolutional module to use for the patch embedding.
+        Norm (nn.Module): A normalization module to use for the transformer layers.
+
+    Attributes:
+        out_layers (list): A list of indices indicating which transformer layers should output their results.
+        num_layers (int): The number of transformer layers to use.
+        embed (_Embedding): The embedding layer.
+        layers (ModuleList): A list of _TransformerLayer objects.
+
+    Methods:
+        forward(x): Processes the input through the transformer and returns the output.
+
+    Example:
+        transformer = _Transformer(
+            img_size=(224, 224, 3),
+            patch_size=16,
+            in_feats=3,
+            embed_size=256,
+            num_heads=8,
+            mlp_dim=2048,
+            num_layers=12,
+            out_layers=[5, 11],
+            Conv=nn.Conv2d,
+            Norm=nn.LayerNorm
+        )
+        output = transformer(input_tensor)
+    """
+
     def __init__(
         self,
         img_size,
@@ -269,9 +484,19 @@ class _Transformer(nn.Sequential):
             self.layers.append(layer)
 
     def forward(self, x):
+        """
+        Processes the input through the transformer and returns the output.
+
+        Parameters:
+            x (tensor): The input tensor.
+
+        Returns:
+            out (list): A list of tensors representing the output of the specified transformer layers.
+        """
         out = []
         x = self.embed(x)
 
+        # Note : Lists are highly inefficient when dealing with tensor operations and must be used carefully
         for i in range(0, self.num_layers):
             x = self.layers[i](x)
             if i in self.out_layers:
@@ -281,7 +506,19 @@ class _Transformer(nn.Sequential):
 
 
 def checkImgSize(img_size, number=4):
-    if all([x >= 2**number for x in img_size]):
+    """
+    Checks if the input image size is greater than or equal to 2^number in each dimension. 
+    If it is, it returns the specified number. Otherwise, it returns the minimum log base 2 
+    of the input image size.
+
+    Args:
+    - img_size (tuple of ints): size of the input image tensor
+    - number (int): a number that the input image size is checked against. Default value is 4.
+
+    Returns:
+    - An integer, either the specified number or the minimum log base 2 of the input image size.
+    """
+    if all([x >= 2 ** number for x in img_size]):
         return number
     else:
         return int(np.min(np.floor(np.log2(img_size))))
@@ -296,9 +533,26 @@ class unetr(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
+        self, parameters: dict,
     ):
+        """
+        Initializes an instance of the `unetr` class.
+
+        Parameters:
+        -----------
+        parameters : dict
+            A dictionary containing the model parameters.
+
+        Raises:
+        -------
+        AssertionError
+            If the input image size is not divisible by the patch size in at least 1 dimension, or if the inner patch size is not smaller than the input image.
+            If the embedding dimension is not divisible by the number of self-attention heads.
+
+        Returns:
+        --------
+        None
+        """
         super(unetr, self).__init__(parameters)
 
         # initialize defaults if not found
@@ -367,7 +621,7 @@ class unetr(ModelBase):
                 "conv0",
                 _DeconvConvBlock(
                     self.embed_size,
-                    32 * 2**self.depth,
+                    32 * 2 ** self.depth,
                     self.Norm,
                     self.Conv,
                     self.ConvTranspose,
@@ -378,7 +632,7 @@ class unetr(ModelBase):
                 tempconvs.add_module(
                     "conv%d" % j,
                     _DeconvConvBlock(
-                        128 * 2**j,
+                        128 * 2 ** j,
                         128 * 2 ** (j - 1),
                         self.Norm,
                         self.Conv,
@@ -399,7 +653,7 @@ class unetr(ModelBase):
         self.upsampling.append(
             self.ConvTranspose(
                 in_channels=self.embed_size,
-                out_channels=32 * 2**self.depth,
+                out_channels=32 * 2 ** self.depth,
                 kernel_size=2,
                 stride=2,
                 padding=0,
