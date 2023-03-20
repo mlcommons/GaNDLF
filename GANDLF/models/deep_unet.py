@@ -32,6 +32,7 @@ class deep_unet(ModelBase):
             + parameters["model"]["architecture"]
         )
 
+        # Define layers of the UNet model
         self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
@@ -185,48 +186,42 @@ class deep_unet(ModelBase):
             sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
-    def forward(self, x):
-        """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+def forward(self, x):
+    """
+    Parameters
+    ----------
+    x : Tensor
+        Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
-        """
-        x1 = self.ins(x)
-        x2 = self.ds_0(x1)
-        x2 = self.en_1(x2)
-        x3 = self.ds_1(x2)
-        x3 = self.en_2(x3)
-        x4 = self.ds_2(x3)
-        x4 = self.en_3(x4)
-        x5 = self.ds_3(x4)
-        x5 = self.en_4(x5)
+    Returns
+    -------
+    x : Tensor
+        Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+    """
 
-        x = self.us_3(x5)
-        xl4 = self.de_3(x, x4)
-        out_3 = self.out_3(xl4)
+    # Encoding path
+    x1 = self.ins(x)
+    x2 = self.ds_0(x1)
+    x3 = self.ds_1(self.en_1(x2))
+    x4 = self.ds_2(self.en_2(x3))
+    x5 = self.ds_3(self.en_3(x4))
 
-        x = self.us_2(xl4)
-        xl3 = self.de_2(x, x3)
-        out_2 = self.out_2(xl3)
+    # Decoding path
+    xl4 = self.de_3(self.us_3(x5), x4)
+    out_3 = self.out_3(xl4)
 
-        x = self.us_1(xl3)
-        xl2 = self.de_1(x, x2)
-        out_1 = self.out_1(xl2)
+    xl3 = self.de_2(self.us_2(xl4), x3)
+    out_2 = self.out_2(xl3)
 
-        x = self.us_0(xl2)
-        xl1 = self.de_0(x, x1)
-        out_0 = self.out_0(xl1)
+    xl2 = self.de_1(self.us_1(xl3), x2)
+    out_1 = self.out_1(xl2)
 
-        # Currently four outputs from the deep network
+    xl1 = self.de_0(self.us_0(xl2), x1)
+    out_0 = self.out_0(xl1)
 
-        return [out_0, out_1, out_2, out_3]
+    # Return output tensors as a list
+    return [out_0, out_1, out_2, out_3]
 
 
 class deep_resunet(deep_unet):
