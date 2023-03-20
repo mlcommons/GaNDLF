@@ -667,6 +667,7 @@ class unetr(ModelBase):
         )
         self.input_conv.add_module("conv2", _ConvBlock(32, 64, self.Norm, self.Conv))
 
+        # Dev note : Need to update the hard-coded number of channel modules here
         self.output_conv = nn.Sequential()
         self.output_conv.add_module("conv1", _ConvBlock(128, 64, self.Norm, self.Conv))
         self.output_conv.add_module("conv2", _ConvBlock(64, 64, self.Norm, self.Conv))
@@ -702,6 +703,7 @@ class unetr(ModelBase):
         torch.Tensor
             The output tensor of shape [batch_size, n_classes, x_dims, y_dims, z_dims].
         """
+
         # Perform transformer encoding of input tensor
         transformer_out = self.transformer(x)
 
@@ -711,6 +713,7 @@ class unetr(ModelBase):
             .transpose(-1, -2)
             .view(-1, self.embed_size, *self.patch_dim)
         )  # z12
+
         for i in range(len(self.convs) - 1, -1, -1):
             # Perform convolution on transformer output and concatenate with previous outputs
             zi = (
@@ -718,8 +721,12 @@ class unetr(ModelBase):
                 .transpose(-1, -2)
                 .view(-1, self.embed_size, *self.patch_dim)
             )
+
             zi = self.convs[i](zi)
+
+            # Perform convolution on concatenated output
             zicat = torch.cat([zi, y], dim=1)
+
             # Perform upsampling on concatenated output
             y = self.upsampling[i](zicat)
 
