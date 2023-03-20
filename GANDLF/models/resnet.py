@@ -150,6 +150,17 @@ class ResNet(ModelBase):
 
 class _BasicBlock(nn.Sequential):
     def __init__(self, num_in_feats, num_out_feats, num_layers, Norm, Conv, num_block):
+        """
+        Defines a basic block of layers with skip connection for ResNet.
+
+        Args:
+        num_in_feats (int): number of input features
+        num_out_feats (int): number of output features
+        num_layers (int): number of layers in the block
+        Norm (nn.Module): normalization module (e.g., BatchNorm)
+        Conv (nn.Module): convolution module (e.g., Conv2d, Conv3d)
+        num_block (int): the index of the block within the network
+        """
         super().__init__()
 
         # iterate through size of block
@@ -168,13 +179,28 @@ class _BasicBlock(nn.Sequential):
 
 
 class _BasicLayer(nn.Sequential):
+    """
+    A basic building block for a ResNet, consisting of two convolutional layers, and optionally a projection layer to match
+    dimensions.
+
+    Args:
+        num_in_feats (int): number of input features
+        num_out_feats (int): number of output features
+        Norm (nn.Module): normalization layer
+        Conv (nn.Module): convolutional layer
+        downsample (bool): whether to downsample input
+    """
+
     def __init__(
         self, num_in_feats, num_out_feats, Norm, Conv, downsample,
     ):
         super().__init__()
 
-        self.sizing = num_out_feats != num_in_feats  # true if size changes
-        if self.sizing:  # add module to project input to correct size
+        # check if size needs to be changed
+        self.sizing = num_out_feats != num_in_feats
+
+        if self.sizing:
+            # add module to project input to correct size
             self.add_module(
                 "project",
                 Conv(
@@ -188,8 +214,7 @@ class _BasicLayer(nn.Sequential):
             )
             self.add_module("projectNorm", Norm(num_out_feats))
 
-        # 3x3 --> 3x3
-
+        # first convolution layer
         self.add_module(
             "conv1",
             Conv(
@@ -204,6 +229,7 @@ class _BasicLayer(nn.Sequential):
         self.add_module("norm1", Norm(num_out_feats))
         self.add_module("relu", nn.ReLU(inplace=True))
 
+        # second convolution layer
         self.add_module(
             "conv2",
             Conv(
@@ -219,16 +245,22 @@ class _BasicLayer(nn.Sequential):
         self.add_module("norm2", Norm(num_out_feats))
 
     def forward(self, x):
+        """
+        Forward pass of a basic layer.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: output tensor
+        """
         identity = x
 
-        out = self.conv1(x)
-        out = self.norm1(out)
-        out = self.relu(out)
+        out = self.relu(self.norm1(self.conv1(x)))
+        out = self.norm2(self.conv2(out))
 
-        out = self.conv2(out)
-        out = self.norm2(out)
-
-        if self.sizing:  # project input to correct output size if needed
+        if self.sizing:
+            # project input to correct output size if needed
             identity = self.project(identity)
             identity = self.projectNorm(identity)
 
@@ -239,25 +271,45 @@ class _BasicLayer(nn.Sequential):
 
 class _BottleNeckBlock(nn.Sequential):
     def __init__(self, num_in_feats, num_out_feats, num_layers, Norm, Conv, num_block):
+        """
+        Initialize a `_BottleNeckBlock` object.
+
+        Args:
+            num_in_feats (int): The number of input features.
+            num_out_feats (int): The number of output features.
+            num_layers (int): The number of layers in the block.
+            Norm (nn.Module): The normalization layer to be used.
+            Conv (nn.Module): The convolutional layer to be used.
+            num_block (int): The index of the current block in the entire network.
+
+        Returns:
+            None
+        """
         super().__init__()
 
-        # iterate through size of block
+        # calculate number of features for the first layer
         if num_block != 0:
             num_feats = 4 * num_in_feats
         else:
             num_feats = num_in_feats
 
+        # iterate through layers in block
         for i_lay in range(0, num_layers):
-            # add basic layer
+            # add bottle neck layer
             layer = _BottleNeckLayer(
                 num_in_feats=num_feats,
                 num_out_feats=num_out_feats,
                 Norm=Norm,
                 Conv=Conv,
-                downsample=(num_block != 0) and (i_lay == 0),
+                downsample=(num_block != 0)
+                and (
+                    i_lay == 0
+                ),  # set downsample flag for the first layer of non-first block
             )
             self.add_module("layer{}".format(i_lay + 1), layer)
-            num_feats = 4 * num_out_feats
+            num_feats = (
+                4 * num_out_feats
+            )  # calculate number of features for the next layer
 
 
 class _BottleNeckLayer(nn.Sequential):
@@ -269,11 +321,23 @@ class _BottleNeckLayer(nn.Sequential):
         Conv,
         downsample,
     ):
+        """
+        Initialize a _BottleNeckLayer.
+
+        Args:
+            num_in_feats (int): number of input features
+            num_out_feats (int): number of output features
+            Norm (nn.Module): normalization module
+            Conv (nn.Module): convolution module
+            downsample (bool): downsample the input
+        """
         super().__init__()
 
-        self.sizing = 4 * num_out_feats != num_in_feats  # true if size changes
+        # Determine whether size of input/output is changing.
+        self.sizing = 4 * num_out_feats != num_in_feats
 
-        if self.sizing:  # add module to project input to correct size
+        # Add a module to project the input to the correct size if needed.
+        if self.sizing:
             self.add_module(
                 "project",
                 Conv(
@@ -287,8 +351,7 @@ class _BottleNeckLayer(nn.Sequential):
             )
             self.add_module("projectNorm", Norm(4 * num_out_feats))
 
-        # 1x1 conv (k) -> 3x3 conv (k) -> 1x1 conv (4*k)
-
+        # Add a 1x1 conv, a 3x3 conv and a 1x1 conv in that order.
         self.add_module(
             "conv1",
             Conv(
@@ -332,37 +395,56 @@ class _BottleNeckLayer(nn.Sequential):
         self.add_module("norm3", Norm(4 * num_out_feats))
 
     def forward(self, x):
+        """
+        Forward pass of a _BottleNeckLayer.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: output tensor
+        """
         identity = x
 
-        out = self.conv1(x)
-        out = self.norm1(out)
-        out = self.relu(out)
+        out = self.relu(self.norm1(self.conv1(x)))
+        out = self.relu(self.norm2(self.conv2(out)))
+        out = self.norm3(self.conv3(out))
 
-        out = self.conv2(out)
-        out = self.norm2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        out = self.norm3(out)
-
-        if self.sizing:  # project input to correct output size if needed
-            identity = self.project(identity)
-            identity = self.projectNorm(identity)
+        # project input to correct output size if needed
+        if self.sizing:
+            identity = self.projectNorm(self.project(identity))
 
         out += identity
         out = self.relu(out)
+
         return out
 
 
 def checkPatchDimensions(patch_size, numlay):
+    """
+    Check that the given patch size is compatible with the number of layers
+    specified.
+
+    Args:
+        patch_size (int or tuple of ints): the patch size
+        numlay (int): the number of layers
+
+    Returns:
+        int: the number of layers minus one if the patch size is incompatible;
+            otherwise, the number of layers
+    """
+    # Convert the patch size to an array if it's an integer
     if isinstance(patch_size, int):
         patch_size_to_check = np.array(patch_size)
     else:
         patch_size_to_check = patch_size
-    # for 2D, don't check divisibility of last dimension
+
+    # If the patch is 2D, don't check divisibility of last dimension
     if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
 
+    # Check that each dimension of the patch size is divisible by 2^(numlay+1) and
+    # is greater than or equal to 2^(numlay+2)
     if all(
         [
             x >= 2 ** (numlay + 2) and x % 2 ** (numlay + 1) == 0
@@ -371,15 +453,25 @@ def checkPatchDimensions(patch_size, numlay):
     ):
         return numlay
     else:
-        # base2 = np.floor(np.log2(patch_size_to_check))
+        # If the patch size is incompatible, compute the base 2 logarithm of
+        # each dimension of the patch size and return the minimum value minus 1
         base2 = np.array([getBase2(x) for x in patch_size_to_check])
-        remain = patch_size_to_check / 2 ** base2  # check that at least 1
+        remain = patch_size_to_check / 2 ** base2
 
         layers = np.where(remain == 1, base2 - 1, base2)
         return int(np.min(layers) - 1)
 
 
 def getBase2(num):
+    """
+    Compute the base 2 logarithm of a number.
+
+    Args:
+        num (int): the number
+
+    Returns:
+        int: the base 2 logarithm of the number
+    """
     base = 0
     while num % 2 == 0:
         num = num / 2
@@ -388,20 +480,65 @@ def getBase2(num):
 
 
 def resnet18(parameters):
+    """
+    Create a ResNet-18 model with the given parameters.
+
+    Args:
+        parameters (Namespace): the parameters for the model
+
+    Returns:
+        ResNet: the ResNet-18 model
+    """
     return ResNet(parameters, _BasicBlock, block_config=(2, 2, 2, 2))
 
 
 def resnet34(parameters):
+    """
+    Create a ResNet-34 model with the given parameters.
+
+    Args:
+        parameters (Namespace): the parameters for the model
+
+    Returns:
+        ResNet: the ResNet-34 model
+    """
     return ResNet(parameters, _BasicBlock, block_config=(3, 4, 6, 3))
 
 
 def resnet50(parameters):
+    """
+    Create a ResNet-50 model with the given parameters.
+
+    Args:
+        parameters (Namespace): the parameters for the model
+
+    Returns:
+        ResNet: the ResNet-50 model
+    """
     return ResNet(parameters, _BottleNeckBlock, block_config=(3, 4, 6, 3))
 
 
 def resnet101(parameters):
+    """
+    Create a ResNet-101 model with the given parameters.
+
+    Args:
+        parameters (Namespace): the parameters for the model
+
+    Returns:
+        ResNet: the ResNet-101 model
+    """
     return ResNet(parameters, _BottleNeckBlock, block_config=(3, 4, 23, 3))
 
 
 def resnet152(parameters):
+    """
+    Create a ResNet-152 model with the given parameters.
+
+    Args:
+        parameters (Namespace): the parameters for the model
+
+    Returns:
+        ResNet: the ResNet-152 model
+    """
     return ResNet(parameters, _BottleNeckBlock, block_config=(3, 8, 36, 3))
