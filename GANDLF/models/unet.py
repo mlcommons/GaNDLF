@@ -192,26 +192,27 @@ class unet(ModelBase):
             Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
+
+        # Encoding path
+
         x1 = self.ins(x)
         x2 = self.ds_0(x1)
-        x2 = self.en_1(x2)
-        x3 = self.ds_1(x2)
-        x3 = self.en_2(x3)
-        x4 = self.ds_2(x3)
-        x4 = self.en_3(x4)
-        x5 = self.ds_3(x4)
-        x5 = self.en_4(x5)
+        x3 = self.ds_1(self.en_1(x2))
+        x4 = self.ds_2(self.en_2(x3))
+        x5 = self.ds_3(self.en_3(x4))
 
-        x = self.us_3(x5)
-        x = self.de_3(x, x4)
-        x = self.us_2(x)
-        x = self.de_2(x, x3)
-        x = self.us_1(x)
-        x = self.de_1(x, x2)
-        x = self.us_0(x)
-        x = self.de_0(x, x1)
-        x = self.out(x)
-        return x
+        # Decoding path
+        xl4 = self.de_3(self.us_3(x5), x4)
+
+        xl3 = self.de_2(self.us_2(xl4), x3)
+
+        xl2 = self.de_1(self.us_1(xl3), x2)
+
+        xl1 = self.de_0(self.us_0(xl2), x1)
+        out = self.out(xl1)
+
+        # Return output tensors
+        return out
 
 
 class resunet(unet):
