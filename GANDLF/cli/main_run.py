@@ -44,9 +44,15 @@ def main_run(
                 assert (
                     parameters == parameters_prev
                 ), "The parameters are not the same as the ones stored in the previous run, please re-check."
-    # Case to be made for both training and testing if output_dir is missing
-    parameters["output_dir"] = model_dir
-    Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
+        parameters["output_dir"] = model_dir
+        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
+
+    # if the output directory is not specified, then use the model directory even for the testing data
+    if output_dir is None:
+        parameters["output_dir"] = model_dir
+    else:
+        parameters["output_dir"] = output_dir
+        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     if "-1" in device:
         device = "cpu"
