@@ -22,8 +22,9 @@ class VGG(ModelBase):
         Initializer function for the VGG model
 
         Args:
-            configuration (dict): A dictionary of configuration parameters for the model.
             parameters (dict) - overall parameters dictionary; parameters specific for DenseNet:
+            configuration (dict): A dictionary of configuration parameters for the model.
+
         """
         super(VGG, self).__init__(parameters)
 

@@ -690,26 +690,29 @@ class unetr(ModelBase):
 
     def forward(self, x):
         """
+        Perform the forward pass of the UNet model.
+
         Parameters
         ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        x : torch.Tensor
+            The input tensor of shape [batch_size, channels, x_dims, y_dims, z_dims].
 
         Returns
         -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
-
+        torch.Tensor
+            The output tensor of shape [batch_size, n_classes, x_dims, y_dims, z_dims].
         """
+        # Perform transformer encoding of input tensor
         transformer_out = self.transformer(x)
 
+        # Perform upsampling on last transformer output and concatenate with previous outputs
         y = self.upsampling[-1](
             transformer_out[-1]
             .transpose(-1, -2)
             .view(-1, self.embed_size, *self.patch_dim)
         )  # z12
-
         for i in range(len(self.convs) - 1, -1, -1):
+            # Perform convolution on transformer output and concatenate with previous outputs
             zi = (
                 transformer_out[i]
                 .transpose(-1, -2)
@@ -717,8 +720,10 @@ class unetr(ModelBase):
             )
             zi = self.convs[i](zi)
             zicat = torch.cat([zi, y], dim=1)
+            # Perform upsampling on concatenated output
             y = self.upsampling[i](zicat)
 
+        # Perform convolution on input tensor and concatenate with final output
         x = self.input_conv(x)
         x = torch.cat([x, y], dim=1)
         x = self.output_conv(x)

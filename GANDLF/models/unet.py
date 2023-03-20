@@ -179,6 +179,8 @@ class unet(ModelBase):
 
     def forward(self, x):
         """
+        Forward pass of the UNet model.
+
         Parameters
         ----------
         x : Tensor
