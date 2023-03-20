@@ -61,8 +61,6 @@ def MCD(predicted, target, num_class, weights=None, ignore_class=None, loss_type
     acc_dice = 0
 
     for i in range(num_class):  # 0 is background
-        if ignore_class is not None and i == ignore_class:
-            continue  # ignore the specified class
 
         currentDice = dice(predicted[:, i, ...], target[:, i, ...])
 
