@@ -30,7 +30,6 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
     Perform post-training optimization and save it to a file.
 
     Args:
-        model_dict (dict): Model dictionary to save.
         model (torch model): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
