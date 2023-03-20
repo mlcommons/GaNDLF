@@ -9,54 +9,60 @@ from .modelBase import ModelBase
 
 class ResNet(ModelBase):
     """
-    Initializer function for the Resnet model
+    A class to define the Resnet model architecture.
 
     Args:
-        configuration (dict): A dictionary of configuration parameters for the model.
-        parameters (dict) - overall parameters dictionary
+        parameters (dict): A dictionary of configuration parameters for the model.
+        blockType (object): The block type to be used in the model.
+        block_config (list): A list of integers, where each integer denotes the number of layers
+        in each block of the model.
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        blockType,  # basic block or bottleneck
-        block_config,
+        self, parameters: dict, blockType, block_config,
     ):
         super(ResNet, self).__init__(parameters)
 
+        # Check the patch size and get the number of allowed layers
         allowedLay = checkPatchDimensions(parameters["patch_size"], len(block_config))
 
+        # Display warning message if patch size is not large enough for desired number of layers
         if allowedLay != len(block_config) and allowedLay >= 1:
             print(
-                "The patch size is not large enough for desired number of layers.",
-                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is in a integer greater than 2.",
+                "The patch size is not large enough for the desired number of layers.",
+                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
                 "Only the first %d layers will run." % allowedLay,
             )
 
+        # Raise an error if the patch size is too small
         elif allowedLay != len(block_config) and allowedLay <= 0:
             sys.exit(
-                "The patch size is not large enough for desired number of layers.",
-                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is in a integer greater than 2.",
+                "The patch size is not large enough for the desired number of layers.",
+                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
             )
 
         block_config = block_config[:allowedLay]
 
-        # check/define defaults
+        # Define defaults if not already defined
         if not ("num_init_features" in parameters):
             parameters["num_init_features"] = 64
+
+        # Set output size based on number of dimensions
         if self.n_dimensions == 2:
             self.output_size = (1, 1)
         elif self.n_dimensions == 3:
             self.output_size = (1, 1, 1)
         else:
             sys.exit("Only 2D or 3D convolutions are supported.")
+
+        # If normalization layer is not defined, use Batch Normalization
         if self.Norm is None:
             sys.stderr.write(
                 "Warning: resnet is not defined without a normalization layer"
             )
             self.Norm = self.BatchNorm
 
-        # first convolution: 7x7 conv stride 2, 2x2 pool stride 2
+        # Define first convolution layer with 7x7 conv stride 2, 2x2 pool stride 2
         self.features = [
             (
                 "conv1",
@@ -73,15 +79,17 @@ class ResNet(ModelBase):
             ("relu1", nn.ReLU(inplace=True)),
             ("pool1", self.MaxPool(kernel_size=3, stride=2, padding=1)),
         ]
+
+        # Add the first convolution layer to the sequential model
         self.features = nn.Sequential(OrderedDict(self.features))
 
         # make conv blocks
         num_features = parameters["num_init_features"]
-        offset = num_features - num_features * 2**-1
+        offset = num_features - num_features * 2 ** -1
         for i, num_lay in enumerate(block_config):
             block = blockType(
                 num_in_feats=int(num_features * 2 ** (i - 1) + offset),
-                num_out_feats=int(num_features * 2**i),
+                num_out_feats=int(num_features * 2 ** i),
                 num_layers=num_lay,
                 Norm=self.Norm,
                 Conv=self.Conv,
@@ -92,9 +100,9 @@ class ResNet(ModelBase):
 
         # final layer, fully connected -> number classes
         if blockType == _BottleNeckBlock:
-            self.classifier = nn.Linear(4 * num_features * 2**i, self.n_classes)
+            self.classifier = nn.Linear(4 * num_features * 2 ** i, self.n_classes)
         else:
-            self.classifier = nn.Linear(num_features * 2**i, self.n_classes)
+            self.classifier = nn.Linear(num_features * 2 ** i, self.n_classes)
 
         # define starting weights
         for m in self.modules():
@@ -109,18 +117,34 @@ class ResNet(ModelBase):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
+        """
+        Defines the computation performed at every forward pass.
+
+        Args:
+            x (tensor): input data
+
+        Returns:
+            tensor: output data
+        """
+        # Pass the input through the features layers
         features = self.features(x)
+
+        # Perform adaptive average pooling
         out = self.AdaptiveAvgPool(self.output_size)(features).view(
             features.size(0), -1
         )
+
+        # Pass the output through the classifier layer
         out = self.classifier(out)
 
+        # Apply the final convolutional layer if it is defined
         if not self.final_convolution_layer is None:
             if self.final_convolution_layer == F.softmax:
                 out = self.final_convolution_layer(out, dim=1)
             else:
                 out = self.final_convolution_layer(out)
 
+        # Return the output
         return out
 
 
@@ -145,12 +169,7 @@ class _BasicBlock(nn.Sequential):
 
 class _BasicLayer(nn.Sequential):
     def __init__(
-        self,
-        num_in_feats,
-        num_out_feats,
-        Norm,
-        Conv,
-        downsample,
+        self, num_in_feats, num_out_feats, Norm, Conv, downsample,
     ):
         super().__init__()
 
@@ -354,7 +373,7 @@ def checkPatchDimensions(patch_size, numlay):
     else:
         # base2 = np.floor(np.log2(patch_size_to_check))
         base2 = np.array([getBase2(x) for x in patch_size_to_check])
-        remain = patch_size_to_check / 2**base2  # check that at least 1
+        remain = patch_size_to_check / 2 ** base2  # check that at least 1
 
         layers = np.where(remain == 1, base2 - 1, base2)
         return int(np.min(layers) - 1)
