@@ -44,8 +44,9 @@ def main_run(
                 assert (
                     parameters == parameters_prev
                 ), "The parameters are not the same as the ones stored in the previous run, please re-check."
-        parameters["output_dir"] = model_dir
-        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
+    # Case to be made for both training and testing if output_dir is missing
+    parameters["output_dir"] = model_dir
+    Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     if "-1" in device:
         device = "cpu"
@@ -100,7 +101,7 @@ def main_run(
                 reset=reset,
             )
         else:
-            data_full, headers = parseTestingCSV(
+            _, data_full, headers = parseTestingCSV(
                 file_data_full, parameters["output_dir"]
             )
             InferenceManager(
