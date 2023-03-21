@@ -29,6 +29,7 @@ from GANDLF.cli import (
     config_generator,
     run_deployment,
     recover_config,
+    post_training_model_optimization,
 )
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
@@ -462,6 +463,7 @@ def test_train_regression_brainage_rad_2d(device):
     parameters["model"]["architecture"] = "brain_age"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
+    parameters_temp = copy.deepcopy(parameters)
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -472,6 +474,13 @@ def test_train_regression_brainage_rad_2d(device):
         resume=False,
         reset=True,
     )
+
+    file_config_temp = get_temp_config_path()
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_temp, file)
+    model_path = os.path.join(outputDir, "brain_age_best.pth.tar")
+    optimization_result = post_training_model_optimization(model_path, file_config_temp)
+    assert optimization_result == False, "Optimization should fail"
 
     sanitize_outputDir()
 
@@ -725,8 +734,9 @@ def test_train_inference_optimize_classification_rad_3d(device):
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     parameters["model"]["architecture"] = all_models_regression[0]
-    parameters["model"]["onnx_export"] = True
+    parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
+    parameters_temp = copy.deepcopy(parameters)
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -736,6 +746,14 @@ def test_train_inference_optimize_classification_rad_3d(device):
         resume=False,
         reset=True,
     )
+
+    file_config_temp = get_temp_config_path()
+    parameters_temp["model"]["onnx_export"] = True
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters_temp, file)
+    model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
+    optimization_result = post_training_model_optimization(model_path, file_config_temp)
+    assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
     for model_type in all_model_type:
