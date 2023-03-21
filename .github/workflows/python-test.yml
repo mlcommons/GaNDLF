@@ -97,8 +97,10 @@ jobs:
     - name: Run OpenFL tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        echo "Removing mlcube_docker because of jinja2 version conflict"
+        echo "Removing mlcube-related dependencies because of jinja2 version conflict"
         pip uninstall mlcube mlcube_docker cookiecutter -y
+        echo "Removing onnx because of protobuf version conflict"
+        pip uninstall onnx -y
         echo "Installing OpenFL"
         git clone https://github.com/securefederatedai/openfl.git
         cd openfl
