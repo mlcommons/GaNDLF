@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Implementation of UNet
+Implementation of UNet with deep supervision and residual connections
 """
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
