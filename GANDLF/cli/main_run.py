@@ -48,11 +48,11 @@ def main_run(
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # if the output directory is not specified, then use the model directory even for the testing data
+    # default behavior
+    parameters["output_dir"] = output_dir
     if output_dir is None:
         parameters["output_dir"] = model_dir
-    else:
-        parameters["output_dir"] = output_dir
-        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
+    Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     if "-1" in device:
         device = "cpu"
