@@ -15,6 +15,18 @@ from .unetr import _Transformer
 
 
 class _DecoderCUP(nn.Sequential):
+    """
+    Decoder module used in the U-Net architecture for upsampling the encoded feature maps.
+    
+    Args:
+    - in_feats (int): Number of input channels.
+    - out_feats (int): Number of output channels.
+    - Norm (nn.Module): Normalization layer to be applied after convolution.
+    - Conv (nn.Module): Convolutional layer used in the decoder.
+    - Upsample (nn.Module): Upsampling layer used to increase the spatial resolution of the feature maps.
+
+    """
+
     def __init__(self, in_feats, out_feats, Norm, Conv, Upsample):
         super().__init__()
 
@@ -32,11 +44,27 @@ class _DecoderCUP(nn.Sequential):
         self.upsample = Upsample
 
     def forward(self, x1, x2):
+        """
+        Forward pass of the decoder module.
+        
+        Args:
+        - x1 (torch.Tensor):
+            Tensor with shape (batch_size, in_feats, H, W),
+            where H and W are the height and width of the input tensor.
+        - x2 (torch.Tensor):
+            Tensor with shape (batch_size, out_feats, 2*H, 2*W),
+            where H and W are the height and width of the input tensor.
+        
+        Returns:
+        - x (torch.Tensor):
+            Tensor with shape (batch_size, out_feats, 2*H, 2*W),
+            where H and W are the height and width of the input tensor.
+        """
         if x2 is not None:
             x1 = torch.cat([x1, x2], dim=1)
-        x = self.conv(x1)
-        x = self.norm(x)
-        x = self.relu(x)
+
+        x = self.relu(self.norm(self.conv(x1)))
+
         x = self.upsample(x)
 
         return x
@@ -44,10 +72,42 @@ class _DecoderCUP(nn.Sequential):
 
 class transunet(ModelBase):
     """
-    This is the TransUNet architecture : https://doi.org/10.48550/arXiv.2102.04306. The 'residualConnections' flag controls residual connections, the
-    Downsampling, Encoding, Decoding modules are defined in the seg_modules file. These smaller modules are basically defined by 2 parameters, the input
-    channels (filters) and the output channels (filters), and some other hyperparameters, which remain constant all the modules. For more details on the
-    smaller modules please have a look at the seg_modules file.
+    transunet architecture: https://doi.org/10.48550/arXiv.2102.04306
+
+    This class implements the TransUNet model for medical image segmentation tasks.
+    The TransUNet architecture consists of an encoder-decoder structure, including downsampling,
+    encoding, and decoding modules. The 'residualConnections' flag controls residual connections.
+    The Downsampling, Encoding, and Decoding modules are defined in the seg_modules file.
+
+    Parameters
+    ----------
+    parameters: dict
+        Dictionary containing model parameters and hyperparameters.
+
+    Attributes
+    ----------
+    depth: int
+        Depth of the model.
+    num_heads: int
+        Number of self-attention heads in the transformer.
+    embed_size: int
+        Embedding dimension for the transformer.
+    patch_dim: list
+        The dimensions of the image patch.
+    ins: InitialConv
+        Initial convolutional layer.
+    ds: ModuleList
+        List containing the downsampling modules.
+    en: ModuleList
+        List containing the encoding modules.
+    de: ModuleList
+        List containing the decoding modules.
+    transformer: _Transformer
+        Transformer module for the architecture.
+    transCUP: _DecoderCUP
+        Decoder CUP module for the architecture.
+    out: out_conv
+        Final output convolutional layer.
     """
 
     def __init__(
@@ -55,13 +115,14 @@ class transunet(ModelBase):
     ):
         super(transunet, self).__init__(parameters)
 
-        # initialize defaults if not found
+        # Initialize default parameters if not found
         parameters["model"]["depth"] = parameters["model"].get("depth", 4)
         parameters["model"]["num_heads"] = parameters["model"].get("num_heads", 12)
         parameters["model"]["embed_dim"] = parameters["model"].get("embed_dim", 768)
 
         self.depth = self.model_depth_check(parameters)
 
+        # Set the image size and upsampling method based on the number of dimensions
         if self.n_dimensions == 2:
             self.img_size = parameters["patch_size"][0:2]
             self.upsample = nn.Upsample(
@@ -85,6 +146,7 @@ class transunet(ModelBase):
 
         self.patch_dim = [i // 2 ** (self.depth) for i in self.img_size]
 
+        # Initialize model modules
         self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
@@ -93,6 +155,7 @@ class transunet(ModelBase):
             norm=self.Norm,
         )
 
+        # Initialize downsampling, encoding, and decoding modules
         self.ds = ModuleList([])
         self.en = ModuleList([])
         self.de = ModuleList([])
@@ -127,6 +190,7 @@ class transunet(ModelBase):
                 )
             )
 
+        # Initialize transformer and decoder CUP modules
         self.transformer = _Transformer(
             img_size=[i // 2 ** (self.depth) for i in self.img_size],
             patch_size=1,
@@ -149,6 +213,7 @@ class transunet(ModelBase):
         )
 
         # TODO: conv 3x3 --> ReLU --> outconv
+        # Initialize final output convolutional layer
         self.out = out_conv(
             input_channels=self.base_filters,
             output_channels=self.n_classes,
@@ -179,6 +244,7 @@ class transunet(ModelBase):
             temp = self.ds[i](y[i])
             y.append(self.en[i](temp))
 
+        # Apply transformer and decoder CUP
         x = self.transformer(y[-1])[-1]
         x = x.transpose(-1, -2).view(-1, self.embed_size, *self.patch_dim)
         x = self.transCUP(x, None)
@@ -187,5 +253,6 @@ class transunet(ModelBase):
         for i in range(self.depth - 1, 0, -1):
             x = self.de[i - 1](x, y[i])
 
+        # Final output convolutional layer
         x = self.out(x)
         return x
