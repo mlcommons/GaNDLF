@@ -98,7 +98,7 @@ jobs:
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         echo "Removing mlcube_docker because of jinja2 version conflict"
-        pip uninstall mlcube_docker cookiecutter -y
+        pip uninstall mlcube mlcube_docker cookiecutter -y
         echo "Installing OpenFL"
         git clone https://github.com/securefederatedai/openfl.git
         cd openfl
