@@ -105,6 +105,7 @@ if __name__ == "__main__":
             "gandlf_configGenerator",
             "gandlf_recoverConfig",
             "gandlf_deploy",
+            "gandlf_optimizeModel",
         ],
         classifiers=[
             "Development Status :: 3 - Alpha",
