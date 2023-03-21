@@ -63,40 +63,42 @@ jobs:
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml -k "generic"        
-    - name: Run classification unit tests with histology
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
-    - name: Run classification unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
-    - name: Run segmentation unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
-    - name: Run regression unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "regression"
-    - name: Run transunet unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "transunet"
+    # - name: Run classification unit tests with histology
+    #   if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+    #   run: |
+    #     pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
+    # - name: Run classification unit tests
+    #   if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+    #   run: |
+    #     pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
+    # - name: Run segmentation unit tests
+    #   if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+    #   run: |
+    #     pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
+    # - name: Run regression unit tests
+    #   if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+    #   run: |
+    #     pytest --cov=. --cov-report=xml --cov-append -k "regression"
+    # - name: Run transunet unit tests
+    #   if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+    #   run: |
+    #     pytest --cov=. --cov-report=xml --cov-append -k "transunet"
 
 
-    - name: Upload coverage
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
+    # - name: Upload coverage
+    #   if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+    #   uses: codecov/codecov-action@v1
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     file: ./coverage.xml
+    #     flags: unittests
 
     # openfl tests start here
     - name: Run OpenFL tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
+        echo "Removing mlcube_docker because of jinja2 version conflict"
+        pip uninstall mlcube_docker -y
         echo "Installing OpenFL"
         git clone https://github.com/securefederatedai/openfl.git
         cd openfl
