@@ -102,7 +102,7 @@ jobs:
         echo "Removing onnx because of protobuf version conflict"
         pip uninstall onnx -y
         echo "Removing onnx because of numpy version conflict"
-        pip uninstall openvino -y
+        pip uninstall openvino openvino-dev -y
         echo "Installing OpenFL"
         git clone https://github.com/securefederatedai/openfl.git
         cd openfl
