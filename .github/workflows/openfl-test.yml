@@ -61,7 +61,8 @@ jobs:
     - name: Run generic unit tests to download data and construct CSVs
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        pytest --cov=. --cov-report=xml -k "generic"   
+        pytest --cov=. --cov-report=xml -k "generic_download"
+        pytest --cov=. --cov-report=xml -k "generic_constructTrainingCSV"
     # openfl tests start here
     - name: Run OpenFL tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
