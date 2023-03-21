@@ -186,42 +186,48 @@ class deep_unet(ModelBase):
             sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
+    def forward(self, x):
+        """
+        Forward pass of the U-Net model.
 
-def forward(self, x):
-    """
-    Parameters
-    ----------
-    x : Tensor
-        Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Parameters
+        ----------
+        x : Tensor
+            Input Tensor with shape [batch_size, channels, x_dims, y_dims, z_dims].
 
-    Returns
-    -------
-    x : Tensor
-        Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
-    """
+        Returns
+        -------
+        list of Tensors
+            List of output Tensors with shape [batch_size, n_classes, x_dims, y_dims, z_dims].
+            The length of the list corresponds to the number of layers in the decoder path.
+        """
 
-    # Encoding path
-    x1 = self.ins(x)
-    x2 = self.ds_0(x1)
-    x3 = self.ds_1(self.en_1(x2))
-    x4 = self.ds_2(self.en_2(x3))
-    x5 = self.ds_3(self.en_3(x4))
+        # Encoding path
+        x1 = self.ins(x)  # First convolution layer
+        x2 = self.ds_0(x1)  # Downsample and apply convolution
+        x3 = self.ds_1(self.en_1(x2))  # Downsample and apply convolution
+        x4 = self.ds_2(self.en_2(x3))  # Downsample and apply convolution
+        x5 = self.ds_3(self.en_3(x4))  # Downsample and apply convolution
 
-    # Decoding path
-    xl4 = self.de_3(self.us_3(x5), x4)
-    out_3 = self.out_3(xl4)
+        # Decoding path
+        # Upsample, concatenate with x4, and apply convolution
+        xl4 = self.de_3(self.us_3(x5), x4)
+        out_3 = self.out_3(xl4)  # Output tensor
 
-    xl3 = self.de_2(self.us_2(xl4), x3)
-    out_2 = self.out_2(xl3)
+        # Upsample, concatenate with x3, and apply convolution
+        xl3 = self.de_2(self.us_2(xl4), x3)
+        out_2 = self.out_2(xl3)  # Output tensor
 
-    xl2 = self.de_1(self.us_1(xl3), x2)
-    out_1 = self.out_1(xl2)
+        # Upsample, concatenate with x2, and apply convolution
+        xl2 = self.de_1(self.us_1(xl3), x2)
+        out_1 = self.out_1(xl2)  # Output tensor
 
-    xl1 = self.de_0(self.us_0(xl2), x1)
-    out_0 = self.out_0(xl1)
+        # Upsample, concatenate with x1, and apply convolution
+        xl1 = self.de_0(self.us_0(xl2), x1)
+        out_0 = self.out_0(xl1)  # Output tensor
 
-    # Return output tensors as a list
-    return [out_0, out_1, out_2, out_3]
+        # Return output tensors as a list
+        return [out_0, out_1, out_2, out_3]
 
 
 class deep_resunet(deep_unet):
