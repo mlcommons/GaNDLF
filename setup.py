@@ -115,7 +115,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
-            "Topic :: Scientific/Engineering :: Medical Science Apps",
+            "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(
             "PyTorch-based framework that handles segmentation/regression/classification using various DL architectures for medical imaging."
