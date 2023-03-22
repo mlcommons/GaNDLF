@@ -20,8 +20,9 @@ GaNDLF addresses all of these, and the information is divided as described in [t
   - [Anonymize Data](#anonymize-data)
   - [Cleanup/Harmonize/Curate Data](#cleanupharmonizecurate-data)
   - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
-  - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
+  - [Running preprocessing before training/inference (optional)](#running-preprocessing-before-traininginference-optional)
 - [Constructing the Data CSV](#constructing-the-data-csv)
+  - [Using the `gandlf_constructCSV` application](#using-the-gandlf_constructcsv-application)
 - [Customize the Training](#customize-the-training)
   - [Running multiple experiments \[OPTIONAL\]](#running-multiple-experiments-optional)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
@@ -79,7 +80,7 @@ It is **highly** recommended that the dataset you want to train/infer on has bee
 - **Intensity harmonization**: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. GaNDLF offers [multiple options](#customize-the-training) for intensity normalization, including Z-scoring, Min-Max scaling, and Histogram matching. 
 - **Resolution harmonization**: Ensures that the images have *similar* physical definitions (i.e., voxel/pixel size/resolution/spacing). An illustration of the impact of voxel size/resolution/spacing can be found [here](https://upenn.box.com/v/spacingsIssue), and it is encourage to read [this article](https://www.nature.com/articles/s41592-020-01008-z#:~:text=of%20all%20images.-,Resampling,-In%20some%20datasets) to added context on how this issue impacts a deep learning pipeline. This functionality is available via [GaNDLF's preprocessing module](#customize-the-training).
 
-Recommended tools for tackling all aforementioned curation tasks: 
+Recommended tools for tackling all aforementioned curation and annotation tasks: 
 - [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
 - [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
 - [3D Slicer](https://www.slicer.org)
@@ -107,7 +108,7 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
 Once these files are present, the patch miner can be run as follows:
 
 ```bash
-(venv_gandlf) $> python gandlf_patchMiner
+(venv_gandlf) $> python gandlf_patchMiner \ 
   # -h, --help         show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
@@ -116,9 +117,10 @@ Once these files are present, the patch miner can be run as follows:
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Running preprocessing before training/inference
+### Running preprocessing before training/inference (optional)
 
-This is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements.
+Running preprocessing before training/inference is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements. To run preprocessing before training/inference you can use the following command, which will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration:
+
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_preprocess \
@@ -127,8 +129,6 @@ This is optional, but recommended. It will significantly reduce the computationa
   -i ./experiment_0/train.csv \ # data in CSV format 
   -o ./experiment_0/output_dir/ # output directory
 ```
-
-This will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -152,42 +152,53 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
   - Multiple segmentation classes should be in a single file with unique label numbers.
   - Multi-label classification/regression is currently not supported.
 
-The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_constructCSV) can be used to make this easier:
+### Using the `gandlf_constructCSV` application
+
+To make the process of creating the CSV easier, we have provided a utility application called `gandlf_constructCSV`. This script works when the data is arranged in the following format (example shown of the data directory arrangement from the [Brain Tumor Segmentation (BraTS) Challenge](https://www.synapse.org/brats)):
+
+```bash
+$DATA_DIRECTORY
+│
+└───Patient_001 # this is constructed from the ${PatientID} header of CSV
+│   │ Patient_001_brain_t1.nii.gz
+│   │ Patient_001_brain_t1ce.nii.gz
+│   │ Patient_001_brain_t2.nii.gz
+│   │ Patient_001_brain_flair.nii.gz
+│   │ Patient_001_seg.nii.gz # optional for segmentation tasks
+│
+└───Patient_002 # this is constructed from the ${PatientID} header of CSV
+│   │ Patient_002_brain_t1.nii.gz
+│   │ Patient_002_brain_t1ce.nii.gz
+│   │ Patient_002_brain_t2.nii.gz
+│   │ Patient_002_brain_flair.nii.gz
+│   │ Patient_002_seg.nii.gz # optional for segmentation tasks
+│
+└───JaneDoe # this is constructed from the ${PatientID} header of CSV
+│   │ randomFileName_0_t1.nii.gz # the string identifier needs to be the same for each modality
+│   │ randomFileName_1_t1ce.nii.gz
+│   │ randomFileName_2_t2.nii.gz
+│   │ randomFileName_3_flair.nii.gz
+│   │ randomFileName_seg.nii.gz # optional for segmentation tasks
+│
+...
+```
+
+The following command shows how the script works:
 
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_constructCSV \
   # -h, --help         show help message and exit
-  -i ./experiment_0/data_dir/ # this is the main data directory
-  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences
-  -l _seg.nii.gz # an example label identifier - not needed for regression/classification
-  -o ./experiment_0/train_data.csv \ # output CSV to be used for training
-  -i ./experiment_0/data_dir/ \ # this is the main data directory
-  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
-  -l _seg.nii.gz \ # label identifier - not needed for regression/classification
+  -i $DATA_DIRECTORY # this is the main data directory 
+  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
+  -l _seg.nii.gz \ # an example label identifier - not needed for regression/classification, and can be changed based on your data
   -o ./experiment_0/train_data.csv # output CSV to be used for training
 ```
-**Note** that this cannot be used for classification/regression tasks directly, and will need modification based on the way your data is stored.
 
-This assumes the data is in the following format:
-```
-./experiment_0/data_dir/
-  │   │
-  │   └───Patient_001 # this is used to construct the "SubjectID" header of the CSV
-  │   │   │ Patient_001_brain_t1.nii.gz
-  │   │   │ Patient_001_brain_t1ce.nii.gz
-  │   │   │ Patient_001_brain_t2.nii.gz
-  │   │   │ Patient_001_brain_flair.nii.gz
-  │   │   │ Patient_001_brain_seg.nii.gz
-  │   │   
-  │   └───Patient_002 # this is used to construct the "Subject_ID" header of the CSV
-  │   │   │ ...
-  │
-```
-
-Notes:
+**Notes**:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
+- For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. 
 
 [Back To Top &uarr;](#table-of-contents)
 
