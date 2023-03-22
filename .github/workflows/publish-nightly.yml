@@ -39,7 +39,7 @@ jobs:
         pip install -e .
         pip install build
     - name: Annotate version
-      run: | # Get current canonical version, append current commit shorthash as an identifier
+      run: | # Get current canonical version, append current date as an identifier
         currentVer=$(python -c "from GANDLF import version; print(version)")
         datestampnow=$(date +'%Y%m%d')
         echo __version__ = \"$currentVer$datestampnow\" > ./GANDLF/version.py
