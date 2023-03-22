@@ -339,7 +339,7 @@ medcam:
 }
 ```
 
-You can choose from the following backends:
+You can choose one of the following backends:
 
 - Grad-CAM (`gcam`)
 - Guided Backpropagation (`gbp`)
@@ -371,8 +371,7 @@ If `${architecture_name}` is supported, the optimized model will get generated i
 
 ## Deployment
 
-You can deploy models trained with GaNDLF into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF.
-Currently, Docker images are supported (which can be converted to Singularity format). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
+GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to [Apptainer/Singularity format](https://apptainer.org/docs/user/main/docker_and_oci.html)). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
@@ -384,7 +383,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
   ## -h, --help         show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
-  --target docker # the target platform (--help will show all available targets)
+  --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
 ```
@@ -396,36 +395,36 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 
 Usage of GaNDLF remains generally the same even from Docker, but there are a few extra considerations.
 
-Once you have pulled the GaNDLF image, it will have a tag, like "cbica/gandlf:latest-cpu". 
-Run the following command to list your images and ensure GaNDLF is present:
+Once you have pulled the GaNDLF image, it will have a tag, like `cbica/gandlf:latest-cpu`. Run the following command to list your images and ensure GaNDLF is present:
+
 ```bash
 docker image ls
 ```
 
 You can invoke `docker run` with the appropriate tag to run GaNDLF:
+
 ```bash
-docker run -it --rm --name gandlf cbica/gandlf:latest-cpu [gandlf command and parameters go here!]
+docker run -it --rm --name gandlf cbica/gandlf:latest-cpu ${gandlf command and parameters go here!}
 ```
 
 Remember that arguments/options for *Docker itself* go *before* the image tag, while the command and arguments for GaNDLF go *after* the image tag. For more details and options, see the [Docker run documentation](https://docs.docker.com/engine/reference/commandline/run/).
 
-However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons. To fix this, we need to use mounts. 
+However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for [security considerations](https://docs.docker.com/develop/security-best-practices/). To fix this, we need to [mount specific locations in the filesystem](#mounting-input-and-output). 
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Mounting Input and Output
 
-The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and directories.
-Generally, it is useful to mount at least input directory (as read-only) and an output directory. See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
+The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and directories. Generally, it is useful to mount at least input directory (as read-only) and an output directory. See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
 
 For example, you might run:
+
 ```bash
 docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu [command and args go here]
 ```
 
-Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine.
-So you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container.
-This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
+Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine. So you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
+
 ```bash
 docker run -it --rm --name dataprep \
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
@@ -438,7 +437,8 @@ docker run -it --rm --name dataprep \
   --labelID _seg.nii.gz
 ```
 
-The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a ValueToPredict column). Then, we can reference the same file when running again:
+The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a `ValueToPredict` column). Then, we can reference the same file when running again:
+
 ```bash
 docker run -it --rm --name training \
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
@@ -453,9 +453,8 @@ docker run -it --rm --name training \
 [Back To Top &uarr;](#table-of-contents)
 #### Special Case for Training
 
-In the case where you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Because you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward.
+In the case where you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Because you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward. For example, you can fine-tune a model on your own data using the following commands as a starting point:
 
-For example, you can fine-tune a model on your own data using the following commands as a starting point:
 ```bash
 # Run training on your new data
 docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf_run -m /embedded_model/ [...] # Do not include "--rm" option!
@@ -476,14 +475,12 @@ For example:
 docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf_run --device cuda [...]
 ```
 
+This can be replicated for ROCm for AMD , by following the [instructions to set up the ROCm Container Toolkit](https://rocmdocs.amd.com/en/latest/ROCm_Virtualization_Containers/ROCm-Virtualization-&-Containers.html?highlight=docker).
+
 [Back To Top &uarr;](#table-of-contents)
 
 ## MLCubes
 
-GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/). This involves distributing an "mlcube.yaml" file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/). The runner will perform many aspects of configuring your container for you.
-
-Currently, only the `mlcube_docker` runner is supported.
-
-See the [MLCube documentation](https://mlcommons.github.io/mlcube/) for more details.
+GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/). This involves distributing an `mlcube.yaml` file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/). The runner will perform many aspects of configuring your container for you. Currently, only the `mlcube_docker` runner is supported. See the [MLCube documentation](https://mlcommons.github.io/mlcube/) for more details.
 
 [Back To Top &uarr;](#table-of-contents)
