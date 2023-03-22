@@ -52,8 +52,8 @@ The `data` directory content should look like the example below (for brevity, th
 ## Segmentation
 ### Segmentation using 3D Radiology Images
 
-1. Download and extract the [sample data](#sample-data) as described above. Or use your own.
-2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document, and the CSV should look like this:
+1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document. Furthermore, the CSV should look like the example below:
 
     ```csv
     SubjectID,Channel_0,Label
@@ -68,7 +68,7 @@ The `data` directory content should look like the example below (for brevity, th
     009,${GANDLF_DATA_3DRAD}/009/image.nii.gz,${GANDLF_DATA_3DRAD}/009/mask.nii.gz
     010,${GANDLF_DATA_3DRAD}/010/image.nii.gz,${GANDLF_DATA_3DRAD}/010/mask.nii.gz
     ```
-3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_rad3d.yaml). This configuration has various levels of customization, and those details are [in this page](https://mlcommons.github.io/GaNDLF/customize.html).
+3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) to help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_rad3d.yaml). This configuration has various levels of customization, and those details are presented on [this page](https://mlcommons.github.io/GaNDLF/customize.html).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
 
