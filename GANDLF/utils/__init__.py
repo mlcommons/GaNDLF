@@ -27,6 +27,7 @@ from .tensor import (
 from .write_parse import (
     writeTrainingCSV,
     parseTrainingCSV,
+    parseTestingCSV,
     get_dataframe,
     convert_relative_paths_in_dataframe,
 )

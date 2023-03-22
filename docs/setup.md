@@ -27,13 +27,13 @@ git clone https://github.com/mlcommons/GaNDLF.git
 cd GaNDLF
 conda create -n venv_gandlf python=3.8 -y
 conda activate venv_gandlf
-### PyTorch LTS installation - https://pytorch.org/get-started/locally
-## CUDA 11.3
-# pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
-## CUDA 10.2
-# pip install torch==1.11.0+cu102 torchvision==0.12.0+cu102 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu102
+### PyTorch installation - https://pytorch.org/get-started/locally
+## CUDA 11.6
+# pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+## ROCm
+# pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
 ## CPU-only
-# pip install torch==1.11.0+cpu torchvision==0.12.0+cpu torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cpu
+# pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
 pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate optimized models for inference
 pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
 pip install -e .
