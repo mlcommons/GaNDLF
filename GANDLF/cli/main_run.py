@@ -47,6 +47,13 @@ def main_run(
         parameters["output_dir"] = model_dir
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
+    # if the output directory is not specified, then use the model directory even for the testing data
+    # default behavior
+    parameters["output_dir"] = output_dir
+    if output_dir is None:
+        parameters["output_dir"] = model_dir
+    Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
+
     if "-1" in device:
         device = "cpu"
 
@@ -100,7 +107,7 @@ def main_run(
                 reset=reset,
             )
         else:
-            data_full, headers = parseTestingCSV(
+            _, data_full, headers = parseTestingCSV(
                 file_data_full, parameters["output_dir"]
             )
             InferenceManager(
