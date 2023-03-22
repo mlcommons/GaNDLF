@@ -1,3 +1,5 @@
+## Introduction
+
 For any DL pipeline, the following flow needs to be performed:
 
 1. Data preparation
@@ -6,14 +8,17 @@ For any DL pipeline, the following flow needs to be performed:
 
 A detailed data flow diagram is presented in [this link](https://github.com/mlcommons/GaNDLF/blob/master/docs/README.md#flowchart).
 
-GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
+GaNDLF addresses all of these, and the information is divided as described in [the following section](#table-of-contents).
+
+
 ## Table of Contents
 
+- [Introduction](#introduction)
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
 - [Preparing the Data](#preparing-the-data)
   - [Anonymize Data](#anonymize-data)
-  - [Cleanup/Harmonize Data](#cleanupharmonize-data)
+  - [Cleanup/Harmonize/Curate Data](#cleanupharmonizecurate-data)
   - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
   - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
 - [Constructing the Data CSV](#constructing-the-data-csv)
@@ -38,7 +43,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. This should end up with the shell that looks like this with the GaNDLF virtual environment activated:
+Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
@@ -51,7 +56,8 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Thi
 
 ### Anonymize Data
 
-GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
+A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. It can be used as follows:
+
 ```bash
 (venv_gandlf) $> python gandlf_anonymizer
   # -h, --help         show help message and exit
@@ -62,46 +68,49 @@ GaNDLF can anonymize single images or a collection of images using the `gandlf_a
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Cleanup/Harmonize Data
+### Cleanup/Harmonize/Curate Data
 
-It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
+It is **highly** recommended that the dataset you want to train/infer on has been harmonized. The following requirements should be considered:
 
 - Registration
-  - Within-modality co-registration [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)]
-  - **OPTIONAL**: Registration of all datasets to patient atlas, if applicable [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)]
-- Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GaNDLF's preprocessing module](#customize-the-training).
-- Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GaNDLF's preprocessing module](#customize-the-training).
+  - Within-modality co-registration [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)].
+  - **OPTIONAL**: Registration of all datasets to patient atlas, if applicable [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)].
+- **Intensity harmonization**: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. GaNDLF offers [multiple options](#customize-the-training) for intensity normalization, including Z-scoring, Min-Max scaling, and Histogram matching. 
+- **Resolution harmonization**: Ensures that the images have *similar* physical definitions (i.e., voxel/pixel size/resolution/spacing). An illustration of the impact of voxel size/resolution/spacing can be found [here](https://upenn.box.com/v/spacingsIssue), and it is encourage to read [this article](https://www.nature.com/articles/s41592-020-01008-z#:~:text=of%20all%20images.-,Resampling,-In%20some%20datasets) to added context on how this issue impacts a deep learning pipeline. This functionality is available via [GaNDLF's preprocessing module](#customize-the-training).
 
-Recommended tools for tackling all aforementioned preprocessing tasks: 
+Recommended tools for tackling all aforementioned curation tasks: 
 - [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
 - [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
+- [3D Slicer](https://www.slicer.org)
+- [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php)
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Offline Patch Extraction (for histology images only)
 
-GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using GaNDLF's integrated patch miner:
+GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches/tiles using GaNDLF’s integrated patch miner, which would need the following files:
 
-- Construct a YAML configuration for OPM with a minimum of the following keys:
-  - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
-  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256]) or a string containing patch size in microns (e.g., "[100m,100m]")
-  - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
-- A CSV file with the following columns:
+1. A configuration file that dictates how the patches/tiles will be extracted. A sample configuration to extract patches is presented [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml). The options that the can be defined in the configuration are as follows:
+  - `scale`: scale at which operations such as tissue mask calculation happens; defaults to `16`.
+  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., `[256,256]`) or a string containing patch size in microns (e.g., `[100m,100m]`).
+  - `num_patches`: defines the number of patches to extract; use `-1` to mine until exhaustion.
+  - `value_map`: mapping RGB values in label image to integer values for training; defaults to `None`.
+  - `read_type`: either `random` or `sequential` (latter is more efficient); defaults to `random`.
+  - `overlap_factor`: Portion of patches that are allowed to overlap (`0->1`); defaults to `0.0`.
+  - `num_workers`: number of workers (note that this does not scale according to the number of threads available on your machine) to use for patch extraction; defaults to `1`.
+2. A CSV file with the following columns:
   - `SubjectID`: the ID of the subject for the WSI
   - `Channel_0`: the WSI file
   - `Label`: (optional) the label map file
-  - `value_map`: mapping RGB values in label image to integer values for training; defaults to None
-  - `read_type`: either "random" or "sequential" (latter is more efficient); defaults to "random"
-  - `pen_size_threshold`: thickness of pen strokes to be considered as a mask
-  - `min_color_difference`: color difference between tissue and pen markings
-  - `overlap_factor`: Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
-- Run the following command:
+
+Once these files are present, the patch miner can be run as follows:
+
 ```bash
 (venv_gandlf) $> python gandlf_patchMiner
   # -h, --help         show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
-  -o ./exp_patchMiner/output_dir/ \ # output directory
+  -o ./exp_patchMiner/output_dir/ # output directory
 ```
 
 [Back To Top &uarr;](#table-of-contents)
@@ -332,15 +341,11 @@ Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 ## Deployment
 
 You can deploy models trained with GaNDLF into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF.
-Currently, Docker images are supported (which can be converted to Singularity format).
-These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/).
-This allows your algorithm to be used in a consistent manner with other machine learning tools.
+Currently, Docker images are supported (which can be converted to Singularity format). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
-The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration.
-This ensures that upstream changes to GaNDLF will not break compatibility with your model.
+The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
-To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images.
-This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
+To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
 python gandlf_deploy \
@@ -364,23 +369,22 @@ Run the following command to list your images and ensure GaNDLF is present:
 ```bash
 docker image ls
 ```
-You can invoke "docker run" with the appropriate tag to run GaNDLF:
+
+You can invoke `docker run` with the appropriate tag to run GaNDLF:
 ```bash
 docker run -it --rm --name gandlf cbica/gandlf:latest-cpu [gandlf command and parameters go here!]
 ```
-Remember that arguments/options for *Docker itself* go *before* the image tag, while the command and arguments for GaNDLF go *after* the image tag.
-For more details and options, see the [Docker run documentation](https://docs.docker.com/engine/reference/commandline/run/).
 
-However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons.
-To fix this, we need to use mounts. 
+Remember that arguments/options for *Docker itself* go *before* the image tag, while the command and arguments for GaNDLF go *after* the image tag. For more details and options, see the [Docker run documentation](https://docs.docker.com/engine/reference/commandline/run/).
+
+However, most commands that require files or directories as input or output will fail, because the container, by default, cannot read or write files on your machine for security reasons. To fix this, we need to use mounts. 
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Mounting Input and Output
 
 The container is basically a filesystem of its own. To make your data available to the container, you will need to mount in files and directories.
-Generally, it is useful to mount at least input directory (as read-only) and an output directory.
-See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
+Generally, it is useful to mount at least input directory (as read-only) and an output directory. See the [Docker bind mount instructions](https://docs.docker.com/storage/bind-mounts/) for more information.
 
 For example, you might run:
 ```bash
@@ -388,10 +392,8 @@ docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:
 ```
 
 Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine.
-So you will need to give paths relative to the mount point *destination*.
-Additionally, any paths used internally by GaNDLF will refer to locations inside the container.
-This means that data CSVs produced by the gandlf_constructCSV script will need to be made from the container and with input in the same locations. Expanding on our last example:
-
+So you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container.
+This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
 ```bash
 docker run -it --rm --name dataprep \
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
@@ -403,9 +405,8 @@ docker run -it --rm --name dataprep \
   --channelsID _t1.nii.gz \
   --labelID _seg.nii.gz
 ```
-The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a ValueToPredict column).
-Then, we can reference the same file when running again:
 
+The above command will generate a data CSV file that you can safely edit outside the container (such as by adding a ValueToPredict column). Then, we can reference the same file when running again:
 ```bash
 docker run -it --rm --name training \
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
@@ -434,12 +435,9 @@ docker rm -f gandlf_training
 
 ### Enabling GPUs
 
-Some special arguments need to be passed to Docker to enable it to use your GPU.
-With Docker version > 19.03 You can pass the "--gpus all" parameter to "docker run" to expose all GPUs to the container.
-See the [NVIDIA Docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#gpu-enumeration) for more details.
+Some special arguments need to be passed to Docker to enable it to use your GPU. With Docker version > 19.03 You can use `docker run --gpus all` to expose all GPUs to the container. See the [NVIDIA Docker documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/user-guide.html#gpu-enumeration) for more details.
 
-If using CUDA, GaNDLF also expects the environment variable CUDA_VISIBLE_DEVICES to be set.
-To use the same settings as your host machine, simply add "-e CUDA_VISIBLE_DEVICES" to your docker run command.
+If using CUDA, GaNDLF also expects the environment variable `CUDA_VISIBLE_DEVICES` to be set. To use the same settings as your host machine, simply add `-e CUDA_VISIBLE_DEVICES` to your docker run command.
 
 For example:
 ```bash
@@ -450,11 +448,9 @@ docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandl
 
 ## MLCubes
 
-GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/).
-This involves distributing an "mlcube.yaml" file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/).
-The runner will perform many aspects of configuring your container for you.
+GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/). This involves distributing an "mlcube.yaml" file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/). The runner will perform many aspects of configuring your container for you.
 
-Currently, only the mlcube_docker runner is supported.
+Currently, only the `mlcube_docker` runner is supported.
 
 See the [MLCube documentation](https://mlcommons.github.io/mlcube/) for more details.
 
