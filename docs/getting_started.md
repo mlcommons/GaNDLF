@@ -18,7 +18,7 @@ This document will help you get started with GaNDLF using a few representative e
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following code snippet, which indicates that the GaNDLF virtual environment has been activated:
+Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
