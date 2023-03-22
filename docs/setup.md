@@ -46,6 +46,13 @@ pip install -e .
 python ./gandlf_verifyInstall
 ```
 
+Alternatively, GaNDLF can be installed via Pip:
+
+```bash
+pip install gandlf
+```
+
+
 ## Docker Installation
 
 We provide containerized versions of GaNDLF, which allows you to run GaNDLF without worrying about installation steps or dependencies.
