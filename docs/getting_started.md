@@ -32,6 +32,7 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Whe
 Sample data will be used for our extensive automated unit tests in all examples. You can download the sample data from [this link](https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip). Example of how to do this from the terminal is shown below:
 
 ```bash
+# continue from previous shell
 (venv_gandlf) $> wget https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip -O ./gandlf_sample_data.zip
 (venv_gandlf) $> unzip ./gandlf_sample_data.zip
 # this should extract a directory called `data` in the current directory
@@ -39,6 +40,7 @@ Sample data will be used for our extensive automated unit tests in all examples.
 The `data` directory content should look like the example below (for brevity, these locations shall be referred to as `${GANDLF_DATA}` in the rest of the document):
 
 ```bash
+# continue from previous shell
 (venv_gandlf) $>  ls data
 2d_histo_segmentation    2d_rad_segmentation    3d_rad_segmentation
 # and a bunch of CSVs which can be ignored

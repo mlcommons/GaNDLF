@@ -20,7 +20,7 @@ This means that GaNDLF was not installed correctly. Please ensure you have follo
 
 ### Where do I start?
 
-The [usage](https://mlcommons.github.io/GaNDLF/usage) guide is fairly comprehensive and provides a good starting point. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+The [usage guide](https://mlcommons.github.io/GaNDLF/usage) provides a good starting point for you to understand the application of GaNDLF. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -38,13 +38,13 @@ Virtually all of it! For more details, please see the [usage](https://mlcommons.
 
 ### Can I run GaNDLF on a high performance computing (HPC) cluster?
 
-YES, we have run GaNDLF on an SGE cluster to great success. Please [post a question](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=) with more details such as the type of scheduler, and so on, and we will do our best to address it.
+Yes, GaNDLF has successfully been run on an SGE cluster and another managed using Kubernetes. Please [post a question](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=) with more details such as the type of scheduler, and so on, and we will do our best to address it.
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### How can I track the per-epoch training performance?
 
-Yes, look for `logs_*.csv` files in the output directory. It should be arranged in accordance with the cross-validation configuration, and should contain separate files for training/validation/testing data, along with the values for all requested performance metrics.
+Yes, look for `logs_*.csv` files in the output directory. It should be arranged in accordance with the cross-validation configuration. Furthermore, it  should contain separate files for each data cohort, i.e., training/validation/testing, along with the values for all requested performance metrics, which are defined per problem type.
 
 [Back To Top &uarr;](#table-of-contents)
 
