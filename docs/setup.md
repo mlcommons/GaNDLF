@@ -46,10 +46,16 @@ pip install -e .
 python ./gandlf_verifyInstall
 ```
 
-Alternatively, GaNDLF can be installed via Pip:
+Alternatively, GaNDLF can be installed via pip by running the following command:
 
 ```bash
-pip install gandlf
+pip install gandlf # this will give you the latest stable release
+```
+
+If you are interested in running the latest version of GaNDLF, you can install the nightly build by running the following command:
+
+```bash
+pip install --pre gandlf
 ```
 
 
