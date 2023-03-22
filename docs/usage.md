@@ -28,6 +28,8 @@ GaNDLF addresses all of these, and the information is divided as described in [t
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
   - [Special notes for Inference for Histology images](#special-notes-for-inference-for-histology-images)
 - [Parallelize the Training](#parallelize-the-training)
+  - [Multi-GPU training](#multi-gpu-training)
+  - [Distributed training](#distributed-training)
 - [Expected Output(s)](#expected-outputs)
   - [Training](#training)
   - [Inference](#inference)
@@ -271,9 +273,13 @@ You can use the following code snippet to run GaNDLF:
 
 ## Parallelize the Training
 
-GaNDLF allows multi-GPU training relatively easily. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` and pass `-d cuda` to the `gandlf_run` script.
+### Multi-GPU training
 
-Distributed training is a more difficult problem to address, since there are multiple ways to configure a high-performance computing cluster (SLURM, OpenHPC, Kubernetes, and so on). Owing to this discrepancy, we have ensured that GaNDLF allows multiple training jobs to be submitted in relatively straightforward manner using the command line inference of each site’s configuration. Simply populate the `paralle_compute_command` in the configuration with the specific command to run before the training job, and GaNDLF will use this string to submit the training job. 
+GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` and pass `-d cuda` to the `gandlf_run` script.
+
+### Distributed training
+
+Distributed training is a more difficult problem to address, since there are multiple ways to configure a high-performance computing cluster (SLURM, OpenHPC, Kubernetes, and so on). Owing to this discrepancy, we have ensured that GaNDLF allows multiple training jobs to be submitted in relatively straightforward manner using the command line inference of each site’s configuration. Simply populate the `parallel_compute_command` in the [configuration](#customize-the-training) with the specific command to run before the training job, and GaNDLF will use this string to submit the training job. 
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -287,13 +293,13 @@ Once your model is trained, you should see the following output:
 ```bash
 # continue from previous shell
 (venv_gandlf) $> ls ./experiment_0/model_dir/
-data_{cohort_type}.csv  # data CSV used for the different cohorts, which can be either training/validation/testing
-data_{cohort_type}.pkl  # same as above, but in pickle format
-logs_{cohort_type}.csv  # logs for the different cohorts that contain the various metrics, which can be either training/validation/testing
-{architecture_name}_best.pth.tar # the best model in native PyTorch format
-{architecture_name}_latest.pth.tar # the latest model in native PyTorch format
-{architecture_name}_initial.pth.tar # the initial model in native PyTorch format
-{architecture_name}_initial.{xml/bin} # the graph-optimized best model in ONNX format
+data_${cohort_type}.csv  # data CSV used for the different cohorts, which can be either training/validation/testing
+data_${cohort_type}.pkl  # same as above, but in pickle format
+logs_${cohort_type}.csv  # logs for the different cohorts that contain the various metrics, which can be either training/validation/testing
+${architecture_name}_best.pth.tar # the best model in native PyTorch format
+${architecture_name}_latest.pth.tar # the latest model in native PyTorch format
+${architecture_name}_initial.pth.tar # the initial model in native PyTorch format
+${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name} is supported, the graph-optimized best model in ONNX format
 # other files dependent on if training/validation/testing output was enabled in configuration
 ```
 
