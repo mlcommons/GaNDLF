@@ -18,7 +18,7 @@ This document will help you get started with GaNDLF using a few representative e
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. This should end up with the shell that looks like this with the GaNDLF virtual environment activated:
+Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following code snippet, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
@@ -29,14 +29,14 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Thi
 
 ## Sample Data
 
-We will use the sample data used for our extensive automated unit tests for all examples. The data is available from [this link](https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip):
+Sample data will be used for our extensive automated unit tests in all examples. You can download the sample data from [this link](https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip). Example of how to do this from the terminal is shown below:
 
 ```bash
 (venv_gandlf) $> wget https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip -O ./gandlf_sample_data.zip
 (venv_gandlf) $> unzip ./gandlf_sample_data.zip
 # this should extract a directory called `data` in the current directory
 ```
-The contents of the `data` directory should look like this (for brevity, this locations shall be referred to as `${GANDLF_DATA}` in the rest of the document):
+The `data` directory content should look like the example below (for brevity, these locations shall be referred to as `${GANDLF_DATA}` in the rest of the document):
 
 ```bash
 (venv_gandlf) $>  ls data
