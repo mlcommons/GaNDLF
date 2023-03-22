@@ -26,7 +26,7 @@ GaNDLF addresses all of these, and the information is divided as described in [t
 - [Customize the Training](#customize-the-training)
   - [Running multiple experiments (optional)](#running-multiple-experiments-optional)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
-  - [Special note for Inference for Histology images](#special-note-for-inference-for-histology-images)
+  - [Special notes for Inference for Histology images](#special-notes-for-inference-for-histology-images)
 - [Parallelize the Training](#parallelize-the-training)
 - [Expected Output(s)](#expected-outputs)
   - [Training](#training)
@@ -245,6 +245,8 @@ learning_rate: [0.1, 0.01]
 
 ## Running GaNDLF (Training/Inference)
 
+You can use the following code snippet to run GaNDLF:
+
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_run \
@@ -259,9 +261,9 @@ learning_rate: [0.1, 0.01]
   # -rm , --resume # [optional] resume previous training by only keeping model dict in `modeldir`
 ```
 
-### Special note for Inference for Histology images
+### Special notes for Inference for Histology images
 
-- If you trying to perform inference on pre-extracted patches, please change the `modality` key in the configuration to `rad`, as this will ensure the histology-specific pipelines are not triggered.
+- If you trying to perform inference on pre-extracted patches, please change the `modality` key in the configuration to `rad`. This will ensure the histology-specific pipelines are not triggered.
 - However, if you are trying to perform inference on full WSIs, `modality` should be kept as `histo`.
 
 [Back To Top &uarr;](#table-of-contents)
