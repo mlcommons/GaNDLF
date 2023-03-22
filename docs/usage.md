@@ -106,7 +106,7 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
   - `Channel_0`: the WSI file
   - `Label`: (optional) the label map file
 
-Once these files are present, the patch miner can be run as follows:
+Once these files are present, the patch miner can be run using the following command:
 
 ```bash
 (venv_gandlf) $> python gandlf_patchMiner \ 
