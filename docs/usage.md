@@ -33,6 +33,7 @@ GaNDLF addresses all of these, and the information is divided as described in [t
 - [Plot the final results](#plot-the-final-results)
   - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
+- [Post-Training Model Optimization](#post-training-model-optimization)
 - [Deployment](#deployment)
 - [Running with Docker](#running-with-docker)
   - [Mounting Input and Output](#mounting-input-and-output)
@@ -124,7 +125,7 @@ This is optional, but recommended. It will significantly reduce the computationa
   # -h, --help         show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
-  -o ./experiment_0/output_dir/ \ # output directory
+  -o ./experiment_0/output_dir/ # output directory
 ```
 
 This will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration.
@@ -161,6 +162,10 @@ The [gandlf_constructCSV](https://github.com/mlcommons/GaNDLF/blob/master/gandlf
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences
   -l _seg.nii.gz # an example label identifier - not needed for regression/classification
   -o ./experiment_0/train_data.csv \ # output CSV to be used for training
+  -i ./experiment_0/data_dir/ \ # this is the main data directory
+  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # 4 structural brain MR images
+  -l _seg.nii.gz \ # label identifier - not needed for regression/classification
+  -o ./experiment_0/train_data.csv # output CSV to be used for training
 ```
 **Note** that this cannot be used for classification/regression tasks directly, and will need modification based on the way your data is stored.
 
@@ -337,6 +342,21 @@ Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
 
 [Back To Top &uarr;](#table-of-contents)
 
+
+## Post-Training Model Optimization
+
+If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimize` script to do so. The usage is as follows:
+
+```bash
+# continue from previous shell
+python gandlf_optimizeModel \
+  -m /path/to/trained/modelName_best.pth.tar \  # directory which contains testing and validation models
+  -c ./experiment_0/config_used_to_train.yaml  # the config file used to train the model
+```
+
+The optimized model will get generated in the model directory, with the name `modelName_optimized.onnx`.
+
+[Back To Top &uarr;](#table-of-contents)
 
 ## Deployment
 

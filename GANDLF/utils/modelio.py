@@ -25,36 +25,24 @@ latest_model_path_end = "_latest.pth.tar"
 initial_model_path_end = "_initial.pth.tar"
 
 
-def save_model(model_dict, model, params, path, onnx_export=True):
+def optimize_and_save_model(model, params, path, onnx_export=True):
     """
-    Save the model dictionary to a file.
+    Perform post-training optimization and save it to a file.
 
     Args:
-        model_dict (dict): Model dictionary to save.
         model (torch model): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
-    num_channel = params["model"]["num_channels"]
-    model_dimension = params["model"]["dimension"]
-    ov_output_data_type = params["model"].get("data_type", "FP32")
-    input_shape = params["patch_size"]
-
-    model_dict["timestamp"] = get_unique_timestamp()
-    model_dict["timestamp_hash"] = hashlib.sha256(
-        str(model_dict["timestamp"]).encode("utf-8")
-    ).hexdigest()
-    model_dict["version"] = pkg_resources.require("GANDLF")[0].version
-    try:
-        model_dict["git_hash"] = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"])
-            .decode("ascii")
-            .strip()
-        )
-    except subprocess.CalledProcessError:
-        model_dict["git_hash"] = None
-    torch.save(model_dict, path)
+    onnx_export = params["model"].get("onnx_export", onnx_export)
+    # check for incompatible topologies and disable onnx export
+    # customized imagenet_vgg no longer supported for onnx export: https://github.com/pytorch/pytorch/issues/42653
+    if onnx_export:
+        if (params["model"]["architecture"] in ["sdnet", "brain_age"]) or (
+            "imagenet_vgg" in params["model"]["architecture"]
+        ):
+            onnx_export = False
 
     if not (onnx_export):
         if "onnx_print" not in params:
@@ -63,7 +51,14 @@ def save_model(model_dict, model, params, path, onnx_export=True):
         return
     else:
         try:
-            onnx_path = path.replace("pth.tar", "onnx")
+            print("Optimizing best model.")
+            num_channel = params["model"]["num_channels"]
+            model_dimension = params["model"]["dimension"]
+            ov_output_data_type = params["model"].get("data_type", "FP32")
+            input_shape = params["patch_size"]
+            onnx_path = path
+            if not (onnx_path.endswith(".onnx")):
+                onnx_path = onnx_path.replace("pth.tar", "onnx")
             if model_dimension == 2:
                 dummy_input = torch.randn(
                     (1, num_channel, input_shape[0], input_shape[1])
@@ -125,6 +120,36 @@ def save_model(model_dict, model, params, path, onnx_export=True):
                 )
         except subprocess.CalledProcessError:
             print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
+
+
+def save_model(model_dict, model, params, path, onnx_export=True):
+    """
+    Save the model dictionary to a file.
+
+    Args:
+        model_dict (dict): Model dictionary to save.
+        model (torch model): Trained torch model.
+        params (dict): The parameter dictionary.
+        path (str): The path to save the model dictionary to.
+        onnx_export (bool): Whether to export to ONNX and OpenVINO.
+    """
+    model_dict["timestamp"] = get_unique_timestamp()
+    model_dict["timestamp_hash"] = hashlib.sha256(
+        str(model_dict["timestamp"]).encode("utf-8")
+    ).hexdigest()
+    model_dict["version"] = pkg_resources.require("GANDLF")[0].version
+    try:
+        model_dict["git_hash"] = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("ascii")
+            .strip()
+        )
+    except subprocess.CalledProcessError:
+        model_dict["git_hash"] = None
+    torch.save(model_dict, path)
+
+    # post-training optimization
+    optimize_and_save_model(model, params, path, onnx_export=onnx_export)
 
 
 def load_model(path, device, full_sanity_check=True):
