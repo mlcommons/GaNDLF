@@ -1,3 +1,5 @@
+## Introduction
+
 For any DL pipeline, the following flow needs to be performed:
 
 1. Data preparation
@@ -6,14 +8,17 @@ For any DL pipeline, the following flow needs to be performed:
 
 A detailed data flow diagram is presented in [this link](https://github.com/mlcommons/GaNDLF/blob/master/docs/README.md#flowchart).
 
-GaNDLF tackles all of these and the details are split in the manner explained in [the following section](#table-of-contents).
+GaNDLF addresses all of these, and the information is divided as described in [the following section](#table-of-contents).
+
+
 ## Table of Contents
 
+- [Introduction](#introduction)
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
 - [Preparing the Data](#preparing-the-data)
   - [Anonymize Data](#anonymize-data)
-  - [Cleanup/Harmonize Data](#cleanupharmonize-data)
+  - [Cleanup/Harmonize/Curate Data](#cleanupharmonizecurate-data)
   - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
   - [Running preprocessing before training/inference](#running-preprocessing-before-traininginference)
 - [Constructing the Data CSV](#constructing-the-data-csv)
@@ -38,7 +43,7 @@ GaNDLF tackles all of these and the details are split in the manner explained in
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. This should end up with the shell that looks like this with the GaNDLF virtual environment activated:
+Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
@@ -51,7 +56,8 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Thi
 
 ### Anonymize Data
 
-GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. The usage is as follows:
+GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. It can be used as follows:
+
 ```bash
 (venv_gandlf) $> python gandlf_anonymizer
   # -h, --help         show help message and exit
@@ -62,40 +68,41 @@ GaNDLF can anonymize single images or a collection of images using the `gandlf_a
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Cleanup/Harmonize Data
+### Cleanup/Harmonize/Curate Data
 
-It is **highly** recommended that the dataset you want to train/infer on has been harmonized:
+It is **highly** recommended that the dataset you want to train/infer on has been harmonized. The following requirements should be considered:
 
 - Registration
-  - Within-modality co-registration [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)]
-  - **OPTIONAL**: Registration of all datasets to patient atlas, if applicable [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)]
-- Size harmonization: Same physical definition of all images (see https://upenn.box.com/v/spacingsIssue for a presentation on how voxel resolutions affects downstream analyses). This is available via [GaNDLF's preprocessing module](#customize-the-training).
-- Intensity harmonization: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. Z-scoring is available via [GaNDLF's preprocessing module](#customize-the-training).
+  - Within-modality co-registration [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)].
+  - **OPTIONAL**: Registration of all datasets to patient atlas, if applicable [[1](https://doi.org/10.1109/TMI.2014.2377694), [2](https://doi.org/10.1038/sdata.2017.117), [3](https://arxiv.org/abs/1811.02629)].
+- **Intensity harmonization**: Same intensity profile, i.e., normalization [[4](https://doi.org/10.1016/j.nicl.2014.08.008), [5](https://visualstudiomagazine.com/articles/2020/08/04/ml-data-prep-normalization.aspx), [6](https://developers.google.com/machine-learning/data-prep/transform/normalization), [7](https://towardsdatascience.com/understand-data-normalization-in-machine-learning-8ff3062101f0)]. GaNDLF offers [multiple options](#customize-the-training) for intensity normalization, including Z-scoring, Min-Max scaling, and Histogram matching. 
+- **Resolution harmonization**: Ensures that the images have *similar* physical definitions (i.e., voxel/pixel size/resolution/spacing). An illustration of the impact of voxel size/resolution/spacing can be found [here](https://upenn.box.com/v/spacingsIssue), and it is encourage to read [this article](https://www.nature.com/articles/s41592-020-01008-z#:~:text=of%20all%20images.-,Resampling,-In%20some%20datasets) to added context on how this issue impacts a deep learning pipeline. This functionality is available via [GaNDLF's preprocessing module](#customize-the-training).
 
-Recommended tools for tackling all aforementioned preprocessing tasks: 
+Recommended tools for tackling all aforementioned curation tasks: 
 - [Cancer Imaging Phenomics Toolkit (CaPTk)](https://github.com/CBICA/CaPTk) 
 - [Federated Tumor Segmentation (FeTS) Front End](https://github.com/FETS-AI/Front-End)
+- [3D Slicer](https://www.slicer.org)
+- [ITK-SNAP](http://www.itksnap.org/pmwiki/pmwiki.php)
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### Offline Patch Extraction (for histology images only)
 
-GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches using GaNDLF's integrated patch miner:
+GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches/tiles using GaNDLF’s integrated patch miner, which would need the following files:
 
-- Construct a YAML configuration for OPM with a minimum of the following keys:
-  - `scale`: scale at which operations such as tissue mask calculation happens; defaults to 16
-  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., [256,256]) or a string containing patch size in microns (e.g., "[100m,100m]")
-  - `num_patches`: defines the number of patches to extract; use -1 to mine until exhaustion
-- A CSV file with the following columns:
+1. A configuration file that dictates how the patches/tiles will be extracted. A sample configuration to extract patches is presented [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml). The options that the can be defined in the configuration are as follows:
+  - `scale`: scale at which operations such as tissue mask calculation happens; defaults to `16`.
+  - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., `[256,256]`) or a string containing patch size in microns (e.g., `[100m,100m]`).
+  - `num_patches`: defines the number of patches to extract; use `-1` to mine until exhaustion.
+  - `value_map`: mapping RGB values in label image to integer values for training; defaults to `None`.
+  - `read_type`: either `random` or `sequential` (latter is more efficient); defaults to `random`.
+  - `overlap_factor`: Portion of patches that are allowed to overlap (`0->1`); defaults to `0.0`.
+  - `num_workers`: number of workers (note that this does not scale according to the number of threads available on your machine) to use for patch extraction; defaults to `1`.
+2. A CSV file with the following columns:
   - `SubjectID`: the ID of the subject for the WSI
   - `Channel_0`: the WSI file
   - `Label`: (optional) the label map file
-  - `value_map`: mapping RGB values in label image to integer values for training; defaults to None
-  - `read_type`: either "random" or "sequential" (latter is more efficient); defaults to "random"
-  - `pen_size_threshold`: thickness of pen strokes to be considered as a mask
-  - `min_color_difference`: color difference between tissue and pen markings
-  - `overlap_factor`: Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
-- Run the following command:
+
 ```bash
 (venv_gandlf) $> python gandlf_patchMiner
   # -h, --help         show help message and exit
