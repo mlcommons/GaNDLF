@@ -62,6 +62,7 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Whe
 A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. It can be used as follows:
 
 ```bash
+# continue from previous shell
 (venv_gandlf) $> python gandlf_anonymizer
   # -h, --help         show help message and exit
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
@@ -109,6 +110,7 @@ GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corres
 Once these files are present, the patch miner can be run using the following command:
 
 ```bash
+# continue from previous shell
 (venv_gandlf) $> python gandlf_patchMiner \ 
   # -h, --help         show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
@@ -224,8 +226,10 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 1. The `gandlf_configGenerator` script can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
 2. Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
 3. Provide the baseline configuration which has enabled you to successfully train a model for `1` epoch for your dataset and problem at hand (regardless of the efficacy).
-4. Run the following command:  
+4. Run the following command:
+
 ```bash
+# continue from previous shell
 (venv_gandlf) $> python gandlf_configGenerator \
   # -h, --help         show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration

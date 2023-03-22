@@ -18,6 +18,7 @@ For any new feature, please ensure the corresponding option in the [sample confi
 Before starting to work on the code-level on GaNDLF, please follow the [installation instructions](./setup.md) to get the environment ready. Once that's done, please install GaNDLF from the source code using the following commands (this can be skipped if you have installed from sources):
 
 ```bash
+# continue from previous shell
 (venv_gandlf) $> git clone https://github.com/mlcommons/GaNDLF.git
 cd GaNDLF
 pip install -e .
