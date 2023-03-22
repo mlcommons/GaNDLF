@@ -34,7 +34,6 @@ GaNDLF addresses all of these, and the information is divided as described in [t
   - [Training](#training)
   - [Inference](#inference)
 - [Plot the final results](#plot-the-final-results)
-  - [Multi-GPU systems](#multi-gpu-systems)
 - [M3D-CAM usage](#m3d-cam-usage)
 - [Post-Training Model Optimization](#post-training-model-optimization)
 - [Deployment](#deployment)
@@ -275,7 +274,7 @@ You can use the following code snippet to run GaNDLF:
 
 ### Multi-GPU training
 
-GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` and pass `-d cuda` to the `gandlf_run` script.
+GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)] and pass `-d cuda` to the `gandlf_run` script.
 
 ### Distributed training
 
@@ -315,20 +314,14 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 
 ## Plot the final results
 
-After the testing/validation training is finished, GaNDLF makes it possible to collect all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_collectStats) can be used for this:
+After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_collectStats) can be used for plotting:
 
 ```bash
 # continue from previous shell
-python gandlf_collectStats \
+(venv_gandlf) $> python gandlf_collectStats \
   -m /path/to/trained/models \  # directory which contains testing and validation models
   -o ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
-
-[Back To Top &uarr;](#table-of-contents)
-
-### Multi-GPU systems
-
-Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)].
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -336,7 +329,7 @@ Please ensure that the environment variable `CUDA_VISIBLE_DEVICES` is set [[ref]
 ## M3D-CAM usage
 
 The integration of the [M3D-CAM library](https://arxiv.org/abs/2007.00453) into GaNDLF enables the generation of attention maps for 3D/2D images in the validation epoch for classification and segmentation tasks.
-To activate M3D-CAM one simply needs to add the following parameter to the config:
+To activate M3D-CAM you just need to add the following parameter to the config:
 
 ```yaml
 medcam: 
@@ -346,34 +339,33 @@ medcam:
 }
 ```
 
-One can choose from the following backends:
+You can choose from the following backends:
 
-- Grad-CAM (gcam)
-- Guided Backpropagation (gbp)
-- Guided Grad-CAM (ggcam)
-- Grad-CAM++ (gcampp)
+- Grad-CAM (`gcam`)
+- Guided Backpropagation (`gbp`)
+- Guided Grad-CAM (`ggcam`)
+- Grad-CAM++ (`gcampp`)
 
 Optionally one can also change the name of the layer for which the attention maps should be generated.
-The default behavior is "auto" which chooses the last convolutional layer.
+The default behavior is `auto` which chooses the last convolutional layer.
 
-All generated attention maps can be found in the experiment output_dir.
-Link to the original repository: https://github.com/MECLabTUDA/M3d-Cam
+All generated attention maps can be found in the experiment's output directory. Link to the original repository: [github.com/MECLabTUDA/M3d-Cam](https://github.com/MECLabTUDA/M3d-Cam)
 
 [Back To Top &uarr;](#table-of-contents)
 
 
 ## Post-Training Model Optimization
 
-If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimize` script to do so. The usage is as follows:
+If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimize` script to do so. The following command shows how it works:
 
 ```bash
 # continue from previous shell
-python gandlf_optimizeModel \
-  -m /path/to/trained/modelName_best.pth.tar \  # directory which contains testing and validation models
+(venv_gandlf) $> python gandlf_optimizeModel \
+  -m /path/to/trained/${architecture_name}_best.pth.tar \  # directory which contains testing and validation models
   -c ./experiment_0/config_used_to_train.yaml  # the config file used to train the model
 ```
 
-The optimized model will get generated in the model directory, with the name `modelName_optimized.onnx`.
+If `${architecture_name}` is supported, the optimized model will get generated in the model directory, with the name `${architecture_name}_optimized.onnx`.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -387,7 +379,8 @@ The resulting image contains your specific version of GaNDLF (including any cust
 To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
-python gandlf_deploy \
+# continue from previous shell
+(venv_gandlf) $> python gandlf_deploy \
   ## -h, --help         show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
