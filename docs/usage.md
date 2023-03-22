@@ -24,7 +24,7 @@ GaNDLF addresses all of these, and the information is divided as described in [t
 - [Constructing the Data CSV](#constructing-the-data-csv)
   - [Using the `gandlf_constructCSV` application](#using-the-gandlf_constructcsv-application)
 - [Customize the Training](#customize-the-training)
-  - [Running multiple experiments \[OPTIONAL\]](#running-multiple-experiments-optional)
+  - [Running multiple experiments (optional)](#running-multiple-experiments-optional)
 - [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
   - [Special note for Inference for Histology images](#special-note-for-inference-for-histology-images)
 - [Parallelize the Training](#parallelize-the-training)
@@ -205,7 +205,7 @@ The following command shows how the script works:
 
 ## Customize the Training
 
-GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. The following is a list of the available samples:
+GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. A list of the available samples is presented as follows:
 
 - [Sample showing all the available options](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml)
 - [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
@@ -218,12 +218,12 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Running multiple experiments [OPTIONAL]
+### Running multiple experiments (optional)
 
-- The `gandlf_configGenerator` script can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
-- Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
-- Provide the baseline configuration which has enabled you to train a model for 1 epoch for your dataset and problem (regardless of the efficacy).
-- Run the following command:  
+1. The `gandlf_configGenerator` script can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
+2. Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
+3. Provide the baseline configuration which has enabled you to successfully train a model for `1` epoch for your dataset and problem at hand (regardless of the efficacy).
+4. Run the following command:  
 ```bash
 (venv_gandlf) $> python gandlf_configGenerator \
   # -h, --help         show help message and exit
@@ -231,7 +231,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
   -s ./samples/config_generator_strategy.yaml \ # strategy file
   -o ./all_experiments/ # output directory
 ```
-- For example, to generate 4 configurations that leverage `unet` and `resunet` architectures for learning rates of `[0.1,0.01]`,  you can pass the following strategy file:
+5. For example, to generate `4` configurations that leverage `unet` and `resunet` architectures for learning rates of `[0.1,0.01]`,  you can use the following strategy file:
 ```yaml
 model:
   {
