@@ -427,7 +427,7 @@ For example, you might run:
 docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu [command and args go here]
 ```
 
-Remember that the process running in the container sees only the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
+Remember that the process running in the container only considers the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
 
 ```bash
 docker run -it --rm --name dataprep \
