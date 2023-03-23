@@ -2,8 +2,8 @@ This page contains answers to frequently asked questions about GaNDLF.
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
-  - [Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?](#why-do-i-get-the-error-pkg_resourcesdistributionnotfound-the-gandlf-distribution-was-not-found)
   - [Where do I start?](#where-do-i-start)
+  - [Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?](#why-do-i-get-the-error-pkg_resourcesdistributionnotfound-the-gandlf-distribution-was-not-found)
   - [Why is GaNDLF not working?](#why-is-gandlf-not-working)
   - [Which parts of a GaNDLF configuration are customizable?](#which-parts-of-a-gandlf-configuration-are-customizable)
   - [Can I run GaNDLF on a high performance computing (HPC) cluster?](#can-i-run-gandlf-on-a-high-performance-computing-hpc-cluster)
@@ -12,15 +12,15 @@ This page contains answers to frequently asked questions about GaNDLF.
   - [How can I update GaNDLF?](#how-can-i-update-gandlf)
   - [What I have another question?](#what-i-have-another-question)
 
-### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
+### Where do I start?
 
-This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
+The [usage guide](https://mlcommons.github.io/GaNDLF/usage) provides a good starting point for you to understand the application of GaNDLF. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 [Back To Top &uarr;](#table-of-contents)
 
-### Where do I start?
+### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
 
-The [usage](https://mlcommons.github.io/GaNDLF/usage) guide is fairly comprehensive and provides a good starting point. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -38,13 +38,13 @@ Virtually all of it! For more details, please see the [usage](https://mlcommons.
 
 ### Can I run GaNDLF on a high performance computing (HPC) cluster?
 
-YES, we have run GaNDLF on an SGE cluster to great success. Please [post a question](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=) with more details such as the type of scheduler, and so on, and we will do our best to address it.
+Yes, GaNDLF has successfully been run on an SGE cluster and another managed using Kubernetes. Please [post a question](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=) with more details such as the type of scheduler, and so on, and we will do our best to address it.
 
 [Back To Top &uarr;](#table-of-contents)
 
 ### How can I track the per-epoch training performance?
 
-Yes, look for `logs_*.csv` files in the output directory. It should be arranged in accordance with the cross-validation configuration, and should contain separate files for training/validation/testing data, along with the values for all requested performance metrics.
+Yes, look for `logs_*.csv` files in the output directory. It should be arranged in accordance with the cross-validation configuration. Furthermore, it  should contain separate files for each data cohort, i.e., training/validation/testing, along with the values for all requested performance metrics, which are defined per problem type.
 
 [Back To Top &uarr;](#table-of-contents)
 
@@ -56,7 +56,8 @@ GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
 
 ### How can I update GaNDLF?
 
-If you have performed `git clone` [during installation](https://mlcommons.github.io/GaNDLF/setup), then you will need to do `git pull` to get the latest master of GaNDLF. Follow this up with `pip install -e .` after activating the appropriate virtual environment to ensure the updates get passed through.
+- If you have [installed from pip](./setup.md), then you can simply run `pip install --upgrade gandlf` to get the latest version of GaNDLF, or if you are interested in the nightly builds, then you can run `pip install --upgrade --pre gandlf`.
+- If you have performed [installation from sources](./extending.md), then you will need to do `git pull` from the base `GaNDLF` directory to get the latest master of GaNDLF. Follow this up with `pip install -e .` after activating the appropriate virtual environment to ensure the updates get passed through.
 
 [Back To Top &uarr;](#table-of-contents)
 

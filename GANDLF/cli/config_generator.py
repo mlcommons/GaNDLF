@@ -84,9 +84,6 @@ def config_generator(base_config_path, strategy_path, output_dir):
         base_config_path (str): Path to baseline configuration.
         strategy_path (str): Strategy to employ when creating new configurations.
         output_dir (str): The output directory.
-
-    Raises:
-        ValueError: Parameter check from previous run.
     """
     base_config = None
     with open(base_config_path, "r") as f:

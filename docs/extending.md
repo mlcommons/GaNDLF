@@ -15,22 +15,17 @@ For any new feature, please ensure the corresponding option in the [sample confi
   - [Code coverage](#code-coverage)
 ## Environment
 
-Before starting to work on the code-level on GaNDLF, please get the environment ready:
-
-**NOTE**: Windows users, please ensure sure you have [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools) installed.
+Before starting to work on the code-level on GaNDLF, please follow the [installation instructions](./setup.md) to get the environment ready. Once that's done, please install GaNDLF from the source code using the following commands (this can be skipped if you have installed from sources):
 
 ```bash
-git clone https://github.com/mlcommons/GaNDLF.git
+# continue from previous shell
+(venv_gandlf) $> git clone https://github.com/mlcommons/GaNDLF.git
 cd GaNDLF
-conda create -p ./venv python=3.6 -y
-conda activate ./venv
-conda install -c conda-forge mamba -y # allows for faster dependency solving
-mamba install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
-conda install -c conda-forge gandlf -y
 pip install -e .
 ```
 
 [Back To Top &uarr;](#table-of-contents)
+
 
 ## Overall Architecture
 
