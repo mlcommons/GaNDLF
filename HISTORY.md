@@ -9,7 +9,9 @@
 - Added ability to specify testing data csv in main cli
 - Normalized surface dice has been added
 - Added dedicated script to perform post-training model optimization
+- Added CI and documentation for OpenFL integration
 - Added getting started guide
+- Added documentation for all loss functions and updated guideline
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`

@@ -350,8 +350,7 @@ You can choose one of the following backends:
 - Guided Grad-CAM (`ggcam`)
 - Grad-CAM++ (`gcampp`)
 
-Optionally one can also change the name of the layer for which the attention maps should be generated.
-The default behavior is `auto` which chooses the last convolutional layer.
+Optionally one can also change the name of the layer for which the attention maps should be generated. The default behavior is `auto` which chooses the last convolutional layer.
 
 All generated attention maps can be found in the experiment's output directory. Link to the original repository: [github.com/MECLabTUDA/M3d-Cam](https://github.com/MECLabTUDA/M3d-Cam)
 

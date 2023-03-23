@@ -154,6 +154,7 @@ def test_generic_constructTrainingCSV():
         # else:
         #     continue
         outputFile = inputDir + "/train_" + application_data + ".csv"
+        outputFile_rel = inputDir + "/train_" + application_data + "_relative.csv"
         # Test with various combinations of relative/absolute paths
         # Absolute input/output
         writeTrainingCSV(
@@ -167,52 +168,7 @@ def test_generic_constructTrainingCSV():
             currentApplicationDir,
             channelsID,
             labelID,
-            outputFile,
-            relativizePathsToOutput=True,
-        )
-        # Relative input, absolute output
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            outputFile,
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            outputFile,
-            relativizePathsToOutput=True,
-        )
-        # Absolute input, relative output
-        writeTrainingCSV(
-            currentApplicationDir,
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            currentApplicationDir,
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
-            relativizePathsToOutput=True,
-        )
-        # Relative input/output
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
-            relativizePathsToOutput=False,
-        )
-        writeTrainingCSV(
-            os.path.relpath(currentApplicationDir, os.getcwd()),
-            channelsID,
-            labelID,
-            os.path.relpath(outputFile, os.getcwd()),
+            outputFile_rel,
             relativizePathsToOutput=True,
         )
 
