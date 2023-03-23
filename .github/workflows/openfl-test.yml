@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: CI-PyTest
+name: OpenFL-Test
 
 on:
   push:
@@ -56,39 +56,29 @@ jobs:
         sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
         python -m pip install wheel
-        python -m pip install openvino-dev==2022.1.0 mlcube_docker
         pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
         pip install -e .
-    - name: Run generic unit tests
+    - name: Run generic unit tests to download data and construct CSVs
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        pytest --cov=. --cov-report=xml -k "generic"        
-    - name: Run classification unit tests with histology
+        pytest --cov=. --cov-report=xml -k "generic_download"
+        pytest --cov=. --cov-report=xml -k "generic_constructTrainingCSV"
+    # openfl tests start here
+    - name: Run OpenFL tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
-    - name: Run classification unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
-    - name: Run segmentation unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
-    - name: Run regression unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "regression"
-    - name: Run transunet unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml --cov-append -k "transunet"
-
-
-    - name: Upload coverage
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
+        echo "Removing onnx because of protobuf version conflict"
+        pip uninstall onnx -y
+        echo "Installing OpenFL"
+        git clone https://github.com/securefederatedai/openfl.git
+        cd openfl
+        git fetch --tags
+        git checkout $(git describe --tags --abbrev=0)
+        pip install -e .
+        cd ..
+        echo "Copying files to appropriate directories"
+        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
+        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
+        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_train.csv
+        cd openfl
+        python -m tests.github.test_fets_challenge --template fets_challenge_seg_test --fed_workspace aggregator --col1 col1 --col2 col2 --rounds-to-train 1

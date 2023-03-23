@@ -394,6 +394,8 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 
 [Back To Top &uarr;](#table-of-contents)
 
+- Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
+- Configurations can be found in [the main repo](https://github.com/mlcommons/GaNDLF/tree/master/testing).
 
 ## Running with Docker
 
