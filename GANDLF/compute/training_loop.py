@@ -14,6 +14,7 @@ from GANDLF.utils import (
     latest_model_path_end,
     initial_model_path_end,
     save_model,
+    optimize_and_save_model,
     load_model,
     version_check,
     write_training_patches,
@@ -518,7 +519,7 @@ def training_loop(
             os.remove(model_paths["latest"])
         save_model(
             {
-                "epoch": 0,
+                "epoch": epoch,
                 "model_state_dict": model_dict,
                 "optimizer_state_dict": optimizer.state_dict(),
                 "loss": best_loss,
@@ -551,36 +552,7 @@ def training_loop(
 
     # once the training is done, optimize the best model
     if os.path.exists(model_paths["best"]):
-        onnx_export = True
-        if params["model"]["architecture"] in ["sdnet", "brain_age"]:
-            onnx_export = False
-        elif "onnx_export" in params["model"] and not (params["model"]["onnx_export"]):
-            onnx_export = False
-
-        if onnx_export:
-            print("Optimizing best model.")
-
-            try:
-                main_dict = load_model(model_paths["best"], params["device"])
-                version_check(params["version"], version_to_check=main_dict["version"])
-                model.load_state_dict(main_dict["model_state_dict"])
-                best_epoch = main_dict["epoch"]
-                optimizer.load_state_dict(main_dict["optimizer_state_dict"])
-                best_loss = main_dict["loss"]
-                save_model(
-                    {
-                        "epoch": best_epoch,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "loss": best_loss,
-                    },
-                    model,
-                    params,
-                    model_paths["best"],
-                    onnx_export,
-                )
-            except Exception as e:
-                print("Best model could not be loaded, error: ", e)
+        optimize_and_save_model(model, params, model_paths["best"], onnx_export=True)
 
 
 if __name__ == "__main__":

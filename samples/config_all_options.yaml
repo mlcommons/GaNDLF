@@ -275,7 +275,7 @@ data_augmentation:
 # that your HPC would expect
 # ${outputDir} will be changed to the outputDir you pass in CLI + '/${fold_number}'
 # ensure that the correct location of the virtual environment is getting invoked, otherwise it would pick up the system python, which might not have all dependencies
-parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/\$JOB_ID.stdout -e ${outputDir}/\$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
+# parallel_compute_command: 'qsub -b y -l gpu -l h_vmem=32G -cwd -o ${outputDir}/\$JOB_ID.stdout -e ${outputDir}/\$JOB_ID.stderr `pwd`/sge_wrapper _correct_location_of_virtual_environment_/venv/bin/python'
 ## queue configuration - https://torchio.readthedocs.io/data/patch_training.html?#queue
 # this determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches
 q_max_length: 40
