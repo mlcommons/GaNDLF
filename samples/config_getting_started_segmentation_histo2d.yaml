@@ -1,0 +1,71 @@
+batch_size: 1
+clip_grad: null
+clip_mode: null
+data_augmentation: {}
+data_postprocessing: {}
+data_postprocessing_after_reverse_one_hot_encoding: {}
+data_preprocessing:
+  normalize: null
+  resize_image:
+  - 128
+  - 128
+enable_padding: false
+grid_aggregator_overlap: crop
+in_memory: false
+inference_mechanism:
+  grid_aggregator_overlap: average
+  patch_overlap: 0
+learning_rate: 0.001
+loss_function: dc
+medcam_enabled: false
+metrics:
+- dice
+modality: histo
+model:
+  amp: true
+  architecture: resunet
+  base_filters: 32
+  class_list:
+  - 0
+  - 255
+  data_type: FP32
+  dimension: 2
+  final_layer: sigmoid
+  ignore_label_validation: null
+  norm_type: instance
+  num_channels: 3
+  onnx_export: true
+  print_summary: true
+  save_at_every_epoch: false
+  type: torch
+nested_training:
+  testing: 1
+  validation: -2
+num_epochs: 1
+optimizer:
+  type: adam
+parallel_compute_command: ''
+patch_sampler: uniform
+patch_size:
+- 128
+- 128
+- 1
+patience: 1
+pin_memory_dataloader: false
+print_rgb_label_warning: true
+q_max_length: 1
+q_num_workers: 0
+q_samples_per_volume: 1
+q_verbose: false
+save_output: false
+save_training: false
+scaling_factor: 1
+scheduler:
+  step_size: 0.0002
+  type: triangle
+track_memory_usage: false
+verbose: true
+version:
+  maximum: 0.0.16
+  minimum: 0.0.14
+weighted_loss: true

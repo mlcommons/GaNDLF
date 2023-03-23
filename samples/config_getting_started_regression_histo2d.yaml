@@ -1,0 +1,65 @@
+batch_size: 1
+clip_grad: null
+clip_mode: null
+data_augmentation: {}
+data_postprocessing: {}
+data_postprocessing_after_reverse_one_hot_encoding: {}
+data_preprocessing:
+  normalize: null
+  rgba2rgb: ''
+enable_padding: false
+grid_aggregator_overlap: crop
+in_memory: false
+inference_mechanism:
+  grid_aggregator_overlap: crop
+  patch_overlap: 0
+learning_rate: 0.001
+loss_function:
+  mse:
+    reduction: mean
+medcam_enabled: false
+metrics:
+  mse: null
+modality: histo
+model:
+  amp: false
+  architecture: densenet121
+  base_filters: 32
+  data_type: FP32
+  dimension: 2
+  final_layer: None
+  ignore_label_validation: null
+  norm_type: none
+  num_channels: 3
+  print_summary: false
+  save_at_every_epoch: false
+  type: torch
+nested_training:
+  testing: 1
+  validation: -2
+num_epochs: 1
+optimizer:
+  type: adam
+parallel_compute_command: ''
+patch_sampler: uniform
+patch_size: 128
+patience: 1
+pin_memory_dataloader: false
+print_rgb_label_warning: true
+q_max_length: 1
+q_num_workers: 0
+q_samples_per_volume: 1
+q_verbose: false
+save_output: false
+save_training: false
+scaling_factor: 1
+scheduler:
+  step_size: 0.0002
+  type: triangle
+track_memory_usage: false
+verbose: false
+version:
+  maximum: 0.0.16
+  minimum: 0.0.14
+weighted_loss: true
+which_model: resunet

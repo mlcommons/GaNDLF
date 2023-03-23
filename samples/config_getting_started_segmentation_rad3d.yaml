@@ -1,0 +1,94 @@
+batch_size: 1
+clip_grad: null
+clip_mode: null
+data_augmentation: {}
+data_postprocessing: {}
+data_postprocessing_after_reverse_one_hot_encoding: {}
+data_preprocessing:
+  normalize: null
+enable_padding: false
+grid_aggregator_overlap: crop
+headers:
+  channelHeaders:
+  - 1
+  labelHeader: 2
+  predictionHeaders: []
+  subjectIDHeader: 0
+in_memory: true
+inference_mechanism:
+  grid_aggregator_overlap: average
+  patch_overlap: 0
+learning_rate: 0.001
+loss_function: dc
+medcam_enabled: false
+metrics:
+  dice: null
+  f1:
+    average: weighted
+    mdmc_average: samplewise
+    multi_class: true
+    threshold: 0.5
+  iou:
+    reduction: elementwise_mean
+    threshold: 0.5
+  precision:
+    average: weighted
+    mdmc_average: samplewise
+    multi_class: true
+    threshold: 0.5
+  recall:
+    average: weighted
+    mdmc_average: samplewise
+    multi_class: true
+    recall:
+      average: macro
+    threshold: 0.5
+modality: rad
+model:
+  amp: true
+  architecture: resunet
+  base_filters: 32
+  class_list:
+  - 0
+  - 1
+  data_type: FP32
+  dimension: 3
+  final_layer: softmax
+  ignore_label_validation: null
+  norm_type: instance
+  num_channels: 1
+  onnx_export: false
+  print_summary: false
+  save_at_every_epoch: false
+  type: torch
+nested_training:
+  testing: -5
+  validation: -5
+num_epochs: 1
+optimizer:
+  type: adam
+parallel_compute_command: ''
+patch_sampler: uniform
+patch_size:
+- 32
+- 32
+- 32
+patience: 1
+pin_memory_dataloader: false
+print_rgb_label_warning: true
+q_max_length: 1
+q_num_workers: 0
+q_samples_per_volume: 1
+q_verbose: false
+save_output: false
+save_training: false
+scaling_factor: 1
+scheduler:
+  step_size: 0.0002
+  type: triangle
+track_memory_usage: false
+verbose: true
+version:
+  maximum: 0.0.16
+  minimum: 0.0.16
+weighted_loss: true
