@@ -350,8 +350,7 @@ You can choose one of the following backends:
 - Guided Grad-CAM (`ggcam`)
 - Grad-CAM++ (`gcampp`)
 
-Optionally one can also change the name of the layer for which the attention maps should be generated.
-The default behavior is `auto` which chooses the last convolutional layer.
+Optionally one can also change the name of the layer for which the attention maps should be generated. The default behavior is `auto` which chooses the last convolutional layer.
 
 All generated attention maps can be found in the experiment's output directory. Link to the original repository: [github.com/MECLabTUDA/M3d-Cam](https://github.com/MECLabTUDA/M3d-Cam)
 
@@ -394,8 +393,6 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 
 [Back To Top &uarr;](#table-of-contents)
 
-- Example data can be found in [the main repo](https://github.com/mlcommons/GaNDLF/raw/master/testing/data.zip); this contains both 3D and 2D data that can be used to run various workloads.
-- Configurations can be found in [the main repo](https://github.com/mlcommons/GaNDLF/tree/master/testing).
 
 ## Running with Docker
 
