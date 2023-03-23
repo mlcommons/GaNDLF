@@ -3,6 +3,8 @@ show_downloads: True
 navigation:
   - title: Home
     url: /
+  - title: Getting Started
+    url: getting_started
   - title: Installation
     url: setup
   - title: Usage
