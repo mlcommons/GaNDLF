@@ -40,12 +40,29 @@ jobs:
         echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
         echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
     
+    - name: Log into GitHub Packages registry (ghcr.io)
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Pre-build dev container image
+      if: github.event_name != 'pull_request' # push when not on PR
+      uses: devcontainers/ci@v0.3
+      with:
+        imageName: ghcr.io/mlcommons/gandlf # This is the image name that will be built and pushed to the registry
+        cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
+        imageTag: devcontainer # This is the tag that will be used for the image
+        push: always
+    
     - name: Build and run dev container task
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: devcontainers/ci@v0.3
       with:
         cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
-        imageTag: latest-cpu # we want to build the image based on the cpu
+        imageTag: devcontainer # This is the tag that will be used for the image
         push: never
         # Change this to be your CI task/script
         runCmd: pytest --cov=. --cov-report=xml -k "generic"
