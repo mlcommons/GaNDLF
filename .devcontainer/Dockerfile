@@ -9,3 +9,6 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bi
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
+
+# opencv dependencies
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 libgl1-mesa-glx -y
