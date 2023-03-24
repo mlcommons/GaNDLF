@@ -11,6 +11,15 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Whe
 
 [Back To Top &uarr;](#table-of-contents)
 
+## Running GaNDLF with GitHub Codespaces
+
+Alternatively, you can launch a [Codespace](https://github.com/features/codespaces) for GaNDLF by clicking this link: 
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=master&repo=342691278)
+
+A codespace will open in a web-based version of [Visual Studio Code](https://code.visualstudio.com/). The [dev container](.devcontainer/devcontainer.json) is fully configured with software needed for this project.
+
+**Note**: Dev containers is an open spec which is supported by [GitHub Codespaces](https://github.com/codespaces) and [other tools](https://containers.dev/supporting).
 
 ## Sample Data
 
