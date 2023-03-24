@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  dev-container-test:
     runs-on: ubuntu-latest
     steps:
     - name: Free space
