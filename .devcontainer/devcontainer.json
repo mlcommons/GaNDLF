@@ -4,7 +4,7 @@
 	"name": "GaNDLF",
 	"build": {
 		"context": "..",
-		"dockerfile": "Dockerfile"
+		"dockerfile": "../Dockerfile-CPU"
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
@@ -21,7 +21,7 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Install some dependencies on GitHub actions
-	"onCreateCommand": "./.devcontainer/onCreateCommand.sh",
+	// "onCreateCommand": "./.devcontainer/onCreateCommand.sh",
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "./.devcontainer/postCreateCommand.sh"
 	// Configure tool-specific properties.
