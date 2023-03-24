@@ -40,6 +40,14 @@ jobs:
         echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
         echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
     
+    - name: Log into GitHub Packages registry (ghcr.io)
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
     - name: Build and run dev container task
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: devcontainers/ci@v0.3
