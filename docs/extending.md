@@ -12,25 +12,22 @@ cd GaNDLF
 pip install -e .
 ```
 
-[Back To Top &uarr;](#table-of-contents)
-
 
 ## Overall Architecture
 
 - Command-line parsing: [gandlf_run](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_run)
 - Parameters from [training configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) get passed as a `dict` via [parameter parser](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/parseConfig.py)
 - [Training Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/training_manager.py): 
-  - Handles k-fold training 
-  - Main entry point from CLI
+    - Handles k-fold training 
+    - Main entry point from CLI
 - [Training Function](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/compute/training_loop.py): 
-  - Performs actual training
+    - Performs actual training
 - [Inference Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/inference_manager.py): 
-  - Handles inference functionality 
-  - Main entry point from CLI
+    - Handles inference functionality 
+    - Main entry point from CLI
 - [Inference Function](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/compute/inference_loop.py): 
-  - Performs actual inference
+    - Performs actual inference
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Dependency Management
 
@@ -45,7 +42,6 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - For details, please see [README for `GANDLF.models` submodule](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/models/Readme.md).
 - [Update Tests](#update-tests)
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Adding Augmentation Transformations
 
@@ -55,7 +51,6 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - For details, please see [README for `GANDLF.data.augmentation` submodule](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/data/augmentation/README.md).
 - [Update Tests](#update-tests)
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Adding Preprocessing functionality
 
@@ -66,7 +61,6 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - For details, please see [README for `GANDLF.data.preprocessing` submodule](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/data/preprocessing/README.md).
 - [Update Tests](#update-tests)
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Adding Training Functionality
 
@@ -74,7 +68,6 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - Update [Training Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/training_manager.py), if any training API has changed
 - [Update Tests](#update-tests)
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Adding Inference Functionality
 
@@ -82,30 +75,31 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - Update [Inference Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/inference_manager.py), if any inference API has changed
 - [Update Tests](#update-tests)
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Update Tests
 
 Once you have made changes to functionality, it is imperative that the unit tests be updated to cover the new code. Please see the [full testing suite](https://github.com/mlcommons/GaNDLF/blob/master/testing/test_full.py) for details and examples.
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Run Tests
 
 Once you have the virtual environment set up, tests can be run using the following command:
-```powershell
-pytest --device cuda # can be cuda or cpu, defaults to cpu
+
+```bash
+# continue from previous shell
+(venv_gandlf) $> pytest --device cuda # can be cuda or cpu, defaults to cpu
 ```
 
 Any failures will be reported in the file [`${GaNDLF_HOME}/testing/failures.log`](https://github.com/mlcommons/GaNDLF/blob/5030ff83a38947c1583b58a08598308886ee9a0a/testing/conftest.py#L25).
 
-[Back To Top &uarr;](#table-of-contents)
 
 ### Code coverage
 
 The code coverage for the tests can be obtained by the following command:
+
 ```powershell
-coverage run -m pytest --device cuda; coverage report -m
+bash
+# continue from previous shell
+(venv_gandlf) $> coverage run -m pytest --device cuda; coverage report -m
 ```
 
-[Back To Top &uarr;](#table-of-contents)
