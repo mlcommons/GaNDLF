@@ -46,6 +46,7 @@ jobs:
       with:
         imageName: ghcr.io/mlcommons/gandlf # This is the image name that will be built and pushed to the registry
         cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
+        imageTag: devcontainer # This is the tag that will be used for the image
         push: always
         # Change this to be your CI task/script
         runCmd: pytest --cov=. --cov-report=xml -k "generic"
