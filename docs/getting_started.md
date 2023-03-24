@@ -9,7 +9,6 @@ Please follow the [installation instructions](./setup.md) to install GaNDLF. Whe
 (venv_gandlf) $> ### subsequent commands go here
 ```
 
-[Back To Top &uarr;](#table-of-contents)
 
 ## Running GaNDLF with GitHub Codespaces
 
@@ -19,7 +18,8 @@ Alternatively, you can launch a [Codespace](https://github.com/features/codespac
 
 A codespace will open in a web-based version of [Visual Studio Code](https://code.visualstudio.com/). The [dev container](.devcontainer/devcontainer.json) is fully configured with software needed for this project.
 
-**Note**: Dev containers is an open spec which is supported by [GitHub Codespaces](https://github.com/codespaces) and [other tools](https://containers.dev/supporting).
+**Note**: Dev Containers is an open spec which is supported by [GitHub Codespaces](https://github.com/codespaces) and [other tools](https://containers.dev/supporting).
+
 
 ## Sample Data
 
@@ -41,8 +41,6 @@ The `data` directory content should look like the example below (for brevity, th
 ```
 
 **Note**: When using your own data, it is vital to correctly [prepare your data](https://mlcommons.github.io/GaNDLF/usage#preparing-the-data) prior to using it for any computational task (such as AI training or inference).
-
-[Back To Top &uarr;](#table-of-contents)
 
 
 ## Segmentation
@@ -67,8 +65,6 @@ The `data` directory content should look like the example below (for brevity, th
 3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) to help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_rad3d.yaml). This configuration has various levels of customization, and those details are presented on [this page](https://mlcommons.github.io/GaNDLF/customize).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, just without `Label` or `ValueToPredict` headers.
-
-[Back To Top &uarr;](#table-of-contents)
 
 ### Segmentation using 2D Histology Images
 
@@ -112,8 +108,6 @@ The `data` directory content should look like the example below (for brevity, th
 
 **Note**: Please consider the [special considerations for histology images during inference](https://mlcommons.github.io/GaNDLF/usage#special-note-for-inference-for-histology-images).
 
-[Back To Top &uarr;](#table-of-contents)
-
 
 ## Classification
 ### Classification using 3D Radiology Images
@@ -137,8 +131,6 @@ The `data` directory content should look like the example below (for brevity, th
 3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_classification_rad3d.yaml). This configuration has various levels of customization, and those details are presented on [this page](https://mlcommons.github.io/GaNDLF/customize).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, but without `Label` or `ValueToPredict` headers.
-
-[Back To Top &uarr;](#table-of-contents)
 
 ### Classification (patch-level) using 2D Histology Images
 
@@ -182,8 +174,6 @@ The `data` directory content should look like the example below (for brevity, th
 
 **Note**: Please consider the [special considerations for histology images during inference](https://mlcommons.github.io/GaNDLF/usage#special-note-for-inference-for-histology-images).
 
-[Back To Top &uarr;](#table-of-contents)
-
 
 ## Regression
 ### Regression using 3D Radiology Images
@@ -207,8 +197,6 @@ The `data` directory content should look like the example below (for brevity, th
 3. [Construct the configuration file](https://mlcommons.github.io/GaNDLF/usage#customize-the-training) that will help design the computation (training and inference) pipeline. An example file for this task can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_regression_rad3d.yaml). This configuration has various levels of customization, and those details are presented on [this page](https://mlcommons.github.io/GaNDLF/customize).
 4. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 5. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, but without `Label` or `ValueToPredict` headers.
-
-[Back To Top &uarr;](#table-of-contents)
 
 ### Regression (patch-level) using 2D Histology Images
 
@@ -250,5 +238,3 @@ The `data` directory content should look like the example below (for brevity, th
 5. Now you are ready to [train your model](https://mlcommons.github.io/GaNDLF/usage#running-gandlf-traininginference).
 6. Once the model is trained, you can infer it on unseen data. Remember to construct a [similar data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) for the unseen data, but without `Label` or `ValueToPredict` headers.
 7. **Note**: Please consider the [special considerations for histology images during inference](https://mlcommons.github.io/GaNDLF/usage#special-note-for-inference-for-histology-images).
-
-[Back To Top &uarr;](#table-of-contents)
