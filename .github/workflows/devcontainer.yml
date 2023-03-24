@@ -44,8 +44,8 @@ jobs:
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: devcontainers/ci@v0.3
       with:
-        imageName: ghcr.io/mlcommons/gandlf-devcontainer # This is the image name that will be built and pushed to the registry
-        cacheFrom: ghcr.io/mlcommons/gandlf-devcontainer # This is the image name that will be used as a cache source
+        imageName: ghcr.io/mlcommons/gandlf # This is the image name that will be built and pushed to the registry
+        cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
         push: always
         # Change this to be your CI task/script
         runCmd: pytest --cov=. --cov-report=xml -k "generic"
