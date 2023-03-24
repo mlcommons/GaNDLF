@@ -10,12 +10,12 @@ Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This ne
 ## Optional Requirements
 
 - **GPU compute** (usually needed for faster training):
-  - Install appropriate drivers:
-    - [NVIDIA](https://www.nvidia.com/Download/index.aspx?lang=en-us)
-    - [AMD](https://www.amd.com/en/support)
-  - Compute toolkit appropriate for your hardware:
-    - NVIDIA: [CUDA](https://developer.nvidia.com/cuda-download) and a compatible [cuDNN](https://developer.nvidia.com/cudnn) installed system-wide
-    - AMD: [ROCm](https://www.amd.com/en/graphics/servers-solutions-rocm)
+    - Install appropriate drivers:
+        - [NVIDIA](https://www.nvidia.com/Download/index.aspx?lang=en-us)
+        - [AMD](https://www.amd.com/en/support)
+    - Compute toolkit appropriate for your hardware:
+        - NVIDIA: [CUDA](https://developer.nvidia.com/cuda-download) and a compatible [cuDNN](https://developer.nvidia.com/cudnn) installed system-wide
+        - AMD: [ROCm](https://www.amd.com/en/graphics/servers-solutions-rocm)
 - Windows: [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools). This is required for PyTorch to work on Windows. If you are using conda, you can install it with `conda install -c anaconda m2w64-toolchain`.
 
 ## Installation
