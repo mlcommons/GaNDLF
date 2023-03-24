@@ -1,16 +1,6 @@
 
 This file contains mid-level information regarding various parameters that can be leveraged to customize the training/inference in GaNDLF.
 
-## Table of Contents
-- [Table of Contents](#table-of-contents)
-- [Model](#model)
-- [Loss function](#loss-function)
-- [Metrics](#metrics)
-- [Patching Strategy](#patching-strategy)
-- [Data Preprocessing](#data-preprocessing)
-- [Data Augmentation](#data-augmentation)
-- [Training Parameters](#training-parameters)
-
 
 ## Model
 

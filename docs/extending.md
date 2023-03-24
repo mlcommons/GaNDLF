@@ -1,18 +1,6 @@
 For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
-## Table of Contents
-- [Table of Contents](#table-of-contents)
-- [Environment](#environment)
-- [Overall Architecture](#overall-architecture)
-- [Dependency Management](#dependency-management)
-- [Adding Models](#adding-models)
-- [Adding Augmentation Transformations](#adding-augmentation-transformations)
-- [Adding Preprocessing functionality](#adding-preprocessing-functionality)
-- [Adding Training Functionality](#adding-training-functionality)
-- [Adding Inference Functionality](#adding-inference-functionality)
-- [Update Tests](#update-tests)
-- [Run Tests](#run-tests)
-  - [Code coverage](#code-coverage)
+
 ## Environment
 
 Before starting to work on the code-level on GaNDLF, please follow the [installation instructions](./setup.md) to get the environment ready. Once that's done, please install GaNDLF from the source code using the following commands (this can be skipped if you have installed from sources):
