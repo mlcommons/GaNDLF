@@ -45,14 +45,4 @@ jobs:
       uses: devcontainers/ci@v0.3
       with:
         # Change this to be your CI task/script
-        runCmd: |
-          sudo apt-get install libvips libvips-tools -y
-          python -m pip install --upgrade pip
-          python -m pip install wheel
-          python -m pip install openvino-dev==2022.1.0 mlcube_docker
-          pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
-          pip install -e .
-    - name: Run generic unit tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        pytest --cov=. --cov-report=xml -k "generic"        
+        runCmd: pytest --cov=. --cov-report=xml -k "generic"
