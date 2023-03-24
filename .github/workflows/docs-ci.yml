@@ -1,0 +1,20 @@
+name: docs-ci
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install -r docs/requirements.txt
+      - run: git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - run: git config --global user.name "github-actions[bot]"
+      - run: mkdocs gh-deploy --force

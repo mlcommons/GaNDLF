@@ -11,39 +11,6 @@ A detailed data flow diagram is presented in [this link](https://github.com/mlco
 GaNDLF addresses all of these, and the information is divided as described in [the following section](#table-of-contents).
 
 
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Table of Contents](#table-of-contents)
-- [Installation](#installation)
-- [Preparing the Data](#preparing-the-data)
-  - [Anonymize Data](#anonymize-data)
-  - [Cleanup/Harmonize/Curate Data](#cleanupharmonizecurate-data)
-  - [Offline Patch Extraction (for histology images only)](#offline-patch-extraction-for-histology-images-only)
-  - [Running preprocessing before training/inference (optional)](#running-preprocessing-before-traininginference-optional)
-- [Constructing the Data CSV](#constructing-the-data-csv)
-  - [Using the `gandlf_constructCSV` application](#using-the-gandlf_constructcsv-application)
-- [Customize the Training](#customize-the-training)
-  - [Running multiple experiments (optional)](#running-multiple-experiments-optional)
-- [Running GaNDLF (Training/Inference)](#running-gandlf-traininginference)
-  - [Special notes for Inference for Histology images](#special-notes-for-inference-for-histology-images)
-- [Parallelize the Training](#parallelize-the-training)
-  - [Multi-GPU training](#multi-gpu-training)
-  - [Distributed training](#distributed-training)
-- [Expected Output(s)](#expected-outputs)
-  - [Training](#training)
-  - [Inference](#inference)
-- [Plot the final results](#plot-the-final-results)
-- [M3D-CAM usage](#m3d-cam-usage)
-- [Post-Training Model Optimization](#post-training-model-optimization)
-- [Deployment](#deployment)
-- [Running with Docker](#running-with-docker)
-  - [Mounting Input and Output](#mounting-input-and-output)
-    - [Special Case for Training](#special-case-for-training)
-  - [Enabling GPUs](#enabling-gpus)
-- [MLCubes](#mlcubes)
-
-
 ## Installation
 
 Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
