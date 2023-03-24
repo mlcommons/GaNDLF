@@ -1,20 +1,5 @@
 This document will help you get started with GaNDLF using a few representative examples.
 
-## Table of Contents
-
-- [Table of Contents](#table-of-contents)
-- [Installation](#installation)
-- [Sample Data](#sample-data)
-- [Segmentation](#segmentation)
-  - [Segmentation using 3D Radiology Images](#segmentation-using-3d-radiology-images)
-  - [Segmentation using 2D Histology Images](#segmentation-using-2d-histology-images)
-- [Classification](#classification)
-  - [Classification using 3D Radiology Images](#classification-using-3d-radiology-images)
-  - [Classification (patch-level) using 2D Histology Images](#classification-patch-level-using-2d-histology-images)
-- [Regression](#regression)
-  - [Regression using 3D Radiology Images](#regression-using-3d-radiology-images)
-  - [Regression (patch-level) using 2D Histology Images](#regression-patch-level-using-2d-histology-images)
-
 
 ## Installation
 
