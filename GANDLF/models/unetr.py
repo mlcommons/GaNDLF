@@ -9,10 +9,10 @@ import math
 
 class _DeconvConvBlock(nn.Sequential):
     """
-    A block consisting of a transposed convolutional layer, followed by a convolutional layer, 
-    a normalization layer, and a ReLU activation function. The block is defined as a sequential 
+    A block consisting of a transposed convolutional layer, followed by a convolutional layer,
+    a normalization layer, and a ReLU activation function. The block is defined as a sequential
     module in PyTorch, making it easy to stack multiple blocks together.
-    
+
     Args:
         in_feats (int): The number of input features to the block.
         out_feats (int): The number of output features from the block.
@@ -507,8 +507,8 @@ class _Transformer(nn.Sequential):
 
 def checkImgSize(img_size, number=4):
     """
-    Checks if the input image size is greater than or equal to 2^number in each dimension. 
-    If it is, it returns the specified number. Otherwise, it returns the minimum log base 2 
+    Checks if the input image size is greater than or equal to 2^number in each dimension.
+    If it is, it returns the specified number. Otherwise, it returns the minimum log base 2
     of the input image size.
 
     Args:
