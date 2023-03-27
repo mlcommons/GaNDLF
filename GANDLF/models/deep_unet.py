@@ -190,16 +190,12 @@ class deep_unet(ModelBase):
         """
         Forward pass of the U-Net model.
 
-        Parameters
-        ----------
-        x : Tensor
-            Input Tensor with shape [batch_size, channels, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Input Tensor with shape [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        list of Tensors
-            List of output Tensors with shape [batch_size, n_classes, x_dims, y_dims, z_dims].
-            The length of the list corresponds to the number of layers in the decoder path.
+        Returns:
+            (list): List of output Tensors with shape [batch_size, n_classes, x_dims, y_dims, z_dims].
+                    The length of the list corresponds to the number of layers in the decoder path.
         """
 
         # Encoding path
