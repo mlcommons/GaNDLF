@@ -9,9 +9,8 @@ def brainage(parameters):
 
     Parameters
     ----------
-    parameters : dict
-        A dictionary containing the model parameters, including:
-        - model: a sub-dictionary containing the model-specific parameters.
+    parameters : (dict) A dictionary containing the model parameters, including:
+            - model: a sub-dictionary containing the model-specific parameters.
             - dimension: the dimensionality of the input data (should be 2 for brain age prediction).
             - amp: whether to use automatic mixed precision (not yet implemented for VGG).
     
