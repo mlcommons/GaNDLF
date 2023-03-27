@@ -39,7 +39,7 @@ class IncConv(nn.Module):
                 Whether to include a bias term in the convolution. Defaults to True.
             inst_norm_affine (bool, optional):
                 Whether to include an affine transformation in the instance normalization. Defaults to True.
-            res (bool, optional): 
+            res (bool, optional):
                 Whether to use residual connections. Defaults to False.
             lrelu_inplace (bool, optional):
                 Whether to perform the LeakyReLU activation function in-place. Defaults to True.
