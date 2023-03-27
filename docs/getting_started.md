@@ -35,7 +35,7 @@ The `data` directory content should look like the example below (for brevity, th
 ## Segmentation
 ### Segmentation using 3D Radiology Images
 
-1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+1. Download and extract the sample data as described in the [sample data](#sample-data). Alternatively, you can use your own data (see [constructing CSV in usage](./usage.md#constructing-the-data-csv) for an example).
 2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document. Furthermore, the CSV should look like the example below (currently, the `Label` header is unused and ignored for classification/regression, which use the `ValueToPredict` header):
 
     ```csv
@@ -57,7 +57,7 @@ The `data` directory content should look like the example below (for brevity, th
 
 ### Segmentation using 2D Histology Images
 
-1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+1. Download and extract the sample data as described in the [sample data](#sample-data). Alternatively, you can use your own data (see [constructing CSV in usage](./usage.md#constructing-the-data-csv) for an example).
 2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is presented [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml):
     ```yaml
     num_patches: 3
@@ -101,7 +101,7 @@ The `data` directory content should look like the example below (for brevity, th
 ## Classification
 ### Classification using 3D Radiology Images
 
-1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+1. Download and extract the sample data as described in the [sample data](#sample-data). Alternatively, you can use your own data (see [constructing CSV in usage](./usage.md#constructing-the-data-csv) for an example).
 2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document. The CSV should look like the following example (currently, the `Label` header is unused and ignored for classification/regression, which use the `ValueToPredict` header):
 
     ```csv
@@ -123,7 +123,7 @@ The `data` directory content should look like the example below (for brevity, th
 
 ### Classification (patch-level) using 2D Histology Images
 
-1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+1. Download and extract the sample data as described in the [sample data](#sample-data). Alternatively, you can use your own data (see [constructing CSV in usage](./usage.md#constructing-the-data-csv) for an example).
 2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is presented [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml):
     ```yaml
     num_patches: 3
@@ -167,7 +167,7 @@ The `data` directory content should look like the example below (for brevity, th
 ## Regression
 ### Regression using 3D Radiology Images
 
-1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+1. Download and extract the sample data as described in the [sample data](#sample-data). Alternatively, you can use your own data (see [constructing CSV in usage](./usage.md#constructing-the-data-csv) for an example).
 2. [Construct the main data file](https://mlcommons.github.io/GaNDLF/usage#constructing-the-data-csv) that will be used for the entire computation cycle. For the sample data for this task, the base location is `${GANDLF_DATA}/3d_rad_segmentation`, and it will be referred to as `${GANDLF_DATA_3DRAD}` in the rest of the document. The CSV should look like the following example (currently, the `Label` header is unused and ignored for classification/regression, which use the `ValueToPredict` header):
 
     ```csv
@@ -189,7 +189,7 @@ The `data` directory content should look like the example below (for brevity, th
 
 ### Regression (patch-level) using 2D Histology Images
 
-1. Download and extract the sample data as described in the [sample data](#sample-data) as described above. Alternatively, you can use your own data.
+1. Download and extract the sample data as described in the [sample data](#sample-data). Alternatively, you can use your own data (see [constructing CSV in usage](./usage.md#constructing-the-data-csv) for an example).
 2. [Extract patches/tiles from the full-size whole slide images](https://mlcommons.github.io/GaNDLF/usage#offline-patch-extraction-for-histology-images-only) for training. A sample configuration to extract patches is presented [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml):
     ```yaml
     num_patches: 3
