@@ -42,10 +42,10 @@ class MSDNet(ModelBase):
         A multi-scale dense neural network architecture that consists of multiple convolutional layers with different dilation rates.
 
         Args:
-        - parameters (dict): A dictionary containing the parameters required to create the convolutional and 
+        - parameters (dict): A dictionary containing the parameters required to create the convolutional and
         batch normalization layers in the model.
         - num_layers (int): The number of layers to be added to the model.
-        
+
         Returns:
         - None
         """
