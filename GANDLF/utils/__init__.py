@@ -56,3 +56,7 @@ from .modelio import (
     save_model,
     optimize_and_save_model,
 )
+
+from .set_determinism import (
+    set_determinism
+)

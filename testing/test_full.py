@@ -2909,3 +2909,27 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     sanitize_outputDir()
 
     print("passed")
+
+def test_random_numbers_are_deterministic_on_cpu():
+    print("48: Starting testing deterministic random numbers generation")
+
+    set_determinism(seed=42)
+    a, b = np.random.rand(3, 3), np.random.rand(3, 3)
+
+    set_determinism(seed=42)
+    c, d = np.random.rand(3, 3), np.random.rand(3, 3)
+
+    # Check that the generated random numbers are the same with numpy
+    assert np.allclose(a, c)
+    assert np.allclose(b, d)
+
+    e, f = [random.random() for _ in range(5)], [random.random() for _ in range(5)]
+
+    set_determinism(seed=42)
+    g, h = [random.random() for _ in range(5)], [random.random() for _ in range(5)]
+
+    # Check that the generated random numbers are the same with Python's built-in random module
+    assert e == g
+    assert f == h
+
+    print("passed")
