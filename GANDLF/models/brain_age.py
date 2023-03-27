@@ -6,7 +6,7 @@ import torchvision
 def brainage(parameters):
     """
     This function creates a VGG16-based neural network model for brain age prediction.
-    
+
     Parameters
     ----------
     parameters : dict
