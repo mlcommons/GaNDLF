@@ -55,7 +55,7 @@ class DownsamplingModule(nn.Module):
     def forward(self, x):
         """
         Applies a downsampling operation to the input tensor.
-        
+
         [input -- > in --> lrelu --> ConvDS --> output]
 
         Args:
