@@ -17,7 +17,7 @@ from .unetr import _Transformer
 class _DecoderCUP(nn.Sequential):
     """
     Decoder module used in the U-Net architecture for upsampling the encoded feature maps.
-    
+
     Args:
     - in_feats (int): Number of input channels.
     - out_feats (int): Number of output channels.
