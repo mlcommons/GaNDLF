@@ -12,6 +12,7 @@ nav:
   - Acknowledgements: acknowledgements.md
 theme:
   features:
+    - toc.integrate
     - search.suggest
     - search.highlight
     - search.share
