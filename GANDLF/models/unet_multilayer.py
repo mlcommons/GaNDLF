@@ -22,17 +22,13 @@ class unet_multilayer(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
+        self, parameters: dict, residualConnections=False,
     ):
         """
         Parameters
         ----------
-        parameters : dict
-            A dictionary containing the model parameters.
-        residualConnections : bool, optional
-            A flag to control residual connections in the model, by default False.
+        parameters (dict): A dictionary containing the model parameters.
+        residualConnections (bool, optional): A flag to control residual connections in the model, by default False.
         """
 
         self.network_kwargs = {"res": residualConnections}
@@ -127,13 +123,11 @@ class unet_multilayer(ModelBase):
 
         Parameters
         ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
         Returns
         -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
         # Store intermediate feature maps
@@ -177,8 +171,7 @@ class resunet_multilayer(unet_multilayer):
         """
         Parameters
         ----------
-        parameters : dict
-            A dictionary containing the model parameters.
+        parameters (dict): A dictionary containing the model parameters.
 
         """
         super(resunet_multilayer, self).__init__(parameters, residualConnections=True)
