@@ -21,6 +21,24 @@ class _MBConv1(nn.Sequential):
         Conv,
         Pool,
     ):
+        """
+        Defines a Single MBConv block in the EfficientNet model.
+
+        Args:
+            num_in_feats: Number of input features.
+            num_out_feats: Number of output features.
+            kernel_size: Size of the convolutional kernel.
+            stride: Stride of the convolutional layer.
+            output_size: Size of the output tensor.
+            reduction: Reduction factor for squeeze excitation.
+            Norm: Normalization layer for the MBConv block.
+            Conv: Convolutional layer for the MBConv block.
+            Pool: Pooling layer for the squeeze excitation block.
+
+        Returns:
+            Output tensor after passing through the MBConv block.
+
+        """
         super().__init__()
 
         # depthwise conv -> batch norm -> swish
@@ -62,6 +80,17 @@ class _MBConv1(nn.Sequential):
         self.add_module("norm2", Norm(num_out_feats))
 
     def forward(self, x):
+        """
+        Sequentially passes the input tensor through depthwise convolution -> batch normalization -> swish activation ->
+        squeeze excitation -> convolution -> batch normalization and returns the output tensor.
+
+        Args:
+            x: Input tensor.
+
+        Returns:
+            Output tensor after passing through the MBConv block.
+
+        """
         out = self.depthconv1(x)
         out = self.norm1(out)
         out = self.silu(out)
@@ -87,6 +116,39 @@ class _MBConv6(nn.Sequential):
         Pool,
         reduction,  # reduction factor for squeeze excitation
     ):
+        """
+        A class representing a single MobileNetV3 block with expansion factor 6.
+
+        Parameters:
+        -----------
+        num_in_feats : int
+            The number of input features/channels.
+        num_out_feats : int
+            The number of output features/channels.
+        kernel_size : int
+            The size of the kernel/convolutional filter.
+        stride : int
+            The stride of the convolutional operation.
+        output_size : int
+            The output size of the block.
+        Norm : torch.nn.Module
+            A normalization layer to be used in the block.
+        Conv : torch.nn.Module
+            A convolutional layer to be used in the block.
+        Pool : torch.nn.Module
+            A pooling layer to be used in the squeeze-excitation block.
+        reduction : float
+            The reduction factor for the squeeze-excitation block.
+
+        Methods:
+        --------
+        forward(x)
+            Performs a forward pass through the block.
+
+        References:
+        -----------
+        [1] https://arxiv.org/abs/1905.02244
+        """
         super().__init__()
 
         # conv -> batch norm --> swish
@@ -142,6 +204,15 @@ class _MBConv6(nn.Sequential):
         self.add_module("norm3", Norm(num_out_feats))
 
     def forward(self, x):
+        """
+        Performs a forward pass through the model.
+
+        Args:
+            x (torch.Tensor): The input tensor to the model.
+
+        Returns:
+            torch.Tensor: The output tensor from the model.
+        """
         out = self.conv1(x)
         out = self.norm1(out)
         out = self.silu(out)
@@ -166,6 +237,15 @@ class _SqueezeExcitation(nn.Sequential):
         output_size,
         Pool,
     ):
+        """
+        Squeeze-and-Excitation block that recalibrates channel-wise feature responses
+
+        Args:
+            num_in_feats (int): Number of input features
+            reduction (int): Reduction factor for number of hidden features
+            output_size (tuple): Tuple containing the size of the output tensor
+            Pool (nn.Module): Pooling operation
+        """
         super().__init__()
 
         # global avg pool
@@ -181,6 +261,15 @@ class _SqueezeExcitation(nn.Sequential):
         self.output_size = output_size
 
     def forward(self, x):
+        """
+        Forward pass for the Squeeze-and-Excitation block
+
+        Args:
+            x (torch.Tensor): Input tensor of shape [batch_size, in_channels, H, W]
+
+        Returns:
+            torch.Tensor: Output tensor of the same shape as the input tensor
+        """
         out = self.Pool(self.output_size)(x).view(x.size(0), -1)
         out = self.FC1(out)
         out = self.relu(out)
@@ -246,35 +335,45 @@ DEFAULT_BLOCKS = [
 
 
 def checkPatchDimensions(patch_size, numlay):
-    if isinstance(patch_size, int):
-        patch_size_to_check = np.array(patch_size)
-    else:
-        patch_size_to_check = patch_size
-    # for 2D, don't check divisibility of last dimension
+    """
+    Check if patch dimensions are divisible by 2^numlay.
+
+    Parameters:
+        patch_size (tuple or int): Tuple of integers or a single integer representing the patch size.
+        numlay (int): Number of layers.
+
+    Returns:
+        int: The largest number of layers that are divisible by 2^numlay.
+    """
+    patch_size_to_check = np.atleast_1d(patch_size)  # Convert to array if not already
     if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
 
-    if all([x >= 2**numlay and x % 2**numlay == 0 for x in patch_size_to_check]):
+    if all(patch_size_to_check >= 2 ** numlay) and all(
+        patch_size_to_check % 2 ** numlay == 0
+    ):
         return numlay
     else:
         base2 = np.array(
-            [getBase2(x) for x in patch_size_to_check]
+            [np.log2(x).astype(int) for x in patch_size_to_check]
         )  # get largest possible number of layers for each dim
         return int(np.min(base2))
 
 
-def getBase2(num):
-    base = 0
-    while num % 2 == 0:
-        num = num / 2
-        base = base + 1
-    return base
-
-
 def num_channels(default_chan, width_factor, divisor):
-    # find the number of channels closest to default * width such that it's divisible by divisor
+    """
+    Compute the number of channels closest to default_chan * width_factor that is divisible by divisor.
+
+    Parameters:
+        default_chan (int): Default number of channels.
+        width_factor (float): Width factor.
+        divisor (int): Divisor.
+
+    Returns:
+        int: The number of channels closest to default_chan * width_factor that is divisible by divisor.
+    """
     default_chan *= width_factor
-    new_out = int(default_chan + divisor / 2) // divisor * divisor
+    new_out = (default_chan + divisor // 2) // divisor * divisor
     new_out = max(new_out, divisor)
 
     if new_out < 0.9 * default_chan:
@@ -284,23 +383,30 @@ def num_channels(default_chan, width_factor, divisor):
 
 
 def num_layers(default_lay, depth_factor):
-    # find the number of layers closest to default * depth
+    """
+    Compute the number of layers closest to default_lay * depth_factor.
+
+    Parameters:
+        default_lay (int): Default number of layers.
+        depth_factor (float): Depth factor.
+
+    Returns:
+        int: The number of layers closest to default_lay * depth_factor.
+    """
     return int(math.ceil(default_lay * depth_factor))
 
 
 class EfficientNet(ModelBase):
     """
-    Initializer function for the Resnet model
+    EfficientNet model with customizable scaling of depth and width.
 
     Args:
-        configuration (dict): A dictionary of configuration parameters for the model.
-        parameters (dict) - overall parameters dictionary
+        parameters (dict): A dictionary of configuration parameters for the model.
+        scale_params (dict) - A dictionary defining scaling of depth and width for the model.
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        scale_params,  # how to scale depth and width
+        self, parameters: dict, scale_params,  # how to scale depth and width
     ):
         super(EfficientNet, self).__init__(parameters)
 
@@ -408,12 +514,27 @@ class EfficientNet(ModelBase):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
+        """
+        Applies the model's layers to the input tensor and produces an output tensor.
+
+        Args:
+            x (torch.Tensor): Input tensor to the model.
+
+        Returns:
+            torch.Tensor: Output tensor produced by the model.
+        """
+        # Pass the input tensor through the feature extraction layers
         features = self.features(x)
+
+        # Apply adaptive average pooling to the output tensor from the previous step
         out = self.AdaptiveAvgPool(self.output_size)(features).view(
             features.size(0), -1
         )
+
+        # Pass the tensor through the classifier layers
         out = self.classifier(out)
 
+        # Apply the final convolution layer if not None
         if not self.final_convolution_layer is None:
             if self.final_convolution_layer == F.softmax:
                 out = self.final_convolution_layer(out, dim=1)
