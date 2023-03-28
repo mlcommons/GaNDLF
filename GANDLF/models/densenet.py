@@ -9,9 +9,28 @@ from collections import OrderedDict
 from .modelBase import ModelBase
 
 
+import torch.nn as nn
+import torch.nn.functional as F
+import torch
+
+
 class _DenseLayer(nn.Sequential):
     def __init__(self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv):
+        """
+        Constructor for _DenseLayer class.
+
+        Parameters:
+            num_input_features (int): Number of input channels to the layer.
+            growth_rate (int): Number of output channels of each convolution operation in the layer.
+            bn_size (int): Factor to scale the number of intermediate channels between the 1x1 and 3x3 convolutions.
+            drop_rate (float): Probability of an element to be zeroed in the Dropout layer.
+            Norm (torch.nn.Module): A normalization module from torch.nn, such as BatchNorm2d or InstanceNorm2d.
+            Conv (torch.nn.Module): A convolution module from torch.nn, such as Conv2d or ConvTranspose2d.
+        """
+        # Call the constructor of the parent class
         super().__init__()
+
+        # Add a batch normalization layer followed by a ReLU activation function and a 1x1 convolution layer
         self.add_module("norm1", Norm(num_input_features))
         self.add_module("relu1", nn.ReLU(inplace=True))
         self.add_module(
@@ -24,6 +43,8 @@ class _DenseLayer(nn.Sequential):
                 bias=False,
             ),
         )
+
+        # Add another batch normalization layer followed by a ReLU activation function and a 3x3 convolution layer
         self.add_module("norm2", Norm(bn_size * growth_rate))
         self.add_module("relu2", nn.ReLU(inplace=True))
         self.add_module(
@@ -37,15 +58,34 @@ class _DenseLayer(nn.Sequential):
                 bias=False,
             ),
         )
+
+        # Set the dropout rate
         self.drop_rate = drop_rate
 
     def forward(self, x):
+        """
+        Forward pass through the _DenseLayer.
+
+        Parameters:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor obtained after concatenating the input tensor and the new features obtained after the convolution operations and dropout.
+        """
+        # Perform forward pass through the layers
         new_features = super().forward(x)
+
+        # If dropout rate is greater than 0, apply dropout to the new features
         if self.drop_rate > 0:
             new_features = F.dropout(
                 new_features, p=self.drop_rate, training=self.training
             )
+
+        # Concatenate the input tensor with the new features and return the result
         return torch.cat([x, new_features], 1)
+
+
+import torch.nn as nn
 
 
 class _DenseBlock(nn.Sequential):
@@ -59,16 +99,32 @@ class _DenseBlock(nn.Sequential):
         norm,
         conv,
     ):
+        """
+        Constructor for _DenseBlock class.
+
+        Parameters:
+            num_layers (int): Number of dense layers to be added to the block.
+            num_input_features (int): Number of input channels to the block.
+            bn_size (int): Factor to scale the number of intermediate channels between the 1x1 and 3x3 convolutions in each dense layer.
+            growth_rate (int): Number of output channels of each convolution operation in each dense layer.
+            drop_rate (float): Probability of an element to be zeroed in the Dropout layer of each dense layer.
+            norm (torch.nn.Module): A normalization module from torch.nn, such as BatchNorm2d or InstanceNorm2d, to be used in each dense layer.
+            conv (torch.nn.Module): A convolution module from torch.nn, such as Conv2d or ConvTranspose2d, to be used in each dense layer.
+        """
+        # Call the constructor of the parent class
         super().__init__()
+
+        # Add num_layers _DenseLayer objects to the block
         for i in range(num_layers):
+            # Calculate the number of input features for the i-th dense layer
+            num_input_features_i = num_input_features + i * growth_rate
+
+            # Create an instance of _DenseLayer with the calculated number of input features and other parameters
             layer = _DenseLayer(
-                num_input_features + i * growth_rate,
-                growth_rate,
-                bn_size,
-                drop_rate,
-                norm,
-                conv,
+                num_input_features_i, growth_rate, bn_size, drop_rate, norm, conv,
             )
+
+            # Add the _DenseLayer object to the block
             self.add_module("denselayer{}".format(i + 1), layer)
 
 
@@ -106,9 +162,7 @@ class DenseNet(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        block_config=(6, 12, 24, 16),
+        self, parameters: dict, block_config=(6, 12, 24, 16),
     ):
         super(DenseNet, self).__init__(parameters)
 
@@ -216,25 +270,41 @@ class DenseNet(ModelBase):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
+        """
+        Forward pass of the network
+
+        Args:
+            x (torch.Tensor) - the input tensor
+
+        Returns:
+            out (torch.Tensor) - the output tensor
+
+        """
+        # Pass the input tensor through the convolutional layers of the model
         features = self.features(x)
+
+        # Apply a ReLU activation function to the feature maps
         out = F.relu(features, inplace=True)
+
+        # Apply adaptive average pooling to the feature maps and flatten the resulting tensor
         out = self.AdaptiveAvgPool(self.output_size)(out).view(features.size(0), -1)
+
+        # Pass the flattened tensor through the fully connected layers of the model
         out = self.classifier(out)
 
+        # Apply the final convolutional operation, if specified
         if not self.final_convolution_layer is None:
             if self.final_convolution_layer == F.softmax:
                 out = self.final_convolution_layer(out, dim=1)
             else:
                 out = self.final_convolution_layer(out)
 
+        # Return the output tensor
         return out
 
 
 def densenet121(parameters):
-    return DenseNet(
-        parameters,
-        block_config=(6, 12, 24, 16),
-    )
+    return DenseNet(parameters, block_config=(6, 12, 24, 16),)
 
 
 def densenet169(parameters):
