@@ -16,6 +16,20 @@ class Decoder(ModelBase):
     def __init__(
         self, parameters, anatomy_factors, num_layers=5,
     ):
+        """
+        Decoder module for SDNet.
+
+        Args:
+            parameters (dict): A dictionary containing model parameters.
+            anatomy_factors (int): The number of anatomical factors to be considered.
+            num_layers (int, optional): The number of layers in the Decoder. Defaults to 5.
+
+        Attributes:
+            num_layers (int): The number of layers in the Decoder.
+            layer_list (list): List of layers in the Decoder module.
+            conv (nn.Conv2d): Convolutional layer to generate the final output.
+            layers (nn.ModuleList): List of layers in the Decoder module.
+        """
         super(Decoder, self).__init__(parameters)
         self.num_layers = num_layers
         self.layer_list = add_conv_block(
@@ -41,6 +55,17 @@ class Decoder(ModelBase):
 
     @staticmethod
     def CalcVectorMeanStd(feat, eps=1e-5):
+        """
+        Calculate the mean and standard deviation of the input feature vector.
+
+        Args:
+            feat (torch.Tensor): Input feature vector.
+            eps (float, optional): Small value added to the variance to avoid divide-by-zero. Defaults to 1e-5.
+
+        Returns:
+            tuple: Tuple containing the mean and standard deviation of the input feature vector.
+        """
+
         # eps is a small value added to the variance to avoid divide-by-zero.
         feat_var = feat.var(dim=1) + eps
         feat_std = feat_var.sqrt()
@@ -49,6 +74,16 @@ class Decoder(ModelBase):
 
     @staticmethod
     def CalcTensorMeanStd(feat, eps=1e-5):
+        """
+        Calculate the mean and standard deviation of the input feature tensor.
+
+        Args:
+            feat (torch.Tensor): Input feature tensor.
+            eps (float, optional): Small value added to the variance to avoid divide-by-zero. Defaults to 1e-5.
+
+        Returns:
+            tuple: Tuple containing the mean and standard deviation of the input feature tensor.
+        """
         # eps is a small value added to the variance to avoid divide-by-zero.
         size = feat.size()
         assert len(size) == 4
@@ -60,6 +95,12 @@ class Decoder(ModelBase):
 
     @staticmethod
     def weight_init(model):
+        """
+        Initialize weights for the given model using He (Kaiming) initialization.
+
+        Args:
+            model (nn.Module): Model for which the weights will be initialized.
+        """
         for module in model.modules():
             if isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear):
                 nn.init.kaiming_normal_(module.weight)
@@ -68,6 +109,16 @@ class Decoder(ModelBase):
 
     @staticmethod
     def AdaIN(content_feat, style_feat):
+        """
+        Adaptive Instance Normalization (AdaIN) operation.
+
+        Args:
+            content_feat (torch.Tensor): Content feature tensor.
+            style_feat (torch.Tensor): Style feature tensor.
+
+        Returns:
+            torch.Tensor: Tensor after applying AdaIN operation.
+        """
         size = content_feat.size()
         style_mean, style_std = Decoder.CalcVectorMeanStd(style_feat)
         content_mean, content_std = Decoder.CalcTensorMeanStd(content_feat)
@@ -79,6 +130,16 @@ class Decoder(ModelBase):
         ) + style_mean.view(style_mean.shape[0], 1, 1, 1).expand(size)
 
     def forward(self, c: torch.Tensor, s: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the Decoder module.
+
+        Args:
+            c (torch.Tensor): Input tensor (anatomy factors).
+            s (torch.Tensor): Style tensor (modality factors).
+
+        Returns:
+            torch.Tensor: Decoded output tensor.
+        """
         x = c
         for i, f in enumerate(self.layers):
             if (i % 2) == 0:
@@ -94,6 +155,19 @@ class Segmentor(ModelBase):
     def __init__(
         self, parameters, anatomy_factors,
     ):
+        """
+        Segmentor module for SDNet.
+
+        Args:
+            parameters (dict): A dictionary containing model parameters.
+            anatomy_factors (int): The number of anatomical factors to be considered.
+
+        Attributes:
+            layer_list (list): List of layers in the Segmentor module.
+            conv (nn.Conv2d): Convolutional layer to generate the final output.
+            layers (nn.ModuleList): List of layers in the Segmentor module.
+        """
+
         super(Segmentor, self).__init__(parameters)
         self.layer_list = add_conv_block(
             self.Conv,
@@ -117,6 +191,12 @@ class Segmentor(ModelBase):
 
     @staticmethod
     def weight_init(model):
+        """
+        Initialize weights for the given model using He (Kaiming) initialization.
+
+        Args:
+            model (nn.Module): Model for which the weights will be initialized.
+        """
         for module in model.modules():
             if isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear):
                 nn.init.kaiming_normal_(module.weight)
@@ -124,6 +204,15 @@ class Segmentor(ModelBase):
                     module.bias.data.zero_()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the Segmentor module.
+
+        Args:
+            x (torch.Tensor): Input tensor (anatomy factors).
+
+        Returns:
+            torch.Tensor: Segmentation map output tensor.
+        """
         for i, f in enumerate(self.layers):
             if (i % 2) == 0:
                 x = f(x)
@@ -137,6 +226,24 @@ class ModalityEncoder(ModelBase):
     def __init__(
         self, parameters, anatomy_factors, modality_factors, num_layers=4,
     ):
+        """
+        Modality Encoder module for SDNet.
+
+        Args:
+            parameters (dict): A dictionary containing model parameters.
+            anatomy_factors (int): The number of anatomical factors to be considered.
+            modality_factors (int): The number of modality factors to be considered.
+            num_layers (int, optional): The number of layers in the Modality Encoder. Defaults to 4.
+
+        Attributes:
+            num_layers (int): The number of layers in the Modality Encoder.
+            layer_list (list): List of layers in the Modality Encoder module.
+            fc (nn.Linear): Fully connected layer for the Modality Encoder.
+            norm (nn.BatchNorm1d): Batch normalization layer for the Modality Encoder.
+            mu_fc (nn.Linear): Fully connected layer for the mean of modality factors.
+            logvar_fc (nn.Linear): Fully connected layer for the log variance of modality factors.
+            layers (nn.ModuleList): List of layers in the Modality Encoder module.
+        """
         super(ModalityEncoder, self).__init__(parameters)
         self.num_layers = num_layers
         self.layer_list = add_downsample_conv_block(
@@ -171,6 +278,16 @@ class ModalityEncoder(ModelBase):
                     module.bias.data.zero_()
 
     def forward(self, x: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the Modality Encoder module.
+
+        Args:
+            x (torch.Tensor): Input tensor (image data).
+            c (torch.Tensor): Anatomy tensor (anatomical factors).
+
+        Returns:
+            torch.Tensor: Tuple containing mean (mu) and log variance (logvar) of the modality factors.
+        """
         x = torch.cat((x, c), 1)
         for i, f in enumerate(self.layers):
             if (i % 2) == 0:
@@ -188,6 +305,20 @@ class SDNet(ModelBase):
     def __init__(
         self, parameters: dict,
     ):
+        """
+        SDNet (Structure-Disentangled Network) module.
+
+        Args:
+            parameters (dict): A dictionary containing model parameters.
+
+        Attributes:
+            anatomy_factors (int): The number of anatomical factors to be considered.
+            modality_factors (int): The number of modality factors to be considered.
+            cencoder (unet): U-Net based Content Encoder for generating anatomy factors.
+            mencoder (ModalityEncoder): Modality Encoder for generating modality factors.
+            decoder (Decoder): Decoder module for generating the reconstructed image.
+            segmentor (Segmentor): Segmentor module for generating the segmentation map.
+        """
         super(SDNet, self).__init__(parameters)
         self.anatomy_factors = 8
         self.modality_factors = 8
@@ -220,11 +351,32 @@ class SDNet(ModelBase):
 
     @staticmethod
     def reparameterize(mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
+        """
+        Reparameterization trick for sampling from a Gaussian distribution.
+
+        Args:
+            mu (torch.Tensor): Mean of the Gaussian distribution.
+            logvar (torch.Tensor): Log variance of the Gaussian distribution.
+        
+        Returns:
+            torch.Tensor: Sampled value from the Gaussian distribution.
+
+        """
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         return mu + eps * std
 
     def forward(self, x: torch.Tensor) -> typing.List[torch.Tensor]:
+        """
+        Forward pass of the SDNet module.
+
+        Args:
+            x (torch.Tensor): Input tensor (image data).
+
+        Returns:
+            typing.List[torch.Tensor]: List containing the segmentation map (sm), reconstructed image (reco), mean (mu),
+                                       log variance (logvar), and re-encoded modality factors (modality_factors_reencoded).
+        """
         if x.shape[1] > 1:
             x = x[:, 0:1, :, :]
         anatomy_factors = F.gumbel_softmax(self.cencoder(x), hard=True, dim=1)
