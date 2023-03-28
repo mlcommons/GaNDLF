@@ -282,8 +282,6 @@ class _BottleNeckBlock(nn.Sequential):
             Conv (nn.Module): The convolutional layer to be used.
             num_block (int): The index of the current block in the entire network.
 
-        Returns:
-            None
         """
         super().__init__()
 
