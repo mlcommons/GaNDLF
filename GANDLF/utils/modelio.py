@@ -85,41 +85,50 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
             print("WARNING: Cannot export to ONNX model.")
             return
 
+        # https://github.com/mlcommons/GaNDLF/issues/605
+        openvino_present = False
         try:
-            if model_dimension == 2:
-                subprocess.call(
-                    [
-                        "mo",
-                        "--input_model",
-                        "{0}".format(onnx_path),
-                        "--input_shape",
-                        "[1,{0},{1},{2}]".format(
-                            num_channel, input_shape[0], input_shape[1]
-                        ),
-                        "--data_type",
-                        "{0}".format(ov_output_data_type),
-                        "--output_dir",
-                        "{0}".format(ov_output_dir),
-                    ],
-                )
-            else:
-                subprocess.call(
-                    [
-                        "mo",
-                        "--input_model",
-                        "{0}".format(onnx_path),
-                        "--input_shape",
-                        "[1,{0},{1},{2},{3}]".format(
-                            num_channel, input_shape[0], input_shape[1], input_shape[2]
-                        ),
-                        "--data_type",
-                        "{0}".format(ov_output_data_type),
-                        "--output_dir",
-                        "{0}".format(ov_output_dir),
-                    ],
-                )
-        except subprocess.CalledProcessError:
-            print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
+            import openvino
+            openvino_present = True
+        except ImportError:
+            print("WARNING: OpenVINO is not present.")
+        
+        if openvino_present:
+            try:
+                if model_dimension == 2:
+                    subprocess.call(
+                        [
+                            "mo",
+                            "--input_model",
+                            "{0}".format(onnx_path),
+                            "--input_shape",
+                            "[1,{0},{1},{2}]".format(
+                                num_channel, input_shape[0], input_shape[1]
+                            ),
+                            "--data_type",
+                            "{0}".format(ov_output_data_type),
+                            "--output_dir",
+                            "{0}".format(ov_output_dir),
+                        ],
+                    )
+                else:
+                    subprocess.call(
+                        [
+                            "mo",
+                            "--input_model",
+                            "{0}".format(onnx_path),
+                            "--input_shape",
+                            "[1,{0},{1},{2},{3}]".format(
+                                num_channel, input_shape[0], input_shape[1], input_shape[2]
+                            ),
+                            "--data_type",
+                            "{0}".format(ov_output_data_type),
+                            "--output_dir",
+                            "{0}".format(ov_output_dir),
+                        ],
+                    )
+            except subprocess.CalledProcessError:
+                print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
 
 
 def save_model(model_dict, model, params, path, onnx_export=True):
