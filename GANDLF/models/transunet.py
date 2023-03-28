@@ -19,11 +19,11 @@ class _DecoderCUP(nn.Sequential):
     Decoder module used in the U-Net architecture for upsampling the encoded feature maps.
 
     Args:
-    - in_feats (int): Number of input channels.
-    - out_feats (int): Number of output channels.
-    - Norm (nn.Module): Normalization layer to be applied after convolution.
-    - Conv (nn.Module): Convolutional layer used in the decoder.
-    - Upsample (nn.Module): Upsampling layer used to increase the spatial resolution of the feature maps.
+        in_feats (int): Number of input channels.
+        out_feats (int): Number of output channels.
+        Norm (nn.Module): Normalization layer to be applied after convolution.
+        Conv (nn.Module): Convolutional layer used in the decoder.
+        Upsample (nn.Module): Upsampling layer used to increase the spatial resolution of the feature maps.
 
     """
 
@@ -48,17 +48,14 @@ class _DecoderCUP(nn.Sequential):
         Forward pass of the decoder module.
         
         Args:
-        - x1 (torch.Tensor):
-            Tensor with shape (batch_size, in_feats, H, W),
-            where H and W are the height and width of the input tensor.
-        - x2 (torch.Tensor):
-            Tensor with shape (batch_size, out_feats, 2*H, 2*W),
-            where H and W are the height and width of the input tensor.
+            x1 (torch.Tensor): Tensor with shape (batch_size, in_feats, H, W),
+                               where H and W are the height and width of the input tensor.
+            x2 (torch.Tensor): Tensor with shape (batch_size, out_feats, 2*H, 2*W),
+                               where H and W are the height and width of the input tensor.
         
         Returns:
-        - x (torch.Tensor):
-            Tensor with shape (batch_size, out_feats, 2*H, 2*W),
-            where H and W are the height and width of the input tensor.
+            x (torch.Tensor): Tensor with shape (batch_size, out_feats, 2*H, 2*W),
+                              where H and W are the height and width of the input tensor.
         """
         if x2 is not None:
             x1 = torch.cat([x1, x2], dim=1)
@@ -86,28 +83,17 @@ class transunet(ModelBase):
 
     Attributes
     ----------
-    depth: int
-        Depth of the model.
-    num_heads: int
-        Number of self-attention heads in the transformer.
-    embed_size: int
-        Embedding dimension for the transformer.
-    patch_dim: list
-        The dimensions of the image patch.
-    ins: InitialConv
-        Initial convolutional layer.
-    ds: ModuleList
-        List containing the downsampling modules.
-    en: ModuleList
-        List containing the encoding modules.
-    de: ModuleList
-        List containing the decoding modules.
-    transformer: _Transformer
-        Transformer module for the architecture.
-    transCUP: _DecoderCUP
-        Decoder CUP module for the architecture.
-    out: out_conv
-        Final output convolutional layer.
+    depth (int): Depth of the model.
+    num_heads (int): Number of self-attention heads in the transformer.
+    embed_size (int): Embedding dimension for the transformer.
+    patch_dim (list): The dimensions of the image patch.
+    ins (InitialConv): Initial convolutional layer.
+    ds (ModuleList): List containing the downsampling modules.
+    en (ModuleList): List containing the encoding modules.
+    de (ModuleList): List containing the decoding modules.
+    transformer (_Transformer): Transformer module for the architecture.
+    transCUP (_DecoderCUP): Decoder CUP module for the architecture.
+    out (out_conv): Final output convolutional layer.
     """
 
     def __init__(
@@ -225,15 +211,11 @@ class transunet(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
         Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+            x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
         y = []
