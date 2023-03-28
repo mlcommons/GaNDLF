@@ -16,12 +16,23 @@ from .modelBase import ModelBase
 
 class SegmentationModel(torch.nn.Module):
     """
-    This has been adapted from its original implementation in
-    https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/base/model.py
+    This class defines a segmentation model. It takes an input tensor and sequentially passes it through the model's
+    encoder, decoder and heads.
 
+    Methods:
+        initialize:
+            Initializes the model's classification or segmentation head
+
+        forward:
+            Sequentially passes the input tensor through the model's encoder, decoder, and heads and returns either the
+            segmentation masks or the class labels.
     """
 
     def initialize(self):
+        """
+        This function initializes the model's classification or segmentation head.
+
+        """
         if self.classification_head is None:
             init.initialize_decoder(self.decoder)
             init.initialize_head(self.segmentation_head)
@@ -29,7 +40,16 @@ class SegmentationModel(torch.nn.Module):
             init.initialize_head(self.classification_head)
 
     def forward(self, x):
-        """Sequentially pass `x` trough model`s encoder, decoder and heads"""
+        """
+        This function sequentially passes the input tensor through the model's encoder, decoder, and heads and returns
+        either the segmentation masks or the class labels.
+
+        Args:
+            x (torch.Tensor): Input tensor
+
+        Returns:
+            torch.Tensor: Segmentation masks or class labels
+        """
         features = self.encoder(x)
 
         if self.classification_head is None:
@@ -162,10 +182,7 @@ class ImageNet_UNet(ModelBase):
         ModelBase (nn.Module): The base model class.
     """
 
-    def __init__(
-        self,
-        parameters,
-    ) -> None:
+    def __init__(self, parameters,) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
         decoder_use_batchnorm = False
