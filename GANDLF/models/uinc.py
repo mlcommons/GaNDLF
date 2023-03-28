@@ -26,8 +26,7 @@ class uinc(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
+        self, parameters: dict,
     ):
         super(uinc, self).__init__(parameters)
 
@@ -211,15 +210,11 @@ class uinc(ModelBase):
     def forward(self, x):
         """
 
-        Parameters
-        ----------
-        x : TYPE
-            DESCRIPTION.
+        Args:
+            x (torch.Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        x6 : TYPE
-            DESCRIPTION.
+        Returns:
+            out (torch.Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
         x = self.conv0_1x1(x)
@@ -247,8 +242,9 @@ class uinc(ModelBase):
 
         if not self.final_convolution_layer is None:
             if self.final_convolution_layer == F.softmax:
-                x6 = self.final_convolution_layer(x6, dim=1)
+                out = self.final_convolution_layer(x6, dim=1)
             else:
-                x6 = self.final_convolution_layer(x6)
-
-        return x6
+                out = self.final_convolution_layer(x6)
+        else:
+            out = x6
+        return out
