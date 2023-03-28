@@ -5,9 +5,9 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework (GaNDLF) f
 ## Why use GaNDLF?
 
 - Supports multiple
-  - Deep Learning model architectures
-  - Channels/modalities 
-  - Prediction classes
+    - Deep Learning model architectures
+    - Channels/modalities 
+    - Prediction classes
 - Robust data augmentation, courtesy of [TorchIO](https://github.com/fepegar/torchio/) and [Albumentations](https://github.com/albumentations-team/albumentations)
 - Built-in cross validation, with support for parallel HPC-based computing
 - Multi-GPU (on the same machine) training
@@ -21,7 +21,7 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework (GaNDLF) f
 - [Getting Started](./getting_started.md)
 - [Application Setup](./setup.md)
 - [Usage](./usage.md)
-  - [Customize the training and inference](./customize.md)
+    - [Customize the training and inference](./customize.md)
 - [Extending GaNDLF](./extending.md)
 - [FAQ](./faq.md)
 - [Acknowledgements](./acknowledgements.md)
