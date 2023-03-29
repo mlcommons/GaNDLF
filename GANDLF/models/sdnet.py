@@ -357,7 +357,7 @@ class SDNet(ModelBase):
         Args:
             mu (torch.Tensor): Mean of the Gaussian distribution.
             logvar (torch.Tensor): Log variance of the Gaussian distribution.
-        
+
         Returns:
             torch.Tensor: Sampled value from the Gaussian distribution.
 
