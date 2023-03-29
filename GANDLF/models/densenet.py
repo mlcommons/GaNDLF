@@ -80,9 +80,6 @@ class _DenseLayer(nn.Sequential):
         return torch.cat([x, new_features], 1)
 
 
-import torch.nn as nn
-
-
 class _DenseBlock(nn.Sequential):
     def __init__(
         self,

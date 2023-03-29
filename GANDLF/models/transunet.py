@@ -52,7 +52,7 @@ class _DecoderCUP(nn.Sequential):
                                where H and W are the height and width of the input tensor.
             x2 (torch.Tensor): Tensor with shape (batch_size, out_feats, 2*H, 2*W),
                                where H and W are the height and width of the input tensor.
-        
+
         Returns:
             x (torch.Tensor): Tensor with shape (batch_size, out_feats, 2*H, 2*W),
                               where H and W are the height and width of the input tensor.

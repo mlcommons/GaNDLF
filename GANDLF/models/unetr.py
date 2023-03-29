@@ -57,7 +57,7 @@ class _DeconvConvBlock(nn.Sequential):
 
         Args:
             x (torch.Tensor): The input tensor.
-        
+
         Returns:
             torch.Tensor: The output tensor.
         """

@@ -85,7 +85,7 @@ class MSDNet(ModelBase):
 
         Args:
             x (torch.Tensor): The input tensor to the model.
-        
+
         Returns:
             torch.Tensor: The output tensor from the model.
         """
