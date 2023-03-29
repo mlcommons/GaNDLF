@@ -9,11 +9,6 @@ from collections import OrderedDict
 from .modelBase import ModelBase
 
 
-import torch.nn as nn
-import torch.nn.functional as F
-import torch
-
-
 class _DenseLayer(nn.Sequential):
     def __init__(self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv):
         """
