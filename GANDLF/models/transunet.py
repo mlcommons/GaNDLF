@@ -46,7 +46,7 @@ class _DecoderCUP(nn.Sequential):
     def forward(self, x1, x2):
         """
         Forward pass of the decoder module.
-        
+
         Args:
             x1 (torch.Tensor): Tensor with shape (batch_size, in_feats, H, W),
                                where H and W are the height and width of the input tensor.
