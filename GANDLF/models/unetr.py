@@ -385,11 +385,11 @@ class _TransformerLayer(nn.Module):
         super().__init__()
 
         # Create normalization modules and a multi-head self-attention module
-        self.norm1 = Norm(embed_size)
+        self.norm1 = nn.LayerNorm(embed_size)
         self.msa = _MSA(embed_size, num_heads)
 
         # Create normalization modules and an MLP
-        self.norm2 = Norm(embed_size)
+        self.norm2 = nn.LayerNorm(embed_size)
         self.mlp = _MLP(embed_size, mlp_dim, Norm)
 
     def forward(self, x):
