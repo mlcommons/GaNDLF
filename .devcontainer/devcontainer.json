@@ -12,7 +12,7 @@
 			"installJupyterlab": true
 		},
 		"ghcr.io/devcontainers/features/nvidia-cuda:1": {
-			"version": 11.3
+			"version": 11.6
 		},
 		"ghcr.io/devcontainers-contrib/features/flake8:2": {}
 	},

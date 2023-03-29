@@ -6,3 +6,4 @@ omit =
     ./testing/conftest.py
     ./gandlf_*
     .github/*
+    .devcontainer/*
