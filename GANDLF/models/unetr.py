@@ -54,7 +54,7 @@ class _DeconvConvBlock(nn.Sequential):
     def forward(self, x):
         """
         Forward pass through the block.
-        
+
         Args:
             x (torch.Tensor): The input tensor.
         
