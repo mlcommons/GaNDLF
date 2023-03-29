@@ -82,7 +82,7 @@ class MSDNet(ModelBase):
     def forward(self, x):
         """
         Forward pass method for the MSDNet class.
-        
+
         Args:
             x (torch.Tensor): The input tensor to the model.
         
