@@ -59,9 +59,14 @@ class _DeconvConvBlock(nn.Sequential):
             x (torch.Tensor): The input tensor.
 
         Returns:
-            torch.Tensor: The output tensor.
+            x (torch.Tensor): The output tensor.
         """
-        x = self.relu(self.norm(self.conv(self.deconv(x))))
+
+        # Apply deconv -> conv -> norm -> relu
+        x = self.deconv(x)
+        x = self.conv(x)
+        x = self.norm(x)
+        x = self.relu(x)
 
         return x
 
@@ -114,7 +119,11 @@ class _ConvBlock(nn.Sequential):
         Returns:
             torch.Tensor: Output tensor of shape (batch_size, out_feats, height, width).
         """
-        x = self.relu(self.norm(self.conv(x)))
+
+        # Apply conv -> norm -> relu
+        x = self.conv(x)
+        x = self.norm(x)
+        x = self.relu(x)
 
         return x
 
@@ -182,9 +191,18 @@ class _UpsampleBlock(nn.Sequential):
         Returns:
             torch.Tensor: Output tensor of shape (batch_size, in_feats//4, 2*height, 2*width).
         """
-        x = self.relu1(self.norm1(self.conv1(x)))
-        x = self.relu2(self.norm2(self.conv2(x)))
 
+        # Apply conv1 -> norm1 -> relu1-> relu2
+        x = self.conv1(x)
+        x = self.norm1(x)
+        x = self.relu1(x)
+
+        # Apply conv2 -> norm2 -> relu2
+        x = self.conv2(x)
+        x = self.norm2(x)
+        x = self.relu2(x)
+
+        # Apply deconv
         x = self.deconv(x)
 
         return x
@@ -222,8 +240,15 @@ class _MLP(nn.Sequential):
         Returns:
             torch.Tensor: The output tensor of shape (batch_size, in_feats).
         """
-        x = self.gelu1(self.linear1(self.norm(x)))
-        x = self.gelu2(self.linear2(x))
+
+        # Apply norm -> linear1 -> gelu1
+        x = self.norm(x)
+        x = self.linear1(x)
+        x = self.gelu1(x)
+
+        # Apply linear2 -> gelu2
+        x = self.linear2(x)
+        x = self.gelu2(x)
 
         return x
 
@@ -261,10 +286,12 @@ class _MSA(nn.Module):
     def __init__(self, embed_size, num_heads):
         super().__init__()
 
+        # Initialize parameters
         self.num_heads = num_heads
         self.query_size = int(embed_size / self.num_heads)
         self.all_heads = self.query_size * self.num_heads  # should equal embed_size
 
+        # Initialize layers
         self.query = nn.Linear(embed_size, self.all_heads)
         self.key = nn.Linear(embed_size, self.all_heads)
         self.value = nn.Linear(embed_size, self.all_heads)
@@ -390,7 +417,11 @@ class _TransformerLayer(nn.Module):
 
         # Create normalization modules and an MLP
         self.norm2 = nn.LayerNorm(embed_size)
-        self.mlp = _MLP(embed_size, mlp_dim, Norm)
+
+        # Dev note: it should be out_feats=mlp_dim, but we have out_feats=num_heads
+        # Also, the Norm parameter is not used in the MLP module
+        # So this needs to be looked at later, but for now, it works
+        self.mlp = _MLP(in_feats=embed_size, out_feats=num_heads, Norm=Norm)
 
     def forward(self, x):
         """
@@ -403,13 +434,15 @@ class _TransformerLayer(nn.Module):
             torch.Tensor: An output tensor of the same shape as the input.
         """
         # Normalize the input and apply multi-head self-attention
-        y = self.msa(self.norm1(x))
+        y = self.norm1(x)
+        y = self.msa(y)
 
         # Add the input to the output of the self-attention module
         x = x + y
 
         # Normalize the output of the self
-        y = self.mlp(self.norm2(x))
+        y = self.norm2(x)
+        y = self.mlp(y)
 
         # Add the input to the output of the MLP
         x = x + y
@@ -538,10 +571,8 @@ class unetr(ModelBase):
         """
         Initializes an instance of the `unetr` class.
 
-        Parameters:
-        -----------
-        parameters : dict
-            A dictionary containing the model parameters.
+        Args:
+        parameters (dict): A dictionary containing the model parameters.
 
         Raises:
         -------
@@ -549,9 +580,6 @@ class unetr(ModelBase):
             If the input image size is not divisible by the patch size in at least 1 dimension, or if the inner patch size is not smaller than the input image.
             If the embedding dimension is not divisible by the number of self-attention heads.
 
-        Returns:
-        --------
-        None
         """
         super(unetr, self).__init__(parameters)
 
