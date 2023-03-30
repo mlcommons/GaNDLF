@@ -36,7 +36,7 @@ class ResNet(ModelBase):
 
         # Raise an error if the patch size is too small
         elif allowedLay != len(block_config) and allowedLay <= 0:
-            sys.exit(
+            raise ValueError(
                 "The patch size is not large enough for the desired number of layers.",
                 " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
             )
@@ -53,7 +53,7 @@ class ResNet(ModelBase):
         elif self.n_dimensions == 3:
             self.output_size = (1, 1, 1)
         else:
-            sys.exit("Only 2D or 3D convolutions are supported.")
+            raise ValueError("Only 2D or 3D convolutions are supported.")
 
         # If normalization layer is not defined, use Batch Normalization
         if self.Norm is None:
