@@ -256,8 +256,14 @@ class _BasicLayer(nn.Sequential):
         """
         identity = x
 
-        out = self.relu(self.norm1(self.conv1(x)))
-        out = self.norm2(self.conv2(out))
+        # Apply CONV -> NORM -> RELU
+        out = self.conv1(x)
+        out = self.norm1(out)
+        out = self.relu(out)
+
+        # Apply CONV -> NORM
+        out = self.conv2(out)
+        out = self.norm2(out)
 
         if self.sizing:
             # project input to correct output size if needed
@@ -266,6 +272,7 @@ class _BasicLayer(nn.Sequential):
 
         out += identity
         out = self.relu(out)
+
         return out
 
 
