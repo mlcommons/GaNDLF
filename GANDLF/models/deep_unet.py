@@ -197,32 +197,47 @@ class deep_unet(ModelBase):
             (list): List of output Tensors with shape [batch_size, n_classes, x_dims, y_dims, z_dims].
                     The length of the list corresponds to the number of layers in the decoder path.
         """
-
         # Encoding path
         x1 = self.ins(x)  # First convolution layer
-        x2 = self.ds_0(x1)  # Downsample and apply convolution
-        x3 = self.ds_1(self.en_1(x2))  # Downsample and apply convolution
-        x4 = self.ds_2(self.en_2(x3))  # Downsample and apply convolution
-        x5 = self.ds_3(self.en_3(x4))  # Downsample and apply convolution
+
+        # Downsample and apply convolution
+        x2 = self.ds_0(x1)
+        x2 = self.en_1(x2)
+
+        # Downsample and apply convolution
+        x3 = self.ds_1(x2)
+        x3 = self.en_2(x3)
+
+        # Downsample and apply convolution
+        x4 = self.ds_2(x3)
+        x4 = self.en_3(x4)
+
+        # Downsample and apply convolution
+        x5 = self.ds_3(x4)
+        x5 = self.en_4(x5)
 
         # Decoding path
         # Upsample, concatenate with x4, and apply convolution
-        xl4 = self.de_3(self.us_3(x5), x4)
-        out_3 = self.out_3(xl4)  # Output tensor
+        x = self.us_3(x5)
+        xl4 = self.de_3(x, x4)
+        out_3 = self.out_3(xl4)  # Output tensor level 3
 
         # Upsample, concatenate with x3, and apply convolution
-        xl3 = self.de_2(self.us_2(xl4), x3)
-        out_2 = self.out_2(xl3)  # Output tensor
+        x = self.us_2(xl4)
+        xl3 = self.de_2(x, x3)
+        out_2 = self.out_2(xl3)  # Output tensor level 2
 
         # Upsample, concatenate with x2, and apply convolution
-        xl2 = self.de_1(self.us_1(xl3), x2)
-        out_1 = self.out_1(xl2)  # Output tensor
+        x = self.us_1(xl3)
+        xl2 = self.de_1(x, x2)
+        out_1 = self.out_1(xl2)  # Output tensor level 1
 
-        # Upsample, concatenate with x1, and apply convolution
-        xl1 = self.de_0(self.us_0(xl2), x1)
-        out_0 = self.out_0(xl1)  # Output tensor
+        # Upsample, concatenate with x2, and apply convolution
+        x = self.us_0(xl2)
+        xl1 = self.de_0(x, x1)
+        out_0 = self.out_0(xl1)  # Output tensor level 0
 
-        # Return output tensors as a list
+        # Return the 4 output tensors as a list
         return [out_0, out_1, out_2, out_3]
 
 
