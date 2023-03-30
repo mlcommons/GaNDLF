@@ -411,13 +411,24 @@ class _BottleNeckLayer(nn.Sequential):
         """
         identity = x
 
-        out = self.relu(self.norm1(self.conv1(x)))
-        out = self.relu(self.norm2(self.conv2(out)))
-        out = self.norm3(self.conv3(out))
+        # Apply CONV -> NORM -> RELU
+        out = self.conv1(x)
+        out = self.norm1(out)
+        out = self.relu(out)
+
+        # Apply CONV -> NORM -> RELU
+        out = self.conv2(out)
+        out = self.norm2(out)
+        out = self.relu(out)
+
+        # Apply CONV -> NORM
+        out = self.conv3(out)
+        out = self.norm3(out)
 
         # project input to correct output size if needed
         if self.sizing:
-            identity = self.projectNorm(self.project(identity))
+            identity = self.project(identity)
+            identity = self.projectNorm(identity)
 
         out += identity
         out = self.relu(out)
@@ -435,7 +446,7 @@ def checkPatchDimensions(patch_size, numlay):
         numlay (int): the number of layers
 
     Returns:
-        int: the number of layers minus one if the patch size is incompatible;
+        numlay (int): the number of layers minus one if the patch size is incompatible;
             otherwise, the number of layers
     """
     # Convert the patch size to an array if it's an integer
@@ -464,7 +475,8 @@ def checkPatchDimensions(patch_size, numlay):
         remain = patch_size_to_check / 2 ** base2
 
         layers = np.where(remain == 1, base2 - 1, base2)
-        return int(np.min(layers) - 1)
+        numlay = np.min(layers) - 1
+        return numlay
 
 
 def getBase2(num):
