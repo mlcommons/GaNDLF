@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/anaconda:0-3
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.8
 
 # Copy environment.yml (if found) to a temp location so we update the environment. Also
 # copy "noop.txt" so the COPY instruction does not fail if no environment.yml exists.
@@ -9,3 +9,6 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bi
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
+
+# opencv dependencies
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 libgl1-mesa-glx -y

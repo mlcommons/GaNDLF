@@ -30,7 +30,7 @@ docker:
   # Docker build context relative to $MLCUBE_ROOT. (gandlf_deploy can handle this automatically.)
   build_context: "../"
   # Docker file name within docker build context. Any "Dockerfile-*" in the GaNDLF source repo is valid.
-  build_file: "Dockerfile-CUDA11.3"
+  build_file: "Dockerfile-CUDA11.6"
   
   # These settings should usually be set by global MLCube configuration, generally not per-deployment.
   # However, some sane defaults (for Docker >19.03) are here:
