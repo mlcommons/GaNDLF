@@ -70,7 +70,7 @@ class IncConv(nn.Module):
             x (torch.Tensor): The input tensor.
 
         Returns:
-            torch.Tensor: The output tensor.
+            x (torch.Tensor): The output tensor.
         """
         x = F.leaky_relu(
             self.inst_norm(self.conv(x)),
