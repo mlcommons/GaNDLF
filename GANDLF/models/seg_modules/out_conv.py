@@ -73,7 +73,7 @@ class out_conv(nn.Module):
             x (torch.Tensor): input tensor.
 
         Returns:
-            output tensor after passing through the output convolution block.
+            x (torch.Tensor): output tensor after passing through the output convolution block.
         """
         x = self.conv0(self.act(self.in_0(x)))
 
