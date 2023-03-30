@@ -373,7 +373,7 @@ def num_channels(default_chan, width_factor, divisor):
         int: The number of channels closest to default_chan * width_factor that is divisible by divisor.
     """
     default_chan *= width_factor
-    new_out = (default_chan + divisor // 2) // divisor * divisor
+    new_out = int(default_chan + divisor / 2) // divisor * divisor
     new_out = max(new_out, divisor)
 
     if new_out < 0.9 * default_chan:
