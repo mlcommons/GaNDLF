@@ -38,7 +38,10 @@ class DecodingModule(nn.Module):
             network_kwargs (dict):
                 Network keyword arguments
         """
-        super(DecodingModule, self).__init__()
+        nn.Module.__init__(self)
+        # Dev note : This should have been a super
+        # super(DecodingModule, self).__init__()
+        # but need to test it more
 
         if conv_kwargs is None:
             conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
