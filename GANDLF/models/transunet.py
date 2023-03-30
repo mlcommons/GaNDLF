@@ -60,7 +60,9 @@ class _DecoderCUP(nn.Sequential):
         if x2 is not None:
             x1 = torch.cat([x1, x2], dim=1)
 
-        x = self.relu(self.norm(self.conv(x1)))
+        x = self.conv(x1)
+        x = self.norm(x)
+        x = self.relu(x)
 
         x = self.upsample(x)
 

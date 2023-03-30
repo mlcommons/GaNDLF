@@ -214,7 +214,7 @@ class uinc(ModelBase):
             x (torch.Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
         Returns:
-            out (torch.Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+            x6 (torch.Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
         x = self.conv0_1x1(x)
@@ -242,9 +242,8 @@ class uinc(ModelBase):
 
         if not self.final_convolution_layer is None:
             if self.final_convolution_layer == F.softmax:
-                out = self.final_convolution_layer(x6, dim=1)
+                x6 = self.final_convolution_layer(x6, dim=1)
             else:
-                out = self.final_convolution_layer(x6)
-        else:
-            out = x6
-        return out
+                x6 = self.final_convolution_layer(x6)
+
+        return x6
