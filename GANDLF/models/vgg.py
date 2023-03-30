@@ -31,16 +31,18 @@ class VGG(ModelBase):
         # amp is not supported for vgg
         parameters["model"]["amp"] = False
 
+        # Setup the feature extractor
         self.features = self.make_layers(configuration, self.n_channels)
 
+        # Setup the classifier
+        # Dev Note: number of input features for linear layer should be changed later,
+        # but works for all vgg right now
         self.classifier = nn.Sequential(
             nn.Dropout(),
             self.GlobalAvgPool(),
             nn.ReLU(True),
             nn.Dropout(),
-            nn.Linear(
-                512, self.n_classes
-            ),  # Note from devs: number of input features should be changed later, but works for all vgg right now
+            nn.Linear(512, self.n_classes),
         )
 
         # Initialize weights, if convolutional use He initialization, if linear use Xavier initialization
