@@ -43,7 +43,10 @@ class EncodingModule(nn.Module):
             residual (bool):
                 Flag for using residual connection.
         """
-        super(EncodingModule, self).__init__()
+        nn.Module.__init__(self)
+        # Dev note : This should have been a super
+        # super(EncodingModule, self).__init__()
+        # but need to test it more
 
         # Set default arguments
         if conv_kwargs is None:
@@ -67,7 +70,7 @@ class EncodingModule(nn.Module):
         self.act = act(**act_kwargs)
         self.dropout = dropout(**dropout_kwargs) if dropout is not None else None
 
-        # Define layers togetjer
+        # Define layers together
         self.in_0 = norm(output_channels, **norm_kwargs)
         self.in_1 = norm(output_channels, **norm_kwargs)
 
