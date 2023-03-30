@@ -20,28 +20,17 @@ class InitialConv(nn.Module):
         The initial convolutional layer for a UNet-like network.
 
         Args:
-            input_channels (int):
-                The number of channels in the input tensor.
-            output_channels (int):
-                The number of channels in the output tensor.
-            conv (nn.Module):
-                The convolutional layer to use.
-            conv_kwargs (dict):
-                The arguments to pass to the convolutional layer.
-            norm (nn.Module):
-                The normalization layer to use.
-            norm_kwargs (dict):
-                The arguments to pass to the normalization layer.
-            activation (nn.Module):
-                The activation function to use.
-            activation_kwargs (dict):
-                The arguments to pass to the activation function.
-            dropout (nn.Module):
-                The dropout layer to use.
-            dropout_kwargs (dict):
-                The arguments to pass to the dropout layer.
-            network_kwargs (bool):
-                Whether to use residual connections.
+            input_channels (int): The number of channels in the input tensor.
+            output_channels (int): The number of channels in the output tensor.
+            conv (nn.Module): The convolutional layer to use.
+            conv_kwargs (dict): The arguments to pass to the convolutional layer.
+            norm (nn.Module): The normalization layer to use.
+            norm_kwargs (dict): The arguments to pass to the normalization layer.
+            activation (nn.Module): The activation function to use.
+            activation_kwargs (dict): The arguments to pass to the activation function.
+            dropout (nn.Module): The dropout layer to use.
+            dropout_kwargs (dict): The arguments to pass to the dropout layer.
+            network_kwargs (bool): Whether to use residual connections.
         """
         nn.Module.__init__(self)
         if conv_kwargs is None:
