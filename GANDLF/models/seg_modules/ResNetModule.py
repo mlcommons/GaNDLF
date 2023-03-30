@@ -7,28 +7,17 @@ class ResNetModule(nn.Module):
     A residual block module for use in ResNet-style architectures.
 
     Args:
-        input_channels (int):
-            The number of input channels.
-        output_channels (int):
-            The number of output channels.
-        Conv (nn.Module):
-            The convolutional layer to use. Should be a torch.nn.Module.
-        Dropout (nn.Module):
-            The dropout layer to use. Should be a torch.nn.Module.
-        InstanceNorm (nn.Module):
-            The instance normalization layer to use. Should be a torch.nn.Module.
-        dropout_p (float):
-            The dropout probability.
-        leakiness (float):
-            The slope of the negative part of the LeakyReLU activation function.
-        conv_bias (bool):
-            Whether or not to use a bias term in the convolutional layer.
-        inst_norm_affine (bool):
-            Whether or not to use affine parameters in the instance normalization layer.
-        res (bool):
-            Whether or not to include a residual connection in the block.
-        lrelu_inplace (bool):
-            Whether or not to perform the operation in-place for the LeakyReLU activation function.
+        input_channels (int): The number of input channels.
+        output_channels (int): The number of output channels.
+        Conv (nn.Module): The convolutional layer to use. Should be a torch.nn.Module.
+        Dropout (nn.Module): The dropout layer to use. Should be a torch.nn.Module.
+        InstanceNorm (nn.Module): The instance normalization layer to use. Should be a torch.nn.Module.
+        dropout_p (float): The dropout probability.
+        leakiness (float): The slope of the negative part of the LeakyReLU activation function.
+        conv_bias (bool): Whether or not to use a bias term in the convolutional layer.
+        inst_norm_affine (bool): Whether or not to use affine parameters in the instance normalization layer.
+        res (bool): Whether or not to include a residual connection in the block.
+        lrelu_inplace (bool): Whether or not to perform the operation in-place for the LeakyReLU activation function.
 
     """
 
@@ -70,8 +59,10 @@ class ResNetModule(nn.Module):
             x (torch.Tensor): The input tensor.
 
         Returns:
-            torch.Tensor: The output tensor.
+            x (torch.Tensor): The output tensor.
         """
+
+        # Apply residual connection if specified
         if self.residual:
             skip = x
         x = F.leaky_relu(
@@ -79,7 +70,10 @@ class ResNetModule(nn.Module):
             negative_slope=self.leakiness,
             inplace=self.lrelu_inplace,
         )
+
+        # Apply inst - conv - skip - relu
         x = self.inst_norm(self.conv(x))
         x = x + skip
         x = F.leaky_relu(x, negative_slope=self.leakiness, inplace=self.lrelu_inplace)
+
         return x
