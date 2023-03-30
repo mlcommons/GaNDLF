@@ -6,9 +6,9 @@ class IncDropout(nn.Module):
         self,
         input_channels,
         output_channels,
-        Conv=nn.Conv2d,
-        Dropout=nn.Dropout2d,
-        InstanceNorm=nn.InstanceNorm2d,
+        Conv,
+        Dropout,
+        InstanceNorm,
         dropout_p=0.3,
         leakiness=1e-2,
         conv_bias=True,
@@ -26,11 +26,11 @@ class IncDropout(nn.Module):
         output_channels : int
             Number of output channels.
         Conv : torch.nn.Module, optional
-            Convolutional layer to use. Default is nn.Conv2d.
+            Convolutional layer to use.
         Dropout : torch.nn.Module, optional
-            Dropout layer to use. Default is nn.Dropout2d.
+            Dropout layer to use.
         InstanceNorm : torch.nn.Module, optional
-            Instance normalization layer to use. Default is nn.InstanceNorm2d.
+            Instance normalization layer to use.
         dropout_p : float, optional
             Probability of an element to be zeroed. Default is 0.3.
         leakiness : float, optional
@@ -64,7 +64,8 @@ class IncDropout(nn.Module):
             x (torch.Tensor): The input tensor.
 
         Returns:
-            torch.Tensor: The output tensor.
+            x (torch.Tensor): The output tensor.
         """
-        x = self.conv(self.dropout(x))
+        x = self.dropout(x)
+        x = self.conv(x)
         return x
