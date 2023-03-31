@@ -13,7 +13,7 @@ GaNDLF addresses all of these, and the information is divided as described in th
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
+Please follow the [installation instructions](./setup.md#installation) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
