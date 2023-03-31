@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python3 with a preference for [conda](https://www.anaconda.com/).
+- Python3 with a preference for [conda](https://conda.io).
 - Knowledge of [managing Python environments](https://docs.python.org/3/tutorial/venv.html). The instructions below assume knowledge of the [conda management system](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
 Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This needs different prerequisites. See the [Docker Installation](#docker-installation) section below for more information. 
@@ -16,15 +16,15 @@ Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This ne
     - Compute toolkit appropriate for your hardware:
         - NVIDIA: [CUDA](https://developer.nvidia.com/cuda-download) and a compatible [cuDNN](https://developer.nvidia.com/cudnn) installed system-wide
         - AMD: [ROCm](https://www.amd.com/en/graphics/servers-solutions-rocm)
-- Windows: [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools). This is required for PyTorch to work on Windows. If you are using conda, you can install it with `conda install -c anaconda m2w64-toolchain`.
+- Windows: [Microsoft Visual C++ 14.0 or greater](http://visualstudio.microsoft.com/visual-cpp-build-tools). This is required for PyTorch to work on Windows. If you are using conda, you can install it using the following command for your virtual environment: `conda install -c anaconda m2w64-toolchain`.
 
 ## Installation
 
-The instructions assume a system using NVIDIA GPUs with [CUDA 10.2](https://developer.nvidia.com/cuda-toolkit-archive) (for AMD, please make the appropriate change during PyTorch installation from [their installation page](https://pytorch.org/get-started/locally)).
+### Install PyTorch 
+
+GaNDLF's primary computational foundation is built on PyTorch, and as such it supports all hardware types that PyTorch supports. Please install PyTorch for your hardware type before installing GaNDLF. See the [PyTorch installation instructions](https://pytorch.org/get-started/locally) for more details. An example installation using CUDA, ROCm, and CPU-only is shown below:
 
 ```bash
-(base) $> git clone https://github.com/mlcommons/GaNDLF.git
-(base) $> cd GaNDLF
 (base) $> conda create -n venv_gandlf python=3.8 -y
 (base) $> conda activate venv_gandlf
 (venv_gandlf) $> ### subsequent commands go here
@@ -35,23 +35,26 @@ The instructions assume a system using NVIDIA GPUs with [CUDA 10.2](https://deve
 # (venv_gandlf) $> pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
 ## CPU-only
 # (venv_gandlf) $> pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
-(venv_gandlf) $> pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate optimized models for inference
-(venv_gandlf) $> pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
-(venv_gandlf) $> pip install -e .
-
-## alternatively you can also use:
-# (venv_gandlf) $> conda install -c pytorch pytorch torchvision -y
-# (venv_gandlf) $> conda install -c conda-forge gandlf -y
-
-## verify installation
-(venv_gandlf) $> python ./gandlf_verifyInstall
 ```
 
-Alternatively, GaNDLF can be installed via pip by running the following command:
+### Optional Dependencies 
+
+The following dependencies are optional, and are needed for specific features of GaNDLF.
+
+```bash
+(venv_gandlf) $> pip install openvino-dev==2022.1.0 # [OPTIONAL] to generate post-training optimized models for inference
+(venv_gandlf) $> pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
+```
+
+### Install from Package Managers
+
+This option is recommended for most users, and allows for the quickest way to get started with GaNDLF.
 
 ```bash
 # continue from previous shell
 (venv_gandlf) $> pip install gandlf # this will give you the latest stable release
+## you can also use conda
+# (venv_gandlf) $> conda install -c conda-forge gandlf -y
 ```
 
 If you are interested in running the latest version of GaNDLF, you can install the nightly build by running the following command:
@@ -59,6 +62,20 @@ If you are interested in running the latest version of GaNDLF, you can install t
 ```bash
 # continue from previous shell
 (venv_gandlf) $> pip install --pre gandlf
+## you can also use conda
+# (venv_gandlf) $> conda install -c conda-forge/label/gandlf_dev -c conda-forge gandlf -y
+```
+
+
+### Install from Sources
+
+Use this option if you want to [contribute to GaNDLF](https://github.com/mlcommons/GaNDLF/blob/master/CONTRIBUTING.md), or are interested to make other code-level changes for your own use.
+
+```bash
+# continue from previous shell
+(venv_gandlf) $> git clone https://github.com/mlcommons/GaNDLF.git
+(venv_gandlf) $> cd GaNDLF
+(venv_gandlf) $> pip install -e .
 ```
 
 
