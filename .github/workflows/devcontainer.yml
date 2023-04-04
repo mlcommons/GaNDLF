@@ -1,0 +1,68 @@
+# this CI workflow is to test running a dev container task in a GitHub Action.
+name: Dev-Container CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  dev-container-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Free space
+      run: |
+        df -h
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo rm -rf "$ANDROID_SDK_ROOT"
+        df -h
+
+    - name: Checkout (GitHub)
+      uses: actions/checkout@v3
+
+    # Use changed-files-specific action to collect file changes.
+    # The following commented condition applied to a step will run that step only if non-docs files have changed.
+    # It should be applied to all functionality-related steps.
+    # if: steps.changed-files-specific.outputs.only_modified == 'false'
+    - name: Detect and screen file changes
+      id: changed-files-specific
+      uses: tj-actions/changed-files@v34
+      with:
+          files: |
+            docs/**
+            *.md
+            LICENSE
+
+    - name: Summarize docs and non-docs modifications
+      run: |
+        echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
+        echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
+    
+    - name: Log into GitHub Packages registry (ghcr.io)
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Pre-build dev container image
+      if: github.event_name != 'pull_request' # push when not on PR
+      uses: devcontainers/ci@v0.3
+      with:
+        imageName: ghcr.io/mlcommons/gandlf # This is the image name that will be built and pushed to the registry
+        cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
+        imageTag: devcontainer # This is the tag that will be used for the image
+        push: always
+    
+    - name: Build and run dev container task
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+      uses: devcontainers/ci@v0.3
+      with:
+        cacheFrom: ghcr.io/mlcommons/gandlf # This is the image name that will be used as a cache source
+        imageTag: devcontainer # This is the tag that will be used for the image
+        push: never
+        # Change this to be your CI task/script
+        runCmd: pytest --cov=. --cov-report=xml -k "generic"

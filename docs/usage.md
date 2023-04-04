@@ -13,7 +13,7 @@ GaNDLF addresses all of these, and the information is divided as described in th
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
+Please follow the [installation instructions](./setup.md#installation) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
@@ -56,17 +56,17 @@ Recommended tools for tackling all aforementioned curation and annotation tasks:
 GaNDLF can be used to convert a Whole Slide Image (WSI) with or without a corresponding label map to patches/tiles using GaNDLF’s integrated patch miner, which would need the following files:
 
 1. A configuration file that dictates how the patches/tiles will be extracted. A sample configuration to extract patches is presented [here](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_getting_started_segmentation_histo2d_patchExtraction.yaml). The options that the can be defined in the configuration are as follows:
+     - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., `[256,256]`) or a string containing patch size in microns (e.g., `[100m,100m]`). This parameter always needs to be specified.
      - `scale`: scale at which operations such as tissue mask calculation happens; defaults to `16`.
-     - `patch_size`: defines the size of the patches to extract, should be a tuple type of integers (e.g., `[256,256]`) or a string containing patch size in microns (e.g., `[100m,100m]`).
-     - `num_patches`: defines the number of patches to extract; use `-1` to mine until exhaustion.
+     - `num_patches`: defines the number of patches to extract, use `-1` to mine until exhaustion; defaults to `-1`.
      - `value_map`: mapping RGB values in label image to integer values for training; defaults to `None`.
      - `read_type`: either `random` or `sequential` (latter is more efficient); defaults to `random`.
      - `overlap_factor`: Portion of patches that are allowed to overlap (`0->1`); defaults to `0.0`.
-     - `num_workers`: number of workers (note that this does not scale according to the number of threads available on your machine) to use for patch extraction; defaults to `1`.
+     - `num_workers`: number of workers to use for patch extraction (note that this does not scale according to the number of threads available on your machine); defaults to `1`.
 2. A CSV file with the following columns:
      - `SubjectID`: the ID of the subject for the WSI
-     - `Channel_0`: the WSI file
-     - `Label`: (optional) the label map file
+     - `Channel_0`: the full path to the WSI file which will be used to extract patches
+     - `Label`: (optional) full path to the label map file
 
 Once these files are present, the patch miner can be run using the following command:
 
