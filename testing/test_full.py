@@ -2933,3 +2933,4 @@ def test_random_numbers_are_deterministic_on_cpu():
     assert f == h
 
     print("passed")
+    
