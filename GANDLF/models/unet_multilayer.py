@@ -121,13 +121,11 @@ class unet_multilayer(ModelBase):
         """
         Forward pass of the UNet model.
 
-        Parameters
-        ----------
-        x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Returns:
+            x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
         # Store intermediate feature maps
