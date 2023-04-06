@@ -139,23 +139,25 @@ class _Transition(nn.Sequential):
 
 
 class DenseNet(ModelBase):
-    """Densenet-BC model class
-    Args:
-        block_config (list of 4 ints) - how many layers in each pooling block
-        parameters (dict) - overall parameters dictionary; parameters specific for DenseNet:
-            growth_rate (int) - how many filters to add each layer (k in paper)
-            num_init_features (int) - the number of filters to learn in the first convolution layer
-            bn_size (int) - multiplicative factor for number of bottle neck layers
-            (i.e. bn_size * k features in the bottleneck layer)
-            drop_rate (float) - dropout rate after each dense layer
-            num_classes (int) - number of classification classes
-            final_convolution_layer (str) - the final convolutional layer to use
-            norm_type (str) - the normalization type to use
-    """
-
     def __init__(
         self, parameters: dict, block_config=(6, 12, 24, 16),
     ):
+        """
+        Densenet-BC model class
+
+        Args:
+            block_config (list of 4 ints): how many layers in each pooling block
+            parameters (dict): overall parameters dictionary; parameters specific for DenseNet:
+                - growth_rate (int): how many filters to add each layer (k in paper)
+                - num_init_features (int): the number of filters to learn in the first convolution layer
+                - bn_size (int): multiplicative factor for number of bottle neck layers
+                (i.e. bn_size * k features in the bottleneck layer)
+                - drop_rate (float): dropout rate after each dense layer
+                - num_classes (int): number of classification classes
+                - final_convolution_layer (str): the final convolutional layer to use
+                - norm_type (str): the normalization type to use
+        """
+
         super(DenseNet, self).__init__(parameters)
 
         # defining some defaults

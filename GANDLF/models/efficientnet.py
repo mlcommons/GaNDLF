@@ -85,11 +85,10 @@ class _MBConv1(nn.Sequential):
         squeeze excitation -> convolution -> batch normalization and returns the output tensor.
 
         Args:
-            x: Input tensor.
+            x (torch.Tensor): Input tensor for the MBConv block.
 
         Returns:
-            Output tensor after passing through the MBConv block.
-
+            out (torch.Tensor): Output tensor after passing through the MBConv block.
         """
         out = self.depthconv1(x)
         out = self.norm1(out)
@@ -117,37 +116,18 @@ class _MBConv6(nn.Sequential):
         reduction,  # reduction factor for squeeze excitation
     ):
         """
-        A class representing a single MobileNetV3 block with expansion factor 6.
+        A class representing a single MobileNetV3 block with expansion factor 6. Refer to https://arxiv.org/abs/1905.02244 for more.
 
-        Parameters:
-        -----------
-        num_in_feats : int
-            The number of input features/channels.
-        num_out_feats : int
-            The number of output features/channels.
-        kernel_size : int
-            The size of the kernel/convolutional filter.
-        stride : int
-            The stride of the convolutional operation.
-        output_size : int
-            The output size of the block.
-        Norm : torch.nn.Module
-            A normalization layer to be used in the block.
-        Conv : torch.nn.Module
-            A convolutional layer to be used in the block.
-        Pool : torch.nn.Module
-            A pooling layer to be used in the squeeze-excitation block.
-        reduction : float
-            The reduction factor for the squeeze-excitation block.
-
-        Methods:
-        --------
-        forward(x)
-            Performs a forward pass through the block.
-
-        References:
-        -----------
-        [1] https://arxiv.org/abs/1905.02244
+        Args:
+            num_in_feats (int): The number of input features/channels.
+            num_out_feats (int): The number of output features/channels.
+            kernel_size (int): The size of the kernel/convolutional filter.
+            stride (int): The stride of the convolutional operation.
+            output_size (int): The output size of the block.
+            Norm (torch.nn.Module): A normalization layer to be used in the block.
+            Conv (torch.nn.Module): A convolutional layer to be used in the block.
+            Pool (torch.nn.Module): A pooling layer to be used in the squeeze-excitation block.
+            reduction (float): The reduction factor for the squeeze-excitation block.
         """
         super().__init__()
 
@@ -338,7 +318,7 @@ def checkPatchDimensions(patch_size, numlay):
     """
     Check if patch dimensions are divisible by 2^numlay.
 
-    Parameters:
+    Args:
         patch_size (tuple or int): Tuple of integers or a single integer representing the patch size.
         numlay (int): Number of layers.
 
@@ -364,7 +344,7 @@ def num_channels(default_chan, width_factor, divisor):
     """
     Compute the number of channels closest to default_chan * width_factor that is divisible by divisor.
 
-    Parameters:
+    Args:
         default_chan (int): Default number of channels.
         width_factor (float): Width factor.
         divisor (int): Divisor.
@@ -386,7 +366,7 @@ def num_layers(default_lay, depth_factor):
     """
     Compute the number of layers closest to default_lay * depth_factor.
 
-    Parameters:
+    Args:
         default_lay (int): Default number of layers.
         depth_factor (float): Depth factor.
 
