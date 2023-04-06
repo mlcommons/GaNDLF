@@ -17,27 +17,17 @@ def add_conv_block(
     Adds a convolution block to a neural network. A convolution block consists of a convolutional layer and a batch
     normalization layer.
 
-    Parameters
-    ----------
-    Conv : class
-        Convolutional layer class.
-    BatchNorm : class
-        Batch normalization layer class.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int, optional
-        Kernel size of the convolutional layer. Default is 3.
-    dilation : int, optional
-        Dilation rate of the convolutional layer. Default is 1.
-    last : bool, optional
-        Indicates if this is the last block in the neural network. Default is False.
+    Args:
+        Conv (class): Convolutional layer class.
+        BatchNorm (class): Batch normalization layer class.
+        in_channels (int): Number of input channels.
+        out_channels (int): Number of output channels.
+        kernel_size (int, optional): Kernel size of the convolutional layer. Default is 3.
+        dilation (int, optional): Dilation rate of the convolutional layer. Default is 1.
+        last (bool, optional): Indicates if this is the last block in the neural network. Default is False.
 
-    Returns
-    -------
-    list
-        A list containing the convolutional layer and batch normalization layer.
+    Returns:
+        list :A list containing the convolutional layer and batch normalization layer.
 
     """
     padding = dilation if not last else 0
