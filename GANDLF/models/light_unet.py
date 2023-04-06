@@ -158,7 +158,7 @@ class light_unet(ModelBase):
 
     def forward(self, x):
         """
-        Args: 
+        Args:
             x (torch.Tensor): A 5D tensor of shape [batch_size, channels, x_dims, y_dims, z_dims].
 
         Returns:
