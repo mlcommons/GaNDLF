@@ -158,15 +158,11 @@ class light_unet(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Args: 
+            x (torch.Tensor): A 5D tensor of shape [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Returns:
+            torch.Tensor: A 5D tensor of shape [batch_size, n_classes, x_dims, y_dims, z_dims], representing the output of the model for image segmentation.
 
         """
         x1 = self.ins(x)
@@ -188,6 +184,7 @@ class light_unet(ModelBase):
         x = self.us_0(x)
         x = self.de_0(x, x1)
         x = self.out(x)
+
         return x
 
 
