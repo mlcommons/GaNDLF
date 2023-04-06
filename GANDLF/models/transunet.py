@@ -78,24 +78,21 @@ class transunet(ModelBase):
     encoding, and decoding modules. The 'residualConnections' flag controls residual connections.
     The Downsampling, Encoding, and Decoding modules are defined in the seg_modules file.
 
-    Parameters
-    ----------
-    parameters: dict
-        Dictionary containing model parameters and hyperparameters.
+    Args:
+        parameters (dict): Dictionary containing model parameters and hyperparameters.
 
-    Attributes
-    ----------
-    depth (int): Depth of the model.
-    num_heads (int): Number of self-attention heads in the transformer.
-    embed_size (int): Embedding dimension for the transformer.
-    patch_dim (list): The dimensions of the image patch.
-    ins (InitialConv): Initial convolutional layer.
-    ds (ModuleList): List containing the downsampling modules.
-    en (ModuleList): List containing the encoding modules.
-    de (ModuleList): List containing the decoding modules.
-    transformer (_Transformer): Transformer module for the architecture.
-    transCUP (_DecoderCUP): Decoder CUP module for the architecture.
-    out (out_conv): Final output convolutional layer.
+    Attributes:
+        depth (int): Depth of the model.
+        num_heads (int): Number of self-attention heads in the transformer.
+        embed_size (int): Embedding dimension for the transformer.
+        patch_dim (list): The dimensions of the image patch.
+        ins (InitialConv): Initial convolutional layer.
+        ds (ModuleList): List containing the downsampling modules.
+        en (ModuleList): List containing the encoding modules.
+        de (ModuleList): List containing the decoding modules.
+        transformer (_Transformer): Transformer module for the architecture.
+        transCUP (_DecoderCUP): Decoder CUP module for the architecture.
+        out (out_conv): Final output convolutional layer.
     """
 
     def __init__(
