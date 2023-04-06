@@ -2910,7 +2910,7 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
 
     print("passed")
 
-def test_random_numbers_are_deterministic_on_cpu():
+def test_generic_random_numbers_are_deterministic_on_cpu():
     print("48: Starting testing deterministic random numbers generation")
 
     set_determinism(seed=42)
