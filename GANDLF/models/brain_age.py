@@ -7,17 +7,14 @@ def brainage(parameters):
     """
     This function creates a VGG16-based neural network model for brain age prediction.
 
-    Parameters
-    ----------
-    parameters : (dict) A dictionary containing the model parameters, including:
+    Args:
+        parameters (dict): A dictionary containing the model parameters, including:
             - model: a sub-dictionary containing the model-specific parameters.
             - dimension: the dimensionality of the input data (should be 2 for brain age prediction).
             - amp: whether to use automatic mixed precision (not yet implemented for VGG).
 
-    Returns
-    -------
-    model : torch.nn.Module
-        A VGG16-based neural network model with a modified classifier layer for brain age prediction.
+    Returns:
+        model (torch.nn.Module): A VGG16-based neural network model with a modified classifier layer for brain age prediction.
     """
 
     # Check that the input data is 2D
