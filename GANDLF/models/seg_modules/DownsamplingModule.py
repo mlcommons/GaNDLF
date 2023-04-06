@@ -16,22 +16,15 @@ class DownsamplingModule(nn.Module):
         """
         Initializes a downsampling module with convolution, batch normalization, and activation layers.
 
-        input_channels (int):
-            Number of input channels
-        output_channels (int):
-            Number of output channels
-        conv (nn.Module):
-            Convolution layer
-        conv_kwargs (dict):
-            Convolution layer keyword arguments
-        norm (nn.Module):
-            Normalization layer
-        norm_kwargs (dict):
-            Normalization layer keyword arguments
-        act (nn.Module):
-            Activation function layer
-        act_kwargs (dict):
-            Activation function layer keyword arguments
+        Args:
+            input_channels (int): Number of input channels
+            output_channels (int): Number of output channels
+            conv (nn.Module): Convolution layer
+            conv_kwargs (dict): Convolution layer keyword arguments
+            norm (nn.Module): Normalization layer
+            norm_kwargs (dict): Normalization layer keyword arguments
+            act (nn.Module): Activation function layer
+            act_kwargs (dict): Activation function layer keyword arguments
         """
         super(DownsamplingModule, self).__init__()
         if conv_kwargs is None:
