@@ -20,28 +20,17 @@ class EncodingModule(nn.Module):
         Encoding module for the UNet model.
 
         Args:
-            input_channels (int):
-                Number of input channels.
-            output_channels (int):
-                Number of output channels.
-            conv (nn.Module):
-                Convolution layer.
-            conv_kwargs (dict):
-                Convolution layer keyword arguments.
-            norm (nn.Module):
-                Normalization layer.
-            norm_kwargs (dict):
-                Normalization layer keyword arguments.
-            act (nn.Module):
-                Activation function layer.
-            act_kwargs (dict):
-                Activation function layer keyword arguments.
-            dropout (nn.Module):
-                Dropout layer.
-            dropout_kwargs (dict):
-                Dropout layer keyword arguments.
-            residual (bool):
-                Flag for using residual connection.
+            input_channels (int): Number of input channels.
+            output_channels (int): Number of output channels.
+            conv (nn.Module): Convolution layer.
+            conv_kwargs (dict): Convolution layer keyword arguments.
+            norm (nn.Module): Normalization layer.
+            norm_kwargs (dict): Normalization layer keyword arguments.
+            act (nn.Module): Activation function layer.
+            act_kwargs (dict): Activation function layer keyword arguments.
+            dropout (nn.Module): Dropout layer.
+            dropout_kwargs (dict): Dropout layer keyword arguments.
+            residual (bool): Flag for using residual connection.
         """
         nn.Module.__init__(self)
         # Dev note : This should have been a super
