@@ -545,11 +545,11 @@ def checkImgSize(img_size, number=4):
     of the input image size.
 
     Args:
-    - img_size (tuple of ints): size of the input image tensor
-    - number (int): a number that the input image size is checked against. Default value is 4.
+        img_size (tuple of ints): size of the input image tensor
+        number (int): a number that the input image size is checked against. Default value is 4.
 
     Returns:
-    - An integer, either the specified number or the minimum log base 2 of the input image size.
+        int : An integer, either the specified number or the minimum log base 2 of the input image size.
     """
     if all([x >= 2 ** number for x in img_size]):
         return number
@@ -572,7 +572,7 @@ class unetr(ModelBase):
         Initializes an instance of the `unetr` class.
 
         Args:
-        parameters (dict): A dictionary containing the model parameters.
+            parameters (dict): A dictionary containing the model parameters.
 
         Raises:
         -------
