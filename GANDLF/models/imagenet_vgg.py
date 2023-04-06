@@ -102,6 +102,40 @@ class imagenet_vgg11(ModelBase):
         return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
+class imagenet_vgg11_bn(ModelBase):
+    def __init__(self, parameters,) -> None:
+        """
+        VGG11 with batch normalization architecture for image classification on ImageNet dataset.
+
+        Args:
+            parameters (dict): Dictionary containing model parameters.
+
+        Attributes:
+            model (torch.nn.Module): VGG11 with batch normalization model.
+        """
+        super(imagenet_vgg11_bn, self).__init__(parameters)
+
+        pretrained = parameters["model"].get("pretrained", True)
+        self.model = create_torchvision_model(
+            "vgg11_bn",
+            pretrained=pretrained,
+            num_classes=self.n_classes,
+            dimensions=self.n_dimensions,
+        )
+
+    def forward(self, x):
+        """
+        Forward pass method.
+
+        Args:
+            x: Input tensor.
+
+        Returns:
+            Tensor: Output tensor.
+        """
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
+
+
 class imagenet_vgg13(ModelBase):
     def __init__(self, parameters,) -> None:
         """
@@ -132,6 +166,40 @@ class imagenet_vgg13(ModelBase):
 
         Returns:
             torch.Tensor: Output tensor after applying the final activation function.
+        """
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
+
+
+class imagenet_vgg13_bn(ModelBase):
+    def __init__(self, parameters,) -> None:
+        """
+        VGG13 with batch normalization architecture for image classification on ImageNet dataset.
+
+        Args:
+            parameters (dict): Dictionary containing model parameters.
+
+        Attributes:
+            model (torch.nn.Module): VGG13 with batch normalization model.
+        """
+        super(imagenet_vgg13_bn, self).__init__(parameters)
+
+        pretrained = parameters["model"].get("pretrained", True)
+        self.model = create_torchvision_model(
+            "vgg13_bn",
+            pretrained=pretrained,
+            num_classes=self.n_classes,
+            dimensions=self.n_dimensions,
+        )
+
+    def forward(self, x):
+        """
+        Forward pass method.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            (torch.Tensor): Output tensor.
         """
         return apply_activation_function(self.final_convolution_layer, self.model(x))
 
@@ -170,6 +238,40 @@ class imagenet_vgg16(ModelBase):
         return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
+class imagenet_vgg16_bn(ModelBase):
+    def __init__(self, parameters,) -> None:
+        """
+        VGG16 with batch normalization architecture for image classification on ImageNet dataset.
+
+        Args:
+            parameters (dict): Dictionary containing model parameters.
+
+        Attributes:
+            model (torch.nn.Module): VGG16 with batch normalization model.
+        """
+        super(imagenet_vgg16_bn, self).__init__(parameters)
+
+        pretrained = parameters["model"].get("pretrained", True)
+        self.model = create_torchvision_model(
+            "vgg16_bn",
+            pretrained=pretrained,
+            num_classes=self.n_classes,
+            dimensions=self.n_dimensions,
+        )
+
+    def forward(self, x):
+        """
+        Forward pass method.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
+        return apply_activation_function(self.final_convolution_layer, self.model(x))
+
+
 class imagenet_vgg19(ModelBase):
     def __init__(self, parameters,) -> None:
         """
@@ -204,108 +306,6 @@ class imagenet_vgg19(ModelBase):
         return apply_activation_function(self.final_convolution_layer, self.model(x))
 
 
-class imagenet_vgg11_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
-        """
-        VGG11 with batch normalization architecture for image classification on ImageNet dataset.
-
-        Args:
-            parameters (dict): Dictionary containing model parameters.
-
-        Attributes:
-            model: VGG11 with batch normalization model.
-        """
-        super(imagenet_vgg11_bn, self).__init__(parameters)
-
-        pretrained = parameters["model"].get("pretrained", True)
-        self.model = create_torchvision_model(
-            "vgg11_bn",
-            pretrained=pretrained,
-            num_classes=self.n_classes,
-            dimensions=self.n_dimensions,
-        )
-
-    def forward(self, x):
-        """
-        Forward pass method.
-
-        Args:
-            x: Input tensor.
-
-        Returns:
-            Tensor: Output tensor.
-        """
-        return apply_activation_function(self.final_convolution_layer, self.model(x))
-
-
-class imagenet_vgg13_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
-        """
-        VGG13 with batch normalization architecture for image classification on ImageNet dataset.
-
-        Args:
-            parameters (dict): Dictionary containing model parameters.
-
-        Attributes:
-            model: VGG13 with batch normalization model.
-        """
-        super(imagenet_vgg13_bn, self).__init__(parameters)
-
-        pretrained = parameters["model"].get("pretrained", True)
-        self.model = create_torchvision_model(
-            "vgg13_bn",
-            pretrained=pretrained,
-            num_classes=self.n_classes,
-            dimensions=self.n_dimensions,
-        )
-
-    def forward(self, x):
-        """
-        Forward pass method.
-
-        Args:
-            x: Input tensor.
-
-        Returns:
-            Tensor: Output tensor.
-        """
-        return apply_activation_function(self.final_convolution_layer, self.model(x))
-
-
-class imagenet_vgg16_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
-        """
-        VGG16 with batch normalization architecture for image classification on ImageNet dataset.
-
-        Args:
-            parameters (dict): Dictionary containing model parameters.
-
-        Attributes:
-            model: VGG16 with batch normalization model.
-        """
-        super(imagenet_vgg16_bn, self).__init__(parameters)
-
-        pretrained = parameters["model"].get("pretrained", True)
-        self.model = create_torchvision_model(
-            "vgg16_bn",
-            pretrained=pretrained,
-            num_classes=self.n_classes,
-            dimensions=self.n_dimensions,
-        )
-
-    def forward(self, x):
-        """
-        Forward pass method.
-
-        Args:
-            x: Input tensor.
-
-        Returns:
-            Tensor: Output tensor.
-        """
-        return apply_activation_function(self.final_convolution_layer, self.model(x))
-
-
 class imagenet_vgg19_bn(ModelBase):
     def __init__(self, parameters,) -> None:
         """
@@ -315,7 +315,7 @@ class imagenet_vgg19_bn(ModelBase):
             parameters (dict): Dictionary containing model parameters.
 
         Attributes:
-            model: VGG19 with batch normalization model.
+            model (torch.nn.Module): VGG19 with batch normalization model.
         """
         super(imagenet_vgg19_bn, self).__init__(parameters)
 
@@ -332,9 +332,9 @@ class imagenet_vgg19_bn(ModelBase):
         Forward pass method.
 
         Args:
-            x: Input tensor.
+            x (torch.Tensor): Input tensor.
 
         Returns:
-            Tensor: Output tensor.
+            torch.Tensor: Output tensor.
         """
         return apply_activation_function(self.final_convolution_layer, self.model(x))
