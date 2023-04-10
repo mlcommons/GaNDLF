@@ -34,7 +34,7 @@ def main_run(
     # and if it does, compare the two and if they are the same, ensure no preprocess is done.
     model_parameters_prev = os.path.join(os.path.dirname(model_dir), "parameters.pkl")
     if train_mode:
-        if not (reset) or not (resume):
+        if resume:
             print(
                 "Trying to resume training without changing any parameters from previous run.",
                 flush=True,
