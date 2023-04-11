@@ -66,18 +66,16 @@ class VGG(ModelBase):
         Returns:
             tensor: Output tensor of shape (batch_size, n_classes).
         """
-        features_output = self.features(x)
-        classifier_output = self.classifier(features_output)
+        out = self.features(x)
+        out = self.classifier(out)
         if not self.final_convolution_layer is None:
             if self.final_convolution_layer == F.softmax:
                 # Apply softmax activation to the output tensor if specified in the configuration
-                classifier_output = self.final_convolution_layer(
-                    classifier_output, dim=1
-                )
+                out = self.final_convolution_layer(out, dim=1)
             else:
                 # Apply whatever final layer specified in the configuration to the output tensor
-                classifier_output = self.final_convolution_layer(classifier_output)
-        return classifier_output
+                out = self.final_convolution_layer(out)
+        return out
 
     def make_layers(self, layer_config, input_channels):
         """
@@ -110,9 +108,9 @@ class VGG(ModelBase):
 # Layer configuration for VGG models, as per the paper and M represents maxpool
 # and the integers represent the number of channels in the convolutional layers
 cfg = {
-    "VGG11": [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
-    "VGG13": [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
-    "VGG16": [
+    "A": [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "B": [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "D": [
         64,
         64,
         "M",
@@ -132,7 +130,7 @@ cfg = {
         512,
         "M",
     ],
-    "VGG19": [
+    "E": [
         64,
         64,
         "M",
@@ -174,7 +172,7 @@ class vgg11(VGG):
         Args:
             parameters (dict): A dictionary containing the parameters for the VGG11 model.
         """
-        super(vgg11, self).__init__(parameters=parameters, configuration=cfg["VGG11"])
+        super(vgg11, self).__init__(parameters=parameters, configuration=cfg["A"])
 
 
 class vgg13(VGG):
@@ -193,7 +191,7 @@ class vgg13(VGG):
         Args:
             parameters (dict): A dictionary containing the parameters for the VGG13 model.
         """
-        super(vgg13, self).__init__(parameters=parameters, configuration=cfg["VGG13"])
+        super(vgg13, self).__init__(parameters=parameters, configuration=cfg["B"])
 
 
 class vgg16(VGG):
@@ -212,7 +210,7 @@ class vgg16(VGG):
         Args:
             parameters (dict): A dictionary containing the parameters for the VGG16 model.
         """
-        super(vgg16, self).__init__(parameters=parameters, configuration=cfg["VGG16"])
+        super(vgg16, self).__init__(parameters=parameters, configuration=cfg["D"])
 
 
 class vgg19(VGG):
@@ -231,4 +229,4 @@ class vgg19(VGG):
         Args:
             parameters (dict): A dictionary containing the parameters for the VGG19 model.
         """
-        super(vgg19, self).__init__(parameters=parameters, configuration=cfg["VGG19"])
+        super(vgg19, self).__init__(parameters=parameters, configuration=cfg["E"])
