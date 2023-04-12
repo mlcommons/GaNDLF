@@ -1,4 +1,4 @@
-import os, pickle, torch
+import os, pickle
 from pathlib import Path
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
