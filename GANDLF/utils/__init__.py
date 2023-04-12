@@ -45,6 +45,7 @@ from .generic import (
     version_check,
     get_array_from_image_or_tensor,
     suppress_stdout_stderr,
+    set_determinism,
 )
 
 from .modelio import (
@@ -55,8 +56,4 @@ from .modelio import (
     load_ov_model,
     save_model,
     optimize_and_save_model,
-)
-
-from .set_determinism import (
-    set_determinism
 )

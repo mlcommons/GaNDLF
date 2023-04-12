@@ -1,5 +1,4 @@
-import os, pickle, random, torch
-import numpy as np
+import os, pickle, torch
 from pathlib import Path
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
@@ -33,7 +32,7 @@ def main_run(
     parameters["device_id"] = -1
     # in case the data being passed is already processed, check if the previous parameters exists,
     # and if it does, compare the two and if they are the same, ensure no preprocess is done.
-    
+
     if parameters["determinism"]:
         set_determinism(42)
 
