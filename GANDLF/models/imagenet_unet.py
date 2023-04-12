@@ -138,11 +138,11 @@ class Unet(SegmentationModel):
                 depth=encoder_depth,
                 weights=encoder_weights,
             )
+            out_channels = self.encoder.out_channels
             modules = []
             modules.append(self.pre_encoder)
             modules.append(self.encoder)
             self.encoder = nn.Sequential(*modules)
-
         else:
             self.encoder = get_encoder(
                 encoder_name,
@@ -150,8 +150,7 @@ class Unet(SegmentationModel):
                 depth=encoder_depth,
                 weights=encoder_weights,
             )
-
-        out_channels = self.encoder.out_channels
+            out_channels = self.encoder.out_channels
 
         if aux_params is None:
             self.decoder = UnetDecoder(
