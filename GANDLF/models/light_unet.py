@@ -7,7 +7,7 @@ from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
-from GANDLF.models.seg_modules.in_conv import in_conv
+from GANDLF.models.seg_modules.InitialConv import InitialConv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 from GANDLF.utils.generic import checkPatchDivisibility
@@ -19,9 +19,7 @@ class light_unet(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
+        self, parameters: dict, residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
         super(light_unet, self).__init__(parameters)
@@ -33,7 +31,7 @@ class light_unet(ModelBase):
             + parameters["model"]["architecture"]
         )
 
-        self.ins = in_conv(
+        self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
             conv=self.Conv,
@@ -160,15 +158,11 @@ class light_unet(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Args:
+            x (torch.Tensor): A 5D tensor of shape [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Returns:
+            torch.Tensor: A 5D tensor of shape [batch_size, n_classes, x_dims, y_dims, z_dims], representing the output of the model for image segmentation.
 
         """
         x1 = self.ins(x)
@@ -190,6 +184,7 @@ class light_unet(ModelBase):
         x = self.us_0(x)
         x = self.de_0(x, x1)
         x = self.out(x)
+
         return x
 
 

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Implementation of UNet
+Implementation of UNet with deep supervision and residual connections
 """
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
-from GANDLF.models.seg_modules.in_conv import in_conv
+from GANDLF.models.seg_modules.InitialConv import InitialConv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 from GANDLF.utils.generic import checkPatchDivisibility
@@ -22,9 +22,7 @@ class deep_unet(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
+        self, parameters: dict, residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
         super(deep_unet, self).__init__(parameters)
@@ -34,7 +32,8 @@ class deep_unet(ModelBase):
             + parameters["model"]["architecture"]
         )
 
-        self.ins = in_conv(
+        # Define layers of the UNet model
+        self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
             conv=self.Conv,
@@ -189,45 +188,56 @@ class deep_unet(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Forward pass of the U-Net model.
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Input Tensor with shape [batch_size, channels, x_dims, y_dims, z_dims].
 
+        Returns:
+            (list): List of output Tensors with shape [batch_size, n_classes, x_dims, y_dims, z_dims].
+                    The length of the list corresponds to the number of layers in the decoder path.
         """
-        x1 = self.ins(x)
+        # Encoding path
+        x1 = self.ins(x)  # First convolution layer
+
+        # Downsample and apply convolution
         x2 = self.ds_0(x1)
         x2 = self.en_1(x2)
+
+        # Downsample and apply convolution
         x3 = self.ds_1(x2)
         x3 = self.en_2(x3)
+
+        # Downsample and apply convolution
         x4 = self.ds_2(x3)
         x4 = self.en_3(x4)
+
+        # Downsample and apply convolution
         x5 = self.ds_3(x4)
         x5 = self.en_4(x5)
 
+        # Decoding path
+        # Upsample, concatenate with x4, and apply convolution
         x = self.us_3(x5)
         xl4 = self.de_3(x, x4)
-        out_3 = self.out_3(xl4)
+        out_3 = self.out_3(xl4)  # Output tensor level 3
 
+        # Upsample, concatenate with x3, and apply convolution
         x = self.us_2(xl4)
         xl3 = self.de_2(x, x3)
-        out_2 = self.out_2(xl3)
+        out_2 = self.out_2(xl3)  # Output tensor level 2
 
+        # Upsample, concatenate with x2, and apply convolution
         x = self.us_1(xl3)
         xl2 = self.de_1(x, x2)
-        out_1 = self.out_1(xl2)
+        out_1 = self.out_1(xl2)  # Output tensor level 1
 
+        # Upsample, concatenate with x2, and apply convolution
         x = self.us_0(xl2)
         xl1 = self.de_0(x, x1)
-        out_0 = self.out_0(xl1)
+        out_0 = self.out_0(xl1)  # Output tensor level 0
 
-        # Currently four outputs from the deep network
-
+        # Return the 4 output tensors as a list
         return [out_0, out_1, out_2, out_3]
 
 
