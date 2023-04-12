@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 
-class in_conv(nn.Module):
+class InitialConv(nn.Module):
     def __init__(
         self,
         input_channels,
@@ -16,6 +16,22 @@ class in_conv(nn.Module):
         dropout_kwargs=None,
         network_kwargs=None,
     ):
+        """
+        The initial convolutional layer for a UNet-like network.
+
+        Args:
+            input_channels (int): The number of channels in the input tensor.
+            output_channels (int): The number of channels in the output tensor.
+            conv (nn.Module): The convolutional layer to use.
+            conv_kwargs (dict): The arguments to pass to the convolutional layer.
+            norm (nn.Module): The normalization layer to use.
+            norm_kwargs (dict): The arguments to pass to the normalization layer.
+            activation (nn.Module): The activation function to use.
+            activation_kwargs (dict): The arguments to pass to the activation function.
+            dropout (nn.Module): The dropout layer to use.
+            dropout_kwargs (dict): The arguments to pass to the dropout layer.
+            network_kwargs (bool): Whether to use residual connections.
+        """
         nn.Module.__init__(self)
         if conv_kwargs is None:
             conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
@@ -33,17 +49,6 @@ class in_conv(nn.Module):
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
-        self.conv = conv
-        self.conv_kwargs = conv_kwargs
-        self.norm = norm
-        self.norm_kwargs = norm_kwargs
-        self.act = act
-        self.act_kwargs = act_kwargs
-        self.dropout = dropout
-        self.dropout_kwargs = dropout_kwargs
-        self.network_kwargs = network_kwargs
-        self.residual = self.network_kwargs["res"]
-
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
         self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
         self.conv2 = conv(output_channels, output_channels, **conv_kwargs)
@@ -51,9 +56,11 @@ class in_conv(nn.Module):
         self.in_0 = norm(output_channels, **norm_kwargs)
         self.in_1 = norm(output_channels, **norm_kwargs)
 
-        self.act = self.act(**act_kwargs)
+        self.act = act(**act_kwargs)
+        self.residual = network_kwargs["res"]
 
-        self.dropout = self.dropout(**dropout_kwargs)
+        if dropout is not None:
+            self.dropout = dropout(**dropout_kwargs)
 
     def forward(self, x):
         """
@@ -63,11 +70,11 @@ class in_conv(nn.Module):
                              |                                                |
                   output <-- + <-------------------------- conv2 <-- lrelu <--|]
 
-        Arguments:
-            x {[Tensor]} -- [Takes in a type of torch Tensor]
+         Args:
+            x (torch.Tensor): Input tensor.
 
         Returns:
-            [Tensor] -- [Returns a torch Tensor]
+            torch.Tensor: Output tensor.
         """
         x = self.conv0(x)
         if self.residual:

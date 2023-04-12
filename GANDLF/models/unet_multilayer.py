@@ -8,7 +8,7 @@ from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
-from GANDLF.models.seg_modules.in_conv import in_conv
+from GANDLF.models.seg_modules.InitialConv import InitialConv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from .modelBase import ModelBase
 
@@ -22,18 +22,25 @@ class unet_multilayer(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
+        self, parameters: dict, residualConnections=False,
     ):
+        """
+        Parameters
+        ----------
+        parameters (dict): A dictionary containing the model parameters.
+        residualConnections (bool, optional): A flag to control residual connections in the model, by default False.
+        """
+
         self.network_kwargs = {"res": residualConnections}
         super(unet_multilayer, self).__init__(parameters)
 
+        # Set the depth of the model based on the input parameters
+        # If the depth is not set, then set it to 4
         parameters["model"]["depth"] = parameters["model"].get("depth", 4)
-
         self.depth = self.model_depth_check(parameters)
 
-        self.ins = in_conv(
+        # Create the initial convolution layer
+        self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
             conv=self.Conv,
@@ -42,11 +49,13 @@ class unet_multilayer(ModelBase):
             network_kwargs=self.network_kwargs,
         )
 
+        # Create lists of downsampling, encoding, decoding and upsampling modules
         self.ds = ModuleList([])
         self.en = ModuleList([])
         self.us = ModuleList([])
         self.de = ModuleList([])
 
+        # Create the required number of downsampling, encoding, decoding and upsampling modules
         for i_lay in range(0, self.depth):
             self.ds.append(
                 DownsamplingModule(
@@ -87,6 +96,7 @@ class unet_multilayer(ModelBase):
                 )
             )
 
+        # Create the final convolution layer
         self.out = out_conv(
             input_channels=self.base_filters,
             output_channels=self.n_classes,
@@ -97,6 +107,7 @@ class unet_multilayer(ModelBase):
             sigmoid_input_multiplier=self.sigmoid_input_multiplier,
         )
 
+        # Check if converter_type is passed in model, generally referring to ACS
         if "converter_type" in parameters["model"]:
             self.ins = self.converter(self.ins).model
             self.out = self.converter(self.out).model
@@ -108,17 +119,17 @@ class unet_multilayer(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Forward pass of the UNet model.
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+
+        Returns:
+            x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
+        # Store intermediate feature maps
+
         y = []
         y.append(self.ins(x))
 
@@ -127,14 +138,21 @@ class unet_multilayer(ModelBase):
             temp = self.ds[i](y[i])
             y.append(self.en[i](temp))
 
+        # Get the feature map at the last (deepest) layer
         x = y[-1]
 
         # [upsample --> encode] x num layers
         for i in range(self.depth - 1, -1, -1):
+
+            # Upsample the feature map to match the size of the corresponding feature map in the encoder
             x = self.us[i](x)
+
+            # Concatenate with the corresponding feature map from the encoder
             x = self.de[i](x, y[i])
 
+        # Get the final output
         x = self.out(x)
+
         return x
 
 
@@ -148,4 +166,10 @@ class resunet_multilayer(unet_multilayer):
     """
 
     def __init__(self, parameters: dict):
+        """
+        Parameters
+        ----------
+        parameters (dict): A dictionary containing the model parameters.
+
+        """
         super(resunet_multilayer, self).__init__(parameters, residualConnections=True)

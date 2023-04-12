@@ -13,6 +13,19 @@ class DownsamplingModule(nn.Module):
         act=nn.LeakyReLU,
         act_kwargs=None,
     ):
+        """
+        Initializes a downsampling module with convolution, batch normalization, and activation layers.
+
+        Args:
+            input_channels (int): Number of input channels
+            output_channels (int): Number of output channels
+            conv (nn.Module): Convolution layer
+            conv_kwargs (dict): Convolution layer keyword arguments
+            norm (nn.Module): Normalization layer
+            norm_kwargs (dict): Normalization layer keyword arguments
+            act (nn.Module): Activation function layer
+            act_kwargs (dict): Activation function layer keyword arguments
+        """
         super(DownsamplingModule, self).__init__()
         if conv_kwargs is None:
             conv_kwargs = {"kernel_size": 3, "stride": 2, "padding": 1, "bias": True}
@@ -34,15 +47,15 @@ class DownsamplingModule(nn.Module):
 
     def forward(self, x):
         """
-        This is a forward function for the current module.
+        Applies a downsampling operation to the input tensor.
 
         [input -- > in --> lrelu --> ConvDS --> output]
 
-        Arguments:
-            x {[Tensor]} -- [Takes in a type of torch Tensor]
+        Args:
+        x (torch.Tensor): Input tensor of shape (batch_size, channels, height, width)
 
         Returns:
-            [Tensor] -- [Returns a torch Tensor]
+            torch.Tensor: The output tensor, of shape (batch_size, output_channels, height // 2, width // 2).
         """
         x = self.act(self.in_0(self.conv0(x)))
 

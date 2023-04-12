@@ -8,7 +8,7 @@ import torch
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
-from GANDLF.models.seg_modules.in_conv import in_conv
+from GANDLF.models.seg_modules.InitialConv import InitialConv
 from .modelBase import ModelBase
 
 
@@ -24,11 +24,10 @@ class fcn(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
+        self, parameters: dict,
     ):
         super(fcn, self).__init__(parameters)
-        self.ins = in_conv(
+        self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
             conv=self.Conv,
@@ -133,16 +132,11 @@ class fcn(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
-
+        Returns:
+            x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
         """
         x1 = self.ins(x)
         x2 = self.ds_0(x1)

@@ -16,12 +16,22 @@ from .modelBase import ModelBase
 
 class SegmentationModel(torch.nn.Module):
     """
-    This has been adapted from its original implementation in
-    https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/base/model.py
+    This class defines a segmentation model. It takes an input tensor and sequentially passes it through the model's
+    encoder, decoder and heads.
 
+    Methods:
+        initialize:
+            Initializes the model's classification or segmentation head
+
+        forward:
+            Sequentially passes the input tensor through the model's encoder, decoder, and heads and returns either the
+            segmentation masks or the class labels.
     """
 
     def initialize(self):
+        """
+        This function initializes the model's classification or segmentation head.
+        """
         if self.classification_head is None:
             init.initialize_decoder(self.decoder)
             init.initialize_head(self.segmentation_head)
@@ -29,7 +39,16 @@ class SegmentationModel(torch.nn.Module):
             init.initialize_head(self.classification_head)
 
     def forward(self, x):
-        """Sequentially pass `x` trough model`s encoder, decoder and heads"""
+        """
+        This function sequentially passes the input tensor through the model's encoder, decoder, and heads and returns
+        either the segmentation masks or the class labels.
+
+        Args:
+            x (torch.Tensor): Input tensor
+
+        Returns:
+            torch.Tensor: Segmentation masks or class labels
+        """
         features = self.encoder(x)
 
         if self.classification_head is None:
@@ -64,45 +83,33 @@ class Unet(SegmentationModel):
     """
     This has been adapted from its original implementation in
     https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/decoders/unet/model.py
-
     Unet_ is a fully convolution neural network for image semantic segmentation. Consist of *encoder*
     and *decoder* parts connected with *skip connections*. Encoder extract features of different spatial
     resolution (skip connections) which are used by decoder to define accurate segmentation mask. Use *concatenation*
     for fusing decoder blocks with skip connections.
 
     Args:
-        encoder_name: Name of the classification model that will be used as an encoder (a.k.a backbone)
-            to extract features of different spatial resolution
-        encoder_depth: A number of stages used in encoder in range [3, 5]. Each stage generate features
-            two times smaller in spatial dimensions than previous one (e.g. for depth 0 we will have features
-            with shapes [(N, C, H, W),], for depth 1 - [(N, C, H, W), (N, C, H // 2, W // 2)] and so on).
-            Default is 5
-        encoder_weights: One of **None** (random initialization), **"imagenet"** (pre-training on ImageNet) and
-            other pretrained weights (see table with available weights for each encoder_name)
-        decoder_channels: List of integers which specify **in_channels** parameter for convolutions used in decoder.
-            Length of the list should be the same as **encoder_depth**
-        decoder_use_batchnorm: If **True**, BatchNorm2d layer between Conv2D and Activation layers
-            is used. If **"inplace"** InplaceABN will be used, allows to decrease memory consumption.
-            Available options are **True, False, "inplace"**
-        decoder_attention_type: Attention module used in decoder of the model. Available options are **None** and **scse**.
-            SCSE paper - https://arxiv.org/abs/1808.08127
-        in_channels: A number of input channels for the model, default is 3 (RGB images)
-        classes: A number of classes for output mask (or you can think as a number of channels of output mask)
-        activation: An activation function to apply after the final convolution layer.
-            Available options are **"sigmoid"**, **"softmax"**, **"logsoftmax"**, **"tanh"**, **"identity"**, **callable** and **None**.
-            Default is **None**
-        aux_params: Dictionary with parameters of the auxiliary output (classification head). Auxiliary output is build
-            on top of encoder if **aux_params** is not **None** (default). Supported params:
-                - classes (int): A number of classes
-                - pooling (str): One of "max", "avg". Default is "avg"
-                - dropout (float): Dropout factor in [0, 1)
-                - activation (str): An activation function to apply "sigmoid"/"softmax" (could be **None** to return logits)
+        encoder_name (str): Name of the classification model to be used as an encoder (a.k.a backbone) to extract features of different spatial resolution.
+        encoder_depth (int): A number of stages used in encoder in range [3, 5]. Each stage generates features two times smaller in spatial dimensions than the previous one. Default is 5.
+        encoder_weights (str or None): One of "None" (random initialization), "imagenet" (pre-training on ImageNet) and other pretrained weights (see table with available weights for each encoder_name).
+        decoder_channels (list of ints): List of integers specifying in_channels parameter for convolutions used in decoder. Length of the list should be the same as encoder_depth.
+        decoder_use_batchnorm (bool or str): If True, BatchNorm2d layer between Conv2D and Activation layers is used. If "inplace", InplaceABN will be used, allowing to decrease memory consumption. Available options are True, False, "inplace".
+        decoder_attention_type (str or None): Attention module used in the decoder of the model. Available options are None and "scse". SCSE paper - https://arxiv.org/abs/1808.08127.
+        in_channels (int): A number of input channels for the model. Default is 3 (RGB images).
+        classes (int): A number of classes for output mask (or you can think as a number of channels of output mask).
+        activation (str, callable, or None): An activation function to apply after the final convolution layer. Available options are "sigmoid", "softmax", "logsoftmax", "tanh", "identity", callable, and None. Default is None.
+        aux_params (dict or None): Dictionary with parameters of the auxiliary output (classification head). Auxiliary output is built on top of the encoder if aux_params is not None (default). Supported params:
+            - classes (int): A number of classes.
+            - pooling (str): One of "max", "avg". Default is "avg".
+            - dropout (float): Dropout factor in [0, 1).
+            - activation (str): An activation function to apply "sigmoid"/"softmax" (could be None to return logits).
 
     Returns:
-        ``torch.nn.Module``: Unet
+        model (torch.nn.Module): A UNet model for image semantic segmentation.
 
-    .. _Unet:
-        https://arxiv.org/abs/1505.04597
+    Reference:
+    Ronneberger, O., Fischer, P., & Brox, T. (2015). U-Net: Convolutional Networks for Biomedical Image Segmentation.
+    arXiv preprint arXiv:1505.04597.
 
     """
 
@@ -162,10 +169,7 @@ class ImageNet_UNet(ModelBase):
         ModelBase (nn.Module): The base model class.
     """
 
-    def __init__(
-        self,
-        parameters,
-    ) -> None:
+    def __init__(self, parameters,) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
         decoder_use_batchnorm = False
@@ -220,6 +224,15 @@ class ImageNet_UNet(ModelBase):
             self.model = self.converter(self.model).model
 
     def forward(self, x):
+        """
+        Forward pass of the model.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
         return self.model(x)
 
 
