@@ -7,7 +7,7 @@ from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
-from GANDLF.models.seg_modules.in_conv import in_conv
+from GANDLF.models.seg_modules.InitialConv import InitialConv
 from GANDLF.models.seg_modules.out_conv import out_conv
 from GANDLF.utils.generic import checkPatchDivisibility
 
@@ -21,9 +21,7 @@ class unet(ModelBase):
     """
 
     def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
+        self, parameters: dict, residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
@@ -33,7 +31,7 @@ class unet(ModelBase):
             + parameters["model"]["architecture"]
         )
 
-        self.ins = in_conv(
+        self.ins = InitialConv(
             input_channels=self.n_channels,
             output_channels=self.base_filters,
             conv=self.Conv,
@@ -181,27 +179,36 @@ class unet(ModelBase):
 
     def forward(self, x):
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Forward pass of the UNet model.
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Args:
+            x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+
+        Returns:
+            x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
 
         """
+
+        # Encoding path
         x1 = self.ins(x)
+
+        # Apply Downsampling and encoding modules
         x2 = self.ds_0(x1)
         x2 = self.en_1(x2)
+
+        # Apply Downsampling and encoding modules
         x3 = self.ds_1(x2)
         x3 = self.en_2(x3)
+
+        # Apply Downsampling and encoding modules
         x4 = self.ds_2(x3)
         x4 = self.en_3(x4)
+
+        # Apply Downsampling and encoding modules
         x5 = self.ds_3(x4)
         x5 = self.en_4(x5)
 
+        # Decoding path
         x = self.us_3(x5)
         x = self.de_3(x, x4)
         x = self.us_2(x)
@@ -211,6 +218,8 @@ class unet(ModelBase):
         x = self.us_0(x)
         x = self.de_0(x, x1)
         x = self.out(x)
+
+        # Return output tensors
         return x
 
 

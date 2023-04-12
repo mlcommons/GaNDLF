@@ -17,6 +17,22 @@ class IncConv(nn.Module):
         res=False,
         lrelu_inplace=True,
     ):
+        """
+        Constructor for the IncConv module.
+
+        Args:
+            input_channels (int): The number of input channels.
+            output_channels (int): The number of output channels.
+            Conv (nn.Module): The convolution module to use.
+            Dropout (nn.Module): The dropout module to use.
+            InstanceNorm (nn.Module): The instance normalization module to use.
+            dropout_p (float, optional): The probability of dropping out a channel. Defaults to 0.3.
+            leakiness (float, optional): The negative slope of the LeakyReLU activation function. Defaults to 1e-2.
+            conv_bias (bool, optional): Whether to include a bias term in the convolution. Defaults to True.
+            inst_norm_affine (bool, optional): Whether to include an affine transformation in the instance normalization. Defaults to True.
+            res (bool, optional): Whether to use residual connections. Defaults to False.
+            lrelu_inplace (bool, optional): Whether to perform the LeakyReLU activation function in-place. Defaults to True.
+        """
         nn.Module.__init__(self)
         self.output_channels = output_channels
         self.leakiness = leakiness
@@ -36,6 +52,15 @@ class IncConv(nn.Module):
         )
 
     def forward(self, x):
+        """
+        The forward function of the IncConv module.
+
+        Args:
+            x (torch.Tensor): The input tensor.
+
+        Returns:
+            x (torch.Tensor): The output tensor.
+        """
         x = F.leaky_relu(
             self.inst_norm(self.conv(x)),
             negative_slope=self.leakiness,

@@ -16,7 +16,28 @@ class EncodingModule(nn.Module):
         dropout_kwargs=None,
         network_kwargs=None,
     ):
+        """
+        Encoding module for the UNet model.
+
+        Args:
+            input_channels (int): Number of input channels.
+            output_channels (int): Number of output channels.
+            conv (nn.Module): Convolution layer.
+            conv_kwargs (dict): Convolution layer keyword arguments.
+            norm (nn.Module): Normalization layer.
+            norm_kwargs (dict): Normalization layer keyword arguments.
+            act (nn.Module): Activation function layer.
+            act_kwargs (dict): Activation function layer keyword arguments.
+            dropout (nn.Module): Dropout layer.
+            dropout_kwargs (dict): Dropout layer keyword arguments.
+            residual (bool): Flag for using residual connection.
+        """
         nn.Module.__init__(self)
+        # Dev note : This should have been a super
+        # super(EncodingModule, self).__init__()
+        # but need to test it more
+
+        # Set default arguments
         if conv_kwargs is None:
             conv_kwargs = {"kernel_size": 3, "stride": 1, "padding": 1, "bias": True}
         if norm_kwargs is None:
@@ -33,31 +54,31 @@ class EncodingModule(nn.Module):
         if network_kwargs is None:
             network_kwargs = {"res": False}
 
+        # Set attributes together
         self.residual = network_kwargs["res"]
+        self.act = act(**act_kwargs)
+        self.dropout = dropout(**dropout_kwargs) if dropout is not None else None
 
-        self.conv0 = conv(output_channels, output_channels, **conv_kwargs)
-        self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
-
+        # Define layers together
         self.in_0 = norm(output_channels, **norm_kwargs)
         self.in_1 = norm(output_channels, **norm_kwargs)
 
-        self.act = act(**act_kwargs)
-
-        self.dropout = dropout(**dropout_kwargs)
+        self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
+        self.conv1 = conv(output_channels, output_channels, **conv_kwargs)
 
     def forward(self, x):
         """
-        The forward function for initial convolution.
+        The forward function for encoding module.
 
         [input --> | --> in --> lrelu --> conv0 --> dropout --> in -|
                    |                                                |
         output <-- + <-------------------------- conv1 <-- lrelu <--|]
 
-        Arguments:
-            x {[Tensor]} -- [Takes in a type of torch Tensor]
+        Args:
+            x (torch.Tensor): Input tensor.
 
         Returns:
-            [Tensor] -- [Returns a torch Tensor]
+            torch.Tensor: Output tensor.
         """
         if self.residual:
             skip = x
