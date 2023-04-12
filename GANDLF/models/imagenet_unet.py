@@ -129,28 +129,30 @@ class Unet(SegmentationModel):
     ):
         super().__init__()
 
+        def _get_fixed_encoder_channels(name, in_channels):
+            if "mit_" in name:
+                # MixVision Transformers only support 3-channel inputs
+                return 3
+            else:
+                return in_channels
+
+        self.encoder = get_encoder(
+            encoder_name,
+            in_channels=_get_fixed_encoder_channels(encoder_name, in_channels),
+            depth=encoder_depth,
+            weights=encoder_weights,
+        )
+        out_channels = self.encoder.out_channels
         if "mit_" in encoder_name:
             # MixVision Transformers only support 3-channel inputs
-            self.pre_encoder = nn.Conv2d(in_channels, 3, kernel_size=1, stride=1)
-            self.encoder = get_encoder(
-                encoder_name,
-                in_channels=3,
-                depth=encoder_depth,
-                weights=encoder_weights,
+            print(
+                "WARNING: MixVision Transformers only support 3 channels, adding an extra Conv layer for compatibility."
             )
-            out_channels = self.encoder.out_channels
+            self.pre_encoder = nn.Conv2d(in_channels, 3, kernel_size=1, stride=1)
             modules = []
             modules.append(self.pre_encoder)
             modules.append(self.encoder)
             self.encoder = nn.Sequential(*modules)
-        else:
-            self.encoder = get_encoder(
-                encoder_name,
-                in_channels=in_channels,
-                depth=encoder_depth,
-                weights=encoder_weights,
-            )
-            out_channels = self.encoder.out_channels
 
         if aux_params is None:
             self.decoder = UnetDecoder(
