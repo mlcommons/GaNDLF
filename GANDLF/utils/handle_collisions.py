@@ -20,7 +20,9 @@ def handle_collisions(df, headers, output_path):
 
     # Find the subjectID header
     subject_id_column_name = headers.get("subjectIDHeader", None)
-    assert subject_id_column_name is not None, "No subject ID column found in the headers."
+    assert (
+        subject_id_column_name is not None
+    ), "No subject ID column found in the headers."
 
     # Create a dictionary to store the count of each subjectid
     subjectid_counts = {}

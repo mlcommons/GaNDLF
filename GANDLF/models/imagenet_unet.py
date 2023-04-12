@@ -169,7 +169,10 @@ class ImageNet_UNet(ModelBase):
         ModelBase (nn.Module): The base model class.
     """
 
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
         decoder_use_batchnorm = False
