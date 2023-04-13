@@ -551,7 +551,7 @@ def checkImgSize(img_size, number=4):
     Returns:
         int : An integer, either the specified number or the minimum log base 2 of the input image size.
     """
-    if all([x >= 2 ** number for x in img_size]):
+    if all([x >= 2**number for x in img_size]):
         return number
     else:
         return int(np.min(np.floor(np.log2(img_size))))
@@ -566,7 +566,8 @@ class unetr(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict,
+        self,
+        parameters: dict,
     ):
         """
         Initializes an instance of the `unetr` class.
@@ -649,7 +650,7 @@ class unetr(ModelBase):
                 "conv0",
                 _DeconvConvBlock(
                     self.embed_size,
-                    32 * 2 ** self.depth,
+                    32 * 2**self.depth,
                     self.Norm,
                     self.Conv,
                     self.ConvTranspose,
@@ -660,7 +661,7 @@ class unetr(ModelBase):
                 tempconvs.add_module(
                     "conv%d" % j,
                     _DeconvConvBlock(
-                        128 * 2 ** j,
+                        128 * 2**j,
                         128 * 2 ** (j - 1),
                         self.Norm,
                         self.Conv,
@@ -681,7 +682,7 @@ class unetr(ModelBase):
         self.upsampling.append(
             self.ConvTranspose(
                 in_channels=self.embed_size,
-                out_channels=32 * 2 ** self.depth,
+                out_channels=32 * 2**self.depth,
                 kernel_size=2,
                 stride=2,
                 padding=0,

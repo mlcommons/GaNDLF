@@ -252,6 +252,7 @@ def test_train_segmentation_rad_2d(device):
     for model in all_models_segmentation:
         if model == "imagenet_unet":
             # imagenet_unet encoder needs to be toned down for small patch size
+            parameters["model"]["encoder_name"] = "mit_b0"
             parameters["model"]["encoder_depth"] = 3
             parameters["model"]["decoder_channels"] = (64, 32, 16)
             parameters["model"]["final_layer"] = random.choice(
@@ -338,6 +339,11 @@ def test_train_segmentation_rad_3d(device):
     for model in all_models_segmentation:
         if model == "imagenet_unet":
             # imagenet_unet encoder needs to be toned down for small patch size
+            parameters["model"]["encoder_name"] = "mit_b0"
+            with pytest.raises(Exception) as exc_info:
+                _ = global_models_dict[model](parameters)
+            print("Exception raised:", exc_info.value)
+            parameters["model"]["encoder_name"] = "resnet34"
             parameters["model"]["encoder_depth"] = 3
             parameters["model"]["decoder_channels"] = (64, 32, 16)
             parameters["model"]["final_layer"] = random.choice(

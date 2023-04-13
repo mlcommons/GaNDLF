@@ -96,7 +96,8 @@ class transunet(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict,
+        self,
+        parameters: dict,
     ):
         super(transunet, self).__init__(parameters)
 
@@ -179,7 +180,7 @@ class transunet(ModelBase):
         self.transformer = _Transformer(
             img_size=[i // 2 ** (self.depth) for i in self.img_size],
             patch_size=1,
-            in_feats=self.base_filters * 2 ** self.depth,
+            in_feats=self.base_filters * 2**self.depth,
             embed_size=self.embed_size,
             num_heads=self.num_heads,
             mlp_dim=2048,

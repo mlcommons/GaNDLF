@@ -89,10 +89,11 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
         openvino_present = False
         try:
             import openvino
+
             openvino_present = True
         except ImportError:
             print("WARNING: OpenVINO is not present.")
-        
+
         if openvino_present:
             try:
                 if model_dimension == 2:
@@ -119,7 +120,10 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
                             "{0}".format(onnx_path),
                             "--input_shape",
                             "[1,{0},{1},{2},{3}]".format(
-                                num_channel, input_shape[0], input_shape[1], input_shape[2]
+                                num_channel,
+                                input_shape[0],
+                                input_shape[1],
+                                input_shape[2],
                             ),
                             "--data_type",
                             "{0}".format(ov_output_data_type),

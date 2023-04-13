@@ -21,7 +21,7 @@ from .modelBase import ModelBase
 
 class MSDNet(ModelBase):
     """
-        A pytorch implementation of the Multi-Scale Dense Network.
+    A pytorch implementation of the Multi-Scale Dense Network.
     """
 
     @staticmethod
@@ -36,7 +36,9 @@ class MSDNet(ModelBase):
             nn.init.kaiming_normal_(layer, layer.weight.data)
 
     def __init__(
-        self, parameters: dict, num_layers=4,
+        self,
+        parameters: dict,
+        num_layers=4,
     ):
         """
         A multi-scale dense neural network architecture that consists of multiple convolutional layers with different dilation rates.

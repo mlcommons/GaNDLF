@@ -2,6 +2,7 @@
 # adapted from https://github.com/qubvel/segmentation_models.pytorch
 from typing import Optional, Union, List
 import torch
+import torch.nn as nn
 
 from segmentation_models_pytorch.base import (
     SegmentationHead,
@@ -128,16 +129,34 @@ class Unet(SegmentationModel):
     ):
         super().__init__()
 
+        def _get_fixed_encoder_channels(name, in_channels):
+            if "mit_" in name:
+                # MixVision Transformers only support 3-channel inputs
+                return 3
+            else:
+                return in_channels
+
         self.encoder = get_encoder(
             encoder_name,
-            in_channels=in_channels,
+            in_channels=_get_fixed_encoder_channels(encoder_name, in_channels),
             depth=encoder_depth,
             weights=encoder_weights,
         )
+        out_channels = self.encoder.out_channels
+        if "mit_" in encoder_name:
+            # MixVision Transformers only support 3-channel inputs
+            print(
+                "WARNING: MixVision Transformers only support 3 channels, adding an extra Conv layer for compatibility."
+            )
+            self.pre_encoder = nn.Conv2d(in_channels, 3, kernel_size=1, stride=1)
+            modules = []
+            modules.append(self.pre_encoder)
+            modules.append(self.encoder)
+            self.encoder = nn.Sequential(*modules)
 
         if aux_params is None:
             self.decoder = UnetDecoder(
-                encoder_channels=self.encoder.out_channels,
+                encoder_channels=out_channels,
                 decoder_channels=decoder_channels,
                 n_blocks=encoder_depth,
                 use_batchnorm=decoder_use_batchnorm,
@@ -153,7 +172,7 @@ class Unet(SegmentationModel):
             self.classification_head = None
         else:
             self.classification_head = ClassificationHead(
-                in_channels=self.encoder.out_channels[-1], **aux_params
+                in_channels=out_channels[-1], **aux_params
             )
             self.segmentation_head = None
 
@@ -169,7 +188,10 @@ class ImageNet_UNet(ModelBase):
         ModelBase (nn.Module): The base model class.
     """
 
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
         decoder_use_batchnorm = False
@@ -203,8 +225,14 @@ class ImageNet_UNet(ModelBase):
         else:
             classifier_head_parameters = None
 
+        default_encoder_name = parameters["model"].get("encoder_name", "resnet34")
+        if "mit_" in default_encoder_name:
+            assert (
+                self.n_dimensions == 2
+            ), "MixVision Transformers only support 2D inputs"
+
         self.model = Unet(
-            encoder_name=parameters["model"].get("encoder_name", "resnet34"),
+            encoder_name=default_encoder_name,
             encoder_weights=parameters["model"]["encoder_weights"],
             in_channels=self.n_channels,
             classes=self.n_classes,
