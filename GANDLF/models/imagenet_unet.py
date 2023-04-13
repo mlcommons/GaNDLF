@@ -194,6 +194,10 @@ class ImageNet_UNet(ModelBase):
     ) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
+        # https://github.com/qubvel/segmentation_models.pytorch/issues/745
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
+
         decoder_use_batchnorm = False
         if parameters["model"]["norm_type"] == "batch":
             decoder_use_batchnorm = True
