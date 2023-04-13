@@ -1530,6 +1530,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["print_summary"] = False
     parameters["data_postprocessing"]["mapping"] = {0: 0, 1: 1}
     parameters["data_postprocessing"]["fill_holes"] = True
+    parameters["data_postprocessing"]["cca"] = True
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     sanitize_outputDir()
