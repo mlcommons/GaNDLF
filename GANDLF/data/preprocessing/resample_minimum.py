@@ -7,13 +7,17 @@ from torchio.typing import TypeTripletFloat
 
 class Resample_Minimum(Resample):
     """
-    This performs resampling of an image to the minimum spacing specified by a single number. Otherwise, it will perform standard resampling.
+    This class inherits from the Resample class and performs resampling of an image
+    to the minimum spacing specified by a single number. Otherwise, it will perform standard resampling.
 
     Args:
-        Resample (_type_): _description_
+        target (float): The minimum spacing value to be used for resampling. Default is 1.
     """
 
     def __init__(self, target: float = 1, **kwargs):
+        self.target = (
+            target  # Added target attribute to store the minimum spacing value
+        )
         super().__init__(**kwargs)
 
     @staticmethod
