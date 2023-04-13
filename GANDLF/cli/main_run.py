@@ -9,7 +9,7 @@ from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     parseTestingCSV,
-    set determinism,
+    set_determinism
 )
 
 def main_run(
