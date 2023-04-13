@@ -19,7 +19,9 @@ class light_unet_multilayer(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict, residualConnections=False,
+        self,
+        parameters: dict,
+        residualConnections=False,
     ):
         self.network_kwargs = {"res": residualConnections}
         super(light_unet_multilayer, self).__init__(parameters)

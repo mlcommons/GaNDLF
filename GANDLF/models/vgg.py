@@ -16,7 +16,9 @@ class VGG(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict, configuration,
+        self,
+        parameters: dict,
+        configuration,
     ):
         """
         Initializer function for the VGG model
@@ -164,7 +166,8 @@ class vgg11(VGG):
     """
 
     def __init__(
-        self, parameters,
+        self,
+        parameters,
     ):
         """
         Initializes the VGG11 model with the given parameters.
@@ -183,7 +186,8 @@ class vgg13(VGG):
     """
 
     def __init__(
-        self, parameters,
+        self,
+        parameters,
     ):
         """
         Initializes the VGG13 model with the given parameters.
@@ -202,7 +206,8 @@ class vgg16(VGG):
     """
 
     def __init__(
-        self, parameters,
+        self,
+        parameters,
     ):
         """
         Initializes the VGG16 model with the given parameters.
@@ -221,7 +226,8 @@ class vgg19(VGG):
     """
 
     def __init__(
-        self, parameters,
+        self,
+        parameters,
     ):
         """
         Initializes the VGG19 model with the given parameters.

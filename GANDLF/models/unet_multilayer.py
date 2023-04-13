@@ -22,7 +22,9 @@ class unet_multilayer(ModelBase):
     """
 
     def __init__(
-        self, parameters: dict, residualConnections=False,
+        self,
+        parameters: dict,
+        residualConnections=False,
     ):
         """
         Parameters
@@ -143,7 +145,6 @@ class unet_multilayer(ModelBase):
 
         # [upsample --> encode] x num layers
         for i in range(self.depth - 1, -1, -1):
-
             # Upsample the feature map to match the size of the corresponding feature map in the encoder
             x = self.us[i](x)
 

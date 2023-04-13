@@ -27,21 +27,37 @@ def create_torchvision_model(modelname, pretrained=True, num_classes=2, dimensio
     assert dimensions == 2, "ImageNet_VGG only supports 2D images"
 
     if modelname == "vgg11":
-        model = torchvision.models.vgg11(pretrained=pretrained,)
+        model = torchvision.models.vgg11(
+            pretrained=pretrained,
+        )
     if modelname == "vgg11_bn":
-        model = torchvision.models.vgg11_bn(pretrained=pretrained,)
+        model = torchvision.models.vgg11_bn(
+            pretrained=pretrained,
+        )
     if modelname == "vgg13":
-        model = torchvision.models.vgg13(pretrained=pretrained,)
+        model = torchvision.models.vgg13(
+            pretrained=pretrained,
+        )
     if modelname == "vgg13_bn":
-        model = torchvision.models.vgg13_bn(pretrained=pretrained,)
+        model = torchvision.models.vgg13_bn(
+            pretrained=pretrained,
+        )
     if modelname == "vgg16":
-        model = torchvision.models.vgg16(pretrained=pretrained,)
+        model = torchvision.models.vgg16(
+            pretrained=pretrained,
+        )
     if modelname == "vgg16_bn":
-        model = torchvision.models.vgg16_bn(pretrained=pretrained,)
+        model = torchvision.models.vgg16_bn(
+            pretrained=pretrained,
+        )
     if modelname == "vgg19":
-        model = torchvision.models.vgg19(pretrained=pretrained,)
+        model = torchvision.models.vgg19(
+            pretrained=pretrained,
+        )
     if modelname == "vgg19_bn":
-        model = torchvision.models.vgg19_bn(pretrained=pretrained,)
+        model = torchvision.models.vgg19_bn(
+            pretrained=pretrained,
+        )
     model.classifier[6] = nn.Linear(
         in_features=model.classifier[3].out_features, out_features=num_classes
     )
@@ -69,7 +85,10 @@ def apply_activation_function(activation_function, input_tensor):
 
 
 class imagenet_vgg11(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         Implements the VGG-11 model for ImageNet classification.
 
@@ -103,7 +122,10 @@ class imagenet_vgg11(ModelBase):
 
 
 class imagenet_vgg11_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         VGG11 with batch normalization architecture for image classification on ImageNet dataset.
 
@@ -137,7 +159,10 @@ class imagenet_vgg11_bn(ModelBase):
 
 
 class imagenet_vgg13(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         Implements the VGG-13 model for ImageNet classification.
 
@@ -171,7 +196,10 @@ class imagenet_vgg13(ModelBase):
 
 
 class imagenet_vgg13_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         VGG13 with batch normalization architecture for image classification on ImageNet dataset.
 
@@ -205,7 +233,10 @@ class imagenet_vgg13_bn(ModelBase):
 
 
 class imagenet_vgg16(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         Implements the VGG-16 model for ImageNet classification.
 
@@ -239,7 +270,10 @@ class imagenet_vgg16(ModelBase):
 
 
 class imagenet_vgg16_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         VGG16 with batch normalization architecture for image classification on ImageNet dataset.
 
@@ -273,7 +307,10 @@ class imagenet_vgg16_bn(ModelBase):
 
 
 class imagenet_vgg19(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         Implements the VGG-19 model for ImageNet classification.
 
@@ -307,7 +344,10 @@ class imagenet_vgg19(ModelBase):
 
 
 class imagenet_vgg19_bn(ModelBase):
-    def __init__(self, parameters,) -> None:
+    def __init__(
+        self,
+        parameters,
+    ) -> None:
         """
         VGG19 with batch normalization architecture for image classification on ImageNet dataset.
 
