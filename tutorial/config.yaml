@@ -2,7 +2,7 @@
 version:
   {
     minimum: 0.0.14,
-    maximum: 0.0.14 # this should NOT be made a variable, but should be tested after every tag is created
+    maximum: 0.0.16 # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
 
@@ -25,7 +25,7 @@ in_memory: False
 save_masks: False
 # Set the Modality : rad for radiology, path for histopathology
 modality: rad
-# Patch size during training - 2D patch for breast images since third dimension is not patched 
+# Patch size during training - 2D patch for breast images since third dimension is not patched
 patch_size: [256, 256]
 # uniform: UniformSampler or label: LabelSampler
 patch_sampler: uniform
@@ -121,13 +121,13 @@ data_preprocessing:
   {
     #'normalize_div_by_255',
     # 'threshold':{
-    #   'min': 10, 
+    #   'min': 10,
     #   'max': 75
     # },
     # 'clip':{
-    #   'min': 10, 
+    #   'min': 10,
     #   'max': 75
-    # }, 
+    # },
     #'normalize_imagenet',
     # 'resample':{
     #   'resolution': [1,2,3]
@@ -152,7 +152,7 @@ data_preprocessing:
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
 # 'kspace': one of motion, ghosting or spiking is picked (randomly) for augmentation
 # 'probability' subkey adds the probability of the particular augmentation getting added during training (this is always 1 for normalize and resampling)
-# data_augmentation: 
+# data_augmentation:
   # {
     # default_probability: 0.5,
     # 'affine',
