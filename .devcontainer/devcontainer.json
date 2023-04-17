@@ -16,6 +16,9 @@
 		},
 		"ghcr.io/devcontainers-contrib/features/flake8:2": {}
 	},
+	"remoteEnv": {
+		"PYTHONPATH": "${containerEnv:PYTHONPATH}:/workspaces/GaNDLF"
+	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
