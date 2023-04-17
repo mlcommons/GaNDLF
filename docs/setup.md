@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python3 with a preference for [conda](https://conda.io).
+- Python3 with a preference for [conda](https://conda.io), and python version `3.8` (higher versions *might* work, but they are **untested**).
 - Knowledge of [managing Python environments](https://docs.python.org/3/tutorial/venv.html). The instructions below assume knowledge of the [conda management system](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
 Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This needs different prerequisites. See the [Docker Installation](#docker-installation) section below for more information. 
