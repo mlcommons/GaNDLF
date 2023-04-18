@@ -194,17 +194,33 @@ class ImageNet_UNet(ModelBase):
     ) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
+        # https://github.com/qubvel/segmentation_models.pytorch/issues/745
+        import ssl
+
+        ssl._create_default_https_context = ssl._create_unverified_context
+
         decoder_use_batchnorm = False
         if parameters["model"]["norm_type"] == "batch":
             decoder_use_batchnorm = True
         decoder_use_batchnorm = parameters["model"].get(
             "decoder_use_batchnorm", decoder_use_batchnorm
         )
+
+        default_encoder_name = parameters["model"].get("encoder_name", "resnet34")
+        # MixVision Transformers only support 2D inputs with 3 channels (the channel dimension is checked in the encoder)
+        if ("mit_" in default_encoder_name) or ("timm-" in default_encoder_name):
+            assert (
+                self.n_dimensions == 2
+            ), "MixVision Transformers and TIMM models only support 2D inputs"
+
         encoder_depth = parameters["model"].get("depth", 5)
         encoder_depth = parameters["model"].get("encoder_depth", encoder_depth)
         parameters["model"]["pretrained"] = parameters["model"].get("pretrained", True)
         if parameters["model"]["pretrained"]:
             parameters["model"]["encoder_weights"] = "imagenet"
+            # special case for some encoders: https://github.com/search?q=repo%3Aqubvel%2Fsegmentation_models.pytorch%20imagenet%2B5k&type=code
+            if default_encoder_name in ["dpn68b", "dpn92", "dpn107"]:
+                parameters["model"]["encoder_weights"] = "imagenet+5k"
         else:
             parameters["model"]["encoder_weights"] = None
 
@@ -224,12 +240,6 @@ class ImageNet_UNet(ModelBase):
             )
         else:
             classifier_head_parameters = None
-
-        default_encoder_name = parameters["model"].get("encoder_name", "resnet34")
-        if "mit_" in default_encoder_name:
-            assert (
-                self.n_dimensions == 2
-            ), "MixVision Transformers only support 2D inputs"
 
         self.model = Unet(
             encoder_name=default_encoder_name,

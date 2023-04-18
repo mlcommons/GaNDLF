@@ -567,3 +567,16 @@ def resnet152(parameters):
         ResNet: the ResNet-152 model
     """
     return ResNet(parameters, _BottleNeckBlock, block_config=(3, 8, 36, 3))
+
+
+def resnet200(parameters):
+    """
+    Create a ResNet-200 model with the given parameters.
+
+    Args:
+        parameters (Namespace): the parameters for the model
+
+    Returns:
+        ResNet: the ResNet-200 model
+    """
+    return ResNet(parameters, _BottleNeckBlock, block_config=(3, 24, 36, 3))
