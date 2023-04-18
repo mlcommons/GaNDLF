@@ -1530,6 +1530,7 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["print_summary"] = False
     parameters["data_postprocessing"]["mapping"] = {0: 0, 1: 1}
     parameters["data_postprocessing"]["fill_holes"] = True
+    parameters["data_postprocessing"]["cca"] = True
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
     sanitize_outputDir()
@@ -1553,11 +1554,13 @@ def test_generic_preprocess_functions():
     # checking tensor with last dimension of size 1
     input_tensor = torch.rand(4, 256, 256, 1)
     input_transformed = global_preprocessing_dict["rgba2rgb"]()(input_tensor)
-    assert input_transformed.shape[1] == 3, "Number of channels is not 3"
+    assert input_transformed.shape[0] == 3, "Number of channels is not 3"
+    assert input_transformed.shape[1:] == input_tensor.shape[1:], "Shape mismatch"
 
     input_tensor = torch.rand(3, 256, 256, 1)
     input_transformed = global_preprocessing_dict["rgb2rgba"]()(input_tensor)
-    assert input_transformed.shape[1] == 4, "Number of channels is not 4"
+    assert input_transformed.shape[0] == 4, "Number of channels is not 4"
+    assert input_transformed.shape[1:] == input_tensor.shape[1:], "Shape mismatch"
 
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
     input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
