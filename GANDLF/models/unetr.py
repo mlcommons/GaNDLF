@@ -219,7 +219,7 @@ class _MLP(nn.Sequential):
 
     """
 
-    def __init__(self, in_feats, out_feats, Norm):  # Which normalization module to use?
+    def __init__(self, in_feats, out_feats):  # Which normalization module to use?
         super().__init__()
 
         self.add_module("norm", nn.LayerNorm(in_feats))
@@ -397,17 +397,13 @@ class _Embedding(nn.Module):
 
 
 class _TransformerLayer(nn.Module):
-    def __init__(self, img_size, embed_size, num_heads, mlp_dim, Conv, Norm):
+    def __init__(self, embed_size, num_heads):
         """
         A module that implements a single transformer layer.
 
         Args:
-            img_size (tuple[int]): The size of the input image tensor (H, W, C).
             embed_size (int): The size of the embedding vector.
             num_heads (int): The number of heads to use in the multi-head self-attention module.
-            mlp_dim (int): The size of the hidden layer in the MLP.
-            Conv (nn.Module): The convolutional module to use for extracting patches.
-            Norm (nn.Module): The normalization module to use (e.g. LayerNorm).
         """
         super().__init__()
 
@@ -421,7 +417,7 @@ class _TransformerLayer(nn.Module):
         # Dev note: it should be out_feats=mlp_dim, but we have out_feats=num_heads
         # Also, the Norm parameter is not used in the MLP module
         # So this needs to be looked at later, but for now, it works
-        self.mlp = _MLP(in_feats=embed_size, out_feats=num_heads, Norm=Norm)
+        self.mlp = _MLP(in_feats=embed_size, out_feats=num_heads)
 
     def forward(self, x):
         """
@@ -460,10 +456,8 @@ class _Transformer(nn.Sequential):
         in_feats (int): The number of input features.
         embed_size (int): The size of the embedding.
         num_heads (int): The number of attention heads to use in the multi-head attention layer.
-        mlp_dim (int): The size of the hidden layer in the feedforward network.
         num_layers (int): The number of transformer layers to use.
         out_layers (list): A list of indices indicating which transformer layers should output their results.
-        Conv (nn.Module): A convolutional module to use for the patch embedding.
         Norm (nn.Module): A normalization module to use for the transformer layers.
 
     Attributes:
@@ -512,7 +506,7 @@ class _Transformer(nn.Sequential):
 
         for _ in range(0, num_layers):
             layer = _TransformerLayer(
-                img_size, embed_size, num_heads, mlp_dim, Conv, Norm
+                embed_size, num_heads,
             )
             self.layers.append(layer)
 
