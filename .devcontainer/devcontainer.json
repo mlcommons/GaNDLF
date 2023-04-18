@@ -19,6 +19,11 @@
 	"remoteEnv": {
 		"PYTHONPATH": "${containerEnv:PYTHONPATH}:/workspaces/GaNDLF"
 	},
+	"hostRequirements": {
+	    "cpus": 8,
+	    "memory": "8gb",
+	    "storage": "64gb"
+	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
