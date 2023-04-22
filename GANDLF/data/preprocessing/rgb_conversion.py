@@ -28,7 +28,7 @@ class RGB2RGBA(IntensityTransform):
                 image_pil_rgb = image_pil.convert("RGBA")
                 image_data_to_set = torch.from_numpy(
                     np.array(image_pil_rgb).transpose([2, 0, 1])
-                ).unsqueeze(0)
+                ).unsqueeze(-1)
             image.set_data(image_data_to_set)
         return subject
 
@@ -54,7 +54,7 @@ class RGBA2RGB(IntensityTransform):
                 image_pil_rgb = image_pil.convert("RGB")
                 image_data_to_set = torch.from_numpy(
                     np.array(image_pil_rgb).transpose([2, 0, 1])
-                ).unsqueeze(0)
+                ).unsqueeze(-1)
             image.set_data(image_data_to_set)
         return subject
 
