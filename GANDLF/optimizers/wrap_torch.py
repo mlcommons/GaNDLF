@@ -13,89 +13,140 @@ from torch.optim import (
 
 
 def sgd(parameters):
-    # pick defaults
-    if not ("momentum" in parameters["optimizer"]):
-        parameters["optimizer"]["momentum"] = 0.9
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0
-    if not ("dampening" in parameters["optimizer"]):
-        parameters["optimizer"]["dampening"] = 0
-    if not ("nesterov" in parameters["optimizer"]):
-        parameters["optimizer"]["nesterov"] = False
-    return SGD(
+    """
+    Creates a Stochastic Gradient Descent optimizer from the PyTorch `torch.optim` module using the input parameters.
+
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.SGD): A Stochastic Gradient Descent optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    momentum = optimizer_params.get("momentum", 0.9)
+    weight_decay = optimizer_params.get("weight_decay", 0)
+    dampening = optimizer_params.get("dampening", 0)
+    nesterov = optimizer_params.get("nesterov", False)
+    
+    # Create the optimizer using the input parameters
+    optimizer = SGD(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        momentum=parameters["optimizer"]["momentum"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
-        dampening=parameters["optimizer"]["dampening"],
-        nesterov=parameters["optimizer"]["nesterov"],
+        lr=parameters.get("learning_rate"),
+        momentum=momentum,
+        weight_decay=weight_decay,
+        dampening=dampening,
+        nesterov=nesterov,
     )
+    
+    return optimizer
 
 
 def asgd(parameters):
-    # pick defaults
-    if not ("lambd" in parameters["optimizer"]):
-        parameters["optimizer"]["lambd"] = 1e-4
-    if not ("alpha" in parameters["optimizer"]):
-        parameters["optimizer"]["alpha"] = 0.75
-    if not ("t0" in parameters["optimizer"]):
-        parameters["optimizer"]["t0"] = 1e6
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0
+    """
+    Creates an Averaged Stochastic Gradient Descent optimizer from the PyTorch `torch.optim` module using the input parameters.
+
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.ASGD): An Averaged Stochastic Gradient Descent optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    lambd = optimizer_params.get("lambd", 1e-4)
+    alpha = optimizer_params.get("alpha", 0.75)
+    t0 = optimizer_params.get("t0", 1e6)
+    weight_decay = optimizer_params.get("weight_decay", 0)
+    
+    # Create the optimizer using the input parameters
     return ASGD(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        alpha=parameters["optimizer"]["alpha"],
-        t0=parameters["optimizer"]["t0"],
-        lambd=parameters["optimizer"]["lambd"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
+        lr=parameters.get("learning_rate"),
+        alpha=alpha,
+        t0=t0,
+        lambd=lambd,
+        weight_decay=weight_decay,
     )
 
 
 def adam(parameters, opt_type="normal"):
-    # pick defaults
-    if not ("betas" in parameters["optimizer"]):
-        parameters["optimizer"]["betas"] = (0.9, 0.999)
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0.00005
-    if not ("eps" in parameters["optimizer"]):
-        parameters["optimizer"]["eps"] = 1e-8
-    if not ("amsgrad" in parameters["optimizer"]):
-        parameters["optimizer"]["amsgrad"] = False
+    """
+    Creates an Adam or AdamW optimizer from the PyTorch `torch.optim` module using the input parameters.
 
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+        opt_type (str): A string indicating the type of optimizer to create (either "normal" for Adam or "AdamW" for AdamW).
+
+    Returns:
+        optimizer (torch.optim.Adam or torch.optim.AdamW): An Adam or AdamW optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    betas = optimizer_params.get("betas", (0.9, 0.999))
+    weight_decay = optimizer_params.get("weight_decay", 0.00005)
+    eps = optimizer_params.get("eps", 1e-8)
+    amsgrad = optimizer_params.get("amsgrad", False)
+    
+    # Determine which optimizer to create based on opt_type
     if opt_type == "normal":
-        function = Adam
+        optimizer_fn = Adam
+    elif opt_type == "AdamW":
+        optimizer_fn = AdamW
     else:
-        function = AdamW
-    return function(
+        raise ValueError(f"Invalid optimizer type: {opt_type}")
+    
+    # Create the optimizer using the input parameters
+    return optimizer_fn(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        betas=parameters["optimizer"]["betas"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
-        eps=parameters["optimizer"]["eps"],
-        amsgrad=parameters["optimizer"]["amsgrad"],
+        lr=parameters.get("learning_rate"),
+        betas=betas,
+        weight_decay=weight_decay,
+        eps=eps,
+        amsgrad=amsgrad,
     )
 
 
 def adamw(parameters):
-    return adam(parameters, opt_type="adamw")
+    """
+    Creates an AdamW optimizer from the PyTorch `torch.optim` module using the input parameters.
 
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.AdamW): An AdamW optimizer.
+
+    """
+    return adam(parameters, opt_type="AdamW")
 
 def adamax(parameters):
-    # pick defaults
-    if not ("betas" in parameters["optimizer"]):
-        parameters["optimizer"]["betas"] = (0.9, 0.999)
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0.00005
-    if not ("eps" in parameters["optimizer"]):
-        parameters["optimizer"]["eps"] = 1e-8
+    """
+    Creates an Adamax optimizer from the PyTorch `torch.optim` module using the input parameters.
 
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.Adamax): An Adamax optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    betas = optimizer_params.get("betas", (0.9, 0.999))
+    weight_decay = optimizer_params.get("weight_decay", 0.00005)
+    eps = optimizer_params.get("eps", 1e-8)
+    
+    # Create the optimizer using the input parameters
     return Adamax(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        betas=parameters["optimizer"]["betas"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
-        eps=parameters["optimizer"]["eps"],
+        lr=parameters.get("learning_rate"),
+        betas=betas,
+        weight_decay=weight_decay,
+        eps=eps,
     )
 
 
@@ -115,72 +166,111 @@ def adamax(parameters):
 
 
 def rprop(parameters):
-    if not ("etas" in parameters["optimizer"]):
-        parameters["optimizer"]["etas"] = (0.5, 1.2)
-    if not ("step_sizes" in parameters["optimizer"]):
-        parameters["optimizer"]["step_sizes"] = (1e-7, 50)
+    """
+    Creates a Resilient Backpropagation optimizer from the PyTorch `torch.optim` module using the input parameters.
+
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.Rprop): A Resilient Backpropagation optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    etas = optimizer_params.get("etas", (0.5, 1.2))
+    step_sizes = optimizer_params.get("step_sizes", (1e-7, 50))
+    
+    # Create the optimizer using the input parameters
     return Rprop(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        etas=parameters["optimizer"]["etas"],
-        step_sizes=parameters["optimizer"]["step_sizes"],
+        lr=parameters.get("learning_rate"),
+        etas=etas,
+        step_sizes=step_sizes,
     )
 
 
 def adadelta(parameters):
-    # pick defaults
-    if not ("rho" in parameters["optimizer"]):
-        parameters["optimizer"]["rho"] = 0.9
-    if not ("eps" in parameters["optimizer"]):
-        parameters["optimizer"]["eps"] = 1e-6
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0
+    """
+    Creates an Adadelta optimizer from the PyTorch `torch.optim` module using the input parameters.
+
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.Adadelta): An Adadelta optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    rho = optimizer_params.get("rho", 0.9)
+    eps = optimizer_params.get("eps", 1e-6)
+    weight_decay = optimizer_params.get("weight_decay", 0)
+    
+    # Create the optimizer using the input parameters
     return Adadelta(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        rho=parameters["optimizer"]["rho"],
-        eps=parameters["optimizer"]["eps"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
+        lr=parameters.get("learning_rate"),
+        rho=rho,
+        eps=eps,
+        weight_decay=weight_decay,
     )
 
 
 def adagrad(parameters):
-    # pick defaults
-    if not ("lr_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["lr_decay"] = 0
-    if not ("eps" in parameters["optimizer"]):
-        parameters["optimizer"]["eps"] = 1e-6
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0
+    """
+    Creates an Adagrad optimizer from the PyTorch `torch.optim` module using the input parameters.
 
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.Adagrad): An Adagrad optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    lr_decay = optimizer_params.get("lr_decay", 0)
+    eps = optimizer_params.get("eps", 1e-6)
+    weight_decay = optimizer_params.get("weight_decay", 0)
+    
+    # Create the optimizer using the input parameters
     return Adagrad(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        lr_decay=parameters["optimizer"]["lr_decay"],
-        eps=parameters["optimizer"]["eps"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
+        lr=parameters.get("learning_rate"),
+        lr_decay=lr_decay,
+        eps=eps,
+        weight_decay=weight_decay,
     )
 
 
 def rmsprop(parameters):
-    # pick defaults
-    if not ("momentum" in parameters["optimizer"]):
-        parameters["optimizer"]["momentum"] = 0
-    if not ("weight_decay" in parameters["optimizer"]):
-        parameters["optimizer"]["weight_decay"] = 0
-    if not ("alpha" in parameters["optimizer"]):
-        parameters["optimizer"]["alpha"] = 0.99
-    if not ("eps" in parameters["optimizer"]):
-        parameters["optimizer"]["eps"] = 1e-8
-    if not ("centered" in parameters["optimizer"]):
-        parameters["optimizer"]["centered"] = False
+    """
+    Creates an RMSprop optimizer from the PyTorch `torch.optim` module using the input parameters.
 
+    Args:
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+
+    Returns:
+        optimizer (torch.optim.RMSprop): An RMSprop optimizer.
+
+    """
+    # Set default values for optimizer parameters
+    optimizer_params = parameters.get("optimizer", {})
+    momentum = optimizer_params.get("momentum", 0)
+    weight_decay = optimizer_params.get("weight_decay", 0)
+    alpha = optimizer_params.get("alpha", 0.99)
+    eps = optimizer_params.get("eps", 1e-8)
+    centered = optimizer_params.get("centered", False)
+    
+    # Create the optimizer using the input parameters
     return RMSprop(
         parameters["model_parameters"],
-        lr=parameters["learning_rate"],
-        alpha=parameters["optimizer"]["alpha"],
-        eps=parameters["optimizer"]["eps"],
-        centered=parameters["optimizer"]["centered"],
-        momentum=parameters["optimizer"]["momentum"],
-        weight_decay=parameters["optimizer"]["weight_decay"],
+        lr=parameters.get("learning_rate"),
+        alpha=alpha,
+        eps=eps,
+        centered=centered,
+        momentum=momentum,
+        weight_decay=weight_decay,
     )
+
