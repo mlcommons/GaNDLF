@@ -31,7 +31,7 @@ parameter_defaults = {
     "print_rgb_label_warning": True,  # default memory tracking
     "data_postprocessing": {},  # default data postprocessing
     "grid_aggregator_overlap": "crop",  # default grid aggregator overlap strategy
-    "determinism": False, #using deterministic version of computation
+    "determinism": False,  # using deterministic version of computation
 }
 
 ## dictionary to define string defaults for appropriate options
