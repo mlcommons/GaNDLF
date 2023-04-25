@@ -15,7 +15,7 @@ def recover_config(modelDir, outputFile):
 
     with open(pickle_location, "rb") as handle:
         parameters = pickle.load(handle)
-        os.makedirs(os.path.dirname(outputFile), exist_ok=True)
+        os.makedirs(os.path.dirname(os.path.realpath(outputFile)), exist_ok=True)
 
         # Remove a few problematic objects from the output
         # These cannot be safe_dumped to YAML (or present other problems).
