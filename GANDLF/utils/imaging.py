@@ -57,7 +57,7 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     This function resizes the input image based on the output size and interpolator.
     Args:
         input_image (SimpleITK.Image): The input image to be resized.
-        output_size (numpy.array | list): The output size to resample input_image to.
+        output_size (Union[numpy.ndarray, list, tuple]): The output size to resample input_image to.
         interpolator (SimpleITK.sitkInterpolator): The desired interpolator.
     Returns:
         SimpleITK.Image: The output image after resizing.
@@ -67,16 +67,14 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     inputSpacing = np.array(input_image.GetSpacing())
     outputSpacing = np.array(inputSpacing)
 
+    output_size_parsed = output_size
     if isinstance(output_size, dict):
         if "resize" in output_size:
             output_size_parsed = output_size["resize"]
-    elif isinstance(output_size, list) or isinstance(output_size, np.array):
-        output_size_parsed = output_size
 
-    if len(output_size_parsed) != len(inputSpacing):
-        sys.exit(
-            "The output size dimension is inconsistent with the input dataset, please check parameters."
-        )
+    assert len(output_size_parsed) == len(
+        inputSpacing
+    ), "The output size dimension is inconsistent with the input dataset, please check parameters."
 
     for i, n in enumerate(output_size_parsed):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
@@ -134,25 +132,31 @@ def perform_sanity_check_on_subject(subject, parameters):
     if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
 
+    def _get_itkimage_or_filereader(subject_str_key):
+        """
+        Helper function to get the itk image or file reader from the subject.
+
+        Args:
+            subject_str_key (Union[str, sitk.Image]): The subject string key.
+
+        Returns:
+            Union[sitk.ImageFileReader, sitk.Image]: The itk image or file reader.
+        """
+        if subject_str_key["path"] != "":
+            file_reader = sitk.ImageFileReader()
+            file_reader.SetFileName(subject_str_key["path"])
+            file_reader.ReadImageInformation()
+            return file_reader
+        else:
+            # this case is required if any tensor/imaging operation has been applied in dataloader
+            file_reader = subject_str_key.as_sitk()
+
     if len(list_for_comparison) > 1:
         for key in list_for_comparison:
             if file_reader_base is None:
-                if subject[str(key)]["path"] != "":
-                    file_reader_base = sitk.ImageFileReader()
-                    file_reader_base.SetFileName(subject[str(key)]["path"])
-                    file_reader_base.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_base = subject[str(key)].as_sitk()
+                file_reader_base = _get_itkimage_or_filereader(subject[str(key)])
             else:
-                if subject[str(key)]["path"] != "":
-                    # in this case, file_reader_base is ready
-                    file_reader_current = sitk.ImageFileReader()
-                    file_reader_current.SetFileName(subject[str(key)]["path"])
-                    file_reader_current.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_current = subject[str(key)].as_sitk()
+                file_reader_current = _get_itkimage_or_filereader(subject[str(key)])
 
                 # this check needs to be absolute
                 if (

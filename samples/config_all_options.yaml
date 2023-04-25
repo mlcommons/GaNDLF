@@ -67,6 +67,8 @@ inference_mechanism: {
 # this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements
 # in I/O at the expense of memory consumption
 in_memory: False
+# if enabled, resize/resample operations in `data_preprocessing` will save files to disk instead of directly getting read into memory as tensors
+memory_save_mode: False
 # this will save the generated masks for validation and testing data for qualitative analysis
 save_output: False
 # this will save the patches used during training for qualitative analysis
