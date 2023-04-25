@@ -96,4 +96,3 @@ def cca(input_image, params=None):
     seg[labels_connected != largest_region] = 0
 
     return seg
-
