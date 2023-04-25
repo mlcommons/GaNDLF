@@ -134,25 +134,30 @@ def perform_sanity_check_on_subject(subject, parameters):
     if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
 
+    def get_sitk_image_reader(info_from_subject):
+        """
+        Helper function to get the sitk image reader from the subject.
+
+        Args:
+            info_from_subject (Union[str, sitk.Image]): The input image from the subject.
+
+        Returns:
+            Union[sitk.ImageFileReader, sitk.Image]: The sitk image reader or the sitk image itself.
+        """
+        if info_from_subject["path"] != "":
+            file_reader = sitk.ImageFileReader()
+            file_reader.SetFileName(info_from_subject["path"])
+            file_reader.ReadImageInformation()
+            return file_reader
+        else:
+            return info_from_subject["sitk_image"]
+
     if len(list_for_comparison) > 1:
         for key in list_for_comparison:
             if file_reader_base is None:
-                if subject[str(key)]["path"] != "":
-                    file_reader_base = sitk.ImageFileReader()
-                    file_reader_base.SetFileName(subject[str(key)]["path"])
-                    file_reader_base.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_base = subject[str(key)].as_sitk()
+                file_reader_base = get_sitk_image_reader(subject[str(key)])
             else:
-                if subject[str(key)]["path"] != "":
-                    # in this case, file_reader_base is ready
-                    file_reader_current = sitk.ImageFileReader()
-                    file_reader_current.SetFileName(subject[str(key)]["path"])
-                    file_reader_current.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_current = subject[str(key)].as_sitk()
+                file_reader_current = get_sitk_image_reader(subject[str(key)])
 
                 # this check needs to be absolute
                 if (
