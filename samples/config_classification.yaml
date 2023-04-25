@@ -105,7 +105,7 @@ data_augmentation:
       'std': [0, 1] # default std-dev range, for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomBlur
     },
     'noise': { # for details, see https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomblur#torchio.transforms.RandomNoise
-      'mean': 0 # default mean
+      'mean': 0, # default mean
       'std': [0, 1] # default std-dev range
     },
     'anisotropic':{
