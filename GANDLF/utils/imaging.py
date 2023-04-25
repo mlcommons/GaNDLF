@@ -134,25 +134,31 @@ def perform_sanity_check_on_subject(subject, parameters):
     if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
 
+    def _get_itkimage_or_filereader(subject_str_key):
+        """
+        Helper function to get the itk image or file reader from the subject.
+
+        Args:
+            subject_str_key (Union[str, sitk.Image]): The subject string key.
+
+        Returns:
+            Union[sitk.ImageFileReader, sitk.Image]: The itk image or file reader.
+        """
+        if subject_str_key["path"] != "":
+            file_reader = sitk.ImageFileReader()
+            file_reader.SetFileName(subject_str_key["path"])
+            file_reader.ReadImageInformation()
+            return file_reader
+        else:
+            # this case is required if any tensor/imaging operation has been applied in dataloader
+            file_reader = subject_str_key.as_sitk()
+
     if len(list_for_comparison) > 1:
         for key in list_for_comparison:
             if file_reader_base is None:
-                if subject[str(key)]["path"] != "":
-                    file_reader_base = sitk.ImageFileReader()
-                    file_reader_base.SetFileName(subject[str(key)]["path"])
-                    file_reader_base.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_base = subject[str(key)].as_sitk()
+                file_reader_base = _get_itkimage_or_filereader(subject[str(key)])
             else:
-                if subject[str(key)]["path"] != "":
-                    # in this case, file_reader_base is ready
-                    file_reader_current = sitk.ImageFileReader()
-                    file_reader_current.SetFileName(subject[str(key)]["path"])
-                    file_reader_current.ReadImageInformation()
-                else:
-                    # this case is required if any tensor/imaging operation has been applied in dataloader
-                    file_reader_current = subject[str(key)].as_sitk()
+                file_reader_current = _get_itkimage_or_filereader(subject[str(key)])
 
                 # this check needs to be absolute
                 if (
