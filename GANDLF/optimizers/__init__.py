@@ -38,7 +38,7 @@ def get_optimizer(params):
     """
     # Retrieve the optimizer type from the input parameters
     optimizer_type = params["optimizer"]["type"]
-    
+
     # Create the optimizer instance using the specified type and input parameters
     if optimizer_type in global_optimizer_dict:
         optimizer_function = global_optimizer_dict[optimizer_type]
