@@ -39,7 +39,7 @@ def sgd(parameters):
         dampening=dampening,
         nesterov=nesterov,
     )
-    
+
     return optimizer
 
 
