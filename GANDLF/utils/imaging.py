@@ -57,7 +57,7 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     This function resizes the input image based on the output size and interpolator.
     Args:
         input_image (SimpleITK.Image): The input image to be resized.
-        output_size (numpy.array | list): The output size to resample input_image to.
+        output_size (Union[numpy.ndarray, list, tuple]): The output size to resample input_image to.
         interpolator (SimpleITK.sitkInterpolator): The desired interpolator.
     Returns:
         SimpleITK.Image: The output image after resizing.
@@ -67,16 +67,14 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     inputSpacing = np.array(input_image.GetSpacing())
     outputSpacing = np.array(inputSpacing)
 
+    output_size_parsed = output_size
     if isinstance(output_size, dict):
         if "resize" in output_size:
             output_size_parsed = output_size["resize"]
-    elif isinstance(output_size, list) or isinstance(output_size, np.array):
-        output_size_parsed = output_size
 
-    if len(output_size_parsed) != len(inputSpacing):
-        sys.exit(
-            "The output size dimension is inconsistent with the input dataset, please check parameters."
-        )
+    assert len(output_size_parsed) == len(
+        inputSpacing
+    ), "The output size dimension is inconsistent with the input dataset, please check parameters."
 
     for i, n in enumerate(output_size_parsed):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
