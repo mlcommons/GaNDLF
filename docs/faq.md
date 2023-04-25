@@ -25,6 +25,10 @@ Yes, GaNDLF has successfully been run on an SGE cluster and another managed usin
 
 Yes, look for `logs_*.csv` files in the output directory. It should be arranged in accordance with the cross-validation configuration. Furthermore, it  should contain separate files for each data cohort, i.e., training/validation/testing, along with the values for all requested performance metrics, which are defined per problem type.
 
+### Why are my compute jobs failing with excess RAM usage?
+
+If you have `data_preprocessing` enabled, GaNDLF will load all of the resized images as tensors into memory. Depending on your dataset (resolution, size, number of modalities), this can lead to high RAM usage. To avoid this, you can enable the memory saver mode by enabling the flag `memory_save_mode` in the configuration. This will write the resized images into disk.
+
 ### How can I resume training from a previous checkpoint?
 
 GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
