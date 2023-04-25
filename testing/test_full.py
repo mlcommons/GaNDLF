@@ -2840,6 +2840,7 @@ def test_generic_deploy_docker():
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
+    parameters["memory_save_mode"] = True
 
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
