@@ -198,7 +198,19 @@ def ImagesFromDataFrame(
                     preprocessing["resize_image"],
                     sitk.sitkNearestNeighbor,
                 )
-                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
+                if parameters["memory_save_mode"]:
+                    _save_resized_images(
+                        img_resized,
+                        parameters["output_dir"],
+                        subject_dict["subject_id"],
+                        "label",
+                        loader_type,
+                        get_filename_extension_sanitized(
+                            str(dataframe[channel][patient])
+                        ),
+                    )
+                else:
+                    subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
 
         else:
             subject_dict["label"] = "NA"
