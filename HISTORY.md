@@ -12,6 +12,7 @@
 - Added CI and documentation for OpenFL integration
 - Added getting started guide
 - Added documentation for all loss functions and updated guideline
+- Added ability to save resized images instead of loading them directly
 
 ## 0.0.15
 - Updated `setup.py` for `python>=3.8`
