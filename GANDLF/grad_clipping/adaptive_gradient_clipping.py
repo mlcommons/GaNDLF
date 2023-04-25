@@ -7,6 +7,16 @@ import torch
 
 
 def unitwise_norm(x, norm_type=2.0):
+    """
+    Computes the norm of a tensor x, where the norm is applied across all dimensions except the first one.
+
+    Args:
+        x (torch.Tensor): Input tensor.
+        norm_type (float): The type of norm to compute (default: 2.0).
+
+    Returns:
+        torch.Tensor: The norm of the tensor.
+    """
     if x.ndim <= 1:
         return x.norm(norm_type)
     else:
@@ -20,6 +30,14 @@ def unitwise_norm(x, norm_type=2.0):
 
 def adaptive_gradient_clip_(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.0):
     """
+    Performs adaptive gradient clipping on the parameters of a PyTorch model.
+
+    Args:
+        parameters (list of torch.Tensor): The parameters to be clipped.
+        clip_factor (float): The factor by which to clip the gradients (default: 0.01).
+        eps (float): A small value added to the norm to avoid division by zero (default: 1e-3).
+        norm_type (float): The type of norm to compute (default: 2.0).
+
     Adaptive Gradient Clipping
     Original implementation of Adaptive Gradient Clipping derived from
     An impl of AGC, as per (https://arxiv.org/abs/2102.06171):
@@ -33,7 +51,7 @@ def adaptive_gradient_clip_(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.
       * Official JAX impl (paper authors): https://github.com/deepmind/deepmind-research/tree/master/nfnets
       * Phil Wang's PyTorch gist: https://gist.github.com/lucidrains/0d6560077edac419ab5d3aa29e674d5c
     """
-    # If parameter is not a list, make it one so that you play with it in for loop
+    # If parameter is not a list, make it one so that you can iterate over it
     if isinstance(parameters, torch.Tensor):
         parameters = [parameters]
 
