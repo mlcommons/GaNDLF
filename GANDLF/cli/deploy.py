@@ -70,23 +70,27 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     docker_client = docker.from_env()
     print("Connected to the docker service.")
 
-    mlcube_config_file = mlcubedir + "/mlcube.yaml"
+    mlcube_config_file = os.path.join(mlcubedir, "mlcube.yaml")
     assert os.path.exists(mlcubedir) and os.path.exists(
         mlcube_config_file
     ), "MLCube Directory: This does not appear to be a valid MLCube directory."
 
-    os.makedirs(outputdir + "/workspace", exist_ok=True)
-    shutil.copytree(
-        mlcubedir + "/workspace", outputdir + "/workspace", dirs_exist_ok=True
-    )
-    shutil.copyfile(config, outputdir + "/workspace/config.yml")
+    output_workspace_folder = os.path.join(outputdir, "workspace")
+    mlcube_workspace_folder = os.path.join(mlcubedir, "workspace")
+
+    os.makedirs(output_workspace_folder, exist_ok=True)
+    if os.path.exists(mlcube_workspace_folder):
+        shutil.copytree(
+            mlcube_workspace_folder, output_workspace_folder, dirs_exist_ok=True,
+        )
+    shutil.copyfile(config, os.path.join(output_workspace_folder, "config.yml"))
 
     # First grab the existing the mlcube config then modify for the embedded-model image.
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
         mlcube_config = yaml.safe_load(f)
 
-    output_mlcube_config_path = outputdir + "/mlcube.yaml"
+    output_mlcube_config_path = os.path.join(outputdir, "mlcube.yaml")
 
     old_train_output_modeldir = mlcube_config["tasks"]["train"]["parameters"][
         "outputs"
