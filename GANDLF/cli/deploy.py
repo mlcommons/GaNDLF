@@ -83,7 +83,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
         shutil.copytree(
             mlcube_workspace_folder, output_workspace_folder, dirs_exist_ok=True,
         )
-    shutil.copyfile(config, os.path.join(output_workspace_folder, "/config.yml"))
+    shutil.copyfile(config, os.path.join(output_workspace_folder, "config.yml"))
 
     # First grab the existing the mlcube config then modify for the embedded-model image.
     mlcube_config = None
