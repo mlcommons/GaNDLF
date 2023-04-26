@@ -31,5 +31,6 @@ tutorial/medmnist/dataset/pathmnist
 tutorial/output_stats
 # Ingnore any ipynbcheckpoints anywhere
 **/.ipynb_checkpoints/*
-
+.jupyter_ystore.db
 tutorial/model
+tutorial/medmnist/dataset/*.csv
