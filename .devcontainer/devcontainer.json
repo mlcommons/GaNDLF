@@ -20,7 +20,6 @@
 		"PYTHONPATH": "${containerEnv:PYTHONPATH}:/workspaces/GaNDLF"
 	},
 	"hostRequirements": {
-	    "cpus": 8,
 	    "memory": "8gb",
 	    "storage": "64gb"
 	},
