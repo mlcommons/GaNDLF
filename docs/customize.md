@@ -130,6 +130,7 @@ This file contains mid-level information regarding various parameters that can b
     - `max_lr`: defines the maximum learning rate to be used for training.
 - `optimizer`: defines the optimizer to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/optimizers/__init__.py).
 - `nested_training`: defines the number of folds to use nested training, takes `testing` and `validation` as sub-parameters, with integer values defining the number of folds to use.
+- `memory_save_mode`: if enabled, resize/resample operations in `data_preprocessing` will save files to disk instead of directly getting read into memory as tensors
 - **Queue configuration**: this defines how the queue for the input to the model is to be designed **after** the [patching strategy](#patching-strategy) has been applied, and more details are [here](https://torchio.readthedocs.io/data/patch_training.html?#queue). This takes the following sub-parameters:
     - `q_max_length`: his determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches.
     - `q_samples_per_volume`: this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower.

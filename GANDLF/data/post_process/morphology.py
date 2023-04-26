@@ -71,7 +71,7 @@ def fill_holes(input_image, params=None):
     return torch.from_numpy(output_array)
 
 
-def cca(input_image):
+def cca(input_image, params=None):
     """
     This function performs connected component analysis on the input image.
 
@@ -85,11 +85,14 @@ def cca(input_image):
     seg = get_array_from_image_or_tensor(input_image)
     mask = seg != 0
 
-    connectivity = input_image.dim() - 1
+    connectivity = input_image.ndim - 1
     labels_connected = label(mask, connectivity=connectivity)
     labels_connected_sizes = [
         np.sum(labels_connected == i) for i in np.unique(labels_connected)
     ]
-    largest_region = np.argmax(labels_connected_sizes[1:]) + 1
+    largest_region = 0
+    if len(labels_connected_sizes) > 1:
+        largest_region = np.argmax(labels_connected_sizes[1:]) + 1
     seg[labels_connected != largest_region] = 0
+
     return seg

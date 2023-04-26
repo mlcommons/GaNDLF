@@ -8,6 +8,7 @@ from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     parseTestingCSV,
+    set_determinism
 )
 
 
@@ -35,6 +36,8 @@ def main_run(
     device = device
     parameters = parseConfig(model_parameters)
     parameters["device_id"] = -1
+    if parameters["determinism"]:
+        set_determinism(42)
     # in case the data being passed is already processed, check if the previous parameters exists,
     # and if it does, compare the two and if they are the same, ensure no preprocess is done.
     model_parameters_prev = os.path.join(os.path.dirname(model_dir), "parameters.pkl")

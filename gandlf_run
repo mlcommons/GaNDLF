@@ -137,6 +137,6 @@ if __name__ == "__main__":
             args.outputdir,
         )
     except Exception as e:
-        raise "Error in GANDLF run: " + e
+        sys.exit("ERROR: " + str(e))
 
     print("Finished.")

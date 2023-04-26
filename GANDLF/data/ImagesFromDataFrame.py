@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import numpy as np
 
 import torch
@@ -7,7 +8,11 @@ from torchio.transforms import Pad
 import SimpleITK as sitk
 from tqdm import tqdm
 
-from GANDLF.utils import perform_sanity_check_on_subject, resize_image
+from GANDLF.utils import (
+    perform_sanity_check_on_subject,
+    resize_image,
+    get_filename_extension_sanitized,
+)
 from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
 
@@ -97,6 +102,33 @@ def ImagesFromDataFrame(
                     preprocessing["resize_image"] = preprocessing[key]
                     break
 
+    # helper function to save the resized images
+    def _save_resized_images(
+        resized_image, output_dir, subject_id, channel_str, loader_type, extension
+    ):
+        """
+        Helper function to save the resized images
+
+        Args:
+            resized_image (sitk.Image): The resized image.
+            output_dir (str): The output directory.
+            subject_id (str): The subject ID.
+            channel_str (str): The channel string.
+            loader_type (str): The loader type.
+            extension (str): The extension of the image.
+        """
+        # save img_resized to disk
+        save_dir_for_resized_images = os.path.join(
+            output_dir, loader_type + "_resized_images"
+        )
+        Path(save_dir_for_resized_images).mkdir(parents=True, exist_ok=True)
+        save_path = os.path.join(
+            save_dir_for_resized_images,
+            subject_id + "_" + channel_str + "_resized" + extension,
+        )
+        if not os.path.isfile(save_path):
+            sitk.WriteImage(resized_image, save_path)
+
     # iterating through the dataframe
     for patient in tqdm(
         range(num_row), desc="Constructing queue for " + loader_type + " data"
@@ -128,9 +160,23 @@ def ImagesFromDataFrame(
                 img_resized = resize_image(
                     subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
                 )
-                # always ensure resized image spacing is used
-                subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
-                subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(img_resized)
+                if parameters["memory_save_mode"]:
+                    _save_resized_images(
+                        img_resized,
+                        parameters["output_dir"],
+                        subject_dict["subject_id"],
+                        str(channel),
+                        loader_type,
+                        get_filename_extension_sanitized(
+                            str(dataframe[channel][patient])
+                        ),
+                    )
+                else:
+                    # always ensure resized image spacing is used
+                    subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
+                    subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(
+                        img_resized
+                    )
 
         # # for regression -- this logic needs to be thought through
         # if predictionHeaders:
@@ -152,7 +198,19 @@ def ImagesFromDataFrame(
                     preprocessing["resize_image"],
                     sitk.sitkNearestNeighbor,
                 )
-                subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
+                if parameters["memory_save_mode"]:
+                    _save_resized_images(
+                        img_resized,
+                        parameters["output_dir"],
+                        subject_dict["subject_id"],
+                        "label",
+                        loader_type,
+                        get_filename_extension_sanitized(
+                            str(dataframe[channel][patient])
+                        ),
+                    )
+                else:
+                    subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
 
         else:
             subject_dict["label"] = "NA"
