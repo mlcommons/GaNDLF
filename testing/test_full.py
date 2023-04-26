@@ -1757,6 +1757,19 @@ def test_generic_preprocess_functions():
     temp_filename_tiff = convert_to_tiff(temp_filename, outputDir)
     assert os.path.exists(temp_filename_tiff), "Tiff file should be created"
 
+    # resize tests
+    input_tensor = np.random.randint(0, 255, size=(20, 20, 20))
+    input_image = sitk.GetImageFromArray(input_tensor)
+    expected_output = (10, 10, 10)
+    input_transformed = resize_image(input_image, expected_output)
+    assert input_transformed.GetSize() == expected_output, "Resize should work"
+    input_tensor = np.random.randint(0, 255, size=(20, 20))
+    input_image = sitk.GetImageFromArray(input_tensor)
+    expected_output = [10, 10]
+    output_size_dict = {"resize": expected_output}
+    input_transformed = resize_image(input_image, output_size_dict)
+    assert list(input_transformed.GetSize()) == expected_output, "Resize should work"
+
     sanitize_outputDir()
 
     print("passed")
@@ -2840,6 +2853,7 @@ def test_generic_deploy_docker():
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
+    parameters["memory_save_mode"] = True
 
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
@@ -2916,5 +2930,30 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     )
 
     sanitize_outputDir()
+
+    print("passed")
+
+
+def test_generic_random_numbers_are_deterministic_on_cpu():
+    print("48: Starting testing deterministic random numbers generation")
+
+    set_determinism(seed=42)
+    a, b = np.random.rand(3, 3), np.random.rand(3, 3)
+
+    set_determinism(seed=42)
+    c, d = np.random.rand(3, 3), np.random.rand(3, 3)
+
+    # Check that the generated random numbers are the same with numpy
+    assert np.allclose(a, c)
+    assert np.allclose(b, d)
+
+    e, f = [random.random() for _ in range(5)], [random.random() for _ in range(5)]
+
+    set_determinism(seed=42)
+    g, h = [random.random() for _ in range(5)], [random.random() for _ in range(5)]
+
+    # Check that the generated random numbers are the same with Python's built-in random module
+    assert e == g
+    assert f == h
 
     print("passed")
