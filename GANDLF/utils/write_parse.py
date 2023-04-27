@@ -204,8 +204,9 @@ def convert_relative_paths_in_dataframe(input_dataframe, headers, path_root):
                 start_path = pathlib.Path(path_root)
                 if start_path.is_file():
                     start_path = start_path.parent
-                if not this_path.is_absolute():
-                    input_dataframe.loc[index, column] = str(
-                        start_path.joinpath(this_path)
-                    )
+                if not this_path.is_file():
+                    if not this_path.is_absolute():
+                        input_dataframe.loc[index, column] = str(
+                            start_path.joinpath(this_path)
+                        )
     return input_dataframe
