@@ -60,7 +60,7 @@ def asgd(parameters):
     alpha = optimizer_params.get("alpha", 0.75)
     t0 = optimizer_params.get("t0", 1e6)
     weight_decay = optimizer_params.get("weight_decay", 0)
-    
+
     # Create the optimizer using the input parameters
     return ASGD(
         parameters["model_parameters"],
@@ -98,7 +98,7 @@ def adam(parameters, opt_type="normal"):
         optimizer_fn = AdamW
     else:
         raise ValueError(f"Invalid optimizer type: {opt_type}")
-    
+
     # Create the optimizer using the input parameters
     return optimizer_fn(
         parameters["model_parameters"],
@@ -139,7 +139,7 @@ def adamax(parameters):
     betas = optimizer_params.get("betas", (0.9, 0.999))
     weight_decay = optimizer_params.get("weight_decay", 0.00005)
     eps = optimizer_params.get("eps", 1e-8)
-    
+
     # Create the optimizer using the input parameters
     return Adamax(
         parameters["model_parameters"],
@@ -180,7 +180,7 @@ def rprop(parameters):
     optimizer_params = parameters.get("optimizer", {})
     etas = optimizer_params.get("etas", (0.5, 1.2))
     step_sizes = optimizer_params.get("step_sizes", (1e-7, 50))
-    
+
     # Create the optimizer using the input parameters
     return Rprop(
         parameters["model_parameters"],
@@ -206,7 +206,7 @@ def adadelta(parameters):
     rho = optimizer_params.get("rho", 0.9)
     eps = optimizer_params.get("eps", 1e-6)
     weight_decay = optimizer_params.get("weight_decay", 0)
-    
+
     # Create the optimizer using the input parameters
     return Adadelta(
         parameters["model_parameters"],
@@ -233,7 +233,7 @@ def adagrad(parameters):
     lr_decay = optimizer_params.get("lr_decay", 0)
     eps = optimizer_params.get("eps", 1e-6)
     weight_decay = optimizer_params.get("weight_decay", 0)
-    
+
     # Create the optimizer using the input parameters
     return Adagrad(
         parameters["model_parameters"],
@@ -262,7 +262,7 @@ def rmsprop(parameters):
     alpha = optimizer_params.get("alpha", 0.99)
     eps = optimizer_params.get("eps", 1e-8)
     centered = optimizer_params.get("centered", False)
-    
+
     # Create the optimizer using the input parameters
     return RMSprop(
         parameters["model_parameters"],
