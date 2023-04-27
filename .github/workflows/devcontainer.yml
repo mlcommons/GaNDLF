@@ -65,4 +65,4 @@ jobs:
         imageTag: devcontainer # This is the tag that will be used for the image
         push: never
         # Change this to be your CI task/script
-        runCmd: pytest --cov=. --cov-report=xml -k "generic not docker"
+        runCmd: pytest --cov=. --cov-report=xml -k "generic and not docker"
