@@ -224,9 +224,9 @@ def adagrad(parameters):
     return Adagrad(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        lr_decay=lr_decay,
-        eps=eps,
-        weight_decay=weight_decay,
+        lr_decay=optimizer_params.get("lr_decay", 0),
+        eps=optimizer_params.get("eps", 1e-6),
+        weight_decay=optimizer_params.get("weight_decay", 0),
     )
 
 
