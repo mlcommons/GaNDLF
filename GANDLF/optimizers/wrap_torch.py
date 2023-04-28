@@ -65,10 +65,10 @@ def asgd(parameters):
     return ASGD(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        alpha=alpha,
-        t0=t0,
-        lambd=lambd,
-        weight_decay=weight_decay,
+        alpha=optimizer_params.get("alpha", 0.75),
+        t0=optimizer_params.get("t0", 1e6),
+        lambd=optimizer_params.get("lambd", 1e-4),
+        weight_decay=optimizer_params.get("weight_decay", 0),
     )
 
 
