@@ -27,10 +27,10 @@ def sgd(parameters):
     optimizer = SGD(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        momentum=optimizer_params.get("momentum", 0.9),
-        weight_decay=optimizer_params.get("weight_decay", 0),
-        dampening=optimizer_params.get("dampening", 0),
-        Nesterov=optimizer_params.get("nesterov", False),
+        momentum=parameters["optimizer"].get("momentum", 0.9),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0),
+        dampening=parameters["optimizer"].get("dampening", 0),
+        Nesterov=parameters["optimizer"].get("Nesterov", False),
     )
 
     return optimizer
@@ -51,10 +51,10 @@ def asgd(parameters):
     return ASGD(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        alpha=optimizer_params.get("alpha", 0.75),
-        t0=optimizer_params.get("t0", 1e6),
-        lambd=optimizer_params.get("lambd", 1e-4),
-        weight_decay=optimizer_params.get("weight_decay", 0),
+        alpha=parameters["optimizer"].get("alpha", 0.75),
+        t0=parameters["optimizer"].get("t0", 1e6),
+        lambd=parameters["optimizer"].get("lambd", 1e-4),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0),
     )
 
 
@@ -83,9 +83,9 @@ def adam(parameters, opt_type="normal"):
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
         betas=optimizer_params.get("betas", (0.9, 0.999)),
-        weight_decay=optimizer_params.get("weight_decay", 0.00005),
-        eps=optimizer_params.get("eps", 1e-8),
-        amsgrad=optimizer_params.get("amsgrad", False),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0.00005),
+        eps=parameters["optimizer"].get("eps", 1e-8),
+        amsgrad=parameters["optimizer"].get("amsgrad", False),
     )
 
 
@@ -117,9 +117,9 @@ def adamax(parameters):
     return Adamax(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        betas=optimizer_params.get("betas", (0.9, 0.999)),
-        weight_decay=optimizer_params.get("weight_decay", 0.00005),
-        eps=optimizer_params.get("eps", 1e-8),
+        betas=parameters["optimizer"].get("betas", (0.9, 0.999)),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0.00005),
+        eps=parameters["optimizer"].get("eps", 1e-8),
     )
 
 
@@ -153,8 +153,8 @@ def rprop(parameters):
     return Rprop(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        etas=optimizer_params.get("etas", (0.5, 1.2)),
-        step_sizes=optimizer_params.get("step_sizes", (1e-7, 50)),
+        etas=parameters["optimizer"].get("etas", (0.5, 1.2)),
+        step_sizes=parameters["optimizer"].get("step_sizes", (1e-7, 50)),
     )
 
 
@@ -173,9 +173,9 @@ def adadelta(parameters):
     return Adadelta(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        rho=optimizer_params.get("rho", 0.9),
-        eps=optimizer_params.get("eps", 1e-6),
-        weight_decay=optimizer_params.get("weight_decay", 0),
+        rho=parameters["optimizer"].get("rho", 0.9),
+        eps=parameters["optimizer"].get("eps", 1e-6),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0),
     )
 
 
@@ -195,9 +195,9 @@ def adagrad(parameters):
     return Adagrad(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        lr_decay=optimizer_params.get("lr_decay", 0),
-        eps=optimizer_params.get("eps", 1e-6),
-        weight_decay=optimizer_params.get("weight_decay", 0),
+        lr_decay=parameters["optimizer"].get("lr_decay", 0),
+        eps=parameters["optimizer"].get("eps", 1e-6),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0),
     )
 
 
@@ -216,10 +216,10 @@ def rmsprop(parameters):
     return RMSprop(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        alpha=optimizer_params.get("alpha", 0.99),
-        eps=optimizer_params.get("eps", 1e-8),
-        centered=optimizer_params.get("centered", False),
-        momentum=optimizer_params.get("momentum", 0),
-        weight_decay=optimizer_params.get("weight_decay", 0),
+        alpha=parameters["optimizer"].get("alpha", 0.99),
+        eps=parameters["optimizer"].get("eps", 1e-8),
+        centered=parameters["optimizer"].get("centered", False),
+        momentum=parameters["optimizer"].get("momentum", 0),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0),
     )
 
