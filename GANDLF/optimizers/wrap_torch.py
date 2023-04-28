@@ -89,10 +89,10 @@ def adam(parameters, opt_type="normal"):
     return optimizer_fn(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        betas=betas,
-        weight_decay=weight_decay,
-        eps=eps,
-        amsgrad=amsgrad,
+        betas=optimizer_params.get("betas", (0.9, 0.999)),
+        weight_decay=optimizer_params.get("weight_decay", 0.00005),
+        eps=optimizer_params.get("eps", 1e-8),
+        amsgrad=optimizer_params.get("amsgrad", False),
     )
 
 
