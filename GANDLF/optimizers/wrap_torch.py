@@ -77,13 +77,6 @@ def adam(parameters, opt_type="normal"):
         optimizer (torch.optim.Adam or torch.optim.AdamW): An Adam or AdamW optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    betas = optimizer_params.get("betas", (0.9, 0.999))
-    weight_decay = optimizer_params.get("weight_decay", 0.00005)
-    eps = optimizer_params.get("eps", 1e-8)
-    amsgrad = optimizer_params.get("amsgrad", False)
-
     # Determine which optimizer to create based on opt_type
     if opt_type == "normal":
         optimizer_fn = Adam
