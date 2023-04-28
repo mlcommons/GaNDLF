@@ -34,10 +34,10 @@ def sgd(parameters):
     optimizer = SGD(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        momentum=momentum,
-        weight_decay=weight_decay,
-        dampening=dampening,
-        nesterov=nesterov,
+        momentum=optimizer_params.get("momentum", 0.9),
+        weight_decay=optimizer_params.get("weight_decay", 0),
+        dampening=optimizer_params.get("dampening", 0),
+        Nesterov=optimizer_params.get("nesterov", False),
     )
 
     return optimizer
