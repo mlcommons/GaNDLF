@@ -175,12 +175,6 @@ def adadelta(parameters):
         optimizer (torch.optim.Adadelta): An Adadelta optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    rho = optimizer_params.get("rho", 0.9)
-    eps = optimizer_params.get("eps", 1e-6)
-    weight_decay = optimizer_params.get("weight_decay", 0)
-
     # Create the optimizer using the input parameters
     return Adadelta(
         parameters["model_parameters"],
