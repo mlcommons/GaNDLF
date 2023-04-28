@@ -171,8 +171,8 @@ def rprop(parameters):
     return Rprop(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        etas=etas,
-        step_sizes=step_sizes,
+        etas=optimizer_params.get("etas", (0.5, 1.2)),
+        step_sizes=optimizer_params.get("step_sizes", (1e-7, 50)),
     )
 
 
