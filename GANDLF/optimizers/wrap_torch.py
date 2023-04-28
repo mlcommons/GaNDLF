@@ -216,10 +216,10 @@ def rmsprop(parameters):
     return RMSprop(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        alpha=alpha,
-        eps=eps,
-        centered=centered,
-        momentum=momentum,
-        weight_decay=weight_decay,
+        alpha=optimizer_params.get("alpha", 0.99),
+        eps=optimizer_params.get("eps", 1e-8),
+        centered=optimizer_params.get("centered", False),
+        momentum=optimizer_params.get("momentum", 0),
+        weight_decay=optimizer_params.get("weight_decay", 0),
     )
 
