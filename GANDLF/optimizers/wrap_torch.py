@@ -30,7 +30,7 @@ def sgd(parameters):
         momentum=parameters["optimizer"].get("momentum", 0.9),
         weight_decay=parameters["optimizer"].get("weight_decay", 0),
         dampening=parameters["optimizer"].get("dampening", 0),
-        Nesterov=parameters["optimizer"].get("Nesterov", False),
+        nesterov=parameters["optimizer"].get("Nesterov", False),
     )
 
     return optimizer
