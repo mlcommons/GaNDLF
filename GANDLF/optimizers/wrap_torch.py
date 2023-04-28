@@ -197,9 +197,9 @@ def adadelta(parameters):
     return Adadelta(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
-        rho=rho,
-        eps=eps,
-        weight_decay=weight_decay,
+        rho=optimizer_params.get("rho", 0.9),
+        eps=optimizer_params.get("eps", 1e-6),
+        weight_decay=optimizer_params.get("weight_decay", 0),
     )
 
 
