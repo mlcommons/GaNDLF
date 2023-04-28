@@ -47,13 +47,6 @@ def asgd(parameters):
         optimizer (torch.optim.ASGD): An Averaged Stochastic Gradient Descent optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    lambd = optimizer_params.get("lambd", 1e-4)
-    alpha = optimizer_params.get("alpha", 0.75)
-    t0 = optimizer_params.get("t0", 1e6)
-    weight_decay = optimizer_params.get("weight_decay", 0)
-
     # Create the optimizer using the input parameters
     return ASGD(
         parameters["model_parameters"],
