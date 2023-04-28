@@ -27,3 +27,5 @@ coverage.xml
 mlcube/workspace/*
 !mlcube/workspace/config.yml
 !mlcube/workspace/channelIDs.yml
+
+tutorial/medmnist/dataset/*/*
