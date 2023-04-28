@@ -90,7 +90,7 @@ def adam(parameters, opt_type="normal"):
     weight_decay = optimizer_params.get("weight_decay", 0.00005)
     eps = optimizer_params.get("eps", 1e-8)
     amsgrad = optimizer_params.get("amsgrad", False)
-    
+
     # Determine which optimizer to create based on opt_type
     if opt_type == "normal":
         optimizer_fn = Adam
