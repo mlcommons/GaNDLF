@@ -113,12 +113,6 @@ def adamax(parameters):
         optimizer (torch.optim.Adamax): An Adamax optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    betas = optimizer_params.get("betas", (0.9, 0.999))
-    weight_decay = optimizer_params.get("weight_decay", 0.00005)
-    eps = optimizer_params.get("eps", 1e-8)
-
     # Create the optimizer using the input parameters
     return Adamax(
         parameters["model_parameters"],
