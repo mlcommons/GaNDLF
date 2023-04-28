@@ -155,11 +155,6 @@ def rprop(parameters):
         optimizer (torch.optim.Rprop): A Resilient Backpropagation optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    etas = optimizer_params.get("etas", (0.5, 1.2))
-    step_sizes = optimizer_params.get("step_sizes", (1e-7, 50))
-
     # Create the optimizer using the input parameters
     return Rprop(
         parameters["model_parameters"],
