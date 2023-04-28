@@ -36,9 +36,16 @@ jobs:
       uses: tj-actions/changed-files@v34
       with:
           files: |
+            .github/*.md
+            .github/ISSUE_TEMPLATE/*.md
+            .github/workflows/devcontainer.yml
+            .github/workflows/docker-image.yml
+            .devcontainer/**
             docs/**
+            mlcube/**
             *.md
             LICENSE
+            Dockerfile-*
 
     - name: Summarize docs and non-docs modifications
       run: |
