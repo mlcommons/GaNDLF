@@ -212,14 +212,6 @@ def rmsprop(parameters):
         optimizer (torch.optim.RMSprop): An RMSprop optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    momentum = optimizer_params.get("momentum", 0)
-    weight_decay = optimizer_params.get("weight_decay", 0)
-    alpha = optimizer_params.get("alpha", 0.99)
-    eps = optimizer_params.get("eps", 1e-8)
-    centered = optimizer_params.get("centered", False)
-
     # Create the optimizer using the input parameters
     return RMSprop(
         parameters["model_parameters"],
