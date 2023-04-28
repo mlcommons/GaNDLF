@@ -23,13 +23,6 @@ def sgd(parameters):
         optimizer (torch.optim.SGD): A Stochastic Gradient Descent optimizer.
 
     """
-    # Set default values for optimizer parameters
-    optimizer_params = parameters.get("optimizer", {})
-    momentum = optimizer_params.get("momentum", 0.9)
-    weight_decay = optimizer_params.get("weight_decay", 0)
-    dampening = optimizer_params.get("dampening", 0)
-    nesterov = optimizer_params.get("nesterov", False)
-
     # Create the optimizer using the input parameters
     optimizer = SGD(
         parameters["model_parameters"],
