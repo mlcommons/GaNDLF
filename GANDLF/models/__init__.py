@@ -8,7 +8,7 @@ from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
 from .densenet import densenet121, densenet169, densenet201, densenet264
-from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152, resnet200
 from .efficientnet import (
     efficientnetB0,
     efficientnetB1,
@@ -91,6 +91,7 @@ global_models_dict = {
     "resnet50": resnet50,
     "resnet101": resnet101,
     "resnet152": resnet152,
+    "resnet200": resnet200,
     # EfficientNet models
     "efficientnetb0": efficientnetB0,
     "efficientnetb1": efficientnetB1,

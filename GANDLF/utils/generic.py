@@ -182,6 +182,7 @@ def get_array_from_image_or_tensor(input_tensor_or_image):
     else:
         raise ValueError("Input must be a torch.Tensor or sitk.Image or np.ndarray")
 
+
 def set_determinism(seed=42):
     """
     This function controls the randomness of the program. It sets the seed both for torch and numpy.
@@ -191,7 +192,7 @@ def set_determinism(seed=42):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(42)
-    torch.use_deterministic_algorithms(True, warn_only = True)
+    torch.use_deterministic_algorithms(True, warn_only=True)
 
     if torch.cuda.is_available():
         os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":16:8"
