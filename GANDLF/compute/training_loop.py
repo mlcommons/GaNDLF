@@ -306,9 +306,10 @@ def training_loop(
         )
         # original number of classes are restored
         params["model"]["num_classes"] = org_num_classes
-    
+        
+    metrics_log = params["metrics"].copy()
+
     if calculate_overall_metrics:
-        metrics_log = params["metrics"].copy()
         for metric in overall_metrics:
             metrics_log[metric] = 0
 
