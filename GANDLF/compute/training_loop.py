@@ -306,22 +306,25 @@ def training_loop(
         )
         # original number of classes are restored
         params["model"]["num_classes"] = org_num_classes
+
+    metrics_log = params["metrics"].copy()
+
     if calculate_overall_metrics:
         for metric in overall_metrics:
-            params["metrics"][metric] = 0
+            metrics_log[metric] = 0
 
     # Setup a few loggers for tracking
     train_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_training.csv"),
-        metrics=params["metrics"],
+        metrics=metrics_log,
     )
     valid_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
-        metrics=params["metrics"],
+        metrics=metrics_log,
     )
     test_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
-        metrics=params["metrics"],
+        metrics=metrics_log,
     )
     train_logger.write_header(mode="train")
     valid_logger.write_header(mode="valid")
