@@ -200,7 +200,7 @@ def parseConfig(config_file_path, version_check_flag=True):
             if isinstance(metric, dict):
                 comparison_string = list(metric.keys())[0]
             # these metrics always need to be dicts
-            if comparison_string in ["accuracy", "f1", "precision", "recall", "specificity" "iou"]:
+            if comparison_string in ["accuracy", "f1", "precision", "recall", "specificity", "iou"]:
                 if not isinstance(metric, dict):
                     temp_dict[metric] = {}
                 else:
