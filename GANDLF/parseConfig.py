@@ -200,7 +200,7 @@ def parseConfig(config_file_path, version_check_flag=True):
             if isinstance(metric, dict):
                 comparison_string = list(metric.keys())[0]
             # these metrics always need to be dicts
-            if comparison_string in ["accuracy", "f1", "precision", "recall", "iou"]:
+            if comparison_string in ["accuracy", "f1", "precision", "recall", "specificity" "iou"]:
                 if not isinstance(metric, dict):
                     temp_dict[metric] = {}
                 else:
@@ -208,7 +208,7 @@ def parseConfig(config_file_path, version_check_flag=True):
             elif not isinstance(metric, dict):
                 temp_dict[metric] = None
 
-            # special case for accuracy, precision, and recall; which could be dicts
+            # special case for accuracy, precision, recall, and specificity; which could be dicts
             ## need to find a better way to do this
             if comparison_string == "accuracy":
                 if comparison_string != "classification_accuracy":
@@ -259,6 +259,19 @@ def parseConfig(config_file_path, version_check_flag=True):
                 )
                 temp_dict["recall"] = initialize_key(
                     temp_dict["recall"], "threshold", 0.5
+                )
+            elif "specificity" in comparison_string:
+                temp_dict["specificity"] = initialize_key(
+                    temp_dict["specificity"], "average", "weighted"
+                )
+                temp_dict["specificity"] = initialize_key(
+                    temp_dict["specificity"], "multi_class", True
+                )
+                temp_dict["specificity"] = initialize_key(
+                    temp_dict["specificity"], "mdmc_average", "samplewise"
+                )
+                temp_dict["specificity"] = initialize_key(
+                    temp_dict["specificity"], "threshold", 0.5
                 )
             elif "iou" in comparison_string:
                 temp_dict["iou"] = initialize_key(
