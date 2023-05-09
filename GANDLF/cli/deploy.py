@@ -165,8 +165,8 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     if gandlf_root == site_packages_dir: # Installed via pip, not as editable source install, extra work is needed
         for file in all_extra_files:
             shutil.copy(os.path.join(gandlf_root, file), os.path.join(gandlf_root, "GANDLF", file))
-            os.symlink(os.path.join(gandlf_root, "GANDLF"), os.path.join(gandlf_root, "GANDLF", "GANDLF"))
-            gandlf_root = os.path.join(gandlf_root, "GANDLF")
+        os.symlink(os.path.join(gandlf_root, "GANDLF"), os.path.join(gandlf_root, "GANDLF", "GANDLF"))
+        gandlf_root = os.path.join(gandlf_root, "GANDLF")
             
     # Requires mlcube_docker python package to be installed with scripts available
     # command_to_run = "mlcube_docker configure --platform=docker  -Pdocker.build_strategy=always" + " --mlcube=" + os.path.realpath(mlcubedir) + " -Pdocker.build_context=" + gandlf_root
