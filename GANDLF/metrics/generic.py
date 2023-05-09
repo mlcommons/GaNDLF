@@ -57,7 +57,7 @@ def accuracy(output, label, params):
 
 
 def specificity_score(output, label, params):
-    return generic_torchmetrics_score(output, label, Accuracy, "specificity", params)
+    return generic_torchmetrics_score(output, label, Specificity, "specificity", params)
 
 
 def iou_score(output, label, params):
