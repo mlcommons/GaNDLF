@@ -4,6 +4,7 @@ import yaml
 import docker
 import tarfile
 import io
+import site
 
 # import copy
 
@@ -154,7 +155,18 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     docker_image = mlcube_config["docker"]["image"]
 
     # Run the mlcube_docker configuration process, forcing build from local repo
+    dockerfiles = [item for item in os.listdir(os.path.dirname(os.path.abspath(__file__))) if (os.path.isfile(item) and item.startswith("Dockerfile-"))]
+    entrypoint_files = [item for item in os.listdir(os.path.dirname(os.path.abspath(__file__))) if (os.path.isfile(item) and item.startswith("gandlf_"))]
+    setup_files = ['setup.py', '.dockerignore', 'pyproject.toml', 'MANIFEST.in']
+    all_extra_files = dockerfiles + entrypoint_files + setup_files
+    
     gandlf_root = os.path.realpath(os.path.dirname(__file__) + "/../../")
+    if gandlf_root == site.getsitepackages(): # Installed via pip, not as editable source install, extra work is needed
+        for file in all_extra_files:
+            shutil.copy(os.path.join(gandlf_root, file), os.path.join(gandlf_root, "GANDLF", file))
+            os.symlink(os.path.join(gandlf_root, "GANDLF"), os.path.join(gandlf_root, "GANDLF", "GANDLF"))
+            gandlf_root = os.path.join(gandlf_root, "GANDLF")
+            
     # Requires mlcube_docker python package to be installed with scripts available
     # command_to_run = "mlcube_docker configure --platform=docker  -Pdocker.build_strategy=always" + " --mlcube=" + os.path.realpath(mlcubedir) + " -Pdocker.build_context=" + gandlf_root
     command_to_run = (

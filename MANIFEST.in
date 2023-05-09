@@ -1,3 +1,7 @@
 include *.md
 include LICENSE
 exclude *.toml
+include setup.py
+include .dockerignore
+include Dockerfile-*
+include gandlf_*
