@@ -208,71 +208,28 @@ def parseConfig(config_file_path, version_check_flag=True):
             elif not isinstance(metric, dict):
                 temp_dict[metric] = None
 
+            print(comparison_string)
+
             # special case for accuracy, precision, recall, and specificity; which could be dicts
             ## need to find a better way to do this
-            if comparison_string == "accuracy":
+            if any(_ in comparison_string for _ in ["precision", "recall", "specificity", "accuracy", "f1"]):
                 if comparison_string != "classification_accuracy":
-                    temp_dict["accuracy"] = initialize_key(
-                        temp_dict["accuracy"], "average", "weighted"
+                    temp_dict[comparison_string] = initialize_key(
+                        temp_dict[comparison_string], "average", "weighted"
                     )
-                    temp_dict["accuracy"] = initialize_key(
-                        temp_dict["accuracy"], "multi_class", True
+                    temp_dict[comparison_string] = initialize_key(
+                        temp_dict[comparison_string], "multi_class", True
                     )
-                    temp_dict["accuracy"] = initialize_key(
-                        temp_dict["accuracy"], "mdmc_average", "samplewise"
+                    temp_dict[comparison_string] = initialize_key(
+                        temp_dict[comparison_string], "mdmc_average", "samplewise"
                     )
-                    temp_dict["accuracy"] = initialize_key(
-                        temp_dict["accuracy"], "threshold", 0.5
+                    temp_dict[comparison_string] = initialize_key(
+                        temp_dict[comparison_string], "threshold", 0.5
                     )
-                    temp_dict["accuracy"] = initialize_key(
-                        temp_dict["accuracy"], "subset_accuracy", False
-                    )
-            elif "f1" in comparison_string:
-                temp_dict["f1"] = initialize_key(temp_dict["f1"], "average", "weighted")
-                temp_dict["f1"] = initialize_key(temp_dict["f1"], "multi_class", True)
-                temp_dict["f1"] = initialize_key(
-                    temp_dict["f1"], "mdmc_average", "samplewise"
-                )
-                temp_dict["f1"] = initialize_key(temp_dict["f1"], "threshold", 0.5)
-            elif "precision" in comparison_string:
-                temp_dict["precision"] = initialize_key(
-                    temp_dict["precision"], "average", "weighted"
-                )
-                temp_dict["precision"] = initialize_key(
-                    temp_dict["precision"], "multi_class", True
-                )
-                temp_dict["precision"] = initialize_key(
-                    temp_dict["precision"], "mdmc_average", "samplewise"
-                )
-                temp_dict["precision"] = initialize_key(
-                    temp_dict["precision"], "threshold", 0.5
-                )
-            elif "recall" in comparison_string:
-                temp_dict["recall"] = initialize_key(
-                    temp_dict["recall"], "average", "weighted"
-                )
-                temp_dict["recall"] = initialize_key(
-                    temp_dict["recall"], "multi_class", True
-                )
-                temp_dict["recall"] = initialize_key(
-                    temp_dict["recall"], "mdmc_average", "samplewise"
-                )
-                temp_dict["recall"] = initialize_key(
-                    temp_dict["recall"], "threshold", 0.5
-                )
-            elif "specificity" in comparison_string:
-                temp_dict["specificity"] = initialize_key(
-                    temp_dict["specificity"], "average", "weighted"
-                )
-                temp_dict["specificity"] = initialize_key(
-                    temp_dict["specificity"], "multi_class", True
-                )
-                temp_dict["specificity"] = initialize_key(
-                    temp_dict["specificity"], "mdmc_average", "samplewise"
-                )
-                temp_dict["specificity"] = initialize_key(
-                    temp_dict["specificity"], "threshold", 0.5
-                )
+                    if comparison_string == "accuracy":
+                        temp_dict[comparison_string] = initialize_key(
+                            temp_dict[comparison_string], "subset_accuracy", False
+                        )
             elif "iou" in comparison_string:
                 temp_dict["iou"] = initialize_key(
                     temp_dict["iou"], "reduction", "elementwise_mean"
