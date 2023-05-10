@@ -167,7 +167,6 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
         for file in setup_files + dockerfiles + entrypoints:
             shutil.copy(os.path.join(gandlf_root, file), os.path.join(gandlf_root, "GANDLF", file))
         if not os.path.exists(os.path.join(gandlf_root, "GANDLF", "GANDLF")):
-            #os.symlink(os.path.join(gandlf_root, "GANDLF"), os.path.join(gandlf_root, "GANDLF", "GANDLF"))
             # point to same package directory, acts as a recursive location for the GaNDLF package
             symlink_location = os.path.join(gandlf_root, "GANDLF", "GANDLF")
             os.symlink("./", os.path.join(gandlf_root, "GANDLF", "GANDLF"))
