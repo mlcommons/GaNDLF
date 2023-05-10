@@ -19,6 +19,7 @@ metrics:
       average: weighted,
     }
   - recall
+  - specificity
   - iou: {
       reduction: sum,
     }
