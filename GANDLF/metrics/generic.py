@@ -1,5 +1,5 @@
 import torch
-from torchmetrics import F1, Precision, Recall, IoU, Accuracy
+from torchmetrics import F1, Precision, Recall, IoU, Accuracy, Specificity
 from GANDLF.utils.tensor import one_hot
 
 
@@ -54,6 +54,10 @@ def f1_score(output, label, params):
 
 def accuracy(output, label, params):
     return generic_torchmetrics_score(output, label, Accuracy, "accuracy", params)
+
+
+def specificity_score(output, label, params):
+    return generic_torchmetrics_score(output, label, Specificity, "specificity", params)
 
 
 def iou_score(output, label, params):
