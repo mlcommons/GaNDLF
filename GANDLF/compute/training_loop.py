@@ -308,7 +308,6 @@ def training_loop(
         params["model"]["num_classes"] = org_num_classes
 
     metrics_log = params["metrics"].copy()
-    print(metrics_log)
     if calculate_overall_metrics:
         for metric in overall_metrics:
             if metric not in metrics_log:
