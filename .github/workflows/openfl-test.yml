@@ -36,18 +36,34 @@ jobs:
       uses: tj-actions/changed-files@v34
       with:
           files: |
+            .github/*.md
+            .github/ISSUE_TEMPLATE/*.md
+            .github/workflows/devcontainer.yml
+            .github/workflows/docker-image.yml
+            .devcontainer/**
             docs/**
+            mlcube/**
             *.md
             LICENSE
+            Dockerfile-*
 
     - name: Summarize docs and non-docs modifications
       run: |
         echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
         echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
     
+    # This second step is unnecessary but highly recommended because
+    # It will cache database and saves time re-downloading it if database isn't stale.
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
     - name: Set up Python 3.8
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.8
     - name: Install dependencies and package

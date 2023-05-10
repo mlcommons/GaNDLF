@@ -17,8 +17,9 @@
 Thank you for your interest in contributing to **GaNDLF**! To make the process as smooth as possible, please follow these guidelines for speedy reviews and merges:
 
 - Ensure your PR addresses an existing issue or feature request (if none exists, please open one so that it can be triaged by the admins).
+- All parties that have commits to a PR should sign the [MLCommons CLA](https://forms.gle/Ew1KkBVpyeJDuRw67).
 - Your PR should be initiated from a branch that either contains the issue number it fixes and/or contains as much top-level information as possible to help moderators review and merge it.
-- The branch should be from your personal fork of GaNDLF.
-- Include tests for the code changes in your PR; if code coverage gets reduced, the merge will be triaged by admins.
+- The branch should be from a fork of GaNDLF.
+- Include tests for the code changes in your PR. Please provide an explanation If code coverage gets reduced, which will help the review process.
 - Update documentation for the added functionality (if any).
 - Fill out PR template.

@@ -506,7 +506,8 @@ class _Transformer(nn.Sequential):
 
         for _ in range(0, num_layers):
             layer = _TransformerLayer(
-                embed_size, num_heads,
+                embed_size,
+                num_heads,
             )
             self.layers.append(layer)
 

@@ -641,6 +641,8 @@ def parseConfig(config_file_path, version_check_flag=True):
             "WARNING: Setting default step_size to:", params["scheduler"]["step_size"]
         )
 
+    # initialize default optimizer
+    params["optimizer"] = params.get("optimizer", {})
     if isinstance(params["optimizer"], str):
         temp_dict = {}
         temp_dict["type"] = params["optimizer"]
