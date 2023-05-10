@@ -161,8 +161,8 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     site_packages_dir = sysconfig.get_path('purelib')
     if gandlf_root == site_packages_dir: # Installed via pip, not as editable source install, extra work is needed
         setup_files = ['setup.py', '.dockerignore', 'pyproject.toml', 'MANIFEST.in']
-        dockerfiles = [file for file in os.listdir(gandlf_root) if os.path.isfile(os.path.join(gandlf_root, item)) and item.startswith("Dockerfile-")]
-        entrypoints = [file for file in os.listdir(gandlf_root) if os.path.isfile(os.path.join(gandlf_root, item)) and item.startswith("gandlf_")]
+        dockerfiles = [item for item in os.listdir(gandlf_root) if os.path.isfile(os.path.join(gandlf_root, item)) and item.startswith("Dockerfile-")]
+        entrypoints = [item for item in os.listdir(gandlf_root) if os.path.isfile(os.path.join(gandlf_root, item)) and item.startswith("gandlf_")]
         for file in setup_files + dockerfiles + entrypoints:
             shutil.copy(os.path.join(gandlf_root, file), os.path.join(gandlf_root, "GANDLF", file))
         if not os.path.exists(os.path.join(gandlf_root, "GANDLF", "GANDLF")):
