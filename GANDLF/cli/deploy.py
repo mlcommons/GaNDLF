@@ -159,6 +159,7 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     
     gandlf_root = os.path.realpath(os.path.dirname(__file__) + "/../../")
     site_packages_dir = sysconfig.get_path('purelib')
+    symlink_location = ""
     if gandlf_root == site_packages_dir: # Installed via pip, not as editable source install, extra work is needed
         setup_files = ['setup.py', '.dockerignore', 'pyproject.toml', 'MANIFEST.in']
         dockerfiles = [item for item in os.listdir(gandlf_root) if os.path.isfile(os.path.join(gandlf_root, item)) and item.startswith("Dockerfile-")]
@@ -167,7 +168,9 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
             shutil.copy(os.path.join(gandlf_root, file), os.path.join(gandlf_root, "GANDLF", file))
         if not os.path.exists(os.path.join(gandlf_root, "GANDLF", "GANDLF")):
             #os.symlink(os.path.join(gandlf_root, "GANDLF"), os.path.join(gandlf_root, "GANDLF", "GANDLF"))
-            os.symlink("../", os.path.join(gandlf_root, "GANDLF", "GANDLF"))
+            # point to same package directory, acts as a recursive location for the GaNDLF package
+            symlink_location = os.path.join(gandlf_root, "GANDLF", "GANDLF")
+            os.symlink("./", os.path.join(gandlf_root, "GANDLF", "GANDLF"))
         gandlf_root = os.path.join(gandlf_root, "GANDLF")
         
     print(os.listdir(gandlf_root))
@@ -191,7 +194,11 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     assert (
         os.system(command_to_run) == 0
     ), "mlcube_docker configuration failed. Check output for more details."
-
+    
+    # Container is made at this point, the recursive symlink no longer needs to exist
+    if os.path.exists(symlink_location) and os.path.islink(symlink_location):
+        os.unlink(symlink_location)
+    
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
     container = docker_client.containers.create(docker_image)
 
