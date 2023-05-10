@@ -208,8 +208,6 @@ def parseConfig(config_file_path, version_check_flag=True):
             elif not isinstance(metric, dict):
                 temp_dict[metric] = None
 
-            print(comparison_string)
-
             # special case for accuracy, precision, recall, and specificity; which could be dicts
             ## need to find a better way to do this
             if any(_ in comparison_string for _ in ["precision", "recall", "specificity", "accuracy", "f1"]):
