@@ -41,6 +41,9 @@ def overall_stats(predictions, ground_truth, params):
             "f1": tm.F1(
                 num_classes=params["model"]["num_classes"], average=average_type_key
             ),
+            "specificity": tm.Specificity(
+                num_classes=params["model"]["num_classes"], average=average_type_key
+            ),
             ## weird error for multi-class problem, where pos_label is not getting set
             # "aucroc": tm.AUROC(
             #     num_classes=params["model"]["num_classes"], average=average_type_key
