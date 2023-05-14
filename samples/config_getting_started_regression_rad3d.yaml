@@ -62,7 +62,7 @@ scheduler:
 track_memory_usage: false
 verbose: false
 version:
-  maximum: 0.0.16
+  maximum: 0.0.17
   minimum: 0.0.14
 weighted_loss: false
 which_model: resunet
