@@ -22,13 +22,13 @@ Alternatively, you can run GaNDLF via [Docker](https://www.docker.com/). This ne
 
 ### Install PyTorch 
 
-GaNDLF's primary computational foundation is built on PyTorch, and as such it supports all hardware types that PyTorch supports. Please install PyTorch for your hardware type before installing GaNDLF. See the [PyTorch installation instructions](https://pytorch.org/get-started/locally) for more details. An example installation using CUDA, ROCm, and CPU-only is shown below:
+GaNDLF's primary computational foundation is built on PyTorch, and as such it supports all hardware types that PyTorch supports. Please install PyTorch for your hardware type before installing GaNDLF. See the [PyTorch installation instructions](https://pytorch.org/get-started/previous-versions/#v1131) for more details. An example installation using CUDA, ROCm, and CPU-only is shown below:
 
 ```bash
 (base) $> conda create -n venv_gandlf python=3.8 -y
 (base) $> conda activate venv_gandlf
 (venv_gandlf) $> ### subsequent commands go here
-### PyTorch installation - https://pytorch.org/get-started/locally
+### PyTorch installation - https://pytorch.org/get-started/previous-versions/#v1131
 ## CUDA 11.6
 # (venv_gandlf) $> pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ## ROCm
