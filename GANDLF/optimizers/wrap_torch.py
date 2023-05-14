@@ -9,6 +9,8 @@ from torch.optim import (
     Adadelta,
     Adagrad,
     RMSprop,
+    LBFGS, 
+    RAdam
 )
 
 
@@ -221,5 +223,47 @@ def rmsprop(parameters):
         centered=parameters["optimizer"].get("centered", False),
         momentum=parameters["optimizer"].get("momentum", 0),
         weight_decay=parameters["optimizer"].get("weight_decay", 0),
+    )
+
+def lbfgs(parameters):
+    """
+    Creates a LBFGS optimizer from the PyTorch `torch.optim` module using the input parameters. 
+    
+    Args: 
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+        
+    Returns: 
+        optimizer (torch.optim.LBFGS): A LBFGS optimizer.
+    """
+    # Create the optimizer using the input parameters
+    return LBFGS(
+        parameters["model_parameters"], 
+        lr=parameters.get("learning_rate"),
+        max_iter=parameters["optimizer"].get("max_iter", 20),
+        max_eval=parameters["optimizer"].get("max_eval", None),
+        tolerance_grad=parameters["optimizer"].get("tolerance_grad", 1e-7), 
+        tolerance_change=parameters["optimizer"].get("tolerance_change", 1e-09),
+        history_size=parameters["optimizer"].get("history_size", 100),
+        line_search_fn=parameters["optimizer"].get("line_search_fn", None),
+    )
+
+def radam(parameters):
+    """
+    Creates a RAdam optimizer from the PyTorch `torch.optim` module using the input parameters. 
+    
+    Args: 
+        parameters (dict): A dictionary containing the input parameters for the optimizer.
+        
+    Returns: 
+        optimizer (torch.optim.RAdam): A RAdam optimizer.
+    """
+    # Create the optimizer using the input parameters
+    return RAdam(
+        parameters["model_parameters"], 
+        lr=parameters.get("learning_rate"),
+        betas=parameters["optimizer"].get("betas", (0.9, 0.999)),
+        eps=parameters["optimizer"].get("eps", 1e-8),
+        weight_decay=parameters["optimizer"].get("weight_decay", 0),
+        foreach=parameters["optimizer"].get("foreach", None),
     )
 
