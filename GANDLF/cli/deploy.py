@@ -157,8 +157,6 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     docker_image = mlcube_config["docker"]["image"]
 
     # Run the mlcube_docker configuration process, forcing build from local repo
-    
-    
     gandlf_root = os.path.realpath(os.path.dirname(__file__) + "/../../")
     site_packages_dir = sysconfig.get_path('purelib')
     symlink_location = ""

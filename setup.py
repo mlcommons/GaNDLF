@@ -48,11 +48,11 @@ setup_files = ['setup.py', '.dockerignore', 'pyproject.toml', 'MANIFEST.in']
 all_extra_files = dockerfiles + entrypoint_files + setup_files
 all_extra_files_pathcorrected = [os.path.join("../", item) for item in all_extra_files]
 # find_packages should only ever find these as subpackages of gandlf, not as top-level packages
-# generate this dynamically? 
+# generate this dynamically?
 # GANDLF.GANDLF is needed to prevent recursion madness in deployments
 toplevel_package_excludes = ['GANDLF.GANDLF', 'anonymize', 'cli', 'compute', 'data', 'grad_clipping', 'losses', 'metrics', 'models', 'optimizers', 'schedulers', 'utils']
 
- 
+
 requirements = [
     "torch==1.13.1",
     "black",
