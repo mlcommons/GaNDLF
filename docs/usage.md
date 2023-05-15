@@ -317,6 +317,8 @@ GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use for
 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
+Please note that in order to deploy a model, for technical reasons, you need write access to the GaNDLF package. With a virtual environment this should be automatic. See the [installation instructions](./setup.md#installation).
+
 To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
@@ -329,6 +331,8 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
 ```
+
+
 
 
 ## Running with Docker
