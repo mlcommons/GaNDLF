@@ -35,4 +35,5 @@ global_augs_dict = {
     "rotate_180": rotate_180,
     "anisotropic": anisotropy,
     "colorjitter": colorjitter_transform,
+    "hed_transform": hed_transform,
 }
