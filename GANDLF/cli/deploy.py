@@ -193,11 +193,11 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
     assert (
         os.system(command_to_run) == 0
     ), "mlcube_docker configuration failed. Check output for more details."
-    
+
     # Container is made at this point, the recursive symlink no longer needs to exist
     if os.path.exists(symlink_location) and os.path.islink(symlink_location):
         os.unlink(symlink_location)
-    
+
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
     container = docker_client.containers.create(docker_image)
 
