@@ -100,3 +100,41 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
                 image.set_data(temp)
 
         return subject
+
+def hed_transform(parameters):
+    return HedColorAugmenter_gandlf(
+        haematoxylin_sigma_range=parameters["haematoxylin_sigma_range"],
+        haematoxylin_bias_range=parameters["haematoxylin_bias_range"],
+        eosin_sigma_range=parameters["eosin_sigma_range"],
+        eosin_bias_range=parameters["eosin_bias_range"],
+        dab_sigma_range=parameters["dab_sigma_range"],
+        dab_bias_range=parameters["dab_bias_range"],
+        cutoff_range=parameters["cutoff_range"],
+    )
+    
+class AugmenterBase:
+    """Base class for patch augmentation with a hed transform"""
+
+    def __init__(self, keyword):
+        """
+        Args:
+            keyword (str): Short name for the transformation.
+        """
+        self._keyword = keyword
+
+    @property
+    def keyword(self):
+        """Get the keyword for the augmenter."""
+        return self._keyword
+
+    def shapes(self, target_shapes):
+        """Calculate the required shape of the input to achieve the target output shape."""
+        return target_shapes
+
+    def transform(self, patch):
+        """Transform the given patch."""
+        pass
+
+    def randomize(self):
+        """Randomize the parameters of the augmenter."""
+        pass
