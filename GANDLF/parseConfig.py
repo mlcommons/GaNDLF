@@ -373,7 +373,6 @@ def parseConfig(config_file_path, version_check_flag=True):
                 params["data_augmentation"], "hed_transform", {}
             )
 
-        for key in ranges:
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
