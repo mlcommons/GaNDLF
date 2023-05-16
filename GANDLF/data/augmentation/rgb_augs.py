@@ -337,3 +337,55 @@ def transform(self, patch):
             for bias_range in self._bias_ranges
         ]
 
+
+class HedColorAugmenter(RandomTransform, IntensityTransform):
+    r"""H&E color augmentation.
+    Args:
+        haematoxylin_sigma_range: Range of sigma for haematoxylin channel.
+        haematoxylin_bias_range: Range of bias for haematoxylin channel.
+        eosin_sigma_range: Range of sigma for eosin channel.
+        eosin_bias_range: Range of bias
+        dab_sigma_range: Range of sigma for DAB channel.
+        dab_bias_range: Range of bias for DAB channel.
+        cutoff_range: Range of cutoff for DAB channel.
+        p: Probability that this transform will be applied.
+        seed: See :py:class:`~torchio.transforms.augmentation.RandomTransform`.
+    """
+
+    def __init__(
+        self,
+        haematoxylin_sigma_range: Tuple[float, float] = (0.5, 1.5),
+        haematoxylin_bias_range: Tuple[float, float] = (-0.5, 0.5),
+        eosin_sigma_range: Tuple[float, float] = (0.5, 1.5),
+        eosin_bias_range: Tuple[float, float] = (-0.5, 0.5),
+        dab_sigma_range: Tuple[float, float] = (0.5, 1.5),
+        dab_bias_range: Tuple[float, float] = (-0.5, 0.5),
+        cutoff_range: Tuple[float, float] = (0.5, 1.5),
+        p: float = 1,
+        seed: Union[int, None] = None,
+    ):
+        super().__init__(p=p, seed=seed)
+        self.haematoxylin_sigma_range = min(haematoxylin_sigma_range)
+        self.haematoxylin_bias_range = min(haematoxylin_bias_range)
+        self.eosin_sigma_range = min(eosin_sigma_range)
+        self.eosin_bias_range = min(eosin_bias_range)
+        self.dab_sigma_range = min(dab_sigma_range)
+        self.dab_bias_range = min(dab_bias_range)
+        self.cutoff_range = min(cutoff_range)
+
+    def apply_transform(self, subject: Subject) -> Subject:
+        transform = HedColorAugmenter(
+            haematoxylin_sigma_range=self.haematoxylin_sigma_range,
+            haematoxylin_bias_range=self.haematoxylin_bias_range,
+            eosin_sigma_range=self.eosin_sigma_range,
+            eosin_bias_range=self.eosin_bias_range,
+            dab_sigma_range=self.dab_sigma_range,
+            dab_bias_range=self.dab_bias_range,
+            cutoff_range=self.cutoff_range,
+        )
+        for _, image in self.get_images_dict(subject).items():
+            if image.data.shape[-1] == 1:
+                temp = image.data.squeeze(-1).unsqueeze(0)
+                temp = transform(temp).squeeze(0).unsqueeze(-1)
+                image.set_data(temp)
+        return subject
