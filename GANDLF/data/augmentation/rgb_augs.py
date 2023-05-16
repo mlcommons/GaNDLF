@@ -1,9 +1,11 @@
 from torchvision.transforms import ColorJitter
 from typing import Tuple, Union
-
+import numpy as np
+from sklearn.color import rgb2hed, hed2rgb
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
 from torchio import Subject
+from GANDLF.utils.exceptions import InvalidRangeError
 
 
 def colorjitter_transform(parameters):
@@ -26,7 +28,7 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
             or the given [min, max]. Should be non negative numbers.
         contrast (float or tuple of float (min, max)): How much to jitter contrast.
             contrast_factor is chosen uniformly from [max(0, 1 - contrast), 1 + contrast]
-            or the given [min, max]. Should be non negative numbers.
+            or the given [min, max]. Should be non ne~gative numbers.
         saturation (float or tuple of float (min, max)): How much to jitter saturation.
             saturation_factor is chosen uniformly from [max(0, 1 - saturation), 1 + saturation]
             or the given [min, max]. Should be non negative numbers.
@@ -101,6 +103,7 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
 
         return subject
 
+
 def hed_transform(parameters):
     return HedColorAugmenter(
         haematoxylin_sigma_range=parameters["haematoxylin_sigma_range"],
@@ -111,7 +114,8 @@ def hed_transform(parameters):
         dab_bias_range=parameters["dab_bias_range"],
         cutoff_range=parameters["cutoff_range"],
     )
-    
+
+
 class AugmenterBase:
     """Base class for patch augmentation with a hed transform"""
 
@@ -213,116 +217,139 @@ class HedColorAugmenter(ColorAugmenterBase):
         )
         self._setcutoffrange(cutoff_range=cutoff_range)
 
-def _setsigmaranges(self, haematoxylin_sigma_range, eosin_sigma_range, dab_sigma_range):
-    """
-    Set the sigma intervals.
-    Args:
-        haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel.
-        eosin_sigma_range (tuple, None): Adjustment range for the Eosin channel.
-        dab_sigma_range (tuple, None): Adjustment range for the DAB channel.
-    Raises:
-        InvalidRangeError: If the sigma range for any channel adjustment is not valid.
-    """
+    def _setsigmaranges(
+        self, haematoxylin_sigma_range, eosin_sigma_range, dab_sigma_range
+    ):
+        """
+        Set the sigma intervals.
+        Args:
+            haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel.
+            eosin_sigma_range (tuple, None): Adjustment range for the Eosin channel.
+            dab_sigma_range (tuple, None): Adjustment range for the DAB channel.
+        Raises:
+            InvalidRangeError: If the sigma range for any channel adjustment is not valid.
+        """
 
-    def check_sigma_range(name, range):
-        if range is not None:
-            if len(range) != 2 or range[1] < range[0] or range[0] < -1.0 or 1.0 < range[1]:
-                raise InvalidRangeError(name, range)
+        def check_sigma_range(name, range):
+            if range is not None:
+                if (
+                    len(range) != 2
+                    or range[1] < range[0]
+                    or range[0] < -1.0
+                    or 1.0 < range[1]
+                ):
+                    raise InvalidRangeError(name, range)
 
-    check_sigma_range("Haematoxylin Sigma", haematoxylin_sigma_range)
-    check_sigma_range("Eosin Sigma", eosin_sigma_range)
-    check_sigma_range("Dab Sigma", dab_sigma_range)
+        check_sigma_range("Haematoxylin Sigma", haematoxylin_sigma_range)
+        check_sigma_range("Eosin Sigma", eosin_sigma_range)
+        check_sigma_range("Dab Sigma", dab_sigma_range)
 
-    self._sigma_ranges = [haematoxylin_sigma_range, eosin_sigma_range, dab_sigma_range]
-    self._sigmas = [
-        haematoxylin_sigma_range[0] if haematoxylin_sigma_range is not None else 0.0,
-        eosin_sigma_range[0] if eosin_sigma_range is not None else 0.0,
-        dab_sigma_range[0] if dab_sigma_range is not None else 0.0,
-    ]
+        self._sigma_ranges = [
+            haematoxylin_sigma_range,
+            eosin_sigma_range,
+            dab_sigma_range,
+        ]
+        self._sigmas = [
+            haematoxylin_sigma_range[0]
+            if haematoxylin_sigma_range is not None
+            else 0.0,
+            eosin_sigma_range[0] if eosin_sigma_range is not None else 0.0,
+            dab_sigma_range[0] if dab_sigma_range is not None else 0.0,
+        ]
 
-def _setbiasranges(self, haematoxylin_bias_range, eosin_bias_range, dab_bias_range):
-    """
-    Set the bias intervals.
-    Args:
-        haematoxylin_bias_range (tuple, None): Bias range for the Haematoxylin channel.
-        eosin_bias_range (tuple, None) Bias range for the Eosin channel.
-        dab_bias_range (tuple, None): Bias range for the DAB channel.
-    Raises:
-        InvalidRangeError: If the bias range for any channel adjustment is not valid.
-    """
+    def _setbiasranges(self, haematoxylin_bias_range, eosin_bias_range, dab_bias_range):
+        """
+        Set the bias intervals.
+        Args:
+            haematoxylin_bias_range (tuple, None): Bias range for the Haematoxylin channel.
+            eosin_bias_range (tuple, None) Bias range for the Eosin channel.
+            dab_bias_range (tuple, None): Bias range for the DAB channel.
+        Raises:
+            InvalidRangeError: If the bias range for any channel adjustment is not valid.
+        """
 
-    def check_bias_range(name, range):
-        if range is not None:
-            if len(range) != 2 or range[1] < range[0] or range[0] < -1.0 or 1.0 < range[1]:
-                raise InvalidRangeError(name, range)
+        def check_bias_range(name, range):
+            if range is not None:
+                if (
+                    len(range) != 2
+                    or range[1] < range[0]
+                    or range[0] < -1.0
+                    or 1.0 < range[1]
+                ):
+                    raise InvalidRangeError(name, range)
 
-    check_bias_range("Haematoxylin Bias", haematoxylin_bias_range)
-    check_bias_range("Eosin Bias", eosin_bias_range)
-    check_bias_range("Dab Bias", dab_bias_range)
+        check_bias_range("Haematoxylin Bias", haematoxylin_bias_range)
+        check_bias_range("Eosin Bias", eosin_bias_range)
+        check_bias_range("Dab Bias", dab_bias_range)
 
-    self._bias_ranges = [haematoxylin_bias_range, eosin_bias_range, dab_bias_range]
-    self._biases = [
-        haematoxylin_bias_range[0] if haematoxylin_bias_range is not None else 0.0,
-        eosin_bias_range[0] if eosin_bias_range is not None else 0.0,
-        dab_bias_range[0] if dab_bias_range is not None else 0.0,
-    ]
+        self._bias_ranges = [haematoxylin_bias_range, eosin_bias_range, dab_bias_range]
+        self._biases = [
+            haematoxylin_bias_range[0] if haematoxylin_bias_range is not None else 0.0,
+            eosin_bias_range[0] if eosin_bias_range is not None else 0.0,
+            dab_bias_range[0] if dab_bias_range is not None else 0.0,
+        ]
 
-def _setcutoffrange(self, cutoff_range):
-    """
-    Set the cutoff value. Patches with mean value outside the cutoff interval will not be augmented.
-    Args:
-        cutoff_range (tuple, None): Cutoff range for mean value.
-    Raises:
-        InvalidRangeError: If the cutoff range is not valid.
-    """
+    def _setcutoffrange(self, cutoff_range):
+        """
+        Set the cutoff value. Patches with mean value outside the cutoff interval will not be augmented.
+        Args:
+            cutoff_range (tuple, None): Cutoff range for mean value.
+        Raises:
+            InvalidRangeError: If the cutoff range is not valid.
+        """
 
-    def check_cutoff_range(name, range):
-        if range is not None:
-            if len(range) != 2 or range[1] < range[0] or range[0] < 0.0 or 1.0 < range[1]:
-                raise InvalidRangeError(name, range)
+        def check_cutoff_range(name, range):
+            if range is not None:
+                if (
+                    len(range) != 2
+                    or range[1] < range[0]
+                    or range[0] < 0.0
+                    or 1.0 < range[1]
+                ):
+                    raise InvalidRangeError(name, range)
 
-    check_cutoff_range("Cutoff", cutoff_range)
+        check_cutoff_range("Cutoff", cutoff_range)
 
-    self._cutoff_range = cutoff_range if cutoff_range is not None else [0.0, 1.0]
+        self._cutoff_range = cutoff_range if cutoff_range is not None else [0.0, 1.0]
 
-def transform(self, patch):
-    """
-    Apply color deformation on the patch.
-    Args:
-        patch (np.ndarray): Patch to transform.
-    Returns:
-        np.ndarray: Transformed patch.
-    """
+    def transform(self, patch):
+        """
+        Apply color deformation on the patch.
+        Args:
+            patch (np.ndarray): Patch to transform.
+        Returns:
+            np.ndarray: Transformed patch.
+        """
 
-    if patch.dtype.kind == "f":
-        patch_mean = np.mean(patch)
-    else:
-        patch_mean = np.mean(patch.astype(np.float32)) / 255.0
+        if patch.dtype.kind == "f":
+            patch_mean = np.mean(patch)
+        else:
+            patch_mean = np.mean(patch.astype(np.float32)) / 255.0
 
-    if self._cutoff_range[0] <= patch_mean <= self._cutoff_range[1]:
-        # Convert the image patch to HED color coding.
-        patch_hed = rgb2hed(patch)
+        if self._cutoff_range[0] <= patch_mean <= self._cutoff_range[1]:
+            # Convert the image patch to HED color coding.
+            patch_hed = rgb2hed(patch)
 
-        # Augment the channels.
-        for i in range(3):
-            if self._sigmas[i] != 0.0:
-                patch_hed[:, :, i] *= 1.0 + self._sigmas[i]
-            if self._biases[i] != 0.0:
-                patch_hed[:, :, i] += self._biases[i]
+            # Augment the channels.
+            for i in range(3):
+                if self._sigmas[i] != 0.0:
+                    patch_hed[:, :, i] *= 1.0 + self._sigmas[i]
+                if self._biases[i] != 0.0:
+                    patch_hed[:, :, i] += self._biases[i]
 
-        # Convert back to RGB color coding.
-        patch_rgb = hed2rgb(patch_hed)
-        patch_transformed = np.clip(patch_rgb, 0.0, 1.0)
+            # Convert back to RGB color coding.
+            patch_rgb = hed2rgb(patch_hed)
+            patch_transformed = np.clip(patch_rgb, 0.0, 1.0)
 
-        # Convert back to integral data type if the input was also integral.
-        if patch.dtype.kind != "f":
-            patch_transformed *= 255.0
-            patch_transformed = patch_transformed.astype(np.uint8)
+            # Convert back to integral data type if the input was also integral.
+            if patch.dtype.kind != "f":
+                patch_transformed *= 255.0
+                patch_transformed = patch_transformed.astype(np.uint8)
 
-        return patch_transformed
-    else:
-        # The image patch is outside the cutoff interval.
-        return patch
+            return patch_transformed
+        else:
+            # The image patch is outside the cutoff interval.
+            return patch
 
     def randomize(self):
         """Randomize the parameters of the augmenter."""
