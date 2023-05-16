@@ -1802,6 +1802,7 @@ def test_generic_augmentation_functions():
     output_tensor = temp(input_tensor)
     assert output_tensor != None, "RGB Augmentation should work"
 
+    # Testing hed transform
     input_tensor = torch.rand(3, 128, 128, 1)
     params = {
         "data_augmentation": {
