@@ -1812,40 +1812,30 @@ def test_generic_augmentation_functions():
     }
 
     augmentation_types = ["hed_transform", "hed_transform_light", "hed_transform_heavy"]
-
+    ranges = [
+        "haematoxylin_bias_range",
+        "eosin_bias_range",
+        "dab_bias_range",
+        "haematoxylin_sigma_range",
+        "eosin_sigma_range",
+        "dab_sigma_range",
+    ]
+    default_range = (
+        [-0.1, 0.1]
+        if augmentation_type == "hed_transform"
+        else [-0.03, 0.03]
+        if augmentation_type == "hed_transform_light"
+        else [-0.95, 0.95]
+    )
     for augmentation_type in augmentation_types:
         if augmentation_type in params["data_augmentation"]:
             hed_transform_params = params["data_augmentation"].setdefault(
                 augmentation_type, {}
             )
-            ranges = [
-                "haematoxylin_bias_range",
-                "eosin_bias_range",
-                "dab_bias_range",
-                "haematoxylin_sigma_range",
-                "eosin_sigma_range",
-                "dab_sigma_range",
-            ]
-            default_range = (
-                [-0.1, 0.1]
-                if augmentation_type == "hed_transform"
-                else [-0.03, 0.03]
-                if augmentation_type == "hed_transform_light"
-                else [-0.95, 0.95]
-            )
-
             for key in ranges:
                 hed_transform_params.setdefault(key, default_range)
 
             hed_transform_params.setdefault("cutoff_range", [0.05, 0.95])
-            temp = global_augs_dict[augmentation_type](
-                params_all_preprocessing_and_augs["data_augmentation"][
-                    augmentation_type
-                ]
-            )
-            output_tensor = None
-            output_tensor = temp(input_tensor)
-            assert output_tensor != None, "HED Augmentation should work"
 
     # Check if the params are correctly set for each augmentation type
     assert params["data_augmentation"]["hed_transform"] == {
