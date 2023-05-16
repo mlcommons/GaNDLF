@@ -14,18 +14,6 @@ from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms.augmentation.intensity.random_blur import Blur
 
 
-def blur(
-    data: TypeData,
-    spacing: TypeTripletFloat,
-    std_voxel: TypeTripletFloat,
-) -> torch.Tensor:
-    assert data.ndim == 3
-    std_physical = np.array(std_voxel) / np.array(spacing)
-    blurred = ndi.gaussian_filter(data, std_physical)
-    tensor = torch.as_tensor(blurred)
-    return tensor
-
-
 class RandomBlurEnhanced(RandomTransform, IntensityTransform):
     r"""Blur an image using a random-sized Gaussian filter.
 
