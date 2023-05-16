@@ -6,3 +6,14 @@ extend-exclude = '''
   | .*.md
 )/
 '''
+
+[tool.coverage.run]
+source = ["./GANDLF"]
+omit = [
+  "./setup.py",
+  "./GANDLF/anonymize/slide_anonymizer.py",
+  "./testing/conftest.py",
+  "./gandlf_*",
+  ".github/*",
+  ".devcontainer/*",
+]
