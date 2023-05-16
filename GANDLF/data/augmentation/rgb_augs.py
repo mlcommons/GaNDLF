@@ -102,7 +102,7 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
         return subject
 
 def hed_transform(parameters):
-    return HedColorAugmenter_gandlf(
+    return HedColorAugmenter(
         haematoxylin_sigma_range=parameters["haematoxylin_sigma_range"],
         haematoxylin_bias_range=parameters["haematoxylin_bias_range"],
         eosin_sigma_range=parameters["eosin_sigma_range"],
