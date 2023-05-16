@@ -200,7 +200,14 @@ def parseConfig(config_file_path, version_check_flag=True):
             if isinstance(metric, dict):
                 comparison_string = list(metric.keys())[0]
             # these metrics always need to be dicts
-            if comparison_string in ["accuracy", "f1", "precision", "recall", "specificity", "iou"]:
+            if comparison_string in [
+                "accuracy",
+                "f1",
+                "precision",
+                "recall",
+                "specificity",
+                "iou",
+            ]:
                 if not isinstance(metric, dict):
                     temp_dict[metric] = {}
                 else:
@@ -210,7 +217,10 @@ def parseConfig(config_file_path, version_check_flag=True):
 
             # special case for accuracy, precision, recall, and specificity; which could be dicts
             ## need to find a better way to do this
-            if any(_ in comparison_string for _ in ["precision", "recall", "specificity", "accuracy", "f1"]):
+            if any(
+                _ in comparison_string
+                for _ in ["precision", "recall", "specificity", "accuracy", "f1"]
+            ):
                 if comparison_string != "classification_accuracy":
                     temp_dict[comparison_string] = initialize_key(
                         temp_dict[comparison_string], "average", "weighted"
@@ -328,22 +338,40 @@ def parseConfig(config_file_path, version_check_flag=True):
                 params["data_augmentation"]["colorjitter"] = initialize_key(
                     params["data_augmentation"]["colorjitter"], "hue", [-0.5, 0.5]
                 )
-        
-        # Added HED augmentation in gandlf
-        augmentation_types = ["hed_transform", "hed_transform_light", "hed_transform_heavy"]
 
-        for augmentation_type in augmentation_types:
-            if augmentation_type in params["data_augmentation"]:
-                hed_transform_params = params["data_augmentation"].setdefault(augmentation_type, {})
-                ranges = [
-                    "haematoxylin_bias_range",
-                    "eosin_bias_range",
-                    "dab_bias_range",
-                    "haematoxylin_sigma_range",
-                    "eosin_sigma_range",
-                    "dab_sigma_range",
-                ]
-                default_range = [-0.1, 0.1] if augmentation_type == "hed_transform" else [-0.03, 0.03] if augmentation_type == "hed_transform_light" else [-0.95, 0.95]
+            # Added HED augmentation in gandlf
+            augmentation_types = [
+                "hed_transform",
+                "hed_transform_light",
+                "hed_transform_heavy",
+            ]
+
+            for augmentation_type in augmentation_types:
+                if augmentation_type in params["data_augmentation"]:
+                    hed_transform_params = params["data_augmentation"].setdefault(
+                        augmentation_type, {}
+                    )
+                    ranges = [
+                        "haematoxylin_bias_range",
+                        "eosin_bias_range",
+                        "dab_bias_range",
+                        "haematoxylin_sigma_range",
+                        "eosin_sigma_range",
+                        "dab_sigma_range",
+                    ]
+                    default_range = (
+                        [-0.1, 0.1]
+                        if augmentation_type == "hed_transform"
+                        else [-0.03, 0.03]
+                        if augmentation_type == "hed_transform_light"
+                        else [-0.95, 0.95]
+                    )
+                    for key in ranges:
+                        hed_transform_params.setdefault(key, default_range)
+
+            params["data_augmentation"] = initialize_key(
+                params["data_augmentation"], "hed_transform", {}
+            )
 
         for key in ranges:
             # special case for anisotropic

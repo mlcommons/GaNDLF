@@ -1811,7 +1811,6 @@ def test_generic_augmentation_functions():
             "hed_transform_heavy": {},
         }
     }
-
     augmentation_types = ["hed_transform", "hed_transform_light", "hed_transform_heavy"]
     ranges = [
         "haematoxylin_bias_range",
