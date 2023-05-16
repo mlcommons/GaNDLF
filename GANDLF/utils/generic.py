@@ -191,7 +191,7 @@ def set_determinism(seed=42):
     """
     random.seed(seed)
     np.random.seed(seed)
-    torch.manual_seed(42)
+    torch.manual_seed(seed)
     torch.use_deterministic_algorithms(True, warn_only=True)
 
     if torch.cuda.is_available():

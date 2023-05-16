@@ -46,8 +46,8 @@ if __name__ == "__main__":
         "--mlcube-root",
         metavar="",
         type=str,
-        default=os.path.dirname(os.path.realpath(__file__)) + "/mlcube",
-        help="Path to an alternative MLCUBE_ROOT directory to use as a template (or a path to a specific mlcube YAML configuration file, in which case we will use the parent directory). The source repository contains an example (which is also the default) at {GaNDLF_ROOT}/mlcube .",
+        required=True,
+        help="Path to an alternative MLCUBE_ROOT directory to use as a template (or a path to a specific mlcube YAML configuration file, in which case we will use the parent directory). The source repository contains an example (https://github.com/mlcommons/GaNDLF/tree/master/mlcube).",
     )
     parser.add_argument(
         "-o",
