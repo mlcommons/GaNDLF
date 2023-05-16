@@ -138,3 +138,104 @@ class AugmenterBase:
     def randomize(self):
         """Randomize the parameters of the augmenter."""
         pass
+
+
+class ColorAugmenterBase(AugmenterBase):
+    """Base class for color patch augmentation."""
+
+    def __init__(self, keyword):
+        """
+        Initialize the object.
+        Args:
+            keyword (str): Short name for the transformation.
+        """
+
+        # Initialize the base class.
+        super().__init__(keyword=keyword)
+
+
+class HedColorAugmenter(ColorAugmenterBase):
+    """Apply color correction in HED color space on the RGB patch."""
+
+    def __init__(
+        self,
+        haematoxylin_sigma_range,
+        haematoxylin_bias_range,
+        eosin_sigma_range,
+        eosin_bias_range,
+        dab_sigma_range,
+        dab_bias_range,
+        cutoff_range,
+    ):
+        """
+        The following code is derived and inspired from the following sources:
+        https://github.com/sebastianffx/stainlib
+        and it is covered under MIT license.
+        Initialize the object. For each channel the augmented value is calculated as value = value * sigma + bias
+        Args:
+            haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.1, 0.1).
+            haematoxylin_bias_range (tuple, None): Bias range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.2, 0.2).
+            eosin_sigma_range (tuple, None): Adjustment range for the Eosin channel from the [-1.0, 1.0] range where 0.0 means no change.
+            eosin_bias_range (tuple, None) Bias range for the Eosin channel from the [-1.0, 1.0] range where 0.0 means no change.
+            dab_sigma_range (tuple, None): Adjustment range for the DAB channel from the [-1.0, 1.0] range where 0.0 means no change.
+            dab_bias_range (tuple, None): Bias range for the DAB channel from the [-1.0, 1.0] range where 0.0 means no change.
+            cutoff_range (tuple, None): Patches with mean value outside the cutoff interval will not be augmented. Values from the [0.0, 1.0] range. The RGB channel values are from the same range.
+        Raises:
+            InvalidHaematoxylinSigmaRangeError: The sigma range for Haematoxylin channel adjustment is not valid.
+            InvalidHaematoxylinBiasRangeError: The bias range for Haematoxylin channel adjustment is not valid.
+            InvalidEosinSigmaRangeError: The sigma range for Eosin channel adjustment is not valid.
+            InvalidEosinBiasRangeError: The bias range for Eosin channel adjustment is not valid.
+            InvalidDabSigmaRangeError: The sigma range for DAB channel adjustment is not valid.
+            InvalidDabBiasRangeError: The bias range for DAB channel adjustment is not valid.
+            InvalidCutoffRangeError: The cutoff range is not valid.
+        """
+
+        # Initialize base class.
+        super().__init__(keyword="hed_color")
+
+        # Initialize members.
+        self._sigma_ranges = None  # Configured sigma ranges for H, E, and D channels.
+        self._bias_ranges = None  # Configured bias ranges for H, E, and D channels.
+        self._cutoff_range = None  # Cutoff interval.
+        self._sigmas = None  # Randomized sigmas for H, E, and D channels.
+        self._biases = None  # Randomized biases for H, E, and D channels.
+
+        # Save configuration.
+        self._setsigmaranges(
+            haematoxylin_sigma_range=haematoxylin_sigma_range,
+            eosin_sigma_range=eosin_sigma_range,
+            dab_sigma_range=dab_sigma_range,
+        )
+        self._setbiasranges(
+            haematoxylin_bias_range=haematoxylin_bias_range,
+            eosin_bias_range=eosin_bias_range,
+            dab_bias_range=dab_bias_range,
+        )
+        self._setcutoffrange(cutoff_range=cutoff_range)
+
+def _setsigmaranges(self, haematoxylin_sigma_range, eosin_sigma_range, dab_sigma_range):
+    """
+    Set the sigma intervals.
+    Args:
+        haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel.
+        eosin_sigma_range (tuple, None): Adjustment range for the Eosin channel.
+        dab_sigma_range (tuple, None): Adjustment range for the DAB channel.
+    Raises:
+        InvalidRangeError: If the sigma range for any channel adjustment is not valid.
+    """
+
+    def check_sigma_range(name, range):
+        if range is not None:
+            if len(range) != 2 or range[1] < range[0] or range[0] < -1.0 or 1.0 < range[1]:
+                raise InvalidRangeError(name, range)
+
+    check_sigma_range("Haematoxylin Sigma", haematoxylin_sigma_range)
+    check_sigma_range("Eosin Sigma", eosin_sigma_range)
+    check_sigma_range("Dab Sigma", dab_sigma_range)
+
+    self._sigma_ranges = [haematoxylin_sigma_range, eosin_sigma_range, dab_sigma_range]
+    self._sigmas = [
+        haematoxylin_sigma_range[0] if haematoxylin_sigma_range is not None else 0.0,
+        eosin_sigma_range[0] if eosin_sigma_range is not None else 0.0,
+        dab_sigma_range[0] if dab_sigma_range is not None else 0.0,
+    ]
