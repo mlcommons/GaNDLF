@@ -40,16 +40,23 @@ The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmen
 
 ## Citation
 
-Please cite the following article for GaNDLF ([full PDF](https://arxiv.org/abs/2103.01006)):
+Please cite the following article for GaNDLF ([full paper](https://www.nature.com/articles/s44172-023-00066-3)):
 
-```
-@misc{pati2021gandlf,
-      title={GaNDLF: A Generally Nuanced Deep Learning Framework for Scalable End-to-End Clinical Workflows in Medical Imaging}, 
-      author={Sarthak Pati and Siddhesh P. Thakur and Megh Bhalerao and Spyridon Thermos and Ujjwal Baid and Karol Gotkowski and Camila Gonzalez and Orhun Guley and Ibrahim Ethem Hamamci and Sezgin Er and Caleb Grenko and Brandon Edwards and Micah Sheller and Jose Agraz and Bhakti Baheti and Vishnu Bashyam and Parth Sharma and Babak Haghighi and Aimilia Gastounioti and Mark Bergman and Anirban Mukhopadhyay and Sotirios A. Tsaftaris and Bjoern Menze and Despina Kontos and Christos Davatzikos and Spyridon Bakas},
-      year={2021},
-      eprint={2103.01006},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+```bib
+@article{pati2023gandlf,
+    author={Pati, Sarthak and Thakur, Siddhesh P. and Hamamc{\i}, {\.{I}}brahim Ethem and Baid, Ujjwal and Baheti, Bhakti and Bhalerao, Megh and G{\"u}ley, Orhun and Mouchtaris, Sofia and Lang, David and Thermos, Spyridon and Gotkowski, Karol and Gonz{\'a}lez, Camila and Grenko, Caleb and Getka, Alexander and Edwards, Brandon and Sheller, Micah and Wu, Junwen and Karkada, Deepthi and Panchumarthy, Ravi and Ahluwalia, Vinayak and Zou, Chunrui and Bashyam, Vishnu and Li, Yuemeng and Haghighi, Babak and Chitalia, Rhea and Abousamra, Shahira and Kurc, Tahsin M. and Gastounioti, Aimilia and Er, Sezgin and Bergman, Mark and Saltz, Joel H. and Fan, Yong and Shah, Prashant and Mukhopadhyay, Anirban and Tsaftaris, Sotirios A. and Menze, Bjoern and Davatzikos, Christos and Kontos, Despina and Karargyris, Alexandros and Umeton, Renato and Mattson, Peter and Bakas, Spyridon},
+    title={GaNDLF: the generally nuanced deep learning framework for scalable end-to-end clinical workflows},
+    journal={Communications Engineering},
+    year={2023},
+    month={May},
+    day={16},
+    volume={2},
+    number={1},
+    pages={23},
+    abstract={Deep Learning (DL) has the potential to optimize machine learning in both the scientific and clinical communities. However, greater expertise is required to develop DL algorithms, and the variability of implementations hinders their reproducibility, translation, and deployment. Here we present the community-driven Generally Nuanced Deep Learning Framework (GaNDLF), with the goal of lowering these barriers. GaNDLF makes the mechanism of DL development, training, and inference more stable, reproducible, interpretable, and scalable, without requiring an extensive technical background. GaNDLF aims to provide an end-to-end solution for all DL-related tasks in computational precision medicine. We demonstrate the ability of GaNDLF to analyze both radiology and histology images, with built-in support for k-fold cross-validation, data augmentation, multiple modalities and output classes. Our quantitative performance evaluation on numerous use cases, anatomies, and computational tasks supports GaNDLF as a robust application framework for deployment in clinical workflows.},
+    issn={2731-3395},
+    doi={10.1038/s44172-023-00066-3},
+    url={https://doi.org/10.1038/s44172-023-00066-3}
 }
 ```
 
