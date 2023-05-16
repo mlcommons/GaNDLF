@@ -4,10 +4,8 @@ from collections import defaultdict
 from typing import Union, Tuple
 
 import torch
-import numpy as np
-import scipy.ndimage as ndi
 
-from torchio.typing import TypeData, TypeTripletFloat, TypeSextetFloat
+from torchio.typing import TypeTripletFloat, TypeSextetFloat
 from torchio.data.subject import Subject
 from torchio.transforms import IntensityTransform
 from torchio.transforms.augmentation import RandomTransform
