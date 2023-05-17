@@ -4,26 +4,12 @@ from collections import defaultdict
 from typing import Union, Tuple
 
 import torch
-import numpy as np
-import scipy.ndimage as ndi
 
-from torchio.typing import TypeData, TypeTripletFloat, TypeSextetFloat
+from torchio.typing import TypeTripletFloat, TypeSextetFloat
 from torchio.data.subject import Subject
 from torchio.transforms import IntensityTransform
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms.augmentation.intensity.random_blur import Blur
-
-
-def blur(
-    data: TypeData,
-    spacing: TypeTripletFloat,
-    std_voxel: TypeTripletFloat,
-) -> torch.Tensor:
-    assert data.ndim == 3
-    std_physical = np.array(std_voxel) / np.array(spacing)
-    blurred = ndi.gaussian_filter(data, std_physical)
-    tensor = torch.as_tensor(blurred)
-    return tensor
 
 
 class RandomBlurEnhanced(RandomTransform, IntensityTransform):
