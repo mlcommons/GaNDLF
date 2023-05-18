@@ -263,6 +263,14 @@ data_augmentation:
       'saturation': [0,0.5], # optional: needs to be between [0,1]
       'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
     }, 
+    'hed_transform':{
+      'haematoxylin_bias_range': [-0.1, 0.1],
+      'eosin_bias_range': [-0.1, 0.1],
+      'dab_bias_range': [-0.1, 0.1],
+      'haematoxylin_sigma_range': [-0.1, -0.1],
+      'eosin_sigma_range': [-0.1, -0.1],
+      'dab_sigma_range': [-0.1, -0.1],
+    }
   }
 # ## post-processing steps - only applied before output labels are saved
 # data_postprocessing:

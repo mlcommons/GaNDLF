@@ -86,6 +86,7 @@ def initialize_key(parameters, key, value=None):
     Returns:
         dict: The final parameter dictionary.
     """
+    print("Initializing '" + key + "' as " + str(value) + "in" + str(parameters))
     if parameters is None:
         parameters = {}
     if key in parameters:
@@ -348,9 +349,12 @@ def parseConfig(config_file_path, version_check_flag=True):
 
             for augmentation_type in augmentation_types:
                 if augmentation_type in params["data_augmentation"]:
-                    hed_transform_params = params["data_augmentation"].setdefault(
-                        augmentation_type, {}
+                    params["data_augmentation"] = initialize_key(
+                        params["data_augmentation"], "hed_transform", {}
                     )
+
+            for augmentation_type in augmentation_types:
+                if augmentation_type in params["data_augmentation"]:
                     ranges = [
                         "haematoxylin_bias_range",
                         "eosin_bias_range",
@@ -367,11 +371,17 @@ def parseConfig(config_file_path, version_check_flag=True):
                         else [-0.95, 0.95]
                     )
                     for key in ranges:
-                        hed_transform_params.setdefault(key, default_range)
+                        params["data_augmentation"]["hed_transform"] = initialize_key(
+                            params["data_augmentation"]["hed_transform"],
+                            key,
+                            default_range,
+                        )
 
-            params["data_augmentation"] = initialize_key(
-                params["data_augmentation"], "hed_transform", {}
-            )
+                    params["data_augmentation"] = initialize_key(
+                        params["data_augmentation"]["hed_transform"],
+                        "cutoff_range",
+                        [0, 1],
+                    )
 
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:

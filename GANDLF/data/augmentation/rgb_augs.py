@@ -106,13 +106,25 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
 
 def hed_transform(parameters):
     return HedColorAugmenter(
-        haematoxylin_sigma_range=parameters["haematoxylin_sigma_range"],
-        haematoxylin_bias_range=parameters["haematoxylin_bias_range"],
-        eosin_sigma_range=parameters["eosin_sigma_range"],
-        eosin_bias_range=parameters["eosin_bias_range"],
-        dab_sigma_range=parameters["dab_sigma_range"],
-        dab_bias_range=parameters["dab_bias_range"],
-        cutoff_range=parameters["cutoff_range"],
+        haematoxylin_sigma_range=parameters["data_augmentation"]["hed_transform"][
+            "haematoxylin_sigma_range"
+        ],
+        haematoxylin_bias_range=parameters["data_augmentation"]["hed_transform"][
+            "haematoxylin_bias_range"
+        ],
+        eosin_sigma_range=parameters["data_augmentation"]["hed_transform"][
+            "eosin_sigma_range"
+        ],
+        eosin_bias_range=parameters["data_augmentation"]["hed_transform"][
+            "eosin_bias_range"
+        ],
+        dab_sigma_range=parameters["data_augmentation"]["hed_transform"][
+            "dab_sigma_range"
+        ],
+        dab_bias_range=parameters["data_augmentation"]["hed_transform"][
+            "dab_bias_range"
+        ],
+        cutoff_range=parameters["data_augmentation"]["hed_transform"]["cutoff_range"],
     )
 
 
