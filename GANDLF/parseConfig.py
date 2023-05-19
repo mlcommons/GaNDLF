@@ -86,7 +86,6 @@ def initialize_key(parameters, key, value=None):
     Returns:
         dict: The final parameter dictionary.
     """
-    print("Initializing '" + key + "' as " + str(value) + "in" + str(parameters))
     if parameters is None:
         parameters = {}
     if key in parameters:
