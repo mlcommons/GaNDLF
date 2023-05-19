@@ -8,6 +8,11 @@ from tqdm import tqdm
 from pathlib import Path
 import pandas as pd
 import tiffslide
+import cv2
+import numpy as np
+from skimage.exposure import rescale_intensity
+from skimage.color import rgb2hed
+from skimage import io
 
 
 class PatchManager:
@@ -237,6 +242,43 @@ class PatchManager:
             passes the check, False if the patch should be rejected.
         """
         self.valid_patch_checks.append(patch_validity_check)
+    
+    def patch_curation(img, intensity_thresh=225, intensity_thresh_b=50, patch_size=256):
+        """
+        Adding the patch curation criteria.
+        @param image array : A function that take patch array as an argument and return True if the patch is to be discarded.
+        Other parameters include intensity threshold to check whiteness in patch
+        Intensity threshold_b to check blackness in the patch
+        patch size : patch size of the image.
+        """
+        
+        count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
+        percent_pixels = count_white_pixels / (patch_size * patch_size)
+
+        ihc_hed = rgb2hed(img)
+        patch_hsv_1 = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:, :, 0]
+        e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
+
+        if np.sum(e < 50) / (patch_size * patch_size) > 0.9 or (np.sum(patch_hsv_1 < 128) / (patch_size * patch_size)) > 0.95:
+            return True
+
+        intensity_thresh_b_1 = 128
+        count_white_pixels_b = np.sum(np.logical_and.reduce(img < intensity_thresh_b_1, axis=2))
+        percent_pixel_b = count_white_pixels_b / (patch_size * patch_size)
+
+        patch_hsv_2 = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:, :, 1]
+        percent_pixel_2 = np.sum(patch_hsv_2 < intensity_thresh_b) / (patch_size * patch_size)
+
+        patch_hsv_3 = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:, :, 2]
+        percent_pixel_3 = np.sum(patch_hsv_3 > intensity_thresh) / (patch_size * patch_size)
+
+        if percent_pixel_2 > 0.96 or np.mean(patch_hsv_2) < 5 or percent_pixel_3 > 0.96:
+            if percent_pixel_2 < 0.25:
+                return True
+
+        elif (percent_pixel_2 > 0.9 and percent_pixel_3 > 0.9) or percent_pixel_b > 0.9 or percent_pixels > 0.65:
+            return True
+
 
     def set_image_header(self, image_header):
         self.image_header = image_header
