@@ -250,7 +250,6 @@ class PatchManager:
             intensity_thresh_b (int, optional): _description_. Defaults to 50.
             patch_size (int, optional): _description_. Defaults to 256.
         """
-        
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size * patch_size)
 
