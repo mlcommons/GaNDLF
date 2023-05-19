@@ -245,11 +245,13 @@ class PatchManager:
     
     def patch_curation(img, intensity_thresh=225, intensity_thresh_b=50, patch_size=256):
         """
-        Adding the patch curation criteria.
-        @param image array : A function that take patch array as an argument and return True if the patch is to be discarded.
-        Other parameters include intensity threshold to check whiteness in patch
-        Intensity threshold_b to check blackness in the patch
-        patch size : patch size of the image.
+        This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
+
+        Args:
+            img (np.ndarray): _description_
+            intensity_thresh (int, optional): _description_. Defaults to 225.
+            intensity_thresh_b (int, optional): _description_. Defaults to 50.
+            patch_size (int, optional): _description_. Defaults to 256.
         """
         
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
