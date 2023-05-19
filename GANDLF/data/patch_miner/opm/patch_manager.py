@@ -240,7 +240,6 @@ class PatchManager:
             passes the check, False if the patch should be rejected.
         """
         self.valid_patch_checks.append(patch_validity_check)
-    
     def patch_curation(img, intensity_thresh=225, intensity_thresh_b=50, patch_size=256):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
