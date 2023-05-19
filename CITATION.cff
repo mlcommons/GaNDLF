@@ -1,0 +1,187 @@
+cff-version: "1.2.0"
+date-released: 2023-05-16
+message: "If you use this software, please cite it using this manuscript."
+title: "GaNDLF: the generally nuanced deep learning framework for scalable end-to-end clinical workflows"
+url: "https://gandlf.org/"
+authors: 
+- family-names: Pati
+  given-names: Sarthak
+- family-names: Thakur
+  given-names: "Siddhesh P."
+- family-names: Hamamci
+  given-names: "Ibrahim E."
+- family-names: Baid
+  given-names: Ujjwal
+- family-names: Baheti
+  given-names: Bhakti
+- family-names: Bhalerao
+  given-names: Megh
+- family-names: Orhun
+  given-names: Guley
+- family-names: Mouchtaris
+  given-names: Sofia
+- family-names: Lang
+  given-names: David
+- family-names: Thermos
+  given-names: Spyridon
+- family-names: Gotkowski
+  given-names: Karol
+- family-names: Gonzalez
+  given-names: Camila
+- family-names: Grenko
+  given-names: Caleb
+- family-names: Getka
+  given-names: Alexander
+- family-names: Edwards
+  given-names: Brandon
+- family-names: Sheller
+  given-names: Micah
+- family-names: Wu
+  given-names: Junwen
+- family-names: Karkada
+  given-names: Deepthi
+- family-names: Panchumarthy
+  given-names: Ravi
+- family-names: Ahluwalia
+  given-names: Vinayak
+- family-names: Zou
+  given-names: Chunrui
+- family-names: Bashyam
+  given-names: Vishnu
+- family-names: Li
+  given-names: Yuemeng
+- family-names: Haghighi
+  given-names: Babak
+- family-names: Chitalia
+  given-names: Rhea
+- family-names: Abousamra
+  given-names: Shahira
+- family-names: Kurc
+  given-names: "Tahsin M."
+- family-names: Gastounioti
+  given-names: Aimilia
+- family-names: Er
+  given-names: Sezgin
+- family-names: Bergman
+  given-names: Mark
+- family-names: Saltz
+  given-names: "Joel H."
+- family-names: Fan
+  given-names: Yong
+- family-names: Shah
+  given-names: Prashant
+- family-names: Mukhopadhyay
+  given-names: Anirban
+- family-names: Tsaftaris
+  given-names: "Sotirios A."
+- family-names: Menze
+  given-names: Bjoern
+- family-names: Davatzikos
+  given-names: Christos
+- family-names: Kontos
+  given-names: Despina
+- family-names: Karargyris
+  given-names: Alexandros
+- family-names: Umeton
+  given-names: Renato
+- family-names: Mattson
+  given-names: Peter
+- family-names: Bakas
+  given-names: Spyridon
+
+preferred-citation:
+  type: article
+  authors:
+  - family-names: Pati
+    given-names: Sarthak
+  - family-names: Thakur
+    given-names: "Siddhesh P."
+  - family-names: Hamamci
+    given-names: "Ibrahim E."
+  - family-names: Baid
+    given-names: Ujjwal
+  - family-names: Baheti
+    given-names: Bhakti
+  - family-names: Bhalerao
+    given-names: Megh
+  - family-names: Orhun
+    given-names: Guley
+  - family-names: Mouchtaris
+    given-names: Sofia
+  - family-names: Lang
+    given-names: David
+  - family-names: Thermos
+    given-names: Spyridon
+  - family-names: Gotkowski
+    given-names: Karol
+  - family-names: Gonzalez
+    given-names: Camila
+  - family-names: Grenko
+    given-names: Caleb
+  - family-names: Getka
+    given-names: Alexander
+  - family-names: Edwards
+    given-names: Brandon
+  - family-names: Sheller
+    given-names: Micah
+  - family-names: Wu
+    given-names: Junwen
+  - family-names: Karkada
+    given-names: Deepthi
+  - family-names: Panchumarthy
+    given-names: Ravi
+  - family-names: Ahluwalia
+    given-names: Vinayak
+  - family-names: Zou
+    given-names: Chunrui
+  - family-names: Bashyam
+    given-names: Vishnu
+  - family-names: Li
+    given-names: Yuemeng
+  - family-names: Haghighi
+    given-names: Babak
+  - family-names: Chitalia
+    given-names: Rhea
+  - family-names: Abousamra
+    given-names: Shahira
+  - family-names: Kurc
+    given-names: "Tahsin M."
+  - family-names: Gastounioti
+    given-names: Aimilia
+  - family-names: Er
+    given-names: Sezgin
+  - family-names: Bergman
+    given-names: Mark
+  - family-names: Saltz
+    given-names: "Joel H."
+  - family-names: Fan
+    given-names: Yong
+  - family-names: Shah
+    given-names: Prashant
+  - family-names: Mukhopadhyay
+    given-names: Anirban
+  - family-names: Tsaftaris
+    given-names: "Sotirios A."
+  - family-names: Menze
+    given-names: Bjoern
+  - family-names: Davatzikos
+    given-names: Christos
+  - family-names: Kontos
+    given-names: Despina
+  - family-names: Karargyris
+    given-names: Alexandros
+  - family-names: Umeton
+    given-names: Renato
+  - family-names: Mattson
+    given-names: Peter
+  - family-names: Bakas
+    given-names: Spyridon
+  journal: "Communications Engineering"
+  year: 2023
+  month: 05
+  volume: 2
+  number: 1
+  pages: 23
+  title: "GaNDLF: the generally nuanced deep learning framework for scalable end-to-end clinical workflows"
+  url: "https://www.nature.com/articles/s44172-023-00066-3"
+  doi: 10.1038/s44172-023-00066-3
