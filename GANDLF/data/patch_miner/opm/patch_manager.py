@@ -266,11 +266,9 @@ class PatchManager:
         count_white_pixels_b = np.sum(np.logical_and.reduce(img < intensity_thresh_b_1, axis=2))
         percent_pixel_b = count_white_pixels_b / (patch_size * patch_size)
 
-        patch_hsv_2 = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:, :, 1]
-        percent_pixel_2 = np.sum(patch_hsv_2 < intensity_thresh_b) / (patch_size * patch_size)
+        percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_b) / (patch_size * patch_size)
 
-        patch_hsv_3 = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:, :, 2]
-        percent_pixel_3 = np.sum(patch_hsv_3 > intensity_thresh) / (patch_size * patch_size)
+        percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size * patch_size)
 
         if percent_pixel_2 > 0.96 or np.mean(patch_hsv_2) < 5 or percent_pixel_3 > 0.96:
             if percent_pixel_2 < 0.25:
