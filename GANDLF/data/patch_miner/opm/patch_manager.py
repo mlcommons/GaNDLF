@@ -259,7 +259,7 @@ class PatchManager:
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
 
-        if np.sum(e < 50) / (patch_size * patch_size) > 0.9 or (np.sum(patch_hsv_1 < 128) / (patch_size * patch_size)) > 0.95:
+        if np.sum(e < 50) / (patch_size * patch_size) > 0.9 or (np.sum(patch_hsv[...,0] < 128) / (patch_size * patch_size)) > 0.95:
             return True
 
         intensity_thresh_b_1 = 128
