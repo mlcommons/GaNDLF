@@ -270,7 +270,7 @@ class PatchManager:
 
         percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size * patch_size)
 
-        if percent_pixel_2 > 0.96 or np.mean(patch_hsv_2) < 5 or percent_pixel_3 > 0.96:
+        if percent_pixel_2 > 0.96 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.96:
             if percent_pixel_2 < 0.25:
                 return True
 
