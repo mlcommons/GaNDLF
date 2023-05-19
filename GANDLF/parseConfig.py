@@ -346,15 +346,11 @@ def parseConfig(config_file_path, version_check_flag=True):
                 "hed_transform_light",
                 "hed_transform_heavy",
             ]
-
             for augmentation_type in augmentation_types:
                 if augmentation_type in params["data_augmentation"]:
                     params["data_augmentation"] = initialize_key(
                         params["data_augmentation"], "hed_transform", {}
                     )
-
-            for augmentation_type in augmentation_types:
-                if augmentation_type in params["data_augmentation"]:
                     ranges = [
                         "haematoxylin_bias_range",
                         "eosin_bias_range",
@@ -363,6 +359,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                         "eosin_sigma_range",
                         "dab_sigma_range",
                     ]
+
                     default_range = (
                         [-0.1, 0.1]
                         if augmentation_type == "hed_transform"
@@ -370,6 +367,7 @@ def parseConfig(config_file_path, version_check_flag=True):
                         if augmentation_type == "hed_transform_light"
                         else [-0.95, 0.95]
                     )
+
                     for key in ranges:
                         params["data_augmentation"]["hed_transform"] = initialize_key(
                             params["data_augmentation"]["hed_transform"],
@@ -377,10 +375,15 @@ def parseConfig(config_file_path, version_check_flag=True):
                             default_range,
                         )
 
-                    params["data_augmentation"] = initialize_key(
+                    params["data_augmentation"]["hed_transform"] = initialize_key(
                         params["data_augmentation"]["hed_transform"],
                         "cutoff_range",
                         [0, 1],
+                    )
+                    params["data_augmentation"]["hed_transform"] = initialize_key(
+                        params["data_augmentation"]["hed_transform"],
+                        "probability",
+                        0.5,
                     )
 
             # special case for anisotropic

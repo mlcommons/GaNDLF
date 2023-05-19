@@ -106,25 +106,13 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
 
 def hed_transform(parameters):
     return HedColorAugmenter(
-        haematoxylin_sigma_range=parameters["data_augmentation"]["hed_transform"][
-            "haematoxylin_sigma_range"
-        ],
-        haematoxylin_bias_range=parameters["data_augmentation"]["hed_transform"][
-            "haematoxylin_bias_range"
-        ],
-        eosin_sigma_range=parameters["data_augmentation"]["hed_transform"][
-            "eosin_sigma_range"
-        ],
-        eosin_bias_range=parameters["data_augmentation"]["hed_transform"][
-            "eosin_bias_range"
-        ],
-        dab_sigma_range=parameters["data_augmentation"]["hed_transform"][
-            "dab_sigma_range"
-        ],
-        dab_bias_range=parameters["data_augmentation"]["hed_transform"][
-            "dab_bias_range"
-        ],
-        cutoff_range=parameters["data_augmentation"]["hed_transform"]["cutoff_range"],
+        haematoxylin_sigma_range=parameters["haematoxylin_sigma_range"],
+        haematoxylin_bias_range=parameters["haematoxylin_bias_range"],
+        eosin_sigma_range=parameters["eosin_sigma_range"],
+        eosin_bias_range=parameters["eosin_bias_range"],
+        dab_sigma_range=parameters["dab_sigma_range"],
+        dab_bias_range=parameters["dab_bias_range"],
+        cutoff_range=parameters["cutoff_range"],
     )
 
 
@@ -388,7 +376,6 @@ class HedColorAugmenter(RandomTransform, IntensityTransform):
         dab_bias_range: Range of bias for DAB channel.
         cutoff_range: Range of cutoff for DAB channel.
         p: Probability that this transform will be applied.
-        seed: See :py:class:`~torchio.transforms.augmentation.RandomTransform`.
     """
 
     def __init__(
@@ -400,10 +387,9 @@ class HedColorAugmenter(RandomTransform, IntensityTransform):
         dab_sigma_range: Tuple[float, float] = (0.5, 1.5),
         dab_bias_range: Tuple[float, float] = (-0.5, 0.5),
         cutoff_range: Tuple[float, float] = (0.5, 1.5),
-        p: float = 1,
-        seed: Union[int, None] = None,
+        p: float = 0.5,
     ):
-        super().__init__(p=p, seed=seed)
+        super().__init__(p=p)
         self.haematoxylin_sigma_range = min(haematoxylin_sigma_range)
         self.haematoxylin_bias_range = min(haematoxylin_bias_range)
         self.eosin_sigma_range = min(eosin_sigma_range)
