@@ -61,7 +61,7 @@ jobs:
       run: | # Get current canonical version, append current date as an identifier
         currentVer=$(python -c "from GANDLF import version; print(version)")
         datestampnow=$(date +'%Y%m%d')
-        echo __version__ = \"$currentVer-dev$datestampnow\" > ./GANDLF/version.py        
+        echo __version__ = \"$currentVer$datestampnow\" > ./GANDLF/version.py        
         
     - name: Build package
       if: env.publish_nightly
