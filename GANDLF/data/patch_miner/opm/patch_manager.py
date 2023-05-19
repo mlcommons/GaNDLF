@@ -9,7 +9,6 @@ from pathlib import Path
 import pandas as pd
 import tiffslide
 import cv2
-import numpy as np
 from skimage.exposure import rescale_intensity
 from skimage.color import rgb2hed
 from skimage import io
