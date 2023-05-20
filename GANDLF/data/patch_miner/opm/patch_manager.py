@@ -245,10 +245,10 @@ class PatchManager:
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
 
         Args:
-            img (np.ndarray): _description_
-            intensity_thresh (int, optional): _description_. Defaults to 225.
-            intensity_thresh_b (int, optional): _description_. Defaults to 50.
-            patch_size (int, optional): _description_. Defaults to 256.
+            img (np.ndarray): Input Patch Array to check the artifact/background.
+            intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
+            intensity_thresh_b (int, optional): Threshold to check blackness in the patch. Defaults to 50.
+            patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256.
         """
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size * patch_size)
