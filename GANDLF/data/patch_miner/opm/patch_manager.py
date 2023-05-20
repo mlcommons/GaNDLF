@@ -240,6 +240,7 @@ class PatchManager:
             passes the check, False if the patch should be rejected.
         """
         self.valid_patch_checks.append(patch_validity_check)
+        
     def patch_curation(img, intensity_thresh=225, intensity_thresh_b=50, patch_size=256):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
@@ -249,6 +250,7 @@ class PatchManager:
             intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
             intensity_thresh_b (int, optional): Threshold to check blackness in the patch. Defaults to 50.
             patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256.
+            @return (boolean) : True to reject the patch 
         """
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size * patch_size)
@@ -263,18 +265,14 @@ class PatchManager:
         intensity_thresh_b_1 = 128
         count_white_pixels_b = np.sum(np.logical_and.reduce(img < intensity_thresh_b_1, axis=2))
         percent_pixel_b = count_white_pixels_b / (patch_size * patch_size)
-
         percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_b) / (patch_size * patch_size)
-
         percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size * patch_size)
 
         if percent_pixel_2 > 0.96 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.96:
             if percent_pixel_2 < 0.25:
                 return True
-
         elif (percent_pixel_2 > 0.9 and percent_pixel_3 > 0.9) or percent_pixel_b > 0.9 or percent_pixels > 0.65:
             return True
-
 
     def set_image_header(self, image_header):
         self.image_header = image_header
