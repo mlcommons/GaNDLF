@@ -20,6 +20,12 @@ from GANDLF.utils import (
 def parse_gandlf_csv(fpath):
     df, _ = parseTrainingCSV(fpath, train=False)
     df = df.drop_duplicates()
+    # nans can be easily removed using df.dropna(axis=1, how='all')
+    # we want to keep them because we want the user to check the CSV instead
+    # there might be cases where labels are accidentally removed for some subjects, but not all
+    assert (
+        df.isnull().values.any() == False
+    ), "Data CSV contains null/nan values, please check."
     for _, row in df.iterrows():
         if "Label" in row:
             yield row["SubjectID"], row["Channel_0"], row["Label"]
