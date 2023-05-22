@@ -152,7 +152,7 @@ class PatchManager:
                 max(mined_start_y, 0) : self.width_bound_check(mined_end_y),
             ] = True
             
-             if self.is_patch_valid(patch):
+             if self.is_patch_valid(patch, patch_size):
                 # Append this patch to the list of patches to be saved
                 self.patches.append(patch)
             return True
@@ -241,7 +241,7 @@ class PatchManager:
         """
         self.valid_patch_checks.append(patch_validity_check)
         
-    def is_patch_valid(self, img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=256):
+    def is_patch_valid(self, img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
 
@@ -250,26 +250,25 @@ class PatchManager:
             intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
             intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 50.
             intensity_thresh_b (int, optional) : Threshold to check blackness in the patch
-            patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256.
+            patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256. patch_size=config["patch_size"]
 
         Returns:
             bool: Whether the patch is valid (True) or not (False)
         """
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
-        percent_pixels = count_white_pixels / (patch_size * patch_size)
+        percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
 
         ihc_hed = rgb2hed(img)
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
 
-        if np.sum(e < 50) / (patch_size * patch_size) > 0.9 or (np.sum(patch_hsv[...,0] < 128) / (patch_size * patch_size)) > 0.95:
+        if np.sum(e < 50) / (patch_size[0] * patch_size[1]) > 0.9 or (np.sum(patch_hsv[...,0] < 128) / (patch_size[0] * patch_size[1])) > 0.95:
             return False
-
         
         count_black_pixels = np.sum(np.logical_and.reduce(img < intensity_thresh_b, axis=2))
-        percent_pixel_b = count_black_pixels / (patch_size * patch_size)
-        percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_saturation) / (patch_size * patch_size)
-        percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size * patch_size)
+        percent_pixel_b = count_black_pixels / (patch_size[0] * patch_size[1])
+        percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_saturation) / (patch_size[0] * patch_size[1])
+        percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size[0] * patch_size[1])
         
         if percent_pixel_2 > 0.96 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.96:
             if percent_pixel_2 < 0.25:
