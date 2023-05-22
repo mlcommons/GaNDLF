@@ -9,6 +9,7 @@ from .wrap_torch import (
     adadelta,
     adagrad,
     rmsprop,
+    radam,
 )
 
 global_optimizer_dict = {
@@ -22,6 +23,7 @@ global_optimizer_dict = {
     "adadelta": adadelta,
     "adagrad": adagrad,
     "rmsprop": rmsprop,
+    "radam": radam,
 }
 
 
