@@ -240,7 +240,7 @@ def alpha_rgb_2d_channel_check(img):
 
 def pen_marking_check(self, img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
         """
-        This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
+        This function is used to curate patches from the input image. It is used to remove patches that have pen markings.
         Args:
             img (np.ndarray): Input Patch Array to check the artifact/background.
             intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
