@@ -249,7 +249,9 @@ class PatchManager:
             intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
             intensity_thresh_b (int, optional): Threshold to check blackness in the patch. Defaults to 50.
             patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256.
-            @return (boolean) : True to reject the patch 
+
+        Returns:
+            bool: Whether the patch is valid or not
         """
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size * patch_size)
