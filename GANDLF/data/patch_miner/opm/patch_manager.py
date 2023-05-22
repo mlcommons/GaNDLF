@@ -261,22 +261,22 @@ class PatchManager:
         e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
 
         if np.sum(e < 50) / (patch_size * patch_size) > 0.9 or (np.sum(patch_hsv[...,0] < 128) / (patch_size * patch_size)) > 0.95:
-            return True
+            return False
 
         intensity_thresh_b_1 = 128
         count_white_pixels_b = np.sum(np.logical_and.reduce(img < intensity_thresh_b_1, axis=2))
         percent_pixel_b = count_white_pixels_b / (patch_size * patch_size)
         percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_b) / (patch_size * patch_size)
         percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size * patch_size)
-
+        
         if percent_pixel_2 > 0.96 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.96:
             if percent_pixel_2 < 0.25:
-                return True
+                return False
         elif (percent_pixel_2 > 0.9 and percent_pixel_3 > 0.9) or percent_pixel_b > 0.9 or percent_pixels > 0.65:
-            return True
+            return False
 
-        # assume that the patch is not valid
-        return False
+        # assume that the patch is valid
+        return True
 
     def set_image_header(self, image_header):
         self.image_header = image_header
