@@ -429,11 +429,7 @@ class PatchManager:
                 new_row.update({"SlidePatchPath": slide_patch_path})
 
                 patch_coords = np_slide_futures[index, 1].coordinates
-            import cv2
-12
-from skimage.exposure import rescale_intensity
-13
-from skimage.color import rgb2hed    new_row.update({"PatchCoordinatesX": patch_coords[1]})
+                new_row.update({"PatchCoordinatesX": patch_coords[1]})
                 new_row.update({"PatchCoordinatesY": patch_coords[0]})
 
                 new_df_rows.append(new_row)
