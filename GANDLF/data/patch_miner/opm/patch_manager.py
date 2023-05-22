@@ -8,9 +8,6 @@ from tqdm import tqdm
 from pathlib import Path
 import pandas as pd
 import tiffslide
-import cv2
-from skimage.exposure import rescale_intensity
-from skimage.color import rgb2hed
 
 
 class PatchManager:
@@ -152,9 +149,9 @@ class PatchManager:
                 max(mined_start_y, 0) : self.width_bound_check(mined_end_y),
             ] = True
             
-            if self.is_patch_valid(patch, patch_size):
-                # Append this patch to the list of patches to be saved
-                self.patches.append(patch)
+            # Append this patch to the list of patches to be saved
+            self.patches.append(patch)
+            
             return True
 
         except Exception as e:
@@ -239,7 +236,7 @@ class PatchManager:
         @param patch_validity_check: A function that takes only an image as an argument and returns True if the patch
             passes the check, False if the patch should be rejected.
         """
-        self.valid_patch_checks.append(patch_validity_check)      
+        self.valid_patch_checks.append(patch_validity_check)
 
     def set_image_header(self, image_header):
         self.image_header = image_header
@@ -432,7 +429,11 @@ class PatchManager:
                 new_row.update({"SlidePatchPath": slide_patch_path})
 
                 patch_coords = np_slide_futures[index, 1].coordinates
-                new_row.update({"PatchCoordinatesX": patch_coords[1]})
+            import cv2
+12
+from skimage.exposure import rescale_intensity
+13
+from skimage.color import rgb2hed    new_row.update({"PatchCoordinatesX": patch_coords[1]})
                 new_row.update({"PatchCoordinatesY": patch_coords[0]})
 
                 new_df_rows.append(new_row)
