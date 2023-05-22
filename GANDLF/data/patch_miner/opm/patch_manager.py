@@ -275,6 +275,9 @@ class PatchManager:
         elif (percent_pixel_2 > 0.9 and percent_pixel_3 > 0.9) or percent_pixel_b > 0.9 or percent_pixels > 0.65:
             return True
 
+        # assume that the patch is not valid
+        return False
+
     def set_image_header(self, image_header):
         self.image_header = image_header
 
