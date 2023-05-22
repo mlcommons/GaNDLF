@@ -390,13 +390,13 @@ class HedColorAugmenter(RandomTransform, IntensityTransform):
         p: float = 0.5,
     ):
         super().__init__(p=p)
-        self.haematoxylin_sigma_range = min(haematoxylin_sigma_range)
-        self.haematoxylin_bias_range = min(haematoxylin_bias_range)
-        self.eosin_sigma_range = min(eosin_sigma_range)
-        self.eosin_bias_range = min(eosin_bias_range)
-        self.dab_sigma_range = min(dab_sigma_range)
-        self.dab_bias_range = min(dab_bias_range)
-        self.cutoff_range = min(cutoff_range)
+        self.haematoxylin_sigma_range = haematoxylin_sigma_range
+        self.haematoxylin_bias_range = haematoxylin_bias_range
+        self.eosin_sigma_range = eosin_sigma_range
+        self.eosin_bias_range = eosin_bias_range
+        self.dab_sigma_range = dab_sigma_range
+        self.dab_bias_range = dab_bias_range
+        self.cutoff_range = cutoff_range
 
     def apply_transform(self, subject: Subject) -> Subject:
         transform = HedColorAugmenter(
