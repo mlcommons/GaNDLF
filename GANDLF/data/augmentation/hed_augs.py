@@ -135,7 +135,7 @@ class HedColorAugmenter(ColorAugmenterBase):
         def check_sigma_range(name, given_range):
             assert given_range is None or (
                 len(given_range) != 2
-                and given_range[1] < given_range[0]
+                and given_range[0] < given_range[1]
                 and -1.0 <= given_range[0]
                 and given_range[1] <= 1.0
             ), f"Invalid range for {name}: {given_range}"
@@ -171,9 +171,9 @@ class HedColorAugmenter(ColorAugmenterBase):
         def check_bias_range(name, given_range):
             assert given_range is None or (
                 len(given_range) != 2
-                or given_range[1] < given_range[0]
+                or given_range[0] < given_range[1]
                 or -1.0 <= given_range[0]
-                or 1.0 < given_range[1]
+                or given_range[1] <= 1.0
             ), f"Invalid range for {name}: {given_range}"
 
         check_bias_range("Haematoxylin Bias", haematoxylin_bias_range)
@@ -199,9 +199,9 @@ class HedColorAugmenter(ColorAugmenterBase):
         def check_cutoff_range(name, given_range):
             assert given_range is None or (
                 len(given_range) != 2
-                or given_range[1] < given_range[0]
-                or given_range[0] < 0.0
-                or 1.0 < given_range[1]
+                or given_range[0] < given_range[1]
+                or 0 <= given_range[0]
+                or given_range[1] <= 1.0
             ), f"Invalid range for {name}: {given_range}"
 
         check_cutoff_range("Cutoff", cutoff_range)
