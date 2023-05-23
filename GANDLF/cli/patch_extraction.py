@@ -12,7 +12,7 @@ from GANDLF.data.patch_miner.opm.utils import (
     generate_initial_mask,
     get_patch_size_in_microns,
     patch_artifact_check,
-    pen_marking_check,
+    # pen_marking_check,
 )
 from GANDLF.utils import (
     parseTrainingCSV,
