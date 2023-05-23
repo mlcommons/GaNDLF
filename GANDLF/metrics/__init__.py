@@ -13,7 +13,14 @@ from .segmentation import (
     nsd_per_label,
 )
 from .regression import classification_accuracy, balanced_acc_score, per_label_accuracy
-from .generic import recall_score, precision_score, iou_score, f1_score, accuracy, specificity_score
+from .generic import (
+    recall_score,
+    precision_score,
+    iou_score,
+    f1_score,
+    accuracy,
+    specificity_score,
+)
 import GANDLF.metrics.classification as classification
 import GANDLF.metrics.regression as regression
 
