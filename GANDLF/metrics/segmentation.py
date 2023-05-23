@@ -153,6 +153,74 @@ def _nsd_base(a_to_b, b_to_a, threshold):
     return dc
 
 
+def _calculator_sensitivity_specificity(
+    inp,
+    target,
+    params,
+    per_label=False,
+):
+    """
+    This function returns sensitivity and specificity.
+
+    Args:
+        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+        per_label (bool): Whether to return per-label dice scores.
+
+    Returns:
+        float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
+    """
+    # inMask is mask of input array equal to a certain tissue (ie. all one's in tumor core)
+    # Ref mask is mask of certain tissue in ground truth (ie. all one's in refernce core )
+    # overlap is mask where the two equal each other
+    # They are of the total number of voxels of the ground truth brain mask
+
+    def get_sensitivity_and_specificity(result_array, target_array):
+        iC = np.sum(result_array)
+        rC = np.sum(target_array)
+
+        overlap = np.where((result_array == target_array), 1, 0)
+
+        # Where they agree are both equal to that value
+        TP = overlap[result_array == 1].sum()
+        FP = iC - TP
+        FN = rC - TP
+        TN = np.count_nonzero((result_array != 1) & (target_array != 1))
+
+        Sens = 1.0 * TP / (TP + FN)
+        Spec = 1.0 * TN / (TN + FP)
+
+        # Make Changes if both input and reference are 0 for the tissue type
+        if (iC == 0) and (rC == 0):
+            Sens = 1.0
+
+        return Sens, Spec
+
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
+
+    sensitivity, specificity, avg_counter = 0, 0, 0
+    sensitivity_per_label, specificity_per_label = [], []
+    for b in range(0, result_array.shape[0]):
+        for i in range(0, params["model"]["num_classes"]):
+            if i != params["model"]["ignore_label_validation"]:
+                s, p = get_sensitivity_and_specificity(
+                    result_array[b, i, ...], target_array[b, i, ...]
+                )
+                sensitivity += s
+                specificity += p
+                if per_label:
+                    sensitivity_per_label.append(s)
+                    specificity_per_label.append(p)
+                avg_counter += 1
+
+    if per_label:
+        return sensitivity_per_label, specificity_per_label
+    else:
+        return sensitivity / avg_counter, specificity / avg_counter
+
+
 def _calculator_generic_all_surface_distances(
     inp,
     target,
