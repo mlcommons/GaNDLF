@@ -84,7 +84,9 @@ def patch_extraction(input_path, output_path, config=None):
         print("Setting valid mask...")
         manager.set_valid_mask(mask, scale)
         # Reject patch if any pixels are transparent
-        manager.add_patch_criteria([alpha_rgb_2d_channel_check, patch_artifact_check, pen_marking_check])
+        manager.add_patch_criteria(alpha_rgb_2d_channel_check)
+        #manager.add_patch_criteria(pen_marking_check)
+        manager.add_patch_criteria(patch_artifact_check)
         # Reject patch if image dimensions are not equal to PATCH_SIZE
         patch_dims_check = partial(
             patch_size_check,
