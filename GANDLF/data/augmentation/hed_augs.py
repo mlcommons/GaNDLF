@@ -1,11 +1,9 @@
-from torchvision.transforms import ColorJitter
 from typing import Tuple, Union
 import numpy as np
 from skimage.color import rgb2hed, hed2rgb
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
 from torchio import Subject
-from GANDLF.utils.exceptions import InvalidRangeError
 
 
 def hed_transform(parameters):
@@ -41,11 +39,11 @@ class AugmenterBase:
 
     def transform(self, patch):
         """Transform the given patch."""
-        pass
+        return patch
 
     def randomize(self):
         """Randomize the parameters of the augmenter."""
-        pass
+        return
 
 
 class ColorAugmenterBase(AugmenterBase):
@@ -134,15 +132,13 @@ class HedColorAugmenter(ColorAugmenterBase):
             InvalidRangeError: If the sigma range for any channel adjustment is not valid.
         """
 
-        def check_sigma_range(name, range):
-            if range is not None:
-                if (
-                    len(range) != 2
-                    or range[1] < range[0]
-                    or range[0] < -1.0
-                    or 1.0 < range[1]
-                ):
-                    raise InvalidRangeError(name, range)
+        def check_sigma_range(name, given_range):
+            assert given_range is None or (
+                len(given_range) != 2
+                and given_range[1] < given_range[0]
+                and -1.0 <= given_range[0]
+                and given_range[1] <= 1.0
+            ), f"Invalid range for {name}: {given_range}"
 
         check_sigma_range("Haematoxylin Sigma", haematoxylin_sigma_range)
         check_sigma_range("Eosin Sigma", eosin_sigma_range)
@@ -172,15 +168,13 @@ class HedColorAugmenter(ColorAugmenterBase):
             InvalidRangeError: If the bias range for any channel adjustment is not valid.
         """
 
-        def check_bias_range(name, range):
-            if range is not None:
-                if (
-                    len(range) != 2
-                    or range[1] < range[0]
-                    or range[0] < -1.0
-                    or 1.0 < range[1]
-                ):
-                    raise InvalidRangeError(name, range)
+        def check_bias_range(name, given_range):
+            assert given_range is None or (
+                len(given_range) != 2
+                or given_range[1] < given_range[0]
+                or -1.0 <= given_range[0]
+                or 1.0 < given_range[1]
+            ), f"Invalid range for {name}: {given_range}"
 
         check_bias_range("Haematoxylin Bias", haematoxylin_bias_range)
         check_bias_range("Eosin Bias", eosin_bias_range)
@@ -202,15 +196,13 @@ class HedColorAugmenter(ColorAugmenterBase):
             InvalidRangeError: If the cutoff range is not valid.
         """
 
-        def check_cutoff_range(name, range):
-            if range is not None:
-                if (
-                    len(range) != 2
-                    or range[1] < range[0]
-                    or range[0] < 0.0
-                    or 1.0 < range[1]
-                ):
-                    raise InvalidRangeError(name, range)
+        def check_cutoff_range(name, given_range):
+            assert given_range is None or (
+                len(given_range) != 2
+                or given_range[1] < given_range[0]
+                or given_range[0] < 0.0
+                or 1.0 < given_range[1]
+            ), f"Invalid range for {name}: {given_range}"
 
         check_cutoff_range("Cutoff", cutoff_range)
 
@@ -280,7 +272,7 @@ class RandomHEDTransform(RandomTransform, IntensityTransform):
         dab_sigma_range: Union[float, Tuple[float, float]] = 0.1,
         dab_bias_range: Union[float, Tuple[float, float]] = 0.1,
         cutoff_range: Union[float, Tuple[float, float]] = (0, 1),
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.transform_object = HedColorAugmenter(
@@ -295,7 +287,7 @@ class RandomHEDTransform(RandomTransform, IntensityTransform):
 
     def apply_transform(self, subject: Subject) -> Subject:
         # Process only if the image is RGB
-        for image_name, image in self.get_images_dict(subject).items():
+        for _, image in self.get_images_dict(subject).items():
             if image.data.ndim != 3 or image.data.shape[-1] != 3:
                 continue
 

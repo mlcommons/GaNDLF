@@ -1,11 +1,8 @@
 from torchvision.transforms import ColorJitter
 from typing import Tuple, Union
-import numpy as np
-from skimage.color import rgb2hed, hed2rgb
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
 from torchio import Subject
-from GANDLF.utils.exceptions import InvalidRangeError
 
 
 def colorjitter_transform(parameters):
