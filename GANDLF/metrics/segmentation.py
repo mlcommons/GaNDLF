@@ -153,6 +153,53 @@ def _nsd_base(a_to_b, b_to_a, threshold):
     return dc
 
 
+def _calculator_generic_all_surface_distances(
+    inp,
+    target,
+    params,
+):
+    """
+    This function returns hd100, hd95, and nsd.
+
+    Args:
+        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        float, float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
+    """
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
+
+    avg_counter = 0
+    return_hd100, return_hd95, return_nsd = 0, 0, 0
+    for b in range(0, result_array.shape[0]):
+        for i in range(0, params["model"]["num_classes"]):
+            if i != params["model"]["ignore_label_validation"]:
+                hd1 = __surface_distances(
+                    result_array[b, i, ...],
+                    target_array[b, i, ...],
+                    params["subject_spacing"][b],
+                )
+                hd2 = __surface_distances(
+                    target_array[b, i, ...],
+                    result_array[b, i, ...],
+                    params["subject_spacing"][b],
+                )
+                threshold = max(min(params["subject_spacing"][0]), 1).item()
+                return_nsd += _nsd_base(hd1, hd2, threshold)
+                return_hd100 += np.percentile(np.hstack((hd1, hd2)), 100)
+                return_hd95 += np.percentile(np.hstack((hd1, hd2)), 95)
+                avg_counter += 1
+
+    return (
+        torch.tensor(return_nsd / avg_counter),
+        torch.tensor(return_hd100 / avg_counter),
+        torch.tensor(return_hd95 / avg_counter),
+    )
+
+
 def _calculator_generic(
     inp,
     target,
