@@ -6,7 +6,10 @@ import torch
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
 from GANDLF.metrics import overall_stats, multi_class_dice
-from GANDLF.metrics.segmentation import _calculator_generic_all_surface_distances
+from GANDLF.metrics.segmentation import (
+    _calculator_generic_all_surface_distances,
+    _calculator_sensitivity_specificity,
+)
 
 # input: 1 csv with 3 columns: subjectid, prediction, ground_truth
 # input: gandlf config
@@ -55,7 +58,8 @@ def generate_metrics_dict(input_csv: str, config: str) -> dict:
 
             for class_index, _ in enumerate(class_list):
                 # this is inconsequential, since one_hot will ensure that the classes are present
-                parameters["model"]["class_list"] = [0]
+                parameters["model"]["class_list"] = [0, 1]
+                parameters["model"]["ignore_label_validation"] = 0
                 overall_stats_dict[row["subject_id"]][
                     "dice_" + str(class_index)
                 ] = multi_class_dice(
@@ -72,5 +76,17 @@ def generate_metrics_dict(input_csv: str, config: str) -> dict:
                     label_image_one_hot,
                     parameters,
                 )
-    
+                (
+                    overall_stats_dict[row["subject_id"]][
+                        "sensitivity_" + str(class_index)
+                    ],
+                    overall_stats_dict[row["subject_id"]][
+                        "specificity_" + str(class_index)
+                    ],
+                ) = _calculator_sensitivity_specificity(
+                    pred_image_one_hot,
+                    label_image_one_hot,
+                    parameters,
+                )
+
     pprint(overall_stats_dict)
