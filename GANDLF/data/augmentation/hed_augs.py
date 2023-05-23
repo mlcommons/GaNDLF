@@ -9,7 +9,7 @@ from GANDLF.utils.exceptions import InvalidRangeError
 
 
 def hed_transform(parameters):
-    return HedColorAugmenter(
+    return RandomHEDTransform(
         haematoxylin_sigma_range=parameters["haematoxylin_sigma_range"],
         haematoxylin_bias_range=parameters["haematoxylin_bias_range"],
         eosin_sigma_range=parameters["eosin_sigma_range"],
