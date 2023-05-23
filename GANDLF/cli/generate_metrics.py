@@ -1,3 +1,4 @@
+from pprint import pprint
 import pandas as pd
 import SimpleITK as sitk
 import torch
@@ -42,7 +43,7 @@ def generate_metrics_dict(input_csv: str, config: str) -> dict:
         # read images and then calculate metrics
         class_list = parameters["model"]["class_list"]
         for _, row in input_df.iterrows():
-            current_subject_metrics = {}
+            overall_stats_dict[row["subject_id"]] = {}
             label_image = sitk.ReadImage(row["ground_truth"])
             pred_image = sitk.ReadImage(row["prediction"])
             label_tensor = torch.from_numpy(sitk.GetArrayFromImage(label_image))
@@ -55,17 +56,21 @@ def generate_metrics_dict(input_csv: str, config: str) -> dict:
             for class_index, _ in enumerate(class_list):
                 # this is inconsequential, since one_hot will ensure that the classes are present
                 parameters["model"]["class_list"] = [0]
-                current_subject_metrics["dice_" + str(class_index)] = multi_class_dice(
+                overall_stats_dict[row["subject_id"]][
+                    "dice_" + str(class_index)
+                ] = multi_class_dice(
                     pred_image_one_hot,
                     label_image_one_hot,
                     parameters,
                 ).item()
-                current_subject_metrics["nsd_" + str(class_index)],
-                current_subject_metrics["hd100_" + str(class_index)],
-                current_subject_metrics[
+                overall_stats_dict[row["subject_id"]]["nsd_" + str(class_index)],
+                overall_stats_dict[row["subject_id"]]["hd100_" + str(class_index)],
+                overall_stats_dict[row["subject_id"]][
                     "hd95_" + str(class_index)
                 ] = _calculator_generic_all_surface_distances(
                     pred_image_one_hot,
                     label_image_one_hot,
                     parameters,
                 )
+    
+    pprint(overall_stats_dict)
