@@ -435,9 +435,8 @@ class PatchManager:
                 new_df_rows.append(new_row)
 
             new_df = pd.DataFrame(new_df_rows)
-            output_df = pd.concat(
-                [output_df, new_df]
-            )  # Concatenate in case there is a pre-existing dataframe
+            # Concatenate in case there is a pre-existing dataframe
+            output_df = pd.concat([output_df, new_df])
 
         output_df.to_csv(csv_filename, index=False)
 
