@@ -271,7 +271,8 @@ def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation 
             patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256. patch_size=config["patch_size"]
         Returns:
             bool: Whether the patch is valid (True) or not (False)
-        """     
+        """    
+        patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
         count_black_pixels = np.sum(np.logical_and.reduce(img < intensity_thresh_b, axis=2))
