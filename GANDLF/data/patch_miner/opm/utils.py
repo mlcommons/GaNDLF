@@ -238,7 +238,7 @@ def alpha_rgb_2d_channel_check(img):
     else:
         return False
 
-def pen_marking_check(self, img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
+def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
         """
         This function is used to curate patches from the input image. It is used to remove patches that have pen markings.
         Args:
@@ -260,7 +260,7 @@ def pen_marking_check(self, img, intensity_thresh=225, intensity_thresh_saturati
         #Assume patch is valid
         return True
         
-def patch_artifact_check(self, img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
+def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
         Args:
