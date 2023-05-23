@@ -267,9 +267,10 @@ data_augmentation:
       'haematoxylin_bias_range': [-0.1, 0.1],
       'eosin_bias_range': [-0.1, 0.1],
       'dab_bias_range': [-0.1, 0.1],
-      'haematoxylin_sigma_range': [-0.1, -0.1],
-      'eosin_sigma_range': [-0.1, -0.1],
-      'dab_sigma_range': [-0.1, -0.1],
+      'haematoxylin_sigma_range': [-0.1, 0.1],
+      'eosin_sigma_range': [-0.1, 0.1],
+      'dab_sigma_range': [-0.1, 0.1],
+      'cutoff_range': [0.01, 0.99],
     }
   }
 # ## post-processing steps - only applied before output labels are saved
