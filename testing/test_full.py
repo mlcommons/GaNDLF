@@ -2968,42 +2968,47 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
     print("passed")
 
 
-def test_metrics_cli_rad_2d():
+def test_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
-    for problem_type in ["segmentation", "classification"]:
-        # read and parse csv
-        training_data, _ = parseTrainingCSV(
-            inputDir + f"/train_2d_rad_{problem_type}.csv"
-        )
-        if problem_type == "segmentation":
-            labels_array = training_data["Label"]
-        else:
-            labels_array = training_data["ValueToPredict"]        
-        training_data["target"] = labels_array
-        training_data["prediction"] = labels_array
+    for dim in ["2d", "3d"]:
+        for problem_type in ["segmentation", "classification"]:
+            # read and parse csv
+            training_data, _ = parseTrainingCSV(
+                inputDir + f"/train_{dim}_rad_{problem_type}.csv"
+            )
+            if problem_type == "segmentation":
+                labels_array = training_data["Label"]
+            else:
+                labels_array = training_data["ValueToPredict"]
+            training_data["target"] = labels_array
+            training_data["prediction"] = labels_array
 
-        # read and initialize parameters for specific data dimension
-        parameters = parseConfig(
-            testingDir + f"/config_{problem_type}.yaml", version_check_flag=False
-        )
-        parameters["modality"] = "rad"
-        parameters["patch_size"] = patch_size["2D"]
-        parameters["model"]["dimension"] = 2
-        parameters["verbose"] = False
+            # read and initialize parameters for specific data dimension
+            parameters = parseConfig(
+                testingDir + f"/config_{problem_type}.yaml", version_check_flag=False
+            )
+            parameters["modality"] = "rad"
+            parameters["patch_size"] = patch_size["2D"]
+            parameters["model"]["dimension"] = 2
+            if dim == "3d":
+                parameters["patch_size"] = patch_size["3D"]
+                parameters["model"]["dimension"] = 3
 
-        temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
-        training_data.to_csv(temp_infer_csv, index=False)
+            parameters["verbose"] = False
 
-        output_file = os.path.join(outputDir, "output.yaml")
-        training_data.to_csv(temp_infer_csv, index=False)
+            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
+            training_data.to_csv(temp_infer_csv, index=False)
 
-        temp_config = get_temp_config_path()
-        with open(temp_config, "w") as file:
-            yaml.dump(parameters, file)
-        
-        # run the metrics calculation
-        generate_metrics_dict(temp_infer_csv, temp_config, output_file)
+            output_file = os.path.join(outputDir, "output.yaml")
+            training_data.to_csv(temp_infer_csv, index=False)
 
-        assert os.path.isfile(output_file), "Metrics output file was not generated"
+            temp_config = get_temp_config_path()
+            with open(temp_config, "w") as file:
+                yaml.dump(parameters, file)
 
-        sanitize_outputDir()
+            # run the metrics calculation
+            generate_metrics_dict(temp_infer_csv, temp_config, output_file)
+
+            assert os.path.isfile(output_file), "Metrics output file was not generated"
+
+            sanitize_outputDir()
