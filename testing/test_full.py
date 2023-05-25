@@ -1138,6 +1138,12 @@ def test_train_metrics_segmentation_rad_2d(device):
         "hausdorff",
         "hausdorff95",
         "normalized_surface_dice",
+        "sensitivity",
+        "sensitivity_per_label",
+        "specificity",
+        "specificity_per_label",
+        "jaccard",
+        "jaccard_per_label",
     ]
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = False
@@ -1851,6 +1857,12 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "hd100_per_label",
         "normalized_surface_dice",
         "normalized_surface_dice_per_label",
+        "sensitivity",
+        "sensitivity_per_label",
+        "specificity",
+        "specificity_per_label",
+        "jaccard",
+        "jaccard_per_label",
     ]
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
@@ -1899,11 +1911,7 @@ def test_generic_model_patch_divisibility():
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = [
-        "dice",
-        "hausdorff",
-        "hausdorff95" "normalized_surface_dice_per_label",
-    ]
+    parameters["metrics"] = ["dice"]
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     # this assertion should fail
