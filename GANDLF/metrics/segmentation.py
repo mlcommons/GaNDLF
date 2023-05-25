@@ -401,12 +401,12 @@ def sensitivity_per_label(inp, target, params):
     return s
 
 
-def specificity(inp, target, params):
+def specificity_segmentation(inp, target, params):
     _, p = _calculator_sensitivity_specificity(inp, target, params)
     return p
 
 
-def specificity_per_label(inp, target, params):
+def specificity_segmentation_per_label(inp, target, params):
     _, p = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
     return p
 
