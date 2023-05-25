@@ -20,11 +20,17 @@ from GANDLF.utils import (
 def parse_gandlf_csv(fpath):
     df, _ = parseTrainingCSV(fpath, train=False)
     df = df.drop_duplicates()
+    # nans can be easily removed using df.dropna(axis=1, how='all')
+    # we want to keep them because we want the user to check the CSV instead
+    # there might be cases where labels are accidentally removed for some subjects, but not all
+    assert (
+        df.isnull().values.any() == False
+    ), "Data CSV contains null/nan values, please check."
     for _, row in df.iterrows():
         if "Label" in row:
             yield row["SubjectID"], row["Channel_0"], row["Label"]
         else:
-            yield row["SubjectID"], row["Channel_0"]
+            yield row["SubjectID"], row["Channel_0"], None
 
 
 def patch_extraction(input_path, output_path, config=None):
@@ -63,7 +69,8 @@ def patch_extraction(input_path, output_path, config=None):
     for sid, slide, label in parse_gandlf_csv(input_path):
         # Create new instance of slide manager
         manager = PatchManager(slide, os.path.join(output_path, str(sid)))
-        manager.set_label_map(label)
+        if label is not None:
+            manager.set_label_map(label)
         manager.set_subjectID(str(sid))
         manager.set_image_header("Channel_0")
         manager.set_mask_header("Label")

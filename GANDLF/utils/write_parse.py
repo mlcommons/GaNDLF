@@ -200,13 +200,14 @@ def convert_relative_paths_in_dataframe(input_dataframe, headers, path_root):
         if (loc == headers["labelHeader"]) or (loc in headers["channelHeaders"]):
             # These entries can be considered as paths to files
             for index, entry in enumerate(input_dataframe[column]):
-                this_path = pathlib.Path(entry)
-                start_path = pathlib.Path(path_root)
-                if start_path.is_file():
-                    start_path = start_path.parent
-                if not this_path.is_file():
-                    if not this_path.is_absolute():
-                        input_dataframe.loc[index, column] = str(
-                            start_path.joinpath(this_path)
-                        )
+                if isinstance(entry, str):
+                    this_path = pathlib.Path(entry)
+                    start_path = pathlib.Path(path_root)
+                    if start_path.is_file():
+                        start_path = start_path.parent
+                    if not this_path.is_file():
+                        if not this_path.is_absolute():
+                            input_dataframe.loc[index, column] = str(
+                                start_path.joinpath(this_path)
+                            )
     return input_dataframe
