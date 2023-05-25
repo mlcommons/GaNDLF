@@ -113,7 +113,11 @@ def find_problem_type_from_parameters(parameters):
             for metric in parameters["metrics"]:
                 if isinstance(metric, str):
                     metric = metric.lower()
-                    if metric in ["dice", "dice_score", "dc", "dice_coefficient"] + surface_distance_ids:
+                    if (
+                        metric
+                        in ["dice", "dice_score", "dc", "dice_coefficient"]
+                        + surface_distance_ids
+                    ):
                         return "segmentation"
             return "classification"
     elif model_final_layer is None:
