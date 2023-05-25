@@ -12,6 +12,8 @@ from scipy.ndimage.morphology import (
     generate_binary_structure,
 )
 
+from sklearn.metrics import jaccard_score
+
 
 def _convert_tensor_to_int_label_array(input_tensor):
     """
@@ -151,6 +153,45 @@ def _nsd_base(a_to_b, b_to_a, threshold):
     fn = np.sum(b_to_a > threshold) / numel_b
     dc = (tp_a + tp_b) / (tp_a + tp_b + fp + fn + sys.float_info.min)
     return dc
+
+
+def _calculator_jaccard(
+    inp,
+    target,
+    params,
+    per_label=False,
+):
+    """
+    This function returns sensitivity and specificity.
+
+    Args:
+        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+        per_label (bool): Whether to return per-label dice scores.
+
+    Returns:
+        float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
+    """
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
+
+    jaccard, avg_counter = 0, 0
+    jaccard_per_label = []
+    for b in range(0, result_array.shape[0]):
+        for i in range(0, params["model"]["num_classes"]):
+            if i != params["model"]["ignore_label_validation"]:
+                jaccard += jaccard_score(
+                    target_array[b, i, ...], result_array[b, i, ...]
+                )
+                if per_label:
+                    jaccard_per_label.append(jaccard)
+                avg_counter += 1
+
+    if per_label:
+        return jaccard_per_label
+    else:
+        return jaccard / avg_counter
 
 
 def _calculator_sensitivity_specificity(
