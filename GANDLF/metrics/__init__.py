@@ -14,7 +14,7 @@ from .segmentation import (
     sensitivity,
     sensitivity_per_label,
     specificity_segmentation,
-    specificity_segmentationper_label,
+    specificity_segmentation_per_label,
     jaccard,
     jaccard_per_label,
 )
@@ -64,7 +64,7 @@ global_metrics_dict = {
     "sensitivity": sensitivity,
     "sensitivity_per_label": sensitivity_per_label,
     "specificity_segmentation": specificity_segmentation,
-    "specificity_segmentationper_label": specificity_segmentationper_label,
+    "specificity_segmentation_per_label": specificity_segmentation_per_label,
     "jaccard": jaccard,
     "jaccard_per_label": jaccard_per_label,
 }

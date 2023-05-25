@@ -1141,8 +1141,8 @@ def test_train_metrics_segmentation_rad_2d(device):
         "normalized_surface_dice",
         "sensitivity",
         "sensitivity_per_label",
-        "specificity",
-        "specificity_per_label",
+        "specificity_segmentation",
+        "specificity_segmentation_per_label",
         "jaccard",
         "jaccard_per_label",
     ]
@@ -1860,8 +1860,8 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "normalized_surface_dice_per_label",
         "sensitivity",
         "sensitivity_per_label",
-        "specificity",
-        "specificity_per_label",
+        "specificity_segmentation",
+        "specificity_segmentation_per_label",
         "jaccard",
         "jaccard_per_label",
     ]
