@@ -182,7 +182,10 @@ def _calculator_jaccard(
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
                 jaccard += jaccard_score(
-                    target_array[b, i, ...], result_array[b, i, ...]
+                    target_array[b, i, ...],
+                    result_array[b, i, ...],
+                    average="samples",
+                    zero_division=0,
                 )
                 if per_label:
                     jaccard_per_label.append(jaccard)
@@ -229,8 +232,8 @@ def _calculator_sensitivity_specificity(
         FN = rC - TP
         TN = np.count_nonzero((result_array != 1) & (target_array != 1))
 
-        Sens = 1.0 * TP / (TP + FN)
-        Spec = 1.0 * TN / (TN + FP)
+        Sens = 1.0 * TP / (TP + FN + sys.float_info.min)
+        Spec = 1.0 * TN / (TN + FP + sys.float_info.min)
 
         # Make Changes if both input and reference are 0 for the tissue type
         if (iC == 0) and (rC == 0):
@@ -259,7 +262,9 @@ def _calculator_sensitivity_specificity(
     if per_label:
         return torch.tensor(sensitivity_per_label), torch.tensor(specificity_per_label)
     else:
-        return torch.tensor(sensitivity / avg_counter), torch.tensor(specificity / avg_counter)
+        return torch.tensor(sensitivity / avg_counter), torch.tensor(
+            specificity / avg_counter
+        )
 
 
 def _calculator_generic_all_surface_distances(
