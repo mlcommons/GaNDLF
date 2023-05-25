@@ -42,15 +42,36 @@ except Exception as error:
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 # Handle cases where specific files need to be bundled into the final package as installed via PyPI
-dockerfiles = [item for item in os.listdir(os.path.dirname(os.path.abspath(__file__))) if (os.path.isfile(item) and item.startswith("Dockerfile-"))]
-entrypoint_files = [item for item in os.listdir(os.path.dirname(os.path.abspath(__file__))) if (os.path.isfile(item) and item.startswith("gandlf_"))]
-setup_files = ['setup.py', '.dockerignore', 'pyproject.toml', 'MANIFEST.in']
+dockerfiles = [
+    item
+    for item in os.listdir(os.path.dirname(os.path.abspath(__file__)))
+    if (os.path.isfile(item) and item.startswith("Dockerfile-"))
+]
+entrypoint_files = [
+    item
+    for item in os.listdir(os.path.dirname(os.path.abspath(__file__)))
+    if (os.path.isfile(item) and item.startswith("gandlf_"))
+]
+setup_files = ["setup.py", ".dockerignore", "pyproject.toml", "MANIFEST.in"]
 all_extra_files = dockerfiles + entrypoint_files + setup_files
 all_extra_files_pathcorrected = [os.path.join("../", item) for item in all_extra_files]
 # find_packages should only ever find these as subpackages of gandlf, not as top-level packages
 # generate this dynamically?
 # GANDLF.GANDLF is needed to prevent recursion madness in deployments
-toplevel_package_excludes = ['GANDLF.GANDLF', 'anonymize', 'cli', 'compute', 'data', 'grad_clipping', 'losses', 'metrics', 'models', 'optimizers', 'schedulers', 'utils']
+toplevel_package_excludes = [
+    "GANDLF.GANDLF",
+    "anonymize",
+    "cli",
+    "compute",
+    "data",
+    "grad_clipping",
+    "losses",
+    "metrics",
+    "models",
+    "optimizers",
+    "schedulers",
+    "utils",
+]
 
 
 requirements = [
@@ -100,7 +121,10 @@ if __name__ == "__main__":
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
         python_requires=">=3.8",
-        packages=find_packages(where=os.path.dirname(os.path.abspath(__file__)), exclude=toplevel_package_excludes),
+        packages=find_packages(
+            where=os.path.dirname(os.path.abspath(__file__)),
+            exclude=toplevel_package_excludes,
+        ),
         cmdclass={
             "install": CustomInstallCommand,
             "develop": CustomDevelopCommand,
@@ -118,6 +142,7 @@ if __name__ == "__main__":
             "gandlf_recoverConfig",
             "gandlf_deploy",
             "gandlf_optimizeModel",
+            "gandlf_generateMetrics",
         ],
         classifiers=[
             "Development Status :: 3 - Alpha",
@@ -138,7 +163,7 @@ if __name__ == "__main__":
         long_description=readme,
         long_description_content_type="text/markdown",
         include_package_data=True,
-        package_data={'GANDLF': all_extra_files_pathcorrected},
+        package_data={"GANDLF": all_extra_files_pathcorrected},
         keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
         zip_safe=False,
     )
