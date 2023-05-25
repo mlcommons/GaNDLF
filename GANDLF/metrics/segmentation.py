@@ -171,7 +171,7 @@ def _calculator_jaccard(
         per_label (bool): Whether to return per-label dice scores.
 
     Returns:
-        float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
+        float: The Jaccard score between the object(s) in ```inp``` and the object(s) in ```target```.
     """
     result_array = _convert_tensor_to_int_label_array(inp)
     target_array = _convert_tensor_to_int_label_array(target)
@@ -210,7 +210,7 @@ def _calculator_sensitivity_specificity(
         per_label (bool): Whether to return per-label dice scores.
 
     Returns:
-        float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
+        float, float: The sensitivity and specificity between the object(s) in ```inp``` and the object(s) in ```target```.
     """
     # inMask is mask of input array equal to a certain tissue (ie. all one's in tumor core)
     # Ref mask is mask of certain tissue in ground truth (ie. all one's in refernce core )
@@ -388,3 +388,33 @@ def nsd_per_label(inp, target, params):
     return _calculator_generic(
         inp, target, params, percentile=100, per_label=True, surface_dice=True
     )
+
+
+def sensitivity(inp, target, params):
+    s, _ = _calculator_sensitivity_specificity(inp, target, params)
+    return s
+
+
+def sensitivity_per_label(inp, target, params):
+    s, _ = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
+    return s
+
+
+def specificity(inp, target, params):
+    _, p = _calculator_sensitivity_specificity(inp, target, params)
+    return p
+
+
+def specificity_per_label(inp, target, params):
+    _, p = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
+    return p
+
+
+def jaccard(inp, target, params):
+    j = _calculator_jaccard(inp, target, params)
+    return j
+
+
+def jaccard_per_label(inp, target, params):
+    j = _calculator_jaccard(inp, target, params, per_label=True)
+    return j
