@@ -13,8 +13,8 @@ from .segmentation import (
     nsd_per_label,
     sensitivity,
     sensitivity_per_label,
-    specificity,
-    specificity_per_label,
+    specificity_segmentation,
+    specificity_segmentation_per_label,
     jaccard,
     jaccard_per_label,
 )
@@ -63,8 +63,8 @@ global_metrics_dict = {
     "per_label_one_hot_accuracy": per_label_accuracy,
     "sensitivity": sensitivity,
     "sensitivity_per_label": sensitivity_per_label,
-    "specificity": specificity,
-    "specificity_per_label": specificity_per_label,
+    "specificity_segmentation": specificity_segmentation,
+    "specificity_segmentation_per_label": specificity_segmentation_per_label,
     "jaccard": jaccard,
     "jaccard_per_label": jaccard_per_label,
 }

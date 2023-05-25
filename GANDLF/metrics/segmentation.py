@@ -12,8 +12,6 @@ from scipy.ndimage.morphology import (
     generate_binary_structure,
 )
 
-from sklearn.metrics import jaccard_score
-
 
 def _convert_tensor_to_int_label_array(input_tensor):
     """
@@ -178,18 +176,16 @@ def _calculator_jaccard(
 
     jaccard, avg_counter = 0, 0
     jaccard_per_label = []
-    for b in range(0, result_array.shape[0]):
-        for i in range(0, params["model"]["num_classes"]):
-            if i != params["model"]["ignore_label_validation"]:
-                jaccard += jaccard_score(
-                    target_array[b, i, ...],
-                    result_array[b, i, ...],
-                    average="samples",
-                    zero_division=0,
-                )
-                if per_label:
-                    jaccard_per_label.append(jaccard)
-                avg_counter += 1
+    for i in range(0, params["model"]["num_classes"]):
+        # this check should only happen during validation
+        if i != params["model"]["ignore_label_validation"]:
+            dice_score = dice(result_array[:, i, ...], target_array[:, i, ...])
+            # https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient#Difference_from_Jaccard
+            j_score = dice_score / (2 - dice_score)
+            jaccard += j_score
+            if per_label:
+                jaccard_per_label.append(jaccard)
+            avg_counter += 1
 
     if per_label:
         return torch.tensor(jaccard_per_label)
@@ -405,12 +401,12 @@ def sensitivity_per_label(inp, target, params):
     return s
 
 
-def specificity(inp, target, params):
+def specificity_segmentation(inp, target, params):
     _, p = _calculator_sensitivity_specificity(inp, target, params)
     return p
 
 
-def specificity_per_label(inp, target, params):
+def specificity_segmentation_per_label(inp, target, params):
     _, p = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
     return p
 
