@@ -11,6 +11,12 @@ from .segmentation import (
     hd95_per_label,
     nsd,
     nsd_per_label,
+    sensitivity,
+    sensitivity_per_label,
+    specificity,
+    specificity_per_label,
+    jaccard,
+    jaccard_per_label,
 )
 from .regression import classification_accuracy, balanced_acc_score, per_label_accuracy
 from .generic import (
@@ -55,6 +61,12 @@ global_metrics_dict = {
     "iou": iou_score,
     "balanced_accuracy": balanced_acc_score,
     "per_label_one_hot_accuracy": per_label_accuracy,
+    "sensitivity": sensitivity,
+    "sensitivity_per_label": sensitivity_per_label,
+    "specificity": specificity,
+    "specificity_per_label": specificity_per_label,
+    "jaccard": jaccard,
+    "jaccard_per_label": jaccard_per_label,
 }
 
 
