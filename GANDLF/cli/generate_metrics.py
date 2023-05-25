@@ -1,3 +1,4 @@
+import yaml
 from pprint import pprint
 import pandas as pd
 import SimpleITK as sitk
@@ -17,13 +18,14 @@ from GANDLF.metrics.segmentation import (
 # output: metrics.csv (based on the config)
 
 
-def generate_metrics_dict(input_csv: str, config: str) -> dict:
+def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -> dict:
     """
     This function generates metrics from the input csv and the config.
 
     Args:
         input_csv (str): The input CSV.
         config (str): The input yaml config.
+        outputfile (str, optional): The output file to save the metrics. Defaults to None.
 
     Returns:
         dict: The metrics dictionary.
@@ -104,3 +106,6 @@ def generate_metrics_dict(input_csv: str, config: str) -> dict:
                 )
 
     pprint(overall_stats_dict)
+    if outputfile is not None:
+        with open(outputfile, "w") as outfile:
+            yaml.dump(overall_stats_dict, outfile)
