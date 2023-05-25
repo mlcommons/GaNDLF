@@ -20,8 +20,8 @@ def dice(predicted, target):
         Computed Dice Score
 
     """
-    predicted_flat = predicted.contiguous().view(-1)
-    label_flat = target.contiguous().view(-1)
+    predicted_flat = predicted.flatten()
+    label_flat = target.flatten()
     intersection = (predicted_flat * label_flat).sum()
 
     dice_score = (2.0 * intersection + sys.float_info.min) / (
