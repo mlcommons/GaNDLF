@@ -9,6 +9,7 @@ from GANDLF.metrics import overall_stats, multi_class_dice
 from GANDLF.metrics.segmentation import (
     _calculator_generic_all_surface_distances,
     _calculator_sensitivity_specificity,
+    _calculator_jaccard,
 )
 
 # input: 1 csv with 3 columns: subjectid, prediction, ground_truth
@@ -84,6 +85,13 @@ def generate_metrics_dict(input_csv: str, config: str) -> dict:
                         "specificity_" + str(class_index)
                     ],
                 ) = _calculator_sensitivity_specificity(
+                    pred_image_one_hot,
+                    label_image_one_hot,
+                    parameters,
+                )
+                overall_stats_dict[row["subject_id"]][
+                    "jaccard_" + str(class_index)
+                ] = _calculator_jaccard(
                     pred_image_one_hot,
                     label_image_one_hot,
                     parameters,
