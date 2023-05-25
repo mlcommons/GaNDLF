@@ -189,9 +189,9 @@ def _calculator_jaccard(
                 avg_counter += 1
 
     if per_label:
-        return jaccard_per_label
+        return torch.tensor(jaccard_per_label)
     else:
-        return jaccard / avg_counter
+        return torch.tensor(jaccard / avg_counter)
 
 
 def _calculator_sensitivity_specificity(
@@ -257,9 +257,9 @@ def _calculator_sensitivity_specificity(
                 avg_counter += 1
 
     if per_label:
-        return sensitivity_per_label, specificity_per_label
+        return torch.tensor(sensitivity_per_label), torch.tensor(specificity_per_label)
     else:
-        return sensitivity / avg_counter, specificity / avg_counter
+        return torch.tensor(sensitivity / avg_counter), torch.tensor(specificity / avg_counter)
 
 
 def _calculator_generic_all_surface_distances(
@@ -315,13 +315,13 @@ def _calculator_generic_all_surface_distances(
                     avg_counter += 1
 
     if per_label:
-        (
+        return (
             torch.tensor(return_nsd),
             torch.tensor(return_hd100),
             torch.tensor(return_hd95),
         )
     else:
-        (
+        return (
             torch.tensor(return_nsd / avg_counter),
             torch.tensor(return_hd100 / avg_counter),
             torch.tensor(return_hd95 / avg_counter),
