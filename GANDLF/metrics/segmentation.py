@@ -266,6 +266,7 @@ def _calculator_generic_all_surface_distances(
     inp,
     target,
     params,
+    per_label=False,
 ):
     """
     This function returns hd100, hd95, and nsd.
@@ -282,7 +283,10 @@ def _calculator_generic_all_surface_distances(
     target_array = _convert_tensor_to_int_label_array(target)
 
     avg_counter = 0
-    return_hd100, return_hd95, return_nsd = 0, 0, 0
+    if per_label:
+        return_hd100, return_hd95, return_nsd = [], [], []
+    else:
+        return_hd100, return_hd95, return_nsd = 0, 0, 0
     for b in range(0, result_array.shape[0]):
         for i in range(0, params["model"]["num_classes"]):
             if i != params["model"]["ignore_label_validation"]:
@@ -297,16 +301,31 @@ def _calculator_generic_all_surface_distances(
                     params["subject_spacing"][b],
                 )
                 threshold = max(min(params["subject_spacing"][0]), 1).item()
-                return_nsd += _nsd_base(hd1, hd2, threshold)
-                return_hd100 += np.percentile(np.hstack((hd1, hd2)), 100)
-                return_hd95 += np.percentile(np.hstack((hd1, hd2)), 95)
-                avg_counter += 1
+                temp_nsd = _nsd_base(hd1, hd2, threshold)
+                temp_hd100 = np.percentile(np.hstack((hd1, hd2)), 100)
+                temp_hd95 = np.percentile(np.hstack((hd1, hd2)), 95)
+                if per_label:
+                    return_nsd.append(temp_nsd)
+                    return_hd100.append(temp_hd100)
+                    return_hd95.append(temp_hd95)
+                else:
+                    return_nsd += temp_nsd
+                    return_hd100 += temp_hd100
+                    return_hd95 += temp_hd95
+                    avg_counter += 1
 
-    return (
-        torch.tensor(return_nsd / avg_counter),
-        torch.tensor(return_hd100 / avg_counter),
-        torch.tensor(return_hd95 / avg_counter),
-    )
+    if per_label:
+        (
+            torch.tensor(return_nsd),
+            torch.tensor(return_hd100),
+            torch.tensor(return_hd95),
+        )
+    else:
+        (
+            torch.tensor(return_nsd / avg_counter),
+            torch.tensor(return_hd100 / avg_counter),
+            torch.tensor(return_hd95 / avg_counter),
+        )
 
 
 def _calculator_generic(
@@ -329,44 +348,20 @@ def _calculator_generic(
         per_label (bool, optional): Whether the hausdorff needs to be calculated per label or not. Defaults to False.
 
     Returns:
-        float or list: The symmetric Hausdorff Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
+        float or list: The symmetric Hausdorff Distance or Normalized Surface Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
 
     See also:
         :func:`hd`
     """
-    result_array = _convert_tensor_to_int_label_array(inp)
-    target_array = _convert_tensor_to_int_label_array(target)
-
-    hd = 0
-    avg_counter = 0
-    hd_per_label = []
-    for b in range(0, result_array.shape[0]):
-        for i in range(0, params["model"]["num_classes"]):
-            if i != params["model"]["ignore_label_validation"]:
-                hd1 = __surface_distances(
-                    result_array[b, i, ...],
-                    target_array[b, i, ...],
-                    params["subject_spacing"][b],
-                )
-                hd2 = __surface_distances(
-                    target_array[b, i, ...],
-                    result_array[b, i, ...],
-                    params["subject_spacing"][b],
-                )
-                if surface_dice:
-                    # ensure threshold always at least 1
-                    threshold = max(min(params["subject_spacing"][0]), 1).item()
-                    current_hd = _nsd_base(hd1, hd2, threshold)
-                else:
-                    current_hd = np.percentile(np.hstack((hd1, hd2)), percentile)
-                hd += current_hd
-                hd_per_label.append(current_hd)
-                avg_counter += 1
-
-    if per_label:
-        return torch.tensor(hd_per_label)
+    _nsd, _hd100, _hd95 = _calculator_generic_all_surface_distances(
+        inp, target, params, per_label=per_label
+    )
+    if surface_dice:
+        return _nsd
+    elif percentile == 95:
+        return _hd95
     else:
-        return torch.tensor(hd / avg_counter)
+        return _hd100
 
 
 def hd95(inp, target, params):
