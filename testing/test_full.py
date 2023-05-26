@@ -2968,7 +2968,7 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
     print("passed")
 
 
-def test_metrics_cli_rad_nd():
+def test_generic_cli_function_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
     for dim in ["2d", "3d"]:
         for problem_type in ["segmentation", "classification"]:
