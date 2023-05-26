@@ -1,7 +1,6 @@
 import yaml
 from pprint import pprint
 import pandas as pd
-import SimpleITK as sitk
 import torch
 import torchio
 
