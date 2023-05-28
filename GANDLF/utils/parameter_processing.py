@@ -1,4 +1,5 @@
 from GANDLF.utils.modelbase import get_modelbase_final_layer
+from GANDLF.metrics import surface_distance_ids
 
 
 def populate_header_in_parameters(parameters, headers):
@@ -53,7 +54,7 @@ def find_problem_type(parameters, model_final_layer):
     This function determines the type of problem at hand - regression, classification or segmentation
 
     Args:
-        headersFromCSV (dict): The CSV headers dictionary.
+        parameters (dict): The parameters passed by the user yaml.
         model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
 
     Returns:
@@ -81,6 +82,46 @@ def find_problem_type(parameters, model_final_layer):
             return "classification"
     else:
         return "segmentation"
+
+
+def find_problem_type_from_parameters(parameters):
+    """
+    This function determines the type of problem at hand - regression, classification or segmentation
+
+    Args:
+        parameters (dict): The parameters passed by the user yaml.
+
+    Returns:
+        str: The problem type (regression/classification/segmentation).
+    """
+    # check if classification has been requested
+    final_layer_classification_phrases = [
+        "classification_but_not_softmax",
+        "logits",
+        "classification_without_softmax",
+        "classification_with_sigmoid",
+    ]
+    model_final_layer = parameters["model"]["final_layer"]
+    if isinstance(model_final_layer, str):
+        model_final_layer = model_final_layer.lower()
+        # check if regression has been requested
+        if model_final_layer in ["regression", "none"]:
+            return "regression"
+        elif model_final_layer in final_layer_classification_phrases:
+            return "classification"
+        else:
+            for metric in parameters["metrics"]:
+                if isinstance(metric, str):
+                    metric = metric.lower()
+                    if (
+                        metric
+                        in ["dice", "dice_score", "dc", "dice_coefficient"]
+                        + surface_distance_ids
+                    ):
+                        return "segmentation"
+            return "classification"
+    elif model_final_layer is None:
+        return "regression"
 
 
 def populate_channel_keys_in_params(data_loader, parameters):

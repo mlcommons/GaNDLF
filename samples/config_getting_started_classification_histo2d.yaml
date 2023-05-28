@@ -64,7 +64,7 @@ model:
   dimension: 2
   final_layer: softmax
   ignore_label_validation: null
-  norm_type: none
+  norm_type: batch
   num_channels: 3
   print_summary: false
   save_at_every_epoch: false
@@ -97,4 +97,3 @@ version:
   maximum: 0.0.17
   minimum: 0.0.14
 weighted_loss: true
-which_model: resunet

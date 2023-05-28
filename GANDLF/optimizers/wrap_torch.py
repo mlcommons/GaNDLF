@@ -9,7 +9,7 @@ from torch.optim import (
     Adadelta,
     Adagrad,
     RMSprop,
-    RAdam
+    RAdam,
 )
 
 
@@ -102,6 +102,7 @@ def adamw(parameters):
 
     """
     return adam(parameters, opt_type="AdamW")
+
 
 def adamax(parameters):
     """
@@ -224,14 +225,15 @@ def rmsprop(parameters):
         weight_decay=parameters["optimizer"].get("weight_decay", 0),
     )
 
+
 def radam(parameters):
     """
-    Creates a RAdam optimizer from the PyTorch `torch.optim` module using the input parameters. 
-    
-    Args: 
+    Creates a RAdam optimizer from the PyTorch `torch.optim` module using the input parameters.
+
+    Args:
         parameters (dict): A dictionary containing the input parameters for the optimizer.
-        
-    Returns: 
+
+    Returns:
         optimizer (torch.optim.RAdam): A RAdam optimizer.
     """
     # Create the optimizer using the input parameters
@@ -243,4 +245,3 @@ def radam(parameters):
         weight_decay=parameters["optimizer"].get("weight_decay", 0),
         foreach=parameters["optimizer"].get("foreach", None),
     )
-
