@@ -150,7 +150,6 @@ class PatchManager:
             ] = True
             # Append this patch to the list of patches to be saved
             self.patches.append(patch)
-            
             return True
 
         except Exception as e:
