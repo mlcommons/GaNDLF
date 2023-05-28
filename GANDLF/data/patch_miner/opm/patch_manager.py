@@ -148,7 +148,6 @@ class PatchManager:
                 max(mined_start_x, 0) : self.width_bound_check(mined_end_x),
                 max(mined_start_y, 0) : self.width_bound_check(mined_end_y),
             ] = True
-            
             # Append this patch to the list of patches to be saved
             self.patches.append(patch)
             
