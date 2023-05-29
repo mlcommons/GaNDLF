@@ -254,7 +254,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
 
-        if np.sum(e < 50) / (patch_size[0] * patch_size[1]) > 0.9 or (np.sum(patch_hsv[...,0] < 128) / (patch_size[0] * patch_size[1])) > 0.95:
+        if np.sum(e < 50) / (patch_size[0] * patch_size[1]) > 0.95 or (np.sum(patch_hsv[...,0] < 128) / (patch_size[0] * patch_size[1])) > 0.97:
             return False
         
         #Assume patch is valid
@@ -280,10 +280,10 @@ def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation 
         percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_saturation) / (patch_size[0] * patch_size[1])
         percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size[0] * patch_size[1])
 
-        if percent_pixel_2 > 0.97 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.97:
+        if percent_pixel_2 > 0.98 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.98:
             if percent_pixel_2 < 0.25:
                 return False
-        elif (percent_pixel_2 > 0.9 and percent_pixel_3 > 0.9) or percent_pixel_b > 0.9 or percent_pixels > 0.65:
+        elif (percent_pixel_2 > 0.95 and percent_pixel_3 > 0.95) or percent_pixel_b > 0.95 or percent_pixels > 0.75:
             return False
 
         # assume that the patch is valid
