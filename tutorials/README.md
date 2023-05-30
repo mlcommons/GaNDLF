@@ -12,7 +12,7 @@ Here are some of the tutorials that are available:
 ### Jupyter Notebook based tutorials
 
 - Create a new directory
-Replicate the instructions for the [MEDMNIST Pathology tutorial](MEDMNIST Pathology images in a notebook: https://github.com/mlcommons/GaNDLF/tree/master/tutorial/classification_medmnist_notebook). This should create a fully-functional tutorial that can be run by anyone, either on Codespaces, or Colab, or locally.
+Replicate the instructions for the [MEDMNIST Pathology tutorial](MEDMNIST Pathology images in a notebook: https://github.com/mlcommons/GaNDLF/tree/master/tutorials/classification_medmnist_notebook). This should create a fully-functional tutorial that can be run by anyone, either on Codespaces, or Colab, or locally.
 
 ### Markdown based tutorials
 
