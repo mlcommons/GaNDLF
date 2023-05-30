@@ -26,3 +26,6 @@ Create a new directory for the tutorial, and add a README.md file in it. The REA
 - Troubleshooting
 - References - if any
 
+## Questions?
+
+For more information or any support, please post on the [Discussions](https://github.com/mlcommons/GaNDLF/discussions) section or [email us](mailto:gandlf@mlcommons.org).
