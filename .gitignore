@@ -27,11 +27,11 @@ coverage.xml
 mlcube/workspace/*
 !mlcube/workspace/config.yml
 !mlcube/workspace/channelIDs.yml
-tutorial/classification_medmnist_notebook/dataset/pathmnist
-tutorial/classification_medmnist_notebook/medmnist/dataset/pathmnist
-tutorial/classification_medmnist_notebook/output_stats
+tutorials/classification_medmnist_notebook/dataset/pathmnist
+tutorials/classification_medmnist_notebook/medmnist/dataset/pathmnist
+tutorials/classification_medmnist_notebook/output_stats
 # Ingnore any ipynbcheckpoints anywhere
 **/.ipynb_checkpoints/*
 .jupyter_ystore.db
-tutorial/classification_medmnist_notebook/model
-tutorial/classification_medmnist_notebook/dataset/*.csv
+tutorials/classification_medmnist_notebook/model
+tutorials/classification_medmnist_notebook/dataset/*.csv
