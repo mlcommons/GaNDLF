@@ -3,4 +3,4 @@
 set -e
 
 # Start the tutorial
-jupyter lab --notebook-dir=/workspaces/GaNDLF/tutorial
+jupyter lab --notebook-dir=/workspaces/GaNDLF/tutorial/classification_medmnist_notebook/
