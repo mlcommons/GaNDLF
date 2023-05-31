@@ -225,11 +225,11 @@ You can use the following code snippet to run GaNDLF:
 
 ## Generate Metrics 
 
-GaNDLF provides a script to generate metrics for the training and inference. The script can be used as follows:
+GaNDLF provides a script to generate metrics after an inference process is done.The script can be used as follows:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_run \
+(venv_gandlf) $> python gandlf_generateMetrics \
   ## -h, --help         show help message and exit
   ## -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
