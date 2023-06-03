@@ -11,8 +11,9 @@ Here are some of the tutorials that are available:
 
 ### Jupyter Notebook based tutorials
 
-- Create a new directory
-Replicate the instructions for the [MEDMNIST Pathology tutorial](MEDMNIST Pathology images in a notebook: https://github.com/mlcommons/GaNDLF/tree/master/tutorials/classification_medmnist_notebook). This should create a fully-functional tutorial that can be run by anyone, either on Codespaces, or Colab, or locally.
+- Create a new directory and replicate the instructions for the [MEDMNIST Pathology tutorial](https://github.com/mlcommons/GaNDLF/tree/master/tutorials/classification_medmnist_notebook). This should create a fully-functional tutorial that can be run by anyone, either on Codespaces, or Colab, or locally.
+- Ensure that the notebook is saved with the output cells, so that the output can be seen without running the notebook.
+- Add any relevant information directly in the notebook.
 
 ### Markdown based tutorials
 
