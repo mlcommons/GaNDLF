@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+# Start the tutorial
+jupyter lab --notebook-dir=/workspaces/GaNDLF/tutorials/classification_medmnist_notebook/
