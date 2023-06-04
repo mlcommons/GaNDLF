@@ -58,4 +58,4 @@ version:
   maximum: 0.0.17
   minimum: 0.0.14
 weighted_loss: True
-which_model: resunet
+

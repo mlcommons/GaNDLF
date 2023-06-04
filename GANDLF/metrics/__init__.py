@@ -11,9 +11,22 @@ from .segmentation import (
     hd95_per_label,
     nsd,
     nsd_per_label,
+    sensitivity,
+    sensitivity_per_label,
+    specificity_segmentation,
+    specificity_segmentation_per_label,
+    jaccard,
+    jaccard_per_label,
 )
 from .regression import classification_accuracy, balanced_acc_score, per_label_accuracy
-from .generic import recall_score, precision_score, iou_score, f1_score, accuracy, specificity_score
+from .generic import (
+    recall_score,
+    precision_score,
+    iou_score,
+    f1_score,
+    accuracy,
+    specificity_score,
+)
 import GANDLF.metrics.classification as classification
 import GANDLF.metrics.regression as regression
 
@@ -48,6 +61,12 @@ global_metrics_dict = {
     "iou": iou_score,
     "balanced_accuracy": balanced_acc_score,
     "per_label_one_hot_accuracy": per_label_accuracy,
+    "sensitivity": sensitivity,
+    "sensitivity_per_label": sensitivity_per_label,
+    "specificity_segmentation": specificity_segmentation,
+    "specificity_segmentation_per_label": specificity_segmentation_per_label,
+    "jaccard": jaccard,
+    "jaccard_per_label": jaccard_per_label,
 }
 
 

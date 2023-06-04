@@ -153,6 +153,182 @@ def _nsd_base(a_to_b, b_to_a, threshold):
     return dc
 
 
+def _calculator_jaccard(
+    inp,
+    target,
+    params,
+    per_label=False,
+):
+    """
+    This function returns sensitivity and specificity.
+
+    Args:
+        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+        per_label (bool): Whether to return per-label dice scores.
+
+    Returns:
+        float: The Jaccard score between the object(s) in ```inp``` and the object(s) in ```target```.
+    """
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
+
+    jaccard, avg_counter = 0, 0
+    jaccard_per_label = []
+    for i in range(0, params["model"]["num_classes"]):
+        # this check should only happen during validation
+        if i != params["model"]["ignore_label_validation"]:
+            dice_score = dice(result_array[:, i, ...], target_array[:, i, ...])
+            # https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient#Difference_from_Jaccard
+            j_score = dice_score / (2 - dice_score)
+            jaccard += j_score
+            if per_label:
+                jaccard_per_label.append(jaccard)
+            avg_counter += 1
+
+    if per_label:
+        return torch.tensor(jaccard_per_label)
+    else:
+        return torch.tensor(jaccard / avg_counter)
+
+
+def _calculator_sensitivity_specificity(
+    inp,
+    target,
+    params,
+    per_label=False,
+):
+    """
+    This function returns sensitivity and specificity.
+
+    Args:
+        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+        per_label (bool): Whether to return per-label dice scores.
+
+    Returns:
+        float, float: The sensitivity and specificity between the object(s) in ```inp``` and the object(s) in ```target```.
+    """
+    # inMask is mask of input array equal to a certain tissue (ie. all one's in tumor core)
+    # Ref mask is mask of certain tissue in ground truth (ie. all one's in refernce core )
+    # overlap is mask where the two equal each other
+    # They are of the total number of voxels of the ground truth brain mask
+
+    def get_sensitivity_and_specificity(result_array, target_array):
+        iC = np.sum(result_array)
+        rC = np.sum(target_array)
+
+        overlap = np.where((result_array == target_array), 1, 0)
+
+        # Where they agree are both equal to that value
+        TP = overlap[result_array == 1].sum()
+        FP = iC - TP
+        FN = rC - TP
+        TN = np.count_nonzero((result_array != 1) & (target_array != 1))
+
+        Sens = 1.0 * TP / (TP + FN + sys.float_info.min)
+        Spec = 1.0 * TN / (TN + FP + sys.float_info.min)
+
+        # Make Changes if both input and reference are 0 for the tissue type
+        if (iC == 0) and (rC == 0):
+            Sens = 1.0
+
+        return Sens, Spec
+
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
+
+    sensitivity, specificity, avg_counter = 0, 0, 0
+    sensitivity_per_label, specificity_per_label = [], []
+    for b in range(0, result_array.shape[0]):
+        for i in range(0, params["model"]["num_classes"]):
+            if i != params["model"]["ignore_label_validation"]:
+                s, p = get_sensitivity_and_specificity(
+                    result_array[b, i, ...], target_array[b, i, ...]
+                )
+                sensitivity += s
+                specificity += p
+                if per_label:
+                    sensitivity_per_label.append(s)
+                    specificity_per_label.append(p)
+                avg_counter += 1
+
+    if per_label:
+        return torch.tensor(sensitivity_per_label), torch.tensor(specificity_per_label)
+    else:
+        return torch.tensor(sensitivity / avg_counter), torch.tensor(
+            specificity / avg_counter
+        )
+
+
+def _calculator_generic_all_surface_distances(
+    inp,
+    target,
+    params,
+    per_label=False,
+):
+    """
+    This function returns hd100, hd95, and nsd.
+
+    Args:
+        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        float, float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
+    """
+    result_array = _convert_tensor_to_int_label_array(inp)
+    target_array = _convert_tensor_to_int_label_array(target)
+
+    avg_counter = 0
+    if per_label:
+        return_hd100, return_hd95, return_nsd = [], [], []
+    else:
+        return_hd100, return_hd95, return_nsd = 0, 0, 0
+    for b in range(0, result_array.shape[0]):
+        for i in range(0, params["model"]["num_classes"]):
+            if i != params["model"]["ignore_label_validation"]:
+                hd1 = __surface_distances(
+                    result_array[b, i, ...],
+                    target_array[b, i, ...],
+                    params["subject_spacing"][b],
+                )
+                hd2 = __surface_distances(
+                    target_array[b, i, ...],
+                    result_array[b, i, ...],
+                    params["subject_spacing"][b],
+                )
+                threshold = max(min(params["subject_spacing"][0]), 1).item()
+                temp_nsd = _nsd_base(hd1, hd2, threshold)
+                temp_hd100 = np.percentile(np.hstack((hd1, hd2)), 100)
+                temp_hd95 = np.percentile(np.hstack((hd1, hd2)), 95)
+                if per_label:
+                    return_nsd.append(temp_nsd)
+                    return_hd100.append(temp_hd100)
+                    return_hd95.append(temp_hd95)
+                else:
+                    return_nsd += temp_nsd
+                    return_hd100 += temp_hd100
+                    return_hd95 += temp_hd95
+                    avg_counter += 1
+
+    if per_label:
+        return (
+            torch.tensor(return_nsd),
+            torch.tensor(return_hd100),
+            torch.tensor(return_hd95),
+        )
+    else:
+        return (
+            torch.tensor(return_nsd / avg_counter),
+            torch.tensor(return_hd100 / avg_counter),
+            torch.tensor(return_hd95 / avg_counter),
+        )
+
+
 def _calculator_generic(
     inp,
     target,
@@ -173,44 +349,20 @@ def _calculator_generic(
         per_label (bool, optional): Whether the hausdorff needs to be calculated per label or not. Defaults to False.
 
     Returns:
-        float or list: The symmetric Hausdorff Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
+        float or list: The symmetric Hausdorff Distance or Normalized Surface Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
 
     See also:
         :func:`hd`
     """
-    result_array = _convert_tensor_to_int_label_array(inp)
-    target_array = _convert_tensor_to_int_label_array(target)
-
-    hd = 0
-    avg_counter = 0
-    hd_per_label = []
-    for b in range(0, result_array.shape[0]):
-        for i in range(0, params["model"]["num_classes"]):
-            if i != params["model"]["ignore_label_validation"]:
-                hd1 = __surface_distances(
-                    result_array[b, i, ...],
-                    target_array[b, i, ...],
-                    params["subject_spacing"][b],
-                )
-                hd2 = __surface_distances(
-                    target_array[b, i, ...],
-                    result_array[b, i, ...],
-                    params["subject_spacing"][b],
-                )
-                if surface_dice:
-                    # ensure threshold always at least 1
-                    threshold = max(min(params["subject_spacing"][0]), 1).item()
-                    current_hd = _nsd_base(hd1, hd2, threshold)
-                else:
-                    current_hd = np.percentile(np.hstack((hd1, hd2)), percentile)
-                hd += current_hd
-                hd_per_label.append(current_hd)
-                avg_counter += 1
-
-    if per_label:
-        return torch.tensor(hd_per_label)
+    _nsd, _hd100, _hd95 = _calculator_generic_all_surface_distances(
+        inp, target, params, per_label=per_label
+    )
+    if surface_dice:
+        return _nsd
+    elif percentile == 95:
+        return _hd95
     else:
-        return torch.tensor(hd / avg_counter)
+        return _hd100
 
 
 def hd95(inp, target, params):
@@ -237,3 +389,33 @@ def nsd_per_label(inp, target, params):
     return _calculator_generic(
         inp, target, params, percentile=100, per_label=True, surface_dice=True
     )
+
+
+def sensitivity(inp, target, params):
+    s, _ = _calculator_sensitivity_specificity(inp, target, params)
+    return s
+
+
+def sensitivity_per_label(inp, target, params):
+    s, _ = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
+    return s
+
+
+def specificity_segmentation(inp, target, params):
+    _, p = _calculator_sensitivity_specificity(inp, target, params)
+    return p
+
+
+def specificity_segmentation_per_label(inp, target, params):
+    _, p = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
+    return p
+
+
+def jaccard(inp, target, params):
+    j = _calculator_jaccard(inp, target, params)
+    return j
+
+
+def jaccard_per_label(inp, target, params):
+    j = _calculator_jaccard(inp, target, params, per_label=True)
+    return j

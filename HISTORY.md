@@ -1,5 +1,5 @@
 ## 0.0.17
-
+- Added a CLI for metrics computation
 
 ## 0.0.16
 - Added a script "gandlf_deploy", allowing deployment of models into MLCubes (currently requires Docker)

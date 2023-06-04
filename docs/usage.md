@@ -223,6 +223,39 @@ You can use the following code snippet to run GaNDLF:
 - However, if you are trying to perform inference on full WSIs, `modality` should be kept as `histo`.
 
 
+## Generate Metrics 
+
+GaNDLF provides a script to generate metrics after an inference process is done.The script can be used as follows:
+
+```bash
+# continue from previous shell
+(venv_gandlf) $> python gandlf_generateMetrics \
+  ## -h, --help         show help message and exit
+  ## -v, --version      Show program's version number and exit.
+  -c , --config       The configuration file (contains all the information related to the training/inference session)
+  -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'
+  -o , --outputfile   Location to save the output dictionary. If not provided, will print to stdout.
+```
+
+Once you have your CSV in the specific format, you can pass it on to generate the metrics. Here is an example for segmentation:
+
+```csv
+SubjectID,Target,Prediction
+001,/path/to/001/target.nii.gz,/path/to/001/prediction.nii.gz
+002,/path/to/002/target.nii.gz,/path/to/001/prediction.nii.gz
+...
+```
+
+Similarly for classification or regression (`A`, `B`, `C`, `D` are integers for classification and floats for regression):
+
+```csv
+SubjectID,Target,Prediction
+001,A,B
+002,C,D
+...
+```
+
+
 ## Parallelize the Training
 
 ### Multi-GPU training
