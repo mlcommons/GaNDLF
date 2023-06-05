@@ -272,6 +272,7 @@ def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation 
         Returns:
             bool: Whether the patch is valid (True) or not (False)
         """    
+        
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
@@ -285,7 +286,6 @@ def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation 
                 return False
         elif (percent_pixel_2 > 0.95 and percent_pixel_3 > 0.95) or percent_pixel_b > 0.95 or percent_pixels > 0.75:
             return False
-
         # assume that the patch is valid
         return True
     
