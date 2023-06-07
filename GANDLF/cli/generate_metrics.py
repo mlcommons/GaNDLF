@@ -44,8 +44,10 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
 
     overall_stats_dict = {}
     parameters = parseConfig(config)
-    problem_type = find_problem_type_from_parameters(parameters)
-    parameters["problem_type"] = problem_type
+    problem_type = parameters.get("problem_type", None)
+    if problem_type is None:
+        problem_type = find_problem_type_from_parameters(parameters)
+        parameters["problem_type"] = problem_type
 
     if problem_type == "regression" or problem_type == "classification":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
@@ -131,6 +133,10 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             overall_stats_dict[current_subject_id] = {}
             target_image = sitk.ReadImage(row["target"])
             pred_image = sitk.ReadImage(row["prediction"])
+            if "vector" in target_image.GetPixelIDTypeAsString().lower():
+                target_image = sitk.ReadImage(row["target"], sitk.sitkFloat32)
+            if "vector" in pred_image.GetPixelIDTypeAsString().lower():
+                pred_image = sitk.ReadImage(row["prediction"], sitk.sitkFloat32)
             stats_filter = sitk.StatisticsImageFilter()
             stats_filter.Execute(target_image)
             max_target = stats_filter.GetMaximum()
@@ -154,9 +160,60 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                     + sys.float_info.epsilon
                 )
             )
+
             sii_filter = sitk.SimilarityIndexImageFilter()
             sii_filter.Execute(target_image, pred_image)
-            overall_stats_dict[current_subject_id]["ssim"] = sii_filter.GetSimilarity()
+            overall_stats_dict[current_subject_id][
+                "ssim"
+            ] = sii_filter.GetSimilarityIndex()
+            
+            ### correlation metrics
+            # # create a temp mask
+            # temp_mask_array = sitk.GetArrayFromImage(target_image)
+            # temp_mask_array = np.ones(temp_mask_array.shape).astype(np.float32)
+            # temp_mask = sitk.GetImageFromArray(temp_mask_array)
+            # caster = sitk.CastImageFilter()
+            # caster.SetOutputPixelType(target_image.GetPixelID())
+            # temp_mask = caster.Execute(temp_mask)
+            # temp_mask.CopyInformation(target_image)
+
+            # from time import time
+            # start = time()
+
+            # correlation_filter = sitk.NormalizedCorrelationImageFilter()
+            # corr_image = correlation_filter.Execute(pred_image, temp_mask, target_image)
+            # stats_filter.Execute(corr_image)
+            # overall_stats_dict[current_subject_id]["ncc_mean"] = stats_filter.GetMean()
+            # overall_stats_dict[current_subject_id]["ncc_std"] = stats_filter.GetSigma()
+            # overall_stats_dict[current_subject_id][
+            #     "ncc_max"
+            # ] = stats_filter.GetMaximum()
+            # overall_stats_dict[current_subject_id][
+            #     "ncc_min"
+            # ] = stats_filter.GetMinimum()
+
+            # end = time()
+            # print("Time taken for NCC: ", end - start)
+            # start = time()
+
+            correlation_filter = sitk.FFTNormalizedCorrelationImageFilter()
+            corr_image = correlation_filter.Execute(target_image, pred_image)
+            stats_filter.Execute(corr_image)
+            overall_stats_dict[current_subject_id][
+                "ncc_fft_mean"
+            ] = stats_filter.GetMean()
+            overall_stats_dict[current_subject_id][
+                "ncc_fft_std"
+            ] = stats_filter.GetSigma()
+            overall_stats_dict[current_subject_id][
+                "ncc_fft_max"
+            ] = stats_filter.GetMaximum()
+            overall_stats_dict[current_subject_id][
+                "ncc_fft_min"
+            ] = stats_filter.GetMinimum()
+
+            # end = time()
+            # print("Time taken for NCC FFT: ", end - start)
 
     pprint(overall_stats_dict)
     if outputfile is not None:
