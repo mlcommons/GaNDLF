@@ -1,8 +1,10 @@
-import yaml
+import yaml, math, sys
 from pprint import pprint
 import pandas as pd
 import torch
 import torchio
+import SimpleITK as sitk
+import numpy as np
 
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
@@ -122,6 +124,39 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                     label_image_one_hot,
                     parameters,
                 ).item()
+    elif problem_type == "synthesis":
+        for _, row in input_df.iterrows():
+            current_subject_id = row[headers["subjectid"]]
+            overall_stats_dict[current_subject_id] = {}
+            overall_stats_dict[current_subject_id] = {}
+            target_image = sitk.ReadImage(row["target"])
+            pred_image = sitk.ReadImage(row["prediction"])
+            stats_filter = sitk.StatisticsImageFilter()
+            stats_filter.Execute(target_image)
+            max_target = stats_filter.GetMaximum()
+            min_target = stats_filter.GetMinimum()
+            sq_diff = sitk.SquaredDifference(target_image, pred_image)
+            stats_filter.Execute(sq_diff)
+            overall_stats_dict[current_subject_id]["mse"] = stats_filter.GetMean()
+            overall_stats_dict[current_subject_id]["rmse"] = stats_filter.GetSigma()
+            # https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio#Definition
+            overall_stats_dict[current_subject_id]["psnr_0"] = 10 * math.log10(
+                max_target**2
+                / (
+                    overall_stats_dict[current_subject_id]["mse"]
+                    + sys.float_info.epsilon
+                )
+            )
+            overall_stats_dict[current_subject_id]["psnr_1"] = 10 * math.log10(
+                (max_target - min_target) ** 2
+                / (
+                    overall_stats_dict[current_subject_id]["mse"]
+                    + sys.float_info.epsilon
+                )
+            )
+            sii_filter = sitk.SimilarityIndexImageFilter()
+            sii_filter.Execute(target_image, pred_image)
+            overall_stats_dict[current_subject_id]["ssim"] = sii_filter.GetSimilarity()
 
     pprint(overall_stats_dict)
     if outputfile is not None:
