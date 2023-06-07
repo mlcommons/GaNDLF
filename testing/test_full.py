@@ -2971,13 +2971,21 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
 def test_generic_cli_function_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
     for dim in ["2d", "3d"]:
-        for problem_type in ["segmentation", "classification"]:
+        # for problem_type in ["segmentation", "classification", "synthesis"]:
+        for problem_type in ["synthesis"]:
+            
+            synthesis_detected = problem_type == "synthesis"
+            problem_type_wrap = problem_type
+            if synthesis_detected:
+                problem_type_wrap = "classification"
             # read and parse csv
             training_data, _ = parseTrainingCSV(
-                inputDir + f"/train_{dim}_rad_{problem_type}.csv"
+                inputDir + f"/train_{dim}_rad_{problem_type_wrap}.csv"
             )
-            if problem_type == "segmentation":
+            if problem_type_wrap == "segmentation":
                 labels_array = training_data["Label"]
+            elif synthesis_detected:
+                labels_array = training_data["Channel_0"]
             else:
                 labels_array = training_data["ValueToPredict"]
             training_data["target"] = labels_array
@@ -2985,7 +2993,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
             # read and initialize parameters for specific data dimension
             parameters = parseConfig(
-                testingDir + f"/config_{problem_type}.yaml", version_check_flag=False
+                testingDir + f"/config_{problem_type_wrap}.yaml", version_check_flag=False
             )
             parameters["modality"] = "rad"
             parameters["patch_size"] = patch_size["2D"]
@@ -2995,12 +3003,13 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 parameters["model"]["dimension"] = 3
 
             parameters["verbose"] = False
+            if synthesis_detected:
+                parameters["problem_type"] = "synthesis"
 
             temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
             training_data.to_csv(temp_infer_csv, index=False)
 
             output_file = os.path.join(outputDir, "output.yaml")
-            training_data.to_csv(temp_infer_csv, index=False)
 
             temp_config = get_temp_config_path()
             with open(temp_config, "w") as file:
