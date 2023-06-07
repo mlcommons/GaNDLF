@@ -133,6 +133,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             overall_stats_dict[current_subject_id] = {}
             target_image = sitk.ReadImage(row["target"])
             pred_image = sitk.ReadImage(row["prediction"])
+            # special case for vector (i.e, RGB) images - there is probably a better way to do this
             if "vector" in target_image.GetPixelIDTypeAsString().lower():
                 target_image = sitk.ReadImage(row["target"], sitk.sitkFloat32)
             if "vector" in pred_image.GetPixelIDTypeAsString().lower():
@@ -145,15 +146,11 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             stats_filter.Execute(sq_diff)
             overall_stats_dict[current_subject_id]["mse"] = stats_filter.GetMean()
             overall_stats_dict[current_subject_id]["rmse"] = stats_filter.GetSigma()
+
             # https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio#Definition
-            overall_stats_dict[current_subject_id]["psnr_0"] = 10 * math.log10(
-                max_target**2
-                / (
-                    overall_stats_dict[current_subject_id]["mse"]
-                    + sys.float_info.epsilon
-                )
-            )
-            overall_stats_dict[current_subject_id]["psnr_1"] = 10 * math.log10(
+            # subtracting min_target from max_target to get the dynamic range
+            # added epsilon to avoid divide by zero
+            overall_stats_dict[current_subject_id]["psnr"] = 10 * math.log10(
                 (max_target - min_target) ** 2
                 / (
                     overall_stats_dict[current_subject_id]["mse"]
@@ -166,7 +163,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             overall_stats_dict[current_subject_id][
                 "ssim"
             ] = sii_filter.GetSimilarityIndex()
-            
+
             ### correlation metrics
             # # create a temp mask
             # temp_mask_array = sitk.GetArrayFromImage(target_image)
@@ -180,6 +177,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             # from time import time
             # start = time()
 
+            ## this methods takes approximately 10x longer than the FFT method
             # correlation_filter = sitk.NormalizedCorrelationImageFilter()
             # corr_image = correlation_filter.Execute(pred_image, temp_mask, target_image)
             # stats_filter.Execute(corr_image)
