@@ -339,7 +339,6 @@ If you have a model previously trained using GaNDLF that you wish to run graph o
 # continue from previous shell
 (venv_gandlf) $> python gandlf_optimizeModel \
   -m /path/to/trained/${architecture_name}_best.pth.tar \  # directory which contains testing and validation models
-  -c ./experiment_0/config_used_to_train.yaml  # the config file used to train the model
 ```
 
 If `${architecture_name}` is supported, the optimized model will get generated in the model directory, with the name `${architecture_name}_optimized.onnx`.
