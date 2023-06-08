@@ -51,6 +51,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         if problem_type is None
         else problem_type
     )
+    parameters["problem_type"] = problem_type
 
     if problem_type == "regression" or problem_type == "classification":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
