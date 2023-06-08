@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 import torchio
 import SimpleITK as sitk
+
 # import numpy as np
 
 from GANDLF.parseConfig import parseConfig
@@ -45,9 +46,11 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
     overall_stats_dict = {}
     parameters = parseConfig(config)
     problem_type = parameters.get("problem_type", None)
-    if problem_type is None:
-        problem_type = find_problem_type_from_parameters(parameters)
-        parameters["problem_type"] = problem_type
+    problem_type = (
+        find_problem_type_from_parameters(parameters)
+        if problem_type is None
+        else problem_type
+    )
 
     if problem_type == "regression" or problem_type == "classification":
         parameters["model"]["num_classes"] = len(parameters["model"]["class_list"])
