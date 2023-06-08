@@ -347,7 +347,7 @@ If you have a model previously trained using GaNDLF that you wish to run graph o
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_optimizeModel \
-  -m /path/to/trained/${architecture_name}_best.pth.tar \  # directory which contains testing and validation models
+  -m /path/to/trained/${architecture_name}_best.pth.tar \  # path to the model file (ending in '.pth.tar') you wish to optimize
   -c ./experiment_0/config_used_to_train.yaml  # the config file used to train the model
 ```
 
