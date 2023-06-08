@@ -255,6 +255,15 @@ SubjectID,Target,Prediction
 ...
 ```
 
+To generate image to image metrics for synthesis tasks, ensure that the config has `problem_type: synthesis`, and the CSV can be in the same format as segmentation:
+
+```csv
+SubjectID,Target,Prediction
+001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz
+002,/path/to/002/target_image.nii.gz,/path/to/001/prediction_image.nii.gz
+...
+```
+
 
 ## Parallelize the Training
 
