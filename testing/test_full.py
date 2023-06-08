@@ -2973,7 +2973,6 @@ def test_generic_cli_function_metrics_cli_rad_nd():
     for dim in ["2d", "3d"]:
         # for problem_type in ["segmentation", "classification", "synthesis"]:
         for problem_type in ["synthesis"]:
-            
             synthesis_detected = problem_type == "synthesis"
             problem_type_wrap = problem_type
             if synthesis_detected:
@@ -2993,7 +2992,8 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
             # read and initialize parameters for specific data dimension
             parameters = parseConfig(
-                testingDir + f"/config_{problem_type_wrap}.yaml", version_check_flag=False
+                testingDir + f"/config_{problem_type_wrap}.yaml",
+                version_check_flag=False,
             )
             parameters["modality"] = "rad"
             parameters["patch_size"] = patch_size["2D"]

@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 import torchio
 import SimpleITK as sitk
-import numpy as np
+# import numpy as np
 
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
