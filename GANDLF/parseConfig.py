@@ -113,10 +113,7 @@ def parseConfig(config_file_path, version_check_flag=True):
     """
     params = config_file_path
     if not isinstance(config_file_path, dict):
-        if config_file_path.endswith(".yaml") or config_file_path.endswith(".yml"):
-            params = yaml.safe_load(open(config_file_path, "r"))
-        elif config_file_path.endswith(".pkl"):
-            params = pickle.load(open(config_file_path,"rb"))
+        params = yaml.safe_load(open(config_file_path, "r"))
 
     if version_check_flag:  # this is only to be used for testing
         assert (
