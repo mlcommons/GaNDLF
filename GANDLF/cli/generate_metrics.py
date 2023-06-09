@@ -93,7 +93,6 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 # this is inconsequential, since one_hot will ensure that the classes are present
                 parameters["model"]["class_list"] = [1]
                 parameters["model"]["num_classes"] = 1
-                # parameters["model"]["ignore_label_validation"] = 0
                 overall_stats_dict[current_subject_id][str(class_index)]["dice"] = dice(
                     current_prediction,
                     current_target,
