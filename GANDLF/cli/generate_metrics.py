@@ -134,7 +134,6 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         for _, row in input_df.iterrows():
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
-            overall_stats_dict[current_subject_id] = {}
             target_image = sitk.ReadImage(row["target"])
             pred_image = sitk.ReadImage(row["prediction"])
             # special case for vector (i.e, RGB) images - there is probably a better way to do this
