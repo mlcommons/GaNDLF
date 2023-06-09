@@ -85,18 +85,22 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             pred_image_one_hot = one_hot(pred_tensor, class_list)
 
             for class_index, _ in enumerate(class_list):
+                current_target = label_image_one_hot[:, class_index, ...].unsqueeze(0)
+                current_prediction = pred_image_one_hot[:, class_index, ...].unsqueeze(
+                    0
+                )
                 overall_stats_dict[current_subject_id][str(class_index)] = {}
                 # this is inconsequential, since one_hot will ensure that the classes are present
-                parameters["model"]["class_list"] = [0, 1]
-                parameters["model"]["num_classes"] = 2
-                parameters["model"]["ignore_label_validation"] = 0
+                parameters["model"]["class_list"] = [1]
+                parameters["model"]["num_classes"] = 1
+                # parameters["model"]["ignore_label_validation"] = 0
                 overall_stats_dict[current_subject_id][str(class_index)]["dice"] = dice(
-                    pred_image_one_hot,
-                    label_image_one_hot,
+                    current_prediction,
+                    current_target,
                 ).item()
                 nsd, hd100, hd95 = _calculator_generic_all_surface_distances(
-                    pred_image_one_hot,
-                    label_image_one_hot,
+                    current_prediction,
+                    current_target,
                     parameters,
                 )
                 overall_stats_dict[current_subject_id][str(class_index)][
@@ -113,8 +117,8 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                     s,
                     p,
                 ) = _calculator_sensitivity_specificity(
-                    pred_image_one_hot,
-                    label_image_one_hot,
+                    current_prediction,
+                    current_target,
                     parameters,
                 )
                 overall_stats_dict[current_subject_id][str(class_index)][
@@ -126,10 +130,38 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 overall_stats_dict[current_subject_id][
                     "jaccard_" + str(class_index)
                 ] = _calculator_jaccard(
-                    pred_image_one_hot,
-                    label_image_one_hot,
+                    current_prediction,
+                    current_target,
                     parameters,
                 ).item()
+                current_target_image = sitk.GetImageFromArray(
+                    current_target[0, 0, ...].long()
+                )
+                current_prediction_image = sitk.GetImageFromArray(
+                    current_prediction[0, 0, ...].long()
+                )
+                label_overlap_filter = sitk.LabelOverlapMeasuresImageFilter()
+                label_overlap_filter.Execute(
+                    current_target_image, current_prediction_image
+                )
+                # overall_stats_dict[current_subject_id][
+                #     "falseDiscoveryRate_" + str(class_index)
+                # ] = label_overlap_filter.GetFalseDiscoveryRate()
+                overall_stats_dict[current_subject_id][
+                    "falseNegativeError_" + str(class_index)
+                ] = label_overlap_filter.GetFalseNegativeError()
+                overall_stats_dict[current_subject_id][
+                    "falsePositiveError_" + str(class_index)
+                ] = label_overlap_filter.GetFalsePositiveError()
+                overall_stats_dict[current_subject_id][
+                    "meanOverlap_" + str(class_index)
+                ] = label_overlap_filter.GetMeanOverlap()
+                overall_stats_dict[current_subject_id][
+                    "unionOverlap_" + str(class_index)
+                ] = label_overlap_filter.GetUnionOverlap()
+                overall_stats_dict[current_subject_id][
+                    "volumeSimilarity_" + str(class_index)
+                ] = label_overlap_filter.GetVolumeSimilarity()
     elif problem_type == "synthesis":
         for _, row in input_df.iterrows():
             current_subject_id = row[headers["subjectid"]]
