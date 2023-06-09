@@ -1,4 +1,4 @@
-import sys, yaml, ast, pkg_resources, pickle
+import sys, yaml, ast, pkg_resources
 import numpy as np
 from copy import deepcopy
 
