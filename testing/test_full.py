@@ -2971,8 +2971,8 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
 def test_generic_cli_function_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
     for dim in ["2d", "3d"]:
-        for problem_type in ["segmentation", "classification", "synthesis"]:
-            synthesis_detected = problem_type == "synthesis"
+        for problem_type in ["segmentation", "classification", "synthesis", "brats_synthesis"]:
+            synthesis_detected = (problem_type == "synthesis") or (problem_type == "brats_synthesis")
             problem_type_wrap = problem_type
             if synthesis_detected:
                 problem_type_wrap = "classification"
@@ -3003,7 +3003,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
             parameters["verbose"] = False
             if synthesis_detected:
-                parameters["problem_type"] = "synthesis"
+                parameters["problem_type"] = problem_type
 
             temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
             training_data.to_csv(temp_infer_csv, index=False)
