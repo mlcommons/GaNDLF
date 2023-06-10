@@ -1,12 +1,12 @@
 import yaml, math, sys
 from pprint import pprint
 import pandas as pd
+from tqdm import tqdm
 import torch
 import torchio
 import SimpleITK as sitk
 import numpy as np
 from torchmetrics import (
-    PeakSignalNoiseRatio,
     StructuralSimilarityIndexMeasure,
     MeanSquaredError,
 )
@@ -70,7 +70,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
     elif problem_type == "segmentation":
         # read images and then calculate metrics
         class_list = parameters["model"]["class_list"]
-        for _, row in input_df.iterrows():
+        for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
             label_image = torchio.LabelMap(row["target"])
@@ -168,7 +168,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 ] = label_overlap_filter.GetVolumeSimilarity()
 
     elif problem_type == "synthesis":
-        for _, row in input_df.iterrows():
+        for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
             target_image = sitk.ReadImage(row["target"])
@@ -221,17 +221,33 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             ] = stats_filter.GetMinimum()
 
     elif problem_type == "brats_synthesis":
-        for _, row in input_df.iterrows():
+
+        def __fix_2d_tensor(input_tensor):
+            """
+            This function checks for 2d images and change the shape to [B, C, H, W]
+
+            Args:
+                input_tensor (torch.Tensor): The input tensor.
+
+            Returns:
+                torch.Tensor: The output tensor in the format that torchmetrics expects.
+            """
+            if input_tensor.shape[-1] == 1:
+                return input_tensor.squeeze(-1).unsqueeze(0)
+            else:
+                return input_tensor
+
+        for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
-            target_image = torchio.ScalarImage(row["target"]).data
-            pred_image = torchio.ScalarImage(row["prediction"]).data
+            target_image = __fix_2d_tensor(torchio.ScalarImage(row["target"]).data)
+            pred_image = __fix_2d_tensor(torchio.ScalarImage(row["prediction"]).data)
             mask = torch.from_numpy(np.ones(target_image.numpy().shape, dtype=np.uint8))
             if "mask" in row:
-                mask = torchio.LabelMap(row["mask"]).data
+                mask = __fix_2d_tensor(torchio.LabelMap(row["mask"]).data)
 
             # Define evaluation Metrics
-            psnr = PeakSignalNoiseRatio()
+            # psnr = PeakSignalNoiseRatio()
             ssim = StructuralSimilarityIndexMeasure(return_full_image=True)
             mse = MeanSquaredError()
 
@@ -242,13 +258,20 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             # Normalize to [0;1] based on GT (otherwise MSE will depend on the image intensity range)
             normalize = parameters.get("normalize", True)
             if normalize:
+                output_infill = output_infill.float()
+                gt_image_infill = gt_image_infill.float()
                 v_max = gt_image_infill.max()
                 output_infill /= v_max
                 gt_image_infill /= v_max
 
             # SSIM - apply on complete masked image but only take values from masked region
             _, ssim_idx_full_image = ssim(gt_image_infill, output_infill)
-            ssim_idx = ssim_idx_full_image[mask]
+            try:
+                ssim_idx = ssim_idx_full_image[mask]
+            except Exception as e:
+                print(f"Error: {e}")
+                if len(ssim_idx_full_image.shape) == 0:
+                    ssim_idx = torch.ones_like(mask) * ssim_idx_full_image
             overall_stats_dict[current_subject_id]["ssim"] = ssim_idx.mean().item()
 
             # only voxels that are to be inferred (-> flat array)
