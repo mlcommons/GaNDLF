@@ -31,6 +31,7 @@ def post_training_model_optimization(model_path, config_path):
         _,
         parameters,
     ) = create_pytorch_objects(parameters, device="cpu")
+    parameters["model"]["onnx_export"] = True
 
     version_check(parameters["version"], version_to_check=main_dict["version"])
     model.load_state_dict(main_dict["model_state_dict"])
