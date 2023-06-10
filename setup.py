@@ -99,7 +99,7 @@ requirements = [
     "psutil",
     "medcam",
     "opencv-python",
-    "torchmetrics==0.5.1",  # newer versions have changed api for f1 invocation
+    "torchmetrics==0.8.1",  # newer versions have changed api for f1 invocation
     "zarr==2.10.3",
     "pydicom",
     "onnx",
