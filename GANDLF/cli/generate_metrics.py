@@ -4,8 +4,12 @@ import pandas as pd
 import torch
 import torchio
 import SimpleITK as sitk
-
-# import numpy as np
+import numpy as np
+from torchmetrics import (
+    PeakSignalNoiseRatio,
+    StructuralSimilarityIndexMeasure,
+    MeanSquaredError,
+)
 
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
@@ -62,6 +66,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         overall_stats_dict = overall_stats(
             predictions_tensor, labels_tensor, parameters
         )
+
     elif problem_type == "segmentation":
         # read images and then calculate metrics
         class_list = parameters["model"]["class_list"]
@@ -161,6 +166,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 overall_stats_dict[current_subject_id][
                     "volumeSimilarity_" + str(class_index)
                 ] = label_overlap_filter.GetVolumeSimilarity()
+
     elif problem_type == "synthesis":
         for _, row in input_df.iterrows():
             current_subject_id = row[headers["subjectid"]]
@@ -198,36 +204,6 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 "ssim"
             ] = sii_filter.GetSimilarityIndex()
 
-            ### correlation metrics
-            # # create a temp mask
-            # temp_mask_array = sitk.GetArrayFromImage(target_image)
-            # temp_mask_array = np.ones(temp_mask_array.shape).astype(np.float32)
-            # temp_mask = sitk.GetImageFromArray(temp_mask_array)
-            # caster = sitk.CastImageFilter()
-            # caster.SetOutputPixelType(target_image.GetPixelID())
-            # temp_mask = caster.Execute(temp_mask)
-            # temp_mask.CopyInformation(target_image)
-
-            # from time import time
-            # start = time()
-
-            ## this methods takes approximately 10x longer than the FFT method
-            # correlation_filter = sitk.NormalizedCorrelationImageFilter()
-            # corr_image = correlation_filter.Execute(pred_image, temp_mask, target_image)
-            # stats_filter.Execute(corr_image)
-            # overall_stats_dict[current_subject_id]["ncc_mean"] = stats_filter.GetMean()
-            # overall_stats_dict[current_subject_id]["ncc_std"] = stats_filter.GetSigma()
-            # overall_stats_dict[current_subject_id][
-            #     "ncc_max"
-            # ] = stats_filter.GetMaximum()
-            # overall_stats_dict[current_subject_id][
-            #     "ncc_min"
-            # ] = stats_filter.GetMinimum()
-
-            # end = time()
-            # print("Time taken for NCC: ", end - start)
-            # start = time()
-
             correlation_filter = sitk.FFTNormalizedCorrelationImageFilter()
             corr_image = correlation_filter.Execute(target_image, pred_image)
             stats_filter.Execute(corr_image)
@@ -244,8 +220,54 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 "ncc_fft_min"
             ] = stats_filter.GetMinimum()
 
-            # end = time()
-            # print("Time taken for NCC FFT: ", end - start)
+    elif problem_type == "brats_synthesis":
+        for _, row in input_df.iterrows():
+            current_subject_id = row[headers["subjectid"]]
+            overall_stats_dict[current_subject_id] = {}
+            target_image = torchio.ScalarImage(row["target"]).data
+            pred_image = torchio.ScalarImage(row["prediction"]).data
+            mask = torch.from_numpy(np.ones(target_image.numpy().shape, dtype=np.uint8))
+            if "mask" in row:
+                mask = torchio.LabelMap(row["mask"]).data
+
+            # Define evaluation Metrics
+            psnr = PeakSignalNoiseRatio()
+            ssim = StructuralSimilarityIndexMeasure(return_full_image=True)
+            mse = MeanSquaredError()
+
+            # Get Infill region (we really are only interested in the infill region)
+            output_infill = pred_image * mask
+            gt_image_infill = target_image * mask
+
+            # Normalize to [0;1] based on GT (otherwise MSE will depend on the image intensity range)
+            normalize = parameters.get("normalize", True)
+            if normalize:
+                v_max = gt_image_infill.max()
+                output_infill /= v_max
+                gt_image_infill /= v_max
+
+            # SSIM - apply on complete masked image but only take values from masked region
+            _, ssim_idx_full_image = ssim(gt_image_infill, output_infill)
+            ssim_idx = ssim_idx_full_image[mask]
+            overall_stats_dict[current_subject_id]["ssim"] = ssim_idx.mean().item()
+
+            # only voxels that are to be inferred (-> flat array)
+            gt_image_infill = gt_image_infill[mask]
+            output_infill = output_infill[mask]
+
+            # MSE
+            overall_stats_dict[current_subject_id]["mse"] = mse(
+                gt_image_infill, output_infill
+            ).item()
+
+            # PSNR - similar to pytorch PeakSignalNoiseRatio until 4 digits after decimal point
+            overall_stats_dict[current_subject_id]["psnr"] = (
+                10.0
+                * torch.log10(
+                    (torch.max(gt_image_infill) - torch.min(gt_image_infill)) ** 2
+                    / overall_stats_dict[current_subject_id]["mse"]
+                ).item()
+            )
 
     pprint(overall_stats_dict)
     if outputfile is not None:
