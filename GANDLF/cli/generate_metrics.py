@@ -242,14 +242,15 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             overall_stats_dict[current_subject_id] = {}
             target_image = __fix_2d_tensor(torchio.ScalarImage(row["target"]).data)
             pred_image = __fix_2d_tensor(torchio.ScalarImage(row["prediction"]).data)
+            # if "mask" is not in the row, we assume that the whole image is the mask
+            # always cast to byte tensor
             mask = (
                 __fix_2d_tensor(torchio.LabelMap(row["mask"]).data)
                 if "mask" in row
                 else torch.from_numpy(
                     np.ones(target_image.numpy().shape, dtype=np.uint8)
                 )
-            )
-            mask = mask.byte()
+            ).byte()
 
             # Define evaluation Metrics
             # psnr = PeakSignalNoiseRatio()
