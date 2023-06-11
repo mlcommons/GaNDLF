@@ -249,6 +249,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                     np.ones(target_image.numpy().shape, dtype=np.uint8)
                 )
             )
+            mask = mask.byte()
 
             # Define evaluation Metrics
             # psnr = PeakSignalNoiseRatio()
