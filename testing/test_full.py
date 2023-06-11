@@ -486,7 +486,8 @@ def test_train_regression_brainage_rad_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_temp, file)
     model_path = os.path.join(outputDir, "brain_age_best.pth.tar")
-    optimization_result = post_training_model_optimization(model_path, file_config_temp)
+    config_path = os.path.join(outputDir, "parameters.pkl")
+    optimization_result = post_training_model_optimization(model_path, config_path)
     assert optimization_result == False, "Optimization should fail"
 
     sanitize_outputDir()
@@ -759,7 +760,8 @@ def test_train_inference_optimize_classification_rad_3d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_temp, file)
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
-    optimization_result = post_training_model_optimization(model_path, file_config_temp)
+    config_path = os.path.join(outputDir, "parameters.pkl")
+    optimization_result = post_training_model_optimization(model_path, config_path)
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
