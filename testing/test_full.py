@@ -2995,6 +2995,8 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 labels_array = training_data["ValueToPredict"]
             training_data["target"] = labels_array
             training_data["prediction"] = labels_array
+            if problem_type == "brats_synthesis":
+                training_data["mask"] = training_data["Label"]
 
             # read and initialize parameters for specific data dimension
             parameters = parseConfig(
