@@ -242,9 +242,13 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             overall_stats_dict[current_subject_id] = {}
             target_image = __fix_2d_tensor(torchio.ScalarImage(row["target"]).data)
             pred_image = __fix_2d_tensor(torchio.ScalarImage(row["prediction"]).data)
-            mask = torch.from_numpy(np.ones(target_image.numpy().shape, dtype=np.uint8))
-            if "mask" in row:
-                mask = __fix_2d_tensor(torchio.LabelMap(row["mask"]).data)
+            mask = (
+                __fix_2d_tensor(torchio.LabelMap(row["mask"]).data)
+                if "mask" in row
+                else torch.from_numpy(
+                    np.ones(target_image.numpy().shape, dtype=np.uint8)
+                )
+            )
 
             # Define evaluation Metrics
             # psnr = PeakSignalNoiseRatio()
@@ -252,14 +256,12 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             mse = MeanSquaredError()
 
             # Get Infill region (we really are only interested in the infill region)
-            output_infill = pred_image * mask
-            gt_image_infill = target_image * mask
+            output_infill = (pred_image * mask).float()
+            gt_image_infill = (target_image * mask).float()
 
             # Normalize to [0;1] based on GT (otherwise MSE will depend on the image intensity range)
             normalize = parameters.get("normalize", True)
             if normalize:
-                output_infill = output_infill.float()
-                gt_image_infill = gt_image_infill.float()
                 v_max = gt_image_infill.max()
                 output_infill /= v_max
                 gt_image_infill /= v_max
