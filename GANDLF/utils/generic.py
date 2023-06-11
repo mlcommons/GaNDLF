@@ -94,7 +94,8 @@ def parse_version(version_string):
     Returns:
         int: The version number.
     """
-    version_string_split = version_string.split(".")
+    version_string_split = version_string.replace("-dev", "")
+    version_string_split = version_string_split.split(".")
     if len(version_string_split) > 3:
         del version_string_split[-1]
     return int("".join(version_string_split))

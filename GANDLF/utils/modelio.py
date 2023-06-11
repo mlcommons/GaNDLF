@@ -2,6 +2,7 @@ import os, hashlib, pkg_resources, subprocess
 import torch
 
 from .generic import get_unique_timestamp
+from ..version import __version__
 
 # these are the base keys for the model dictionary to save
 model_dict_full = {
@@ -150,7 +151,8 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     model_dict["timestamp_hash"] = hashlib.sha256(
         str(model_dict["timestamp"]).encode("utf-8")
     ).hexdigest()
-    model_dict["version"] = pkg_resources.require("GANDLF")[0].version
+    model_dict["version"] = __version__
+    model_dict["parameters"] = params
     try:
         model_dict["git_hash"] = (
             subprocess.check_output(["git", "rev-parse", "HEAD"])
