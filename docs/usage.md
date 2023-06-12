@@ -264,7 +264,7 @@ SubjectID,Target,Prediction
 ...
 ```
 
-To generate image to image metrics for the BraTS synthesis tasks [[1](https://www.synapse.org/#!Synapse:syn51156910/wiki/622356), [2](https://www.synapse.org/#!Synapse:syn51156910/wiki/622357)], ensure that the config has `problem_type: brats_synthesis`, and the CSV can be in the same format as segmentation:
+To generate image to image metrics for the BraTS synthesis tasks [[1](https://www.synapse.org/#!Synapse:syn51156910/wiki/622356), [2](https://www.synapse.org/#!Synapse:syn51156910/wiki/622357)], ensure that the config has `problem_type: brats_synthesis`, and the CSV can be in the same format as segmentation (note that the `Mask` column is optional):
 
 ```csv
 SubjectID,Target,Prediction,Mask
