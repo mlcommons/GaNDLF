@@ -362,36 +362,42 @@ def get_class_imbalance_weights(training_df, params):
     """
     penalty_weights, class_weights = None, None
     if params["weighted_loss"]:
-        print("Calculating weights")
-        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
-        if params["problem_type"] == "classification":
-            (
-                penalty_weights,
-                class_weights,
-            ) = get_class_imbalance_weights_classification(training_df, params)
-        elif params["problem_type"] == "segmentation":
-            # Set up the dataloader for penalty calculation
-            from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+        (penalty_weights, class_weights) = (
+            params.get("weights", None),
+            params.get("class_weights", None),
+        )
+        if penalty_weights is None or class_weights is None:
+            print("Calculating weights")
+            if params["problem_type"] == "classification":
+                (
+                    penalty_weights,
+                    class_weights,
+                ) = get_class_imbalance_weights_classification(training_df, params)
+            elif params["problem_type"] == "segmentation":
+                # Set up the dataloader for penalty calculation
+                from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
-            penalty_data = ImagesFromDataFrame(
-                training_df,
-                parameters=params,
-                train=False,
-                loader_type="penalty",
-            )
+                penalty_data = ImagesFromDataFrame(
+                    training_df,
+                    parameters=params,
+                    train=False,
+                    loader_type="penalty",
+                )
 
-            penalty_loader = DataLoader(
-                penalty_data,
-                batch_size=1,
-                shuffle=True,
-                pin_memory=False,
-            )
+                penalty_loader = DataLoader(
+                    penalty_data,
+                    batch_size=1,
+                    shuffle=True,
+                    pin_memory=False,
+                )
 
-            (
-                penalty_weights,
-                class_weights,
-            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
-            del penalty_data, penalty_loader
+                (
+                    penalty_weights,
+                    class_weights,
+                ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
+                del penalty_data, penalty_loader
+        else:
+            print("Using weights from config file")
 
     return penalty_weights, class_weights
 
