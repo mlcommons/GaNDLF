@@ -36,29 +36,20 @@ def main_run(
     device = device
     parameters = parseConfig(model_parameters)
     parameters["device_id"] = -1
-    if parameters["determinism"]:
-        set_determinism(42)
-    # in case the data being passed is already processed, check if the previous parameters exists,
-    # and if it does, compare the two and if they are the same, ensure no preprocess is done.
-    model_parameters_prev = os.path.join(os.path.dirname(model_dir), "parameters.pkl")
+
     if train_mode:
         if resume:
             print(
                 "Trying to resume training without changing any parameters from previous run.",
                 flush=True,
             )
-            if os.path.exists(model_parameters_prev):
-                parameters_prev = pickle.load(open(model_parameters_prev, "rb"))
-                assert (
-                    parameters == parameters_prev
-                ), "The parameters are not the same as the ones stored in the previous run, please re-check."
         parameters["output_dir"] = model_dir
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # if the output directory is not specified, then use the model directory even for the testing data
     # default behavior
-    parameters["output_dir"] = output_dir
-    if output_dir is None:
+    parameters["output_dir"] = parameters.get("output_dir", output_dir)
+    if parameters["output_dir"] is None:
         parameters["output_dir"] = model_dir
     Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
