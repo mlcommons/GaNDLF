@@ -47,12 +47,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         train_loader = get_train_loader(parameters)
         parameters["training_samples_size"] = len(train_loader)
 
-        # Calculate the weights here
-        (
-            parameters["weights"],
-            parameters["class_weights"],
-        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
-
     if val_csv is not None:
         parameters["validation_data"], headers_to_populate_val = parseTrainingCSV(
             val_csv, train=False
@@ -90,6 +84,13 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             )
 
         scheduler = get_scheduler(parameters)
+
+        # Calculate the weights here
+        (
+            parameters["weights"],
+            parameters["class_weights"],
+        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
+
     else:
         scheduler = None
 
