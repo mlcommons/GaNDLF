@@ -524,4 +524,12 @@ def get_image_from_tensor(input_tensor: torch.Tensor) -> sitk.Image:
     Returns:
         sitk.Image: The converted sitk image.
     """
-    return sitk.GetImageFromArray(input_tensor.cpu().numpy())
+    arr = input_tensor.cpu().numpy()
+    # this is specifically the case for 2D rgb images
+    return_image = sitk.GetImageFromArray(arr)
+    if arr.shape[1] == 3:
+        return_image = sitk.GetImageFromArray(arr)
+    elif arr.shape[0] == 1:
+        return_image = sitk.GetImageFromArray(arr[0])
+
+    return return_image
