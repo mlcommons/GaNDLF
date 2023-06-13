@@ -26,7 +26,8 @@ if __name__ == "__main__":
         "--config",
         metavar="",
         type=str,
-        default="",
+        default=None,
+        required=False,
         help="The configuration file (contains all the information related to the training/inference session).",
     )
 
