@@ -260,7 +260,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
 
             # PSNR - similar to pytorch PeakSignalNoiseRatio until 4 digits after decimal point
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
-                gt_image_infill, output_infill, mask
+                gt_image_infill, output_infill
             ).item()
 
     pprint(overall_stats_dict)
