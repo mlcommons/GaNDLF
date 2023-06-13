@@ -12,7 +12,7 @@ from torchmetrics import (
 from GANDLF.utils import get_image_from_tensor
 
 
-def structural_similarity_index(target, prediction, mask=None):
+def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
     """
     Computes the structural similarity index between the target and prediction.
 
@@ -36,7 +36,7 @@ def structural_similarity_index(target, prediction, mask=None):
     return ssim_idx.mean()
 
 
-def mean_squared_error(target, prediction):
+def mean_squared_error(target, prediction) -> torch.Tensor:
     """
     Computes the mean squared error between the target and prediction.
 
@@ -48,7 +48,7 @@ def mean_squared_error(target, prediction):
     return mse(target, prediction)
 
 
-def peak_signal_noise_ratio(target, prediction):
+def peak_signal_noise_ratio(target, prediction) -> torch.Tensor:
     """
     Computes the peak signal to noise ratio between the target and prediction.
 
@@ -64,7 +64,7 @@ def peak_signal_noise_ratio(target, prediction):
     )
 
 
-def mean_squared_log_error(target, prediction):
+def mean_squared_log_error(target, prediction) -> torch.Tensor:
     """
     Computes the mean squared log error between the target and prediction.
 
@@ -76,7 +76,7 @@ def mean_squared_log_error(target, prediction):
     return mle(target, prediction)
 
 
-def mean_absolute_error(target, prediction):
+def mean_absolute_error(target, prediction) -> torch.Tensor:
     """
     Computes the mean absolute error between the target and prediction.
 
@@ -88,7 +88,7 @@ def mean_absolute_error(target, prediction):
     return mae(target, prediction)
 
 
-def _get_ncc_image(target, prediction):
+def _get_ncc_image(target, prediction) -> sitk.Image:
     """
     Computes normalized cross correlation image between target and prediction.
 
@@ -100,7 +100,7 @@ def _get_ncc_image(target, prediction):
         torch.Tensor: The normalized cross correlation image.
     """
 
-    def __convert_to_grayscale(image: sitk.Image):
+    def __convert_to_grayscale(image: sitk.Image) -> sitk.Image:
         """
         Helper function to convert image to grayscale.
 
