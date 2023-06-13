@@ -6,14 +6,21 @@ import torch
 import torchio
 import SimpleITK as sitk
 import numpy as np
-from torchmetrics import (
-    StructuralSimilarityIndexMeasure,
-    MeanSquaredError,
-)
 
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
-from GANDLF.metrics import overall_stats
+from GANDLF.metrics import (
+    overall_stats,
+    structural_similarity_index,
+    mean_squared_error,
+    peak_signal_noise_ratio,
+    mean_squared_log_error,
+    mean_absolute_error,
+    ncc_mean,
+    ncc_std,
+    ncc_max,
+    ncc_min,
+)
 from GANDLF.losses.segmentation import dice
 from GANDLF.metrics.segmentation import (
     _calculator_generic_all_surface_distances,
@@ -168,59 +175,6 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 ] = label_overlap_filter.GetVolumeSimilarity()
 
     elif problem_type == "synthesis":
-        for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
-            current_subject_id = row[headers["subjectid"]]
-            overall_stats_dict[current_subject_id] = {}
-            target_image = sitk.ReadImage(row["target"])
-            pred_image = sitk.ReadImage(row["prediction"])
-            # special case for vector (i.e, RGB) images - there is probably a better way to do this
-            if "vector" in target_image.GetPixelIDTypeAsString().lower():
-                target_image = sitk.ReadImage(row["target"], sitk.sitkFloat32)
-            if "vector" in pred_image.GetPixelIDTypeAsString().lower():
-                pred_image = sitk.ReadImage(row["prediction"], sitk.sitkFloat32)
-            stats_filter = sitk.StatisticsImageFilter()
-            stats_filter.Execute(target_image)
-            max_target = stats_filter.GetMaximum()
-            min_target = stats_filter.GetMinimum()
-            sq_diff = sitk.SquaredDifference(target_image, pred_image)
-            stats_filter.Execute(sq_diff)
-            overall_stats_dict[current_subject_id]["mse"] = stats_filter.GetMean()
-            overall_stats_dict[current_subject_id]["rmse"] = stats_filter.GetSigma()
-
-            # https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio#Definition
-            # subtracting min_target from max_target to get the dynamic range
-            # added epsilon to avoid divide by zero
-            overall_stats_dict[current_subject_id]["psnr"] = 10 * math.log10(
-                (max_target - min_target) ** 2
-                / (
-                    overall_stats_dict[current_subject_id]["mse"]
-                    + sys.float_info.epsilon
-                )
-            )
-
-            sii_filter = sitk.SimilarityIndexImageFilter()
-            sii_filter.Execute(target_image, pred_image)
-            overall_stats_dict[current_subject_id][
-                "ssim"
-            ] = sii_filter.GetSimilarityIndex()
-
-            correlation_filter = sitk.FFTNormalizedCorrelationImageFilter()
-            corr_image = correlation_filter.Execute(target_image, pred_image)
-            stats_filter.Execute(corr_image)
-            overall_stats_dict[current_subject_id][
-                "ncc_fft_mean"
-            ] = stats_filter.GetMean()
-            overall_stats_dict[current_subject_id][
-                "ncc_fft_std"
-            ] = stats_filter.GetSigma()
-            overall_stats_dict[current_subject_id][
-                "ncc_fft_max"
-            ] = stats_filter.GetMaximum()
-            overall_stats_dict[current_subject_id][
-                "ncc_fft_min"
-            ] = stats_filter.GetMinimum()
-
-    elif problem_type == "brats_synthesis":
 
         def __fix_2d_tensor(input_tensor):
             """
@@ -252,11 +206,6 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 )
             ).byte()
 
-            # Define evaluation Metrics
-            # psnr = PeakSignalNoiseRatio()
-            ssim = StructuralSimilarityIndexMeasure(return_full_image=True)
-            mse = MeanSquaredError()
-
             # Get Infill region (we really are only interested in the infill region)
             output_infill = (pred_image * mask).float()
             gt_image_infill = (target_image * mask).float()
@@ -268,33 +217,45 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 output_infill /= v_max
                 gt_image_infill /= v_max
 
-            # SSIM - apply on complete masked image but only take values from masked region
-            _, ssim_idx_full_image = ssim(gt_image_infill, output_infill)
-            try:
-                ssim_idx = ssim_idx_full_image[mask]
-            except Exception as e:
-                print(f"Error: {e}")
-                if len(ssim_idx_full_image.shape) == 0:
-                    ssim_idx = torch.ones_like(mask) * ssim_idx_full_image
-            overall_stats_dict[current_subject_id]["ssim"] = ssim_idx.mean().item()
+            overall_stats_dict[current_subject_id][
+                "ssim"
+            ] = structural_similarity_index(gt_image_infill, output_infill).item()
+
+            # ncc metrics
+            overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
+                gt_image_infill, output_infill
+            ).item()
+            overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
+                gt_image_infill, output_infill
+            ).item()
+            overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
+                gt_image_infill, output_infill
+            ).item()
+            overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
+                gt_image_infill, output_infill
+            ).item()
 
             # only voxels that are to be inferred (-> flat array)
+            # these are required for mse, psnr, etc.
             gt_image_infill = gt_image_infill[mask]
             output_infill = output_infill[mask]
 
-            # MSE
-            overall_stats_dict[current_subject_id]["mse"] = mse(
+            overall_stats_dict[current_subject_id]["mse"] = mean_squared_error(
+                gt_image_infill, output_infill
+            ).item()
+
+            overall_stats_dict[current_subject_id]["msle"] = mean_squared_log_error(
+                gt_image_infill, output_infill
+            ).item()
+
+            overall_stats_dict[current_subject_id]["mae"] = mean_absolute_error(
                 gt_image_infill, output_infill
             ).item()
 
             # PSNR - similar to pytorch PeakSignalNoiseRatio until 4 digits after decimal point
-            overall_stats_dict[current_subject_id]["psnr"] = (
-                10.0
-                * torch.log10(
-                    (torch.max(gt_image_infill) - torch.min(gt_image_infill)) ** 2
-                    / overall_stats_dict[current_subject_id]["mse"]
-                ).item()
-            )
+            overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
+                gt_image_infill, output_infill, mask
+            ).item()
 
     pprint(overall_stats_dict)
     if outputfile is not None:
