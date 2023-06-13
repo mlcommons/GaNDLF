@@ -51,6 +51,8 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         for column_to_check in required_columns:
             if column_to_check == col_lower:
                 headers[column_to_check] = col
+        if col_lower == "mask":
+            headers["mask"] = col
     for column in required_columns:
         assert column in headers, f"The input csv should have a column named {column}"
 
@@ -80,8 +82,8 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
-            label_image = torchio.LabelMap(row["target"])
-            pred_image = torchio.LabelMap(row["prediction"])
+            label_image = torchio.LabelMap(row[headers["target"]])
+            pred_image = torchio.LabelMap(row[headers["prediction"]])
             label_tensor = label_image.data
             pred_tensor = pred_image.data
             spacing = label_image.spacing
@@ -194,12 +196,16 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
-            target_image = __fix_2d_tensor(torchio.ScalarImage(row["target"]).data)
-            pred_image = __fix_2d_tensor(torchio.ScalarImage(row["prediction"]).data)
+            target_image = __fix_2d_tensor(
+                torchio.ScalarImage(row[headers["target"]]).data
+            )
+            pred_image = __fix_2d_tensor(
+                torchio.ScalarImage(row[headers["prediction"]]).data
+            )
             # if "mask" is not in the row, we assume that the whole image is the mask
             # always cast to byte tensor
             mask = (
-                __fix_2d_tensor(torchio.LabelMap(row["mask"]).data)
+                __fix_2d_tensor(torchio.LabelMap(row[headers["mask"]]).data)
                 if "mask" in row
                 else torch.from_numpy(
                     np.ones(target_image.numpy().shape, dtype=np.uint8)
