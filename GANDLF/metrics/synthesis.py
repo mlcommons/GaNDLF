@@ -100,7 +100,7 @@ def _get_ncc_image(target, prediction):
         torch.Tensor: The normalized cross correlation image.
     """
 
-    def __convert_to_grayscale(image):
+    def __convert_to_grayscale(image: sitk.Image):
         """
         Helper function to convert image to grayscale.
 
