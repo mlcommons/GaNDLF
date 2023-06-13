@@ -1,5 +1,5 @@
 from pathlib import Path
-import requests, zipfile, io, os, csv, random, copy, shutil, yaml, torch, pytest
+import requests, zipfile, io, os, csv, random, copy, shutil, yaml, torch, pytest, random
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -2977,11 +2977,8 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             "segmentation",
             "classification",
             "synthesis",
-            "brats_synthesis",
         ]:
-            synthesis_detected = (problem_type == "synthesis") or (
-                problem_type == "brats_synthesis"
-            )
+            synthesis_detected = problem_type == "synthesis"
             problem_type_wrap = problem_type
             if synthesis_detected:
                 problem_type_wrap = "classification"
@@ -2997,8 +2994,10 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 labels_array = training_data["ValueToPredict"]
             training_data["target"] = labels_array
             training_data["prediction"] = labels_array
-            if problem_type == "brats_synthesis":
-                training_data["mask"] = training_data["Label"]
+            if synthesis_detected:
+                rand_int = random.randint(0, 1)
+                if rand_int == 0:
+                    training_data["mask"] = training_data["Label"]
 
             # read and initialize parameters for specific data dimension
             parameters = parseConfig(
