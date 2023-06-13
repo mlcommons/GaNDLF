@@ -1,4 +1,5 @@
 import os, sys
+from typing import Union
 import numpy as np
 import SimpleITK as sitk
 import torch
@@ -497,7 +498,7 @@ def get_output_from_calculator(predictions, ground_truth, calculator):
     return temp_output
 
 
-def get_tensor_from_image(input_image: sitk.Image) -> torch.Tensor:
+def get_tensor_from_image(input_image: Union[sitk.Image, str]) -> torch.Tensor:
     """
     This function converts a sitk image to a torch tensor.
 
@@ -507,4 +508,7 @@ def get_tensor_from_image(input_image: sitk.Image) -> torch.Tensor:
     Returns:
         torch.Tensor: The converted torch tensor.
     """
+    input_image = (
+        sitk.ReadImage(input_image) if isinstance(input_image, str) else input_image
+    )
     return torch.from_numpy(sitk.GetArrayFromImage(input_image))
