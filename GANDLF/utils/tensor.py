@@ -512,3 +512,16 @@ def get_tensor_from_image(input_image: Union[sitk.Image, str]) -> torch.Tensor:
         sitk.ReadImage(input_image) if isinstance(input_image, str) else input_image
     )
     return torch.from_numpy(sitk.GetArrayFromImage(input_image))
+
+
+def get_image_from_tensor(input_tensor: torch.Tensor) -> sitk.Image:
+    """
+    This function converts a torch tensor to a sitk image.
+
+    Args:
+        input_tensor (torch.Tensor): The input tensor.
+
+    Returns:
+        sitk.Image: The converted sitk image.
+    """
+    return sitk.GetImageFromArray(input_tensor.cpu().numpy())
