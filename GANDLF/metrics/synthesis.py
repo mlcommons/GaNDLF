@@ -117,6 +117,8 @@ def _get_ncc_image(target, prediction):
             )
             image_pil_gray = image_pil.convert("L")
             return sitk.GetImageFromArray(image_pil_gray)
+        else:
+            return image
 
     target_image = __convert_to_grayscale(get_image_from_tensor(target))
     pred_image = __convert_to_grayscale(get_image_from_tensor(prediction))
