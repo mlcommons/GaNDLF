@@ -230,16 +230,16 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             # ncc metrics
             overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
                 gt_image_infill, output_infill
-            ).item()
+            )
             overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
                 gt_image_infill, output_infill
-            ).item()
+            )
             overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
                 gt_image_infill, output_infill
-            ).item()
+            )
             overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
                 gt_image_infill, output_infill
-            ).item()
+            )
 
             # only voxels that are to be inferred (-> flat array)
             # these are required for mse, psnr, etc.
