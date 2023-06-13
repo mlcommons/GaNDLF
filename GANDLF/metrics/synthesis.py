@@ -48,16 +48,15 @@ def mean_squared_error(target, prediction):
     return mse(target, prediction)
 
 
-def peak_signal_noise_ratio(target, prediction, mask=None):
+def peak_signal_noise_ratio(target, prediction):
     """
     Computes the peak signal to noise ratio between the target and prediction.
 
     Args:
         target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
-        mask (torch.Tensor, optional): The mask tensor. Defaults to None.
     """
-    mse = mean_squared_error(target, prediction, mask)
+    mse = mean_squared_error(target, prediction)
     return (
         10.0
         * torch.log10((torch.max(target) - torch.min(target)) ** 2)
