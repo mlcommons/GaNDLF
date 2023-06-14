@@ -9,7 +9,7 @@ import cv2
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from GANDLF.utils import parseTestingCSV
+from GANDLF.utils import parseTestingCSV, get_tensor_from_image
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.patch_miner.opm.utils import (
@@ -1937,8 +1937,7 @@ def test_generic_one_hot_logic():
     print("32: Starting one hot logic tests")
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
-    img_array = sitk.GetArrayFromImage(img)
-    img_tensor = torch.from_numpy(img_array).to(torch.float16)
+    img_tensor = get_tensor_from_image(img).to(torch.float16)
     img_tensor = img_tensor.unsqueeze(0).unsqueeze(0)
 
     class_list = [*range(0, np.max(random_array) + 1)]
