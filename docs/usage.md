@@ -242,7 +242,7 @@ Once you have your CSV in the specific format, you can pass it on to generate th
 ```csv
 SubjectID,Target,Prediction
 001,/path/to/001/target.nii.gz,/path/to/001/prediction.nii.gz
-002,/path/to/002/target.nii.gz,/path/to/001/prediction.nii.gz
+002,/path/to/002/target.nii.gz,/path/to/002/prediction.nii.gz
 ...
 ```
 
@@ -252,6 +252,15 @@ Similarly for classification or regression (`A`, `B`, `C`, `D` are integers for 
 SubjectID,Target,Prediction
 001,A,B
 002,C,D
+...
+```
+
+To generate image to image metrics for synthesis tasks (including for the BraTS synthesis tasks [[1](https://www.synapse.org/#!Synapse:syn51156910/wiki/622356), [2](https://www.synapse.org/#!Synapse:syn51156910/wiki/622357)]), ensure that the config has `problem_type: synthesis`, and the CSV can be in the same format as segmentation (note that the `Mask` column is optional):
+
+```csv
+SubjectID,Target,Prediction,Mask
+001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz,/path/to/001/brain_mask.nii.gz
+002,/path/to/002/target_image.nii.gz,/path/to/002/prediction_image.nii.gz,/path/to/002/brain_mask.nii.gz
 ...
 ```
 
@@ -338,8 +347,7 @@ If you have a model previously trained using GaNDLF that you wish to run graph o
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_optimizeModel \
-  -m /path/to/trained/${architecture_name}_best.pth.tar \  # directory which contains testing and validation models
-  -c ./experiment_0/config_used_to_train.yaml  # the config file used to train the model
+  -m /path/to/trained/${architecture_name}_best.pth.tar  # directory which contains testing and validation models
 ```
 
 If `${architecture_name}` is supported, the optimized model will get generated in the model directory, with the name `${architecture_name}_optimized.onnx`.

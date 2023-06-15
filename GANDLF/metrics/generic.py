@@ -1,5 +1,5 @@
 import torch
-from torchmetrics import F1, Precision, Recall, IoU, Accuracy, Specificity
+from torchmetrics import F1Score, Precision, Recall, JaccardIndex, Accuracy, Specificity
 from GANDLF.utils.tensor import one_hot
 
 
@@ -49,7 +49,7 @@ def precision_score(output, label, params):
 
 
 def f1_score(output, label, params):
-    return generic_torchmetrics_score(output, label, F1, "f1", params)
+    return generic_torchmetrics_score(output, label, F1Score, "f1", params)
 
 
 def accuracy(output, label, params):
@@ -68,7 +68,7 @@ def iou_score(output, label, params):
     elif params["problem_type"] == "segmentation":
         label = one_hot(label, params["model"]["class_list"])
 
-    recall = IoU(
+    recall = JaccardIndex(
         reduction=params["metrics"]["iou"]["reduction"],
         num_classes=num_classes,
         threshold=params["metrics"]["iou"]["threshold"],

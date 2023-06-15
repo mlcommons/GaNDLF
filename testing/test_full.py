@@ -9,7 +9,7 @@ import cv2
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from GANDLF.utils import parseTestingCSV
+from GANDLF.utils import parseTestingCSV, get_tensor_from_image
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.patch_miner.opm.utils import (
@@ -486,7 +486,8 @@ def test_train_regression_brainage_rad_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_temp, file)
     model_path = os.path.join(outputDir, "brain_age_best.pth.tar")
-    optimization_result = post_training_model_optimization(model_path, file_config_temp)
+    config_path = os.path.join(outputDir, "parameters.pkl")
+    optimization_result = post_training_model_optimization(model_path, config_path)
     assert optimization_result == False, "Optimization should fail"
 
     sanitize_outputDir()
@@ -759,7 +760,8 @@ def test_train_inference_optimize_classification_rad_3d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_temp, file)
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
-    optimization_result = post_training_model_optimization(model_path, file_config_temp)
+    config_path = os.path.join(outputDir, "parameters.pkl")
+    optimization_result = post_training_model_optimization(model_path, config_path)
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
@@ -1935,8 +1937,7 @@ def test_generic_one_hot_logic():
     print("32: Starting one hot logic tests")
     random_array = np.random.randint(5, size=(20, 20, 20))
     img = sitk.GetImageFromArray(random_array)
-    img_array = sitk.GetArrayFromImage(img)
-    img_tensor = torch.from_numpy(img_array).to(torch.float16)
+    img_tensor = get_tensor_from_image(img).to(torch.float16)
     img_tensor = img_tensor.unsqueeze(0).unsqueeze(0)
 
     class_list = [*range(0, np.max(random_array) + 1)]
@@ -2971,21 +2972,35 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
 def test_generic_cli_function_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
     for dim in ["2d", "3d"]:
-        for problem_type in ["segmentation", "classification"]:
+        for problem_type in [
+            "segmentation",
+            "classification",
+            "synthesis",
+        ]:
+            synthesis_detected = problem_type == "synthesis"
+            problem_type_wrap = problem_type
+            if synthesis_detected:
+                problem_type_wrap = "classification"
             # read and parse csv
             training_data, _ = parseTrainingCSV(
-                inputDir + f"/train_{dim}_rad_{problem_type}.csv"
+                inputDir + f"/train_{dim}_rad_{problem_type_wrap}.csv"
             )
-            if problem_type == "segmentation":
+            if problem_type_wrap == "segmentation":
                 labels_array = training_data["Label"]
+            elif synthesis_detected:
+                labels_array = training_data["Channel_0"]
             else:
                 labels_array = training_data["ValueToPredict"]
             training_data["target"] = labels_array
             training_data["prediction"] = labels_array
+            if synthesis_detected:
+                # this optional
+                training_data["mask"] = training_data["Label"]
 
             # read and initialize parameters for specific data dimension
             parameters = parseConfig(
-                testingDir + f"/config_{problem_type}.yaml", version_check_flag=False
+                testingDir + f"/config_{problem_type_wrap}.yaml",
+                version_check_flag=False,
             )
             parameters["modality"] = "rad"
             parameters["patch_size"] = patch_size["2D"]
@@ -2995,12 +3010,13 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 parameters["model"]["dimension"] = 3
 
             parameters["verbose"] = False
+            if synthesis_detected:
+                parameters["problem_type"] = problem_type
 
             temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
             training_data.to_csv(temp_infer_csv, index=False)
 
             output_file = os.path.join(outputDir, "output.yaml")
-            training_data.to_csv(temp_infer_csv, index=False)
 
             temp_config = get_temp_config_path()
             with open(temp_config, "w") as file:

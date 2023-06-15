@@ -16,7 +16,13 @@ def post_training_model_optimization(model_path, config_path):
         bool: True if successful, False otherwise.
     """
 
-    parameters = parseConfig(config_path, version_check_flag=False)
+    main_dict = load_model(model_path, "cpu")
+    parameters = main_dict.get("parameters", None)
+    parameters = (
+        parseConfig(config_path, version_check_flag=False)
+        if parameters is None
+        else parameters
+    )
     (
         model,
         _,
@@ -25,8 +31,8 @@ def post_training_model_optimization(model_path, config_path):
         _,
         parameters,
     ) = create_pytorch_objects(parameters, device="cpu")
+    parameters["model"]["onnx_export"] = True
 
-    main_dict = load_model(model_path, "cpu")
     version_check(parameters["version"], version_to_check=main_dict["version"])
     model.load_state_dict(main_dict["model_state_dict"])
     optimize_and_save_model(model, parameters, model_path, onnx_export=True)
