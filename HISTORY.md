@@ -2,6 +2,7 @@
 - Added a CLI for metrics computation
 - Added metrics specific for image-to-image comparison
 - Allow `penalty` and `class_weights` defined in the config to be used instead of a re-computation
+- Resume functionality now includes penalty calculation
 
 ## 0.0.16
 - Added a script "gandlf_deploy", allowing deployment of models into MLCubes (currently requires Docker)
