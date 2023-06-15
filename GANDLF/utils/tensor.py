@@ -1,5 +1,6 @@
 import os, sys
 from typing import Union
+from pandas.util import hash_pandas_object
 import numpy as np
 import SimpleITK as sitk
 import torch
@@ -368,6 +369,15 @@ def get_class_imbalance_weights(training_df, params):
             params.get("weights", None),
             params.get("class_weights", None),
         )
+        if params["previous_parameters"] is not None:
+            previous_training_hash = params["previous_parameters"]["training_data_hash"]
+            current_training_data_hash = params.get(
+                "training_data_hash", hash_pandas_object(training_df).sum()
+            )
+            # compare the previous and current training data hashes, and reset the weights if the training data has changed
+            if previous_training_hash != current_training_data_hash:
+                penalty_weights, class_weights = None, None
+        
         if penalty_weights is None or class_weights is None:
             print("Calculating weights")
             if params["problem_type"] == "classification":
