@@ -58,8 +58,6 @@ def inference_loop(
 
     # ensure outputs are saved properly
     parameters["save_output"] = True
-    # this is used to perform sanity checking
-    parameters["previous_parameters"] = None
 
     assert (
         parameters["model"]["type"].lower() == "torch"
@@ -92,7 +90,7 @@ def inference_loop(
 
         main_dict = torch.load(file_to_load, map_location=parameters["device"])
         model.load_state_dict(main_dict["model_state_dict"])
-        parameters["previous_parameters"] = main_dict["parameters"]
+        parameters["previous_parameters"] = main_dict.get("parameters", None)
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
         # Loading the executable OpenVINO model

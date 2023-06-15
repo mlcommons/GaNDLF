@@ -33,6 +33,7 @@ parameter_defaults = {
     "data_postprocessing": {},  # default data postprocessing
     "grid_aggregator_overlap": "crop",  # default grid aggregator overlap strategy
     "determinism": False,  # using deterministic version of computation
+    "previous_parameters": None,  # previous parameters to be used for resuming training and perform sanity checking
 }
 
 ## dictionary to define string defaults for appropriate options
