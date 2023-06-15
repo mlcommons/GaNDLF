@@ -56,21 +56,17 @@ def inference_loop(
     print("Number of classes  : ", len(parameters["model"]["class_list"]))
     parameters["testing_data"] = inferenceDataFromPickle
 
-    (
-        model,
-        _,
-        _,
-        _,
-        _,
-        parameters,
-    ) = create_pytorch_objects(parameters, device=device)
-
     # ensure outputs are saved properly
     parameters["save_output"] = True
 
+    assert (
+        parameters["model"]["type"].lower() == "torch"
+        or parameters["model"]["type"].lower() == "openvino"
+    ), f"The model type is not recognized: {parameters['model']['type']}"
+
     # Loading the weights into the model
     main_dict = None
-    if parameters["model"]["type"] == "torch":
+    if parameters["model"]["type"].lower() == "torch":
         # Loading the weights into the model
         if os.path.isdir(modelDir):
             files_to_check = [
@@ -118,10 +114,15 @@ def inference_loop(
                 )
             model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
             parameters["model"]["IO"] = [input_blob, output_blob]
-    else:
-        raise ValueError(
-            "The model type is not recognized: ", parameters["model"]["type"]
-        )
+
+    (
+        model,
+        _,
+        _,
+        _,
+        _,
+        parameters,
+    ) = create_pytorch_objects(parameters, device=device)
 
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
