@@ -375,8 +375,7 @@ def get_class_imbalance_weights(training_df, params):
                 "training_data_hash", hash_pandas_object(training_df).sum()
             )
             # compare the previous and current training data hashes, and reset the weights if the training data has changed
-            if previous_training_hash != current_training_data_hash:
-                penalty_weights, class_weights = None, None
+            penalty_weights = None if previous_training_hash != current_training_data_hash else penalty_weights
         
         if penalty_weights is None or class_weights is None:
             print("Calculating weights")
