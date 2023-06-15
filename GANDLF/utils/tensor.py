@@ -369,14 +369,20 @@ def get_class_imbalance_weights(training_df, params):
             params.get("weights", None),
             params.get("class_weights", None),
         )
+        # this default is needed for openfl
+        params["previous_parameters"] = params.get("previous_parameters", None)
         if params["previous_parameters"] is not None:
             previous_training_hash = params["previous_parameters"]["training_data_hash"]
             current_training_data_hash = params.get(
                 "training_data_hash", hash_pandas_object(training_df).sum()
             )
             # compare the previous and current training data hashes, and reset the weights if the training data has changed
-            penalty_weights = None if previous_training_hash != current_training_data_hash else penalty_weights
-        
+            penalty_weights = (
+                None
+                if previous_training_hash != current_training_data_hash
+                else penalty_weights
+            )
+
         if penalty_weights is None or class_weights is None:
             print("Calculating weights")
             if params["problem_type"] == "classification":
