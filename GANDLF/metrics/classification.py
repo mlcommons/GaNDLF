@@ -38,7 +38,7 @@ def overall_stats(predictions, ground_truth, params):
             "recall": tm.Recall(
                 num_classes=params["model"]["num_classes"], average=average_type_key
             ),
-            "f1": tm.F1(
+            "f1": tm.F1Score(
                 num_classes=params["model"]["num_classes"], average=average_type_key
             ),
             "specificity": tm.Specificity(
