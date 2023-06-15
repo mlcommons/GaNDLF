@@ -64,6 +64,15 @@ def inference_loop(
         or parameters["model"]["type"].lower() == "openvino"
     ), f"The model type is not recognized: {parameters['model']['type']}"
 
+    (
+        model,
+        _,
+        _,
+        _,
+        _,
+        parameters,
+    ) = create_pytorch_objects(parameters, device=device)
+
     # Loading the weights into the model
     main_dict = None
     if parameters["model"]["type"].lower() == "torch":
@@ -115,15 +124,6 @@ def inference_loop(
                 )
             model, input_blob, output_blob = load_ov_model(xml_to_check, device.upper())
             parameters["model"]["IO"] = [input_blob, output_blob]
-
-    (
-        model,
-        _,
-        _,
-        _,
-        _,
-        parameters,
-    ) = create_pytorch_objects(parameters, device=device)
 
     if not (os.environ.get("HOSTNAME") is None):
         print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
