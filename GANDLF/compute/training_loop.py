@@ -271,21 +271,6 @@ def training_loop(
         ),
     }
 
-    if not os.path.exists(model_paths["initial"]):
-        save_model(
-            {
-                "epoch": 0,
-                "model_state_dict": get_model_dict(model, params["device_id"]),
-                "optimizer_state_dict": optimizer.state_dict(),
-                "loss": best_loss,
-            },
-            model,
-            params,
-            model_paths["initial"],
-            onnx_export=False,
-        )
-        print("Initial model saved.")
-
     # if previous model file is present, load it up for sanity checks
     main_dict = None
     if os.path.exists(model_paths["best"]):
@@ -304,6 +289,22 @@ def training_loop(
         scheduler,
         params,
     ) = create_pytorch_objects(params, training_data, validation_data, device)
+
+    # save the initial model
+    if not os.path.exists(model_paths["initial"]):
+        save_model(
+            {
+                "epoch": 0,
+                "model_state_dict": get_model_dict(model, params["device_id"]),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "loss": best_loss,
+            },
+            model,
+            params,
+            model_paths["initial"],
+            onnx_export=False,
+        )
+        print("Initial model saved.")
 
     # if previous model file is present, load it up
     if main_dict is not None:
