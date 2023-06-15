@@ -1,5 +1,7 @@
 import os, sys
+from typing import Union
 import numpy as np
+import SimpleITK as sitk
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -500,3 +502,38 @@ def get_output_from_calculator(predictions, ground_truth, calculator):
     else:
         temp_output = temp_output.cpu().item()
     return temp_output
+
+
+def get_tensor_from_image(input_image: Union[sitk.Image, str]) -> torch.Tensor:
+    """
+    This function converts a sitk image to a torch tensor.
+
+    Args:
+        input_image (sitk.Image): The input image.
+
+    Returns:
+        torch.Tensor: The converted torch tensor.
+    """
+    input_image = (
+        sitk.ReadImage(input_image) if isinstance(input_image, str) else input_image
+    )
+    return torch.from_numpy(sitk.GetArrayFromImage(input_image))
+
+
+def get_image_from_tensor(input_tensor: torch.Tensor) -> sitk.Image:
+    """
+    This function converts a torch tensor to a sitk image.
+
+    Args:
+        input_tensor (torch.Tensor): The input tensor.
+
+    Returns:
+        sitk.Image: The converted sitk image.
+    """
+    arr = input_tensor.cpu().numpy()
+    return_image = sitk.GetImageFromArray(arr)
+    # this is specifically the case for 3D images
+    if (arr.shape[0] == 1) and (arr.shape[1] > 3):
+        return_image = sitk.GetImageFromArray(arr[0])
+
+    return return_image

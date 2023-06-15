@@ -242,7 +242,7 @@ Once you have your CSV in the specific format, you can pass it on to generate th
 ```csv
 SubjectID,Target,Prediction
 001,/path/to/001/target.nii.gz,/path/to/001/prediction.nii.gz
-002,/path/to/002/target.nii.gz,/path/to/001/prediction.nii.gz
+002,/path/to/002/target.nii.gz,/path/to/002/prediction.nii.gz
 ...
 ```
 
@@ -255,12 +255,12 @@ SubjectID,Target,Prediction
 ...
 ```
 
-To generate image to image metrics for synthesis tasks, ensure that the config has `problem_type: synthesis`, and the CSV can be in the same format as segmentation:
+To generate image to image metrics for synthesis tasks (including for the BraTS synthesis tasks [[1](https://www.synapse.org/#!Synapse:syn51156910/wiki/622356), [2](https://www.synapse.org/#!Synapse:syn51156910/wiki/622357)]), ensure that the config has `problem_type: synthesis`, and the CSV can be in the same format as segmentation (note that the `Mask` column is optional):
 
 ```csv
-SubjectID,Target,Prediction
-001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz
-002,/path/to/002/target_image.nii.gz,/path/to/001/prediction_image.nii.gz
+SubjectID,Target,Prediction,Mask
+001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz,/path/to/001/brain_mask.nii.gz
+002,/path/to/002/target_image.nii.gz,/path/to/002/prediction_image.nii.gz,/path/to/002/brain_mask.nii.gz
 ...
 ```
 
