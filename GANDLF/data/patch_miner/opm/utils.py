@@ -260,7 +260,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         #Assume patch is valid
         return True
         
-def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
+def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation =5, intensity_thresh_b = 128, patch_size=[256,256]):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
         Args:
@@ -281,10 +281,10 @@ def patch_artifact_check(img, intensity_thresh=225, intensity_thresh_saturation 
         percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_saturation) / (patch_size[0] * patch_size[1])
         percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size[0] * patch_size[1])
 
-        if percent_pixel_2 > 0.98 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.98:
-            if percent_pixel_2 < 0.25:
+        if percent_pixel_2 > 0.99 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.99:
+            if percent_pixel_2 < 0.1:
                 return False
-        elif (percent_pixel_2 > 0.95 and percent_pixel_3 > 0.95) or percent_pixel_b > 0.95 or percent_pixels > 0.75:
+        elif (percent_pixel_2 > 0.99 and percent_pixel_3 > 0.99) or percent_pixel_b > 0.99 or percent_pixels > 0.9:
             return False
         # assume that the patch is valid
         return True
