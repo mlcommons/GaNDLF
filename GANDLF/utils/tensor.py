@@ -1,5 +1,6 @@
 import os, sys
 from typing import Union
+from pandas.util import hash_pandas_object
 import numpy as np
 import SimpleITK as sitk
 import torch
@@ -364,36 +365,56 @@ def get_class_imbalance_weights(training_df, params):
     """
     penalty_weights, class_weights = None, None
     if params["weighted_loss"]:
-        print("Calculating weights")
-        # if params["weighted_loss"][weights] is None # You can get weights from the user here, might need some playing with class_list to do later
-        if params["problem_type"] == "classification":
-            (
-                penalty_weights,
-                class_weights,
-            ) = get_class_imbalance_weights_classification(training_df, params)
-        elif params["problem_type"] == "segmentation":
-            # Set up the dataloader for penalty calculation
-            from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-
-            penalty_data = ImagesFromDataFrame(
-                training_df,
-                parameters=params,
-                train=False,
-                loader_type="penalty",
+        (penalty_weights, class_weights) = (
+            params.get("weights", None),
+            params.get("class_weights", None),
+        )
+        # this default is needed for openfl
+        params["previous_parameters"] = params.get("previous_parameters", None)
+        if params["previous_parameters"] is not None:
+            previous_training_hash = params["previous_parameters"]["training_data_hash"]
+            current_training_data_hash = params.get(
+                "training_data_hash", hash_pandas_object(training_df).sum()
+            )
+            # compare the previous and current training data hashes, and reset the weights if the training data has changed
+            penalty_weights = (
+                None
+                if previous_training_hash != current_training_data_hash
+                else penalty_weights
             )
 
-            penalty_loader = DataLoader(
-                penalty_data,
-                batch_size=1,
-                shuffle=True,
-                pin_memory=False,
-            )
+        if penalty_weights is None or class_weights is None:
+            print("Calculating weights")
+            if params["problem_type"] == "classification":
+                (
+                    penalty_weights,
+                    class_weights,
+                ) = get_class_imbalance_weights_classification(training_df, params)
+            elif params["problem_type"] == "segmentation":
+                # Set up the dataloader for penalty calculation
+                from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
-            (
-                penalty_weights,
-                class_weights,
-            ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
-            del penalty_data, penalty_loader
+                penalty_data = ImagesFromDataFrame(
+                    training_df,
+                    parameters=params,
+                    train=False,
+                    loader_type="penalty",
+                )
+
+                penalty_loader = DataLoader(
+                    penalty_data,
+                    batch_size=1,
+                    shuffle=True,
+                    pin_memory=False,
+                )
+
+                (
+                    penalty_weights,
+                    class_weights,
+                ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
+                del penalty_data, penalty_loader
+        else:
+            print("Using weights from config file")
 
     return penalty_weights, class_weights
 
