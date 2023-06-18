@@ -238,7 +238,7 @@ def alpha_rgb_2d_channel_check(img):
     else:
         return False
 
-def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size=[256,256]):
+def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size):
         """
         This function is used to curate patches from the input image. It is used to remove patches that have pen markings.
         Args:
@@ -250,13 +250,14 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         Returns:
             bool: Whether the patch is valid (True) or not (False)
         """
+        patch_size=config["patch_size"]
         ihc_hed = rgb2hed(img)
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
 
         if np.sum(e < 50) / (patch_size[0] * patch_size[1]) > 0.95 or (np.sum(patch_hsv[...,0] < 128) / (patch_size[0] * patch_size[1])) > 0.97:
             return False
-        
+
         #Assume patch is valid
         return True
         
@@ -271,7 +272,7 @@ def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation 
             patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256. patch_size=config["patch_size"]
         Returns:
             bool: Whether the patch is valid (True) or not (False)
-        """    
+        """
         
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
