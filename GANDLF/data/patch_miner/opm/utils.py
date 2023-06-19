@@ -238,7 +238,7 @@ def alpha_rgb_2d_channel_check(img):
     else:
         return False
 
-def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128, patch_size):
+def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128):
         """
         This function is used to curate patches from the input image. It is used to remove patches that have pen markings.
         Args:
@@ -261,7 +261,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         #Assume patch is valid
         return True
         
-def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation =5, intensity_thresh_b = 128, patch_size=[256,256]):
+def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation =5, intensity_thresh_b = 128):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
         Args:
@@ -273,7 +273,7 @@ def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation 
         Returns:
             bool: Whether the patch is valid (True) or not (False)
         """
-        
+        patch_size = config["patch_size"]
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
@@ -306,6 +306,7 @@ def parse_config(config_file):
     config["value_map"] = config.get("value_map", None)
     config["read_type"] = config.get("read_type", "random")
     config["overlap_factor"] = config.get("overlap_factor", 0.0)
+    config["patch_size"] = config.get("patch_size", [256,256])
 
     return config
 
