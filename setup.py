@@ -142,6 +142,7 @@ if __name__ == "__main__":
             "gandlf_deploy",
             "gandlf_optimizeModel",
             "gandlf_generateMetrics",
+            "gandlf_deployMetrics",
         ],
         classifiers=[
             "Development Status :: 3 - Alpha",

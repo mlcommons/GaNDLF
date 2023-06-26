@@ -81,11 +81,12 @@ if __name__ == "__main__":
         config_to_use = args.config
 
     result = run_deployment(
-        args.model,
-        config_to_use,
-        args.target,
-        args.outputdir,
         args.mlcube_root,
+        args.outputdir,
+        args.target,
+        "model",
+        config_to_use,
+        args.model,
         args.requires_gpu,
     )
     assert result, "Deployment to the target platform failed."

@@ -2876,11 +2876,12 @@ def test_generic_deploy_docker():
     )
 
     result = run_deployment(
-        outputDir,
-        testingDir + "/config_segmentation.yaml",
-        "docker",
+        os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
         deploymentOutputDir,
-        os.path.join(gandlfRootDir, "mlcube"),
+        "docker",
+        "model",
+        testingDir + "/config_segmentation.yaml",
+        outputDir,
         requires_gpu=True,
     )
 
