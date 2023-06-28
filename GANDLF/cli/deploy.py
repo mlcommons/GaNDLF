@@ -201,17 +201,14 @@ def deploy_docker_mlcube(
     embed_asset(output_mlcube_config_path, container, "embedded_mlcube.yml")
 
     # Embed modeldir if available
-    if modeldir is not None:
-        print("Attempting to embed the model...")
-        embed_asset(modeldir, container, "embedded_model")
+    print("Attempting to embed the model...")
+    embed_asset(modeldir, container, "embedded_model")
 
     # Embed config if available
-    if config is not None:
-        embed_asset(config, container, "embedded_config.yml")
+    embed_asset(config, container, "embedded_config.yml")
 
     # Embed entrypoint script if available
-    if entrypoint_script is not None:
-        embed_asset(entrypoint_script, container, "entrypoint.py")
+    embed_asset(entrypoint_script, container, "entrypoint.py")
 
     # Commit the container to the same tag.
     docker_repo = docker_image.split(":")[0]
@@ -238,6 +235,13 @@ def deploy_docker_mlcube(
 
 
 def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
+    """
+    This function is used to get the metrics from mlcube config file.
+
+    Args:
+        mlcube_config_file (str): The path of mlcube config file.
+        entrypoint_script (str): The path of entrypoint script.
+    """
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
         mlcube_config = yaml.safe_load(f)
@@ -249,6 +253,14 @@ def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
 
 
 def get_model_mlcube_config(mlcube_config_file, requires_gpu):
+    """
+    This function returns the mlcube config for the model.
+
+    Args:
+        mlcube_config_file (str): Path to mlcube config file.
+        requires_gpu (bool): Whether the model requires GPU.
+    """
+    ++documentation
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
         mlcube_config = yaml.safe_load(f)

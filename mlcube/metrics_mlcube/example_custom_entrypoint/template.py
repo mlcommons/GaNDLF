@@ -14,7 +14,13 @@ def create_csv(predictions, labels):
 
 
 def run_gandlf(output_path, parameters_file):
-    """A function that calls GaNDLF's generate metrics command with the previously created csv"""
+    """    
+    A function that calls GaNDLF's generate metrics command with the previously created csv.
+
+    Args:
+        output_path (str): The path to the output folder
+        parameters_file (str): The path to the parameters file
+    """
     exit_status = os.system(
         f"python3.8 gandlf_generateMetrics -c {parameters_file} -i ./data.csv -o {output_path}"
     )
