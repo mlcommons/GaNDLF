@@ -11,14 +11,16 @@ import sys
 
 def create_csv(predictions, labels):
     """A function that creates a ./data.csv file from input folders."""
+    # Add your logic here
+    raise NotImplementedError
 
 
 def run_gandlf(output_path, parameters_file):
-    """    
+    """
     A function that calls GaNDLF's generate metrics command with the previously created csv.
 
     Args:
-        output_path (str): The path to the output folder
+        output_path (str): The path to the output file/folder
         parameters_file (str): The path to the parameters file
     """
     exit_status = os.system(
