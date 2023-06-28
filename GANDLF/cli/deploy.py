@@ -311,13 +311,23 @@ def get_model_mlcube_config(mlcube_config_file, requires_gpu):
 
 
 def embed_asset(asset, container, asset_name):
+    """
+    This function embeds an asset into a container.
+
+    Args:
+        asset (str): The path to the asset to embed.
+        container (docker.models.containers.Container): The container to embed the asset into.
+        asset_name (str): The name of the asset to embed.
+    """
     # Tarball the modeldir, config.yml and mlcube.yaml into memory, insert into container
-    asset_file_io = io.BytesIO()
-    with tarfile.open(fileobj=asset_file_io, mode="w|gz") as tar:
-        tar.add(os.path.realpath(asset), arcname=asset_name)
-    asset_file_io.seek(0)
-    container.put_archive("/", asset_file_io)
-    asset_file_io.close()
+    if asset is not None:
+        if os.path.exists(asset):
+            asset_file_io = io.BytesIO()
+            with tarfile.open(fileobj=asset_file_io, mode="w|gz") as tar:
+                tar.add(os.path.realpath(asset), arcname=asset_name)
+            asset_file_io.seek(0)
+            container.put_archive("/", asset_file_io)
+            asset_file_io.close()
 
 
 ## TODO!
