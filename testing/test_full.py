@@ -3028,3 +3028,22 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             assert os.path.isfile(output_file), "Metrics output file was not generated"
 
             sanitize_outputDir()
+
+
+def test_generic_deploy_metrics_docker():
+    print("50: Testing deployment of a metrics generator to Docker")
+    # requires an installed Docker engine
+
+    deploymentOutputDir = os.path.join(outputDir, "mlcube")
+
+    result = run_deployment(
+        os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
+        deploymentOutputDir,
+        "docker",
+        "metrics",
+    )
+
+    assert result, "run_deployment returned false"
+    sanitize_outputDir()
+
+    print("passed")
