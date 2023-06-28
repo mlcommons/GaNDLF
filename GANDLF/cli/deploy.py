@@ -260,7 +260,6 @@ def get_model_mlcube_config(mlcube_config_file, requires_gpu):
         mlcube_config_file (str): Path to mlcube config file.
         requires_gpu (bool): Whether the model requires GPU.
     """
-    ++documentation
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
         mlcube_config = yaml.safe_load(f)
