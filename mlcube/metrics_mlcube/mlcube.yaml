@@ -45,8 +45,7 @@ tasks:
     entrypoint: "python3.8 gandlf_generateMetrics"
     parameters:
       inputs: {
-        predictions: predictions/,
-        labels: labels/,
+        data_path: data/,
         # GaNDLF config file
         parameters_file: {type: file, default: config.yaml}
       }
