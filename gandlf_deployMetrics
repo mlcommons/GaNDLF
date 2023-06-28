@@ -24,6 +24,14 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument(
+        "-e",
+        "--entrypoint",
+        metavar="",
+        type=str,
+        help="A custom python entrypoint script to use instead of the default.",
+        default=None,
+    )
+    parser.add_argument(
         "-r",
         "--mlcube-root",
         metavar="",
@@ -45,5 +53,11 @@ if __name__ == "__main__":
     if not os.path.exists(args.outputdir):
         os.makedirs(args.outputdir, exist_ok=True)
 
-    result = run_deployment(args.mlcube_root, args.outputdir, args.target, "metrics")
+    result = run_deployment(
+        args.mlcube_root,
+        args.outputdir,
+        args.target,
+        "metrics",
+        entrypoint_script=args.entrypoint,
+    )
     assert result, "Deployment to the target platform failed."

@@ -22,6 +22,7 @@ def run_deployment(
     outputdir,
     target,
     mlcube_type,
+    entrypoint_script=None,
     configfile=None,
     modeldir=None,
     requires_gpu=None,
@@ -69,9 +70,14 @@ def run_deployment(
             configfile
         ), f"The config file {configfile} does not exist."
 
+    if entrypoint_script:
+        assert os.path.exists(
+            entrypoint_script
+        ), f"Error: The script path {entrypoint_script} does not exist."
+
     if target.lower() == "docker":
         result = deploy_docker_mlcube(
-            mlcubedir, outputdir, configfile, modeldir, requires_gpu
+            mlcubedir, outputdir, entrypoint_script, configfile, modeldir, requires_gpu
         )
         assert result, "Something went wrong during platform-specific deployment."
 
@@ -79,7 +85,12 @@ def run_deployment(
 
 
 def deploy_docker_mlcube(
-    mlcubedir, outputdir, config=None, modeldir=None, requires_gpu=None
+    mlcubedir,
+    outputdir,
+    entrypoint_script=None,
+    config=None,
+    modeldir=None,
+    requires_gpu=None,
 ):
     """
     Deploy the docker mlcube of the model or metrics calculator.
@@ -115,7 +126,7 @@ def deploy_docker_mlcube(
         # we can use that as an indicator if we are doing model or metrics deployment
         mlcube_config = get_model_mlcube_config(mlcube_config_file, requires_gpu)
     else:
-        mlcube_config = get_metrics_mlcube_config(mlcube_config_file)
+        mlcube_config = get_metrics_mlcube_config(mlcube_config_file, entrypoint_script)
 
     output_mlcube_config_path = os.path.join(outputdir, "mlcube.yaml")
     with open(output_mlcube_config_path, "w") as f:
@@ -198,6 +209,10 @@ def deploy_docker_mlcube(
     if config is not None:
         embed_asset(config, container, "embedded_config.yml")
 
+    # Embed entrypoint script if available
+    if entrypoint_script is not None:
+        embed_asset(entrypoint_script, container, "entrypoint.py")
+
     # Commit the container to the same tag.
     docker_repo = docker_image.split(":")[0]
     docker_tag = docker_image.split(":")[1]
@@ -222,10 +237,13 @@ def deploy_docker_mlcube(
     return True
 
 
-def get_metrics_mlcube_config(mlcube_config_file):
+def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
         mlcube_config = yaml.safe_load(f)
+    if entrypoint_script:
+        # modify the entrypoint to run a custom script
+        mlcube_config["tasks"]["evaluate"]["entrypoint"] = "python3.8 /entrypoint.py"
     mlcube_config["docker"]["build_strategy"] = "auto"
     return mlcube_config
 
