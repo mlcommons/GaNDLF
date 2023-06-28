@@ -85,8 +85,8 @@ if __name__ == "__main__":
         args.outputdir,
         args.target,
         "model",
-        config_to_use,
-        args.model,
-        args.requires_gpu,
+        configfile=config_to_use,
+        modeldir=args.model,
+        requires_gpu=args.requires_gpu,
     )
     assert result, "Deployment to the target platform failed."

@@ -2880,8 +2880,8 @@ def test_generic_deploy_docker():
         deploymentOutputDir,
         "docker",
         "model",
-        testingDir + "/config_segmentation.yaml",
-        outputDir,
+        configfile=testingDir + "/config_segmentation.yaml",
+        modeldir=outputDir,
         requires_gpu=True,
     )
 
