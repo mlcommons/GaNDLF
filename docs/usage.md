@@ -354,7 +354,7 @@ If `${architecture_name}` is supported, the optimized model will get generated i
 
 ## Deployment
 
-## Deploy as a Model
+### Deploy as a Model
 
 GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to [Apptainer/Singularity format](https://apptainer.org/docs/user/main/docker_and_oci.html)). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
