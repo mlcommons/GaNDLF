@@ -374,7 +374,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
   --mlcube-type model # deploy as a model MLCube.
 ```
 
-## Deploy as a Metrics Generator
+### Deploy as a Metrics Generator
 
 You can also deploy GaNDLF as a metrics generator (see the [Generate Metrics](#generate-metrics) section) as follows:
 
