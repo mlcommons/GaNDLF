@@ -353,6 +353,7 @@ If you have a model previously trained using GaNDLF that you wish to run graph o
 
 If `${architecture_name}` is supported, the optimized model will get generated in the model directory, with the name `${architecture_name}_optimized.onnx`.
 
+
 ## Deployment
 
 GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to [Apptainer/Singularity format](https://apptainer.org/docs/user/main/docker_and_oci.html)). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
@@ -375,6 +376,9 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 ```
 
 
+## Federating your model using OpenFL
+
+Once you have a model definition, it is easy to perform federated learning using the [Open Federated Learning (OpenFL) library](https://github.com/securefederatedai/openfl). Follow the tutorial in [this page](https://openfl.readthedocs.io/en/latest/running_the_federation_with_gandlf.html) to get started.
 
 
 ## Running with Docker
