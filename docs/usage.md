@@ -206,8 +206,8 @@ You can use the following code snippet to run GaNDLF:
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_run \
-  ## -h, --help         show help message and exit
-  ## -v, --version      Show program's version number and exit.
+  # -h, --help         show help message and exit
+  # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
   -m ./experiment_0/model_dir/ \ # model directory (i.e., the `modeldir`) where the output of the training will be stored, created if not present
@@ -230,8 +230,8 @@ GaNDLF provides a script to generate metrics after an inference process is done.
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_generateMetrics \
-  ## -h, --help         show help message and exit
-  ## -v, --version      Show program's version number and exit.
+  # -h, --help         show help message and exit
+  # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
   -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'
   -o , --outputfile   Location to save the output dictionary. If not provided, will print to stdout.
@@ -365,7 +365,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_deploy \
-  ## -h, --help         show help message and exit
+  # -h, --help         show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   --target docker \ # the target platform (--help will show all available targets)
