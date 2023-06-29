@@ -11,6 +11,7 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
 		"ghcr.io/devcontainers/features/python": {
+			"version": "none",
 			"installJupyterlab": true
 		}
 		// "ghcr.io/devcontainers-contrib/features/flake8:2": {} included in the universal image
@@ -21,10 +22,10 @@
 	},
 
 	"hostRequirements": {
-	    "memory": "8gb",
-	    "storage": "64gb"
+		"memory": "8gb",
+		"storage": "64gb"
 	},
- 
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
