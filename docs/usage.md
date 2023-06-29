@@ -29,7 +29,8 @@ A major reason why one would want to anonymize data is to ensure that trained mo
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_anonymizer
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
+  # -v, --version      Show program's version number and exit.
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
   -o ./output_dir_or_file # output directory to save anonymized images or a single output image file
@@ -73,7 +74,7 @@ Once these files are present, the patch miner can be run using the following com
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_patchMiner \ 
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
   -o ./exp_patchMiner/output_dir/ # output directory
@@ -86,7 +87,7 @@ Running preprocessing before training/inference is optional, but recommended. It
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_preprocess \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
   -o ./experiment_0/output_dir/ # output directory
@@ -148,7 +149,7 @@ The following command shows how the script works:
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_constructCSV \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -i $DATA_DIRECTORY # this is the main data directory 
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
   -l _seg.nii.gz \ # an example label identifier - not needed for regression/classification, and can be changed based on your data
@@ -184,7 +185,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_configGenerator \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration
   -s ./samples/config_generator_strategy.yaml \ # strategy file
   -o ./all_experiments/ # output directory
@@ -206,7 +207,7 @@ You can use the following code snippet to run GaNDLF:
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_run \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
@@ -230,7 +231,7 @@ GaNDLF provides a script to generate metrics after an inference process is done.
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_generateMetrics \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
   -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'
@@ -365,7 +366,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_deploy \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   --target docker \ # the target platform (--help will show all available targets)
