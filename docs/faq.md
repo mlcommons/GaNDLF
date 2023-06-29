@@ -40,6 +40,10 @@ GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
 - If you have [installed from pip](./setup.md), then you can simply run `pip install --upgrade gandlf` to get the latest version of GaNDLF, or if you are interested in the nightly builds, then you can run `pip install --upgrade --pre gandlf`.
 - If you have performed [installation from sources](./extending.md), then you will need to do `git pull` from the base `GaNDLF` directory to get the latest master of GaNDLF. Follow this up with `pip install -e .` after activating the appropriate virtual environment to ensure the updates get passed through.
 
+### How can I perform federated learning of my GaNDLF model?
+
+Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-using-openfl.
+
 ### What if I have another question?
 
 Please [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
