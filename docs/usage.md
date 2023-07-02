@@ -381,6 +381,12 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 Once you have a model definition, it is easy to perform federated learning using the [Open Federated Learning (OpenFL) library](https://github.com/securefederatedai/openfl). Follow the tutorial in [this page](https://openfl.readthedocs.io/en/latest/running_the_federation_with_gandlf.html) to get started.
 
 
+## Federating your model evaluation using MedPerf
+
+Once you have a trained model, you can perform [federated evaluation](https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html#Federated-evaluation) using [MedPerf](https://medperf.org/). Follow the tutorial in [this page](https://docs.medperf.org/mlcubes/gandlf_mlcube/) to get started.
+
+
+https://docs.medperf.org/mlcubes/gandlf_mlcube/
 ## Running with Docker
 
 The usage of GaNDLF remains generally the same even from Docker, but there are a few extra considerations.

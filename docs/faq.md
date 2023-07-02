@@ -44,6 +44,10 @@ GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
 
 Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-using-openfl.
 
+### How can I perform federated evaluation of my GaNDLF model?
+
+Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-evaluation-using-medperf.
+
 ### What if I have another question?
 
 Please [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
