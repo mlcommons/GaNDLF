@@ -115,8 +115,8 @@ def overall_stats(predictions, ground_truth, params):
     calculators = {
         "mse": tm.MeanSquaredError(),
         "mae": tm.MeanAbsoluteError(),
-        "pearson": tm.PearsonCorrcoef(),
-        "spearman": tm.SpearmanCorrcoef(),
+        "pearson": tm.PearsonCorrCoef(),
+        "spearman": tm.SpearmanCorrCoef(),
     }
     for metric_name, calculator in calculators.items():
         output_metrics[metric_name] = get_output_from_calculator(

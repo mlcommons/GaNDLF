@@ -29,7 +29,8 @@ A major reason why one would want to anonymize data is to ensure that trained mo
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_anonymizer
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
+  # -v, --version      Show program's version number and exit.
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
   -o ./output_dir_or_file # output directory to save anonymized images or a single output image file
@@ -73,7 +74,7 @@ Once these files are present, the patch miner can be run using the following com
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_patchMiner \ 
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
   -o ./exp_patchMiner/output_dir/ # output directory
@@ -86,7 +87,7 @@ Running preprocessing before training/inference is optional, but recommended. It
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_preprocess \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
   -o ./experiment_0/output_dir/ # output directory
@@ -148,7 +149,7 @@ The following command shows how the script works:
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_constructCSV \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -i $DATA_DIRECTORY # this is the main data directory 
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
   -l _seg.nii.gz \ # an example label identifier - not needed for regression/classification, and can be changed based on your data
@@ -184,7 +185,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_configGenerator \
-  # -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration
   -s ./samples/config_generator_strategy.yaml \ # strategy file
   -o ./all_experiments/ # output directory
@@ -206,8 +207,8 @@ You can use the following code snippet to run GaNDLF:
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_run \
-  ## -h, --help         show help message and exit
-  ## -v, --version      Show program's version number and exit.
+  # -h, --help         Show help message and exit
+  # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
   -m ./experiment_0/model_dir/ \ # model directory (i.e., the `modeldir`) where the output of the training will be stored, created if not present
@@ -230,8 +231,8 @@ GaNDLF provides a script to generate metrics after an inference process is done.
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_generateMetrics \
-  ## -h, --help         show help message and exit
-  ## -v, --version      Show program's version number and exit.
+  # -h, --help         Show help message and exit
+  # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
   -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'
   -o , --outputfile   Location to save the output dictionary. If not provided, will print to stdout.
@@ -242,7 +243,7 @@ Once you have your CSV in the specific format, you can pass it on to generate th
 ```csv
 SubjectID,Target,Prediction
 001,/path/to/001/target.nii.gz,/path/to/001/prediction.nii.gz
-002,/path/to/002/target.nii.gz,/path/to/001/prediction.nii.gz
+002,/path/to/002/target.nii.gz,/path/to/002/prediction.nii.gz
 ...
 ```
 
@@ -252,6 +253,15 @@ Similarly for classification or regression (`A`, `B`, `C`, `D` are integers for 
 SubjectID,Target,Prediction
 001,A,B
 002,C,D
+...
+```
+
+To generate image to image metrics for synthesis tasks (including for the BraTS synthesis tasks [[1](https://www.synapse.org/#!Synapse:syn51156910/wiki/622356), [2](https://www.synapse.org/#!Synapse:syn51156910/wiki/622357)]), ensure that the config has `problem_type: synthesis`, and the CSV can be in the same format as segmentation (note that the `Mask` column is optional):
+
+```csv
+SubjectID,Target,Prediction,Mask
+001,/path/to/001/target_image.nii.gz,/path/to/001/prediction_image.nii.gz,/path/to/001/brain_mask.nii.gz
+002,/path/to/002/target_image.nii.gz,/path/to/002/prediction_image.nii.gz,/path/to/002/brain_mask.nii.gz
 ...
 ```
 
@@ -338,35 +348,65 @@ If you have a model previously trained using GaNDLF that you wish to run graph o
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_optimizeModel \
-  -m /path/to/trained/${architecture_name}_best.pth.tar \  # directory which contains testing and validation models
+  -m /path/to/trained/${architecture_name}_best.pth.tar  # directory which contains testing and validation models
 ```
 
 If `${architecture_name}` is supported, the optimized model will get generated in the model directory, with the name `${architecture_name}_optimized.onnx`.
 
+
 ## Deployment
+
+### Deploy as a Model
 
 GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to [Apptainer/Singularity format](https://apptainer.org/docs/user/main/docker_and_oci.html)). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
-
-Please note that in order to deploy a model, for technical reasons, you need write access to the GaNDLF package. With a virtual environment this should be automatic. See the [installation instructions](./setup.md#installation).
 
 To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
 # continue from previous shell
 (venv_gandlf) $> python gandlf_deploy \
-  ## -h, --help         show help message and exit
+  # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
+  --mlcube-type model # deploy as a model MLCube.
 ```
 
+### Deploy as a Metrics Generator
+
+You can also deploy GaNDLF as a metrics generator (see the [Generate Metrics](#generate-metrics) section) as follows:
+
+```bash
+(venv_gandlf) $> python gandlf_deploy \
+  ## -h, --help         show help message and exit
+  --target docker \ # the target platform (--help will show all available targets)
+  --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
+  -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
+  -e ./my_custom_script.py # An optional custom script used as an entrypoint for your MLCube
+  --mlcube-type metrics # deploy as a metrics MLCube.
+```
+
+The resulting MLCube can be used to calculate any metrics supported in GaNDLF. You can configure which metrics to be calculated by passing a GaNDLF config file when running the MLCube.
+
+For more information about using a custom entrypoint script, see the examples [here](https://github.com/mlcommons/GaNDLF/tree/master/mlcube).
+
+## Federating your model using OpenFL
+
+Once you have a model definition, it is easy to perform federated learning using the [Open Federated Learning (OpenFL) library](https://github.com/securefederatedai/openfl). Follow the tutorial in [this page](https://openfl.readthedocs.io/en/latest/running_the_federation_with_gandlf.html) to get started.
 
 
+## Federating your model evaluation using MedPerf
 
+Once you have a trained model, you can perform [federated evaluation](https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html#Federated-evaluation) using [MedPerf](https://medperf.org/). Follow the tutorial in [this page](https://docs.medperf.org/mlcubes/gandlf_mlcube/) to get started.
+
+!!! note
+  Please note that in order to create a GaNDLF MLCube, for technical reasons, you need write access to the GaNDLF package. With a virtual environment this should be automatic. See the [installation instructions](./setup.md#installation).
+
+https://docs.medperf.org/mlcubes/gandlf_mlcube/
 ## Running with Docker
 
 The usage of GaNDLF remains generally the same even from Docker, but there are a few extra considerations.

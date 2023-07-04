@@ -14,17 +14,30 @@ deploy_targets = [
     #'onefile'
 ]
 
+mlcube_types = ["model", "metrics"]
 
-def run_deployment(modeldir, configfile, target, outputdir, mlcubedir, requires_gpu):
+
+def run_deployment(
+    mlcubedir,
+    outputdir,
+    target,
+    mlcube_type,
+    entrypoint_script=None,
+    configfile=None,
+    modeldir=None,
+    requires_gpu=None,
+):
     """
     Run the deployment of the model.
 
     Args:
-        modeldir (str): The path to the model directory.
-        configfile (str): The path to the configuration file.
-        target (str): The target to deploy to.
-        outputdir (str): The path to the output directory.
         mlcubedir (str): The path to the mlcube directory.
+        outputdir (str): The path to the output directory.
+        target (str): The target to deploy to.
+        mlcube_type (str): Either 'model' or 'metrics'
+        configfile (str, Optional): The path to the configuration file. Required for models
+        modeldir (str, Optional): The path to the model directory. Required for models
+        requires_gpu (str, Optional): Whether the model requires GPU. Required for models
 
     Returns:
         bool: True if the deployment was successful, False otherwise.
@@ -33,6 +46,10 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir, requires_
         target in deploy_targets
     ), f"The deployment target {target} is not a valid target."
 
+    assert (
+        mlcube_type in mlcube_types
+    ), f"The mlcube type {mlcube_type} is not a valid type."
+
     if not os.path.exists(outputdir):
         os.makedirs(outputdir, exist_ok=True)
 
@@ -40,37 +57,51 @@ def run_deployment(modeldir, configfile, target, outputdir, mlcubedir, requires_
         outputdir
     ), f"Output location {outputdir} exists but is a file, not a directory."
 
-    assert os.path.exists(modeldir), f"Error: The model path {modeldir} does not exist."
+    if mlcube_type == "model":
+        assert os.path.exists(
+            modeldir
+        ), f"Error: The model path {modeldir} does not exist."
 
-    assert os.path.isdir(
-        modeldir
-    ), f"The model path {modeldir} exists but is not a directory."
+        assert os.path.isdir(
+            modeldir
+        ), f"The model path {modeldir} exists but is not a directory."
 
-    assert os.path.exists(configfile), f"The config file {configfile} does not exist."
+        assert os.path.exists(
+            configfile
+        ), f"The config file {configfile} does not exist."
+
+    if entrypoint_script:
+        assert os.path.exists(
+            entrypoint_script
+        ), f"Error: The script path {entrypoint_script} does not exist."
 
     if target.lower() == "docker":
         result = deploy_docker_mlcube(
-            modeldir, configfile, outputdir, mlcubedir, requires_gpu
+            mlcubedir, outputdir, entrypoint_script, configfile, modeldir, requires_gpu
         )
         assert result, "Something went wrong during platform-specific deployment."
 
     return True
 
 
-def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
+def deploy_docker_mlcube(
+    mlcubedir,
+    outputdir,
+    entrypoint_script=None,
+    config=None,
+    modeldir=None,
+    requires_gpu=None,
+):
     """
-    Deploy the docker mlcube of the model.
+    Deploy the docker mlcube of the model or metrics calculator.
 
     Args:
-        modeldir (str): The path to the model directory.
-        config (str): The path to the configuration file.
-        outputdir (str): The path to the output directory.
         mlcubedir (str): The path to the mlcube directory.
+        outputdir (str): The path to the output directory.
+        config (str, Optional): The path to the configuration file. Required for models
+        modeldir (str, Optional): The path to the model directory. Required for models
+        requires_gpu (str, Optional): Whether the model requires GPU. Required for models
     """
-    # Set up docker client for any future calls
-    docker_client = docker.from_env()
-    print("Connected to the docker service.")
-
     mlcube_config_file = os.path.join(mlcubedir, "mlcube.yaml")
     assert os.path.exists(mlcubedir) and os.path.exists(
         mlcube_config_file
@@ -86,70 +117,18 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
             output_workspace_folder,
             dirs_exist_ok=True,
         )
-    shutil.copyfile(config, os.path.join(output_workspace_folder, "config.yml"))
 
-    # First grab the existing the mlcube config then modify for the embedded-model image.
-    mlcube_config = None
-    with open(mlcube_config_file, "r") as f:
-        mlcube_config = yaml.safe_load(f)
+    if config is not None:
+        shutil.copyfile(config, os.path.join(output_workspace_folder, "config.yml"))
+
+    # First grab the existing the mlcube config
+    if modeldir is not None:
+        # we can use that as an indicator if we are doing model or metrics deployment
+        mlcube_config = get_model_mlcube_config(mlcube_config_file, requires_gpu)
+    else:
+        mlcube_config = get_metrics_mlcube_config(mlcube_config_file, entrypoint_script)
 
     output_mlcube_config_path = os.path.join(outputdir, "mlcube.yaml")
-
-    old_train_output_modeldir = mlcube_config["tasks"]["train"]["parameters"][
-        "outputs"
-    ].pop("modeldir", None)
-    mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("modeldir", None)
-    mlcube_config["tasks"]["train"]["parameters"]["inputs"].pop("config", None)
-    # Currently disabled because we've decided exposing config-on-inference complicates the MLCube use case.
-    # mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("config", None)
-
-    # Change output so that each task always places secondary output in the workspace
-    mlcube_config["tasks"]["train"]["parameters"]["outputs"][
-        "output_path"
-    ] = old_train_output_modeldir
-
-    # Change entrypoints to point specifically to the embedded model and config
-    mlcube_config["tasks"]["train"]["entrypoint"] = (
-        mlcube_config["tasks"]["train"]["entrypoint"]
-        + " --modeldir /embedded_model/"
-        + " --config /embedded_config.yml"
-    )
-    mlcube_config["tasks"]["infer"]["entrypoint"] = (
-        mlcube_config["tasks"]["infer"]["entrypoint"]
-        + " --modeldir /embedded_model/"
-        + " --config /embedded_config.yml"
-    )
-
-    # Change some configuration if GPU is required by default
-    if requires_gpu:
-        mlcube_config["platform"]["accelerator_count"] = 1
-        mlcube_config["tasks"]["train"]["entrypoint"] = mlcube_config["tasks"]["train"][
-            "entrypoint"
-        ] = mlcube_config["tasks"]["train"]["entrypoint"].replace(
-            "--device cpu", "--device cuda"
-        )
-        mlcube_config["tasks"]["infer"]["entrypoint"] = mlcube_config["tasks"]["infer"][
-            "entrypoint"
-        ] = mlcube_config["tasks"]["infer"]["entrypoint"].replace(
-            "--device cpu", "--device cuda"
-        )
-
-    # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
-    # In either case, the embedded model will not change persistently.
-    # The output in workspace will be the result of resuming training with new data on the embedded model.
-    # This is currently disabled -- "reset" and "resume" seem to behave strangely in these conditions.
-    # mlcube_config["tasks"]["training_from_reset"] = copy.deepcopy(
-    #    mlcube_config["tasks"]["training"]
-    # )
-    # mlcube_config["tasks"]["training_from_reset"]["entrypoint"] = (
-    #    mlcube_config["tasks"]["training_from_reset"]["entrypoint"] + " --reset True"
-    # )
-    # mlcube_config["tasks"]["training"]["entrypoint"] = (
-    #    mlcube_config["tasks"]["training"]["entrypoint"] + " --resume True"
-    # )
-
-    mlcube_config["docker"]["build_strategy"] = "auto"
-
     with open(output_mlcube_config_path, "w") as f:
         f.write(yaml.dump(mlcube_config, sort_keys=False, default_flow_style=False))
 
@@ -214,34 +193,22 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
         os.unlink(symlink_location)
 
     # If mlcube_docker configuration worked, the image is now present in Docker so we can manipulate it.
+    docker_client = docker.from_env()
+    print("Connected to the docker service.")
     container = docker_client.containers.create(docker_image)
 
+    # Embed mlcube config
+    embed_asset(output_mlcube_config_path, container, "embedded_mlcube.yml")
+
+    # Embed modeldir if available
     print("Attempting to embed the model...")
+    embed_asset(modeldir, container, "embedded_model")
 
-    # Tarball the modeldir, config.yml and mlcube.yaml into memory, insert into container
-    modeldir_file_io = io.BytesIO()
-    with tarfile.open(fileobj=modeldir_file_io, mode="w|gz") as tar:
-        tar.add(os.path.realpath(modeldir), arcname="embedded_model")
-    modeldir_file_io.seek(0)
-    container.put_archive("/", modeldir_file_io)
-    modeldir_file_io.close()
+    # Embed config if available
+    embed_asset(config, container, "embedded_config.yml")
 
-    # Do the same for config and mlcube.yaml
-    config_file_io = io.BytesIO()
-    with tarfile.open(fileobj=config_file_io, mode="w|gz") as tar:
-        tar.add(os.path.realpath(config), arcname="embedded_config.yml")
-    config_file_io.seek(0)
-    container.put_archive("/", config_file_io)
-    config_file_io.close()
-
-    mlcube_file_io = io.BytesIO()
-    with tarfile.open(fileobj=mlcube_file_io, mode="w|gz") as tar:
-        tar.add(
-            os.path.realpath(output_mlcube_config_path), arcname="embedded_mlcube.yaml"
-        )
-    mlcube_file_io.seek(0)
-    container.put_archive("/", mlcube_file_io)
-    mlcube_file_io.close()
+    # Embed entrypoint script if available
+    embed_asset(entrypoint_script, container, "entrypoint.py")
 
     # Commit the container to the same tag.
     docker_repo = docker_image.split(":")[0]
@@ -261,10 +228,117 @@ def deploy_docker_mlcube(modeldir, config, outputdir, mlcubedir, requires_gpu):
         f"To run this container as an MLCube, you (or the end-user) should invoke the MLCube runner with --mlcube={outputdir} ."
     )
     print(
-        "Otherwise, it will function as a standard docker image of GaNDLF, but with embedded model/config files."
+        "Otherwise, it will function as a standard docker image of GaNDLF, but with possibly embedded model/config files."
     )
     print("Deployment finished successfully!")
     return True
+
+
+def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
+    """
+    This function is used to get the metrics from mlcube config file.
+
+    Args:
+        mlcube_config_file (str): The path of mlcube config file.
+        entrypoint_script (str): The path of entrypoint script.
+    """
+    mlcube_config = None
+    with open(mlcube_config_file, "r") as f:
+        mlcube_config = yaml.safe_load(f)
+    if entrypoint_script:
+        # modify the entrypoint to run a custom script
+        mlcube_config["tasks"]["evaluate"]["entrypoint"] = "python3.8 /entrypoint.py"
+    mlcube_config["docker"]["build_strategy"] = "auto"
+    return mlcube_config
+
+
+def get_model_mlcube_config(mlcube_config_file, requires_gpu):
+    """
+    This function returns the mlcube config for the model.
+
+    Args:
+        mlcube_config_file (str): Path to mlcube config file.
+        requires_gpu (bool): Whether the model requires GPU.
+    """
+    mlcube_config = None
+    with open(mlcube_config_file, "r") as f:
+        mlcube_config = yaml.safe_load(f)
+    mlcube_config["docker"]["build_strategy"] = "auto"
+
+    # modify for the embedded-model image.
+    old_train_output_modeldir = mlcube_config["tasks"]["train"]["parameters"][
+        "outputs"
+    ].pop("modeldir", None)
+    mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("modeldir", None)
+    mlcube_config["tasks"]["train"]["parameters"]["inputs"].pop("config", None)
+    # Currently disabled because we've decided exposing config-on-inference complicates the MLCube use case.
+    # mlcube_config["tasks"]["infer"]["parameters"]["inputs"].pop("config", None)
+
+    # Change output so that each task always places secondary output in the workspace
+    mlcube_config["tasks"]["train"]["parameters"]["outputs"][
+        "output_path"
+    ] = old_train_output_modeldir
+
+    # Change entrypoints to point specifically to the embedded model and config
+    mlcube_config["tasks"]["train"]["entrypoint"] = (
+        mlcube_config["tasks"]["train"]["entrypoint"]
+        + " --modeldir /embedded_model/"
+        + " --config /embedded_config.yml"
+    )
+    mlcube_config["tasks"]["infer"]["entrypoint"] = (
+        mlcube_config["tasks"]["infer"]["entrypoint"]
+        + " --modeldir /embedded_model/"
+        + " --config /embedded_config.yml"
+    )
+
+    # Change some configuration if GPU is required by default
+    if requires_gpu:
+        mlcube_config["platform"]["accelerator_count"] = 1
+        mlcube_config["tasks"]["train"]["entrypoint"] = mlcube_config["tasks"]["train"][
+            "entrypoint"
+        ] = mlcube_config["tasks"]["train"]["entrypoint"].replace(
+            "--device cpu", "--device cuda"
+        )
+        mlcube_config["tasks"]["infer"]["entrypoint"] = mlcube_config["tasks"]["infer"][
+            "entrypoint"
+        ] = mlcube_config["tasks"]["infer"]["entrypoint"].replace(
+            "--device cpu", "--device cuda"
+        )
+
+    return mlcube_config
+    # Duplicate training task into one from reset (must be explicit) and one that resumes with new data
+    # In either case, the embedded model will not change persistently.
+    # The output in workspace will be the result of resuming training with new data on the embedded model.
+    # This is currently disabled -- "reset" and "resume" seem to behave strangely in these conditions.
+    # mlcube_config["tasks"]["training_from_reset"] = copy.deepcopy(
+    #    mlcube_config["tasks"]["training"]
+    # )
+    # mlcube_config["tasks"]["training_from_reset"]["entrypoint"] = (
+    #    mlcube_config["tasks"]["training_from_reset"]["entrypoint"] + " --reset True"
+    # )
+    # mlcube_config["tasks"]["training"]["entrypoint"] = (
+    #    mlcube_config["tasks"]["training"]["entrypoint"] + " --resume True"
+    # )
+
+
+def embed_asset(asset, container, asset_name):
+    """
+    This function embeds an asset into a container.
+
+    Args:
+        asset (str): The path to the asset to embed.
+        container (docker.models.containers.Container): The container to embed the asset into.
+        asset_name (str): The name of the asset to embed.
+    """
+    # Tarball the modeldir, config.yml and mlcube.yaml into memory, insert into container
+    if asset is not None:
+        if os.path.exists(asset):
+            asset_file_io = io.BytesIO()
+            with tarfile.open(fileobj=asset_file_io, mode="w|gz") as tar:
+                tar.add(os.path.realpath(asset), arcname=asset_name)
+            asset_file_io.seek(0)
+            container.put_archive("/", asset_file_io)
+            asset_file_io.close()
 
 
 ## TODO!

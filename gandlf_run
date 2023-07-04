@@ -122,8 +122,7 @@ if __name__ == "__main__":
         args.reset = False
 
     # config file should always be present
-    if not (os.path.isfile(args.config)):
-        sys.exit("ERROR: Configuration file not found!")
+    assert os.path.isfile(args.config), "Configuration file not found!"
 
     try:
         main_run(

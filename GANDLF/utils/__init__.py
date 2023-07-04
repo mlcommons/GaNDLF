@@ -22,6 +22,8 @@ from .tensor import (
     print_model_summary,
     get_ground_truths_and_predictions_tensor,
     get_output_from_calculator,
+    get_tensor_from_image,
+    get_image_from_tensor,
 )
 
 from .write_parse import (

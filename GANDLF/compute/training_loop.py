@@ -255,6 +255,29 @@ def training_loop(
         # testing_data = validation_data
         testingDataDefined = False
 
+    # Setup a few variables for tracking
+    best_loss = 1e7
+    patience, start_epoch = 0, 0
+    first_model_saved = False
+    model_paths = {
+        "best": os.path.join(
+            output_dir, params["model"]["architecture"] + best_model_path_end
+        ),
+        "initial": os.path.join(
+            output_dir, params["model"]["architecture"] + initial_model_path_end
+        ),
+        "latest": os.path.join(
+            output_dir, params["model"]["architecture"] + latest_model_path_end
+        ),
+    }
+
+    # if previous model file is present, load it up for sanity checks
+    main_dict = None
+    if os.path.exists(model_paths["best"]):
+        main_dict = load_model(model_paths["best"], params["device"])
+        version_check(params["version"], version_to_check=main_dict["version"])
+        params["previous_parameters"] = main_dict.get("parameters", None)
+
     # Defining our model here according to parameters mentioned in the configuration file
     print("Number of channels : ", params["model"]["num_channels"])
 
@@ -266,6 +289,34 @@ def training_loop(
         scheduler,
         params,
     ) = create_pytorch_objects(params, training_data, validation_data, device)
+
+    # save the initial model
+    if not os.path.exists(model_paths["initial"]):
+        save_model(
+            {
+                "epoch": 0,
+                "model_state_dict": get_model_dict(model, params["device_id"]),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "loss": best_loss,
+            },
+            model,
+            params,
+            model_paths["initial"],
+            onnx_export=False,
+        )
+        print("Initial model saved.")
+
+    # if previous model file is present, load it up
+    if main_dict is not None:
+        try:
+            model.load_state_dict(main_dict["model_state_dict"])
+            start_epoch = main_dict["epoch"]
+            optimizer.load_state_dict(main_dict["optimizer_state_dict"])
+            best_loss = main_dict["loss"]
+            params["previous_parameters"] = main_dict.get("parameters", None)
+            print("Previous model successfully loaded.")
+        except RuntimeWarning:
+            RuntimeWarning("Previous model could not be loaded, initializing model")
 
     if params["model"]["print_summary"]:
         print_model_summary(
@@ -343,50 +394,6 @@ def training_loop(
             enabled=False,
         )
         params["medcam_enabled"] = False
-
-    # Setup a few variables for tracking
-    best_loss = 1e7
-    patience, start_epoch = 0, 0
-    first_model_saved = False
-    model_paths = {
-        "best": os.path.join(
-            output_dir, params["model"]["architecture"] + best_model_path_end
-        ),
-        "initial": os.path.join(
-            output_dir, params["model"]["architecture"] + initial_model_path_end
-        ),
-        "latest": os.path.join(
-            output_dir, params["model"]["architecture"] + latest_model_path_end
-        ),
-    }
-
-    if not os.path.exists(model_paths["initial"]):
-        save_model(
-            {
-                "epoch": 0,
-                "model_state_dict": get_model_dict(model, params["device_id"]),
-                "optimizer_state_dict": optimizer.state_dict(),
-                "loss": best_loss,
-            },
-            model,
-            params,
-            model_paths["initial"],
-            onnx_export=False,
-        )
-        print("Initial model saved.")
-
-    # if previous model file is present, load it up
-    if os.path.exists(model_paths["best"]):
-        try:
-            main_dict = load_model(model_paths["best"], params["device"])
-            version_check(params["version"], version_to_check=main_dict["version"])
-            model.load_state_dict(main_dict["model_state_dict"])
-            start_epoch = main_dict["epoch"]
-            optimizer.load_state_dict(main_dict["optimizer_state_dict"])
-            best_loss = main_dict["loss"]
-            print("Previous model successfully loaded.")
-        except RuntimeWarning:
-            RuntimeWarning("Previous model could not be loaded, initializing model")
 
     print("Using device:", device, flush=True)
 
