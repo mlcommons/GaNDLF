@@ -356,11 +356,11 @@ If `${architecture_name}` is supported, the optimized model will get generated i
 
 ## Deployment
 
+### Deploy as a Model
+
 GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use formats -- users of your model do not even need to install GaNDLF. Currently, Docker images are supported (which can be converted to [Apptainer/Singularity format](https://apptainer.org/docs/user/main/docker_and_oci.html)). These images meet [the MLCube interface](https://mlcommons.org/en/mlcube/). This allows your algorithm to be used in a consistent manner with other machine learning tools.
 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
-
-Please note that in order to deploy a model, for technical reasons, you need write access to the GaNDLF package. With a virtual environment this should be automatic. See the [installation instructions](./setup.md#installation).
 
 To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
@@ -373,8 +373,26 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
   -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
+  --mlcube-type model # deploy as a model MLCube.
 ```
 
+### Deploy as a Metrics Generator
+
+You can also deploy GaNDLF as a metrics generator (see the [Generate Metrics](#generate-metrics) section) as follows:
+
+```bash
+(venv_gandlf) $> python gandlf_deploy \
+  ## -h, --help         show help message and exit
+  --target docker \ # the target platform (--help will show all available targets)
+  --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
+  -o ./output_dir # Output directory where a  new mlcube.yaml file to be distributed with your image will be created
+  -e ./my_custom_script.py # An optional custom script used as an entrypoint for your MLCube
+  --mlcube-type metrics # deploy as a metrics MLCube.
+```
+
+The resulting MLCube can be used to calculate any metrics supported in GaNDLF. You can configure which metrics to be calculated by passing a GaNDLF config file when running the MLCube.
+
+For more information about using a custom entrypoint script, see the examples [here](https://github.com/mlcommons/GaNDLF/tree/master/mlcube).
 
 ## Federating your model using OpenFL
 
@@ -385,6 +403,8 @@ Once you have a model definition, it is easy to perform federated learning using
 
 Once you have a trained model, you can perform [federated evaluation](https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html#Federated-evaluation) using [MedPerf](https://medperf.org/). Follow the tutorial in [this page](https://docs.medperf.org/mlcubes/gandlf_mlcube/) to get started.
 
+!!! note
+  Please note that in order to create a GaNDLF MLCube, for technical reasons, you need write access to the GaNDLF package. With a virtual environment this should be automatic. See the [installation instructions](./setup.md#installation).
 
 https://docs.medperf.org/mlcubes/gandlf_mlcube/
 ## Running with Docker
