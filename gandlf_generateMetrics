@@ -56,14 +56,11 @@ if __name__ == "__main__":
     parser.add_argument("-rawinput", "--rawinput", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
-    if args.modeldir is None and args.outputdir:
-        args.modeldir = args.outputdir
-
     assert args.config is not None, "Missing required parameter: config"
     assert args.inputdata is not None, "Missing required parameter: inputdata"
 
     try:
-        generate_metrics(
+        generate_metrics.generate_metrics_dict(
             args.inputdata,
             args.config,
             args.outputfile,
