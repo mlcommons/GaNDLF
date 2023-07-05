@@ -261,7 +261,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         #Assume patch is valid
         return True
 
-def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation =5, intensity_thresh_b = 128):
+def patch_artifact_check(img, intensity_thresh = 250, intensity_thresh_saturation = 5, intensity_thresh_b = 128, patch_size = (256,256)):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
         Args:
@@ -274,7 +274,6 @@ def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation 
             bool: Whether the patch is valid (True) or not (False)
         """
         #patch_size = config["patch_size"]
-        patch_size = (256,256)
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
