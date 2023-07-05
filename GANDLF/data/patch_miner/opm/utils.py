@@ -260,7 +260,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
 
         #Assume patch is valid
         return True
-   
+
 def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation =5, intensity_thresh_b = 128):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
