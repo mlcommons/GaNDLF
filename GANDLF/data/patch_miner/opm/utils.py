@@ -290,7 +290,7 @@ def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation 
             return False
         # assume that the patch is valid
         return True
-    
+
 def parse_config(config_file):
     """
     Parse config file and return a dictionary of config values.
