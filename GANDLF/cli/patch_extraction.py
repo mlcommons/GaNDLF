@@ -50,7 +50,6 @@ def patch_extraction(input_path, output_path, config=None):
 
     # initialize default config
     cfg = {}
-    cfg["scale"] = 16
     if config is not None:
         cfg = config
         if isinstance(config, str):
