@@ -55,6 +55,7 @@ def patch_extraction(input_path, output_path, config=None):
         cfg = config
         if isinstance(config, str):
             cfg = parse_config(config)
+    cfg["scale"] = cfg.get("scale", 16)
     cfg["patch_size"] = cfg.get("patch_size", (256, 256))
     original_patch_size = cfg["patch_size"]
 
