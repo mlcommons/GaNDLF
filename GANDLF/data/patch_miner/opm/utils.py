@@ -238,7 +238,6 @@ def alpha_rgb_2d_channel_check(img):
     else:
         return False
 
-"""
 def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50, intensity_thresh_b = 128):
     """
     This function is used to curate patches from the input image. It is used to remove patches that have pen markings.
