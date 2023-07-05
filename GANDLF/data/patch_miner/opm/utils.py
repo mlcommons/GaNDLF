@@ -262,33 +262,33 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
 """
 
 def patch_artifact_check(img, intensity_thresh = 250, intensity_thresh_saturation = 5, intensity_thresh_b = 128, patch_size = (256,256)):
-        """
-        This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
-        Args:
-            img (np.ndarray): Input Patch Array to check the artifact/background.
-            intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
-            intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 50.
-            intensity_thresh_b (int, optional) : Threshold to check blackness in the patch
-            patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256. patch_size=config["patch_size"]
-        Returns:
-            bool: Whether the patch is valid (True) or not (False)
-        """
-        #patch_size = config["patch_size"]
-        patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-        count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
-        percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
-        count_black_pixels = np.sum(np.logical_and.reduce(img < intensity_thresh_b, axis=2))
-        percent_pixel_b = count_black_pixels / (patch_size[0] * patch_size[1])
-        percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_saturation) / (patch_size[0] * patch_size[1])
-        percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size[0] * patch_size[1])
+    """
+    This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
+    Args:
+        img (np.ndarray): Input Patch Array to check the artifact/background.
+        intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
+        intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 50.
+        intensity_thresh_b (int, optional) : Threshold to check blackness in the patch
+        patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256. patch_size=config["patch_size"]
+    Returns:
+        bool: Whether the patch is valid (True) or not (False)
+    """
+    #patch_size = config["patch_size"]
+    patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
+    percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
+    count_black_pixels = np.sum(np.logical_and.reduce(img < intensity_thresh_b, axis=2))
+    percent_pixel_b = count_black_pixels / (patch_size[0] * patch_size[1])
+    percent_pixel_2 = np.sum(patch_hsv[...,1] < intensity_thresh_saturation) / (patch_size[0] * patch_size[1])
+    percent_pixel_3 = np.sum(patch_hsv[...,2] > intensity_thresh) / (patch_size[0] * patch_size[1])
 
-        if percent_pixel_2 > 0.99 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.99:
-            if percent_pixel_2 < 0.1:
-                return False
-        elif (percent_pixel_2 > 0.99 and percent_pixel_3 > 0.99) or percent_pixel_b > 0.99 or percent_pixels > 0.9:
+    if percent_pixel_2 > 0.99 or np.mean(patch_hsv[...,1]) < 5 or percent_pixel_3 > 0.99:
+        if percent_pixel_2 < 0.1:
             return False
-        # assume that the patch is valid
-        return True
+    elif (percent_pixel_2 > 0.99 and percent_pixel_3 > 0.99) or percent_pixel_b > 0.99 or percent_pixels > 0.9:
+        return False
+    # assume that the patch is valid
+    return True
 
 def parse_config(config_file):
     """
