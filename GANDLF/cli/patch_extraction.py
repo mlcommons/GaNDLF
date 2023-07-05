@@ -48,17 +48,14 @@ def patch_extraction(input_path, output_path, config=None):
     Image.MAX_IMAGE_PIXELS = None
     warnings.simplefilter("ignore")
 
+    # initialize default config
+    cfg = {}
+    cfg["scale"] = 16
     if config is not None:
         cfg = config
         if isinstance(config, str):
             cfg = parse_config(config)
-    else:
-        cfg = {}
-        cfg["scale"] = 16
-
-    if "patch_size" not in cfg:
-        cfg["patch_size"] = (256, 256)
-
+    cfg["patch_size"] = cfg.get("patch_size", (256, 256))
     original_patch_size = cfg["patch_size"]
 
     if not os.path.exists(output_path):
@@ -86,7 +83,7 @@ def patch_extraction(input_path, output_path, config=None):
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_rgb_2d_channel_check)
         #manager.add_patch_criteria(pen_marking_check) ### will be added to main code after rigourous experimentation
-        #manager.add_patch_criteria(patch_artifact_check)
+        manager.add_patch_criteria(patch_artifact_check)
         # Reject patch if image dimensions are not equal to PATCH_SIZE
         patch_dims_check = partial(
             patch_size_check,
