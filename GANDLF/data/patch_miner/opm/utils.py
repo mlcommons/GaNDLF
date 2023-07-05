@@ -250,7 +250,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         Returns:
             bool: Whether the patch is valid (True) or not (False)
         """
-        patch_size=config["patch_size"]
+        patch_size= (256,256)
         ihc_hed = rgb2hed(img)
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         e = rescale_intensity(ihc_hed[:, :, 1], out_range=(0, 255), in_range=(0, np.percentile(ihc_hed[:, :, 1], 99)))
@@ -260,7 +260,7 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
 
         #Assume patch is valid
         return True
-        
+   
 def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation =5, intensity_thresh_b = 128):
         """
         This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
@@ -273,7 +273,8 @@ def patch_artifact_check(img, intensity_thresh=250, intensity_thresh_saturation 
         Returns:
             bool: Whether the patch is valid (True) or not (False)
         """
-        patch_size = config["patch_size"]
+        #patch_size = config["patch_size"]
+        patch_size = (256,256)
         patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         count_white_pixels = np.sum(np.logical_and.reduce(img > intensity_thresh, axis=2))
         percent_pixels = count_white_pixels / (patch_size[0] * patch_size[1])
