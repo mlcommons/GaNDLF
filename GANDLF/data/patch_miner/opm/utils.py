@@ -259,7 +259,6 @@ def pen_marking_check(img, intensity_thresh=225, intensity_thresh_saturation =50
         return False
     #Assume patch is valid
     return True
-"""
 
 def patch_artifact_check(img, intensity_thresh = 250, intensity_thresh_saturation = 5, intensity_thresh_b = 128, patch_size = (256,256)):
     """
