@@ -25,7 +25,7 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
             or the given [min, max]. Should be non negative numbers.
         contrast (float or tuple of float (min, max)): How much to jitter contrast.
             contrast_factor is chosen uniformly from [max(0, 1 - contrast), 1 + contrast]
-            or the given [min, max]. Should be non ne~gative numbers.
+            or the given [min, max]. Should be non negative numbers.
         saturation (float or tuple of float (min, max)): How much to jitter saturation.
             saturation_factor is chosen uniformly from [max(0, 1 - saturation), 1 + saturation]
             or the given [min, max]. Should be non negative numbers.
