@@ -16,7 +16,7 @@ from GANDLF.utils import (
     resample_image,
     reverse_one_hot,
     get_ground_truths_and_predictions_tensor,
-    update_metric_from_list_to_single_string,
+    print_and_format_metrics,
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
@@ -499,21 +499,12 @@ def validate_network(
             average_epoch_valid_metric = overall_stats(
                 predictions_array, ground_truth_array, params
             )
-        for metric in params["metrics"]:
-            if isinstance(total_epoch_valid_metric[metric], np.ndarray):
-                to_print = (
-                    total_epoch_valid_metric[metric] / len(valid_dataloader)
-                ).tolist()
-            else:
-                to_print = total_epoch_valid_metric[metric] / len(valid_dataloader)
-            average_epoch_valid_metric[metric] = to_print
-        for metric in average_epoch_valid_metric.keys():
-            print(
-                "     Epoch Final   " + mode + " " + metric + " : ",
-                average_epoch_valid_metric[metric],
-            )
-        average_epoch_valid_metric = update_metric_from_list_to_single_string(
-            average_epoch_valid_metric
+        average_epoch_valid_metric = print_and_format_metrics(
+            average_epoch_valid_metric,
+            total_epoch_valid_metric,
+            params["metrics"],
+            mode,
+            len(valid_dataloader),
         )
 
     else:
