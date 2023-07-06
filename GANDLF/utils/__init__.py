@@ -49,7 +49,6 @@ from .generic import (
     get_array_from_image_or_tensor,
     suppress_stdout_stderr,
     set_determinism,
-    update_metric_from_list_to_single_string,
     print_and_format_metrics,
 )
 
