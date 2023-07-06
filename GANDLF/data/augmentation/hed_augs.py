@@ -134,10 +134,10 @@ class HedColorAugmenter(ColorAugmenterBase):
 
         def check_sigma_range(name, given_range):
             assert given_range is None or (
-                len(given_range) != 2
+                len(given_range) == 2
                 and given_range[0] < given_range[1]
-                and -1.0 <= given_range[0]
-                and given_range[1] <= 1.0
+                and -1.0 <= given_range[0] <= 1.0
+                and -1.0 <= given_range[1] <= 1.0
             ), f"Invalid range for {name}: {given_range}"
 
         check_sigma_range("Haematoxylin Sigma", haematoxylin_sigma_range)
