@@ -16,6 +16,7 @@ from GANDLF.utils import (
     resample_image,
     reverse_one_hot,
     get_ground_truths_and_predictions_tensor,
+    update_metric_from_list_to_single_string,
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
@@ -511,6 +512,10 @@ def validate_network(
                 "     Epoch Final   " + mode + " " + metric + " : ",
                 average_epoch_valid_metric[metric],
             )
+        average_epoch_valid_metric = update_metric_from_list_to_single_string(
+            average_epoch_valid_metric
+        )
+
     else:
         average_epoch_valid_loss, average_epoch_valid_metric = 0, {}
 
