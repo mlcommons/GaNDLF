@@ -1,4 +1,5 @@
 import os, datetime, sys
+from copy import deepcopy
 import random
 import numpy as np
 import torch
@@ -201,3 +202,28 @@ def set_determinism(seed=42):
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = True
+
+
+def update_metric_from_list_to_single_string(input_metrics_dict) -> dict:
+    """
+    This function updates the metrics dictionary to have a single string for each metric.
+
+    Args:
+        input_metrics_dict (dict): The input metrics dictionary.
+    Returns:
+        dict: The updated metrics dictionary.
+    """
+    print(input_metrics_dict)
+    output_metrics_dict = deepcopy(input_metrics_dict)
+    for metric in input_metrics_dict.keys():
+        if isinstance(input_metrics_dict[metric], list):
+            output_metrics_dict[metric] = ("_").join(
+                str(input_metrics_dict[metric])
+                .replace("[", "")
+                .replace("]", "")
+                .replace(" ", "")
+                .split(",")
+            )
+
+    print(output_metrics_dict)
+    return output_metrics_dict
