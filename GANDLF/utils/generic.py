@@ -204,26 +204,65 @@ def set_determinism(seed=42):
         torch.backends.cudnn.benchmark = True
 
 
-def update_metric_from_list_to_single_string(input_metrics_dict) -> dict:
+def print_and_format_metrics(
+    cohort_level_metrics,
+    sample_level_metrics,
+    metrics_dict_from_parameters,
+    mode,
+    length_of_dataloader,
+):
     """
-    This function updates the metrics dictionary to have a single string for each metric.
+    This function prints and formats the metrics.
 
     Args:
-        input_metrics_dict (dict): The input metrics dictionary.
-    Returns:
-        dict: The updated metrics dictionary.
-    """
-    print(input_metrics_dict)
-    output_metrics_dict = deepcopy(input_metrics_dict)
-    for metric in input_metrics_dict.keys():
-        if isinstance(input_metrics_dict[metric], list):
-            output_metrics_dict[metric] = ("_").join(
-                str(input_metrics_dict[metric])
-                .replace("[", "")
-                .replace("]", "")
-                .replace(" ", "")
-                .split(",")
-            )
+        cohort_level_metrics (dict): The cohort level metrics calculated from the GANDLF.metrics.overall_stats function.
+        sample_level_metrics (dict): The sample level metrics calculated from separate samples from the dataloader(s).
+        metrics_dict_from_parameters (dict): The metrics dictionary to populate.
+        mode (str): The mode of the metrics (train, val, test).
+        length_of_dataloader (int): The length of the dataloader.
 
-    print(output_metrics_dict)
+    Returns:
+        dict: The metrics dictionary populated with the metrics.
+    """
+
+    def __update_metric_from_list_to_single_string(input_metrics_dict) -> dict:
+        """
+        Helper function updates the metrics dictionary to have a single string for each metric.
+
+        Args:
+            input_metrics_dict (dict): The input metrics dictionary.
+        Returns:
+            dict: The updated metrics dictionary.
+        """
+        print(input_metrics_dict)
+        output_metrics_dict = deepcopy(input_metrics_dict)
+        for metric in input_metrics_dict.keys():
+            if isinstance(input_metrics_dict[metric], list):
+                output_metrics_dict[metric] = ("_").join(
+                    str(input_metrics_dict[metric])
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", "")
+                    .split(",")
+                )
+
+        print(output_metrics_dict)
+        return output_metrics_dict
+
+    output_metrics_dict = deepcopy(cohort_level_metrics)
+    for metric in metrics_dict_from_parameters:
+        if isinstance(sample_level_metrics[metric], np.ndarray):
+            to_print = (sample_level_metrics[metric] / length_of_dataloader).tolist()
+        else:
+            to_print = sample_level_metrics[metric] / length_of_dataloader
+        output_metrics_dict[metric] = to_print
+    for metric in output_metrics_dict.keys():
+        print(
+            "     Epoch Final   " + mode + " " + metric + " : ",
+            output_metrics_dict[metric],
+        )
+    output_metrics_dict = __update_metric_from_list_to_single_string(
+        output_metrics_dict
+    )
+
     return output_metrics_dict
