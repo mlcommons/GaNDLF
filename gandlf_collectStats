@@ -10,12 +10,7 @@ from pathlib import Path
 from io import StringIO
 
 from GANDLF.cli import copyrightMessage
-from GANDLF.utils.plot_utils import (
-    plot_classification,
-    plot_segmentation,
-    plot_regression,
-    plot_synthesis,
-)
+from GANDLF.utils.plot_utils import plot_all
 
 
 if __name__ == "__main__":
@@ -57,49 +52,5 @@ if __name__ == "__main__":
     df_validation = pd.read_csv(validationLogs)
     df_testing = pd.read_csv(testingLogs) if os.path.isfile(testingLogs) else None
 
-    # Check for metrics in columns
-    segmentation_metrics = ["dice", "jaccard", "hausdorff", "hd100", "hd95", "nsd"]
-    classification_metrics = ["accuracy"]
-    regression_metrics = ["mae", "mse"]
-    synthesis_metrics = ["ssim", "psnr"]
-
-    # Detect if these metrics exist in the columns
-    segmentation_detected = any(
-        metric in df_training.columns for metric in segmentation_metrics
-    )
-    classification_detected = any(
-        metric in df_training.columns for metric in classification_metrics
-    )
-    regression_detected = any(
-        metric in df_training.columns for metric in regression_metrics
-    )
-    synthesis_detected = any(
-        metric in df_training.columns for metric in synthesis_metrics
-    )
-
-    # check for classification task
-    if classification_detected:
-        print("Classification task detected, generating accuracy and loss plots.")
-        plot_classification(
-            df_training, df_validation, df_testing, outputDir, classification_metrics
-        )
-    elif segmentation_detected:
-        print("Segmentation task detected, generating dice and loss plots.")
-        plot_segmentation(
-            df_training, df_validation, df_testing, outputDir, segmentation_metrics
-        )
-    elif regression_detected:
-        print("Regression task detected, generating mae and mse plots.")
-        plot_regression(
-            df_training, df_validation, df_testing, outputDir, regression_metrics
-        )
-    elif synthesis_detected:
-        print("Synthesis task detected, generating ssim and psnr plots.")
-        plot_synthesis(
-            df_training, df_validation, df_testing, outputDir, synthesis_metrics
-        )
-    else:
-        print("No task detected, exiting.")
-        exit(0)
-
-    print("Plots saved successfully.")
+    # Check for metrics in columns and do tight plots
+    plot_all()
