@@ -9,7 +9,7 @@ from io import StringIO
 
 
 def plot_classification(
-    df_training, df_validation, df_testing, output_plot, combined_plots
+    df_training, df_validation, df_testing, output_plot, metrics=["accuracy"]
 ):
     banned_col_nametags = ["per_class", "per_label", "global"]
 
@@ -22,21 +22,18 @@ def plot_classification(
         :, ~df_validation.columns.str.contains("|".join(banned_col_nametags))
     ]
 
+    # Assert that atleast one of the metrics is present in the column names of the dataframe
+    assert any(metric in df_training.columns for metric in metrics)
+
     required_cols = [
         "epoch_no",
         "train_loss",
         "valid_loss",
     ]
 
-    if not all(col in df_training.columns for col in required_cols):
-        raise ValueError(
-            "Some required columns are missing in the training logs CSV file."
-        )
+    assert all(col in df_training.columns for col in required_cols)
 
-    if not all(col in df_validation.columns for col in required_cols):
-        raise ValueError(
-            "Some required columns are missing in the validation logs CSV file."
-        )
+    assert all(col in df_validation.columns for col in required_cols)
 
     epochs = len(df_training)
 
@@ -85,7 +82,9 @@ def plot_classification(
     print("Classification plots saved successfully.")
 
 
-def plot_segmentation(df_training, df_validation, df_testing, output_plot):
+def plot_segmentation(
+    df_training, df_validation, df_testing, output_plot, metrics=["dice"]
+):
     print("Segmentation task detected, generating dice and loss plots.")
 
     banned_col_nametags = ["per_class", "per_label", "global"]
@@ -99,21 +98,18 @@ def plot_segmentation(df_training, df_validation, df_testing, output_plot):
         :, ~df_validation.columns.str.contains("|".join(banned_col_nametags))
     ]
 
+    # Assert that atleast one of the metrics is present in the column names of the dataframe
+    assert any(metric in df_training.columns for metric in metrics)
+
     required_cols = [
         "epoch_no",
         "train_loss",
         "valid_loss",
     ]
 
-    if not all(col in df_training.columns for col in required_cols):
-        raise ValueError(
-            "Some required columns are missing in the training logs CSV file."
-        )
+    assert all(col in df_training.columns for col in required_cols)
 
-    if not all(col in df_validation.columns for col in required_cols):
-        raise ValueError(
-            "Some required columns are missing in the validation logs CSV file."
-        )
+    assert all(col in df_validation.columns for col in required_cols)
 
     epochs = len(df_training)
 
