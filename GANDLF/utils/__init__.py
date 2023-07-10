@@ -61,9 +61,4 @@ from .modelio import (
     optimize_and_save_model,
 )
 
-from .plot_utils import (
-    plot_classification,
-    plot_segmentation,
-    plot_regression,
-    plot_synthesis,
-)
+from .plot_utils import plot_all
