@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "--modeldir",
         metavar="",
         type=str,
-        help="Input directory which contains testing and validation models",
+        help="Input directory which contains testing and validation models log files",
     )
     parser.add_argument(
         "-o",
@@ -47,8 +47,6 @@ if __name__ == "__main__":
     Path(outputDir).mkdir(parents=True, exist_ok=True)
     outputFile = os.path.join(outputDir, "data.csv")  # data file name
     outputPlot = os.path.join(outputDir, "plot.png")  # plot file
-
-    combinedPlots = args.combinedplots
 
     trainingLogs = os.path.join(inputDir, "logs_training.csv")
     validationLogs = os.path.join(inputDir, "logs_validation.csv")
@@ -83,17 +81,23 @@ if __name__ == "__main__":
     if classification_detected:
         print("Classification task detected, generating accuracy and loss plots.")
         plot_classification(
-            df_training, df_validation, df_testing, outputDir, combinedPlots
+            df_training, df_validation, df_testing, outputDir, classification_metrics
         )
     elif segmentation_detected:
         print("Segmentation task detected, generating dice and loss plots.")
-        plot_segmentation(df_training, df_validation, df_testing)
+        plot_segmentation(
+            df_training, df_validation, df_testing, outputDir, segmentation_metrics
+        )
     elif regression_detected:
         print("Regression task detected, generating mae and mse plots.")
-        plot_regression(df_training, df_validation, df_testing)
+        plot_regression(
+            df_training, df_validation, df_testing, outputDir, regression_metrics
+        )
     elif synthesis_detected:
         print("Synthesis task detected, generating ssim and psnr plots.")
-        plot_synthesis(df_training, df_validation, df_testing)
+        plot_synthesis(
+            df_training, df_validation, df_testing, outputDir, synthesis_metrics
+        )
     else:
         print("No task detected, exiting.")
         exit(0)
