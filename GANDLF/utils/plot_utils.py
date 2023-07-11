@@ -1,5 +1,3 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import seaborn as sns
@@ -12,7 +10,7 @@ def plot_all(
     df_training,
     df_validation,
     df_testing,
-    output_plot,
+    output_plot_dir,
 ):
     # Drop any columns that might have "_" in the values of their rows, this can be checked through the first row or data type
     banned_cols = [
@@ -93,7 +91,8 @@ def plot_all(
     plt.ylabel("Loss")
     plt.title("Loss Plot")
     plt.legend()
-    plt.savefig(os.path.join(output_plot, "loss_plot.png"), dpi=300)
+    Path(output_plot_dir).mkdir(parents=True, exist_ok=True)
+    plt.savefig(os.path.join(output_plot_dir, "loss_plot.png"), dpi=300)
     plt.close()
 
     # Plot for other metrics
@@ -128,7 +127,7 @@ def plot_all(
             plt.ylabel(metric.capitalize())
             plt.title(f"{metric.capitalize()} Plot")
             plt.legend()
-            plt.savefig(os.path.join(output_plot, f"{metric}_plot.png"), dpi=300)
+            plt.savefig(os.path.join(output_plot_dir, f"{metric}_plot.png"), dpi=300)
             plt.close()
 
     print("Plots saved successfully.")
