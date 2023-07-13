@@ -61,5 +61,3 @@ from .modelio import (
     save_model,
     optimize_and_save_model,
 )
-
-from .plot_utils import plot_all
