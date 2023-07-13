@@ -225,7 +225,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
 
             overall_stats_dict[current_subject_id][
                 "ssim"
-            ] = structural_similarity_index(gt_image_infill, output_infill).item()
+            ] = structural_similarity_index(gt_image_infill, output_infill, mask).item()
 
             # ncc metrics
             overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(

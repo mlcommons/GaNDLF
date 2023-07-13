@@ -49,6 +49,7 @@ from .generic import (
     get_array_from_image_or_tensor,
     suppress_stdout_stderr,
     set_determinism,
+    print_and_format_metrics,
 )
 
 from .modelio import (
