@@ -1861,6 +1861,13 @@ def test_generic_augmentation_functions():
             )(input_tensor)
             assert output_tensor != None, "Augmentation should work"
 
+    temp = global_augs_dict["hed_transform"](
+        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "HED Augmentation should work"
+
     # additional test for elastic
     params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
     for key_to_pop in ["num_control_points", "max_displacement", "locked_borders"]:
