@@ -76,7 +76,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v3
       with:
-        images: docker.io/cbica/gandlf, ghcr.io/mlcommons/gandlf # Push to both registries
+        images: docker.io/mlcommons/gandlf, ghcr.io/mlcommons/gandlf # Push to both registries
         flavor: | # Handle prefixing and "latest" generation -- use "tags" property to specify events/tags further
           latest=true
           suffix=-${{ matrix.dockertag }},onlatest=true
@@ -103,7 +103,7 @@ jobs:
     # Run the image from the base entrypoint as a test
     - name: Test container with entrypoint
       # Run a tag we generated from the metadata extraction above -- they're all the same image, but echo it regardless just so we know.
-      run: echo "Running docker.io/cbica/gandlf:latest-${{ matrix.dockertag }} ..." && docker run --rm docker.io/cbica/gandlf:latest-${{ matrix.dockertag }}
+      run: echo "Running docker.io/mlcommons/gandlf:latest-${{ matrix.dockertag }} ..." && docker run --rm docker.io/mlcommons/gandlf:latest-${{ matrix.dockertag }}
 
     # Push Docker image with Buildx (but don't push on PR)
     # https://github.com/docker/build-push-action

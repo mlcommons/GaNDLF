@@ -21,6 +21,7 @@ from GANDLF.utils import (
     print_model_summary,
     get_ground_truths_and_predictions_tensor,
     get_model_dict,
+    print_and_format_metrics,
 )
 from GANDLF.metrics import overall_stats
 from GANDLF.logger import Logger
@@ -204,19 +205,13 @@ def train_network(model, train_dataloader, optimizer, params):
         average_epoch_train_metric = overall_stats(
             predictions_array, ground_truth_array, params
         )
-    for metric in params["metrics"]:
-        if isinstance(total_epoch_train_metric[metric], np.ndarray):
-            to_print = (
-                total_epoch_train_metric[metric] / len(train_dataloader)
-            ).tolist()
-        else:
-            to_print = total_epoch_train_metric[metric] / len(train_dataloader)
-        average_epoch_train_metric[metric] = to_print
-    for metric in average_epoch_train_metric.keys():
-        print(
-            "     Epoch Final   train " + metric + " : ",
-            average_epoch_train_metric[metric],
-        )
+    average_epoch_train_metric = print_and_format_metrics(
+        average_epoch_train_metric,
+        total_epoch_train_metric,
+        params["metrics"],
+        "train",
+        len(train_dataloader),
+    )
 
     return average_epoch_train_loss, average_epoch_train_metric
 
@@ -348,15 +343,12 @@ def training_loop(
         overall_metrics = overall_stats(torch.Tensor([1]), torch.Tensor([1]), params)
     elif params["problem_type"] == "classification":
         # this is just used to generate the headers for the overall stats
-        org_num_classes = params["model"]["num_classes"]
-        params["model"]["num_classes"] = 3
+        temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
         overall_metrics = overall_stats(
-            torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int32),
-            torch.Tensor([0, 0, 2, 2, 1, 2]).to(dtype=torch.int32),
+            temp_tensor.to(dtype=torch.int32),
+            temp_tensor.to(dtype=torch.int32),
             params,
         )
-        # original number of classes are restored
-        params["model"]["num_classes"] = org_num_classes
 
     metrics_log = params["metrics"].copy()
     if calculate_overall_metrics:
@@ -373,13 +365,15 @@ def training_loop(
         logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=metrics_log,
     )
-    test_logger = Logger(
-        logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
-        metrics=metrics_log,
-    )
+    if testingDataDefined:
+        test_logger = Logger(
+            logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
+            metrics=metrics_log,
+        )
     train_logger.write_header(mode="train")
     valid_logger.write_header(mode="valid")
-    test_logger.write_header(mode="test")
+    if testingDataDefined:
+        test_logger.write_header(mode="test")
 
     if "medcam" in params:
         model = medcam.inject(
