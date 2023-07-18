@@ -288,19 +288,20 @@ class RandomHEDTransform(RandomTransform, IntensityTransform):
     def apply_transform(self, subject: Subject) -> Subject:
         # Process only if the image is RGB
         for _, image in self.get_images_dict(subject).items():
-            if image.data.ndim != 3 or image.data.shape[-1] != 3:
-                continue
+            if image.data.shape[-1] == 1:
 
-            # Convert image data to tensor
-            tensor = image.data.permute(2, 0, 1).unsqueeze(0)
+                if image.data.ndim == 4:
+                    tensor = image.data[..., 0]
+                    # Convert image data to tensor
+                    tensor = tensor.permute(2, 0, 1).unsqueeze(0)
 
-            # Apply transform
-            transformed_tensor = self.transform_object.transform(tensor)
+                    # Apply transform
+                    transformed_tensor = self.transform_object.transform(tensor)
 
-            # Convert tensor back to image data
-            transformed_data = transformed_tensor.squeeze(0).permute(1, 2, 0)
+                    # Convert tensor back to image data
+                    transformed_data = transformed_tensor.squeeze(0).permute(1, 2, 0)
 
-            # Update image data
-            image.set_data(transformed_data)
+                    # Update image data
+                    image.set_data(transformed_data)
 
         return subject
