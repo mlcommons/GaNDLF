@@ -1,5 +1,6 @@
 from typing import Tuple, Union
 import numpy as np
+import torch
 from skimage.color import rgb2hed, hed2rgb
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
@@ -28,22 +29,23 @@ class AugmenterBase:
         """
         self._keyword = keyword
 
-    @property
-    def keyword(self):
-        """Get the keyword for the augmenter."""
-        return self._keyword
+    ## commented the following lines because the user is never given access to these
+    # @property
+    # def keyword(self):
+    #     """Get the keyword for the augmenter."""
+    #     return self._keyword
 
-    def shapes(self, target_shapes):
-        """Calculate the required shape of the input to achieve the target output shape."""
-        return target_shapes
+    # def shapes(self, target_shapes):
+    #     """Calculate the required shape of the input to achieve the target output shape."""
+    #     return target_shapes
 
-    def transform(self, patch):
-        """Transform the given patch."""
-        return patch
+    # def transform(self, patch):
+    #     """Transform the given patch."""
+    #     return patch
 
-    def randomize(self):
-        """Randomize the parameters of the augmenter."""
-        return
+    # def randomize(self):
+    #     """Randomize the parameters of the augmenter."""
+    #     return
 
 
 class ColorAugmenterBase(AugmenterBase):
@@ -208,37 +210,41 @@ class HedColorAugmenter(ColorAugmenterBase):
 
         self._cutoff_range = cutoff_range if cutoff_range is not None else [0.0, 1.0]
 
-    def randomize(self):
-        """Randomize the parameters of the augmenter."""
+    ## commented the following lines because the user is never given access to this function
+    # def randomize(self):
+    #     """Randomize the parameters of the augmenter."""
 
-        # Randomize sigma and bias for each channel.
-        self._sigmas = [
-            np.random.uniform(sigma_range[0], sigma_range[1]) if sigma_range else 1.0
-            for sigma_range in self._sigma_ranges
-        ]
-        self._biases = [
-            np.random.uniform(bias_range[0], bias_range[1]) if bias_range else 0.0
-            for bias_range in self._bias_ranges
-        ]
+    #     # Randomize sigma and bias for each channel.
+    #     self._sigmas = [
+    #         np.random.uniform(sigma_range[0], sigma_range[1]) if sigma_range else 1.0
+    #         for sigma_range in self._sigma_ranges
+    #     ]
+    #     self._biases = [
+    #         np.random.uniform(bias_range[0], bias_range[1]) if bias_range else 0.0
+    #         for bias_range in self._bias_ranges
+    #     ]
 
-    def transform(self, patch):
+    def transform(self, patch: torch.Tensor) -> torch.Tensor:
         """
         Apply color deformation on the patch.
+
         Args:
-            patch (np.ndarray): Patch to transform.
+            patch (torch.Tensor): The input patch to transform.
+
         Returns:
-            np.ndarray: Transformed patch.
+            torch.Tensor: The transformed patch.
         """
 
+        current_patch = patch.numpy().astype(np.float32)
         patch_mean = (
-            np.mean(patch.astype(np.float32)) / 255.0
-            if patch.dtype.kind != "f"
-            else np.mean(patch)
+            np.mean(current_patch) / 255.0
+            if current_patch.dtype.kind != "f"
+            else np.mean(current_patch)
         )
 
         if self._cutoff_range[0] <= patch_mean <= self._cutoff_range[1]:
             # Convert the image patch to HED color coding.
-            patch_hed = rgb2hed(patch)
+            patch_hed = rgb2hed(current_patch)
 
             # Augment the channels.
             for i in range(3):
@@ -252,7 +258,7 @@ class HedColorAugmenter(ColorAugmenterBase):
             patch_transformed = np.clip(patch_transformed, 0.0, 1.0)
 
             # Convert back to integral data type if the input was also integral.
-            if patch.dtype.kind != "f":
+            if current_patch.dtype.kind != "f":
                 patch_transformed *= 255.0
                 patch_transformed = patch_transformed.astype(np.uint8)
 
@@ -289,18 +295,20 @@ class RandomHEDTransform(RandomTransform, IntensityTransform):
         # Process only if the image is RGB
         for _, image in self.get_images_dict(subject).items():
             if image.data.shape[-1] == 1:
-
                 if image.data.ndim == 4:
                     tensor = image.data[..., 0]
-                    # Convert image data to tensor
-                    tensor = tensor.permute(2, 0, 1).unsqueeze(0)
+                    # put channel to last axis (needed for colorconv to work)
+                    tensor = tensor.permute(2, 1, 0)
 
-                    ## TESTS ARE FAILING HERE
                     # Apply transform
                     transformed_tensor = self.transform_object.transform(tensor)
 
-                    # Convert tensor back to image data
-                    transformed_data = transformed_tensor.squeeze(0).permute(1, 2, 0)
+                    # Convert tensor back to tensor data
+                    transformed_data = (
+                        torch.from_numpy(transformed_tensor)
+                        .permute(2, 0, 1)
+                        .unsqueeze(-1)
+                    )
 
                     # Update image data
                     image.set_data(transformed_data)
