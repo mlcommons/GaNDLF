@@ -256,6 +256,11 @@ def parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
     params = initialize_key(params, "data_augmentation", {})
+    # for all others, ensure probability is present
+    params["data_augmentation"]["default_probability"] = params[
+        "data_augmentation"
+    ].get("default_probability", 0.5)
+
     if not (params["data_augmentation"] is None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
             # special case for random swapping and elastic transformations - which takes a patch size for computation
@@ -341,12 +346,12 @@ def parseConfig(config_file_path, version_check_flag=True):
                 )
 
             # Added HED augmentation in gandlf
-            augmentation_types = [
+            hed_augmentation_types = [
                 "hed_transform",
                 "hed_transform_light",
                 "hed_transform_heavy",
             ]
-            for augmentation_type in augmentation_types:
+            for augmentation_type in hed_augmentation_types:
                 if augmentation_type in params["data_augmentation"]:
                     params["data_augmentation"] = initialize_key(
                         params["data_augmentation"], "hed_transform", {}
@@ -380,11 +385,6 @@ def parseConfig(config_file_path, version_check_flag=True):
                         "cutoff_range",
                         [0, 1],
                     )
-                    params["data_augmentation"]["hed_transform"] = initialize_key(
-                        params["data_augmentation"]["hed_transform"],
-                        "probability",
-                        0.5,
-                    )
 
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
@@ -415,10 +415,6 @@ def parseConfig(config_file_path, version_check_flag=True):
                         )
                         # default
                     params["data_augmentation"]["anisotropic"]["downsampling"] = 1.5
-
-            # for all others, ensure probability is present
-            if "default_probability" not in params["data_augmentation"]:
-                params["data_augmentation"]["default_probability"] = 0.5
 
             for key in params["data_augmentation"]:
                 if key != "default_probability":
