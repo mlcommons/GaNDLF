@@ -1849,6 +1849,12 @@ def test_generic_augmentation_functions():
         "dab_sigma_range": [-0.1, 0.1],
         "cutoff_range": [0.05, 0.95],
     }
+    temp = global_augs_dict["hed_transform"](
+        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "HED Augmentation should work"
 
     # this is for all other augmentations
     input_tensor = torch.rand(3, 128, 128, 128)
@@ -1860,13 +1866,6 @@ def test_generic_augmentation_functions():
                 params_all_preprocessing_and_augs["data_augmentation"][aug_lower]
             )(input_tensor)
             assert output_tensor != None, "Augmentation should work"
-
-    temp = global_augs_dict["hed_transform"](
-        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
-    )
-    output_tensor = None
-    output_tensor = temp(input_tensor)
-    assert output_tensor != None, "HED Augmentation should work"
 
     # additional test for elastic
     params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
