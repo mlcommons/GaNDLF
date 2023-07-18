@@ -295,6 +295,7 @@ class RandomHEDTransform(RandomTransform, IntensityTransform):
                     # Convert image data to tensor
                     tensor = tensor.permute(2, 0, 1).unsqueeze(0)
 
+                    ## TESTS ARE FAILING HERE
                     # Apply transform
                     transformed_tensor = self.transform_object.transform(tensor)
 
