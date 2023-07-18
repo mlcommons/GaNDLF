@@ -8,6 +8,7 @@ from torchmetrics import (
     MeanSquaredError,
     MeanSquaredLogError,
     MeanAbsoluteError,
+    PeakSignalNoiseRatio,
 )
 from GANDLF.utils import get_image_from_tensor
 
@@ -25,7 +26,7 @@ def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
         torch.Tensor: The structural similarity index.
     """
     ssim = StructuralSimilarityIndexMeasure(return_full_image=True)
-    _, ssim_idx_full_image = ssim(target, prediction)
+    _, ssim_idx_full_image = ssim(preds=prediction, target=target)
     mask = torch.ones_like(ssim_idx_full_image) if mask is None else mask
     try:
         ssim_idx = ssim_idx_full_image[mask]
@@ -45,7 +46,7 @@ def mean_squared_error(target, prediction) -> torch.Tensor:
         prediction (torch.Tensor): The prediction tensor.
     """
     mse = MeanSquaredError()
-    return mse(target, prediction)
+    return mse(preds=prediction, target=target)
 
 
 def peak_signal_noise_ratio(target, prediction) -> torch.Tensor:
@@ -56,12 +57,8 @@ def peak_signal_noise_ratio(target, prediction) -> torch.Tensor:
         target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
     """
-    mse = mean_squared_error(target, prediction)
-    return (
-        10.0
-        * torch.log10((torch.max(target) - torch.min(target)) ** 2)
-        / (mse + sys.float_info.epsilon)
-    )
+    psnr = PeakSignalNoiseRatio()
+    return psnr(preds=prediction, target=target)
 
 
 def mean_squared_log_error(target, prediction) -> torch.Tensor:
@@ -73,7 +70,7 @@ def mean_squared_log_error(target, prediction) -> torch.Tensor:
         prediction (torch.Tensor): The prediction tensor.
     """
     mle = MeanSquaredLogError()
-    return mle(target, prediction)
+    return mle(preds=prediction, target=target)
 
 
 def mean_absolute_error(target, prediction) -> torch.Tensor:
@@ -85,7 +82,7 @@ def mean_absolute_error(target, prediction) -> torch.Tensor:
         prediction (torch.Tensor): The prediction tensor.
     """
     mae = MeanAbsoluteError()
-    return mae(target, prediction)
+    return mae(preds=prediction, target=target)
 
 
 def _get_ncc_image(target, prediction) -> sitk.Image:
