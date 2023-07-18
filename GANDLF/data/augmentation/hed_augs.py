@@ -188,13 +188,12 @@ class HedColorAugmenter(ColorAugmenterBase):
             dab_bias_range[0] if dab_bias_range is not None else 0.0,
         ]
 
-    def _setcutoffrange(self, cutoff_range):
+    def _setcutoffrange(self, cutoff_range: Union[tuple, None]):
         """
         Set the cutoff value. Patches with mean value outside the cutoff interval will not be augmented.
+
         Args:
-            cutoff_range (tuple, None): Cutoff range for mean value.
-        Raises:
-            InvalidRangeError: If the cutoff range is not valid.
+            cutoff_range (Union[tuple, None]): Cutoff range for mean value.
         """
 
         def check_cutoff_range(name, given_range):
