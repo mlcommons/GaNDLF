@@ -154,15 +154,19 @@ class HedColorAugmenter(ColorAugmenterBase):
             dab_sigma_range[0] if dab_sigma_range is not None else 0.0,
         ]
 
-    def _setbiasranges(self, haematoxylin_bias_range, eosin_bias_range, dab_bias_range):
+    def _setbiasranges(
+        self,
+        haematoxylin_bias_range: Union[tuple, None],
+        eosin_bias_range: Union[tuple, None],
+        dab_bias_range: Union[tuple, None],
+    ):
         """
         Set the bias intervals.
+
         Args:
-            haematoxylin_bias_range (tuple, None): Bias range for the Haematoxylin channel.
-            eosin_bias_range (tuple, None) Bias range for the Eosin channel.
-            dab_bias_range (tuple, None): Bias range for the DAB channel.
-        Raises:
-            InvalidRangeError: If the bias range for any channel adjustment is not valid.
+            haematoxylin_bias_range (Union[tuple, None]): Bias range for the Haematoxylin channel.
+            eosin_bias_range (Union[tuple, None]): Bias range for the Eosin channel.
+            dab_bias_range (Union[tuple, None]): Bias range for the DAB channel.
         """
 
         def check_bias_range(name, given_range):
