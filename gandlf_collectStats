@@ -7,20 +7,14 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
-from io import StringIO
 
 from GANDLF.cli import copyrightMessage
-from GANDLF.utils.plot_utils import plot_all
-
-import os
-import seaborn as sns
-import matplotlib.pyplot as plt
-from pathlib import Path
 
 
 def plot_all(df_training, df_validation, df_testing, output_plot_dir):
     """
     Plots training, validation, and testing data for loss and other metrics.
+    TODO: this function needs to be moved under utils and then called after every training epoch.
 
     Args:
         df_training (pd.DataFrame): DataFrame containing training data.
