@@ -1,5 +1,6 @@
 from typing import Tuple, Union
 import numpy as np
+import torch
 from skimage.color import rgb2hed, hed2rgb
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
@@ -28,22 +29,23 @@ class AugmenterBase:
         """
         self._keyword = keyword
 
-    @property
-    def keyword(self):
-        """Get the keyword for the augmenter."""
-        return self._keyword
+    ## commented the following lines because the user is never given access to these
+    # @property
+    # def keyword(self):
+    #     """Get the keyword for the augmenter."""
+    #     return self._keyword
 
-    def shapes(self, target_shapes):
-        """Calculate the required shape of the input to achieve the target output shape."""
-        return target_shapes
+    # def shapes(self, target_shapes):
+    #     """Calculate the required shape of the input to achieve the target output shape."""
+    #     return target_shapes
 
-    def transform(self, patch):
-        """Transform the given patch."""
-        return patch
+    # def transform(self, patch):
+    #     """Transform the given patch."""
+    #     return patch
 
-    def randomize(self):
-        """Randomize the parameters of the augmenter."""
-        return
+    # def randomize(self):
+    #     """Randomize the parameters of the augmenter."""
+    #     return
 
 
 class ColorAugmenterBase(AugmenterBase):
@@ -65,35 +67,28 @@ class HedColorAugmenter(ColorAugmenterBase):
 
     def __init__(
         self,
-        haematoxylin_sigma_range,
-        haematoxylin_bias_range,
-        eosin_sigma_range,
-        eosin_bias_range,
-        dab_sigma_range,
-        dab_bias_range,
-        cutoff_range,
-    ):
+        haematoxylin_sigma_range: Union[tuple, None],
+        haematoxylin_bias_range: Union[tuple, None],
+        eosin_sigma_range: Union[tuple, None],
+        eosin_bias_range: Union[tuple, None],
+        dab_sigma_range: Union[tuple, None],
+        dab_bias_range: Union[tuple, None],
+        cutoff_range: Union[tuple, None],
+    ) -> ColorAugmenterBase:
         """
-        The following code is derived and inspired from the following sources:
-        https://github.com/sebastianffx/stainlib
-        and it is covered under MIT license.
-        Initialize the object. For each channel the augmented value is calculated as value = value * sigma + bias
+        The following code is derived and inspired from the following sources: https://github.com/sebastianffx/stainlib.
+
         Args:
-            haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.1, 0.1).
-            haematoxylin_bias_range (tuple, None): Bias range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.2, 0.2).
-            eosin_sigma_range (tuple, None): Adjustment range for the Eosin channel from the [-1.0, 1.0] range where 0.0 means no change.
-            eosin_bias_range (tuple, None) Bias range for the Eosin channel from the [-1.0, 1.0] range where 0.0 means no change.
-            dab_sigma_range (tuple, None): Adjustment range for the DAB channel from the [-1.0, 1.0] range where 0.0 means no change.
-            dab_bias_range (tuple, None): Bias range for the DAB channel from the [-1.0, 1.0] range where 0.0 means no change.
-            cutoff_range (tuple, None): Patches with mean value outside the cutoff interval will not be augmented. Values from the [0.0, 1.0] range. The RGB channel values are from the same range.
-        Raises:
-            InvalidHaematoxylinSigmaRangeError: The sigma range for Haematoxylin channel adjustment is not valid.
-            InvalidHaematoxylinBiasRangeError: The bias range for Haematoxylin channel adjustment is not valid.
-            InvalidEosinSigmaRangeError: The sigma range for Eosin channel adjustment is not valid.
-            InvalidEosinBiasRangeError: The bias range for Eosin channel adjustment is not valid.
-            InvalidDabSigmaRangeError: The sigma range for DAB channel adjustment is not valid.
-            InvalidDabBiasRangeError: The bias range for DAB channel adjustment is not valid.
-            InvalidCutoffRangeError: The cutoff range is not valid.
+            haematoxylin_sigma_range (Union[tuple, None]): Adjustment range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.1, 0.1).
+            haematoxylin_bias_range (Union[tuple, None]): Bias range for the Haematoxylin channel from the [-1.0, 1.0] range where 0.0 means no change. For example (-0.2, 0.2).
+            eosin_sigma_range (Union[tuple, None]): Adjustment range for the Eosin channel from the [-1.0, 1.0] range where 0.0 means no change.
+            eosin_bias_range (Union[tuple, None]): Bias range for the Eosin channel from the [-1.0, 1.0] range where 0.0 means no change.
+            dab_sigma_range (Union[tuple, None]): Adjustment range for the DAB channel from the [-1.0, 1.0] range where 0.0 means no change.
+            dab_bias_range (Union[tuple, None]): Bias range for the DAB channel from the [-1.0, 1.0] range where 0.0 means no change.
+            cutoff_range (Union[tuple, None]): Patches with mean value outside the cutoff interval will not be augmented. Values from the [0.0, 1.0] range. The RGB channel values are from the same range.
+
+        Returns:
+            ColorAugmenterBase: _description_
         """
 
         # Initialize base class.
@@ -120,16 +115,18 @@ class HedColorAugmenter(ColorAugmenterBase):
         self._setcutoffrange(cutoff_range=cutoff_range)
 
     def _setsigmaranges(
-        self, haematoxylin_sigma_range, eosin_sigma_range, dab_sigma_range
+        self,
+        haematoxylin_sigma_range: Union[tuple, None],
+        eosin_sigma_range: Union[tuple, None],
+        dab_sigma_range: Union[tuple, None],
     ):
         """
         Set the sigma intervals.
+
         Args:
-            haematoxylin_sigma_range (tuple, None): Adjustment range for the Haematoxylin channel.
-            eosin_sigma_range (tuple, None): Adjustment range for the Eosin channel.
-            dab_sigma_range (tuple, None): Adjustment range for the DAB channel.
-        Raises:
-            InvalidRangeError: If the sigma range for any channel adjustment is not valid.
+            haematoxylin_sigma_range (Union[tuple, None]): Adjustment range for the Haematoxylin channel.
+            eosin_sigma_range (Union[tuple, None]): Adjustment range for the Eosin channel.
+            dab_sigma_range (Union[tuple, None]): Adjustment range for the DAB channel.
         """
 
         def check_sigma_range(name, given_range):
@@ -157,15 +154,19 @@ class HedColorAugmenter(ColorAugmenterBase):
             dab_sigma_range[0] if dab_sigma_range is not None else 0.0,
         ]
 
-    def _setbiasranges(self, haematoxylin_bias_range, eosin_bias_range, dab_bias_range):
+    def _setbiasranges(
+        self,
+        haematoxylin_bias_range: Union[tuple, None],
+        eosin_bias_range: Union[tuple, None],
+        dab_bias_range: Union[tuple, None],
+    ):
         """
         Set the bias intervals.
+
         Args:
-            haematoxylin_bias_range (tuple, None): Bias range for the Haematoxylin channel.
-            eosin_bias_range (tuple, None) Bias range for the Eosin channel.
-            dab_bias_range (tuple, None): Bias range for the DAB channel.
-        Raises:
-            InvalidRangeError: If the bias range for any channel adjustment is not valid.
+            haematoxylin_bias_range (Union[tuple, None]): Bias range for the Haematoxylin channel.
+            eosin_bias_range (Union[tuple, None]): Bias range for the Eosin channel.
+            dab_bias_range (Union[tuple, None]): Bias range for the DAB channel.
         """
 
         def check_bias_range(name, given_range):
@@ -187,13 +188,12 @@ class HedColorAugmenter(ColorAugmenterBase):
             dab_bias_range[0] if dab_bias_range is not None else 0.0,
         ]
 
-    def _setcutoffrange(self, cutoff_range):
+    def _setcutoffrange(self, cutoff_range: Union[tuple, None]):
         """
         Set the cutoff value. Patches with mean value outside the cutoff interval will not be augmented.
+
         Args:
-            cutoff_range (tuple, None): Cutoff range for mean value.
-        Raises:
-            InvalidRangeError: If the cutoff range is not valid.
+            cutoff_range (Union[tuple, None]): Cutoff range for mean value.
         """
 
         def check_cutoff_range(name, given_range):
@@ -208,37 +208,41 @@ class HedColorAugmenter(ColorAugmenterBase):
 
         self._cutoff_range = cutoff_range if cutoff_range is not None else [0.0, 1.0]
 
-    def randomize(self):
-        """Randomize the parameters of the augmenter."""
+    ## commented the following lines because the user is never given access to this function
+    # def randomize(self):
+    #     """Randomize the parameters of the augmenter."""
 
-        # Randomize sigma and bias for each channel.
-        self._sigmas = [
-            np.random.uniform(sigma_range[0], sigma_range[1]) if sigma_range else 1.0
-            for sigma_range in self._sigma_ranges
-        ]
-        self._biases = [
-            np.random.uniform(bias_range[0], bias_range[1]) if bias_range else 0.0
-            for bias_range in self._bias_ranges
-        ]
+    #     # Randomize sigma and bias for each channel.
+    #     self._sigmas = [
+    #         np.random.uniform(sigma_range[0], sigma_range[1]) if sigma_range else 1.0
+    #         for sigma_range in self._sigma_ranges
+    #     ]
+    #     self._biases = [
+    #         np.random.uniform(bias_range[0], bias_range[1]) if bias_range else 0.0
+    #         for bias_range in self._bias_ranges
+    #     ]
 
-    def transform(self, patch):
+    def transform(self, patch: torch.Tensor) -> torch.Tensor:
         """
         Apply color deformation on the patch.
+
         Args:
-            patch (np.ndarray): Patch to transform.
+            patch (torch.Tensor): The input patch to transform.
+
         Returns:
-            np.ndarray: Transformed patch.
+            torch.Tensor: The transformed patch.
         """
 
+        current_patch = patch.numpy().astype(np.float32)
         patch_mean = (
-            np.mean(patch.astype(np.float32)) / 255.0
-            if patch.dtype.kind != "f"
-            else np.mean(patch)
+            np.mean(current_patch) / 255.0
+            if current_patch.dtype.kind != "f"
+            else np.mean(current_patch)
         )
 
         if self._cutoff_range[0] <= patch_mean <= self._cutoff_range[1]:
             # Convert the image patch to HED color coding.
-            patch_hed = rgb2hed(patch)
+            patch_hed = rgb2hed(current_patch)
 
             # Augment the channels.
             for i in range(3):
@@ -252,7 +256,7 @@ class HedColorAugmenter(ColorAugmenterBase):
             patch_transformed = np.clip(patch_transformed, 0.0, 1.0)
 
             # Convert back to integral data type if the input was also integral.
-            if patch.dtype.kind != "f":
+            if current_patch.dtype.kind != "f":
                 patch_transformed *= 255.0
                 patch_transformed = patch_transformed.astype(np.uint8)
 
@@ -288,19 +292,23 @@ class RandomHEDTransform(RandomTransform, IntensityTransform):
     def apply_transform(self, subject: Subject) -> Subject:
         # Process only if the image is RGB
         for _, image in self.get_images_dict(subject).items():
-            if image.data.ndim != 3 or image.data.shape[-1] != 3:
-                continue
+            if image.data.shape[-1] == 1:
+                if image.data.ndim == 4:
+                    tensor = image.data[..., 0]
+                    # put channel to last axis (needed for colorconv to work)
+                    tensor = tensor.permute(2, 1, 0)
 
-            # Convert image data to tensor
-            tensor = image.data.permute(2, 0, 1).unsqueeze(0)
+                    # Apply transform
+                    transformed_tensor = self.transform_object.transform(tensor)
 
-            # Apply transform
-            transformed_tensor = self.transform_object.transform(tensor)
+                    # Convert tensor back to tensor data
+                    transformed_data = (
+                        torch.from_numpy(transformed_tensor)
+                        .permute(2, 0, 1)
+                        .unsqueeze(-1)
+                    )
 
-            # Convert tensor back to image data
-            transformed_data = transformed_tensor.squeeze(0).permute(1, 2, 0)
-
-            # Update image data
-            image.set_data(transformed_data)
+                    # Update image data
+                    image.set_data(transformed_data)
 
         return subject
