@@ -31,6 +31,7 @@ from .synthesis import (
     structural_similarity_index,
     mean_squared_error,
     peak_signal_noise_ratio,
+    peak_signal_noise_ratio_eps,
     mean_squared_log_error,
     mean_absolute_error,
     ncc_mean,
