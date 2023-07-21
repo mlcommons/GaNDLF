@@ -262,7 +262,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
                 gt_image_infill, output_infill
             ).item()
-            
+
             overall_stats_dict[current_subject_id]["psnr_range_eps"] = peak_signal_noise_ratio_eps(
                 gt_image_infill, output_infill
             ).item()
