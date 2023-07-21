@@ -61,6 +61,24 @@ def peak_signal_noise_ratio(target, prediction) -> torch.Tensor:
     return psnr(preds=prediction, target=target)
 
 
+def peak_signal_noise_ratio_eps(target, prediction) -> torch.Tensor:
+    """
+    Computes the peak signal to noise ratio between the target and prediction. Uses a small epsilon in the denominator
+    of the fraction to avoid infinity as output. Also, operates on the data range instead of the maximum. This version
+    of PSNR is potentially more robust than the original formular.
+    
+    Args:
+        target (torch.Tensor): The target tensor.
+        prediction (torch.Tensor): The prediction tensor.
+    """
+    mse = mean_squared_error(target, prediction)
+    return (
+        10.0
+        * torch.log10((torch.max(target) - torch.min(target)) ** 2)
+        / (mse + sys.float_info.epsilon)
+    )
+
+
 def mean_squared_log_error(target, prediction) -> torch.Tensor:
     """
     Computes the mean squared log error between the target and prediction.
