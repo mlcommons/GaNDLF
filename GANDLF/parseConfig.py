@@ -348,8 +348,8 @@ def parseConfig(config_file_path, version_check_flag=True):
             # Added HED augmentation in gandlf
             hed_augmentation_types = [
                 "hed_transform",
-                "hed_transform_light",
-                "hed_transform_heavy",
+                # "hed_transform_light",
+                # "hed_transform_heavy",
             ]
             for augmentation_type in hed_augmentation_types:
                 if augmentation_type in params["data_augmentation"]:
