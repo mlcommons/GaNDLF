@@ -256,6 +256,11 @@ def parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO augmentations
     params = initialize_key(params, "data_augmentation", {})
+    # for all others, ensure probability is present
+    params["data_augmentation"]["default_probability"] = params[
+        "data_augmentation"
+    ].get("default_probability", 0.5)
+
     if not (params["data_augmentation"] is None):
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
             # special case for random swapping and elastic transformations - which takes a patch size for computation
@@ -340,6 +345,47 @@ def parseConfig(config_file_path, version_check_flag=True):
                     params["data_augmentation"]["colorjitter"], "hue", [-0.5, 0.5]
                 )
 
+            # Added HED augmentation in gandlf
+            hed_augmentation_types = [
+                "hed_transform",
+                # "hed_transform_light",
+                # "hed_transform_heavy",
+            ]
+            for augmentation_type in hed_augmentation_types:
+                if augmentation_type in params["data_augmentation"]:
+                    params["data_augmentation"] = initialize_key(
+                        params["data_augmentation"], "hed_transform", {}
+                    )
+                    ranges = [
+                        "haematoxylin_bias_range",
+                        "eosin_bias_range",
+                        "dab_bias_range",
+                        "haematoxylin_sigma_range",
+                        "eosin_sigma_range",
+                        "dab_sigma_range",
+                    ]
+
+                    default_range = (
+                        [-0.1, 0.1]
+                        if augmentation_type == "hed_transform"
+                        else [-0.03, 0.03]
+                        if augmentation_type == "hed_transform_light"
+                        else [-0.95, 0.95]
+                    )
+
+                    for key in ranges:
+                        params["data_augmentation"]["hed_transform"] = initialize_key(
+                            params["data_augmentation"]["hed_transform"],
+                            key,
+                            default_range,
+                        )
+
+                    params["data_augmentation"]["hed_transform"] = initialize_key(
+                        params["data_augmentation"]["hed_transform"],
+                        "cutoff_range",
+                        [0, 1],
+                    )
+
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
                 if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
@@ -369,10 +415,6 @@ def parseConfig(config_file_path, version_check_flag=True):
                         )
                         # default
                     params["data_augmentation"]["anisotropic"]["downsampling"] = 1.5
-
-            # for all others, ensure probability is present
-            if "default_probability" not in params["data_augmentation"]:
-                params["data_augmentation"]["default_probability"] = 0.5
 
             for key in params["data_augmentation"]:
                 if key != "default_probability":

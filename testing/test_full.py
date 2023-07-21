@@ -1810,6 +1810,52 @@ def test_generic_augmentation_functions():
     output_tensor = temp(input_tensor)
     assert output_tensor != None, "RGB Augmentation should work"
 
+    # testing HED transforms with different options
+    input_tensor = torch.rand(3, 128, 128, 1)
+    params = {
+        "data_augmentation": {
+            "hed_transform": {},
+            # "hed_transform_light": {},
+            # "hed_transform_heavy": {},
+        }
+    }
+    temp = global_augs_dict["hed_transform"](
+        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
+    )
+    ranges = [
+        "haematoxylin_bias_range",
+        "eosin_bias_range",
+        "dab_bias_range",
+        "haematoxylin_sigma_range",
+        "eosin_sigma_range",
+        "dab_sigma_range",
+    ]
+
+    default_range = [-0.1, 0.1]
+    for key in ranges:
+        params["data_augmentation"]["hed_transform"].setdefault(key, default_range)
+
+    params["data_augmentation"]["hed_transform"].setdefault(
+        "cutoff_range", [0.05, 0.95]
+    )
+
+    # Check if the params are correctly set for each augmentation type
+    assert params["data_augmentation"]["hed_transform"] == {
+        "haematoxylin_bias_range": [-0.1, 0.1],
+        "eosin_bias_range": [-0.1, 0.1],
+        "dab_bias_range": [-0.1, 0.1],
+        "haematoxylin_sigma_range": [-0.1, 0.1],
+        "eosin_sigma_range": [-0.1, 0.1],
+        "dab_sigma_range": [-0.1, 0.1],
+        "cutoff_range": [0.05, 0.95],
+    }
+    temp = global_augs_dict["hed_transform"](
+        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "HED Augmentation should work"
+
     # this is for all other augmentations
     input_tensor = torch.rand(3, 128, 128, 128)
     for aug in params_all_preprocessing_and_augs["data_augmentation"]:
