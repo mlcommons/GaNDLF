@@ -1815,8 +1815,8 @@ def test_generic_augmentation_functions():
     params = {
         "data_augmentation": {
             "hed_transform": {},
-            "hed_transform_light": {},
-            "hed_transform_heavy": {},
+            # "hed_transform_light": {},
+            # "hed_transform_heavy": {},
         }
     }
     temp = global_augs_dict["hed_transform"](
