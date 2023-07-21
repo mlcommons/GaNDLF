@@ -1,6 +1,5 @@
 from torchvision.transforms import ColorJitter
 from typing import Tuple, Union
-
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
 from torchio import Subject
