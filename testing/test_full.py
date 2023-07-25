@@ -1233,7 +1233,7 @@ def test_train_losses_segmentation_rad_2d(device):
     parameters["model"]["print_summary"] = False
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     # loop through selected models and train for single epoch
-    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
+    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky", "focal"]:
         parameters["loss_function"] = loss_type
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
