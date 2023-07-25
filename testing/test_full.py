@@ -1237,6 +1237,11 @@ def test_train_losses_segmentation_rad_2d(device):
         parameters["loss_function"] = loss_type
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
+        file_config_temp = get_temp_config_path()
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters, file)
+        # read and parse csv
+        parameters = parseConfig(file_config_temp, version_check_flag=True)
         sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
