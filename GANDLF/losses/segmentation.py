@@ -175,3 +175,39 @@ def KullbackLeiblerDivergence(mu, logvar, params=None):
     """
     loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=-1)
     return loss.mean()
+
+
+def FocalLoss(predicted, target, params=None):
+    """
+    This function calculates the Focal loss between two tensors.
+
+    Args:
+        predicted (torch.Tensor): predicted generally by the network
+        target (torch.Tensor): Required target label to match the predicted with
+        params (dict, optional): Additional parameters for computing loss function, including weights for each class
+
+    Returns:
+        torch.Tensor: Computed Focal Loss
+    """
+    gamma = params.get("loss_function", {}).get("gamma", 2.0)
+    size_average = params.get("loss_function", {}).get("size_average", True)
+
+    def focal_loss(preds, target, gamma, size_average=True):
+        ce_loss = torch.nn.CrossEntropyLoss(reduce=False)
+        logpt = ce_loss(preds, target)
+        pt = torch.exp(-logpt)
+        loss = ((1 - pt) ** gamma) * logpt
+        if size_average:
+            return loss.mean()
+        return loss.sum()
+
+    acc_focal_loss = 0
+    num_classes = predicted.shape[1]
+
+    for i in range(num_classes):
+        curr_loss = focal_loss(predicted[:, i, ...], target[:, i, ...], gamma, size_average)
+        if params is not None and params.get("weights") is not None:
+            curr_loss = curr_loss * params["weights"][i]
+        acc_focal_loss += curr_loss
+
+    return acc_focal_loss
