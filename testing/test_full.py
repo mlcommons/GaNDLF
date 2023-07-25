@@ -1226,9 +1226,6 @@ def test_train_losses_segmentation_rad_2d(device):
         parameters = parseConfig(file_config_temp, version_check_flag=True)
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
-        parameters = parseConfig(
-            testingDir + "/config_segmentation.yaml", version_check_flag=False
-        )
         training_data, parameters["headers"] = parseTrainingCSV(
             inputDir + "/train_2d_rad_segmentation.csv"
         )
@@ -1246,7 +1243,14 @@ def test_train_losses_segmentation_rad_2d(device):
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         return parameters, training_data
     # loop through selected models and train for single epoch
-    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky", "focal"]:
+    for loss_type in [
+        "dc", 
+        "dc_log", 
+        "dcce", 
+        "dcce_logits", 
+        "tversky",
+        "focal", 
+        "dc_focal"]:
         parameters, training_data = get_parameters_after_alteration(loss_type)
         sanitize_outputDir()
         TrainingManager(
