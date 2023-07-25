@@ -206,9 +206,10 @@ def FocalLoss(predicted, target, params=None):
         logpt = ce_loss(preds, target)
         pt = torch.exp(-logpt)
         loss = ((1 - pt) ** gamma) * logpt
+        return_loss = loss.sum()
         if size_average:
-            return loss.mean()
-        return loss.sum()
+            return_loss = loss.mean()
+        return return_loss
 
     acc_focal_loss = 0
     num_classes = predicted.shape[1]
