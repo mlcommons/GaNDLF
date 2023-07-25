@@ -9,7 +9,7 @@ from .segmentation import (
     FocalLoss,
 )
 from .regression import CE, CEL, MSE_loss, L1_loss
-from .hybrid import DCCE, DCCE_Logits
+from .hybrid import DCCE, DCCE_Logits, DC_Focal
 
 
 # global defines for the losses
@@ -27,4 +27,5 @@ global_losses_dict = {
     "kld": KullbackLeiblerDivergence,
     "l1": L1_loss,
     "focal": FocalLoss,
+    "dc_focal": DC_Focal,
 }
