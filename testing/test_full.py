@@ -1213,38 +1213,41 @@ def test_train_metrics_regression_rad_2d(device):
 
 def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
-    # read and parse csv
-    parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
-    )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["class_list"] = [0, 255]
-    # disabling amp because some losses do not support Half, yet
-    parameters["model"]["amp"] = False
-    parameters["model"]["num_channels"] = 3
-    parameters["model"]["architecture"] = "resunet"
-    parameters["metrics"] = ["dice"]
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky", "focal"]:
+    # healper function to read and parse yaml and return parameters
+    def get_parameters_after_alteration(loss_type: str) -> dict:
         parameters = parseConfig(
             testingDir + "/config_segmentation.yaml", version_check_flag=False
         )
         parameters["loss_function"] = loss_type
-        parameters["nested_training"]["testing"] = -5
-        parameters["nested_training"]["validation"] = -5
         file_config_temp = get_temp_config_path()
         with open(file_config_temp, "w") as file:
             yaml.dump(parameters, file)
         # read and parse csv
         parameters = parseConfig(file_config_temp, version_check_flag=True)
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        parameters = parseConfig(
+            testingDir + "/config_segmentation.yaml", version_check_flag=False
+        )
+        training_data, parameters["headers"] = parseTrainingCSV(
+            inputDir + "/train_2d_rad_segmentation.csv"
+        )
+        parameters["modality"] = "rad"
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["dimension"] = 2
+        parameters["model"]["class_list"] = [0, 255]
+        # disabling amp because some losses do not support Half, yet
+        parameters["model"]["amp"] = False
+        parameters["model"]["num_channels"] = 3
+        parameters["model"]["architecture"] = "resunet"
+        parameters["metrics"] = ["dice"]
+        parameters["model"]["onnx_export"] = False
+        parameters["model"]["print_summary"] = False
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        return parameters, training_data
+    # loop through selected models and train for single epoch
+    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky", "focal"]:
+        parameters, training_data = get_parameters_after_alteration(loss_type)
         sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
