@@ -41,7 +41,6 @@ parameter_defaults_string = {
     "optimizer": "adam",  # the optimizer
     "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
-    "loss_function": "dc",  # default loss
     "clip_mode": None,  # default clip mode
 }
 
