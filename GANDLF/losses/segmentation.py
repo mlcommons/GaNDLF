@@ -185,9 +185,9 @@ def FocalLoss(predicted, target, params=None):
     """
     gamma = 2.0
     size_average = True
-    if isinstance(params, dict):
-        gamma = params.get("loss_function", {}).get("gamma", 2.0)
-        size_average = params.get("loss_function", {}).get("size_average", True)
+    if isinstance(params["loss_function"], dict):
+        gamma = params["loss_function"].get("gamma", 2.0)
+        size_average = params["loss_function"].get("size_average", True)
 
     def _focal_loss(preds, target, gamma, size_average=True):
         """
