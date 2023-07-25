@@ -186,6 +186,11 @@ def parseConfig(config_file_path, version_check_flag=True):
                 params["loss_function"] = {}
                 params["loss_function"]["mse"] = {}
                 params["loss_function"]["mse"]["reduction"] = "mean"
+            elif params["loss_function"] == "focal":
+                params["loss_function"] = {}
+                params["loss_function"]["focal"] = {}
+                params["loss_function"]["focal"]["gamma"] = 2.0
+                params["loss_function"]["focal"]["size_average"] = True
 
     assert "metrics" in params, "'metrics' needs to be defined in the config file"
     if "metrics" in params:
