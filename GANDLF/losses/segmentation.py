@@ -195,7 +195,7 @@ def FocalLoss(predicted, target, params=None):
         gamma = params.get("loss_function", {}).get("gamma", 2.0)
         size_average = params.get("loss_function", {}).get("size_average", True)
 
-    def focal_loss(preds, target, gamma, size_average=True):
+    def _focal_loss(preds, target, gamma, size_average=True):
         ce_loss = torch.nn.CrossEntropyLoss(reduce=False)
         logpt = ce_loss(preds, target)
         pt = torch.exp(-logpt)
@@ -208,7 +208,7 @@ def FocalLoss(predicted, target, params=None):
     num_classes = predicted.shape[1]
 
     for i in range(num_classes):
-        curr_loss = focal_loss(
+        curr_loss = _focal_loss(
             predicted[:, i, ...], target[:, i, ...], gamma, size_average
         )
         if params is not None and params.get("weights") is not None:
