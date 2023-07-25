@@ -3,22 +3,16 @@ import torch
 
 
 # Dice scores and dice losses
-def dice(predicted, target):
+def dice(predicted, target) -> torch.Tensor:
     """
-    This function computes a dice score between two tensors
+    This function computes a dice score between two tensors.
 
-    Parameters
-    ----------
-    predicted : Tensor
-        predicted value by the network
-    target : Tensor
-        Required target label to match the predicted with
+    Args:
+        predicted (_type_): Predicted value by the network.
+        target (_type_): Required target label to match the predicted with
 
-    Returns
-    -------
-    Tensor
-        Computed Dice Score
-
+    Returns:
+        torch.Tensor: The computed dice score.
     """
     predicted_flat = predicted.flatten()
     label_flat = target.flatten()
@@ -36,7 +30,7 @@ def MCD(predicted, target, num_class, weights=None, ignore_class=None, loss_type
     This function computes the mean class dice score between two tensors
 
     Args:
-        predicted (torch.Tensor): predicted generally by the network
+        predicted (torch.Tensor): Predicted generally by the network
         target (torch.Tensor): Required target label to match the predicted with
         num_class (int): Number of classes (including the background class)
         weights (list, optional): Dice weights for each class (excluding the background class), defaults to None
@@ -105,7 +99,7 @@ def tversky_loss(predicted, target, alpha=0.5, beta=0.5):
     This function calculates the Tversky loss between two tensors.
 
     Args:
-        predicted (torch.Tensor): predicted generally by the network
+        predicted (torch.Tensor): Predicted generally by the network
         target (torch.Tensor): Required target label to match the predicted with
         alpha (float, optional): Weight of false positives. Defaults to 0.5.
         beta (float, optional): Weight of false negatives. Defaults to 0.5.
@@ -138,7 +132,7 @@ def MCT_loss(predicted, target, params=None):
     This function calculates the Multi-Class Tversky loss between two tensors.
 
     Args:
-        predicted (torch.Tensor): predicted generally by the network
+        predicted (torch.Tensor): Predicted generally by the network
         target (torch.Tensor): Required target label to match the predicted with
         params (dict, optional): Additional parameters for computing loss function, including weights for each class
 
@@ -182,7 +176,7 @@ def FocalLoss(predicted, target, params=None):
     This function calculates the Focal loss between two tensors.
 
     Args:
-        predicted (torch.Tensor): predicted generally by the network
+        predicted (torch.Tensor): Predicted generally by the network
         target (torch.Tensor): Required target label to match the predicted with
         params (dict, optional): Additional parameters for computing loss function, including weights for each class
 
@@ -196,6 +190,18 @@ def FocalLoss(predicted, target, params=None):
         size_average = params.get("loss_function", {}).get("size_average", True)
 
     def _focal_loss(preds, target, gamma, size_average=True):
+        """
+        Internal helper function to calcualte focal loss for a single class.
+
+        Args:
+            preds (torch.Tensor): predicted generally by the network
+            target (torch.Tensor): Required target label to match the predicted with
+            gamma (float): The gamma value for focal loss
+            size_average (bool, optional): Whether to average the loss across the batch. Defaults to True.
+
+        Returns:
+            torch.Tensor: Computed focal loss for a single class.
+        """
         ce_loss = torch.nn.CrossEntropyLoss(reduce=False)
         logpt = ce_loss(preds, target)
         pt = torch.exp(-logpt)
