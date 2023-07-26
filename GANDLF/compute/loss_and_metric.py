@@ -25,26 +25,22 @@ def get_metric_output(metric_function, predicted, ground_truth, params):
 
 def get_loss_and_metrics(image, ground_truth, predicted, params):
     """
-    image: torch.Tensor
-        The input image stack according to requirements
-    ground_truth : torch.Tensor
-        The input ground truth for the corresponding image label
-    predicted : torch.Tensor
-        The input predicted label for the corresponding image label
-    params : dict
-        The parameters passed by the user yaml
+    This function computes the loss and metrics for a given image, ground truth and predicted output.
 
-    Returns
-    -------
-    loss : torch.Tensor
-        The computed loss from the label and the output
-    metric_output : torch.Tensor
-        The computed metric from the label and the output
+    Args:
+        image (torch.Tensor): The input image stack according to requirements.
+        ground_truth (torch.Tensor): The input ground truth for the corresponding image label.
+        predicted (torch.Tensor): The input predicted label for the corresponding image label.
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        torch.Tensor: The computed loss from the label and the prediction.
+        dict: The computed metric from the label and the prediction.
     """
     # this is currently only happening for mse_torch
     if isinstance(params["loss_function"], dict):
         # check for mse_torch
-        loss_function = global_losses_dict["mse"]
+        loss_function = global_losses_dict[list(params["loss_function"].keys())[0]]
     else:
         loss_str_lower = params["loss_function"].lower()
         if loss_str_lower in global_losses_dict:
