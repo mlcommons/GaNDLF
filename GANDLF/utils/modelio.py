@@ -198,9 +198,8 @@ def load_model(
             )
 
     # check if required keys are absent, and if so raise an error
-    model_dict_required = {"version", "parameters", "timestamp", "timestamp_hash"}
     incomplete_required_keys = [
-        key for key in model_dict_required if key not in model_dict.keys()
+        key for key in model_dict_required.keys() if key not in model_dict.keys()
     ]
     if len(incomplete_required_keys) > 0:
         raise KeyError(
