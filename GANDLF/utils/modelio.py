@@ -1,9 +1,12 @@
-import os, hashlib, pkg_resources, subprocess
+import hashlib
+import os
+import subprocess
+from typing import Any, Dict
+
 import torch
 
-from .generic import get_unique_timestamp
 from ..version import __version__
-from typing import Dict, Any
+from .generic import get_unique_timestamp
 
 # these are the base keys for the model dictionary to save
 model_dict_full = {
@@ -25,11 +28,6 @@ model_dict_required = {
 best_model_path_end = "_best.pth.tar"
 latest_model_path_end = "_latest.pth.tar"
 initial_model_path_end = "_initial.pth.tar"
-
-
-import os
-import torch
-import subprocess
 
 
 def optimize_and_save_model(model, params, path, onnx_export=True):
