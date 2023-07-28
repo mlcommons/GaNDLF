@@ -112,6 +112,7 @@ scheduler:
 # Set which loss function you want to use - options : 'dc' - for dice only, 'dcce' - for sum of dice and CE and you can guess the next (only lower-case please)
 # options: dc (dice only), dc_log (-log of dice), ce (), dcce (sum of dice and ce), mse () ...
 # mse is the MSE defined by torch and can define a variable 'reduction'; see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss
+# focal is the focal loss and can define 2 variables: gamma and size_average
 # use mse_torch for regression/classification problems and dice for segmentation
 loss_function: dc
 # this parameter weights the loss to handle imbalanced losses better
@@ -120,6 +121,12 @@ weighted_loss: True
 #  {
 #    'mse':{
 #      'reduction': 'mean' # see https://pytorch.org/docs/stable/generated/torch.nn.MSELoss.html#torch.nn.MSELoss for all options
+#    }
+#  }
+#loss_function:
+#  {
+#    'focal':{
+#      'gamma': 1.0
 #    }
 #  }
 # Which optimizer do you want to use - sgd, asgd, adam, adamw, adamax, sparseadam, rprop, adadelta, adagrad, rmsprop,
@@ -263,6 +270,15 @@ data_augmentation:
       'saturation': [0,0.5], # optional: needs to be between [0,1]
       'hue': [-0.25,0.25], # optional: needs to be between [-0.5,0.5] for range and [0,1] for a single value
     }, 
+    'hed_transform':{
+      'haematoxylin_bias_range': [-0.1, 0.1],
+      'eosin_bias_range': [-0.1, 0.1],
+      'dab_bias_range': [-0.1, 0.1],
+      'haematoxylin_sigma_range': [-0.1, 0.1],
+      'eosin_sigma_range': [-0.1, 0.1],
+      'dab_sigma_range': [-0.1, 0.1],
+      'cutoff_range': [0.01, 0.99],
+    }
   }
 # ## post-processing steps - only applied before output labels are saved
 # data_postprocessing:

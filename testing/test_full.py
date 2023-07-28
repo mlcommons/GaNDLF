@@ -1213,30 +1213,45 @@ def test_train_metrics_regression_rad_2d(device):
 
 def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
-    # read and parse csv
-    parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
-    )
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_2d_rad_segmentation.csv"
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["2D"]
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["class_list"] = [0, 255]
-    # disabling amp because some losses do not support Half, yet
-    parameters["model"]["amp"] = False
-    parameters["model"]["num_channels"] = 3
-    parameters["model"]["architecture"] = "resunet"
-    parameters["metrics"] = ["dice"]
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    for loss_type in ["dc", "dc_log", "dcce", "dcce_logits", "tversky"]:
+    # healper function to read and parse yaml and return parameters
+    def get_parameters_after_alteration(loss_type: str) -> dict:
+        parameters = parseConfig(
+            testingDir + "/config_segmentation.yaml", version_check_flag=False
+        )
         parameters["loss_function"] = loss_type
+        file_config_temp = get_temp_config_path()
+        with open(file_config_temp, "w") as file:
+            yaml.dump(parameters, file)
+        # read and parse csv
+        parameters = parseConfig(file_config_temp, version_check_flag=True)
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
+        training_data, parameters["headers"] = parseTrainingCSV(
+            inputDir + "/train_2d_rad_segmentation.csv"
+        )
+        parameters["modality"] = "rad"
+        parameters["patch_size"] = patch_size["2D"]
+        parameters["model"]["dimension"] = 2
+        parameters["model"]["class_list"] = [0, 255]
+        # disabling amp because some losses do not support Half, yet
+        parameters["model"]["amp"] = False
+        parameters["model"]["num_channels"] = 3
+        parameters["model"]["architecture"] = "resunet"
+        parameters["metrics"] = ["dice"]
+        parameters["model"]["onnx_export"] = False
+        parameters["model"]["print_summary"] = False
+        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        return parameters, training_data
+    # loop through selected models and train for single epoch
+    for loss_type in [
+        "dc", 
+        "dc_log", 
+        "dcce", 
+        "dcce_logits", 
+        "tversky",
+        "focal", 
+        "dc_focal"]:
+        parameters, training_data = get_parameters_after_alteration(loss_type)
         sanitize_outputDir()
         TrainingManager(
             dataframe=training_data,
@@ -1809,6 +1824,52 @@ def test_generic_augmentation_functions():
     output_tensor = None
     output_tensor = temp(input_tensor)
     assert output_tensor != None, "RGB Augmentation should work"
+
+    # testing HED transforms with different options
+    input_tensor = torch.rand(3, 128, 128, 1)
+    params = {
+        "data_augmentation": {
+            "hed_transform": {},
+            # "hed_transform_light": {},
+            # "hed_transform_heavy": {},
+        }
+    }
+    temp = global_augs_dict["hed_transform"](
+        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
+    )
+    ranges = [
+        "haematoxylin_bias_range",
+        "eosin_bias_range",
+        "dab_bias_range",
+        "haematoxylin_sigma_range",
+        "eosin_sigma_range",
+        "dab_sigma_range",
+    ]
+
+    default_range = [-0.1, 0.1]
+    for key in ranges:
+        params["data_augmentation"]["hed_transform"].setdefault(key, default_range)
+
+    params["data_augmentation"]["hed_transform"].setdefault(
+        "cutoff_range", [0.05, 0.95]
+    )
+
+    # Check if the params are correctly set for each augmentation type
+    assert params["data_augmentation"]["hed_transform"] == {
+        "haematoxylin_bias_range": [-0.1, 0.1],
+        "eosin_bias_range": [-0.1, 0.1],
+        "dab_bias_range": [-0.1, 0.1],
+        "haematoxylin_sigma_range": [-0.1, 0.1],
+        "eosin_sigma_range": [-0.1, 0.1],
+        "dab_sigma_range": [-0.1, 0.1],
+        "cutoff_range": [0.05, 0.95],
+    }
+    temp = global_augs_dict["hed_transform"](
+        params_all_preprocessing_and_augs["data_augmentation"]["hed_transform"]
+    )
+    output_tensor = None
+    output_tensor = temp(input_tensor)
+    assert output_tensor != None, "HED Augmentation should work"
 
     # this is for all other augmentations
     input_tensor = torch.rand(3, 128, 128, 128)
