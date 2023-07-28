@@ -3,6 +3,7 @@ import torch
 
 from .generic import get_unique_timestamp
 from ..version import __version__
+from typing import Dict, Any
 
 # these are the base keys for the model dictionary to save
 model_dict_full = {
@@ -130,13 +131,19 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
                 print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
 
 
-def save_model(model_dict, model, params, path, onnx_export=True):
+def save_model(
+    model_dict: Dict[str, Any],
+    model: torch.nn.Module,
+    params: Dict[str, Any],
+    path: str,
+    onnx_export: bool = True,
+):
     """
     Save the model dictionary to a file.
 
     Args:
         model_dict (dict): Model dictionary to save.
-        model (torch model): Trained torch model.
+        model (torch.nn.Module): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
@@ -147,6 +154,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     ).hexdigest()
     model_dict["version"] = __version__
     model_dict["parameters"] = params
+
     try:
         model_dict["git_hash"] = (
             subprocess.check_output(["git", "rev-parse", "HEAD"])
@@ -155,20 +163,23 @@ def save_model(model_dict, model, params, path, onnx_export=True):
         )
     except subprocess.CalledProcessError:
         model_dict["git_hash"] = None
+
     torch.save(model_dict, path)
 
     # post-training optimization
     optimize_and_save_model(model, params, path, onnx_export=onnx_export)
 
 
-def load_model(path, device, full_sanity_check=True):
+def load_model(
+    path: str, device: torch.device, full_sanity_check: bool = True
+) -> Dict[str, Any]:
     """
     Load a model dictionary from a file.
 
     Args:
         path (str): The path to save the model dictionary to.
         device (torch.device): The device to run the model on.
-        full_sanity_check (bool): Whether to run full sanity checking on model.
+        full_sanity_check (bool): Whether to run full sanity checking on the model.
 
     Returns:
         dict: Model dictionary containing model parameters and metadata.
@@ -187,8 +198,9 @@ def load_model(path, device, full_sanity_check=True):
             )
 
     # check if required keys are absent, and if so raise an error
+    model_dict_required = {"version", "parameters", "timestamp", "timestamp_hash"}
     incomplete_required_keys = [
-        key for key in model_dict_required.keys() if key not in model_dict.keys()
+        key for key in model_dict_required if key not in model_dict.keys()
     ]
     if len(incomplete_required_keys) > 0:
         raise KeyError(
@@ -199,7 +211,7 @@ def load_model(path, device, full_sanity_check=True):
     return model_dict
 
 
-def load_ov_model(path, device="CPU"):
+def load_ov_model(path: str, device: str = "CPU"):
     """
     Load an OpenVINO IR model from an .xml file.
 
