@@ -196,7 +196,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         def __percentile_clip(input_tensor, reference_tensor=None, p_min=0.5, p_max=99.5, strictlyPositive=True):
             """Normalizes a tensor based on percentiles. Clips values below and above the percentile.
             Percentiles for normalization can come from another tensor.
-        
+
             Args:
                 input_tensor (torch.Tensor): Tensor to be normalized based on the data from the reference_tensor.
                     If reference_tensor is None, the percentiles from this tensor will be used.
@@ -204,19 +204,18 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 p_min (float, optional): Lower end percentile. Defaults to 0.5.
                 p_max (float, optional): Upper end percentile. Defaults to 99.5.
                 strictlyPositive (bool, optional): Ensures that really all values are above 0 before normalization. Defaults to True.
-        
+
             Returns:
                 torch.Tensor: The input_tensor normalized based on the percentiles of the reference tensor.
             """
             if(reference_tensor == None):
                 reference_tensor = input_tensor
             v_min, v_max = np.percentile(reference_tensor, [p_min,p_max]) #get p_min percentile and p_max percentile
-        
+
             if( v_min < 0 and strictlyPositive): #set lower bound to be 0 if it would be below
                 v_min = 0
             output_tensor = np.clip(input_tensor,v_min,v_max) #clip values to percentiles from reference_tensor
             output_tensor = (output_tensor - v_min)/(v_max-v_min) #normalizes values to [0;1]
-        
             return output_tensor
 
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
@@ -245,9 +244,9 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             # Normalize to [0;1] based on GT (otherwise MSE will depend on the image intensity range)
             normalize = parameters.get("normalize", True)
             if normalize:
-                reference_tensor = gt_image * ~mask #use all the tissue that is not masked for normalization
+                reference_tensor = target_image * ~mask #use all the tissue that is not masked for normalization
                 gt_image_infill = __percentile_clip(gt_image_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
-                prediction_infill = __percentile_clip(prediction_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
+                output_infill = __percentile_clip(output_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
 
             overall_stats_dict[current_subject_id][
                 "ssim"
