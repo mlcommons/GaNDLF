@@ -14,7 +14,6 @@ from GANDLF.metrics import (
     structural_similarity_index,
     mean_squared_error,
     peak_signal_noise_ratio,
-    peak_signal_noise_ratio_eps,
     mean_squared_log_error,
     mean_absolute_error,
     ncc_mean,
@@ -263,8 +262,8 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 gt_image_infill, output_infill
             ).item()
 
-            overall_stats_dict[current_subject_id]["psnr_range_eps"] = peak_signal_noise_ratio_eps(
-                gt_image_infill, output_infill
+            overall_stats_dict[current_subject_id]["psnr_eps"] = peak_signal_noise_ratio(
+                gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
             ).item()
 
     pprint(overall_stats_dict)
