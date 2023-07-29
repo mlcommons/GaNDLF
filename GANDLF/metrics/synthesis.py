@@ -1,4 +1,3 @@
-import sys
 import SimpleITK as sitk
 import PIL.Image
 import numpy as np
