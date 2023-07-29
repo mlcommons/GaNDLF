@@ -69,11 +69,7 @@ def peak_signal_noise_ratio(target, prediction, data_range=None, epsilon=None) -
             min_v = 0 if torch.min(target) > 0 else torch.min(target) #look at this line
             max_v = torch.max(target)
             data_range = max_v - min_v
-        return (
-            10.0
-            * torch.log10(data_range) ** 2)
-            / (mse + epsilon)
-        )
+        return 10.0 * ( torch.log10(data_range) ** 2) / (mse + epsilon) )
 
 
 def mean_squared_log_error(target, prediction) -> torch.Tensor:
