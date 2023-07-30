@@ -27,10 +27,10 @@ from GANDLF.cli import (
     preprocess_and_save,
     patch_extraction,
     config_generator,
-    run_deployment,
+    deploy,
     recover_config,
     post_training_model_optimization,
-    generate_metrics_dict,
+    generate_metrics
 )
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
@@ -487,7 +487,8 @@ def test_train_regression_brainage_rad_2d(device):
         yaml.dump(parameters_temp, file)
     model_path = os.path.join(outputDir, "brain_age_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization.post_training_model_optimization(
+        model_path, config_path)
     assert optimization_result == False, "Optimization should fail"
 
     sanitize_outputDir()
@@ -761,7 +762,8 @@ def test_train_inference_optimize_classification_rad_3d(device):
         yaml.dump(parameters_temp, file)
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization.post_training_model_optimization(
+        model_path, config_path)
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
@@ -1390,7 +1392,7 @@ def test_generic_cli_function_preprocess():
     with open(file_config_temp, "w") as outfile:
         yaml.dump(parameters, outfile, default_flow_style=False)
 
-    preprocess_and_save(temp_csv, file_config_temp, outputDir)
+    preprocess_and_save.preprocess_and_save(temp_csv, file_config_temp, outputDir)
     training_data, parameters["headers"] = parseTrainingCSV(
         outputDir + "/data_processed.csv"
     )
@@ -1432,7 +1434,7 @@ def test_generic_cli_function_preprocess():
     with open(file_config_temp, "w") as outfile:
         yaml.dump(parameters, outfile, default_flow_style=False)
 
-    preprocess_and_save(temp_csv, file_config_temp, outputDir)
+    preprocess_and_save.preprocess_and_save(temp_csv, file_config_temp, outputDir)
     training_data, parameters["headers"] = parseTrainingCSV(
         outputDir + "/data_processed.csv"
     )
@@ -1475,7 +1477,7 @@ def test_generic_cli_function_mainrun(device):
 
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
-    main_run(
+    main_run.main_run(
         file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
     )
     sanitize_outputDir()
@@ -1484,7 +1486,7 @@ def test_generic_cli_function_mainrun(device):
         yaml.dump(parameters, file)
 
     # testing train/valid split
-    main_run(
+    main_run.main_run(
         file_data + "," + file_data,
         file_config_temp,
         outputDir,
@@ -1498,7 +1500,7 @@ def test_generic_cli_function_mainrun(device):
         yaml.dump(parameters, file)
 
     # testing train/valid/test split with resume
-    main_run(
+    main_run.main_run(
         file_data + "," + file_data + "," + file_data,
         file_config_temp,
         outputDir,
@@ -2149,7 +2151,7 @@ def test_train_inference_segmentation_histology_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
 
-    patch_extraction(
+    patch_extraction.patch_extraction(
         inputDir + "/train_2d_histo_segmentation.csv",
         output_dir_patches_output,
         file_config_temp,
@@ -2231,7 +2233,7 @@ def test_train_inference_classification_histology_large_2d(device):
     with open(file_config_temp, "w") as file:
         yaml.dump(parameters_patch, file)
 
-    patch_extraction(
+    patch_extraction.patch_extraction(
         inputDir + "/train_2d_histo_classification.csv",
         output_dir_patches_output,
         file_config_temp,
@@ -2404,7 +2406,7 @@ def test_train_inference_classification_histology_2d(device):
             shutil.rmtree(output_dir_patches_output)
         # this ensures that the output directory for num_patches=3 is preserved
         Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
-        patch_extraction(
+        patch_extraction.patch_extraction(
             inputDir + "/train_2d_histo_classification.csv",
             output_dir_patches_output,
             file_config_temp,
@@ -2823,7 +2825,8 @@ def test_generic_cli_function_configgenerator():
         baseConfigDir, "config_generator_sample_strategy.yaml"
     )
     sanitize_outputDir()
-    config_generator(base_config_path, generator_config_path, outputDir)
+    config_generator.config_generator(
+        base_config_path, generator_config_path, outputDir)
     all_files = os.listdir(outputDir)
     assert len(all_files) == 72, "config generator did not generate all files"
 
@@ -2847,7 +2850,8 @@ def test_generic_cli_function_configgenerator():
 
     # test for failure
     with pytest.raises(Exception) as exc_info:
-        config_generator(base_config_path, file_config_temp, outputDir)
+        config_generator.config_generator(
+            base_config_path, file_config_temp, outputDir)
     sanitize_outputDir()
 
     print("Exception raised:", exc_info.value)
@@ -2888,7 +2892,7 @@ def test_generic_cli_function_recoverconfig():
         reset=True,
     )
     output_config_path = get_temp_config_path()
-    assert recover_config(
+    assert recover_config.recover_config(
         outputDir, output_config_path
     ), "recover_config returned false"
     assert os.path.exists(output_config_path), "Didn't create a config file"
@@ -2936,7 +2940,7 @@ def test_generic_deploy_docker():
         reset=True,
     )
 
-    result = run_deployment(
+    result = deploy.run_deployment(
         os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
         deploymentOutputDir,
         "docker",
@@ -2946,7 +2950,7 @@ def test_generic_deploy_docker():
         requires_gpu=True,
     )
 
-    assert result, "run_deployment returned false"
+    assert result, "deploy.run_deployment returned false"
     sanitize_outputDir()
 
     print("passed")
@@ -2990,7 +2994,7 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     # Save testing data to a csv file
     testing_data.to_csv(test_data_path, index=False)
 
-    main_run(
+    main_run.main_run(
         train_data_path + "," + train_data_path + "," + test_data_path,
         file_config_temp,
         outputDir,
@@ -3084,7 +3088,8 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 yaml.dump(parameters, file)
 
             # run the metrics calculation
-            generate_metrics_dict(temp_infer_csv, temp_config, output_file)
+            generate_metrics.generate_metrics_dict(
+                temp_infer_csv, temp_config, output_file)
 
             assert os.path.isfile(output_file), "Metrics output file was not generated"
 
@@ -3097,14 +3102,14 @@ def test_generic_deploy_metrics_docker():
 
     deploymentOutputDir = os.path.join(outputDir, "mlcube")
 
-    result = run_deployment(
+    result = deploy.run_deployment(
         os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
         deploymentOutputDir,
         "docker",
         "metrics",
     )
 
-    assert result, "run_deployment returned false"
+    assert result, "deploy.run_deployment returned false"
     sanitize_outputDir()
 
     print("passed")

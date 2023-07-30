@@ -1,3 +1,4 @@
+import argparse
 import os, sys, pickle
 from pathlib import Path
 import numpy as np
@@ -13,6 +14,7 @@ from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from .copyright_message import copyrightMessage
 
 import torchio
 
@@ -213,3 +215,66 @@ def preprocess_and_save(
     path_for_csv = Path(os.path.join(output_dir, "data_processed.csv")).as_posix()
     print("Writing final csv for subsequent training: ", path_for_csv)
     base_df.to_csv(path_for_csv, header=True, index=False)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_Preprocess",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate training/inference data which are preprocessed to reduce resource footprint during computation.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        metavar="",
+        type=str,
+        help="The configuration file (contains all the information related to the training/inference session), this is read from 'output' during inference",
+        required=True,
+    )
+    parser.add_argument(
+        "-i",
+        "--inputdata",
+        metavar="",
+        type=str,
+        help="Data csv file that is used for training/inference",
+        required=True,
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        metavar="",
+        type=str,
+        help="Output directory to save intermediate files and model weights",
+        required=True,
+    )
+    parser.add_argument(
+        "-l",
+        "--labelPad",
+        metavar="",
+        type=str,
+        default="constant",
+        help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
+        required=False,
+    )
+    parser.add_argument(
+        "-a",
+        "--applyaugs",
+        metavar="",
+        type=bool,
+        default=False,
+        help="This specifies the whether to apply data augmentation during output creation. Defaults to False",
+        required=False,
+    )
+
+    args = parser.parse_args()
+
+    preprocess_and_save(
+        args.inputdata, args.config, args.output, args.labelPad, args.applyaugs
+    )
+
+    print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

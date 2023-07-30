@@ -1,9 +1,9 @@
+import argparse
 import os, warnings
 from functools import partial
 from pathlib import Path
 
 from PIL import Image
-
 from GANDLF.data.patch_miner.opm.patch_manager import PatchManager
 from GANDLF.data.patch_miner.opm.utils import (
     alpha_rgb_2d_channel_check,
@@ -17,6 +17,7 @@ from GANDLF.data.patch_miner.opm.utils import (
 from GANDLF.utils import (
     parseTrainingCSV,
 )
+from .copyright_message import copyrightMessage
 
 
 def parse_gandlf_csv(fpath):
@@ -93,3 +94,46 @@ def patch_extraction(input_path, output_path, config=None):
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
         manager.mine_patches(output_csv=out_csv_path, config=cfg)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_PatchMiner",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Construct patches from whole slide image(s).\n\n"
+        + copyrightMessage,
+    )
+
+    parser.add_argument(
+        "-i",
+        "--input_CSV",
+        dest="input_path",
+        help="input path for the tissue",
+        required=True,
+    )
+    parser.add_argument(
+        "-o",
+        "--output_path",
+        dest="output_path",
+        default=None,
+        required=True,
+        help="output path for the patches",
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        dest="config",
+        help="config (in YAML) for running the patch miner. Needs 'scale' and 'patch_size' to be defined, otherwise defaults to 16 and (256, 256), respectively.",
+        required=False,
+    )
+
+    args = parser.parse_args()
+
+    patch_extraction(args.input_path, args.output_path, args.config)
+
+    print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

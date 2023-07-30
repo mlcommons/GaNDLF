@@ -1,3 +1,5 @@
+import argparse
+import sys
 import yaml
 from pprint import pprint
 import pandas as pd
@@ -7,6 +9,7 @@ import torchio
 import SimpleITK as sitk
 import numpy as np
 
+from GANDLF import version
 from GANDLF.parseConfig import parseConfig
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
 from GANDLF.metrics import (
@@ -27,6 +30,7 @@ from GANDLF.metrics.segmentation import (
     _calculator_sensitivity_specificity,
     _calculator_jaccard,
 )
+from .copyright_message import copyrightMessage
 
 
 def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -> dict:
@@ -267,3 +271,68 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
     if outputfile is not None:
         with open(outputfile, "w") as outfile:
             yaml.dump(overall_stats_dict, outfile)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_Metrics",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Metrics calculator.\n\n" + copyrightMessage,
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        "--parameters_file",
+        metavar="",
+        type=str,
+        required=True,
+        help="The configuration file (contains all the information related to the training/inference session)",
+    )
+    parser.add_argument(
+        "-i",
+        "--inputdata",
+        "--data_path",
+        metavar="",
+        type=str,
+        required=True,
+        help="CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'",
+    )
+    parser.add_argument(
+        "-o",
+        "--outputfile",
+        "--output_path",
+        metavar="",
+        type=str,
+        default=None,
+        help="Location to save the output dictionary. If not provided, will print to stdout.",
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version="%(prog)s v{}".format(version) + "\n\n" + copyrightMessage,
+        help="Show program's version number and exit.",
+    )
+
+    # This is a dummy argument that exists to trigger MLCube mounting requirements.
+    # Do not remove.
+    parser.add_argument("-rawinput", "--rawinput", help=argparse.SUPPRESS)
+
+    args = parser.parse_args()
+    assert args.config is not None, "Missing required parameter: config"
+    assert args.inputdata is not None, "Missing required parameter: inputdata"
+
+    try:
+        generate_metrics_dict(
+            args.inputdata,
+            args.config,
+            args.outputfile,
+        )
+    except Exception as e:
+        sys.exit("ERROR: " + str(e))
+
+    print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

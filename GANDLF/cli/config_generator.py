@@ -1,6 +1,8 @@
+import argparse
 import yaml
 from pathlib import Path
 from copy import deepcopy
+from .copyright_message import copyrightMessage
 
 
 def generate_new_configs_from_key_and_value(
@@ -117,3 +119,47 @@ def config_generator(base_config_path, strategy_path, output_dir):
     for i, config in enumerate(new_configs_list):
         with open(f"{output_dir}/config_{i}.yaml", "w") as f:
             yaml.dump(config, f)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_ConfigGenerator",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate multiple GaNDLF configurations based on a single baseline GaNDLF for experimentation.\n\n"
+        + copyrightMessage,
+    )
+
+    parser.add_argument(
+        "-c",
+        "--config",
+        metavar="",
+        type=str,
+        help="Path to base config.",
+        required=True,
+    )
+    parser.add_argument(
+        "-s",
+        "--strategy",
+        metavar="",
+        type=str,
+        help="Config creation strategy in a yaml format.",
+        required=True,
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        metavar="",
+        type=str,
+        help="Path to output directory.",
+        required=True,
+    )
+
+    args = parser.parse_args()
+
+    config_generator(args.config, args.strategy, args.output)
+
+    print("Finished.")
+
+
+if __name__ == "__main__":
+    main()
