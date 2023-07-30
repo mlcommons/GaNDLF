@@ -20,8 +20,11 @@ def post_training_model_optimization(model_path: str, config_path: str) -> bool:
     parameters = main_dict.get("parameters", None)
 
     # If parameters are not available in the model file, parse them from the config file
-    if parameters is None:
-        parameters = parseConfig(config_path, version_check_flag=False)
+    parameters = (
+        parseConfig(config_path, version_check_flag=False)
+        if parameters is None
+        else parameters
+    )
 
     # Create PyTorch objects and set onnx_export to True for optimization
     model, _, _, _, _, parameters = create_pytorch_objects(parameters, device="cpu")
