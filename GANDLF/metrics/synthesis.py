@@ -63,7 +63,7 @@ def peak_signal_noise_ratio(target, prediction, data_range=None, epsilon=None) -
         psnr = PeakSignalNoiseRatio(data_range=data_range)
         return psnr(preds=prediction, target=target)
     else:
-        # implementation of PSNR that does not give `inf`/`nan` when `mse==0`
+        # implementation of PSNR that does not give 'inf'/'nan' when 'mse==0'
         mse = mean_squared_error(target, prediction)
         if data_range == None: #compute data_range like torchmetrics if not given
             min_v = 0 if torch.min(target) > 0 else torch.min(target) #look at this line
