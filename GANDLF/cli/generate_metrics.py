@@ -211,8 +211,8 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             reference_tensor = input_tensor if reference_tensor is None else reference_tensor
             v_min, v_max = np.percentile(reference_tensor, [p_min,p_max]) #get p_min percentile and p_max percentile
 
-            if( v_min < 0 and strictlyPositive): #set lower bound to be 0 if it would be below
-                v_min = 0
+            # set lower bound to be 0 if strictlyPositive is enabled
+            v_min = max(v_min, 0.0) if strictlyPositive else v_min
             output_tensor = np.clip(input_tensor,v_min,v_max) #clip values to percentiles from reference_tensor
             output_tensor = (output_tensor - v_min)/(v_max-v_min) #normalizes values to [0;1]
             return output_tensor
