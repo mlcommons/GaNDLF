@@ -208,8 +208,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             Returns:
                 torch.Tensor: The input_tensor normalized based on the percentiles of the reference tensor.
             """
-            if(reference_tensor == None):
-                reference_tensor = input_tensor
+            reference_tensor = input_tensor if reference_tensor is None else reference_tensor
             v_min, v_max = np.percentile(reference_tensor, [p_min,p_max]) #get p_min percentile and p_max percentile
 
             if( v_min < 0 and strictlyPositive): #set lower bound to be 0 if it would be below
