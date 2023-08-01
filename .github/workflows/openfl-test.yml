@@ -90,7 +90,7 @@ jobs:
         cd openfl
         git fetch --tags
         git checkout $(git describe --tags --abbrev=0)
-        pip install tensorboardX<=2.6.1 # https://github.com/lanpa/tensorboardX/issues/716
+        pip install "tensorboardX!=2.6.2" # https://github.com/lanpa/tensorboardX/issues/716
         pip install -e .
         cd ..
         echo "Copying files to appropriate directories"
