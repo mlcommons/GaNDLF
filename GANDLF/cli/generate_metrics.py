@@ -1,3 +1,4 @@
+import sys
 import yaml
 from pprint import pprint
 import pandas as pd
@@ -258,9 +259,12 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 gt_image_infill, output_infill
             ).item()
 
-            # PSNR - similar to pytorch PeakSignalNoiseRatio until 4 digits after decimal point
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
                 gt_image_infill, output_infill
+            ).item()
+
+            overall_stats_dict[current_subject_id]["psnr_eps"] = peak_signal_noise_ratio(
+                gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
             ).item()
 
     pprint(overall_stats_dict)
