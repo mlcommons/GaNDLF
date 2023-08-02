@@ -283,15 +283,22 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 gt_image_infill, output_infill
             ).item()
 
-            #TODO: use data_range=1.0 as parameter for PSNR when the Pull request is accepted that introduces the data_range parameter!
-            # PSNR - similar to pytorch PeakSignalNoiseRatio until 4 digits after decimal point
-            overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
-                gt_image_infill, output_infill
+            overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio( #torchmetrics PSNR using "max"
+                gt_image_infill, output_infill 
             ).item()
 
-            overall_stats_dict[current_subject_id]["psnr_eps"] = peak_signal_noise_ratio(
+            overall_stats_dict[current_subject_id]["psnr_eps"] = peak_signal_noise_ratio( #same as above but with epsilon for robustness
                 gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
             ).item()
+
+            if normalize : #only use fix data range to [0;1] if the data was normalized before
+                overall_stats_dict[current_subject_id]["psnr_01"] = peak_signal_noise_ratio( #torchmetrics PSNR but with fixed data range of 0 to 1
+                    gt_image_infill, output_infill, data_range=1.0
+                ).item()
+    
+                overall_stats_dict[current_subject_id]["psnr_01_eps"] = peak_signal_noise_ratio( #same as above but with epsilon for robustness
+                    gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
+                ).item()
 
     pprint(overall_stats_dict)
     if outputfile is not None:
