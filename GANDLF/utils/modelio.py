@@ -127,8 +127,8 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
                         ),
                     )
                 ov.runtime.serialize(ov_model, xml_path=xml_path, bin_path=bin_path)
-            except subprocess.CalledProcessError:
-                print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
+            except Exception as e:
+                print("WARNING: OpenVINO Model Optimizer IR conversion failed: " + e)
 
 
 def save_model(
