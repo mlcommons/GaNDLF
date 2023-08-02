@@ -61,7 +61,6 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
             print("Optimizing the best model.")
             num_channel = params["model"]["num_channels"]
             model_dimension = params["model"]["dimension"]
-            ov_output_data_type = params["model"].get("data_type", "FP32")
             input_shape = params["patch_size"]
             onnx_path = path
             if not onnx_path.endswith(".onnx"):
