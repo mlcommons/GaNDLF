@@ -283,7 +283,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 gt_image_infill, output_infill
             ).item()
 
-                        # torchmetrics PSNR using "max"
+            # torchmetrics PSNR using "max"
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
                 gt_image_infill, output_infill
             ).item()
