@@ -97,6 +97,9 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             parameters["class_weights"],
         ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
+        print("Class weights  : ", parameters["class_weights"])
+        print("Penalty weights: ", parameters["weights"])
+
     else:
         scheduler = None
 
