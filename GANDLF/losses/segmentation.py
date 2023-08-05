@@ -3,13 +3,13 @@ import torch
 
 
 # Dice scores and dice losses
-def dice(predicted, target) -> torch.Tensor:
+def dice(predicted: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """
     This function computes a dice score between two tensors.
 
     Args:
-        predicted (_type_): Predicted value by the network.
-        target (_type_): Required target label to match the predicted with
+        predicted (torch.Tensor): Predicted value by the network.
+        target (torch.Tensor): Required target label to match the predicted with
 
     Returns:
         torch.Tensor: The computed dice score.
@@ -25,7 +25,14 @@ def dice(predicted, target) -> torch.Tensor:
     return dice_score
 
 
-def MCD(predicted, target, num_class, weights=None, ignore_class=None, loss_type=0):
+def MCD(
+    predicted: torch.Tensor,
+    target: torch.Tensor,
+    num_class: int,
+    weights: list = None,
+    ignore_class: int = None,
+    loss_type: int = 0,
+) -> torch.Tensor:
     """
     This function computes the mean class dice score between two tensors
 
@@ -66,7 +73,9 @@ def MCD(predicted, target, num_class, weights=None, ignore_class=None, loss_type
     return acc_dice
 
 
-def MCD_loss(predicted, target, params):
+def MCD_loss(
+    predicted: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
     """
     These weights should be the penalty weights, not dice weights
     """
@@ -80,7 +89,9 @@ def MCD_loss(predicted, target, params):
     )
 
 
-def MCD_log_loss(predicted, target, params):
+def MCD_log_loss(
+    predicted: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
     """
     These weights should be the penalty weights, not dice weights
     """
@@ -94,7 +105,9 @@ def MCD_log_loss(predicted, target, params):
     )
 
 
-def tversky_loss(predicted, target, alpha=0.5, beta=0.5):
+def tversky_loss(
+    predicted: torch.Tensor, target: torch.Tensor, alpha: float = 0.5, beta: float = 0.5
+) -> torch.Tensor:
     """
     This function calculates the Tversky loss between two tensors.
 
@@ -127,7 +140,9 @@ def tversky_loss(predicted, target, alpha=0.5, beta=0.5):
     return loss
 
 
-def MCT_loss(predicted, target, params=None):
+def MCT_loss(
+    predicted: torch.Tensor, target: torch.Tensor, params: dict = None
+) -> torch.Tensor:
     """
     This function calculates the Multi-Class Tversky loss between two tensors.
 
@@ -171,7 +186,9 @@ def KullbackLeiblerDivergence(mu, logvar, params=None):
     return loss.mean()
 
 
-def FocalLoss(predicted, target, params=None):
+def FocalLoss(
+    predicted: torch.Tensor, target: torch.Tensor, params: dict = None
+) -> torch.Tensor:
     """
     This function calculates the Focal loss between two tensors.
 
