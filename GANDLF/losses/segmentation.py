@@ -25,6 +25,37 @@ def dice(predicted: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return dice_score
 
 
+def mcc(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    """
+    This function computes the Matthews Correlation Coefficient (MCC) between two tensors. Adapted from https://github.com/kakumarabhishek/MCC-Loss/blob/main/loss.py.
+
+    Args:
+        predictions (torch.Tensor): The predicted value by the network.
+        targets (torch.Tensor): Required target label to match the predicted with
+
+    Returns:
+        torch.Tensor: The computed MCC score.
+    """
+    tp = torch.sum(torch.mul(predictions, targets))
+    tn = torch.sum(torch.mul((1 - predictions), (1 - targets)))
+    fp = torch.sum(torch.mul(predictions, (1 - targets)))
+    fn = torch.sum(torch.mul((1 - predictions), targets))
+
+    numerator = torch.mul(tp, tn) - torch.mul(fp, fn)
+    # Adding epsilon to the denominator to avoid divide-by-zero errors.
+    denominator = (
+        torch.sqrt(
+            torch.add(tp, 1, fp)
+            * torch.add(tp, 1, fn)
+            * torch.add(tn, 1, fp)
+            * torch.add(tn, 1, fn)
+        )
+        + sys.float_info.epsilon
+    )
+
+    return torch.div(numerator.sum(), denominator.sum())
+
+
 def MCD(
     predicted: torch.Tensor,
     target: torch.Tensor,
