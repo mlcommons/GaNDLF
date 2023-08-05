@@ -1250,7 +1250,9 @@ def test_train_losses_segmentation_rad_2d(device):
         "dcce_logits", 
         "tversky",
         "focal", 
-        "dc_focal"]:
+        "dc_focal",
+        "mcc"
+        "mcc_log"]:
         parameters, training_data = get_parameters_after_alteration(loss_type)
         sanitize_outputDir()
         TrainingManager(
