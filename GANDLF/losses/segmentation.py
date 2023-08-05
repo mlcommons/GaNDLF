@@ -56,10 +56,11 @@ def mcc(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
     return torch.div(numerator.sum(), denominator.sum())
 
 
-def MCD(
+def generic_loss_calculator(
     predicted: torch.Tensor,
     target: torch.Tensor,
     num_class: int,
+    loss_criteria: function,
     weights: list = None,
     ignore_class: int = None,
     loss_type: int = 0,
@@ -71,6 +72,7 @@ def MCD(
         predicted (torch.Tensor): Predicted generally by the network
         target (torch.Tensor): Required target label to match the predicted with
         num_class (int): Number of classes (including the background class)
+        loss_criteria (function): Loss function to use
         weights (list, optional): Dice weights for each class (excluding the background class), defaults to None
         ignore_class (int, optional): Class to ignore, defaults to None
         loss_type (int, optional): Type of loss to compute, defaults to 0
@@ -81,11 +83,10 @@ def MCD(
     Returns:
         torch.Tensor: Mean Class Dice score
     """
-
     acc_dice = 0
 
     for i in range(num_class):  # 0 is background
-        currentDice = dice(predicted[:, i, ...], target[:, i, ...])
+        currentDice = loss_criteria(predicted[:, i, ...], target[:, i, ...])
 
         if loss_type == 1:
             currentDice = 1 - currentDice  # subtract from 1 because this is a loss
@@ -108,12 +109,21 @@ def MCD_loss(
     predicted: torch.Tensor, target: torch.Tensor, params: dict
 ) -> torch.Tensor:
     """
-    These weights should be the penalty weights, not dice weights
+    This function computes the Dice loss between two tensors. These weights should be the penalty weights, not dice weights.
+
+    Args:
+        predicted (torch.Tensor): The predicted value by the network.
+        target (torch.Tensor): Required target label to match the predicted with
+        params (dict): Dictionary of parameters
+
+    Returns:
+        torch.Tensor: The computed MCC loss.
     """
-    return MCD(
+    return generic_loss_calculator(
         predicted,
         target,
         len(params["model"]["class_list"]),
+        dice,
         params["weights"],
         None,
         1,
@@ -124,12 +134,71 @@ def MCD_log_loss(
     predicted: torch.Tensor, target: torch.Tensor, params: dict
 ) -> torch.Tensor:
     """
-    These weights should be the penalty weights, not dice weights
+    This function computes the Dice loss between two tensors with log. These weights should be the penalty weights, not dice weights.
+
+    Args:
+        predicted (torch.Tensor): The predicted value by the network.
+        target (torch.Tensor): Required target label to match the predicted with
+        params (dict): Dictionary of parameters
+
+    Returns:
+        torch.Tensor: The computed MCC loss.
     """
-    return MCD(
+    return generic_loss_calculator(
         predicted,
         target,
         len(params["model"]["class_list"]),
+        dice,
+        params["weights"],
+        None,
+        2,
+    )
+
+
+def MCD_loss(
+    predicted: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
+    """
+    This function computes the Matthews Correlation Coefficient (MCC) loss between two tensors. These weights should be the penalty weights, not dice weights.
+
+    Args:
+        predicted (torch.Tensor): The predicted value by the network.
+        target (torch.Tensor): Required target label to match the predicted with
+        params (dict): Dictionary of parameters
+
+    Returns:
+        torch.Tensor: The computed MCC loss.
+    """
+    return generic_loss_calculator(
+        predicted,
+        target,
+        len(params["model"]["class_list"]),
+        mcc,
+        params["weights"],
+        None,
+        1,
+    )
+
+
+def MCC_log_loss(
+    predicted: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
+    """
+    This function computes the Matthews Correlation Coefficient (MCC) loss between two tensors with log. These weights should be the penalty weights, not dice weights.
+
+    Args:
+        predicted (torch.Tensor): The predicted value by the network.
+        target (torch.Tensor): Required target label to match the predicted with
+        params (dict): Dictionary of parameters
+
+    Returns:
+        torch.Tensor: The computed MCC loss.
+    """
+    return generic_loss_calculator(
+        predicted,
+        target,
+        len(params["model"]["class_list"]),
+        mcc,
         params["weights"],
         None,
         2,
