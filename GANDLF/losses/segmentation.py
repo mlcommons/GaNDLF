@@ -75,7 +75,7 @@ def generic_loss_calculator(
         loss_criteria (function): Loss function to use
         weights (list, optional): Dice weights for each class (excluding the background class), defaults to None
         ignore_class (int, optional): Class to ignore, defaults to None
-        loss_type (int, optional): Type of loss to compute, defaults to 0
+        loss_type (int, optional): Type of loss to compute, defaults to 0. The options are:
             0: no loss, normal dice calculation
             1: dice loss, (1-dice)
             2: log dice, -log(dice)
@@ -83,26 +83,33 @@ def generic_loss_calculator(
     Returns:
         torch.Tensor: Mean Class Dice score
     """
-    acc_dice = 0
+    accumulated_loss = 0
+    # default to a ridiculous value so that it is ignored by default
+    ignore_class = -1e10 if ignore_class is None else ignore_class
 
-    for i in range(num_class):  # 0 is background
-        currentDice = loss_criteria(predicted[:, i, ...], target[:, i, ...])
+    for class_index in range(num_class):
+        if class_index != ignore_class:
+            current_loss = loss_criteria(
+                predicted[:, class_index, ...], target[:, class_index, ...]
+            )
 
-        if loss_type == 1:
-            currentDice = 1 - currentDice  # subtract from 1 because this is a loss
-        elif loss_type == 2:
-            # negative because we want positive losses
-            currentDice = -torch.log(currentDice + torch.finfo(torch.float32).eps)
+            if loss_type == 1:
+                # subtract from 1 because this is a loss
+                current_loss = 1 - current_loss
+            elif loss_type == 2:
+                # negative because we want positive losses, and add epsilon to avoid infinities
+                current_loss = -torch.log(current_loss + torch.finfo(torch.float32).eps)
 
-        if weights is not None:
-            currentDice = currentDice * weights[i]  # multiply by weight
+            # multiply by appropriate weight if provided
+            if weights is not None:
+                current_loss = current_loss * weights[class_index]
 
-        acc_dice += currentDice
+            accumulated_loss += current_loss
 
     if weights is None:
-        acc_dice /= num_class  # we should not be considering 0
+        accumulated_loss /= num_class
 
-    return acc_dice
+    return accumulated_loss
 
 
 def MCD_loss(
