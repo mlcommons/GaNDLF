@@ -39,7 +39,7 @@ This file contains mid-level information regarding various parameters that can b
 - Defined in the `loss_function` parameter of the model configuration.
 - By passing `weighted_loss: True`, the loss function will be weighted by the inverse of the class frequency.
 - This parameter controls the function which the model is trained. All options can be found [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/losses/__init__.py). Some examples are:
-    - Segmentation: dice (`dice` or `dc`), dice and cross entropy (`dcce`), focal loss (`focal`), dice and focal (`dc_focal`), mathews (`mcc`)
+    - Segmentation: dice (`dice` or `dc`), dice and cross entropy (`dcce`), focal loss (`focal`), dice and focal (`dc_focal`), matthews (`mcc`)
     - Classification/regression: mean squared error (`mse`)
     - And many more.
 
