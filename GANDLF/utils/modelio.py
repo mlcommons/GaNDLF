@@ -99,6 +99,7 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
             import openvino as ov
             from openvino.tools.mo import convert_model
             from openvino.runtime import get_version
+
             openvino_present = False
             # check for the correct openvino version to prevent inadvertent api breaks
             if "2023.0.1" in get_version():
