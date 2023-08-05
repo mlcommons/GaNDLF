@@ -50,7 +50,7 @@ def mcc(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
             * torch.add(tn, 1, fp)
             * torch.add(tn, 1, fn)
         )
-        + sys.float_info.epsilon
+        + torch.finfo(torch.float32).eps
     )
 
     return torch.div(numerator.sum(), denominator.sum())
