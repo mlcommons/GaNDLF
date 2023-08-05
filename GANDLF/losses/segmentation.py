@@ -60,7 +60,7 @@ def generic_loss_calculator(
     predicted: torch.Tensor,
     target: torch.Tensor,
     num_class: int,
-    loss_criteria: function,
+    loss_criteria,
     weights: list = None,
     ignore_class: int = None,
     loss_type: int = 0,
