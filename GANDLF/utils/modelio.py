@@ -87,8 +87,6 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
                     input_names=["input"],
                     output_names=["output"],
                 )
-
-            ov_output_dir = os.path.dirname(os.path.abspath(path))
         except RuntimeWarning:
             print("WARNING: Cannot export to ONNX model.")
             return
