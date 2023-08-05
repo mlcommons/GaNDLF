@@ -308,7 +308,7 @@ def FocalLoss(
 
     def _focal_loss(preds, target, gamma, size_average=True):
         """
-        Internal helper function to calcualte focal loss for a single class.
+        Internal helper function to calculate focal loss for a single class.
 
         Args:
             preds (torch.Tensor): predicted generally by the network
