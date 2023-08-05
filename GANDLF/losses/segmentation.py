@@ -93,12 +93,13 @@ def generic_loss_calculator(
                 predicted[:, class_index, ...], target[:, class_index, ...]
             )
 
-            if loss_type == 1:
-                # subtract from 1 because this is a loss
-                current_loss = 1 - current_loss
-            elif loss_type == 2:
+            # subtract from 1 because this is supposed to be a loss
+            default_loss = 1 - current_loss
+            if loss_type == 2 or loss_type == "log":
                 # negative because we want positive losses, and add epsilon to avoid infinities
                 current_loss = -torch.log(current_loss + torch.finfo(torch.float32).eps)
+            else:
+                current_loss = default_loss
 
             # multiply by appropriate weight if provided
             if weights is not None:
