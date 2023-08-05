@@ -155,7 +155,7 @@ def MCD_log_loss(
     )
 
 
-def MCD_loss(
+def MCC_loss(
     predicted: torch.Tensor, target: torch.Tensor, params: dict
 ) -> torch.Tensor:
     """
