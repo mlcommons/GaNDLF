@@ -18,9 +18,7 @@ def brainage(parameters):
     """
 
     # Check that the input data is 2D
-    if parameters["model"]["dimension"] != 2:
-        print("Error: Brain Age predictions only work on 2D data")
-        sys.exit(1)
+    assert parameters["model"]["dimension"] == 2, "Brain Age predictions only work on 2D data"
 
     try:
         # Load the pretrained VGG16 model
