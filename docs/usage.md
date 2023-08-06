@@ -172,6 +172,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 - [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
 
 **Notes**: 
+
 - More details on the configuration options are available in the [customization page](customize.md).
 - Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
 
