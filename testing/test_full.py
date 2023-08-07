@@ -1213,6 +1213,7 @@ def test_train_metrics_regression_rad_2d(device):
 
 def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
+
     # healper function to read and parse yaml and return parameters
     def get_parameters_after_alteration(loss_type: str) -> dict:
         parameters = parseConfig(
@@ -1242,17 +1243,19 @@ def test_train_losses_segmentation_rad_2d(device):
         parameters["model"]["print_summary"] = False
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         return parameters, training_data
+
     # loop through selected models and train for single epoch
     for loss_type in [
-        "dc", 
-        "dc_log", 
-        "dcce", 
-        "dcce_logits", 
+        "dc",
+        "dc_log",
+        "dcce",
+        "dcce_logits",
         "tversky",
-        "focal", 
+        "focal",
         "dc_focal",
-        "mcc"
-        "mcc_log"]:
+        "mcc",
+        "mcc_log",
+    ]:
         parameters, training_data = get_parameters_after_alteration(loss_type)
         sanitize_outputDir()
         TrainingManager(
