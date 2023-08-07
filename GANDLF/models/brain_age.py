@@ -25,9 +25,8 @@ def brainage(parameters):
     try:
         # Load the pretrained VGG16 model
         model = torchvision.models.vgg16(pretrained=True)
-    except Exception as e:
-        print("Error: Failed to load VGG16 model:", str(e))
-        sys.exit(1)
+    except Exception:
+        sys.exit("Error: Failed to load VGG16 model: " + traceback.format_exc())
 
     # Remove the final convolutional layer
     model.final_convolution_layer = None
