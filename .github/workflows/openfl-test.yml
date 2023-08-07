@@ -11,7 +11,7 @@ on:
     
 
 jobs:
-  build:
+  openfl-test:
 
     runs-on: ubuntu-latest
 
@@ -25,7 +25,7 @@ jobs:
         sudo rm -rf "$ANDROID_SDK_ROOT"
         df -h
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     
     # Use changed-files-specific action to collect file changes.
     # The following commented condition applied to a step will run that step only if non-docs files have changed.
@@ -69,6 +69,7 @@ jobs:
     - name: Install dependencies and package
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
+        sudo apt-get update
         sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
         python -m pip install wheel
@@ -90,7 +91,6 @@ jobs:
         cd openfl
         git fetch --tags
         git checkout $(git describe --tags --abbrev=0)
-        # pip install "tensorboardX!=2.6.2" # https://github.com/lanpa/tensorboardX/issues/716
         sed -i -e 's/protobuf==3.19.6/protobuf/g' setup.py ## this should NOT be there
         pip install -e .
         cd ..
