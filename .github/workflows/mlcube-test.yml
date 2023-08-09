@@ -1,6 +1,6 @@
 # This workflow will test gandlf_deploy for model and metrics MLCubes
 
-name: CI-PyTest
+name: MLCube-Test
 
 on:
   push:
