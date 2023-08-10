@@ -60,7 +60,7 @@ def peak_signal_noise_ratio(target, prediction, data_range=None, epsilon=None) -
     """
 
     if epsilon == None:
-        psnr = PeakSignalNoiseRatio(data_range=data_range)
+        psnr = PeakSignalNoiseRatio() if data_range == None else PeakSignalNoiseRatio(data_range=data_range[1]-data_range[0])
         return psnr(preds=prediction, target=target)
     else: # implementation of PSNR that does not give 'inf'/'nan' when 'mse==0'
         mse = mean_squared_error(target, prediction)
