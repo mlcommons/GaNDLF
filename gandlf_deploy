@@ -51,7 +51,7 @@ if __name__ == "__main__":
         "--mlcube-type",
         metavar="",
         type=str,
-        help="The mlcube type. Valid inputs are: " + ", ".join(deploy_targets) + " .",
+        help="The mlcube type. Valid inputs are: " + ", ".join(mlcube_types) + " .",
         required=True,
     )
     parser.add_argument(
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         "--entrypoint",
         metavar="",
         type=str,
-        help="An optional custom python entrypoint script to use instead of the default specified in mlcube.yaml.",
+        help="An optional custom python entrypoint script to use instead of the default specified in mlcube.yaml. (Only for inference and metrics)",
         default=None,
     )
 

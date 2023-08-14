@@ -21,7 +21,7 @@ platform:
 
 docker:
   # The image tag that will be built/pulled/used. Change to suit your organization/model:version.
-  image: mlcommons/gandlf:0.0.1
+  image: mlcommons/gandlf-metrics:0.0.1
   
   ## Generally, these build options will only be needed by GaNDLF maintainers.
   # Docker build context relative to $MLCUBE_ROOT. (gandlf_deploy can handle this automatically.)
