@@ -35,6 +35,7 @@ def run_deployment(
         outputdir (str): The path to the output directory.
         target (str): The target to deploy to.
         mlcube_type (str): Either 'model' or 'metrics'
+        entrypoint_script (str): The path of entrypoint script. Only used for metrics and inference
         configfile (str, Optional): The path to the configuration file. Required for models
         modeldir (str, Optional): The path to the model directory. Required for models
         requires_gpu (str, Optional): Whether the model requires GPU. Required for models
@@ -98,6 +99,7 @@ def deploy_docker_mlcube(
     Args:
         mlcubedir (str): The path to the mlcube directory.
         outputdir (str): The path to the output directory.
+        entrypoint_script (str): The path of entrypoint script. Only used for metrics and inference
         config (str, Optional): The path to the configuration file. Required for models
         modeldir (str, Optional): The path to the model directory. Required for models
         requires_gpu (str, Optional): Whether the model requires GPU. Required for models
@@ -124,7 +126,9 @@ def deploy_docker_mlcube(
     # First grab the existing the mlcube config
     if modeldir is not None:
         # we can use that as an indicator if we are doing model or metrics deployment
-        mlcube_config = get_model_mlcube_config(mlcube_config_file, requires_gpu)
+        mlcube_config = get_model_mlcube_config(
+            mlcube_config_file, requires_gpu, entrypoint_script
+        )
     else:
         mlcube_config = get_metrics_mlcube_config(mlcube_config_file, entrypoint_script)
 
@@ -252,13 +256,14 @@ def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
     return mlcube_config
 
 
-def get_model_mlcube_config(mlcube_config_file, requires_gpu):
+def get_model_mlcube_config(mlcube_config_file, requires_gpu, entrypoint_script):
     """
     This function returns the mlcube config for the model.
 
     Args:
         mlcube_config_file (str): Path to mlcube config file.
         requires_gpu (bool): Whether the model requires GPU.
+        entrypoint_script (str): The path of entrypoint script. Only used for infer task
     """
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
@@ -304,6 +309,13 @@ def get_model_mlcube_config(mlcube_config_file, requires_gpu):
         ] = mlcube_config["tasks"]["infer"]["entrypoint"].replace(
             "--device cpu", "--device cuda"
         )
+
+    if entrypoint_script:
+        # modify the infer entrypoint to run a custom script.
+        device = "cuda" if requires_gpu else "cpu"
+        mlcube_config["tasks"]["infer"][
+            "entrypoint"
+        ] = f"python3.8 /entrypoint.py --device {device}"
 
     return mlcube_config
     # Duplicate training task into one from reset (must be explicit) and one that resumes with new data

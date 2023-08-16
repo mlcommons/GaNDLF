@@ -7,21 +7,18 @@ import pandas as pd
 def create_csv(predictions, labels):
     """This function expects `predictions` to be structured in a certain way:
     it should contain the following paths: `testing/<subID>/<subID>_seg.nii.gz`
-    `labels` is expected to have a `data.csv` file containing relative paths of
-    labels"""
+    where <subID> is an integer not padded with zeros.`labels` is expected to have
+    a list of folders, each containing a 'mask.nii.gz'. Names of the folders are subject
+    IDs (integers padded with zeros to have three digit places)."""
 
-    # read and parse expected labels dict
-    labels_data_csv = os.path.join(labels, "data.csv")
-    labels_df = pd.read_csv(labels_data_csv)
-    for col in labels_df:
-        if col.lower() == "subjectid":
-            subjectid_header = col
-        if col.lower() == "label":
-            label_header = col
-    labels_records = labels_df.to_dict("records")
-    labels_dict = {
-        int(rec[subjectid_header]): rec[label_header] for rec in labels_records
-    }
+    # read and parse expected labels
+    labels_dict = {}
+    for subjectID in os.listdir(labels):
+        folder_path = os.path.join(labels, subjectID)
+        if not os.path.isdir(folder_path):
+            continue
+        label_path = os.path.join(folder_path, "mask.nii.gz")
+        labels_dict[int(subjectID)] = label_path
 
     # generate data input dict
     input_data = []
@@ -31,7 +28,6 @@ def create_csv(predictions, labels):
         )
         pred_path = os.path.abspath(pred_path)
         label_path = labels_dict[int(subjectID)]
-        label_path = os.path.join(labels, label_path)
         label_path = os.path.abspath(label_path)
         prediction_record = {
             "SubjectID": subjectID,
@@ -41,7 +37,7 @@ def create_csv(predictions, labels):
         input_data.append(prediction_record)
 
     input_data_df = pd.DataFrame(input_data)
-    input_data_df.to_csv("./data.csv")
+    input_data_df.to_csv("./data.csv", index=False)
 
 
 def run_gandlf(output_path, parameters_file):

@@ -301,14 +301,14 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 overall_stats_dict[current_subject_id][
                     "psnr_01"
                 ] = peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, data_range=1.0
+                    gt_image_infill, output_infill, data_range=(0,1)
                 ).item()
 
                 # same as above but with epsilon for robustness
                 overall_stats_dict[current_subject_id][
                     "psnr_01_eps"
                 ] = peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
+                    gt_image_infill, output_infill, data_range=(0,1), epsilon=sys.float_info.epsilon
                 ).item()
 
     pprint(overall_stats_dict)
