@@ -11,5 +11,5 @@ fi
 
 pip install -e .
 python ./gandlf_verifyInstall
-sudo chmod -R 755 tutorials/classification_medmnist_notebook/medmnist/dataset
+sudo chmod -R 755 tutorials/classification_medmnist_notebook/medmnist/dataset # dummy commit
 gzip -dk -r tutorials/classification_medmnist_notebook/medmnist/dataset
