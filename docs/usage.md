@@ -157,6 +157,7 @@ The following command shows how the script works:
 ```
 
 **Notes**:
+
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 - For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. 
@@ -172,6 +173,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 - [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
 
 **Notes**: 
+
 - More details on the configuration options are available in the [customization page](customize.md).
 - Ensure that the configuration has valid syntax by checking the file using any YAML validator such as [yamlchecker.com](https://yamlchecker.com/) or [yamlvalidator.com](https://yamlvalidator.com/) **before** trying to train.
 

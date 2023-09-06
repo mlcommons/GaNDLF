@@ -1,7 +1,6 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# This workflow will test gandlf_deploy for model and metrics MLCubes
 
-name: OpenFL-Test
+name: MLCube-Test
 
 on:
   push:
@@ -11,7 +10,7 @@ on:
     
 
 jobs:
-  openfl-test:
+  test-deploy:
 
     runs-on: ubuntu-latest
 
@@ -73,30 +72,11 @@ jobs:
         sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
         python -m pip install wheel
+        python -m pip install openvino-dev==2023.0.1 mlcube_docker
         pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
         pip install -e .
-    - name: Run generic unit tests to download data and construct CSVs
+    - name: Run mlcube deploy tests
+      working-directory: ./testing
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        pytest --cov=. --cov-report=xml -k "generic_download"
-        pytest --cov=. --cov-report=xml -k "generic_constructTrainingCSV"
-    # openfl tests start here
-    - name: Run OpenFL tests
-      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
-      run: |
-        echo "Removing onnx because of protobuf version conflict"
-        pip uninstall onnx -y
-        echo "Installing OpenFL"
-        git clone https://github.com/securefederatedai/openfl.git
-        cd openfl
-        git fetch --tags
-        git checkout $(git describe --tags --abbrev=0)
-        sed -i -e 's/protobuf==3.19.6/protobuf/g' setup.py ## this should NOT be there
-        pip install -e .
-        cd ..
-        echo "Copying files to appropriate directories"
-        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
-        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
-        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_train.csv
-        cd openfl
-        python -m tests.github.test_fets_challenge --template fets_challenge_seg_test --fed_workspace aggregator --col1 col1 --col2 col2 --rounds-to-train 1
+        sh test_deploy.sh

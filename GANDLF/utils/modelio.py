@@ -1,8 +1,12 @@
-import os, hashlib, pkg_resources, subprocess
+import hashlib
+import os
+import subprocess
+from typing import Any, Dict
+
 import torch
 
-from .generic import get_unique_timestamp
 from ..version import __version__
+from .generic import get_unique_timestamp
 
 # these are the base keys for the model dictionary to save
 model_dict_full = {
@@ -31,35 +35,37 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
     Perform post-training optimization and save it to a file.
 
     Args:
-        model (torch model): Trained torch model.
+        model (torch.nn.Module): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
     """
+    # Check if ONNX export is enabled in the parameter dictionary
     onnx_export = params["model"].get("onnx_export", onnx_export)
-    # check for incompatible topologies and disable onnx export
-    # customized imagenet_vgg no longer supported for onnx export: https://github.com/pytorch/pytorch/issues/42653
+
+    # Check for incompatible topologies and disable ONNX export
+    # Customized imagenet_vgg no longer supported for ONNX export
     if onnx_export:
-        if (params["model"]["architecture"] in ["sdnet", "brain_age"]) or (
-            "imagenet_vgg" in params["model"]["architecture"]
-        ):
+        architecture = params["model"]["architecture"]
+        if architecture in ["sdnet", "brain_age"] or "imagenet_vgg" in architecture:
             onnx_export = False
 
-    if not (onnx_export):
+    if not onnx_export:
+        # Print a warning if ONNX export is disabled and not already warned
         if "onnx_print" not in params:
             print("WARNING: Current model is not supported by ONNX/OpenVINO!")
             params["onnx_print"] = True
         return
     else:
         try:
-            print("Optimizing best model.")
+            print("Optimizing the best model.")
             num_channel = params["model"]["num_channels"]
             model_dimension = params["model"]["dimension"]
-            ov_output_data_type = params["model"].get("data_type", "FP32")
             input_shape = params["patch_size"]
             onnx_path = path
-            if not (onnx_path.endswith(".onnx")):
+            if not onnx_path.endswith(".onnx"):
                 onnx_path = onnx_path.replace("pth.tar", "onnx")
+
             if model_dimension == 2:
                 dummy_input = torch.randn(
                     (1, num_channel, input_shape[0], input_shape[1])
@@ -69,6 +75,7 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
                     (1, num_channel, input_shape[0], input_shape[1], input_shape[2])
                 )
 
+            # Export the model to ONNX format
             with torch.no_grad():
                 torch.onnx.export(
                     model.to("cpu"),
@@ -80,69 +87,62 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
                     input_names=["input"],
                     output_names=["output"],
                 )
-
-            ov_output_dir = os.path.dirname(os.path.abspath(path))
         except RuntimeWarning:
             print("WARNING: Cannot export to ONNX model.")
             return
 
-        # https://github.com/mlcommons/GaNDLF/issues/605
+        # Check if OpenVINO is present and try to convert the ONNX model
         openvino_present = False
         try:
-            import openvino
+            import openvino as ov
+            from openvino.tools.mo import convert_model
+            from openvino.runtime import get_version
 
-            openvino_present = True
+            openvino_present = False
+            # check for the correct openvino version to prevent inadvertent api breaks
+            if "2023.0.1" in get_version():
+                openvino_present = True
         except ImportError:
             print("WARNING: OpenVINO is not present.")
 
         if openvino_present:
+            xml_path = onnx_path.replace("onnx", "xml")
+            bin_path = onnx_path.replace("onnx", "bin")
             try:
                 if model_dimension == 2:
-                    subprocess.call(
-                        [
-                            "mo",
-                            "--input_model",
-                            "{0}".format(onnx_path),
-                            "--input_shape",
-                            "[1,{0},{1},{2}]".format(
-                                num_channel, input_shape[0], input_shape[1]
-                            ),
-                            "--data_type",
-                            "{0}".format(ov_output_data_type),
-                            "--output_dir",
-                            "{0}".format(ov_output_dir),
-                        ],
+                    ov_model = convert_model(
+                        onnx_path,
+                        input_shape=(1, num_channel, input_shape[0], input_shape[1]),
                     )
                 else:
-                    subprocess.call(
-                        [
-                            "mo",
-                            "--input_model",
-                            "{0}".format(onnx_path),
-                            "--input_shape",
-                            "[1,{0},{1},{2},{3}]".format(
-                                num_channel,
-                                input_shape[0],
-                                input_shape[1],
-                                input_shape[2],
-                            ),
-                            "--data_type",
-                            "{0}".format(ov_output_data_type),
-                            "--output_dir",
-                            "{0}".format(ov_output_dir),
-                        ],
+                    ov_model = convert_model(
+                        onnx_path,
+                        input_shape=(
+                            1,
+                            num_channel,
+                            input_shape[0],
+                            input_shape[1],
+                            input_shape[2],
+                        ),
                     )
-            except subprocess.CalledProcessError:
-                print("WARNING: OpenVINO Model Optimizer IR conversion failed.")
+                ov.runtime.serialize(ov_model, xml_path=xml_path, bin_path=bin_path)
+            except Exception as e:
+                print("WARNING: OpenVINO Model Optimizer IR conversion failed: " + e)
 
 
-def save_model(model_dict, model, params, path, onnx_export=True):
+def save_model(
+    model_dict: Dict[str, Any],
+    model: torch.nn.Module,
+    params: Dict[str, Any],
+    path: str,
+    onnx_export: bool = True,
+):
     """
     Save the model dictionary to a file.
 
     Args:
         model_dict (dict): Model dictionary to save.
-        model (torch model): Trained torch model.
+        model (torch.nn.Module): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
         onnx_export (bool): Whether to export to ONNX and OpenVINO.
@@ -153,6 +153,7 @@ def save_model(model_dict, model, params, path, onnx_export=True):
     ).hexdigest()
     model_dict["version"] = __version__
     model_dict["parameters"] = params
+
     try:
         model_dict["git_hash"] = (
             subprocess.check_output(["git", "rev-parse", "HEAD"])
@@ -161,20 +162,23 @@ def save_model(model_dict, model, params, path, onnx_export=True):
         )
     except subprocess.CalledProcessError:
         model_dict["git_hash"] = None
+
     torch.save(model_dict, path)
 
     # post-training optimization
     optimize_and_save_model(model, params, path, onnx_export=onnx_export)
 
 
-def load_model(path, device, full_sanity_check=True):
+def load_model(
+    path: str, device: torch.device, full_sanity_check: bool = True
+) -> Dict[str, Any]:
     """
     Load a model dictionary from a file.
 
     Args:
         path (str): The path to save the model dictionary to.
         device (torch.device): The device to run the model on.
-        full_sanity_check (bool): Whether to run full sanity checking on model.
+        full_sanity_check (bool): Whether to run full sanity checking on the model.
 
     Returns:
         dict: Model dictionary containing model parameters and metadata.
@@ -205,7 +209,7 @@ def load_model(path, device, full_sanity_check=True):
     return model_dict
 
 
-def load_ov_model(path, device="CPU"):
+def load_ov_model(path: str, device: str = "CPU"):
     """
     Load an OpenVINO IR model from an .xml file.
 

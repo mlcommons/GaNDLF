@@ -1,3 +1,4 @@
+import sys
 import yaml
 from pprint import pprint
 import pandas as pd
@@ -193,6 +194,30 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             else:
                 return input_tensor
 
+        def __percentile_clip(input_tensor, reference_tensor=None, p_min=0.5, p_max=99.5, strictlyPositive=True):
+            """Normalizes a tensor based on percentiles. Clips values below and above the percentile.
+            Percentiles for normalization can come from another tensor.
+
+            Args:
+                input_tensor (torch.Tensor): Tensor to be normalized based on the data from the reference_tensor.
+                    If reference_tensor is None, the percentiles from this tensor will be used.
+                reference_tensor (torch.Tensor, optional): The tensor used for obtaining the percentiles.
+                p_min (float, optional): Lower end percentile. Defaults to 0.5.
+                p_max (float, optional): Upper end percentile. Defaults to 99.5.
+                strictlyPositive (bool, optional): Ensures that really all values are above 0 before normalization. Defaults to True.
+
+            Returns:
+                torch.Tensor: The input_tensor normalized based on the percentiles of the reference tensor.
+            """
+            reference_tensor = input_tensor if reference_tensor is None else reference_tensor
+            v_min, v_max = np.percentile(reference_tensor, [p_min,p_max]) #get p_min percentile and p_max percentile
+
+            # set lower bound to be 0 if strictlyPositive is enabled
+            v_min = max(v_min, 0.0) if strictlyPositive else v_min
+            output_tensor = np.clip(input_tensor,v_min,v_max) #clip values to percentiles from reference_tensor
+            output_tensor = (output_tensor - v_min)/(v_max-v_min) #normalizes values to [0;1]
+            return output_tensor
+
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row[headers["subjectid"]]
             overall_stats_dict[current_subject_id] = {}
@@ -219,27 +244,29 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             # Normalize to [0;1] based on GT (otherwise MSE will depend on the image intensity range)
             normalize = parameters.get("normalize", True)
             if normalize:
-                v_max = gt_image_infill.max()
-                output_infill /= v_max
-                gt_image_infill /= v_max
+                reference_tensor = target_image * ~mask #use all the tissue that is not masked for normalization
+                gt_image_infill = __percentile_clip(gt_image_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
+                output_infill = __percentile_clip(output_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
 
             overall_stats_dict[current_subject_id][
                 "ssim"
             ] = structural_similarity_index(gt_image_infill, output_infill, mask).item()
 
             # ncc metrics
-            overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
-                gt_image_infill, output_infill
-            )
-            overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
-                gt_image_infill, output_infill
-            )
-            overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
-                gt_image_infill, output_infill
-            )
-            overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
-                gt_image_infill, output_infill
-            )
+            compute_ncc = parameters.get("compute_ncc", True)
+            if compute_ncc:
+                overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
+                    gt_image_infill, output_infill
+                )
+                overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
+                    gt_image_infill, output_infill
+                )
+                overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
+                    gt_image_infill, output_infill
+                )
+                overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
+                    gt_image_infill, output_infill
+                )
 
             # only voxels that are to be inferred (-> flat array)
             # these are required for mse, psnr, etc.
@@ -258,10 +285,33 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 gt_image_infill, output_infill
             ).item()
 
-            # PSNR - similar to pytorch PeakSignalNoiseRatio until 4 digits after decimal point
+            # torchmetrics PSNR using "max"
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
                 gt_image_infill, output_infill
             ).item()
+
+            # same as above but with epsilon for robustness
+            overall_stats_dict[current_subject_id][
+                "psnr_eps"
+            ] = peak_signal_noise_ratio(
+                gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
+            ).item()
+
+            # only use fix data range to [0;1] if the data was normalized before
+            if normalize:
+                # torchmetrics PSNR but with fixed data range of 0 to 1
+                overall_stats_dict[current_subject_id][
+                    "psnr_01"
+                ] = peak_signal_noise_ratio(
+                    gt_image_infill, output_infill, data_range=(0,1)
+                ).item()
+
+                # same as above but with epsilon for robustness
+                overall_stats_dict[current_subject_id][
+                    "psnr_01_eps"
+                ] = peak_signal_noise_ratio(
+                    gt_image_infill, output_infill, data_range=(0,1), epsilon=sys.float_info.epsilon
+                ).item()
 
     pprint(overall_stats_dict)
     if outputfile is not None:

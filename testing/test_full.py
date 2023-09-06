@@ -1213,6 +1213,7 @@ def test_train_metrics_regression_rad_2d(device):
 
 def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
+
     # healper function to read and parse yaml and return parameters
     def get_parameters_after_alteration(loss_type: str) -> dict:
         parameters = parseConfig(
@@ -1242,15 +1243,19 @@ def test_train_losses_segmentation_rad_2d(device):
         parameters["model"]["print_summary"] = False
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         return parameters, training_data
+
     # loop through selected models and train for single epoch
     for loss_type in [
-        "dc", 
-        "dc_log", 
-        "dcce", 
-        "dcce_logits", 
+        "dc",
+        "dc_log",
+        "dcce",
+        "dcce_logits",
         "tversky",
-        "focal", 
-        "dc_focal"]:
+        "focal",
+        "dc_focal",
+        "mcc",
+        "mcc_log",
+    ]:
         parameters, training_data = get_parameters_after_alteration(loss_type)
         sanitize_outputDir()
         TrainingManager(
@@ -2936,17 +2941,25 @@ def test_generic_deploy_docker():
         reset=True,
     )
 
-    result = run_deployment(
-        os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
-        deploymentOutputDir,
-        "docker",
-        "model",
-        configfile=testingDir + "/config_segmentation.yaml",
-        modeldir=outputDir,
-        requires_gpu=True,
+    custom_entrypoint = os.path.join(
+        gandlfRootDir,
+        "mlcube/model_mlcube/example_custom_entrypoint/getting_started_3d_rad_seg.py",
     )
-
-    assert result, "run_deployment returned false"
+    for entrypoint_script in [None, custom_entrypoint]:
+        result = run_deployment(
+            os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
+            deploymentOutputDir,
+            "docker",
+            "model",
+            entrypoint_script=entrypoint_script,
+            configfile=testingDir + "/config_segmentation.yaml",
+            modeldir=outputDir,
+            requires_gpu=True,
+        )
+        msg = "run_deployment returned false"
+        if entrypoint_script:
+            msg += " with custom entrypoint script"
+        assert result, msg
     sanitize_outputDir()
 
     print("passed")

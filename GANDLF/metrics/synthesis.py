@@ -1,4 +1,3 @@
-import sys
 import SimpleITK as sitk
 import PIL.Image
 import numpy as np
@@ -8,6 +7,7 @@ from torchmetrics import (
     MeanSquaredError,
     MeanSquaredLogError,
     MeanAbsoluteError,
+    PeakSignalNoiseRatio,
 )
 from GANDLF.utils import get_image_from_tensor
 
@@ -25,7 +25,7 @@ def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
         torch.Tensor: The structural similarity index.
     """
     ssim = StructuralSimilarityIndexMeasure(return_full_image=True)
-    _, ssim_idx_full_image = ssim(target, prediction)
+    _, ssim_idx_full_image = ssim(preds=prediction, target=target)
     mask = torch.ones_like(ssim_idx_full_image) if mask is None else mask
     try:
         ssim_idx = ssim_idx_full_image[mask]
@@ -45,23 +45,31 @@ def mean_squared_error(target, prediction) -> torch.Tensor:
         prediction (torch.Tensor): The prediction tensor.
     """
     mse = MeanSquaredError()
-    return mse(target, prediction)
+    return mse(preds=prediction, target=target)
 
 
-def peak_signal_noise_ratio(target, prediction) -> torch.Tensor:
+def peak_signal_noise_ratio(target, prediction, data_range=None, epsilon=None) -> torch.Tensor:
     """
     Computes the peak signal to noise ratio between the target and prediction.
 
     Args:
         target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        data_range (tuple, optional): If not None, this data range (min, max) is used as enumerator instead of computing it from the given data. Defaults to None.
+        epsilon (float, optional): If not None, this epsilon is added to the denominator of the fraction to avoid infinity as output. Defaults to None.
     """
-    mse = mean_squared_error(target, prediction)
-    return (
-        10.0
-        * torch.log10((torch.max(target) - torch.min(target)) ** 2)
-        / (mse + sys.float_info.epsilon)
-    )
+
+    if epsilon == None:
+        psnr = PeakSignalNoiseRatio() if data_range == None else PeakSignalNoiseRatio(data_range=data_range[1]-data_range[0])
+        return psnr(preds=prediction, target=target)
+    else: # implementation of PSNR that does not give 'inf'/'nan' when 'mse==0'
+        mse = mean_squared_error(target, prediction)
+        if data_range == None: #compute data_range like torchmetrics if not given
+            min_v = 0 if torch.min(target) > 0 else torch.min(target) #look at this line
+            max_v = torch.max(target)
+        else:
+            min_v, max_v = data_range
+        return 10.0 * torch.log10(((max_v-min_v) ** 2) / (mse + epsilon))
 
 
 def mean_squared_log_error(target, prediction) -> torch.Tensor:
@@ -73,7 +81,7 @@ def mean_squared_log_error(target, prediction) -> torch.Tensor:
         prediction (torch.Tensor): The prediction tensor.
     """
     mle = MeanSquaredLogError()
-    return mle(target, prediction)
+    return mle(preds=prediction, target=target)
 
 
 def mean_absolute_error(target, prediction) -> torch.Tensor:
@@ -85,7 +93,7 @@ def mean_absolute_error(target, prediction) -> torch.Tensor:
         prediction (torch.Tensor): The prediction tensor.
     """
     mae = MeanAbsoluteError()
-    return mae(target, prediction)
+    return mae(preds=prediction, target=target)
 
 
 def _get_ncc_image(target, prediction) -> sitk.Image:
