@@ -2211,7 +2211,7 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters_patch["patch_size"] = [128, 128]
     parameters_patch["value_map"] = {0: 0, 255: 255}
 
-    file_config_temp = write_temp_config_path(parameters)
+    file_config_temp = write_temp_config_path(parameters_patch)
 
     patch_extraction(
         inputDir + "/train_2d_histo_classification.csv",
