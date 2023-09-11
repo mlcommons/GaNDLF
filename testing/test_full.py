@@ -2131,7 +2131,7 @@ def test_train_inference_segmentation_histology_2d(device):
     # define patches to be extracted in terms of microns
     parameters_patch["patch_size"] = ["1000m", "1000m"]
 
-    file_config_temp = write_temp_config_path(parameters)
+    file_config_temp = write_temp_config_path(parameters_patch)
 
     patch_extraction(
         inputDir + "/train_2d_histo_segmentation.csv",
