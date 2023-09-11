@@ -2910,17 +2910,26 @@ def test_generic_deploy_docker():
         reset=True,
     )
 
-    result = run_deployment(
-        os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
-        deploymentOutputDir,
-        "docker",
-        "model",
-        configfile=testingDir + "/config_segmentation.yaml",
-        modeldir=outputDir,
-        requires_gpu=True,
+    custom_entrypoint = os.path.join(
+        gandlfRootDir,
+        "mlcube/model_mlcube/example_custom_entrypoint/getting_started_3d_rad_seg.py",
     )
+    for entrypoint_script in [None, custom_entrypoint]:
+        result = run_deployment(
+            os.path.join(gandlfRootDir, "mlcube/model_mlcube/"),
+            deploymentOutputDir,
+            "docker",
+            "model",
+            entrypoint_script=entrypoint_script,
+            configfile=testingDir + "/config_segmentation.yaml",
+            modeldir=outputDir,
+            requires_gpu=True,
+        )
+        msg = "run_deployment returned false"
+        if entrypoint_script:
+            msg += " with custom entrypoint script"
+        assert result, msg
 
-    assert result, "run_deployment returned false"
     sanitize_outputDir()
 
     print("passed")
