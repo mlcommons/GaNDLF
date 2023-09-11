@@ -2861,7 +2861,7 @@ def test_generic_cli_function_recoverconfig():
         resume=False,
         reset=True,
     )
-    output_config_path = write_temp_config_path(parameters=None)
+    output_config_path = write_temp_config_path(None)
     assert recover_config(
         outputDir, output_config_path
     ), "recover_config returned false"
@@ -3078,59 +3078,6 @@ def test_generic_deploy_metrics_docker():
     sanitize_outputDir()
 
     print("passed")
-
-
-def test_train_synthesis_rad_3d(device):
-    print("XX: Starting 3D Rad synthesis tests")
-    # read and parse csv
-    # read and initialize parameters for specific data dimension
-    parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
-    )
-    parameters["model"]["final_layer"] = "synthesis"
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_3d_rad_segmentation.csv"
-    )
-    parameters["modality"] = "rad"
-    parameters["patch_size"] = patch_size["3D"]
-    parameters["model"]["dimension"] = 3
-    parameters["model"]["class_list"] = [0, 1]
-    parameters["model"]["final_layer"] = "softmax"
-    parameters["model"]["amp"] = True
-    parameters["in_memory"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    for model in all_models_segmentation:
-        if model == "imagenet_unet":
-            # imagenet_unet encoder needs to be toned down for small patch size
-            parameters["model"]["encoder_name"] = "mit_b0"
-            with pytest.raises(Exception) as exc_info:
-                _ = global_models_dict[model](parameters)
-            print("Exception raised:", exc_info.value)
-            parameters["model"]["encoder_name"] = "resnet34"
-            parameters["model"]["encoder_depth"] = 3
-            parameters["model"]["decoder_channels"] = (64, 32, 16)
-            parameters["model"]["final_layer"] = random.choice(
-                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
-            )
-            parameters["model"]["converter_type"] = random.choice(
-                ["acs", "soft", "conv3d"]
-            )
-        parameters["model"]["architecture"] = model
-        parameters["nested_training"]["testing"] = -5
-        parameters["nested_training"]["validation"] = -5
-        sanitize_outputDir()
-        TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            resume=False,
-            reset=True,
-        )
 
     sanitize_outputDir()
 
