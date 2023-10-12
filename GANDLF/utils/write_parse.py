@@ -22,8 +22,7 @@ def writeTrainingCSV(
     channelsID_list = channelsID.split(",")  # split into list
 
     outputToWrite = "SubjectID,"
-    for i, n in enumerate(channelsID_list):
-        outputToWrite += "Channel_" + str(i) + ","
+    outputToWrite += ",".join(["Channel_" + str(i) for i, n in enumerate(channelsID_list)]) + ","
     if labelID is not None:
         outputToWrite += "Label"
     outputToWrite += "\n"
