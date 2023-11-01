@@ -155,8 +155,9 @@ def save_model(
     model_dict["parameters"] = params
 
     try:
+        print("DEBUG os.getcwd():", os.getcwd())
         model_dict["git_hash"] = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=os.getcwd())
             .decode("ascii")
             .strip()
         )
