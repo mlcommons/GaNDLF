@@ -161,7 +161,7 @@ def save_model(
             .decode("ascii")
             .strip()
         )
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         model_dict["git_hash"] = None
 
     torch.save(model_dict, path)
