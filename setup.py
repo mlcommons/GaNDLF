@@ -84,7 +84,7 @@ requirements = [
     "torchvision",
     "tqdm",
     "torchio==0.18.75",
-    "pandas<2.0.0",
+    "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
     "setuptools",
