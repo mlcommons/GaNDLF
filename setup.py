@@ -92,7 +92,7 @@ requirements = [
     "pyyaml",
     "tiffslide",
     "matplotlib",
-    "requests>=2.25.0",
+    "gdown",
     "pytest",
     "coverage",
     "pytest-cov",
