@@ -195,16 +195,16 @@ def test_generic_constructTrainingCSV():
             i = 0
             for row in csv_reader:
                 if i == 0:
-                    row.append("ValueToPredict")
+                    row.concat("ValueToPredict") 
                     csv_writer_2.writerow(row)
-                    # row.append('ValueToPredict_2')
+                    # row.concat('ValueToPredict_2')
                     csv_writer_1.writerow(row)
                 else:
                     row_regression = copy.deepcopy(row)
                     row_classification = copy.deepcopy(row)
-                    row_regression.append(str(random.uniform(0, 1)))
-                    # row_regression.append(str(random.uniform(0, 1)))
-                    row_classification.append(str(random.randint(0, 2)))
+                    row_regression.concat(str(random.uniform(0, 1)))
+                    # row_regression.concat(str(random.uniform(0, 1)))
+                    row_classification.concat(str(random.randint(0, 2)))
                     csv_writer_1.writerow(row_regression)
                     csv_writer_2.writerow(row_classification)
                 i += 1
@@ -2269,7 +2269,7 @@ def test_train_inference_classification_histology_large_2d(device):
         # try to break resizer
         new_filename = resize_for_ci(row["Channel_0"], scale=10)
         row["Channel_0"] = new_filename
-        files_to_delete.append(new_filename)
+        files_to_delete.concat(new_filename)
         # we do not need the last subject
         break
 
@@ -2279,7 +2279,7 @@ def test_train_inference_classification_histology_large_2d(device):
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
     input_df.to_csv(resized_inference_data_list, index=False)
-    files_to_delete.append(resized_inference_data_list)
+    files_to_delete.concat(resized_inference_data_list)
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
