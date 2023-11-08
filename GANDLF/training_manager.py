@@ -93,7 +93,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
         else:
             # loop over all trainAndVal_index and construct new dataframe
             for subject_idx in trainAndVal_index:
-                trainingAndValidationData = trainingAndValidationData.append(
+                trainingAndValidationData = trainingAndValidationData._append(
                     trainingData_full[
                         trainingData_full[
                             trainingData_full.columns[
@@ -106,7 +106,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
             # loop over all testing_index and construct new dataframe
             for subject_idx in testing_index:
-                testingData = testingData.append(
+                testingData = testingData._append(
                     trainingData_full[
                         trainingData_full[
                             trainingData_full.columns[
@@ -199,7 +199,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
             # loop over all train_index and construct new dataframe
             for subject_idx in train_index:
-                trainingData = trainingData.append(
+                trainingData = trainingData._append(
                     trainingData_full[
                         trainingData_full[
                             trainingData_full.columns[
@@ -212,7 +212,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
             # loop over all val_index and construct new dataframe
             for subject_idx in val_index:
-                validationData = validationData.append(
+                validationData = validationData._append(
                     trainingData_full[
                         trainingData_full[
                             trainingData_full.columns[
