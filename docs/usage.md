@@ -33,7 +33,7 @@ A major reason why one would want to anonymize data is to ensure that trained mo
   # -v, --version      Show program's version number and exit.
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
-  -o ./output_dir_or_file # output directory to save anonymized images or a single output image file
+  -o ./output_dir_or_file # output directory to save anonymized images or a single output image file (for a DICOM to NIfTi conversion specify a .nii.gz file)
 ```
 
 ### Cleanup/Harmonize/Curate Data
