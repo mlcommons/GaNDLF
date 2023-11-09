@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL github="https://github.com/mlcommons/GaNDLF"
 LABEL docs="https://mlcommons.github.io/GaNDLF/"
 LABEL version=1.0
