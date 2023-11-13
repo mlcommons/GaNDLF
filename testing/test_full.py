@@ -546,283 +546,284 @@ def test_train_regression_rad_3d(device):
     print("passed")
 
 
-# def test_train_classification_rad_2d(device):
-#     print("10: Starting 2D Rad classification tests")
-#     # read and initialize parameters for specific data dimension
-#     parameters = parseConfig(
-#         testingDir + "/config_classification.yaml", version_check_flag=False
-#     )
-#     parameters["modality"] = "rad"
-#     parameters["track_memory_usage"] = True
-#     parameters["patch_size"] = patch_size["2D"]
-#     parameters["model"]["dimension"] = 2
-#     # read and parse csv
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_2d_rad_classification.csv"
-#     )
-#     parameters["model"]["num_channels"] = 3
-#     parameters["model"]["onnx_export"] = False
-#     parameters["model"]["print_summary"] = False
-#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#     # loop through selected models and train for single epoch
-#     for model in all_models_regression:
-#         if model == "imagenet_unet":
-#             parameters["model"]["depth"] = 2
-#             parameters["model"]["decoder_channels"] = [32, 16]
-#             parameters["model"]["encoder_weights"] = "None"
-#             parameters["model"]["converter_type"] = random.choice(
-#                 ["acs", "soft", "conv3d"]
-#             )
-#         parameters["model"]["architecture"] = model
-#         parameters["nested_training"]["testing"] = -5
-#         parameters["nested_training"]["validation"] = -5
-#         sanitize_outputDir()
-#         TrainingManager(
-#             dataframe=training_data,
-#             outputDir=outputDir,
-#             parameters=parameters,
-#             device=device,
-#             resume=False,
-#             reset=True,
-#         )
+def test_train_classification_rad_2d(device):
+    print("10: Starting 2D Rad classification tests")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["track_memory_usage"] = True
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    for model in all_models_regression:
+        if model == "imagenet_unet":
+            parameters["model"]["depth"] = 2
+            parameters["model"]["decoder_channels"] = [32, 16]
+            parameters["model"]["encoder_weights"] = "None"
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
+        parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
 
-#     # ensure sigmoid and softmax activations are tested for imagenet models
-#     for activation_type in ["sigmoid", "softmax"]:
-#         parameters["model"]["architecture"] = "imagenet_vgg11"
-#         parameters["model"]["final_layer"] = activation_type
-#         parameters["nested_training"]["testing"] = -5
-#         parameters["nested_training"]["validation"] = -5
-#         sanitize_outputDir()
-#         TrainingManager(
-#             dataframe=training_data,
-#             outputDir=outputDir,
-#             parameters=parameters,
-#             device=device,
-#             resume=False,
-#             reset=True,
-#         )
+    # ensure sigmoid and softmax activations are tested for imagenet models
+    for activation_type in ["sigmoid", "softmax"]:
+        parameters["model"]["architecture"] = "imagenet_vgg11"
+        parameters["model"]["final_layer"] = activation_type
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
 
-#     sanitize_outputDir()
+    sanitize_outputDir()
 
-#     print("passed")
-
-
-# def test_train_classification_rad_3d(device):
-#     print("11: Starting 3D Rad classification tests")
-#     # read and initialize parameters for specific data dimension
-#     parameters = parseConfig(
-#         testingDir + "/config_classification.yaml", version_check_flag=False
-#     )
-#     parameters["modality"] = "rad"
-#     parameters["patch_size"] = patch_size["3D"]
-#     parameters["model"]["dimension"] = 3
-#     # read and parse csv
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_3d_rad_classification.csv"
-#     )
-#     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#     parameters["model"]["onnx_export"] = False
-#     parameters["model"]["print_summary"] = False
-#     # loop through selected models and train for single epoch
-#     for model in all_models_regression:
-#         if "efficientnet" in model:
-#             parameters["patch_size"] = [16, 16, 16]
-#         else:
-#             parameters["patch_size"] = patch_size["3D"]
-#         if model == "imagenet_unet":
-#             parameters["model"]["encoder_name"] = "efficientnet-b0"
-#             parameters["model"]["depth"] = 1
-#             parameters["model"]["decoder_channels"] = [64]
-#             parameters["model"]["final_layer"] = random.choice(
-#                 ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
-#             )
-#             parameters["model"]["converter_type"] = random.choice(
-#                 ["acs", "soft", "conv3d"]
-#             )
-#         parameters["model"]["architecture"] = model
-#         parameters["nested_training"]["testing"] = -5
-#         parameters["nested_training"]["validation"] = -5
-#         sanitize_outputDir()
-#         TrainingManager(
-#             dataframe=training_data,
-#             outputDir=outputDir,
-#             parameters=parameters,
-#             device=device,
-#             resume=False,
-#             reset=True,
-#         )
-
-#     sanitize_outputDir()
-
-#     print("passed")
+    print("passed")
 
 
-# def test_train_resume_inference_classification_rad_3d(device):
-#     print("12: Starting 3D Rad classification tests for resume and reset")
-#     # read and initialize parameters for specific data dimension
-#     parameters = parseConfig(
-#         testingDir + "/config_classification.yaml", version_check_flag=False
-#     )
-#     parameters["modality"] = "rad"
-#     parameters["patch_size"] = patch_size["3D"]
-#     parameters["model"]["dimension"] = 3
-#     # read and parse csv
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_3d_rad_classification.csv"
-#     )
-#     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#     # loop through selected models and train for single epoch
-#     model = all_models_regression[0]
-#     parameters["model"]["architecture"] = model
-#     parameters["model"]["onnx_export"] = False
-#     parameters["model"]["print_summary"] = False
-#     sanitize_outputDir()
-#     TrainingManager(
-#         dataframe=training_data,
-#         outputDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#         resume=False,
-#         reset=True,
-#     )
+def test_train_classification_rad_3d(device):
+    print("11: Starting 3D Rad classification tests")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    # loop through selected models and train for single epoch
+    for model in all_models_regression:
+        if "efficientnet" in model:
+            parameters["patch_size"] = [16, 16, 16]
+        else:
+            parameters["patch_size"] = patch_size["3D"]
+        if model == "imagenet_unet":
+            parameters["model"]["encoder_name"] = "efficientnet-b0"
+            parameters["model"]["depth"] = 1
+            parameters["model"]["decoder_channels"] = [64]
+            parameters["model"]["final_layer"] = random.choice(
+                ["sigmoid", "softmax", "logsoftmax", "tanh", "identity"]
+            )
+            parameters["model"]["converter_type"] = random.choice(
+                ["acs", "soft", "conv3d"]
+            )
+        parameters["model"]["architecture"] = model
+        parameters["nested_training"]["testing"] = -5
+        parameters["nested_training"]["validation"] = -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
 
-#     ## testing resume with parameter updates
-#     parameters["num_epochs"] = 2
-#     parameters["nested_training"]["testing"] = -5
-#     parameters["nested_training"]["validation"] = -5
-#     parameters["model"]["save_at_every_epoch"] = True
-#     TrainingManager(
-#         dataframe=training_data,
-#         outputDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#         resume=True,
-#         reset=False,
-#     )
+    sanitize_outputDir()
 
-#     ## testing resume without parameter updates
-#     parameters["num_epochs"] = 1
-#     parameters["nested_training"]["testing"] = -5
-#     parameters["nested_training"]["validation"] = -5
-#     TrainingManager(
-#         dataframe=training_data,
-#         outputDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#         resume=False,
-#         reset=False,
-#     )
-
-#     parameters["output_dir"] = outputDir  # this is in inference mode
-#     InferenceManager(
-#         dataframe=training_data,
-#         modelDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#     )
-#     sanitize_outputDir()
-
-#     print("passed")
+    print("passed")
 
 
-# def test_train_inference_optimize_classification_rad_3d(device):
-#     print("13: Starting 3D Rad segmentation tests for optimization")
-#     # read and initialize parameters for specific data dimension
-#     parameters = parseConfig(
-#         testingDir + "/config_classification.yaml", version_check_flag=False
-#     )
-#     parameters["modality"] = "rad"
-#     parameters["patch_size"] = patch_size["3D"]
-#     parameters["model"]["dimension"] = 3
-#     # read and parse csv
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_3d_rad_classification.csv"
-#     )
-#     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#     parameters["model"]["architecture"] = all_models_regression[0]
-#     parameters["model"]["onnx_export"] = False
-#     parameters["model"]["print_summary"] = False
-#     parameters_temp = copy.deepcopy(parameters)
-#     sanitize_outputDir()
-#     TrainingManager(
-#         dataframe=training_data,
-#         outputDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#         resume=False,
-#         reset=True,
-#     )
+#ERROR: throwing GPU runtime error
+def test_train_resume_inference_classification_rad_3d(device):
+    print("12: Starting 3D Rad classification tests for resume and reset")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
-#     # file_config_temp = write_temp_config_path(parameters_temp)
-#     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
-#     config_path = os.path.join(outputDir, "parameters.pkl")
-#     optimization_result = post_training_model_optimization(model_path, config_path)
-#     assert optimization_result == True, "Optimization should pass"
+    ## testing resume with parameter updates
+    parameters["num_epochs"] = 2
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    parameters["model"]["save_at_every_epoch"] = True
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=True,
+        reset=False,
+    )
 
-#     ## testing inference
-#     for model_type in all_model_type:
-#         parameters["model"]["type"] = model_type
-#         parameters["output_dir"] = outputDir  # this is in inference mode
-#         InferenceManager(
-#             dataframe=training_data,
-#             modelDir=outputDir,
-#             parameters=parameters,
-#             device=device,
-#         )
+    ## testing resume without parameter updates
+    parameters["num_epochs"] = 1
+    parameters["nested_training"]["testing"] = -5
+    parameters["nested_training"]["validation"] = -5
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=False,
+    )
 
-#     sanitize_outputDir()
+    parameters["output_dir"] = outputDir  # this is in inference mode
+    InferenceManager(
+        dataframe=training_data,
+        modelDir=outputDir,
+        parameters=parameters,
+        device=device,
+    )
+    sanitize_outputDir()
 
-#     print("passed")
+    print("passed")
 
+#ERROR: The specified model IR was not found: C:\Users\aines\Desktop\GaNDLF\testing\data_output\densenet121_best.xml. (ValueError)
+def test_train_inference_optimize_classification_rad_3d(device):
+    print("13: Starting 3D Rad segmentation tests for optimization")
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["3D"]
+    parameters["model"]["dimension"] = 3
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["architecture"] = all_models_regression[0]
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters_temp = copy.deepcopy(parameters)
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
-# def test_train_inference_optimize_segmentation_rad_2d(device):
-#     print("14: Starting 2D Rad segmentation tests for optimization")
-#     # read and parse csv
-#     parameters = parseConfig(
-#         testingDir + "/config_segmentation.yaml", version_check_flag=False
-#     )
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_2d_rad_segmentation.csv"
-#     )
-#     parameters["patch_size"] = patch_size["2D"]
-#     parameters["modality"] = "rad"
-#     parameters["model"]["dimension"] = 2
-#     parameters["model"]["class_list"] = [0, 255]
-#     parameters["model"]["amp"] = True
-#     parameters["save_output"] = True
-#     parameters["model"]["num_channels"] = 3
-#     parameters["metrics"] = ["dice"]
-#     parameters["model"]["architecture"] = "resunet"
-#     parameters["model"]["onnx_export"] = True
-#     parameters["model"]["print_summary"] = False
-#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#     sanitize_outputDir()
-#     TrainingManager(
-#         dataframe=training_data,
-#         outputDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#         resume=False,
-#         reset=True,
-#     )
+    # file_config_temp = write_temp_config_path(parameters_temp)
+    model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
+    config_path = os.path.join(outputDir, "parameters.pkl")
+    optimization_result = post_training_model_optimization(model_path, config_path)
+    assert optimization_result == True, "Optimization should pass"
 
-#     ## testing inference
-#     for model_type in all_model_type:
-#         parameters["model"]["type"] = model_type
-#         parameters["output_dir"] = outputDir  # this is in inference mode
-#         InferenceManager(
-#             dataframe=training_data,
-#             modelDir=outputDir,
-#             parameters=parameters,
-#             device=device,
-#         )
+    ## testing inference
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        parameters["output_dir"] = outputDir  # this is in inference mode
+        InferenceManager(
+            dataframe=training_data,
+            modelDir=outputDir,
+            parameters=parameters,
+            device=device,
+        )
 
-#     sanitize_outputDir()
+    sanitize_outputDir()
 
-#     print("passed")
+    print("passed")
+
+#ERROR: The specified model IR was not found: C:\Users\aines\Desktop\GaNDLF\testing\data_output\resunet_best.xml. (ValueError)
+def test_train_inference_optimize_segmentation_rad_2d(device):
+    print("14: Starting 2D Rad segmentation tests for optimization")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["modality"] = "rad"
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["save_output"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = ["dice"]
+    parameters["model"]["architecture"] = "resunet"
+    parameters["model"]["onnx_export"] = True
+    parameters["model"]["print_summary"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+
+    ## testing inference
+    for model_type in all_model_type:
+        parameters["model"]["type"] = model_type
+        parameters["output_dir"] = outputDir  # this is in inference mode
+        InferenceManager(
+            dataframe=training_data,
+            modelDir=outputDir,
+            parameters=parameters,
+            device=device,
+        )
+
+    sanitize_outputDir()
+
+    print("passed")
 
 
 # def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
