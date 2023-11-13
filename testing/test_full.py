@@ -1115,56 +1115,56 @@ def test_train_normtype_segmentation_rad_3d(device):
 
     print("passed")
 
+#ERROR: numpy has no attr bool.
+def test_train_metrics_segmentation_rad_2d(device):
+    print("21: Starting 2D Rad segmentation tests for metrics")
+    # read and parse csv
+    parameters = parseConfig(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["data_postprocessing"] = {"mapping": {0: 0, 255: 1}}
+    parameters["model"]["amp"] = True
+    parameters["save_output"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["metrics"] = [
+        "dice",
+        "hausdorff",
+        "hausdorff95",
+        "normalized_surface_dice",
+        "sensitivity",
+        "sensitivity_per_label",
+        "specificity_segmentation",
+        "specificity_segmentation_per_label",
+        "jaccard",
+        "jaccard_per_label",
+    ]
+    parameters["model"]["architecture"] = "resunet"
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    file_config_temp = write_temp_config_path(parameters)
 
-# def test_train_metrics_segmentation_rad_2d(device):
-#     print("21: Starting 2D Rad segmentation tests for metrics")
-#     # read and parse csv
-#     parameters = parseConfig(
-#         testingDir + "/config_segmentation.yaml", version_check_flag=False
-#     )
-#     parameters["modality"] = "rad"
-#     parameters["patch_size"] = patch_size["2D"]
-#     parameters["model"]["dimension"] = 2
-#     parameters["model"]["class_list"] = [0, 255]
-#     parameters["data_postprocessing"] = {"mapping": {0: 0, 255: 1}}
-#     parameters["model"]["amp"] = True
-#     parameters["save_output"] = True
-#     parameters["model"]["num_channels"] = 3
-#     parameters["metrics"] = [
-#         "dice",
-#         "hausdorff",
-#         "hausdorff95",
-#         "normalized_surface_dice",
-#         "sensitivity",
-#         "sensitivity_per_label",
-#         "specificity_segmentation",
-#         "specificity_segmentation_per_label",
-#         "jaccard",
-#         "jaccard_per_label",
-#     ]
-#     parameters["model"]["architecture"] = "resunet"
-#     parameters["model"]["onnx_export"] = False
-#     parameters["model"]["print_summary"] = False
-#     file_config_temp = write_temp_config_path(parameters)
+    parameters = parseConfig(file_config_temp, version_check_flag=False)
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    sanitize_outputDir()
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
-#     parameters = parseConfig(file_config_temp, version_check_flag=False)
-#     training_data, parameters["headers"] = parseTrainingCSV(
-#         inputDir + "/train_2d_rad_segmentation.csv"
-#     )
-#     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-#     sanitize_outputDir()
-#     TrainingManager(
-#         dataframe=training_data,
-#         outputDir=outputDir,
-#         parameters=parameters,
-#         device=device,
-#         resume=False,
-#         reset=True,
-#     )
+    sanitize_outputDir()
 
-#     sanitize_outputDir()
-
-#     print("passed")
+    print("passed")
 
 
 # def test_train_metrics_regression_rad_2d(device):
