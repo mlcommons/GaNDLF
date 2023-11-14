@@ -93,8 +93,8 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     Returns:
         float: The symmetric Hausdorff Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
     """
-    result = np.atleast_1d(result.astype(np.bool))
-    reference = np.atleast_1d(reference.astype(np.bool))
+    result = np.atleast_1d(result.astype(bool))
+    reference = np.atleast_1d(reference.astype(bool))
     if voxelspacing is not None:
         voxelspacing = _ni_support._normalize_sequence(voxelspacing, result.ndim)
         voxelspacing = np.asarray(voxelspacing, dtype=np.float64)
