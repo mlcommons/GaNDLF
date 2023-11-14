@@ -51,7 +51,7 @@ singularity:
 tasks:
   train:
   # Trains a new model, creating a model directory, or resumes training on an existing model.
-    entrypoint: "python3.8 gandlf_run --train True --device cpu"
+    entrypoint: "python3.9 gandlf_run --train True --device cpu"
     parameters:
       inputs: {
         # Path to a data csv such as that constructed by the "construct_csv" task.
@@ -67,7 +67,7 @@ tasks:
       
   infer:
   # Runs inference on some existing model given new data
-    entrypoint: "python3.8 gandlf_run --train False --device cpu"
+    entrypoint: "python3.9 gandlf_run --train False --device cpu"
     parameters:
       inputs: {
         # Path to a data csv such as that constructed by the "construct_csv" task.
@@ -84,7 +84,7 @@ tasks:
 
   construct_csv:
   # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.
-    entrypoint: "python3.8 gandlf_constructCSV --relativizePaths True"
+    entrypoint: "python3.9 gandlf_constructCSV --relativizePaths True"
     parameters:
       inputs: {
         # Do NOT change the position of the inputDir parameter! It is relevant due to MLCube mounting rules.
@@ -99,7 +99,7 @@ tasks:
 
   recover_config:
   # Extracts the config file from the embedded model (if any) in the MLCube.
-    entrypoint: "python3.8 gandlf_recoverConfig --mlcube internal"
+    entrypoint: "python3.9 gandlf_recoverConfig --mlcube internal"
     parameters: 
       outputs: {
         outputFile: {type: "file", default: "recovered_config.yml"},
