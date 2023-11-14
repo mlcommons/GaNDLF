@@ -34,7 +34,7 @@ def run_gandlf(output_path, device):
         device (str): device to run on (i.e. CPU or GPU)
     """
     exit_status = os.system(
-        "python3.8 gandlf_run --train False "
+        "python3.9 gandlf_run --train False "
         f"--device {device} --config /embedded_config.yml "
         f"--modeldir /embedded_model/ -i ./data.csv -o {output_path}"
     )
