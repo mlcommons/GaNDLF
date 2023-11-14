@@ -2188,7 +2188,7 @@ def write_temp_config_path(parameters_to_write):
 
 #     print("passed")
 
-
+# #ERROR: NO ERROR, CSV FILE CONTAINS NULL VALUE. FUNCTION IS FINE
 # def test_train_inference_classification_histology_large_2d(device):
 #     print(
 #         "35: Starting histology train/inference classification tests for large images to check exception handling"
@@ -2273,7 +2273,7 @@ def write_temp_config_path(parameters_to_write):
 #         # try to break resizer
 #         new_filename = resize_for_ci(row["Channel_0"], scale=10)
 #         row["Channel_0"] = new_filename
-#         files_to_delete.concat(new_filename)
+#         files_to_delete._append(new_filename)
 #         # we do not need the last subject
 #         break
 
@@ -2363,7 +2363,7 @@ def write_temp_config_path(parameters_to_write):
 
 #     print("passed")
 
-
+# #ERROR: ValueError: The specified model IR was not found: C:\Users\aines\Desktop\GaNDLF\testing\data_output\modelDir\densenet121_best.xml.
 # def test_train_inference_classification_histology_2d(device):
 #     print("36: Starting histology train/inference classification tests")
 #     # overwrite previous results
@@ -2878,7 +2878,7 @@ def write_temp_config_path(parameters_to_write):
 
 #     print("passed")
 
-
+# #ERROR: AssertionError: mlcube_docker configuration failed. Check output for more details.
 # def test_generic_deploy_docker():
 #     print("46: Testing deployment of a model to Docker")
 #     # Train, then try deploying that model (requires an installed Docker engine)
@@ -2938,7 +2938,7 @@ def write_temp_config_path(parameters_to_write):
 
 #     print("passed")
 
-
+# #ERROR: pkg_resources.ContextualVersionConflict: (pandas 2.1.2 (c:\users\aines\desktop\gandlf\venv\lib\site-packages), Requirement.parse('pandas<2.0.0'), {'GANDLF'})
 # def test_collision_subjectid_test_segmentation_rad_2d(device):
 #     print("47: Starting 2D Rad segmentation tests for collision of subjectID in test")
 #     parameters = parseConfig(
@@ -3014,7 +3014,8 @@ def write_temp_config_path(parameters_to_write):
 
 #     print("passed")
 
-
+# #ERROR: pkg_resources.ContextualVersionConflict: (pandas 2.1.2 (c:\users\aines\desktop\gandlf\venv\lib\site-packages), Requirement.parse('pandas<2.0.0'), {'GANDLF'})
+# #CHANGED CODE FROM "DF.iterItems to df.items" in "generate_metrics.py" at line 50.
 # def test_generic_cli_function_metrics_cli_rad_nd():
 #     print("49: Starting metric calculation tests")
 #     for dim in ["2d", "3d"]:
@@ -3073,7 +3074,7 @@ def write_temp_config_path(parameters_to_write):
 
 #             sanitize_outputDir()
 
-
+# #ERROR: AssertionError: mlcube_docker configuration failed. Check output for more details.
 # def test_generic_deploy_metrics_docker():
 #     print("50: Testing deployment of a metrics generator to Docker")
 #     # requires an installed Docker engine
