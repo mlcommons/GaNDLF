@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:3.8-bullseye
+FROM mcr.microsoft.com/devcontainers/python:3.9-bullseye
 
 # Copy environment.yml (if found) to a temp location so we update the environment. Also
 # copy "noop.txt" so the COPY instruction does not fail if no environment.yml exists.

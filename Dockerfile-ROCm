@@ -6,24 +6,27 @@ LABEL version=1.0
 # Quick start instructions on using Docker with ROCm: https://github.com/RadeonOpenCompute/ROCm-docker/blob/master/quick-start.md
 
 # The base image contains ROCm, python 3.8 and pytorch already, no need to install those
-RUN python3 -m pip install --upgrade pip
-RUN python3.8 -m pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
-RUN python3 -m pip install --upgrade pip && python3 -m pip install openvino-dev==2023.0.1 opencv-python-headless mlcube_docker
+RUN apt-get update && apt-get install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update &&  apt-get install -y  python3.9 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.8-dev libffi-dev libgl1
+RUN python3.9 -m pip install --upgrade pip
+RUN python3.9 -m pip install torch==1.13.1+rocm5.2 torchvision==0.14.1+rocm5.2 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/rocm5.2
+RUN python3.9 -m pip install --upgrade pip && python3.9 -m pip install openvino-dev==2023.0.1 opencv-python-headless mlcube_docker
 RUN apt-get update && apt-get install -y libgl1
 
 # Do some dependency installation separately here to make layer caching more efficient
 COPY ./setup.py ./setup.py
-RUN python3.8 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
-    && python3.8 -m pip install -r ./requirements.txt
+RUN python3.9 -c "from setup import requirements; file = open('requirements.txt', 'w'); file.writelines([req + '\n' for req in requirements]); file.close()" \
+    && python3.9 -m pip install -r ./requirements.txt
 
 COPY . /GaNDLF
 WORKDIR /GaNDLF
-RUN python3 -m pip install -e .
+RUN python3.9 -m pip install -e .
 
 # Entrypoint forces all commands given via "docker run" to go through python, CMD forces the default entrypoint script argument to be gandlf_run
 # If a user calls "docker run gandlf:[tag] gandlf_anonymize", it will resolve to running "python gandlf_anonymize" instead.
 # CMD is inherently overridden by args to "docker run", entrypoint is constant.
-ENTRYPOINT python3
+ENTRYPOINT python3.9
 CMD gandlf_run
 
 
