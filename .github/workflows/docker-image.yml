@@ -57,7 +57,6 @@ jobs:
     # Install the cosign tool except on PR
     # https://github.com/sigstore/cosign-installer
     - name: Install cosign
-      # if: github.event_name != 'pull_request'
       uses: sigstore/cosign-installer@v3.2.0
         
     - name: Log into GitHub Packages registry (ghcr.io)
