@@ -277,7 +277,6 @@ def test_train_segmentation_rad_2d(device):
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
-        print(parameters)
         TrainingManager(
             dataframe=training_data,
             outputDir=outputDir,
