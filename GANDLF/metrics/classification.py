@@ -1,6 +1,7 @@
 import torchmetrics as tm
 from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
+from GANDLF.utils.generic import determine_task
 
 
 def overall_stats(predictions, ground_truth, params):
@@ -27,7 +28,7 @@ def overall_stats(predictions, ground_truth, params):
         "per_class_average": "macro",
         "per_class_weighted": "weighted",
     }
-    task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
+    task = determine_task(params)
     # consider adding a "multilabel field in the future"
     # metrics that need the "average" parameter
 
@@ -70,7 +71,8 @@ def overall_stats(predictions, ground_truth, params):
         for metric_name, calculator in calculators.items():
             if metric_name == "aucroc":
                 one_hot_preds = one_hot(
-                    predictions.long(), num_classes=params["model"]["num_classes"]
+                    predictions.long(),
+                    num_classes=params["model"]["num_classes"],
                 )
                 output_metrics[metric_name] = get_output_from_calculator(
                     one_hot_preds.float(), ground_truth, calculator
