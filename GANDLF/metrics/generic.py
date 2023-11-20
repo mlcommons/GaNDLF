@@ -28,10 +28,8 @@ def generic_function_output_with_check(
         )
         return torch.zeros((1), device=predicted_classes.device)
     else:
-        try:
-            max_clamp_val = metric_function.num_classes - 1
-        except AttributeError:
-            max_clamp_val = 1
+        # this ensures that we always have at least 1 class to clamp to
+        max_clamp_val = min(metric_function.num_classes - 1, 1)
         predicted_new = torch.clamp(
             predicted_classes.cpu().int(), max=max_clamp_val
         )
