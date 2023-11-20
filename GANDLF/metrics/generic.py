@@ -104,6 +104,7 @@ def iou_score(output, label, params):
     elif params["problem_type"] == "segmentation":
         label = one_hot(label, params["model"]["class_list"])
     task = determine_task(params)
+    recall = sys.float_info.max
     if task == "binary":
         recall = JaccardIndex(
             task=task,
@@ -117,8 +118,8 @@ def iou_score(output, label, params):
             threshold=params["metrics"]["iou"]["threshold"],
         )
     else:
-        raise NotImplementedError(
-            "IoU score is not implemented for multilabel problems"
+        print(
+            f"IoU score is not implemented for multilabel problems, setting recall to {recall}"
         )
 
     return generic_function_output_with_check(
