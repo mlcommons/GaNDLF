@@ -2259,7 +2259,7 @@ def test_train_inference_classification_histology_large_2d(device):
         ]:
             _ = get_patch_size_in_microns(row["Channel_0"], patch_size)
 
-        # try to break resizer
+        # try to break resizer - test
         new_filename = resize_for_ci(row["Channel_0"], scale=10)
         row["Channel_0"] = new_filename
         files_to_delete.append(new_filename)
