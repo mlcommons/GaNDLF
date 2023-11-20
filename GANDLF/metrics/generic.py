@@ -15,13 +15,7 @@ def define_average_type_key(params, metric_name):
     """Determine if the metric config defines the type of average to use.
     If not, fallback to the default (macro) average type.
     """
-    if "average" in params["metrics"][metric_name]:
-        average_type_key = params["metrics"][metric_name]["average"]
-    else:
-        average_type_key = "macro"
-        UserWarning(
-            "WARNING: Average type not defined in config, using default (macro)."
-        )
+    average_type_key = params["metrics"][metric_name].get("average", "macro")
     return average_type_key
 
 
