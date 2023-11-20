@@ -47,7 +47,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
     # check required headers in a case insensitive manner
     headers = {}
     required_columns = ["subjectid", "prediction", "target"]
-    for col, _ in input_df.items():                             
+    for col, _ in input_df.items():                     
         col_lower = col.lower()
         for column_to_check in required_columns:
             if column_to_check == col_lower:

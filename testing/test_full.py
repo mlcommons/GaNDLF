@@ -195,7 +195,7 @@ def test_generic_constructTrainingCSV():
             i = 0
             for row in csv_reader:
                 if i == 0:
-                    row.append("ValueToPredict") 
+                    row.append("ValueToPredict")
                     csv_writer_2.writerow(row)
                     # row.append('ValueToPredict_2')
                     csv_writer_1.writerow(row)
@@ -2262,7 +2262,7 @@ def test_train_inference_classification_histology_large_2d(device):
         # try to break resizer
         new_filename = resize_for_ci(row["Channel_0"], scale=10)
         row["Channel_0"] = new_filename
-        files_to_delete._append(new_filename)
+        files_to_delete.append(new_filename)
         # we do not need the last subject
         break
 
