@@ -195,7 +195,7 @@ def test_generic_constructTrainingCSV():
             i = 0
             for row in csv_reader:
                 if i == 0:
-                    row.append("ValueToPredict") 
+                    row.append("ValueToPredict")
                     csv_writer_2.writerow(row)
                     # row.append('ValueToPredict_2')
                     csv_writer_1.writerow(row)
