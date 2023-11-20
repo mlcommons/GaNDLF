@@ -3,6 +3,7 @@ import sys
 import torchvision
 import traceback
 
+
 def brainage(parameters):
     """
     This function creates a VGG16-based neural network model for brain age prediction.
@@ -18,7 +19,9 @@ def brainage(parameters):
     """
 
     # Check that the input data is 2D
-    assert parameters["model"]["dimension"] == 2, "Brain Age predictions only work on 2D data"
+    assert (
+        parameters["model"]["dimension"] == 2
+    ), "Brain Age predictions only work on 2D data"
 
     try:
         # Load the pretrained VGG16 model
@@ -38,13 +41,19 @@ def brainage(parameters):
     features = list(model.classifier.children())[:-1]  # Remove the last layer
     features.extend(
         [
-            nn.Linear(num_features, 1024),  # Add a linear layer with 1024 output features
+            nn.Linear(
+                num_features, 1024
+            ),  # Add a linear layer with 1024 output features
             nn.ReLU(True),  # Add a ReLU activation function
             nn.Dropout2d(0.8),  # Add a 2D dropout layer with a probability of 0.8
-            nn.Linear(1024, 1),  # Add a linear layer with 1 output feature (for brain age prediction)
+            nn.Linear(
+                1024, 1
+            ),  # Add a linear layer with 1 output feature (for brain age prediction)
         ]
     )
-    model.classifier = nn.Sequential(*features)  # Replace the model classifier with the modified one
+    model.classifier = nn.Sequential(
+        *features
+    )  # Replace the model classifier with the modified one
 
     # Set the "amp" parameter to False (not yet implemented for VGG)
     parameters["model"]["amp"] = False

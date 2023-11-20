@@ -34,7 +34,9 @@ class Logger:
         if os.stat(self.filename).st_size == 0:
             mode_lower = mode.lower()
             row = "epoch_no," + mode_lower + "_loss,"
-            row += ",".join([mode_lower + "_" + metric for metric in self.metrics]) + ","
+            row += (
+                ",".join([mode_lower + "_" + metric for metric in self.metrics]) + ","
+            )
             row = row[:-1]
             row += "\n"
             self.csv.write(row)
