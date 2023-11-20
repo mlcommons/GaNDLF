@@ -64,7 +64,7 @@ def overall_stats(predictions, ground_truth, params):
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key
-                if average_type_key is not "micro"
+                if average_type_key != "micro"
                 else "macro",
             ),
         }
