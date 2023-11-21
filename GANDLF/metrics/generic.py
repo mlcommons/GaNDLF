@@ -112,7 +112,7 @@ def iou_score(output, label, params):
         )
     else:
         print(
-            f"IoU score is not implemented for multilabel problems, setting recall to {recall}"
+            f"WARNING: IoU score is not implemented for multilabel problems, setting recall to {recall}"
         )
 
     return generic_function_output_with_check(
