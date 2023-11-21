@@ -110,7 +110,7 @@ steps to follow to write tests:
 def test_generic_download_data():
     print("00: Downloading the sample data")
     urlToDownload = (
-        "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
+        "https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT"
     )
 
     files_check = [
@@ -122,11 +122,12 @@ def test_generic_download_data():
     for file in files_check:
         if not os.path.isfile(file):
             print("Downloading and extracting sample data")
-            r = requests.get(urlToDownload)
-            z = zipfile.ZipFile(io.BytesIO(r.content))
-            z.extractall(testingDir)
+            output = os.path.join(testingDir, "gandlf_unit_test_data.tgz")
+            gdown.download(urlToDownload, output, quiet=False)
+            with zipfile.ZipFile(output, "r") as zip_ref:
+                zip_ref.extractall(testingDir)
+            os.remove(output)
             break
-
     sanitize_outputDir()
 
     print("passed")
