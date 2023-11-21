@@ -1,5 +1,5 @@
 from pathlib import Path
-import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
+import requests, zipfile, io, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -109,7 +109,9 @@ steps to follow to write tests:
 
 def test_generic_download_data():
     print("00: Downloading the sample data")
-    urlToDownload = "https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT"
+    urlToDownload = (
+        "https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip"
+    )
 
     files_check = [
         os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff"),
@@ -120,11 +122,9 @@ def test_generic_download_data():
     for file in files_check:
         if not os.path.isfile(file):
             print("Downloading and extracting sample data")
-            output = os.path.join(testingDir, "gandlf_unit_test_data.tgz")
-            gdown.download(urlToDownload, output, quiet=False)
-            with zipfile.ZipFile(output, "r") as zip_ref:
-                zip_ref.extractall(testingDir)
-            os.remove(output)
+            r = requests.get(urlToDownload)
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(testingDir)
             break
 
     sanitize_outputDir()
@@ -210,7 +210,7 @@ def test_generic_constructTrainingCSV():
                 i += 1
 
 
-# these are helper functions to be used in other tests
+# # these are helper functions to be used in other tests
 def sanitize_outputDir():
     print("02_1: Sanitizing outputDir")
     if os.path.isdir(outputDir):
@@ -230,7 +230,7 @@ def write_temp_config_path(parameters_to_write):
     return temp_config_path
 
 
-# these are helper functions to be used in other tests
+#these are helper functions to be used in other tests
 
 
 def test_train_segmentation_rad_2d(device):
@@ -658,6 +658,7 @@ def test_train_classification_rad_3d(device):
     print("passed")
 
 
+
 def test_train_resume_inference_classification_rad_3d(device):
     print("12: Starting 3D Rad classification tests for resume and reset")
     # read and initialize parameters for specific data dimension
@@ -726,7 +727,6 @@ def test_train_resume_inference_classification_rad_3d(device):
 
     print("passed")
 
-
 def test_train_inference_optimize_classification_rad_3d(device):
     print("13: Starting 3D Rad segmentation tests for optimization")
     # read and initialize parameters for specific data dimension
@@ -776,7 +776,6 @@ def test_train_inference_optimize_classification_rad_3d(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_train_inference_optimize_segmentation_rad_2d(device):
     print("14: Starting 2D Rad segmentation tests for optimization")
@@ -888,7 +887,6 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device):
     print("16: Starting 3D Rad classification tests for multi-fold logits inference")
@@ -1200,7 +1198,6 @@ def test_train_metrics_regression_rad_2d(device):
 
     print("passed")
 
-
 def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
 
@@ -1341,7 +1338,6 @@ def test_generic_config_read():
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_generic_cli_function_preprocess():
     print("25: Starting testing cli function preprocess")
@@ -1496,7 +1492,6 @@ def test_generic_cli_function_mainrun(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_dataloader_construction_train_segmentation_3d(device):
     print("27: Starting 3D Rad segmentation tests")
@@ -1879,7 +1874,6 @@ def test_generic_augmentation_functions():
 
     print("passed")
 
-
 def test_train_checkpointing_segmentation_rad_2d(device):
     print("30: Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
@@ -2184,7 +2178,6 @@ def test_train_inference_segmentation_histology_2d(device):
 
     print("passed")
 
-
 def test_train_inference_classification_histology_large_2d(device):
     print(
         "35: Starting histology train/inference classification tests for large images to check exception handling"
@@ -2358,7 +2351,6 @@ def test_train_inference_classification_histology_large_2d(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_train_inference_classification_histology_2d(device):
     print("36: Starting histology train/inference classification tests")
@@ -2874,7 +2866,6 @@ def test_generic_cli_function_recoverconfig():
 
     print("passed")
 
-
 def test_generic_deploy_docker():
     print("46: Testing deployment of a model to Docker")
     # Train, then try deploying that model (requires an installed Docker engine)
@@ -3068,7 +3059,6 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             assert os.path.isfile(output_file), "Metrics output file was not generated"
 
             sanitize_outputDir()
-
 
 def test_generic_deploy_metrics_docker():
     print("50: Testing deployment of a metrics generator to Docker")

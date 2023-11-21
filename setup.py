@@ -84,7 +84,7 @@ requirements = [
     "torchvision",
     "tqdm",
     "torchio==0.18.75",
-    "pandas<2.0.0",
+    "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
     "setuptools",
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">=3.9, <=3.10",
+        python_requires=">=3.9, <3.11",
         packages=find_packages(
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
