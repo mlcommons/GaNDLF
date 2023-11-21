@@ -76,7 +76,7 @@ toplevel_package_excludes = [
 
 requirements = [
     "torch==1.13.1",
-    "black",
+    "black==23.11.0",
     "numpy==1.25.0",
     "scipy",
     "SimpleITK!=2.0.*",
