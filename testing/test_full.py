@@ -2272,7 +2272,7 @@ def test_train_inference_classification_histology_large_2d(device):
     # drop last subject
     input_df.drop(index=input_df.index[-1], axis=0, inplace=True)
     input_df.to_csv(resized_inference_data_list, index=False)
-    files_to_delete.concat(resized_inference_data_list)
+    files_to_delete.append(resized_inference_data_list)
 
     file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
     temp_df = pd.read_csv(file_for_Training)
