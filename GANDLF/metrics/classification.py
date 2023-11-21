@@ -32,7 +32,7 @@ def overall_stats(predictions, ground_truth, params):
     # consider adding a "multilabel field in the future"
     # metrics that need the "average" parameter
 
-    for average_type_key in average_types_keys.keys():
+    for average_type_key in average_types_keys.values():
         calculators = {
             "accuracy": tm.Accuracy(
                 task=task,
@@ -59,7 +59,6 @@ def overall_stats(predictions, ground_truth, params):
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            ## weird error for multi-class problem, where pos_label is not getting set
             "aucroc": tm.AUROC(
                 task=task,
                 num_classes=params["model"]["num_classes"],

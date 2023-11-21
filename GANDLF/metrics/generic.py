@@ -1,5 +1,7 @@
 import sys
 import torch
+import warnings
+from typing import Dict, Union, Any
 from torchmetrics import (
     F1Score,
     Precision,
@@ -12,11 +14,34 @@ from GANDLF.utils.tensor import one_hot
 from GANDLF.utils.generic import determine_task
 
 
-def define_average_type_key(params, metric_name):
-    """Determine if the metric config defines the type of average to use.
-    If not, fallback to the default (macro) average type.
+def define_average_type_key(
+    params: Dict[str, Union[Dict[str, Any], Any]], metric_name: str
+):
+    """Determine if the the 'average' filed is defined in the metric config.
+    If not, fallback to the default 'macro'
+    values.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+        metric_name (str): The name of the metric.
+    Returns:
+        str: The average type key.
     """
     average_type_key = params["metrics"][metric_name].get("average", "macro")
+    return average_type_key
+
+
+def define_multidim_average_type_key(params, metric_name):
+    """Determine if the the 'multidim_average' filed is defined in the metric config.
+    If not, fallback to the default 'global'.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+        metric_name (str): The name of the metric.
+    Returns:
+        str: The average type key.
+    """
+    average_type_key = params["metrics"][metric_name].get(
+        "multidim_average", "global"
+    )
     return average_type_key
 
 
@@ -29,10 +54,10 @@ def generic_function_output_with_check(
         )
         return torch.zeros((1), device=predicted_classes.device)
     else:
-        # this ensures that we always have at least 1 class to clamp to
-        # max_clamp_val = min(metric_function.num_classes - 1, 1)
         # I need to do this that way, otherwise for binary problems it will
-        # raise and error
+        # raise and error as the binary metrics do not have .num_classes
+        # attribute.
+        # https://tinyurl.com/564rh9yp link to example from BinaryAccuracy.
         try:
             max_clamp_val = metric_function.num_classes - 1
         except AttributeError:
@@ -54,15 +79,24 @@ def generic_torchmetrics_score(
         predicted_classes = torch.argmax(output, 1)
     elif params["problem_type"] == "segmentation":
         label = one_hot(label, params["model"]["class_list"])
-    else:
-        params["metrics"][metric_key]["multi_class"] = False
-        params["metrics"][metric_key]["mdmc_average"] = None
+    # if task == "binary":
+    # Caution - now we are not using the AUROC metric here.
+    # Adding it will cause this binary implementation to throw an error
+    # due to the fact that AUROC does not have a multidim_average field.
     metric_function = metric_class(
         task=task,
-        average=params["metrics"][metric_key]["average"],
         num_classes=num_classes,
         threshold=params["metrics"][metric_key]["threshold"],
+        average=define_average_type_key(params, metric_key),
+        multidim_average=define_multidim_average_type_key(params, metric_key),
     )
+    # elif task == "multiclass":
+    #     metric_function = metric_class(
+    #         task=task,
+    #         average=define_average_type_key(params, metric_key),
+    #         num_classes=num_classes,
+    #         threshold=params["metrics"][metric_key]["threshold"],
+    #     )
 
     return generic_function_output_with_check(
         predicted_classes.cpu().int(), label.cpu().int(), metric_function
@@ -117,8 +151,9 @@ def iou_score(output, label, params):
             threshold=params["metrics"]["iou"]["threshold"],
         )
     else:
-        print(
-            f"IoU score is not implemented for multilabel problems, setting recall to {recall}"
+        warnings.warn(
+            f"WARNING! IoU score is not implemented for multilabel problems, setting recall to {recall}",
+            UserWarning,
         )
 
     return generic_function_output_with_check(
