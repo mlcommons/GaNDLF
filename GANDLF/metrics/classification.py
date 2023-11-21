@@ -32,7 +32,7 @@ def overall_stats(predictions, ground_truth, params):
     # consider adding a "multilabel field in the future"
     # metrics that need the "average" parameter
 
-    for average_type, average_type_key in average_types_keys.items():
+    for average_type_key in average_types_keys.keys():
         calculators = {
             "accuracy": tm.Accuracy(
                 task=task,
