@@ -27,7 +27,7 @@ def generic_function_output_with_check(
         # I need to do this with try-except, otherwise for binary problems it will
         # raise and error as the binary metrics do not have .num_classes
         # attribute.
-        # https://tinyurl.com/564rh9yp link to example from BinaryAccuracy.
+        # https://github.com/Lightning-AI/torchmetrics/blob/v1.1.2/src/torchmetrics/classification/accuracy.py#L31-L146 link to example from BinaryAccuracy.
         try:
             max_clamp_val = metric_function.num_classes - 1
         except AttributeError:
