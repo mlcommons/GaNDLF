@@ -64,9 +64,7 @@ def overall_stats(predictions, ground_truth, params):
             "aucroc": tm.AUROC(
                 task=task,
                 num_classes=params["model"]["num_classes"],
-                average=average_type_key
-                if average_type_key != "micro"
-                else "macro",
+                average=average_type_key if average_type_key != "micro" else "macro",
             ),
         }
         for metric_name, calculator in calculators.items():
