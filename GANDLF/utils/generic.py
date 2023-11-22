@@ -6,6 +6,7 @@ import torch
 import SimpleITK as sitk
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from os import devnull
+from typing import Dict, Any, Union
 
 
 @contextmanager
@@ -46,6 +47,18 @@ def checkPatchDivisibility(patch_size, number=16):
     if (unique.shape[0] == 1) and (unique[0] < number):
         return False
     return True
+
+
+def determine_classification_task_type(params: Dict[str, Union[Dict[str, Any], Any]]) -> str:
+    """Determine the task (binary or multiclass) from the model config.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        str: A string that denotes the classification task type.
+    """
+    task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
+    return task
 
 
 def get_date_time():
@@ -146,7 +159,10 @@ def checkPatchDimensions(patch_size, numlay):
         patch_size_to_check = patch_size_to_check[:-1]
 
     if all(
-        [x >= 2 ** (numlay + 1) and x % 2**numlay == 0 for x in patch_size_to_check]
+        [
+            x >= 2 ** (numlay + 1) and x % 2**numlay == 0
+            for x in patch_size_to_check
+        ]
     ):
         return numlay
     else:
@@ -182,7 +198,9 @@ def get_array_from_image_or_tensor(input_tensor_or_image):
     elif isinstance(input_tensor_or_image, np.ndarray):
         return input_tensor_or_image
     else:
-        raise ValueError("Input must be a torch.Tensor or sitk.Image or np.ndarray")
+        raise ValueError(
+            "Input must be a torch.Tensor or sitk.Image or np.ndarray"
+        )
 
 
 def set_determinism(seed=42):
@@ -252,7 +270,9 @@ def print_and_format_metrics(
     output_metrics_dict = deepcopy(cohort_level_metrics)
     for metric in metrics_dict_from_parameters:
         if isinstance(sample_level_metrics[metric], np.ndarray):
-            to_print = (sample_level_metrics[metric] / length_of_dataloader).tolist()
+            to_print = (
+                sample_level_metrics[metric] / length_of_dataloader
+            ).tolist()
         else:
             to_print = sample_level_metrics[metric] / length_of_dataloader
         output_metrics_dict[metric] = to_print
@@ -266,3 +286,36 @@ def print_and_format_metrics(
     )
 
     return output_metrics_dict
+
+
+def define_average_type_key(
+    params: Dict[str, Union[Dict[str, Any], Any]], metric_name: str
+) -> str:
+    """Determine if the the 'average' filed is defined in the metric config.
+    If not, fallback to the default 'macro'
+    values.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+        metric_name (str): The name of the metric.
+
+    Returns:
+        str: The average type key.
+    """
+    average_type_key = params["metrics"][metric_name].get("average", "macro")
+    return average_type_key
+
+
+def define_multidim_average_type_key(params, metric_name) -> str:
+    """Determine if the the 'multidim_average' filed is defined in the metric config.
+    If not, fallback to the default 'global'.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+        metric_name (str): The name of the metric.
+
+    Returns:
+        str: The average type key.
+    """
+    average_type_key = params["metrics"][metric_name].get(
+        "multidim_average", "global"
+    )
+    return average_type_key

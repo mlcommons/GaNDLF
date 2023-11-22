@@ -21,7 +21,7 @@ metrics:
   - recall
   - specificity
   - iou: {
-      reduction: sum,
+      average: micro,
     }
     
 modality: rad

@@ -1,5 +1,7 @@
 import torchmetrics as tm
+from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
+from GANDLF.utils.generic import determine_classification_task_type
 
 
 def overall_stats(predictions, ground_truth, params):
@@ -26,42 +28,82 @@ def overall_stats(predictions, ground_truth, params):
         "per_class_average": "macro",
         "per_class_weighted": "weighted",
     }
+    task = determine_classification_task_type(params)
+    # consider adding a "multilabel field in the future"
     # metrics that need the "average" parameter
-    for average_type, average_type_key in average_types_keys.items():
+
+    for average_type_key in average_types_keys.values():
+        # multidim_average is not used when constructing these metrics
+        # think of having it
         calculators = {
             "accuracy": tm.Accuracy(
-                num_classes=params["model"]["num_classes"], average=average_type_key
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key,
             ),
             "precision": tm.Precision(
-                num_classes=params["model"]["num_classes"], average=average_type_key
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key,
             ),
             "recall": tm.Recall(
-                num_classes=params["model"]["num_classes"], average=average_type_key
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key,
             ),
             "f1": tm.F1Score(
-                num_classes=params["model"]["num_classes"], average=average_type_key
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key,
             ),
             "specificity": tm.Specificity(
-                num_classes=params["model"]["num_classes"], average=average_type_key
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key,
             ),
-            ## weird error for multi-class problem, where pos_label is not getting set
-            # "aucroc": tm.AUROC(
-            #     num_classes=params["model"]["num_classes"], average=average_type_key
-            # ),
+            "aucroc": tm.AUROC(
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key
+                if average_type_key != "micro"
+                else "macro",
+            ),
         }
         for metric_name, calculator in calculators.items():
-            output_metrics[
-                f"{metric_name}_{average_type}"
-            ] = get_output_from_calculator(predictions, ground_truth, calculator)
+            if metric_name == "aucroc":
+                one_hot_preds = one_hot(
+                    predictions.long(),
+                    num_classes=params["model"]["num_classes"],
+                )
+                output_metrics[metric_name] = get_output_from_calculator(
+                    one_hot_preds.float(), ground_truth, calculator
+                )
+            else:
+                output_metrics[metric_name] = get_output_from_calculator(
+                    predictions, ground_truth, calculator
+                )
+
+    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCRAD IT ####
+    # what is AUC metric telling at all? Computing it for predictions and ground truth
+    # is not making sense
     # metrics that do not have any "average" parameter
-    calculators = {
-        "auc": tm.AUC(reorder=True),
-        ## weird error for multi-class problem, where pos_label is not getting set
-        # "roc": tm.ROC(num_classes=params["model"]["num_classes"]),
-    }
-    for metric_name, calculator in calculators.items():
-        output_metrics[metric_name] = get_output_from_calculator(
-            predictions, ground_truth, calculator
-        )
+    # calculators = {
+    #
+    #     # "auc": tm.AUC(reorder=True),
+    #     ## weird error for multi-class problem, where pos_label is not getting set
+    #     "roc": tm.ROC(task=task, num_classes=params["model"]["num_classes"]),
+    # }
+    # for metric_name, calculator in calculators.items():
+    #     if metric_name == "roc":
+    #         one_hot_preds = one_hot(
+    #             predictions.long(), num_classes=params["model"]["num_classes"]
+    #         )
+    #         output_metrics[metric_name] = get_output_from_calculator(
+    #             one_hot_preds.float(), ground_truth, calculator
+    #         )
+    #     else:
+    #         output_metrics[metric_name] = get_output_from_calculator(
+    #             predictions, ground_truth, calculator
+    #         )
 
     return output_metrics

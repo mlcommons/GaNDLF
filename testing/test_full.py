@@ -156,7 +156,9 @@ def test_generic_constructTrainingCSV():
         # else:
         #     continue
         outputFile = inputDir + "/train_" + application_data + ".csv"
-        outputFile_rel = inputDir + "/train_" + application_data + "_relative.csv"
+        outputFile_rel = (
+            inputDir + "/train_" + application_data + "_relative.csv"
+        )
         # Test with various combinations of relative/absolute paths
         # Absolute input/output
         writeTrainingCSV(
@@ -184,7 +186,9 @@ def test_generic_constructTrainingCSV():
         with open(
             inputDir + "/train_" + application_data + ".csv", "r"
         ) as read_f, open(
-            inputDir + "/train_" + application_data_regression + ".csv", "w", newline=""
+            inputDir + "/train_" + application_data_regression + ".csv",
+            "w",
+            newline="",
         ) as write_reg, open(
             inputDir + "/train_" + application_data_classification + ".csv",
             "w",
@@ -252,7 +256,9 @@ def test_train_segmentation_rad_2d(device):
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # read and initialize parameters for specific data dimension
     for model in all_models_segmentation:
         if model == "imagenet_unet":
@@ -302,7 +308,9 @@ def test_train_segmentation_sdnet_rad_2d(device):
     parameters["model"]["architecture"] = "sdnet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -336,10 +344,14 @@ def test_train_segmentation_rad_3d(device):
     parameters["model"]["final_layer"] = "softmax"
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for model in all_models_segmentation:
         if model == "imagenet_unet":
@@ -390,11 +402,15 @@ def test_train_regression_rad_2d(device):
         inputDir + "/train_2d_rad_regression.csv"
     )
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["class_list"] = parameters["headers"][
+        "predictionHeaders"
+    ]
     parameters["scaling_factor"] = 1
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         parameters["model"]["architecture"] = model
@@ -431,9 +447,13 @@ def test_train_regression_rad_2d_imagenet(device):
         inputDir + "/train_2d_rad_regression.csv"
     )
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["class_list"] = parameters["headers"][
+        "predictionHeaders"
+    ]
     parameters["scaling_factor"] = 1
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for model in all_models_classification:
         parameters["model"]["architecture"] = model
@@ -469,13 +489,17 @@ def test_train_regression_brainage_rad_2d(device):
         inputDir + "/train_2d_rad_regression.csv"
     )
     parameters["model"]["num_channels"] = 3
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["class_list"] = parameters["headers"][
+        "predictionHeaders"
+    ]
     parameters["scaling_factor"] = 1
     parameters["model"]["architecture"] = "brain_age"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     parameters_temp = copy.deepcopy(parameters)
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -489,7 +513,9 @@ def test_train_regression_brainage_rad_2d(device):
     # file_config_temp = write_temp_config_path(parameters_temp)
     model_path = os.path.join(outputDir, "brain_age_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization(
+        model_path, config_path
+    )
     assert optimization_result == False, "Optimization should fail"
 
     sanitize_outputDir()
@@ -510,11 +536,17 @@ def test_train_regression_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_regression.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters["model"]["class_list"] = parameters["headers"]["predictionHeaders"]
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters["model"]["class_list"] = parameters["headers"][
+        "predictionHeaders"
+    ]
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         if "efficientnet" in model:
@@ -564,7 +596,9 @@ def test_train_classification_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for model in all_models_regression:
         if model == "imagenet_unet":
@@ -621,8 +655,12 @@ def test_train_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
     # loop through selected models and train for single epoch
@@ -673,8 +711,12 @@ def test_train_resume_inference_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -741,8 +783,12 @@ def test_train_inference_optimize_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     parameters["model"]["architecture"] = all_models_regression[0]
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
@@ -758,9 +804,13 @@ def test_train_inference_optimize_classification_rad_3d(device):
     )
 
     # file_config_temp = write_temp_config_path(parameters_temp)
-    model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
+    model_path = os.path.join(
+        outputDir, all_models_regression[0] + "_best.pth.tar"
+    )
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization(
+        model_path, config_path
+    )
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
@@ -798,7 +848,9 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "resunet"
     parameters["model"]["onnx_export"] = True
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -826,7 +878,9 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
 
 
 def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
-    print("15: Starting 3D Rad classification tests for single fold logits inference")
+    print(
+        "15: Starting 3D Rad classification tests for single fold logits inference"
+    )
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -840,8 +894,12 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -872,8 +930,12 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["final_layer"] = "logits"
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -888,6 +950,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     sanitize_outputDir()
 
     print("passed")
+
 
 def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device):
     print("16: Starting 3D Rad classification tests for multi-fold logits inference")
@@ -907,8 +970,12 @@ def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     model = all_models_regression[0]
     parameters["model"]["architecture"] = model
@@ -940,7 +1007,8 @@ def test_train_scheduler_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters = parseConfig(
-            testingDir + "/config_classification.yaml", version_check_flag=False
+            testingDir + "/config_classification.yaml",
+            version_check_flag=False,
         )
         parameters["modality"] = "rad"
         parameters["patch_size"] = patch_size["2D"]
@@ -952,7 +1020,9 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters["model"]["num_channels"] = 3
         parameters["model"]["architecture"] = "densenet121"
         parameters["model"]["norm_type"] = "instance"
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters = populate_header_in_parameters(
+            parameters, parameters["headers"]
+        )
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
         parameters["scheduler"] = {}
@@ -996,7 +1066,9 @@ def test_train_optimizer_classification_rad_2d(device):
     parameters["model"]["norm_type"] = "none"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for optimizer in global_optimizer_dict:
         parameters["optimizer"] = {}
@@ -1033,12 +1105,16 @@ def test_clip_train_classification_rad_3d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
     )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
     parameters["model"]["architecture"] = "vgg16"
     parameters["model"]["norm_type"] = "None"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for clip_mode in all_clip_modes:
         parameters["clip_mode"] = clip_mode
@@ -1078,15 +1154,21 @@ def test_train_normtype_segmentation_rad_3d(device):
     parameters["in_memory"] = True
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
 
     # these should raise exceptions
     for norm_type in ["none", None]:
         parameters["model"]["norm_type"] = norm_type
         file_config_temp = write_temp_config_path(parameters)
         with pytest.raises(Exception) as exc_info:
-            parameters = parseConfig(file_config_temp, version_check_flag=False)
+            parameters = parseConfig(
+                file_config_temp, version_check_flag=False
+            )
 
         print("Exception raised:", exc_info.value)
 
@@ -1149,7 +1231,9 @@ def test_train_metrics_segmentation_rad_2d(device):
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -1184,7 +1268,9 @@ def test_train_metrics_regression_rad_2d(device):
     parameters["model"]["architecture"] = "vgg11"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = True
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -1227,7 +1313,9 @@ def test_train_losses_segmentation_rad_2d(device):
         parameters["metrics"] = ["dice"]
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters = populate_header_in_parameters(
+            parameters, parameters["headers"]
+        )
         return parameters, training_data
 
     # loop through selected models and train for single epoch
@@ -1275,7 +1363,9 @@ def test_generic_config_read():
         inputDir + "/train_2d_rad_segmentation.csv"
     )
     assert parameters is not None, "parameters is None"
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    data_loader = ImagesFromDataFrame(
+        training_data, parameters, True, "unit_test"
+    )
     assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
@@ -1295,7 +1385,9 @@ def test_generic_config_read():
         inputDir + "/train_2d_rad_segmentation.csv"
     )
     assert parameters is not None, "parameters is None"
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    data_loader = ImagesFromDataFrame(
+        training_data, parameters, True, "unit_test"
+    )
     assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
@@ -1313,7 +1405,9 @@ def test_generic_config_read():
         inputDir + "/train_2d_rad_segmentation.csv"
     )
     assert parameters is not None, "parameters is None"
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    data_loader = ImagesFromDataFrame(
+        training_data, parameters, True, "unit_test"
+    )
     assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
@@ -1331,7 +1425,9 @@ def test_generic_config_read():
         inputDir + "/train_2d_rad_segmentation.csv"
     )
     assert parameters is not None, "parameters is None"
-    data_loader = ImagesFromDataFrame(training_data, parameters, True, "unit_test")
+    data_loader = ImagesFromDataFrame(
+        training_data, parameters, True, "unit_test"
+    )
     assert data_loader is not None, "data_loader is None"
 
     os.remove(file_config_temp)
@@ -1349,7 +1445,9 @@ def test_generic_cli_function_preprocess():
     input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
-    input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
+    input_data_df["metadata_test_float"] = np.random.rand(
+        input_data_df.shape[0]
+    )
     input_data_df["metadata_test_int"] = np.random.randint(
         0, 100, input_data_df.shape[0]
     )
@@ -1407,7 +1505,9 @@ def test_generic_cli_function_preprocess():
     input_data_df, _ = parseTrainingCSV(file_data, train=False)
     # add random metadata to ensure it gets preserved
     input_data_df["metadata_test_string"] = input_data_df.shape[0] * ["test"]
-    input_data_df["metadata_test_float"] = np.random.rand(input_data_df.shape[0])
+    input_data_df["metadata_test_float"] = np.random.rand(
+        input_data_df.shape[0]
+    )
     input_data_df["metadata_test_int"] = np.random.randint(
         0, 100, input_data_df.shape[0]
     )
@@ -1459,7 +1559,13 @@ def test_generic_cli_function_mainrun(device):
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     main_run(
-        file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
+        file_data,
+        file_config_temp,
+        outputDir,
+        True,
+        device,
+        resume=False,
+        reset=True,
     )
     sanitize_outputDir()
 
@@ -1528,7 +1634,9 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["model"]["dimension"] = 3
     parameters["model"]["class_list"] = [0, 1]
     parameters["model"]["amp"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
     parameters["model"]["architecture"] = "unet"
     parameters["weighted_loss"] = False
     parameters["model"]["onnx_export"] = False
@@ -1536,7 +1644,9 @@ def test_dataloader_construction_train_segmentation_3d(device):
     parameters["data_postprocessing"]["mapping"] = {0: 0, 1: 1}
     parameters["data_postprocessing"]["fill_holes"] = True
     parameters["data_postprocessing"]["cca"] = True
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     sanitize_outputDir()
     TrainingManager(
@@ -1560,25 +1670,37 @@ def test_generic_preprocess_functions():
     input_tensor = torch.rand(4, 256, 256, 1)
     input_transformed = global_preprocessing_dict["rgba2rgb"]()(input_tensor)
     assert input_transformed.shape[0] == 3, "Number of channels is not 3"
-    assert input_transformed.shape[1:] == input_tensor.shape[1:], "Shape mismatch"
+    assert (
+        input_transformed.shape[1:] == input_tensor.shape[1:]
+    ), "Shape mismatch"
 
     input_tensor = torch.rand(3, 256, 256, 1)
     input_transformed = global_preprocessing_dict["rgb2rgba"]()(input_tensor)
     assert input_transformed.shape[0] == 4, "Number of channels is not 4"
-    assert input_transformed.shape[1:] == input_tensor.shape[1:], "Shape mismatch"
+    assert (
+        input_transformed.shape[1:] == input_tensor.shape[1:]
+    ), "Shape mismatch"
 
     input_tensor = 2 * torch.rand(3, 256, 256, 1) - 1
-    input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"](
+        input_tensor
+    )
     input_tensor = 2 * torch.rand(1, 3, 256, 256) - 1
-    input_transformed = global_preprocessing_dict["normalize_imagenet"](input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_standardize"](input_tensor)
-    input_transformed = global_preprocessing_dict["normalize_div_by_255"](input_tensor)
+    input_transformed = global_preprocessing_dict["normalize_imagenet"](
+        input_tensor
+    )
+    input_transformed = global_preprocessing_dict["normalize_standardize"](
+        input_tensor
+    )
+    input_transformed = global_preprocessing_dict["normalize_div_by_255"](
+        input_tensor
+    )
     parameters_dict = {}
     parameters_dict["min"] = 0.25
     parameters_dict["max"] = 0.75
-    input_transformed = global_preprocessing_dict["threshold"](parameters_dict)(
-        input_tensor
-    )
+    input_transformed = global_preprocessing_dict["threshold"](
+        parameters_dict
+    )(input_tensor)
     assert (
         torch.count_nonzero(
             input_transformed[input_transformed < parameters_dict["min"]]
@@ -1587,7 +1709,9 @@ def test_generic_preprocess_functions():
         == 0
     ), "Input should be thresholded"
 
-    input_transformed = global_preprocessing_dict["clip"](parameters_dict)(input_tensor)
+    input_transformed = global_preprocessing_dict["clip"](parameters_dict)(
+        input_tensor
+    )
     assert (
         torch.count_nonzero(
             input_transformed[input_transformed < parameters_dict["min"]]
@@ -1605,7 +1729,9 @@ def test_generic_preprocess_functions():
 
     ## stain_normalization checks
     input_tensor = 2 * torch.rand(3, 256, 256, 1) + 10
-    training_data, _ = parseTrainingCSV(inputDir + "/train_2d_rad_segmentation.csv")
+    training_data, _ = parseTrainingCSV(
+        inputDir + "/train_2d_rad_segmentation.csv"
+    )
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["stain_normalizer"] = {
@@ -1633,13 +1759,17 @@ def test_generic_preprocess_functions():
     # adaptive histogram equalization
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
-    parameters_temp["data_preprocessing"]["histogram_matching"] = {"target": "adaptive"}
+    parameters_temp["data_preprocessing"]["histogram_matching"] = {
+        "target": "adaptive"
+    }
     non_zero_normalizer = global_preprocessing_dict["histogram_matching"](
         parameters_temp["data_preprocessing"]["histogram_matching"]
     )
     input_transformed = non_zero_normalizer(input_tensor)
     # histogram matching
-    training_data, _ = parseTrainingCSV(inputDir + "/train_3d_rad_segmentation.csv")
+    training_data, _ = parseTrainingCSV(
+        inputDir + "/train_3d_rad_segmentation.csv"
+    )
     parameters_temp = {}
     parameters_temp["data_preprocessing"] = {}
     parameters_temp["data_preprocessing"]["histogram_matching"] = {
@@ -1673,11 +1803,21 @@ def test_generic_preprocess_functions():
 
     cropper = global_preprocessing_dict["crop"]([64, 64, 64])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (1, 128, 128, 128), "Cropping should work"
+    assert input_transformed.shape == (
+        1,
+        128,
+        128,
+        128,
+    ), "Cropping should work"
 
     cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (1, 128, 128, 128), "Center-crop should work"
+    assert input_transformed.shape == (
+        1,
+        128,
+        128,
+        128,
+    ), "Center-crop should work"
 
     # test pure morphological operations
     input_tensor_3d = torch.rand(1, 1, 256, 256, 256)
@@ -1698,12 +1838,18 @@ def test_generic_preprocess_functions():
     # test obtaining arrays
     input_tensor_3d = torch.rand(256, 256, 256)
     input_array = get_array_from_image_or_tensor(input_tensor_3d)
-    assert isinstance(input_array, np.ndarray), "Array should be obtained from tensor"
+    assert isinstance(
+        input_array, np.ndarray
+    ), "Array should be obtained from tensor"
     input_image = sitk.GetImageFromArray(input_array)
     input_array = get_array_from_image_or_tensor(input_image)
-    assert isinstance(input_array, np.ndarray), "Array should be obtained from image"
+    assert isinstance(
+        input_array, np.ndarray
+    ), "Array should be obtained from image"
     input_array = get_array_from_image_or_tensor(input_array)
-    assert isinstance(input_array, np.ndarray), "Array should be obtained from array"
+    assert isinstance(
+        input_array, np.ndarray
+    ), "Array should be obtained from array"
 
     with pytest.raises(Exception) as exc_info:
         input_list = [0, 1]
@@ -1773,7 +1919,9 @@ def test_generic_preprocess_functions():
     expected_output = [10, 10]
     output_size_dict = {"resize": expected_output}
     input_transformed = resize_image(input_image, output_size_dict)
-    assert list(input_transformed.GetSize()) == expected_output, "Resize should work"
+    assert (
+        list(input_transformed.GetSize()) == expected_output
+    ), "Resize should work"
 
     sanitize_outputDir()
 
@@ -1830,7 +1978,9 @@ def test_generic_augmentation_functions():
 
     default_range = [-0.1, 0.1]
     for key in ranges:
-        params["data_augmentation"]["hed_transform"].setdefault(key, default_range)
+        params["data_augmentation"]["hed_transform"].setdefault(
+            key, default_range
+        )
 
     params["data_augmentation"]["hed_transform"].setdefault(
         "cutoff_range", [0.05, 0.95]
@@ -1860,16 +2010,26 @@ def test_generic_augmentation_functions():
         output_tensor = None
         if aug_lower in global_augs_dict:
             output_tensor = global_augs_dict[aug](
-                params_all_preprocessing_and_augs["data_augmentation"][aug_lower]
+                params_all_preprocessing_and_augs["data_augmentation"][
+                    aug_lower
+                ]
             )(input_tensor)
             assert output_tensor != None, "Augmentation should work"
 
     # additional test for elastic
-    params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
-    for key_to_pop in ["num_control_points", "max_displacement", "locked_borders"]:
+    params_elastic = params_all_preprocessing_and_augs["data_augmentation"][
+        "elastic"
+    ]
+    for key_to_pop in [
+        "num_control_points",
+        "max_displacement",
+        "locked_borders",
+    ]:
         params_elastic.pop(key_to_pop, None)
     output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
-    assert output_tensor != None, "Augmentation for base elastic transform should work"
+    assert (
+        output_tensor != None
+    ), "Augmentation for base elastic transform should work"
 
     sanitize_outputDir()
 
@@ -1911,7 +2071,9 @@ def test_train_checkpointing_segmentation_rad_2d(device):
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -1956,18 +2118,24 @@ def test_generic_model_patch_divisibility():
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
     parameters["metrics"] = ["dice"]
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
 
     # this assertion should fail
     with pytest.raises(BaseException) as _:
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     parameters["model"]["architecture"] = "uinc"
     parameters["model"]["base_filters"] = 11
 
     # this assertion should fail
     with pytest.raises(BaseException) as _:
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     sanitize_outputDir()
 
@@ -2003,7 +2171,8 @@ def test_generic_one_hot_logic():
 
     # check combined foreground
     combined_array = np.logical_or(
-        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
+        np.logical_or((random_array == 1), (random_array == 2)),
+        (random_array == 3),
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
@@ -2024,8 +2193,12 @@ def test_generic_one_hot_logic():
     )
 
     for key, value in parameters["data_postprocessing"]["mapping"].items():
-        comparison = (img_tensor_oh_rev_array == key) == (mapped_output == value)
-        assert comparison.all(), "Arrays at {}:{} are not equal".format(key, value)
+        comparison = (img_tensor_oh_rev_array == key) == (
+            mapped_output == value
+        )
+        assert comparison.all(), "Arrays at {}:{} are not equal".format(
+            key, value
+        )
 
     # check the case where 0 is present as an int in a special case
     class_list = [0, "1||2||3", np.max(random_array)]
@@ -2049,7 +2222,8 @@ def test_generic_one_hot_logic():
 
     # check combined foreground
     combined_array = np.logical_or(
-        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
+        np.logical_or((random_array == 1), (random_array == 2)),
+        (random_array == 3),
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
@@ -2075,7 +2249,9 @@ def test_generic_anonymizer():
     assert os.path.exists(output_file), "Anonymized file does not exist"
 
     # test nifti conversion
-    config_file_for_nifti = os.path.join(outputDir, "config_anonymizer_nifti.yaml")
+    config_file_for_nifti = os.path.join(
+        outputDir, "config_anonymizer_nifti.yaml"
+    )
     with open(config_file, "r") as file_data:
         yaml_data = file_data.read()
     parameters = yaml.safe_load(yaml_data)
@@ -2086,22 +2262,32 @@ def test_generic_anonymizer():
     # for nifti conversion, the input needs to be in a dir
     input_folder_for_nifti = os.path.join(outputDir, "nifti_input")
     Path(input_folder_for_nifti).mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(input_file, os.path.join(input_folder_for_nifti, "MR_small.dcm"))
+    shutil.copyfile(
+        input_file, os.path.join(input_folder_for_nifti, "MR_small.dcm")
+    )
 
     output_file = os.path.join(outputDir, "MR_small.nii.gz")
 
-    run_anonymizer(input_folder_for_nifti, output_file, config_file_for_nifti, "rad")
+    run_anonymizer(
+        input_folder_for_nifti, output_file, config_file_for_nifti, "rad"
+    )
     assert os.path.exists(output_file), "Anonymized file does not exist"
 
     if not os.path.exists(output_file):
         raise Exception("Output NIfTI file was not created")
 
-    input_file = os.path.join(inputDir, "2d_histo_segmentation", "1", "image.tiff")
+    input_file = os.path.join(
+        inputDir, "2d_histo_segmentation", "1", "image.tiff"
+    )
     output_file_histo = os.path.join(outputDir, "histo_anon.tiff")
     # this assertion should fail since histo anonymizer is not implementer
     with pytest.raises(BaseException) as exc_info:
-        run_anonymizer(input_folder_for_nifti, output_file_histo, None, "histo")
-        assert os.path.exists(output_file_histo), "Anonymized file does not exist"
+        run_anonymizer(
+            input_folder_for_nifti, output_file_histo, None, "histo"
+        )
+        assert os.path.exists(
+            output_file_histo
+        ), "Anonymized file does not exist"
     print("Exception raised: ", exc_info.value)
     sanitize_outputDir()
 
@@ -2116,7 +2302,9 @@ def test_train_inference_segmentation_histology_2d(device):
     if os.path.isdir(output_dir_patches):
         shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
-    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    output_dir_patches_output = os.path.join(
+        output_dir_patches, "histo_patches_output"
+    )
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
 
     parameters_patch = {}
@@ -2134,7 +2322,9 @@ def test_train_inference_segmentation_histology_2d(device):
         file_config_temp,
     )
 
-    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    file_for_Training = os.path.join(
+        output_dir_patches_output, "opm_train.csv"
+    )
     # read and parse csv
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
@@ -2146,7 +2336,9 @@ def test_train_inference_segmentation_histology_2d(device):
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     parameters["model"]["architecture"] = "resunet"
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
@@ -2189,7 +2381,9 @@ def test_train_inference_classification_histology_large_2d(device):
     if os.path.isdir(output_dir_patches):
         shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
-    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    output_dir_patches_output = os.path.join(
+        output_dir_patches, "histo_patches_output"
+    )
     Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
 
     for sub in ["1", "2"]:
@@ -2241,7 +2435,12 @@ def test_train_inference_classification_histology_large_2d(device):
             print("Trying vips:", ex1)
             try:
                 os.system(
-                    "vips resize " + filename + " " + new_filename + " " + str(scale)
+                    "vips resize "
+                    + filename
+                    + " "
+                    + new_filename
+                    + " "
+                    + str(scale)
                 )
             except Exception as ex2:
                 print("Resize could not be done:", ex2)
@@ -2249,7 +2448,9 @@ def test_train_inference_classification_histology_large_2d(device):
 
     for _, row in input_df.iterrows():
         # ensure opm mask size check is triggered
-        _, _ = generate_initial_mask(resize_for_ci(row["Channel_0"], scale=2), 1)
+        _, _ = generate_initial_mask(
+            resize_for_ci(row["Channel_0"], scale=2), 1
+        )
 
         for patch_size in [
             [128, 128],
@@ -2275,7 +2476,9 @@ def test_train_inference_classification_histology_large_2d(device):
     input_df.to_csv(resized_inference_data_list, index=False)
     files_to_delete.append(resized_inference_data_list)
 
-    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    file_for_Training = os.path.join(
+        output_dir_patches_output, "opm_train.csv"
+    )
     temp_df = pd.read_csv(file_for_Training)
     temp_df.drop("Label", axis=1, inplace=True)
     temp_df["valuetopredict"] = np.random.randint(2, size=len(temp_df))
@@ -2295,7 +2498,9 @@ def test_train_inference_classification_histology_large_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
     parameters["data_preprocessing"]["rgba2rgb"] = ""
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["model"]["print_summary"] = False
@@ -2312,7 +2517,9 @@ def test_train_inference_classification_histology_large_2d(device):
         reset=True,
     )
     parameters["output_dir"] = modelDir  # this is in inference mode
-    parameters["data_preprocessing"]["resize_patch"] = parameters_patch["patch_size"]
+    parameters["data_preprocessing"]["resize_patch"] = parameters_patch[
+        "patch_size"
+    ]
     parameters["patch_size"] = [
         parameters_patch["patch_size"][0] * 10,
         parameters_patch["patch_size"][1] * 10,
@@ -2361,7 +2568,9 @@ def test_train_inference_classification_histology_2d(device):
     if os.path.isdir(output_dir_patches):
         shutil.rmtree(output_dir_patches)
     Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
-    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    output_dir_patches_output = os.path.join(
+        output_dir_patches, "histo_patches_output"
+    )
 
     parameters_patch = {}
     # extracting minimal number of patches to ensure that the test does not take too long
@@ -2381,7 +2590,9 @@ def test_train_inference_classification_histology_2d(device):
             file_config_temp,
         )
 
-    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    file_for_Training = os.path.join(
+        output_dir_patches_output, "opm_train.csv"
+    )
     temp_df = pd.read_csv(file_for_Training)
     temp_df.drop("Label", axis=1, inplace=True)
     temp_df["valuetopredict"] = np.random.randint(2, size=6)
@@ -2401,7 +2612,9 @@ def test_train_inference_classification_histology_2d(device):
     parameters["model"]["architecture"] = "densenet121"
     parameters["model"]["norm_type"] = "none"
     parameters["data_preprocessing"]["rgba2rgb"] = ""
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     parameters["nested_training"]["testing"] = 1
     parameters["nested_training"]["validation"] = -2
     parameters["model"]["print_summary"] = False
@@ -2469,7 +2682,9 @@ def test_train_segmentation_unet_layerchange_rad_2d(device):
         parameters["model"]["amp"] = True
         parameters["model"]["print_summary"] = False
         parameters["model"]["num_channels"] = 3
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters = populate_header_in_parameters(
+            parameters, parameters["headers"]
+        )
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
         parameters["nested_training"]["testing"] = -5
@@ -2507,18 +2722,24 @@ def test_train_segmentation_unetr_rad_3d(device):
 
     # this assertion should fail
     with pytest.raises(BaseException) as _:
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
     with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 19
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     with pytest.raises(BaseException) as _:
         parameters["model"]["inner_patch_size"] = 64
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     for patch in [16, 8]:
         parameters["model"]["inner_patch_size"] = patch
@@ -2527,7 +2748,9 @@ def test_train_segmentation_unetr_rad_3d(device):
         parameters["model"]["num_channels"] = len(
             parameters["headers"]["channelHeaders"]
         )
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters = populate_header_in_parameters(
+            parameters, parameters["headers"]
+        )
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
         parameters["nested_training"]["testing"] = -5
@@ -2567,7 +2790,9 @@ def test_train_segmentation_unetr_rad_2d(device):
         parameters["model"]["amp"] = True
         parameters["model"]["print_summary"] = False
         parameters["model"]["num_channels"] = 3
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+        parameters = populate_header_in_parameters(
+            parameters, parameters["headers"]
+        )
         # loop through selected models and train for single epoch
         parameters["model"]["norm_type"] = "batch"
         parameters["nested_training"]["testing"] = -5
@@ -2605,12 +2830,16 @@ def test_train_segmentation_transunet_rad_2d(device):
     with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     parameters["model"]["embed_dim"] = 64
     parameters["model"]["depth"] = 2
@@ -2618,7 +2847,9 @@ def test_train_segmentation_transunet_rad_2d(device):
     parameters["model"]["num_heads"] = 8
     parameters["model"]["amp"] = True
     parameters["model"]["num_channels"] = 3
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     parameters["model"]["norm_type"] = "batch"
     parameters["nested_training"]["testing"] = -5
@@ -2655,32 +2886,44 @@ def test_train_segmentation_transunet_rad_3d(device):
 
     # this assertion should fail
     with pytest.raises(BaseException) as _:
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     parameters["model"]["dimension"] = 3
     parameters["patch_size"] = [32, 32, 32]
 
     with pytest.raises(BaseException) as _:
         parameters["model"]["depth"] = 1
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 6
         parameters["model"]["embed_dim"] = 64
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     with pytest.raises(BaseException) as _:
         parameters["model"]["num_heads"] = 3
         parameters["model"]["embed_dim"] = 50
-        global_models_dict[parameters["model"]["architecture"]](parameters=parameters)
+        global_models_dict[parameters["model"]["architecture"]](
+            parameters=parameters
+        )
 
     parameters["model"]["num_heads"] = 8
     parameters["model"]["embed_dim"] = 64
     parameters["model"]["depth"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     parameters["model"]["norm_type"] = "batch"
     parameters["nested_training"]["testing"] = -5
@@ -2719,7 +2962,9 @@ def test_train_gradient_clipping_classification_rad_2d(device):
     parameters["model"]["num_channels"] = 3
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # ensure gradient clipping is getting tested
     for clip_mode in ["norm", "value", "agc"]:
         parameters["model"]["architecture"] = "imagenet_vgg11"
@@ -2742,7 +2987,9 @@ def test_train_gradient_clipping_classification_rad_2d(device):
 
 
 def test_train_segmentation_unet_conversion_rad_3d(device):
-    print("43: Starting 3D Rad segmentation tests for unet with ACS conversion")
+    print(
+        "43: Starting 3D Rad segmentation tests for unet with ACS conversion"
+    )
     # read and parse csv
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
@@ -2759,10 +3006,14 @@ def test_train_segmentation_unet_conversion_rad_3d(device):
     parameters["model"]["amp"] = True
     parameters["in_memory"] = True
     parameters["verbose"] = False
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters["model"]["num_channels"] = len(
+        parameters["headers"]["channelHeaders"]
+    )
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     # loop through selected models and train for single epoch
     for model in ["unet", "unet_multilayer", "lightunet_multilayer"]:
         for converter_type in ["acs", "soft", "conv3d"]:
@@ -2802,7 +3053,9 @@ def test_generic_cli_function_configgenerator():
             parameters = parseConfig(
                 os.path.join(outputDir, file), version_check_flag=False
             )
-        assert parameters, "config generator did not generate valid config files"
+        assert (
+            parameters
+        ), "config generator did not generate valid config files"
     sanitize_outputDir()
 
     generator_config = yaml.safe_load(open(generator_config_path, "r"))
@@ -2844,7 +3097,9 @@ def test_generic_cli_function_recoverconfig():
     parameters["model"]["architecture"] = "sdnet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -2891,7 +3146,9 @@ def test_generic_deploy_docker():
     parameters["data_preprocessing"]["resize_image"] = [224, 224]
     parameters["memory_save_mode"] = True
 
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters = populate_header_in_parameters(
+        parameters, parameters["headers"]
+    )
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -2928,7 +3185,9 @@ def test_generic_deploy_docker():
 
 
 def test_collision_subjectid_test_segmentation_rad_2d(device):
-    print("47: Starting 2D Rad segmentation tests for collision of subjectID in test")
+    print(
+        "47: Starting 2D Rad segmentation tests for collision of subjectID in test"
+    )
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -2991,10 +3250,14 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
     assert np.allclose(a, c)
     assert np.allclose(b, d)
 
-    e, f = [random.random() for _ in range(5)], [random.random() for _ in range(5)]
+    e, f = [random.random() for _ in range(5)], [
+        random.random() for _ in range(5)
+    ]
 
     set_determinism(seed=42)
-    g, h = [random.random() for _ in range(5)], [random.random() for _ in range(5)]
+    g, h = [random.random() for _ in range(5)], [
+        random.random() for _ in range(5)
+    ]
 
     # Check that the generated random numbers are the same with Python's built-in random module
     assert e == g
@@ -3057,7 +3320,9 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             # run the metrics calculation
             generate_metrics_dict(temp_infer_csv, temp_config, output_file)
 
-            assert os.path.isfile(output_file), "Metrics output file was not generated"
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated"
 
             sanitize_outputDir()
 

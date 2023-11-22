@@ -50,6 +50,7 @@ from .generic import (
     suppress_stdout_stderr,
     set_determinism,
     print_and_format_metrics,
+    determine_classification_task_type,
 )
 
 from .modelio import (
