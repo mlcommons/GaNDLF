@@ -9,7 +9,7 @@ from torchmetrics import (
 )
 from GANDLF.utils.tensor import one_hot
 from GANDLF.utils.generic import (
-    determine_task,
+    determine_classification_task_type,
     define_average_type_key,
     define_multidim_average_type_key,
 )
