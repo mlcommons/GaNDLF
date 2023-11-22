@@ -47,7 +47,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
     # check required headers in a case insensitive manner
     headers = {}
     required_columns = ["subjectid", "prediction", "target"]
-    for col, _ in input_df.iteritems():
+    for col, _ in input_df.items():
         col_lower = col.lower()
         for column_to_check in required_columns:
             if column_to_check == col_lower:
@@ -194,7 +194,13 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             else:
                 return input_tensor
 
-        def __percentile_clip(input_tensor, reference_tensor=None, p_min=0.5, p_max=99.5, strictlyPositive=True):
+        def __percentile_clip(
+            input_tensor,
+            reference_tensor=None,
+            p_min=0.5,
+            p_max=99.5,
+            strictlyPositive=True,
+        ):
             """Normalizes a tensor based on percentiles. Clips values below and above the percentile.
             Percentiles for normalization can come from another tensor.
 
@@ -209,13 +215,21 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             Returns:
                 torch.Tensor: The input_tensor normalized based on the percentiles of the reference tensor.
             """
-            reference_tensor = input_tensor if reference_tensor is None else reference_tensor
-            v_min, v_max = np.percentile(reference_tensor, [p_min,p_max]) #get p_min percentile and p_max percentile
+            reference_tensor = (
+                input_tensor if reference_tensor is None else reference_tensor
+            )
+            v_min, v_max = np.percentile(
+                reference_tensor, [p_min, p_max]
+            )  # get p_min percentile and p_max percentile
 
             # set lower bound to be 0 if strictlyPositive is enabled
             v_min = max(v_min, 0.0) if strictlyPositive else v_min
-            output_tensor = np.clip(input_tensor,v_min,v_max) #clip values to percentiles from reference_tensor
-            output_tensor = (output_tensor - v_min)/(v_max-v_min) #normalizes values to [0;1]
+            output_tensor = np.clip(
+                input_tensor, v_min, v_max
+            )  # clip values to percentiles from reference_tensor
+            output_tensor = (output_tensor - v_min) / (
+                v_max - v_min
+            )  # normalizes values to [0;1]
             return output_tensor
 
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
@@ -244,9 +258,23 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             # Normalize to [0;1] based on GT (otherwise MSE will depend on the image intensity range)
             normalize = parameters.get("normalize", True)
             if normalize:
-                reference_tensor = target_image * ~mask #use all the tissue that is not masked for normalization
-                gt_image_infill = __percentile_clip(gt_image_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
-                output_infill = __percentile_clip(output_infill, reference_tensor=reference_tensor, p_min=0.5, p_max=99.5, strictlyPositive=True)
+                reference_tensor = (
+                    target_image * ~mask
+                )  # use all the tissue that is not masked for normalization
+                gt_image_infill = __percentile_clip(
+                    gt_image_infill,
+                    reference_tensor=reference_tensor,
+                    p_min=0.5,
+                    p_max=99.5,
+                    strictlyPositive=True,
+                )
+                output_infill = __percentile_clip(
+                    output_infill,
+                    reference_tensor=reference_tensor,
+                    p_min=0.5,
+                    p_max=99.5,
+                    strictlyPositive=True,
+                )
 
             overall_stats_dict[current_subject_id][
                 "ssim"
@@ -303,14 +331,17 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 overall_stats_dict[current_subject_id][
                     "psnr_01"
                 ] = peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, data_range=(0,1)
+                    gt_image_infill, output_infill, data_range=(0, 1)
                 ).item()
 
                 # same as above but with epsilon for robustness
                 overall_stats_dict[current_subject_id][
                     "psnr_01_eps"
                 ] = peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, data_range=(0,1), epsilon=sys.float_info.epsilon
+                    gt_image_infill,
+                    output_infill,
+                    data_range=(0, 1),
+                    epsilon=sys.float_info.epsilon,
                 ).item()
 
     pprint(overall_stats_dict)

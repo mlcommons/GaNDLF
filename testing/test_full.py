@@ -128,7 +128,6 @@ def test_generic_download_data():
                 zip_ref.extractall(testingDir)
             os.remove(output)
             break
-
     sanitize_outputDir()
 
     print("passed")
@@ -216,7 +215,7 @@ def test_generic_constructTrainingCSV():
                 i += 1
 
 
-# these are helper functions to be used in other tests
+# # these are helper functions to be used in other tests
 def sanitize_outputDir():
     print("02_1: Sanitizing outputDir")
     if os.path.isdir(outputDir):
@@ -236,7 +235,7 @@ def write_temp_config_path(parameters_to_write):
     return temp_config_path
 
 
-# these are helper functions to be used in other tests
+#these are helper functions to be used in other tests
 
 
 def test_train_segmentation_rad_2d(device):
@@ -698,6 +697,7 @@ def test_train_classification_rad_3d(device):
     print("passed")
 
 
+
 def test_train_resume_inference_classification_rad_3d(device):
     print("12: Starting 3D Rad classification tests for resume and reset")
     # read and initialize parameters for specific data dimension
@@ -770,7 +770,6 @@ def test_train_resume_inference_classification_rad_3d(device):
 
     print("passed")
 
-
 def test_train_inference_optimize_classification_rad_3d(device):
     print("13: Starting 3D Rad segmentation tests for optimization")
     # read and initialize parameters for specific data dimension
@@ -828,7 +827,6 @@ def test_train_inference_optimize_classification_rad_3d(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_train_inference_optimize_segmentation_rad_2d(device):
     print("14: Starting 2D Rad segmentation tests for optimization")
@@ -954,12 +952,8 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     print("passed")
 
 
-def test_train_inference_classification_with_logits_multiple_folds_rad_3d(
-    device,
-):
-    print(
-        "16: Starting 3D Rad classification tests for multi-fold logits inference"
-    )
+def test_train_inference_classification_with_logits_multiple_folds_rad_3d(device):
+    print("16: Starting 3D Rad classification tests for multi-fold logits inference")
     # read and initialize parameters for specific data dimension
     parameters = parseConfig(
         testingDir + "/config_classification.yaml", version_check_flag=False
@@ -1291,7 +1285,6 @@ def test_train_metrics_regression_rad_2d(device):
 
     print("passed")
 
-
 def test_train_losses_segmentation_rad_2d(device):
     print("23: Starting 2D Rad segmentation tests for losses")
 
@@ -1442,7 +1435,6 @@ def test_generic_config_read():
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_generic_cli_function_preprocess():
     print("25: Starting testing cli function preprocess")
@@ -1607,7 +1599,6 @@ def test_generic_cli_function_mainrun(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_dataloader_construction_train_segmentation_3d(device):
     print("27: Starting 3D Rad segmentation tests")
@@ -2044,7 +2035,6 @@ def test_generic_augmentation_functions():
 
     print("passed")
 
-
 def test_train_checkpointing_segmentation_rad_2d(device):
     print("30: Starting 2D Rad segmentation tests for metrics")
     # read and parse csv
@@ -2381,7 +2371,6 @@ def test_train_inference_segmentation_histology_2d(device):
 
     print("passed")
 
-
 def test_train_inference_classification_histology_large_2d(device):
     print(
         "35: Starting histology train/inference classification tests for large images to check exception handling"
@@ -2570,7 +2559,6 @@ def test_train_inference_classification_histology_large_2d(device):
     sanitize_outputDir()
 
     print("passed")
-
 
 def test_train_inference_classification_histology_2d(device):
     print("36: Starting histology train/inference classification tests")
@@ -3134,7 +3122,6 @@ def test_generic_cli_function_recoverconfig():
 
     print("passed")
 
-
 def test_generic_deploy_docker():
     print("46: Testing deployment of a model to Docker")
     # Train, then try deploying that model (requires an installed Docker engine)
@@ -3338,7 +3325,6 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             ), "Metrics output file was not generated"
 
             sanitize_outputDir()
-
 
 def test_generic_deploy_metrics_docker():
     print("50: Testing deployment of a metrics generator to Docker")
