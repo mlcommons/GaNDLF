@@ -287,13 +287,14 @@ def print_and_format_metrics(
 
 def define_average_type_key(
     params: Dict[str, Union[Dict[str, Any], Any]], metric_name: str
-):
+) -> str:
     """Determine if the the 'average' filed is defined in the metric config.
     If not, fallback to the default 'macro'
     values.
     Args:
         params (dict): The parameter dictionary containing training and data information.
         metric_name (str): The name of the metric.
+
     Returns:
         str: The average type key.
     """
@@ -301,12 +302,13 @@ def define_average_type_key(
     return average_type_key
 
 
-def define_multidim_average_type_key(params, metric_name):
+def define_multidim_average_type_key(params, metric_name) -> str:
     """Determine if the the 'multidim_average' filed is defined in the metric config.
     If not, fallback to the default 'global'.
     Args:
         params (dict): The parameter dictionary containing training and data information.
         metric_name (str): The name of the metric.
+
     Returns:
         str: The average type key.
     """
