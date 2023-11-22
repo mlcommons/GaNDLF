@@ -9,17 +9,6 @@ from os import devnull
 from typing import Dict, Any, Union
 
 
-@contextmanagerimport os, datetime, sys
-from copy import deepcopy
-import random
-import numpy as np
-import torch
-import SimpleITK as sitk
-from contextlib import contextmanager, redirect_stderr, redirect_stdout
-from os import devnull
-from typing import Dict, Any, Union
-
-
 @contextmanager
 def suppress_stdout_stderr():
     """A context manager that redirects stdout and stderr to devnull"""
