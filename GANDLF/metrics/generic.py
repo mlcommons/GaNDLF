@@ -95,7 +95,7 @@ def iou_score(output, label, params):
         predicted_classes = torch.argmax(output, 1)
     elif params["problem_type"] == "segmentation":
         label = one_hot(label, params["model"]["class_list"])
-    task = determine_task(params)
+    task = determine_classification_task_type(params)
     recall = JaccardIndex(
         task=task,
         num_classes=num_classes,
