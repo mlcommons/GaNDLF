@@ -1,6 +1,4 @@
-import sys
 import torch
-import warnings
 from torchmetrics import (
     F1Score,
     Precision,
