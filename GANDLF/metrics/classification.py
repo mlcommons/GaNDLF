@@ -1,7 +1,7 @@
 import torchmetrics as tm
 from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
-from GANDLF.utils.generic import determine_task
+from GANDLF.utils.generic import determine_classification_task_type
 
 
 def overall_stats(predictions, ground_truth, params):
