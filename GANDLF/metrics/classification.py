@@ -28,7 +28,7 @@ def overall_stats(predictions, ground_truth, params):
         "per_class_average": "macro",
         "per_class_weighted": "weighted",
     }
-    task = determine_task(params)
+    task = determine_classification_task_type(params)
     # consider adding a "multilabel field in the future"
     # metrics that need the "average" parameter
 
