@@ -49,10 +49,13 @@ def checkPatchDivisibility(patch_size, number=16):
     return True
 
 
-def determine_task(params: Dict[str, Union[Dict[str, Any], Any]]) -> str:
+def determine_classification_task_type(params: Dict[str, Union[Dict[str, Any], Any]]) -> str:
     """Determine the task (binary or multiclass) from the model config.
     Args:
         params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        str: A string that denotes the classification task type.
     """
     task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
     return task
