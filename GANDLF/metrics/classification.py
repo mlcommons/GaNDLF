@@ -33,6 +33,8 @@ def overall_stats(predictions, ground_truth, params):
     # metrics that need the "average" parameter
 
     for average_type_key in average_types_keys.values():
+        # multidim_average is not used when constructing these metrics
+        # think of having it
         calculators = {
             "accuracy": tm.Accuracy(
                 task=task,

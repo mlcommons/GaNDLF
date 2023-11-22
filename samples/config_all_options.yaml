@@ -51,14 +51,14 @@ metrics:
   # - hausdorff # hausdorff 100 percentile, segmentation
   # - hausdorff95 # hausdorff 95 percentile, segmentation
   # - mse # regression/classification
-  # - accuracy # classification
+  # - accuracy # classification ## more details https://lightning.ai/docs/torchmetrics/v1.1.2/classification/accuracy.html
   # - classification_accuracy # classification
   # - balanced_accuracy # classification ## more details https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html
   # - per_label_accuracy # used for classification
-  # - f1 # classification/segmentation
-  # - precision # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id3
-  # - recall # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#id4
-  # - iou # classification/segmentation ## more details https://torchmetrics.readthedocs.io/en/latest/references/modules.html#iou
+  # - f1 # classification/segmentation ## more details https://lightning.ai/docs/torchmetrics/v1.1.2/classification/f1_score.html
+  # - precision # classification/segmentation ## more details https://lightning.ai/docs/torchmetrics/v1.1.2/classification/precision.html
+  # - recall # classification/segmentation ## more details https://lightning.ai/docs/torchmetrics/v1.1.2/classification/recall.html
+  # - iou # classification/segmentation ## more details https://lightning.ai/docs/torchmetrics/v1.1.2/classification/jaccard_index.html
 ## this customizes the inference, primarily used for segmentation outputs
 inference_mechanism: {
   grid_aggregator_overlap: crop, # this option provides the option to strategize the grid aggregation output; should be either 'crop' or 'average' - https://torchio.readthedocs.io/patches/patch_inference.html#grid-aggregator
