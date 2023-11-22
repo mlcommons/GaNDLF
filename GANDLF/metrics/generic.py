@@ -42,7 +42,7 @@ def generic_function_output_with_check(
 def generic_torchmetrics_score(
     output, label, metric_class, metric_key, params
 ):
-    task = determine_task(params)
+    task = determine_classification_task_type(params)
     num_classes = params["model"]["num_classes"]
     predicted_classes = output
     if params["problem_type"] == "classification":
