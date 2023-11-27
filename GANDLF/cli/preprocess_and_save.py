@@ -105,15 +105,13 @@ def preprocess_and_save(
             # the "squeeze" is needed because the dataloader automatically
             # constructs 5D tensor considering the batch_size as first
             # dimension, but the constructor needs 4D tensor.
-            subject_process[str(channel)] = torchio.Image(
+            subject_process[str(channel)] = torchio.ScalarImage(
                 tensor=subject[str(channel)]["data"].squeeze(0),
-                type=torchio.INTENSITY,
                 path=subject[str(channel)]["path"],
             )
         if parameters["headers"]["labelHeader"] is not None:
-            subject_process["label"] = torchio.Image(
+            subject_process["label"] = torchio.LabelMap(
                 tensor=subject["label"]["data"].squeeze(0),
-                type=torchio.LABEL,
                 path=subject["label"]["path"],
             )
         subject_dict_to_write = torchio.Subject(subject_process)
