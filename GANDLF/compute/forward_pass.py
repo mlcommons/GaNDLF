@@ -150,7 +150,6 @@ def validate_network(
         for key in params["channel_keys"]:
             subject_dict[key] = torchio.ScalarImage(
                 path=subject[key]["path"],
-                type=subject[key]["type"],
                 tensor=subject[key]["data"].squeeze(0),
                 affine=subject[key]["affine"].squeeze(0),
             )
@@ -320,7 +319,6 @@ def validate_network(
                 output_prediction = output_prediction.unsqueeze(0)
                 if params["save_output"]:
                     img_for_metadata = torchio.ScalarImage(
-                        type=subject["1"]["type"],
                         tensor=subject["1"]["data"].squeeze(0),
                         affine=subject["1"]["affine"].squeeze(0),
                     ).as_sitk()
