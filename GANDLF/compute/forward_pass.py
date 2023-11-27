@@ -132,9 +132,8 @@ def validate_network(
         # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
         if "label" in subject:
             if subject["label"] != ["NA"]:
-                subject_dict["label"] = torchio.Image(
+                subject_dict["label"] = torchio.LabelMap(
                     path=subject["label"]["path"],
-                    type=torchio.LABEL,
                     tensor=subject["label"]["data"].squeeze(0),
                     affine=subject["label"]["affine"].squeeze(0),
                 )
@@ -149,7 +148,7 @@ def validate_network(
                 )
 
         for key in params["channel_keys"]:
-            subject_dict[key] = torchio.Image(
+            subject_dict[key] = torchio.ScalarImage(
                 path=subject[key]["path"],
                 type=subject[key]["type"],
                 tensor=subject[key]["data"].squeeze(0),
@@ -320,7 +319,7 @@ def validate_network(
                 output_prediction = aggregator.get_output_tensor()
                 output_prediction = output_prediction.unsqueeze(0)
                 if params["save_output"]:
-                    img_for_metadata = torchio.Image(
+                    img_for_metadata = torchio.ScalarImage(
                         type=subject["1"]["type"],
                         tensor=subject["1"]["data"].squeeze(0),
                         affine=subject["1"]["affine"].squeeze(0),
