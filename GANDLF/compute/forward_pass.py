@@ -129,7 +129,8 @@ def validate_network(
         subject_dict = {}
         label_ground_truth = None
         label_present = False
-        # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, such as pre-processing and augmentations, if appropriate
+        # this is when we want the dataloader to pick up properties of GaNDLF's DataLoader, 
+        # such as pre-processing and augmentations, if appropriate
         if "label" in subject:
             if subject["label"] != ["NA"]:
                 subject_dict["label"] = torchio.LabelMap(
