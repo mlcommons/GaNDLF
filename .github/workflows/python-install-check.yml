@@ -3,7 +3,7 @@ name: Installations across python versions
 on: [push, pull_request]
 
 jobs:
-  black:
+  pyversion_installation:
     runs-on: ubuntu-latest
     strategy:
       matrix:
