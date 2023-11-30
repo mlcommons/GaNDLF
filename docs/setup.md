@@ -41,7 +41,7 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 
 ### Optional Dependencies 
 
-The following dependencies are **optional**, and are needed for specific features of GaNDLF.
+The following dependencies are **optional**, and are only needed to access specific features of GaNDLF.
 
 ```bash
 (venv_gandlf) $> pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
