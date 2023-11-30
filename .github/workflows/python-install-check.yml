@@ -1,9 +1,9 @@
-name: Installations across python versions
+name: Install across python versions
 
 on: [push, pull_request]
 
 jobs:
-  pyversion_installation:
+  pyversion_install:
     runs-on: ubuntu-latest
     strategy:
       matrix:
