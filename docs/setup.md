@@ -29,9 +29,11 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 (base) $> conda activate venv_gandlf
 (venv_gandlf) $> ### subsequent commands go here
 ### PyTorch installation - https://pytorch.org/get-started/previous-versions/#v210
-## CUDA 11.6
+## CUDA 12.1
+# (venv_gandlf) $> pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
+## CUDA 11.8
 # (venv_gandlf) $> pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
-## ROCm
+## ROCm 5.6
 # (venv_gandlf) $> pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/rocm5.6
 ## CPU-only
 # (venv_gandlf) $> pip install torch==2.1.0+cpu torchvision==0.16.0+cpu torchaudio==2.1.0 --extra-index-url https://download.pytorch.org/whl/cpu
@@ -39,7 +41,7 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 
 ### Optional Dependencies 
 
-The following dependencies are optional, and are needed for specific features of GaNDLF.
+The following dependencies are **optional**, and are needed for specific features of GaNDLF.
 
 ```bash
 (venv_gandlf) $> pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
