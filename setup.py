@@ -110,7 +110,7 @@ requirements = [
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
-    "segmentation-models-pytorch==0.3.2",
+    "segmentation-models-pytorch==0.3.3",
     "ACSConv==0.1.1",
     "docker",
     "dicom-anonymizer",
