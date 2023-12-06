@@ -236,7 +236,7 @@ GaNDLF provides a script to generate metrics after an inference process is done.
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
-  -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'
+  -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'SubjectID,Target,Prediction'
   -o , --outputfile   Location to save the output dictionary. If not provided, will print to stdout.
 ```
 
