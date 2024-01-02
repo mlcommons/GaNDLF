@@ -57,7 +57,7 @@ Please cite the following article for GaNDLF ([full paper](https://www.nature.co
     abstract={Deep Learning (DL) has the potential to optimize machine learning in both the scientific and clinical communities. However, greater expertise is required to develop DL algorithms, and the variability of implementations hinders their reproducibility, translation, and deployment. Here we present the community-driven Generally Nuanced Deep Learning Framework (GaNDLF), with the goal of lowering these barriers. GaNDLF makes the mechanism of DL development, training, and inference more stable, reproducible, interpretable, and scalable, without requiring an extensive technical background. GaNDLF aims to provide an end-to-end solution for all DL-related tasks in computational precision medicine. We demonstrate the ability of GaNDLF to analyze both radiology and histology images, with built-in support for k-fold cross-validation, data augmentation, multiple modalities and output classes. Our quantitative performance evaluation on numerous use cases, anatomies, and computational tasks supports GaNDLF as a robust application framework for deployment in clinical workflows.},
     issn={2731-3395},
     doi={10.1038/s44172-023-00066-3},
-    url={https://doi.org/10.1038/s44172-023-00066-3}
+    url={https://www.nature.com/articles/s44172-023-00066-3}
 }
 ```
 
