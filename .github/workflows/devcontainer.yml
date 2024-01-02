@@ -28,7 +28,7 @@ jobs:
     # if: steps.changed-files-specific.outputs.only_modified == 'false'
     - name: Detect and screen file changes
       id: changed-files-specific
-      uses: tj-actions/changed-files@v34
+      uses: tj-actions/changed-files@v41
       with:
           files: |
             docs/**
