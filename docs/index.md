@@ -42,7 +42,7 @@ Please cite the following article for GaNDLF ([full paper](https://www.nature.co
     pages={23},
     issn={2731-3395},
     doi={10.1038/s44172-023-00066-3},
-    url={https://doi.org/10.1038/s44172-023-00066-3}
+    url={https://www.nature.com/articles/s44172-023-00066-3}
 }
 ```
 
