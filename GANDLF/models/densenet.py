@@ -10,7 +10,9 @@ from .modelBase import ModelBase
 
 
 class _DenseLayer(nn.Sequential):
-    def __init__(self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv):
+    def __init__(
+        self, num_input_features, growth_rate, bn_size, drop_rate, Norm, Conv
+    ):
         """
         Constructor for _DenseLayer class.
 
@@ -126,7 +128,9 @@ class _DenseBlock(nn.Sequential):
 
 
 class _Transition(nn.Sequential):
-    def __init__(self, num_input_features, num_output_features, Norm, Conv, AvgPool):
+    def __init__(
+        self, num_input_features, num_output_features, Norm, Conv, AvgPool
+    ):
         super().__init__()
         self.add_module("norm", Norm(num_input_features))
         self.add_module("relu", nn.ReLU(inplace=True))
@@ -232,7 +236,9 @@ class DenseNet(ModelBase):
                 conv=self.Conv,
             )
             self.features.add_module("denseblock{}".format(i + 1), block)
-            num_features = num_features + num_layers * parameters["growth_rate"]
+            num_features = (
+                num_features + num_layers * parameters["growth_rate"]
+            )
             if i != len(block_config) - 1:
                 trans = _Transition(
                     num_input_features=num_features,
@@ -261,7 +267,9 @@ class DenseNet(ModelBase):
 
         for m in self.modules():
             if isinstance(m, self.Conv):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+                nn.init.kaiming_normal_(
+                    m.weight, mode="fan_out", nonlinearity="relu"
+                )
             elif isinstance(m, self.Norm):
                 if m.weight is not None:
                     m.weight.data.fill_(1)
@@ -288,7 +296,9 @@ class DenseNet(ModelBase):
         out = F.relu(features, inplace=True)
 
         # Apply adaptive average pooling to the feature maps and flatten the resulting tensor
-        out = self.AdaptiveAvgPool(self.output_size)(out).view(features.size(0), -1)
+        out = self.AdaptiveAvgPool(self.output_size)(out).view(
+            features.size(0), -1
+        )
 
         # Pass the flattened tensor through the fully connected layers of the model
         out = self.classifier(out)
