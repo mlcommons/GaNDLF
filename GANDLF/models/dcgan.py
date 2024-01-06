@@ -5,15 +5,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 from modelBase import ModelBase
 from warnings import warn
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple
 from GANDLF.parseConfig import parseConfig
 
 
-class _GneratorDCGAN(nn.Sequential):
+class _GneratorDCGAN(nn.Module):
     """Generator for the DCGAN."""
 
     def __init__(
         self,
+        output_patch_size: Tuple[int, int, int],
+        n_dimensions: int,
         latent_vector_dim: int,
         num_output_features: int,
         growth_rate: int,
@@ -25,6 +27,9 @@ class _GneratorDCGAN(nn.Sequential):
         """
         Initializes a new instance of the _GneratorDCGAN class.
         Parameters:
+        output_patch_size (Tuple[int, int,int]): The size of the output
+        patch.
+            n_dimensions (int): The dimensionality of the input and output.
             latent_vector_dim (int): The dimension of the latent vector
         to be used as input to the generator.
             num_output_features (int): The number of output channels in
@@ -43,19 +48,26 @@ class _GneratorDCGAN(nn.Sequential):
         should be a transposed convolution (i.e. nn.ConvTranspose2d).
         """
         super().__init__()
-        self.add_module(
+        self.feature_extractor = nn.Sequential()
+        self.feature_extractor.add_module(
             "conv1t",
             conv(latent_vector_dim, bn_size, 4, 1, 0, bias=False),
         )
-        self.add_module("norm1", norm(bn_size))
-        self.add_module("leaky_relu1", nn.LeakyReLU(slope, inplace=True))
-        self.add_module(
+        self.feature_extractor.add_module("norm1", norm(bn_size))
+        self.feature_extractor.add_module(
+            "leaky_relu1", nn.LeakyReLU(slope, inplace=True)
+        )
+        self.feature_extractor.add_module(
             "conv2t",
             conv(bn_size, bn_size // growth_rate, 4, 2, 1, bias=False),
         )
-        self.add_module("norm2", norm(bn_size // growth_rate))
-        self.add_module("leaky_relu2", nn.LeakyReLU(slope, inplace=True))
-        self.add_module(
+        self.feature_extractor.add_module(
+            "norm2", norm(bn_size // growth_rate)
+        )
+        self.feature_extractor.add_module(
+            "leaky_relu2", nn.LeakyReLU(slope, inplace=True)
+        )
+        self.feature_extractor.add_module(
             "conv3t",
             conv(
                 bn_size // growth_rate,
@@ -66,9 +78,13 @@ class _GneratorDCGAN(nn.Sequential):
                 bias=False,
             ),
         )
-        self.add_module("norm3", norm(bn_size // (growth_rate**2)))
-        self.add_module("leaky_relu3", nn.LeakyReLU(slope, inplace=True))
-        self.add_module(
+        self.feature_extractor.add_module(
+            "norm3", norm(bn_size // (growth_rate**2))
+        )
+        self.feature_extractor.add_module(
+            "leaky_relu3", nn.LeakyReLU(slope, inplace=True)
+        )
+        self.feature_extractor.add_module(
             "conv4t",
             conv(
                 bn_size // (growth_rate**2),
@@ -79,7 +95,79 @@ class _GneratorDCGAN(nn.Sequential):
                 bias=False,
             ),
         )
-        self.add_module("tanh", nn.Tanh())
+        feature_extractor_output_size = (
+            self._get_output_size_feature_extractor(
+                self.feature_extractor, latent_vector_dim, n_dimensions
+            )
+        )
+        # if the output size of the feature extractor does not match
+        # the output patch size, add an upsampling layer and a 1x1
+        # convolution to match the output size and reparametrize the
+        # interpoladed output
+        if not self._output_shape_matching(
+            output_patch_size, feature_extractor_output_size
+        ):
+            self.feature_extractor.add_module(
+                "upsample",
+                nn.Upsample(
+                    size=output_patch_size[:-1]
+                    if n_dimensions == 2
+                    else output_patch_size,
+                    mode="bilinear" if n_dimensions == 2 else "trilinear",
+                    align_corners=True,
+                ),
+            )
+            self.feature_extractor.add_module(
+                "conv5",
+                conv(
+                    num_output_features, num_output_features, 1, 1, bias=False
+                ),
+            )
+
+        self.feature_extractor.add_module("tanh", nn.Tanh())
+
+    @staticmethod
+    def _output_shape_matching(
+        output_patch_size: Tuple[int, int, int],
+        feature_extractor_output_size: Tuple[int, int, int],
+    ) -> bool:
+        """Checks if the output patch size matches the output size of
+        the feature extractor.
+        Args:
+            output_patch_size (Tuple[int, int, int]): The size of the
+        output patch.
+            feature_extractor_output_size (Tuple[int, int, int]): The
+        output size of the feature extractor.
+        Returns:
+            bool: True if the output patch size matches the output size
+        """
+        if output_patch_size[-1] == 1:
+            output_patch_size = output_patch_size[:-1]
+        if output_patch_size != feature_extractor_output_size:
+            return False
+        return True
+
+    @staticmethod
+    def _get_output_size_feature_extractor(
+        feature_extractor: nn.Module,
+        latent_vector_dim: int,
+        n_dimensions: int = 3,
+    ) -> int:
+        """Determines the output size of the feature extractor to
+        initialize the classifier.
+        Args:
+            feature_extractor (nn.Module): The feature extractor module.
+            latent_vector_dim (int): The dimension of the latent vector
+        to be used as input to the generator.
+        Returns:
+            int: The output size of the feature extractor.
+        """
+        dummy_input_shape = [1, latent_vector_dim, 1, 1]
+        if n_dimensions == 3:
+            dummy_input_shape.append(1)
+        dummy_input = torch.randn(dummy_input_shape)
+        dummy_output = feature_extractor(dummy_input)
+        return dummy_output.shape[2:]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -90,7 +178,8 @@ class _GneratorDCGAN(nn.Sequential):
         Returns:
             torch.Tensor: The generated image.
         """
-        return super().forward(x)
+        out = self.feature_extractor(x)
+        return out
 
 
 class _DiscriminatorDCGAN(nn.Module):
@@ -98,7 +187,8 @@ class _DiscriminatorDCGAN(nn.Module):
 
     def __init__(
         self,
-        input_patch_size: Union[Tuple[int, int, int], Tuple[int, int]],
+        input_patch_size: Tuple[int, int, int],
+        n_dimensions: int,
         num_input_features: int,
         growth_rate: int,
         bn_size: int,
@@ -110,6 +200,9 @@ class _DiscriminatorDCGAN(nn.Module):
         """
         Initializes a new instance of the _DiscriminatorDCGAN class.
         Parameters:
+            input_patch_size (Tuple[int, int,int]): The size of the
+        input patch.
+            n_dimensions (int): The dimensionality of the input.
             num_input_features (int): The number of input channels in
         the image to be discriminated.
             growth_rate (int): The growth rate of the number of hidden
@@ -172,7 +265,10 @@ class _DiscriminatorDCGAN(nn.Module):
         self.feature_extractor.add_module("flatten", nn.Flatten(start_dim=1))
 
         num_output_features = self._get_output_size_feature_extractor(
-            self.feature_extractor, input_patch_size
+            self.feature_extractor,
+            input_patch_size,
+            num_input_features,
+            n_dimensions,
         )
         self.classifier.add_module(
             "linear1", nn.Linear(num_output_features, 128)
@@ -187,13 +283,25 @@ class _DiscriminatorDCGAN(nn.Module):
     @staticmethod
     def _get_output_size_feature_extractor(
         feature_extractor: nn.Module,
-        patch_size: Union[Tuple[int, int, int], Tuple[int, int]],
+        patch_size: Tuple[int, int, int],
         n_channels: int = 1,
+        n_dimensions: int = 3,
     ) -> int:
         """Determines the output size of the feature extractor to
         initialize the classifier.
+        Args:
+            feature_extractor (nn.Module): The feature extractor module.
+            patch_size (Tuple[int, int,int]): The size of the input patch.
+            n_channels (int): The number of input channels in the image
+        to be discriminated.
+            n_dimensions (int): The dimensionality of the input.
+        Returns:
+            int: The output size of the feature extractor.
         """
-        dummy_input = torch.randn((1, n_channels, *patch_size[:-1]))
+        dummy_input_shape = [1, n_channels, *patch_size]
+        if n_dimensions == 2:
+            dummy_input_shape.pop()
+        dummy_input = torch.randn(dummy_input_shape)
         dummy_output = feature_extractor(dummy_input)
         return dummy_output.shape[1]
 
@@ -243,6 +351,8 @@ class DCGAN(ModelBase):
             )
             self.Norm = self.BatchNorm
         self.generator = _GneratorDCGAN(
+            self.patch_size,
+            self.n_dimensions,
             parameters["latent_vector_dim"],
             self.n_channels,
             parameters["growth_rate"],
@@ -253,6 +363,7 @@ class DCGAN(ModelBase):
         )
         self.discriminator = _DiscriminatorDCGAN(
             self.patch_size,
+            self.n_dimensions,
             self.n_channels,
             parameters["growth_rate"],
             parameters["bn_size"],
@@ -324,20 +435,3 @@ class DCGAN(ModelBase):
             torch.Tensor: The probability that the image is real.
         """
         return self.discriminator(image)
-
-
-if __name__ == "__main__":
-    testingDir = "/home/szymon/code/GaNDLF/testing"
-    parameters = parseConfig(
-        testingDir + "/config_segmentation.yaml", version_check_flag=False
-    )
-
-    parameters["model"]["architecture"] = "DCGAN"
-    parameters["model"]["dimension"] = 2
-    parameters["model"]["num_channels"] = 1
-    patch_size = parameters["patch_size"]
-    fake_input = torch.randn((1, 100, 1, 1))
-    real_image = torch.randn((4, 1, *patch_size[:-1]))
-    model = DCGAN(parameters)
-    fake_output = model.generator_forward(fake_input)
-    disc_output = model.discriminator_forward(real_image)
