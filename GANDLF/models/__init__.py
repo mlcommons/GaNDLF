@@ -117,6 +117,7 @@ global_models_dict = {
     "msdnet": MSDNet,
     "brain_age": brainage,
     "sdnet": SDNet,
+    # GAN models
     "dcgan": DCGAN,
 }
 
