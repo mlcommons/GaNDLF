@@ -106,6 +106,8 @@ requirements = [
     "medcam",
     "opencv-python",
     "torchmetrics==1.1.2",
+    "torch-fidelity",
+    "lpips",
     "zarr==2.10.3",
     "pydicom",
     "onnx",
