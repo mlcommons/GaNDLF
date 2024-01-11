@@ -1,4 +1,4 @@
-# GANDLF Preprocessing
+# GANDLF Optimizers
 
 ## Adding a new algorithm
 
