@@ -15,9 +15,7 @@ from GANDLF.utils.generic import (
 )
 
 
-def generic_function_output_with_check(
-    predicted_classes, label, metric_function
-):
+def generic_function_output_with_check(predicted_classes, label, metric_function):
     if torch.min(predicted_classes) < 0:
         print(
             "WARNING: Negative values detected in prediction, cannot compute torchmetrics calculations."
@@ -32,16 +30,12 @@ def generic_function_output_with_check(
             max_clamp_val = metric_function.num_classes - 1
         except AttributeError:
             max_clamp_val = 1
-        predicted_new = torch.clamp(
-            predicted_classes.cpu().int(), max=max_clamp_val
-        )
+        predicted_new = torch.clamp(predicted_classes.cpu().int(), max=max_clamp_val)
         predicted_new = predicted_new.reshape(label.shape)
         return metric_function(predicted_new, label.cpu().int())
 
 
-def generic_torchmetrics_score(
-    output, label, metric_class, metric_key, params
-):
+def generic_torchmetrics_score(output, label, metric_class, metric_key, params):
     task = determine_classification_task_type(params)
     num_classes = params["model"]["num_classes"]
     predicted_classes = output
@@ -67,9 +61,7 @@ def recall_score(output, label, params):
 
 
 def precision_score(output, label, params):
-    return generic_torchmetrics_score(
-        output, label, Precision, "precision", params
-    )
+    return generic_torchmetrics_score(output, label, Precision, "precision", params)
 
 
 def f1_score(output, label, params):
@@ -77,15 +69,11 @@ def f1_score(output, label, params):
 
 
 def accuracy(output, label, params):
-    return generic_torchmetrics_score(
-        output, label, Accuracy, "accuracy", params
-    )
+    return generic_torchmetrics_score(output, label, Accuracy, "accuracy", params)
 
 
 def specificity_score(output, label, params):
-    return generic_torchmetrics_score(
-        output, label, Specificity, "specificity", params
-    )
+    return generic_torchmetrics_score(output, label, Specificity, "specificity", params)
 
 
 def iou_score(output, label, params):

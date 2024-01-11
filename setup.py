@@ -81,7 +81,7 @@ toplevel_package_excludes = [
 
 
 requirements = [
-    "torch==1.13.1",
+    "torch==2.1.0",
     "black==23.11.0",
     "numpy==1.25.0",
     "scipy",
@@ -89,7 +89,7 @@ requirements = [
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
     "torchvision",
     "tqdm",
-    "torchio==0.18.75",
+    "torchio==0.19.3",
     "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
@@ -110,7 +110,7 @@ requirements = [
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
-    "segmentation-models-pytorch==0.3.2",
+    "segmentation-models-pytorch==0.3.3",
     "ACSConv==0.1.1",
     "docker",
     "dicom-anonymizer",
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">=3.9, <3.11",
+        python_requires=">3.8, <3.12",
         packages=find_packages(
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
@@ -157,6 +157,7 @@ if __name__ == "__main__":
             "Operating System :: OS Independent",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
             "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(
