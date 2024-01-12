@@ -17,7 +17,6 @@ parameter_defaults = {
     "save_output": False,  # save outputs during validation/testing
     "in_memory": False,  # pin data to cpu memory
     "pin_memory_dataloader": False,  # pin data to gpu memory
-    "enable_padding": False,  # if padding needs to be done when "patch_sampler" is "label"
     "scaling_factor": 1,  # scaling factor for regression problems
     "q_max_length": 100,  # the max length of queue
     "q_samples_per_volume": 10,  # number of samples per volume
@@ -39,7 +38,6 @@ parameter_defaults = {
 ## dictionary to define string defaults for appropriate options
 parameter_defaults_string = {
     "optimizer": "adam",  # the optimizer
-    "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "clip_mode": None,  # default clip mode
 }
@@ -639,6 +637,36 @@ def parseConfig(config_file_path, version_check_flag=True):
     if "opt" in params:
         print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]
+
+    if "patch_sampler" in params:
+        # check if user has passed a dict
+        temp_dict = {}
+        # if "patch_sampler" is a string, then it is the type of sampler
+        if isinstance(params["patch_sampler"], str):
+            temp_dict["type"] = params["patch_sampler"]
+        elif isinstance(params["patch_sampler"], dict):
+            # dict requires special handling
+            temp_dict = params["patch_sampler"]
+
+        # ensure "type" is defined in the dict
+        if not ("type" in temp_dict):
+            for key in temp_dict:
+                if "label" in key:
+                    temp_dict["type"] = "label"
+                elif "weight" in key:
+                    temp_dict["type"] = "weight"
+                else:
+                    # default
+                    temp_dict["type"] = "uniform"
+                break
+
+        # initialize defaults for patch sampler
+        temp_dict[key]["enable_padding"] = temp_dict[key].get("enable_padding", False)
+        temp_dict[key]["padding_mode"] = temp_dict[key].get("padding_mode", "symmetric")
+        temp_dict[key]["biased_sampling"] = temp_dict[key].get("biased_sampling", False)
+
+        # now assign the dict back to the params
+        params["patch_sampler"] = temp_dict
 
     # define defaults
     for current_parameter in parameter_defaults:
