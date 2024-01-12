@@ -37,4 +37,39 @@ def get_scheduler(params):
     Returns:
         model (object): The scheduler definition.
     """
-    return global_schedulers_dict[params["scheduler"]["type"]](params)
+    scheduler_type = params["scheduler"]["type"]
+    if scheduler_type in global_schedulers_dict:
+        scheduler_function = global_schedulers_dict[scheduler_type]
+        scheduler = scheduler_function(params)
+    else:
+        raise ValueError("Scheduler type %s not found" % scheduler_type)
+    return scheduler
+
+
+def get_scheduler_gan(params):
+    """
+    Function to get the scheduler definition for both the generator and discriminator.
+
+    Args:
+        params (dict): The parameters' dictionary.
+
+    Returns:
+        model (object): The scheduler definition.
+    """
+    scheduler_gen_type = params["scheduler_gen"]["type"]
+    scheduler_disc_type = params["scheduler_disc"]["type"]
+    if scheduler_gen_type in global_schedulers_dict:
+        scheduler_gen_function = global_schedulers_dict[scheduler_gen_type]
+        scheduler_gen = scheduler_gen_function(params)
+    else:
+        raise ValueError(
+            "Genertor scheduler type %s not found" % scheduler_gen_type
+        )
+    if scheduler_disc_type in global_schedulers_dict:
+        scheduler_disc_function = global_schedulers_dict[scheduler_disc_type]
+        scheduler_disc = scheduler_disc_function(params)
+    else:
+        raise ValueError(
+            "Discriminator scheduler type %s not found" % scheduler_disc_type
+        )
+    return scheduler_gen, scheduler_disc
