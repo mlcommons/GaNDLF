@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+python -m ensurepip # ensures pip is installed in the current environment
 pip install --upgrade pip
 pip install wheel
 pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate optimized models for inference
