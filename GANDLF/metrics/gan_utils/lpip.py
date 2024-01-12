@@ -145,27 +145,3 @@ class LPIPSGandlf(Metric):
 
         """
         return self._plot(val, ax)
-
-
-if __name__ == "__main__":
-    lpip = LPIPSGandlf(
-        n_dim=3,
-        n_channels=3,
-        net_type="squeeze",
-        normalize=False,
-    )
-    rand_input_1 = (torch.rand(10, 3, 100, 100) * 2) - 1
-    rand_input_2 = (torch.rand(10, 3, 100, 100) * 2) - 1
-    # with torch.no_grad():
-    print(lpip(rand_input_1, rand_input_2))
-
-    import torchmetrics
-
-    lpips_metric = (
-        torchmetrics.image.lpip.LearnedPerceptualImagePatchSimilarity(
-            net_type="squeeze",
-            normalize=False,
-            reduction="mean",
-        )
-    )
-    print(lpips_metric(rand_input_1, rand_input_2))
