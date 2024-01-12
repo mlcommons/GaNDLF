@@ -643,7 +643,7 @@ def parseConfig(config_file_path, version_check_flag=True):
         temp_dict = {}
         # if "patch_sampler" is a string, then it is the type of sampler
         if isinstance(params["patch_sampler"], str):
-            temp_dict["type"] = params["patch_sampler"]
+            temp_dict["type"] = params["patch_sampler"].lower()
         elif isinstance(params["patch_sampler"], dict):
             # dict requires special handling
             temp_dict = params["patch_sampler"]
