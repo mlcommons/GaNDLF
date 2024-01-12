@@ -281,10 +281,26 @@ def ImagesFromDataFrame(
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
     if not train:
         return subjects_dataset
+
+    # initialize the sampler
+    sampler_obj = global_sampler_dict[sampler["type"]](patch_size)
     if sampler["type"] in ("weighted", "weightedsampler", "weightedsample"):
-        sampler_obj = global_sampler_dict[sampler["type"]](patch_size, probability_map="label")
-    else:
-        sampler_obj = global_sampler_dict[sampler["type"]](patch_size)
+        sampler_obj = global_sampler_dict[sampler["type"]](
+            patch_size, probability_map="label"
+        )
+    elif sampler["type"] in ("label", "labelsampler", "labelsample"):
+        # if biased sampling is detected, then we need to pass the class probabilities
+        if train and sampler["biased_sampling"]:
+            # initialize the class probabilities dict
+            label_probabilities = {}
+            if "class_weights" in parameters:
+                for class_index in parameters["class_weights"]:
+                    label_probabilities[
+                        parameters["model"]["class_list"][class_index]
+                    ] = parameters["class_weights"][class_index]
+            sampler_obj = global_sampler_dict[sampler["type"]](
+                patch_size, label_probabilities=label_probabilities
+            )
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(
         subjects_dataset,
