@@ -2,6 +2,7 @@ import torch
 import torchmetrics as tm
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
+from gan_utils.lpip import LPIPSGandlf
 
 
 def overall_stats(
@@ -40,7 +41,7 @@ def _calculator_ssim(
     """
     This function computes the SSIM between the generated images and the real
     images. Except for the params specified below, the rest of the params are
-    default from torchmetrics.
+    default from torchmetrics. Works both for 2D and 3D images.
     Args:
         generated_images (torch.Tensor): The generated images.
         real_images (torch.Tensor): The real images.
@@ -107,8 +108,11 @@ def _calculator_FID(
 def _calculator_LPIPS(
     generated_images: torch.Tensor,
     real_images: torch.Tensor,
-    reduction: str,
+    net_type: str,
     n_input_channels: int,
+    n_dim: int,
+    reduction: str = "mean",
+    converter_type: Optional[str] = None,
 ) -> torch.Tensor:
     """This function computes the LPIPS between the generated images and the
     real images. Except for the params specified below, the rest of the params
@@ -116,26 +120,20 @@ def _calculator_LPIPS(
     Args:
         generated_images (torch.Tensor): The generated images.
         real_images (torch.Tensor): The real images.
-        reduction (str): The reduction type.
+        reduction (str): The reduction type, one of 'mean' or 'sum'
         n_input_channels (int): The number of input channels.
     Returns:
         torch.Tensor: The LPIP score.
     """
-    lpips_metric = tm.image.lpip.LearnedPerceptualImagePatchSimilarity(
-        net="squeeze",
+    lpips_metric = LPIPSGandlf(
+        net_type=net_type,
         normalize=True,
         reduction=reduction,
+        n_dim=n_dim,
+        n_channels=n_input_channels,
+        converter_type=converter_type,
     )
-    if n_input_channels == 1:
-        # need manual patching for single channel data
-        lpips_metric.net.net.slices._modules["0"]._modules[
-            "0"
-        ] = torch.nn.Conv2d(
-            1,
-            64,
-            kernel_size=(3, 3),
-            stride=(2, 2),
-        )
+
     # check input dtype
     if generated_images.dtype != torch.float32:
         generated_images = generated_images.float()
