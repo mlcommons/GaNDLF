@@ -63,11 +63,10 @@ def ImagesFromDataFrame(
     q_samples_per_volume = parameters["q_samples_per_volume"]
     q_num_workers = parameters["q_num_workers"]
     q_verbose = parameters["q_verbose"]
-    sampler = parameters["patch_sampler"]
     augmentations = parameters["data_augmentation"]
     preprocessing = parameters["data_preprocessing"]
     in_memory = parameters["in_memory"]
-    enable_padding = parameters["enable_padding"]
+    sampler = parameters["patch_sampler"]
 
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
@@ -82,14 +81,6 @@ def ImagesFromDataFrame(
     labelHeader = headers["labelHeader"]
     predictionHeaders = headers["predictionHeaders"]
     subjectIDHeader = headers["subjectIDHeader"]
-
-    # this basically means that label sampler is selected with padding
-    if isinstance(sampler, dict):
-        sampler_padding = sampler["label"]["padding_type"]
-        sampler = "label"
-    else:
-        sampler = sampler.lower()  # for easier parsing
-        sampler_padding = "symmetric"
 
     resize_images_flag = False
     # if resize has been defined but resample is not (or is none)
@@ -251,14 +242,13 @@ def ImagesFromDataFrame(
                 )
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
-            if "label" in sampler or "weight" in sampler:
-                if enable_padding:
-                    psize_pad = list(
-                        np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
-                    )
-                    # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-                    padder = Pad(psize_pad, padding_mode=sampler_padding)
-                    subject = padder(subject)
+            if sampler["enable_padding"]:
+                psize_pad = list(
+                    np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
+                )
+                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
+                subject = padder(subject)
 
             # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
             if in_memory:
@@ -291,16 +281,16 @@ def ImagesFromDataFrame(
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
     if not train:
         return subjects_dataset
-    if sampler in ("weighted", "weightedsampler", "weightedsample"):
-        sampler = global_sampler_dict[sampler](patch_size, probability_map="label")
+    if sampler["type"] in ("weighted", "weightedsampler", "weightedsample"):
+        sampler_obj = global_sampler_dict[sampler["type"]](patch_size, probability_map="label")
     else:
-        sampler = global_sampler_dict[sampler](patch_size)
+        sampler_obj = global_sampler_dict[sampler["type"]](patch_size)
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(
         subjects_dataset,
         max_length=q_max_length,
         samples_per_volume=q_samples_per_volume,
-        sampler=sampler,
+        sampler=sampler_obj,
         num_workers=q_num_workers,
         shuffle_subjects=True,
         shuffle_patches=True,
