@@ -3,7 +3,7 @@ import psutil
 import warnings
 from typing import Dict, Any, Union, Tuple
 from .loss_and_metric import get_loss_and_metrics
-from models.modelBase import ModelBase
+from ..models.modelBase import ModelBase
 
 
 def step(model, image, label, params, train=True):
@@ -125,7 +125,7 @@ def step_gan(
 
     Parameters
     ----------
-    gan_model : BaseModel derived class
+    gan_model : ModelBase derived class
         The model to process the input image with, it should support
     appropriate dimensions.
     image : torch.Tensor
