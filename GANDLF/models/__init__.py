@@ -2,13 +2,23 @@
 from .unet import unet, resunet
 from .light_unet import light_unet, light_resunet
 from .unet_multilayer import unet_multilayer, resunet_multilayer
-from .light_unet_multilayer import light_unet_multilayer, light_resunet_multilayer
+from .light_unet_multilayer import (
+    light_unet_multilayer,
+    light_resunet_multilayer,
+)
 from .deep_unet import deep_unet, deep_resunet
 from .uinc import uinc
 from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
 from .densenet import densenet121, densenet169, densenet201, densenet264
-from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152, resnet200
+from .resnet import (
+    resnet18,
+    resnet34,
+    resnet50,
+    resnet101,
+    resnet152,
+    resnet200,
+)
 from .efficientnet import (
     efficientnetB0,
     efficientnetB1,
@@ -35,6 +45,8 @@ from .MSDNet import MSDNet
 from .brain_age import brainage
 from .unetr import unetr
 from .transunet import transunet
+
+from .dcgan import DCGAN
 
 # Define a dictionary of model architectures and corresponding functions
 global_models_dict = {
@@ -105,6 +117,8 @@ global_models_dict = {
     "msdnet": MSDNet,
     "brain_age": brainage,
     "sdnet": SDNet,
+    # GAN models
+    "dcgan": DCGAN,
 }
 
 
@@ -118,4 +132,6 @@ def get_model(params):
     Returns:
         model (torch.nn.Module): The model definition.
     """
-    return global_models_dict[params["model"]["architecture"]](parameters=params)
+    return global_models_dict[params["model"]["architecture"]](
+        parameters=params
+    )
