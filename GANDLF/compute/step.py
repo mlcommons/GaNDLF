@@ -2,7 +2,7 @@ import torch
 import psutil
 import warnings
 from typing import Dict, Any, Union, Tuple
-from .loss_and_metric import get_loss_and_metrics
+from .loss_and_metric import get_loss_and_metrics, get_loss_and_metrics_gans
 from ..models.modelBase import ModelBase
 
 
@@ -108,11 +108,10 @@ def step(model, image, label, params, train=True):
 
 def step_gan(
     gan_model: ModelBase,
-    image: torch.Tensor,
+    primary_images: torch.Tensor,
     label: Union[torch.Tensor, None],
     params: Dict,
-    step_discriminator: bool = True,
-    step_generator: bool = False,
+    secondary_images: Union[torch.Tensor, None] = None,
     train: bool = True,
 ) -> Tuple[
     Union[torch.Tensor, None],
@@ -136,10 +135,6 @@ def step_gan(
     step, this should be None.
     params : dict
         The parameters passed by the user yaml.
-    step_discriminator : bool
-        Whether step is made on a discriminator submodel.
-    step_generator : bool
-        Whether step is made on a generator submodel.
     train : bool
         Whether the model is in training mode.
 
@@ -170,27 +165,10 @@ def step_gan(
             "|===========================================================================|"
         )
 
-    if step_discriminator and step_generator:
-        raise ValueError(
-            "Both discriminator and generator cannot be stepped at the same time."
-        )
-    if not (step_discriminator or step_generator):
-        raise ValueError(
-            "Either discriminator or generator must be stepped at the same time."
-        )
-    if step_discriminator and label is None:
-        raise ValueError("Label must be provided for discriminator step.")
-    if step_generator and label is not None:
-        warnings.warn(
-            "Label is provided for generator step. This label will be ignored.",
-            UserWarning,
-        )
+    sub_model = gan_model.discriminator
 
-    sub_model = (
-        gan_model.discriminator if step_discriminator else gan_model.generator
-    )
     if params["model"]["dimension"] == 2:
-        image = torch.squeeze(image, -1)
+        image = torch.squeeze(primary_images, -1)
     if not (train) and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             sub_model(
@@ -208,12 +186,9 @@ def step_gan(
     attention_map = None
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
-    if step_discriminator:  # TODO check if the metrics are suitable
-        loss, metric_output = get_loss_and_metrics(
-            image, label, output, params
-        )
-    else:
-        loss, metric_output = None, None
+    loss, metric_output = get_loss_and_metrics_gans(
+        image, secondary_images, label, output, params
+    )
 
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)

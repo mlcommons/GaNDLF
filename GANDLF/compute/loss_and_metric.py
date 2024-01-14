@@ -1,16 +1,23 @@
 import sys
+from torch import Tensor
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 import torch.nn.functional as nnf
-
-from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
+from typing import Union
+from GANDLF.utils import (
+    one_hot,
+    reverse_one_hot,
+    get_linear_interpolation_mode,
+)
 
 
 def get_metric_output(metric_function, predicted, ground_truth, params):
     """
     This function computes the output of a metric function.
     """
-    metric_output = metric_function(predicted, ground_truth, params).detach().cpu()
+    metric_output = (
+        metric_function(predicted, ground_truth, params).detach().cpu()
+    )
 
     if metric_output.dim() == 0:
         return metric_output.item()
@@ -40,7 +47,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
     # this is currently only happening for mse_torch
     if isinstance(params["loss_function"], dict):
         # check for mse_torch
-        loss_function = global_losses_dict[list(params["loss_function"].keys())[0]]
+        loss_function = global_losses_dict[
+            list(params["loss_function"].keys())[0]
+        ]
     else:
         loss_str_lower = params["loss_function"].lower()
         if loss_str_lower in global_losses_dict:
@@ -53,7 +62,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
 
     loss = 0
     # specialized loss function for sdnet
-    sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
+    sdnet_check = (len(predicted) > 1) and (
+        params["model"]["architecture"] == "sdnet"
+    )
 
     if params["problem_type"] == "segmentation":
         ground_truth = one_hot(ground_truth, params["model"]["class_list"])
@@ -93,10 +104,16 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
 
     if sdnet_check:
         # this is specific for sdnet-style archs
-        loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
-        loss_reco = global_losses_dict["l1"](predicted[1], image[:, :1, ...], None)
+        loss_seg = loss_function(
+            predicted[0], ground_truth.squeeze(-1), params
+        )
+        loss_reco = global_losses_dict["l1"](
+            predicted[1], image[:, :1, ...], None
+        )
         loss_kld = global_losses_dict["kld"](predicted[2], predicted[3])
-        loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
+        loss_cycle = global_losses_dict["mse"](
+            predicted[2], predicted[4], None
+        )
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
         if deep_supervision_model:
@@ -104,7 +121,9 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             for i, _ in enumerate(predicted):
                 # loss is calculated based on resampled "soft" labels using a pre-defined weights array
                 loss += (
-                    loss_function(predicted[i], ground_truth_resampled[i], params)
+                    loss_function(
+                        predicted[i], ground_truth_resampled[i], params
+                    )
                     * loss_weights[i]
                 )
         else:
@@ -119,7 +138,10 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             metric_function = global_metrics_dict[metric_lower]
             if sdnet_check:
                 metric_output[metric] = get_metric_output(
-                    metric_function, predicted[0], ground_truth.squeeze(-1), params
+                    metric_function,
+                    predicted[0],
+                    ground_truth.squeeze(-1),
+                    params,
                 )
             else:
                 if deep_supervision_model:
@@ -136,3 +158,72 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
                         metric_function, predicted, ground_truth, params
                     )
     return loss, metric_output
+
+
+def get_loss_gans(predictions: Tensor, labels: Tensor, params: dict) -> Tensor:
+    """
+    Compute the loss value for adversatial generative networks.
+    Args:
+        predictions (Tensor): The predicted output from the model.
+        labels (Tensor): The ground truth label.
+        params (dict): The parameters passed by the user yaml.
+    Returns:
+        loss (Tensor): The computed loss from the label and the prediction.
+    """
+
+    if isinstance(params["loss_function"], dict):
+        # check for mse_torch
+        loss_function = global_losses_dict[
+            list(params["loss_function"].keys())[0]
+        ]
+    else:
+        loss_str_lower = params["loss_function"].lower()
+        if loss_str_lower in global_losses_dict:
+            loss_function = global_losses_dict[loss_str_lower]
+        else:
+            sys.exit(
+                "WARNING: Could not find the requested loss function '"
+                + params["loss_function"]
+            )
+
+    loss = loss_function(predictions, labels, params)
+    return loss
+
+
+def get_loss_and_metrics_gans(
+    images: Tensor,
+    secondary_images: Union[Tensor, None],
+    labels: Tensor,
+    predictions: Tensor,
+    params: dict,
+):
+    """
+    A function to compute the loss and optionally the metrics for generative
+    adversarial networks.
+
+    Args:
+        images (torch.Tensor): The input image stack according to requirements.
+        secondary_images (torch.Tensor or None): The input secondary image stack
+    used only when computing metrics.
+        predictions (torch.Tensor) : discriminator output
+        labels (torch.Tensor) : ground truth
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        loss (torch.Tensor): The computed loss from the label and the prediction.
+        dict: The computed metric from the label and the prediction.
+    """
+    loss = get_loss_gans(predictions, labels, params)
+    metric_output = {}
+    # Metrics should be a list
+    if secondary_images is not None:
+        for metric in params["metrics"]:
+            metric_lower = metric.lower()
+            metric_output[metric] = 0
+            if metric_lower in global_metrics_dict:
+                metric_function = global_metrics_dict[metric_lower]
+                metric_output[metric] = get_metric_output(
+                    metric_function, images, secondary_images, params
+                )
+        return loss, metric_output
+    return loss, None
