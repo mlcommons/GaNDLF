@@ -1,12 +1,9 @@
 """Implementation of DCGAN model."""
-import sys
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from modelBase import ModelBase
+from GANDLF.models.modelBase import ModelBase
 from warnings import warn
 from typing import Dict, Tuple
-from GANDLF.parseConfig import parseConfig
 
 
 class _GneratorDCGAN(nn.Module):
