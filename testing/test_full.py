@@ -123,7 +123,7 @@ def test_generic_download_data():
         if not os.path.isfile(file):
             print("Downloading and extracting sample data")
             output = os.path.join(testingDir, "gandlf_unit_test_data.tgz")
-            gdown.download(urlToDownload, output, quiet=False, verify = True)
+            gdown.download(urlToDownload, output, quiet=False)
             with zipfile.ZipFile(output, "r") as zip_ref:
                 zip_ref.extractall(testingDir)
             os.remove(output)
@@ -1465,7 +1465,12 @@ def test_generic_cli_function_preprocess():
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "unet"
     parameters["metrics"] = ["dice"]
-    parameters["patch_sampler"] = "label"
+    parameters["patch_sampler"] = {
+        "type": "label",
+        "enable_padding": True,
+        "biased_sampling": True,
+
+    }
     parameters["weighted_loss"] = True
     parameters["save_output"] = True
     parameters["data_preprocessing"]["to_canonical"] = None
