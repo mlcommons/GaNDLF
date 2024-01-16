@@ -97,8 +97,8 @@ jobs:
         pip install -e .
         cd ..
         echo "Copying files to appropriate directories and updated headers"
-        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/openfl/valid.csv
-        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/openfl/valid.csv
-        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/openfl/train.csv
+        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
+        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
+        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/train.csv
         cd openfl
         python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1
