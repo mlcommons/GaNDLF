@@ -90,7 +90,9 @@ jobs:
         git clone https://github.com/securefederatedai/openfl.git
         cd openfl
         git fetch --tags
-        git checkout $(git describe --tags --abbrev=0)
+        #### THIS SHOULD BE PRESENT IN THE TESTS -- IT ENSURES THE LATEST TAG IS USED
+        ## git checkout $(git describe --tags --abbrev=0)
+        #### THIS SHOULD BE PRESENT IN THE TESTS -- IT ENSURES THE LATEST TAG IS USED
         sed -i -e 's/protobuf==3.19.6/protobuf/g' setup.py ## this should NOT be there
         pip install -e .
         cd ..
