@@ -33,7 +33,7 @@ jobs:
     # if: steps.changed-files-specific.outputs.only_modified == 'false'
     - name: Detect and screen file changes
       id: changed-files-specific
-      uses: tj-actions/changed-files@v34
+      uses: tj-actions/changed-files@v41
       with:
           files: |
             .github/*.md
@@ -95,8 +95,8 @@ jobs:
         pip install -e .
         cd ..
         echo "Copying files to appropriate directories"
-        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/openfl/openfl/valid.csv
-        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/openfl/openfl/valid.csv
-        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/openfl/openfl/train.csv
+        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
+        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_val.csv
+        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/seg_test_train.csv
         cd openfl
-        python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1
+        python -m tests.github.test_fets_challenge --template fets_challenge_seg_test --fed_workspace aggregator --col1 col1 --col2 col2 --rounds-to-train 1
