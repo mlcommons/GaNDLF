@@ -1469,7 +1469,6 @@ def test_generic_cli_function_preprocess():
         "type": "label",
         "enable_padding": True,
         "biased_sampling": True,
-
     }
     parameters["weighted_loss"] = True
     parameters["save_output"] = True
@@ -2073,6 +2072,11 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "jaccard",
         "jaccard_per_label",
     ]
+    parameters["patch_sampler"] = {
+        "type": "label",
+        "enable_padding": True,
+        "biased_sampling": True,
+    }
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
