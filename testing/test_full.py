@@ -123,7 +123,7 @@ def test_generic_download_data():
         if not os.path.isfile(file):
             print("Downloading and extracting sample data")
             output = os.path.join(testingDir, "gandlf_unit_test_data.tgz")
-            gdown.download(urlToDownload, output, quiet=False)
+            gdown.download(urlToDownload, output, quiet=False, verify = True)
             with zipfile.ZipFile(output, "r") as zip_ref:
                 zip_ref.extractall(testingDir)
             os.remove(output)
