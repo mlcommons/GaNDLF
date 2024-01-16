@@ -87,7 +87,7 @@ jobs:
         echo "Removing onnx because of protobuf version conflict"
         pip uninstall onnx -y
         echo "Installing OpenFL"
-        git clone https://github.com/securefederatedai/openfl.git
+        git clone --depth=1 https://github.com/securefederatedai/openfl.git
         cd openfl
         git fetch --tags
         echo "Checkout the latest OpenFL tag"
