@@ -18,7 +18,11 @@ from .segmentation import (
     jaccard,
     jaccard_per_label,
 )
-from .regression import classification_accuracy, balanced_acc_score, per_label_accuracy
+from .regression import (
+    classification_accuracy,
+    balanced_acc_score,
+    per_label_accuracy,
+)
 from .generic import (
     recall_score,
     precision_score,
