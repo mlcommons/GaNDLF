@@ -2045,6 +2045,16 @@ def test_train_checkpointing_segmentation_rad_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
+    parameters["patch_sampler"] = {
+        "type": "label",
+        "enable_padding": True,
+        "biased_sampling": True,
+    }
+    file_config_temp = write_temp_config_path(parameters)
+    parameters = parseConfig(
+        file_config_temp, version_check_flag=False
+    )
+
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )
@@ -2072,11 +2082,6 @@ def test_train_checkpointing_segmentation_rad_2d(device):
         "jaccard",
         "jaccard_per_label",
     ]
-    parameters["patch_sampler"] = {
-        "type": "label",
-        "enable_padding": True,
-        "biased_sampling": True,
-    }
     parameters["model"]["architecture"] = "unet"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
