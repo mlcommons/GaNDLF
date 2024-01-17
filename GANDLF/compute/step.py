@@ -169,6 +169,7 @@ def step_gan(
 
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(primary_images, -1)
+
     if not (train) and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             sub_model(
@@ -189,6 +190,7 @@ def step_gan(
     loss, metric_output = get_loss_and_metrics_gans(
         image, secondary_images, label, output, params
     )
+
 
     if params["model"]["dimension"] == 2:
         output = torch.unsqueeze(output, -1)
