@@ -296,11 +296,11 @@ def ImagesFromDataFrame(
         if train and sampler["biased_sampling"]:
             # initialize the class probabilities dict
             label_probabilities = {}
-            if "class_weights" in parameters:
-                for class_index in parameters["class_weights"]:
-                    label_probabilities[
-                        parameters["model"]["class_list"][class_index]
-                    ] = parameters["class_weights"][class_index]
+            if "weights" in parameters:
+                for class_index in parameters["weights"]:
+                    label_probabilities[class_index] = parameters["weights"][
+                        class_index
+                    ]
             sampler_obj = global_sampler_dict[sampler["type"]](
                 patch_size, label_probabilities=label_probabilities
             )
