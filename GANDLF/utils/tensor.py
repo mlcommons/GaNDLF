@@ -364,7 +364,7 @@ def get_class_imbalance_weights(training_df, params):
         float, float: The penalty and class weights for different classes under consideration for classification.
     """
     penalty_weights, class_weights = None, None
-    if params["weighted_loss"]:
+    if params["weighted_loss"] or params["patch_sampler"]["biased_sampling"]:
         (penalty_weights, class_weights) = (
             params.get("weights", None),
             params.get("class_weights", None),

@@ -82,10 +82,10 @@ patch_sampler: uniform
 # patch_sampler: label
 # patch_sampler:
 #   {
-#     label:
-#       {
-#         padding_type: constant # how the label gets padded, for options, see 'mode' in https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-#       }
+#     type: label,
+#     enable_padding: True,
+#     padding_mode: symmetric,  # for options, see 'mode' in https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+#     biased_sampling: True,  # adds additional sampling probability of labels based on "class_weights"; only gets invoked when using label sampler.
 #   }
 # If enabled, this parameter pads images and labels when label sampler is used
 enable_padding: False
@@ -116,7 +116,7 @@ scheduler:
 # use mse_torch for regression/classification problems and dice for segmentation
 loss_function: dc
 # this parameter weights the loss to handle imbalanced losses better
-weighted_loss: True 
+weighted_loss: True  # generates new keys "class_weights" and "weights" that handle the aggregate weights of the class and penalties per label, respectively
 #loss_function:
 #  {
 #    'mse':{
