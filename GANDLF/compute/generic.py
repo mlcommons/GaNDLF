@@ -48,12 +48,14 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
 
         # Calculate the weights here
         (
-            parameters["weights"],
+            parameters["penalty_weights"],
+            parameters["sampling_weights"],
             parameters["class_weights"],
         ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
-        print("Class weights  : ", parameters["class_weights"])
-        print("Penalty weights: ", parameters["weights"])
+        print("Penalty weights : ", parameters["penalty_weights"])
+        print("Sampling weights: ", parameters["sampling_weights"])
+        print("Class weights   : ", parameters["class_weights"])
 
         # get the train loader
         train_loader = get_train_loader(parameters)

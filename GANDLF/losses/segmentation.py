@@ -132,7 +132,7 @@ def MCD_loss(
         target,
         len(params["model"]["class_list"]),
         dice,
-        params["weights"],
+        params["penalty_weights"],
         None,
         1,
     )
@@ -157,7 +157,7 @@ def MCD_log_loss(
         target,
         len(params["model"]["class_list"]),
         dice,
-        params["weights"],
+        params["penalty_weights"],
         None,
         2,
     )
@@ -182,7 +182,7 @@ def MCC_loss(
         target,
         len(params["model"]["class_list"]),
         mcc,
-        params["weights"],
+        params["penalty_weights"],
         None,
         1,
     )
@@ -207,7 +207,7 @@ def MCC_log_loss(
         target,
         len(params["model"]["class_list"]),
         mcc,
-        params["weights"],
+        params["penalty_weights"],
         None,
         2,
     )
@@ -268,11 +268,11 @@ def MCT_loss(
 
     for i in range(num_classes):
         curr_loss = tversky_loss(predicted[:, i, ...], target[:, i, ...])
-        if params is not None and params.get("weights") is not None:
-            curr_loss = curr_loss * params["weights"][i]
+        if params is not None and params.get("penalty_weights") is not None:
+            curr_loss = curr_loss * params["penalty_weights"][i]
         acc_tv_loss += curr_loss
 
-    if params is not None and params.get("weights") is None:
+    if params is not None and params.get("penalty_weights") is None:
         acc_tv_loss /= num_classes
 
     return acc_tv_loss
@@ -343,8 +343,8 @@ def FocalLoss(
         curr_loss = _focal_loss(
             predicted[:, i, ...], target[:, i, ...], gamma, size_average
         )
-        if params is not None and params.get("weights") is not None:
-            curr_loss = curr_loss * params["weights"][i]
+        if params is not None and params.get("penalty_weights") is not None:
+            curr_loss = curr_loss * params["penalty_weights"][i]
         acc_focal_loss += curr_loss
 
     return acc_focal_loss
