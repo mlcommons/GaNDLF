@@ -38,7 +38,7 @@ def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
 
     # initialize parameters for inference
     for key in ["penalty_weights", "sampling_weights", "class_weights"]:
-        parameters[key] = parameters.get(key, None)    
+        parameters[key] = parameters.get(key, None)
 
     n_folds = parameters["nested_training"]["validation"]
 
