@@ -117,6 +117,7 @@ requirements = [
     "twine",
     "zarr",
     "keyring",
+    "connected-components-3d",
 ]
 
 if __name__ == "__main__":
@@ -148,6 +149,7 @@ if __name__ == "__main__":
             "gandlf_deploy",
             "gandlf_optimizeModel",
             "gandlf_generateMetrics",
+            "gandlf_generateBraTSMetrics"
         ],
         classifiers=[
             "Development Status :: 3 - Alpha",
