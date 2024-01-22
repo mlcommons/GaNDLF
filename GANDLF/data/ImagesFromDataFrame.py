@@ -12,6 +12,7 @@ from GANDLF.utils import (
     perform_sanity_check_on_subject,
     resize_image,
     get_filename_extension_sanitized,
+    get_correct_padding_size,
 )
 from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
@@ -243,13 +244,7 @@ def ImagesFromDataFrame(
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if sampler["enable_padding"]:
-                psize_pad = list(
-                    np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
-                )
-                # ensure that the patch size for z-axis is not 1 for 2d images
-                if parameters["model"]["dimension"] == 2:
-                    psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
-                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+                psize_pad = get_correct_padding_size(patch_size, parameters["model"]["dimension"])
                 padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
                 subject = padder(subject)
 
