@@ -35,6 +35,7 @@ def preprocess_and_save(
         output_dir (str): The output directory.
         label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
         applyaugs (bool): If data augmentation is to be applied before saving the image. Defaults to False.
+        apply_zero_crop (bool): If zero cropping is to be applied before saving the image. Defaults to False.
 
     Raises:
         ValueError: Parameter check from previous
