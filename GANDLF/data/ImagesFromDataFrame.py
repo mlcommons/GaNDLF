@@ -1,7 +1,9 @@
+from typing import Union
 import os
 from pathlib import Path
 import numpy as np
 
+import pandas
 import torch
 import torchio
 from torchio.transforms import Pad
@@ -12,6 +14,7 @@ from GANDLF.utils import (
     perform_sanity_check_on_subject,
     resize_image,
     get_filename_extension_sanitized,
+    get_correct_padding_size,
 )
 from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
@@ -31,30 +34,27 @@ global_sampler_dict = {
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(
-    dataframe, parameters, train, apply_zero_crop=False, loader_type=""
-):
+    dataframe: pandas.DataFrame,
+    parameters: dict,
+    train: bool,
+    apply_zero_crop: bool = False,
+    loader_type: str = "",
+) -> Union[torchio.SubjectsDataset, torchio.Queue]:
     """
-    Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
+    Reads the pandas dataframe and gives the dataloader to use for training/validation/testing.
 
-    Parameters
-    ----------
-    dataframe : pandas.DataFrame
-        The main input dataframe which is calculated after splitting the data CSV
-    parameters : dict
-        The parameters dictionary
-    train : bool
-        If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
-    apply_zero_crop : bool
-        If enabled, the crop_external_zero_plane is applied.
-    loader_type : str
-        Type of loader for printing.
+    Args:
+        dataframe (pandas.DataFrame): The main input dataframe which is calculated after splitting the data CSV.
+        parameters (dict): The parameters dictionary.
+        train (bool): If the dataloader is for training or not.
+        apply_zero_crop (bool, optional): If zero crop is to be applied. Defaults to False.
+        loader_type (str, optional): The type of loader to use for printing. Defaults to "".
 
-    Returns
-    -------
-    subjects_dataset: torchio.SubjectsDataset
-        This is the output for validation/testing, where patching and data augmentation is disregarded
-    patches_queue: torchio.Queue
-        This is the output for training, which is the subjects_dataset queue after patching and data augmentation is taken into account
+    Raises:
+        ValueError: If the subject cannot be loaded.
+
+    Returns:
+        Union[torchio.SubjectsDataset, torchio.Queue]: The dataloader queue for validation/testing (where patching and data augmentation is not required) or the subjects dataset for training.
     """
     # store in previous variable names
     patch_size = parameters["patch_size"]
@@ -243,13 +243,9 @@ def ImagesFromDataFrame(
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if sampler["enable_padding"]:
-                psize_pad = list(
-                    np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
+                psize_pad = get_correct_padding_size(
+                    patch_size, parameters["model"]["dimension"]
                 )
-                # ensure that the patch size for z-axis is not 1 for 2d images
-                if parameters["model"]["dimension"] == 2:
-                    psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
-                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
                 padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
                 subject = padder(subject)
 
