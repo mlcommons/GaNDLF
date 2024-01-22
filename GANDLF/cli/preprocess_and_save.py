@@ -8,6 +8,7 @@ from GANDLF.utils import (
     parseTrainingCSV,
     populate_header_in_parameters,
     get_dataframe,
+    get_correct_padding_size,
 )
 from GANDLF.parseConfig import parseConfig
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
@@ -117,33 +118,31 @@ def preprocess_and_save(
         subject_dict_to_write = torchio.Subject(subject_process)
 
         # apply a different padding mode to image and label (so that label information is not duplicated)
-        if (parameters["patch_sampler"] == "label") or (
-            isinstance(parameters["patch_sampler"], dict)
-        ):
+        if parameters["patch_sampler"]["type"] == "label":
             # get the padding size from the patch_size
-            psize_pad = list(
-                np.asarray(np.ceil(np.divide(parameters["patch_size"], 2)), dtype=int)
+            psize_pad = get_correct_padding_size(
+                parameters["patch_size"], parameters["model"]["dimension"]
             )
             # initialize the padder for images
             padder = torchio.transforms.Pad(
-                psize_pad, padding_mode="symmetric", include=keys_with_images
+                psize_pad, padding_mode=label_pad_mode, include=keys_with_images+["label"]
             )
             subject_dict_to_write = padder(subject_dict_to_write)
 
-            if parameters["headers"]["labelHeader"] is not None:
-                # initialize the padder for label
-                padder_label = torchio.transforms.Pad(
-                    psize_pad, padding_mode=label_pad_mode, include="label"
-                )
-                subject_dict_to_write = padder_label(subject_dict_to_write)
+            # if parameters["headers"]["labelHeader"] is not None:
+            #     # initialize the padder for label
+            #     padder_label = torchio.transforms.Pad(
+            #         psize_pad, padding_mode=label_pad_mode, include="label"
+            #     )
+            #     subject_dict_to_write = padder_label(subject_dict_to_write)
 
-                sampler = torchio.data.LabelSampler(parameters["patch_size"])
-                generator = sampler(subject_dict_to_write, num_patches=1)
-                for patch in generator:
-                    for channel in parameters["headers"]["channelHeaders"]:
-                        subject_dict_to_write[str(channel)] = patch[str(channel)]
+            #     sampler = torchio.data.LabelSampler(parameters["patch_size"])
+            #     generator = sampler(subject_dict_to_write, num_patches=1)
+            #     for patch in generator:
+            #         for channel in parameters["headers"]["channelHeaders"]:
+            #             subject_dict_to_write[str(channel)] = patch[str(channel)]
 
-                    subject_dict_to_write["label"] = patch["label"]
+            #         subject_dict_to_write["label"] = patch["label"]
 
         # write new images
         common_ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
