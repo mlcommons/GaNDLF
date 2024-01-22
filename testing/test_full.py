@@ -1465,7 +1465,11 @@ def test_generic_cli_function_preprocess():
     parameters["model"]["num_channels"] = 3
     parameters["model"]["architecture"] = "unet"
     parameters["metrics"] = ["dice"]
-    parameters["patch_sampler"] = "label"
+    parameters["patch_sampler"] = {
+        "type": "label",
+        "enable_padding": True,
+        "biased_sampling": True,
+    }
     parameters["weighted_loss"] = True
     parameters["save_output"] = True
     parameters["data_preprocessing"]["to_canonical"] = None
@@ -2041,6 +2045,16 @@ def test_train_checkpointing_segmentation_rad_2d(device):
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
+    parameters["patch_sampler"] = {
+        "type": "label",
+        "enable_padding": True,
+        "biased_sampling": True,
+    }
+    file_config_temp = write_temp_config_path(parameters)
+    parameters = parseConfig(
+        file_config_temp, version_check_flag=False
+    )
+
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_rad_segmentation.csv"
     )

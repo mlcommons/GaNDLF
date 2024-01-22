@@ -243,9 +243,13 @@ def ImagesFromDataFrame(
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
             if sampler["enable_padding"]:
-                psize_pad = get_correct_padding_size(
-                    patch_size, parameters["model"]["dimension"]
+                psize_pad = list(
+                    np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
                 )
+                # ensure that the patch size for z-axis is not 1 for 2d images
+                if parameters["model"]["dimension"] == 2:
+                    psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
+                # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
                 padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
                 subject = padder(subject)
 
