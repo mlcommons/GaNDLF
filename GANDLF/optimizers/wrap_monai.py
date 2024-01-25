@@ -1,9 +1,8 @@
 from monai.optimizers import (
-    novograd,
-    WarmupCosineSchedule as WCS
+    novograd
 )
 
-def novograd(parameters):
+def novograd_wrapper(parameters):
     return novograd(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
@@ -11,9 +10,4 @@ def novograd(parameters):
         eps=parameters["optimizer"].get("eps", 1e-8),
         weight_decay=parameters["optimizer"].get("weight_decay", 3e-05),
         amsgrad=parameters["optimizer"].get("amsgrad", False),
-    )
-
-def WCS(parameters):
-    return WCS(
-        
     )
