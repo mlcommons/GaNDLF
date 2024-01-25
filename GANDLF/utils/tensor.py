@@ -283,7 +283,8 @@ def get_class_imbalance_weights_classification(training_df, params):
     for i in range(params["model"]["num_classes"]):
         penalty_dict[i] /= penalty_sum
 
-    return penalty_dict, weight_dict
+    # passing None for sampling_weights because there is no clear way to calculate this for classification tasks which do not have a label
+    return penalty_dict, None, weight_dict
 
 
 def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
@@ -349,7 +350,7 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
         for key, val in penalty.items()
     }
 
-    return penalty_dict, weights_dict
+    return penalty_dict, penalty_dict, weights_dict
 
 
 def get_class_imbalance_weights(training_df, params):
@@ -363,10 +364,11 @@ def get_class_imbalance_weights(training_df, params):
     Returns:
         float, float: The penalty and class weights for different classes under consideration for classification.
     """
-    penalty_weights, class_weights = None, None
-    if params["weighted_loss"]:
-        (penalty_weights, class_weights) = (
-            params.get("weights", None),
+    penalty_weights, sampling_weights, class_weights = None, None, None
+    if params["weighted_loss"] or params["patch_sampler"]["biased_sampling"]:
+        (penalty_weights, sampling_weights, class_weights) = (
+            params.get("penalty_weights", None),
+            params.get("sampling_weights", None),
             params.get("class_weights", None),
         )
         # this default is needed for openfl
@@ -383,11 +385,15 @@ def get_class_imbalance_weights(training_df, params):
                 else penalty_weights
             )
 
-        if penalty_weights is None or class_weights is None:
+        # calculate the penalty/sampling weights only if one of the following conditions are met
+        if (params["weighted_loss"] and (penalty_weights is None)) or (
+            params["patch_sampler"]["biased_sampling"] and (sampling_weights is None)
+        ):
             print("Calculating weights")
             if params["problem_type"] == "classification":
                 (
                     penalty_weights,
+                    sampling_weights,
                     class_weights,
                 ) = get_class_imbalance_weights_classification(training_df, params)
             elif params["problem_type"] == "segmentation":
@@ -410,13 +416,14 @@ def get_class_imbalance_weights(training_df, params):
 
                 (
                     penalty_weights,
+                    sampling_weights,
                     class_weights,
                 ) = get_class_imbalance_weights_segmentation(penalty_loader, params)
                 del penalty_data, penalty_loader
         else:
             print("Using weights from config file")
 
-    return penalty_weights, class_weights
+    return penalty_weights, sampling_weights, class_weights
 
 
 def get_linear_interpolation_mode(dimensionality):

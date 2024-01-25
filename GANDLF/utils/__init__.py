@@ -8,6 +8,7 @@ from .imaging import (
     resample_image,
     perform_sanity_check_on_subject,
     write_training_patches,
+    get_correct_padding_size,
 )
 
 from .tensor import (

@@ -1,4 +1,5 @@
-import os, pathlib, sys, math
+from typing import Union
+import os, pathlib, math, copy
 import numpy as np
 import SimpleITK as sitk
 import torchio
@@ -126,8 +127,6 @@ def perform_sanity_check_on_subject(subject, parameters):
     # read the first image and save that for comparison
     file_reader_base = None
 
-    import copy
-
     list_for_comparison = copy.deepcopy(parameters["headers"]["channelHeaders"])
     if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
@@ -240,3 +239,22 @@ def write_training_patches(subject, params):
             img_to_write,
             os.path.join(training_output_dir_current_subject, "label_" + key + ext),
         )
+
+
+def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: int):
+    """
+    This function returns the correct padding size based on the patch size and overlap.
+
+    Args:
+        patch_size (Union[list, tuple]): The patch size.
+        model_dimension (int): The model dimension.
+
+    Returns:
+        Union[list, tuple]: The correct padding size.
+    """
+    psize_pad = list(np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int))
+    # ensure that the patch size for z-axis is not 1 for 2d images
+    if model_dimension == 2:
+        psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
+
+    return psize_pad

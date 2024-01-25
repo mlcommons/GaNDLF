@@ -36,11 +36,9 @@ def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
 
     parameters["output_dir"] = outputDir
 
-    # # initialize parameters for inference
-    if not ("weights" in parameters):
-        parameters["weights"] = None  # no need for loss weights for inference
-    if not ("class_weights" in parameters):
-        parameters["class_weights"] = None  # no need for class weights for inference
+    # initialize parameters for inference
+    for key in ["penalty_weights", "sampling_weights", "class_weights"]:
+        parameters[key] = parameters.get(key, None)
 
     n_folds = parameters["nested_training"]["validation"]
 
