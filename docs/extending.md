@@ -16,7 +16,7 @@ Before starting to work on the code-level on GaNDLF, please follow the [instruct
 ## Overall Architecture
 
 - Command-line parsing: [gandlf_run](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_run)
-- Parameters from [training configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) get passed as a `dict` via [parameter parser](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/parseConfig.py)
+- Parameters from [training configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) get passed as a `dict` via the [config manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/config_manager.py)
 - [Training Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/training_manager.py): 
     - Handles k-fold training 
     - Main entry point from CLI
