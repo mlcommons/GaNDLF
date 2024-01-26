@@ -98,7 +98,7 @@ def initialize_key(parameters, key, value=None):
     return parameters
 
 
-def parseConfig(config_file_path, version_check_flag=True):
+def _parseConfig(config_file_path, version_check_flag=True):
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
@@ -714,3 +714,17 @@ def parseConfig(config_file_path, version_check_flag=True):
         params["inference_mechanism"] = inference_mechanism
 
     return params
+
+
+def ConfigManager(config_file_path, version_check_flag=True) -> None:
+    """
+    This function parses the configuration file and returns a dictionary of parameters.
+
+    Args:
+        config_file_path (Union[str, dict]): The filename of the configuration file.
+        version_check_flag (bool, optional): Whether to check the version in configuration file. Defaults to True.
+
+    Returns:
+        dict: The parameter dictionary.
+    """
+    return _parseConfig(config_file_path, version_check_flag)
