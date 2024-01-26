@@ -26,7 +26,7 @@ global_optimizer_dict = {
     "adagrad": adagrad,
     "rmsprop": rmsprop,
     "radam": radam,
-    "Novograd": novograd_wrapper
+    "novograd": novograd_wrapper
 }
 
 
