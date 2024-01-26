@@ -10,7 +10,7 @@ from GANDLF.utils import (
     get_dataframe,
     get_correct_padding_size,
 )
-from GANDLF.parseConfig import parseConfig
+from GANDLF.config_manager import ConfigManager
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -45,7 +45,7 @@ def preprocess_and_save(
     # read the csv
     # don't care if the dataframe gets shuffled or not
     dataframe, headers = parseTrainingCSV(data_csv, train=False)
-    parameters = parseConfig(config_file)
+    parameters = ConfigManager(config_file)
 
     # save the parameters so that the same compute doesn't happen once again
     parameter_file = os.path.join(output_dir, "parameters.pkl")
