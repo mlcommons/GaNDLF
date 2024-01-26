@@ -40,6 +40,7 @@ def get_optimizers_gan(params):
     optimizer_gen_type = params["optimizer_gen"]["type"]
     optimizer_disc_type = params["optimizer_disc"]["type"]
     if optimizer_gen_type in global_optimizer_dict:
+        params["model_parameters"] = params["model_parameters_gen"]
         optimizer_gen_function = global_optimizer_dict[optimizer_gen_type]
         optimizer_gen = optimizer_gen_function(params)
     else:
@@ -47,12 +48,14 @@ def get_optimizers_gan(params):
             "Generator optimizer type %s not found" % optimizer_gen_type
         )
     if optimizer_disc_type in global_optimizer_dict:
+        params["model_parameters"] = params["model_parameters_disc"]
         optimizer_disc_function = global_optimizer_dict[optimizer_disc_type]
         optimizer_disc = optimizer_disc_function(params)
     else:
         raise ValueError(
             "Discriminator optimizer type %s not found" % optimizer_disc_type
         )
+
     return optimizer_gen, optimizer_disc
 
 

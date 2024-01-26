@@ -44,6 +44,7 @@ from .synthesis import (
 )
 import GANDLF.metrics.classification as classification
 import GANDLF.metrics.regression as regression
+import GANDLF.metrics.generation as generation
 
 
 # global defines for the metrics
@@ -124,3 +125,5 @@ def overall_stats(predictions, ground_truth, params):
         return classification.overall_stats(predictions, ground_truth, params)
     elif params["problem_type"] == "regression":
         return regression.overall_stats(predictions, ground_truth, params)
+    elif params["problem_type"] == "generation":
+        return generation.overall_stats(predictions, ground_truth, params)

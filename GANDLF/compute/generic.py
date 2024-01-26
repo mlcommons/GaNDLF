@@ -179,7 +179,10 @@ def create_pytorch_objects_gan(
 
     # get the model
     model = get_model(parameters)
-    parameters["model_parameters"] = model.parameters()
+
+    parameters["model_parameters_gen"] = model.generator.parameters()
+    parameters["model_parameters_disc"] = model.discriminator.parameters()
+
     optimizer_gen, optimizer_disc = get_optimizers_gan(parameters)
     parameters["optimizer_gen_object"] = optimizer_gen
     parameters["optimizer_disc_object"] = optimizer_disc
@@ -222,7 +225,9 @@ def create_pytorch_objects_gan(
     generator_keys_to_remove = [
         "optimizer_gen_object",
         "optimizer_disc_object",
-        "model_parameters",
+        "model_parameters_gen",
+        "model_parameters_disc",
+
     ]
     for key in generator_keys_to_remove:
         parameters.pop(key, None)
