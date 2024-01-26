@@ -1,9 +1,9 @@
 from monai.optimizers import (
-    novograd
+    Novograd
 )
 
 def novograd_wrapper(parameters):
-    return novograd(
+    return Novograd(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
         betas=parameters["optimizer"].get("betas", (0.9, 0.999)),
