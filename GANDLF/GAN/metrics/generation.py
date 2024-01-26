@@ -2,7 +2,7 @@ import torch
 import torchmetrics as tm
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
-from gan_utils.lpip import LPIPSGandlf
+from .gan_utils.lpip import LPIPSGandlf
 
 
 def overall_stats(

@@ -44,7 +44,7 @@ from .synthesis import (
 )
 import GANDLF.metrics.classification as classification
 import GANDLF.metrics.regression as regression
-import GANDLF.metrics.generation as generation
+import GANDLF.GAN.metrics.generation as generation
 
 
 # global defines for the metrics

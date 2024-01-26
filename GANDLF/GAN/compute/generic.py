@@ -1,8 +1,8 @@
 from pandas.util import hash_pandas_object
 
 from GANDLF.models import get_model
-from GANDLF.schedulers import get_scheduler
-from GANDLF.optimizers import get_optimizer
+from GANDLF.schedulers import get_scheduler_gan
+from GANDLF.optimizers import get_optimizers_gan
 from GANDLF.data import (
     get_train_loader,
     get_validation_loader,
@@ -15,7 +15,7 @@ from GANDLF.utils import (
 )
 
 
-def create_pytorch_objects(
+def create_pytorch_objects_gan(
     parameters, train_csv=None, val_csv=None, device="cpu"
 ):
     """
@@ -29,12 +29,15 @@ def create_pytorch_objects(
 
     Returns:
         model (torch.nn.Module): The model to use for training.
-        optimizer (Optimizer): The optimizer to use for training.
+        optimizer_gen (Optimizer): The optimizer to use for training generator.
+        optimizer_disc (Optimizer): The optimizer to use for training discriminator.
         train_loader (torch.utils.data.DataLoader): The training data loader.
         val_loader (torch.utils.data.DataLoader): The validation data loader.
-        scheduler (object): The scheduler to use for training.
+        scheduler_gen (object): The scheduler to use for training generator.
+        scheduler_disc (object): The scheduler to use for training discriminator.
         parameters (dict): The updated parameters dictionary.
     """
+
     # initialize train and val loaders
     train_loader, val_loader = None, None
     headers_to_populate_train, headers_to_populate_val = None, None
@@ -70,13 +73,13 @@ def create_pytorch_objects(
 
     # get the model
     model = get_model(parameters)
-    parameters["model_parameters"] = model.parameters()
 
-    # get the optimizer
-    optimizer = get_optimizer(parameters)
-    parameters["optimizer_object"] = optimizer
+    parameters["model_parameters_gen"] = model.generator.parameters()
+    parameters["model_parameters_disc"] = model.discriminator.parameters()
 
-    # send model to correct device
+    optimizer_gen, optimizer_disc = get_optimizers_gan(parameters)
+    parameters["optimizer_gen_object"] = optimizer_gen
+    parameters["optimizer_disc_object"] = optimizer_disc
     (
         model,
         parameters["model"]["amp"],
@@ -86,10 +89,9 @@ def create_pytorch_objects(
         model,
         amp=parameters["model"]["amp"],
         device=device,
-        optimizer_1=optimizer,
+        optimizer_1=optimizer_gen,
+        optimizer_2=optimizer_disc,
     )
-
-    # only need to create scheduler if training
     if train_csv is not None:
         if not ("step_size" in parameters["scheduler"]):
             parameters["scheduler"]["step_size"] = (
@@ -97,7 +99,7 @@ def create_pytorch_objects(
                 / parameters["learning_rate"]
             )
 
-        scheduler = get_scheduler(parameters)
+        scheduler_gen, scheduler_disc = get_scheduler_gan(parameters)
 
         # Calculate the weights here
         (
@@ -111,11 +113,25 @@ def create_pytorch_objects(
         print("Penalty weights: ", parameters["weights"])
 
     else:
-        scheduler = None
+        scheduler_gen, scheduler_disc = None, None
 
     # these keys contain generators, and are not needed beyond this point in params
-    generator_keys_to_remove = ["optimizer_object", "model_parameters"]
+    generator_keys_to_remove = [
+        "optimizer_gen_object",
+        "optimizer_disc_object",
+        "model_parameters_gen",
+        "model_parameters_disc",
+    ]
     for key in generator_keys_to_remove:
         parameters.pop(key, None)
 
-    return model, optimizer, train_loader, val_loader, scheduler, parameters
+    return (
+        model,
+        optimizer_gen,
+        optimizer_disc,
+        train_loader,
+        val_loader,
+        scheduler_gen,
+        scheduler_disc,
+        parameters,
+    )
