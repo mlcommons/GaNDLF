@@ -117,7 +117,7 @@ requirements = [
     "twine",
     "zarr",
     "keyring",
-    "monai",
+    "monai==1.3.0",
 ]
 
 if __name__ == "__main__":
