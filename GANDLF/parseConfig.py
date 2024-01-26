@@ -17,7 +17,6 @@ parameter_defaults = {
     "save_output": False,  # save outputs during validation/testing
     "in_memory": False,  # pin data to cpu memory
     "pin_memory_dataloader": False,  # pin data to gpu memory
-    "enable_padding": False,  # if padding needs to be done when "patch_sampler" is "label"
     "scaling_factor": 1,  # scaling factor for regression problems
     "q_max_length": 100,  # the max length of queue
     "q_samples_per_volume": 10,  # number of samples per volume
@@ -39,7 +38,6 @@ parameter_defaults = {
 ## dictionary to define string defaults for appropriate options
 parameter_defaults_string = {
     "optimizer": "adam",  # the optimizer
-    "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "clip_mode": None,  # default clip mode
 }
@@ -639,6 +637,30 @@ def parseConfig(config_file_path, version_check_flag=True):
     if "opt" in params:
         print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]
+
+    # initialize defaults for patch sampler
+    temp_patch_sampler_dict = {
+        "type": "uniform",
+        "enable_padding": False,
+        "padding_mode": "symmetric",
+        "biased_sampling": False,
+    }
+    # check if patch_sampler is defined in the config
+    if "patch_sampler" in params:
+        # if "patch_sampler" is a string, then it is the type of sampler
+        if isinstance(params["patch_sampler"], str):
+            print(
+                "WARNING: Defining 'patch_sampler' as a string will be deprecated in a future release, please use a dictionary instead"
+            )
+            temp_patch_sampler_dict["type"] = params["patch_sampler"].lower()
+        elif isinstance(params["patch_sampler"], dict):
+            # dict requires special handling
+            for key in params["patch_sampler"]:
+                temp_patch_sampler_dict[key] = params["patch_sampler"][key]
+
+    # now assign the dict back to the params
+    params["patch_sampler"] = temp_patch_sampler_dict
+    del temp_patch_sampler_dict
 
     # define defaults
     for current_parameter in parameter_defaults:
