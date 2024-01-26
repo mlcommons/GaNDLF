@@ -2904,7 +2904,7 @@ def test_generic_cli_function_recoverconfig():
     assert os.path.exists(output_config_path), "Didn't create a config file"
 
     new_params = ConfigManager(output_config_path, version_check_flag=False)
-    assert new_params, "Created YAML could not be parsed by parseConfig"
+    assert new_params, "Created YAML could not be parsed by ConfigManager"
 
     sanitize_outputDir()
 
