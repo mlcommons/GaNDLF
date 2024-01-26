@@ -9,13 +9,14 @@ flowchart TD
 
     subgraph Data Processing
         DataFrame --> |Training| TrainingManager --> Data_Training --> training_loop
-        DataFrame --> |Inference| InferenceManager
+        DataFrame --> |Inference| InferenceManager --> Data_Inference --> inference_loop
         parameters --> TrainingManager
         parameters --> InferenceManager
     end
 
     subgraph Training Loop
         training_loop --> create_pytorch_objects
+        parameters --> create_pytorch_objects
         create_pytorch_objects --> model
         create_pytorch_objects --> optimizer
         create_pytorch_objects --> scheduler
