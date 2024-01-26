@@ -117,6 +117,7 @@ requirements = [
     "twine",
     "zarr",
     "keyring",
+    "monai",
 ]
 
 if __name__ == "__main__":
