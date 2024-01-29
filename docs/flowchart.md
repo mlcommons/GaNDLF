@@ -1,5 +1,6 @@
-## Flowchart of GaNDLF
+## Internal Connections of GaNDLF
 
+### I/O and Top-Level Parsing
 ```mermaid
 flowchart TD
     subgraph Input [Start]
@@ -13,20 +14,28 @@ flowchart TD
         parameters --> TrainingManager
         parameters --> InferenceManager
     end
+```
 
-    subgraph Training Loop
-        training_loop --> create_pytorch_objects
-        parameters --> create_pytorch_objects
-        create_pytorch_objects --> model
-        create_pytorch_objects --> optimizer
-        create_pytorch_objects --> scheduler
-        create_pytorch_objects --> DataLoader_Training
-        create_pytorch_objects --> DataLoader_Validation
-        create_pytorch_objects --> weights
-        create_pytorch_objects -->|updated| parameters
+### Creating Compute Objects
+```mermaid
+flowchart 
+    subgraph Object Creation
+        training_loop --> compute.generic.create_pytorch_objects
+        parameters --> compute.generic.create_pytorch_objects
+        compute.generic.create_pytorch_objects --> model
+        compute.generic.create_pytorch_objects --> optimizer
+        compute.generic.create_pytorch_objects --> scheduler
+        compute.generic.create_pytorch_objects --> DataLoader_Training
+        compute.generic.create_pytorch_objects --> DataLoader_Validation
+        compute.generic.create_pytorch_objects --> weights
+        compute.generic.create_pytorch_objects -->|updated| parameters
         model -->|initialized model| utils.modelio.save_mode
     end
+```
 
+### Training and Validation
+```mermaid
+flowchart TD
     subgraph Training
         model --> train_network
         DataLoader_Training --> train_network
