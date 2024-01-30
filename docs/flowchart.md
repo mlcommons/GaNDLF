@@ -46,12 +46,13 @@ flowchart
 ```mermaid
 flowchart TD
     subgraph Training
-        Data_Training[(Data_Training)] --> train_network[\train_network\]
         parameters([parameters]) --> train_network
         train_network -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        model[[model]] --> step[\compute.step\]
+        Data_Training[(Data_Training)] --> step[\compute.step\]
+        model[[model]] --> step
         optimizer[[optimizer]] --> step
         step -->|loss backpropagation| optimizer
+        create_pytorch_objects --> optimizer[[optimizer]]
         step -->|latest model| save_model[\utils.modelio.save_model\]
         step -->|loss and metrics| log_metrics[[training_logger]]
     end
@@ -61,7 +62,6 @@ flowchart TD
         create_pytorch_objects --> Data_Training[(Data_Training)]
         create_pytorch_objects --> Data_Validation[(Data_Validation)] 
         create_pytorch_objects --> model[[model]]
-        create_pytorch_objects --> optimizer[[optimizer]]
         create_pytorch_objects --> scheduler[[scheduler]]
         create_pytorch_objects --> weights[[weights]]
     end
