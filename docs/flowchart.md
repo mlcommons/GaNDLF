@@ -18,6 +18,8 @@ flowchart TD
         df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Inference[(Data_Inference)] --> inference_loop[\inference_loop\]
         parameters([parameters]) --> TrainingManager
         parameters --> InferenceManager
+        training_loop -->|actual training including backpropagation| Training
+        training_loop -->|validate model performance without backpropagation| Validation
     end
 ```
 
