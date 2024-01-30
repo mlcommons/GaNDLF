@@ -82,7 +82,7 @@ flowchart TD
 flowchart TD
     subgraph Step Function
         Each_Sample[(Each_Sample)] -->|forward pass| model[[model]]
-        model[[model]] --> type{Train/Validate/Infer}
+        model[[model]] --> type{Compute Type}
         type -->|training| training_loss(Calculate Loss and Backpropagate)
         type -->|validation| validation_loss(Calculate Loss and Report)
         type -->|inference| inferences_metrics(Return Prediction)
