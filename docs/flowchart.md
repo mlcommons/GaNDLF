@@ -35,6 +35,7 @@ flowchart
         parameters([parameters]) <-->|updated| create_pytorch_objects
         create_pytorch_objects --> Data_Training[(Data_Training)]
         create_pytorch_objects --> Data_Validation[(Data_Validation)] 
+        create_pytorch_objects --> Data_Inference[(Data_Inference)] 
         create_pytorch_objects --> model[[model]]
         create_pytorch_objects --> optimizer[[optimizer]]
         create_pytorch_objects --> scheduler[[scheduler]]
@@ -53,6 +54,8 @@ flowchart TD
         optimizer[[optimizer]] --> step
         step -->|loss backpropagation| optimizer
         create_pytorch_objects --> optimizer[[optimizer]]
+        create_pytorch_objects --> scheduler[[scheduler]]
+        scheduler -->|update learning rate| optimizer
         step -->|latest model| save_model[\utils.modelio.save_model\]
         step -->|loss and metrics| log_metrics[[training_logger]]
     end
@@ -62,8 +65,10 @@ flowchart TD
         create_pytorch_objects --> Data_Training[(Data_Training)]
         create_pytorch_objects --> Data_Validation[(Data_Validation)] 
         create_pytorch_objects --> model[[model]]
-        create_pytorch_objects --> scheduler[[scheduler]]
-        create_pytorch_objects --> weights[[weights]]
+    end
+     
+    subgraph Validation
+        Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
     end
 ```
 
@@ -72,7 +77,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Validation
-        DataLoader_Validation[(DataLoader_Validation)] --> validate_network[\validate_network\]
+        Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
         parameters([parameters]) --> validate_network
         model[[model]] --> validate_network
         optimizer[[optimizer]] --> validate_network
