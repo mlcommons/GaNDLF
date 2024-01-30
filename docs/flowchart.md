@@ -16,7 +16,7 @@ flowchart TD
     subgraph Data Processing
         df --> |Training| TrainingManager[/TrainingManager/] --> Data_Training[(Data_Training)] --> training_loop[\training_loop\]
         df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Inference[(Data_Inference)] --> inference_loop[\inference_loop\]
-        parameters --> TrainingManager
+        parameters([parameters]) --> TrainingManager
         parameters --> InferenceManager
     end
 ```
@@ -57,6 +57,7 @@ flowchart TD
 flowchart TD
     subgraph Validation
         model[[model]] --> validate_network[\validate_network\]
+        parameters([parameters]) --> validate_network
         DataLoader_Validation[(DataLoader_Validation)] --> validate_network
         optimizer[[optimizer]] --> validate_network
         validate_network -->|validate mode| step[\compute.step\]
@@ -72,5 +73,19 @@ flowchart TD
         model[[model]] --> inference_loop[\inference_loop\]
         DataLoader_Inference[(DataLoader_Inference)] --> inference_loop
         inference_loop -->|inference mode| step[\compute.step\]
+    end
+```
+
+### The Actual `Step` Routine
+
+```mermaid
+flowchart TD
+    subgraph Step Function
+        Each_Sample[(Each_Sample)] -->|forward pass| model[[model]]
+        model[[model]] --> type{Train/Validate/Infer}
+        type -->|training| training_loss(Calculate Loss and Backpropagate)
+        type -->|validation| validation_loss(Calculate Loss and Report)
+        type -->|inference| inferences_metrics(Return Prediction)
+
     end
 ```
