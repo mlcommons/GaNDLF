@@ -20,8 +20,8 @@ flowchart TD
         parameters --> InferenceManager
         training_loop -->|actual training including backpropagation| Training[\Training\]
         training_loop -->|validate model performance without backpropagation| Validation[\Validation\]
-        inference_loop -->|return predictions| Inference[\Inference\]
         training_loop --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        inference_loop -->|return predictions| Inference[\Inference\]
         inference_loop --> create_pytorch_objects
     end
 ```
