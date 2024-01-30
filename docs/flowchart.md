@@ -123,3 +123,15 @@ flowchart TD
         type -->|inference| inferences_metrics(Return Only Prediction because no GT)
     end
 ```
+
+### The `GANDLF.data` Submodule
+
+```mermaid
+flowchart TD
+    subgraph GANDLF.data.ImagesFromDataFrame
+        df[(DataFrame)] --> ImagesFromDataFrame[\GANDLF.data.ImagesFromDataFrame\]
+        parameters([parameters]) --> ImagesFromDataFrame
+        ImagesFromDataFrame -->|Training| tioq[[torchio.Queue]]
+        ImagesFromDataFrame -->|Not Training| tiosd[[torchio.SubjectsDataset]]
+    end
+```
