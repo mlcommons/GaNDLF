@@ -44,7 +44,7 @@ flowchart TD
         Data_Training[(Data_Training)] --> train_network
         optimizer[[optimizer]] --> train_network
         parameters([parameters]) --> train_network
-        train_network -->|iterate subjects| step[\compute.step\]
+        train_network -->|train mode| step[\compute.step\]
         step -->|loss backpropagation| optimizer
         step -->|latest model| save_model[\utils.modelio.save_model\]
     end
@@ -59,6 +59,7 @@ flowchart TD
         model[[model]] --> validate_network[\validate_network\]
         DataLoader_Validation[(DataLoader_Validation)] --> validate_network
         optimizer[[optimizer]] --> validate_network
+        validate_network -->|validate mode| step[\compute.step\]
         validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
     end
 ```
@@ -70,6 +71,6 @@ flowchart TD
     subgraph Inference
         model[[model]] --> inference_loop[\inference_loop\]
         DataLoader_Inference[(DataLoader_Inference)] --> inference_loop
-        inference_loop -->|iterate subjects| step[\compute.step\]
+        inference_loop -->|inference mode| step[\compute.step\]
     end
 ```
