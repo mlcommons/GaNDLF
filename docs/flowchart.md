@@ -20,13 +20,16 @@ flowchart TD
         parameters --> InferenceManager
         training_loop -->|actual training including backpropagation| Training[\Training\]
         training_loop -->|validate model performance without backpropagation| Validation[\Validation\]
+        inference_loop -->|return predictions| Inference[\Inference\]
+        training_loop --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        inference_loop --> create_pytorch_objects
     end
 ```
 
 ### Creating PyTorch Compute Objects
 ```mermaid
 flowchart 
-    subgraph Object Creation
+    subgraph ObjectCreation
         training_loop[\training_loop\] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
         inference_loop[\inference_loop\] --> create_pytorch_objects
         parameters([parameters]) <-->|updated| create_pytorch_objects
@@ -45,14 +48,23 @@ flowchart TD
     subgraph Training
         Data_Training[(Data_Training)] --> train_network[\train_network\]
         parameters([parameters]) --> train_network
-        model[[model]] --> train_network
-        optimizer[[optimizer]] --> train_network
-        train_network -->|training mode| step[\compute.step\]
+        train_network -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        model[[model]] --> step[\compute.step\]
+        optimizer[[optimizer]] --> step
         step -->|loss backpropagation| optimizer
         step -->|latest model| save_model[\utils.modelio.save_model\]
         step -->|loss and metrics| log_metrics[[training_logger]]
     end
-
+     
+    subgraph ObjectCreation
+        parameters([parameters]) <-->|updated| create_pytorch_objects
+        create_pytorch_objects --> Data_Training[(Data_Training)]
+        create_pytorch_objects --> Data_Validation[(Data_Validation)] 
+        create_pytorch_objects --> model[[model]]
+        create_pytorch_objects --> optimizer[[optimizer]]
+        create_pytorch_objects --> scheduler[[scheduler]]
+        create_pytorch_objects --> weights[[weights]]
+    end
 ```
 
 ### Validation
@@ -73,12 +85,19 @@ flowchart TD
 
 ### Inference
 ```mermaid
-flowchart TD
+flowchart
     subgraph Inference
-        model[[model]] --> inference_loop[\inference_loop\]
-        inference_loop --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        DataLoader_Inference[(DataLoader_Inference)] --> inference_loop
-        inference_loop -->|inference mode| step[\compute.step\]
+        inference_loop -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        model[[model]] --> step
+        DataLoader_Inference[(DataLoader_Inference)] -->|inference mode| step[\compute.step\]
+        step --> Predictions[(Predictions)]
+    end
+     
+    subgraph ObjectCreation
+        parameters([parameters]) <-->|updated| create_pytorch_objects
+        create_pytorch_objects --> DataLoader_Inference[(Data_Inference)]
+        create_pytorch_objects --> model[[model]]
+        model -->|load| weights[[weights]]
     end
 ```
 
