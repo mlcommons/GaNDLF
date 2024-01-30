@@ -15,7 +15,7 @@ flowchart TD
 
     subgraph Data Processing
         df --> |Training| TrainingManager[/TrainingManager/] --> Data_Training[(Data_Training)] --> training_loop[\training_loop\]
-        df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Inference[(Data_Inference)] --> inference_loop[\inference_loop\]
+        df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Testing[(Data_Testing)] --> inference_loop[\inference_loop\]
         parameters([parameters]) --> TrainingManager
         parameters --> InferenceManager
         training_loop -->|actual training including backpropagation| Training[\Training\]
@@ -30,12 +30,12 @@ flowchart TD
 ```mermaid
 flowchart 
     subgraph ObjectCreation
-        training_loop[\training_loop\] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        inference_loop[\inference_loop\] --> create_pytorch_objects
+        training_loop[\training_loop\] -.-> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        inference_loop[\inference_loop\] -.-> create_pytorch_objects
         parameters([parameters]) <-->|updated| create_pytorch_objects
         create_pytorch_objects --> Data_Training[(Data_Training)]
         create_pytorch_objects --> Data_Validation[(Data_Validation)] 
-        create_pytorch_objects --> Data_Inference[(Data_Inference)] 
+        create_pytorch_objects --> Data_Testing[(Data_Testing)] 
         create_pytorch_objects --> model[[model]]
         create_pytorch_objects --> optimizer[[optimizer]]
         create_pytorch_objects --> scheduler[[scheduler]]
@@ -94,13 +94,13 @@ flowchart
     subgraph Inference
         inference_loop -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
         model[[model]] --> step
-        DataLoader_Inference[(DataLoader_Inference)] -->|inference mode| step[\compute.step\]
+        DataLoader_Testing[(DataLoader_Testing)] -->|inference mode| step[\compute.step\]
         step --> Predictions[(Predictions)]
     end
      
     subgraph ObjectCreation
         parameters([parameters]) <-->|updated| create_pytorch_objects
-        create_pytorch_objects --> DataLoader_Inference[(Data_Inference)]
+        create_pytorch_objects --> DataLoader_Testing[(Data_Testing)]
         create_pytorch_objects --> model[[model]]
         model -->|load| weights[[weights]]
     end
