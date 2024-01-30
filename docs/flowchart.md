@@ -29,7 +29,7 @@ flowchart TD
 ### Creating PyTorch Compute Objects
 ```mermaid
 flowchart TD
-    Data_Training_And_Validation[(Data_Training_And_Validation)] --> create_pytorch_objects
+    Data_Training_And_Validation[(Data_Training_And_Validation)] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
     parameters([parameters]) <==>|updated| create_pytorch_objects
     create_pytorch_objects -->|cross-validation| Data_Training[(Data_Training)]
     create_pytorch_objects -->|cross-validation| Data_Validation[(Data_Validation)] 
@@ -95,7 +95,7 @@ flowchart
     end
      
     subgraph ObjectCreation
-        parameters([parameters]) <-->|updated| create_pytorch_objects
+        parameters([parameters]) --> create_pytorch_objects
         create_pytorch_objects --> DataLoader_Testing[(Data_Testing)]
         create_pytorch_objects --> model[[model]]
         model -->|load| weights[[weights]]
