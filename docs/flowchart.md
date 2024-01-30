@@ -21,6 +21,27 @@ flowchart TD
         training_loop -->|actual training including backpropagation| Training
         training_loop -->|validate model performance without backpropagation| Validation
     end
+
+    subgraph Training
+        Data_Training[(Data_Training)] --> train_network[\train_network\]
+        parameters([parameters]) --> train_network
+        model[[model]] --> train_network
+        optimizer[[optimizer]] --> train_network
+        train_network -->|training mode| step[\compute.step\]
+        step -->|loss backpropagation| optimizer
+        step -->|latest model| save_model[\utils.modelio.save_model\]
+        step -->|loss and metrics| log_metrics[[training_logger]]
+    end
+    
+    subgraph Validation
+        DataLoader_Validation[(DataLoader_Validation)] --> validate_network[\validate_network\]
+        parameters([parameters]) --> validate_network
+        model[[model]] --> validate_network
+        optimizer[[optimizer]] --> validate_network
+        validate_network -->|validate mode| step[\compute.step\]
+        validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
+        step -->|loss and metrics| log_metrics[[validation_logger]]
+    end
 ```
 
 ### Creating PyTorch Compute Objects
