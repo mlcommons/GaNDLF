@@ -1,6 +1,6 @@
 ## Internal Connections of GaNDLF
 
-### I/O and Top-Level Parsing
+### I/O
 ```mermaid
 flowchart TD
     subgraph Input Files
@@ -12,18 +12,26 @@ flowchart TD
         InputData[(InputData)] -->|pandas| df[(DataFrame)]
         InputYAMLConfig --> ConfigManager[/ConfigManager/] -->|error checks and defaults| parameters([parameters])
     end
+```
 
-    subgraph Data Processing
-        df --> |Training| TrainingManager[/TrainingManager/] --> Data_Training_And_Validation[(Data_Training_And_Validation)] --> training_loop[\training_loop\]
-        df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Testing[(Data_Testing)] --> inference_loop[\inference_loop\]
-        parameters([parameters]) --> TrainingManager
-        parameters --> InferenceManager
-        training_loop -->|actual training including backpropagation| Training[\Training\]
-        training_loop -->|validate model performance without backpropagation| Validation[\Validation\]
-        training_loop --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        inference_loop -->|return predictions| Inference[\Inference\]
-        inference_loop --> create_pytorch_objects
-    end
+### Top-Level Parsing
+```mermaid
+flowchart TD
+    df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_Training_And_Validation[(Data_Training_And_Validation)] --> training_loop[\training_loop\]
+    df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Testing[(Data_Testing)] --> inference_loop[\inference_loop\]
+    parameters([parameters]) --> TrainingManager
+    parameters --> InferenceManager
+    training_loop -->|actual training including backpropagation| Training[\Training\]
+    training_loop -->|validate model performance without backpropagation| Validation[\Validation\]
+    training_loop <--> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+    Data_Training_And_Validation --> create_pytorch_objects
+    parameters --> create_pytorch_objects
+    Data_Testing --> create_pytorch_objects
+    inference_loop -->|only forward pass| Inference[\Inference\]
+    inference_loop <--> create_pytorch_objects
+    Training -->|complete| model[[model]]
+    Validation -->|complete| model
+    Inference -->|complete| Predictions[(Predictions)]
 ```
 
 ### Creating PyTorch Compute Objects
