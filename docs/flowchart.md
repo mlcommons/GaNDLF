@@ -118,6 +118,7 @@ flowchart TD
         Each_Sample[(Each_Sample)] -->|forward pass| model[[model]]
         model --> Predictions[(Predictions)]
         Predictions[(Predictions)] --> type{compute.loss_and_metric}
+        parameters([parameters]) --> type
         type -->|training/validation| loss(Return Loss, Metrics, & Prediction)
         type -->|inference| inferences_metrics(Return Only Prediction because no GT)
     end
