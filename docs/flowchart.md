@@ -3,14 +3,19 @@
 ### I/O and Top-Level Parsing
 ```mermaid
 flowchart TD
-    subgraph Input [Start]
-        InputData -->|pandas csv| DataFrame
-        InputConfig --> ConfigManager --> parameters
+    subgraph Input Files
+        InputData[(InputData)] 
+        InputYAMLConfig 
+    end
+
+    subgraph Parsing
+        InputData[(InputData)] -->|pandas| df[(DataFrame)]
+        InputYAMLConfig --> ConfigManager[/ConfigManager/] -->|error checks and defaults| parameters
     end
 
     subgraph Data Processing
-        DataFrame --> |Training| TrainingManager --> Data_Training --> training_loop
-        DataFrame --> |Inference| InferenceManager --> Data_Inference --> inference_loop
+        df --> |Training| TrainingManager[/TrainingManager/] --> Data_Training[(Data_Training)] --> training_loop[\training_loop\]
+        df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Inference[(Data_Inference)] --> inference_loop[\inference_loop\]
         parameters --> TrainingManager
         parameters --> InferenceManager
     end
