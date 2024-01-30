@@ -44,7 +44,7 @@ flowchart TD
         Data_Training[(Data_Training)] --> train_network
         optimizer[[optimizer]] --> train_network
         parameters([parameters]) --> train_network
-        train_network -->|train mode| step[\compute.step\]
+        train_network -->|training mode| step[\compute.step\]
         step -->|loss backpropagation| optimizer
         step -->|latest model| save_model[\utils.modelio.save_model\]
     end
@@ -76,16 +76,16 @@ flowchart TD
     end
 ```
 
-### The Actual `Step` Routine
+### The Actual `compute.step` Routine
 
 ```mermaid
 flowchart TD
     subgraph Step Function
         Each_Sample[(Each_Sample)] -->|forward pass| model[[model]]
         model[[model]] --> type{Compute Type}
-        type -->|training| training_loss(Calculate Loss and Backpropagate)
-        type -->|validation| validation_loss(Calculate Loss and Report)
-        type -->|inference| inferences_metrics(Return Prediction)
+        type -->|training| training_loss(Return Loss & Metrics)
+        type -->|validation| validation_loss(Return Loss & Metrics)
+        type -->|inference| inferences_metrics(Just Return Prediction)
 
     end
 ```
