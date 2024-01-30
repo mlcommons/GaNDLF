@@ -1,5 +1,7 @@
 ## Internal Connections of GaNDLF
 
+- The flowcharts have been created using the [mermaid](https://mermaid-js.github.io/mermaid/#/) library. Documentation for the flowchart section can be found [here](https://mermaid.js.org/syntax/flowchart.html).
+
 ### I/O
 ```mermaid
 flowchart TD
