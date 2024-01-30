@@ -10,7 +10,7 @@ flowchart TD
 
     subgraph Parsing
         InputData[(InputData)] -->|pandas| df[(DataFrame)]
-        InputYAMLConfig --> ConfigManager[/ConfigManager/] -->|error checks and defaults| parameters
+        InputYAMLConfig --> ConfigManager[/ConfigManager/] -->|error checks and defaults| parameters([parameters])
     end
 
     subgraph Data Processing
@@ -25,14 +25,14 @@ flowchart TD
 ```mermaid
 flowchart 
     subgraph Object Creation
-        training_loop --> compute.generic.create_pytorch_objects
-        parameters <-->|updated| compute.generic.create_pytorch_objects
-        compute.generic.create_pytorch_objects --> model
-        compute.generic.create_pytorch_objects --> optimizer
-        compute.generic.create_pytorch_objects --> scheduler
-        compute.generic.create_pytorch_objects --> DataLoader_Training
-        compute.generic.create_pytorch_objects --> DataLoader_Validation
-        compute.generic.create_pytorch_objects --> weights
+        training_loop[\training_loop\] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        parameters([parameters]) <-->|updated| create_pytorch_objects
+        create_pytorch_objects --> model[[model]]
+        create_pytorch_objects --> optimizer[[optimizer]]
+        create_pytorch_objects --> scheduler[[scheduler]]
+        create_pytorch_objects --> Data_Training[(Data_Training)]
+        create_pytorch_objects --> Data_Validation[(Data_Validation)] 
+        create_pytorch_objects --> weights[[weights]]
     end
 ```
 
