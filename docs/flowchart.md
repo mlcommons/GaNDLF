@@ -40,25 +40,26 @@ flowchart
 ```mermaid
 flowchart TD
     subgraph Training
-        model --> train_network
-        DataLoader_Training --> train_network
-        optimizer --> train_network
-        parameters --> train_network
-        train_network -->|iterate subjects| compute.step.step
-        compute.step.step -->|loss backpropagation| optimizer
-        compute.step.step -->|latest model| utils.modelio.save_mode
+        model[[model]] --> train_network[\train_network\]
+        Data_Training[(Data_Training)] --> train_network
+        optimizer[[optimizer]] --> train_network
+        parameters([parameters]) --> train_network
+        train_network -->|iterate subjects| step[\compute.step\]
+        step -->|loss backpropagation| optimizer
+        step -->|latest model| save_model[\utils.modelio.save_model\]
     end
 
 ```
 
-### validation
+### Validation
+
 ```mermaid
 flowchart TD
     subgraph Validation
         model --> validate_network
         DataLoader_Validation --> validate_network
         optimizer --> validate_network
-        validate_network -->|if validation loss improves| utils.modelio.save_mode
+        validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
     end
 ```
 
@@ -69,6 +70,6 @@ flowchart TD
     subgraph Inference
         model --> inference_loop
         DataLoader_Inference --> inference_loop
-        inference_loop -->|iterate subjects| compute.step.step
+        inference_loop -->|iterate subjects| compute.step
     end
 ```
