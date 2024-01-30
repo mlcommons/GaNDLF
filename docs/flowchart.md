@@ -26,7 +26,7 @@ flowchart TD
 flowchart 
     subgraph Object Creation
         training_loop[\training_loop\] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        inference_loop[\training_loop\] --> create_pytorch_objects
+        inference_loop[\inference_loop\] --> create_pytorch_objects
         parameters([parameters]) <-->|updated| create_pytorch_objects
         create_pytorch_objects --> Data_Training[(Data_Training)]
         create_pytorch_objects --> Data_Validation[(Data_Validation)] 
