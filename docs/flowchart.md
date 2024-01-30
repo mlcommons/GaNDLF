@@ -56,20 +56,20 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Validation
-        model --> validate_network
-        DataLoader_Validation --> validate_network
-        optimizer --> validate_network
+        model[[model]] --> validate_network[\validate_network\]
+        DataLoader_Validation[(DataLoader_Validation)] --> validate_network
+        optimizer[[optimizer]] --> validate_network
         validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
     end
 ```
 
 
-### Interence
+### Inference
 ```mermaid
 flowchart TD
     subgraph Inference
-        model --> inference_loop
-        DataLoader_Inference --> inference_loop
-        inference_loop -->|iterate subjects| compute.step
+        model[[model]] --> inference_loop[\inference_loop\]
+        DataLoader_Inference[(DataLoader_Inference)] --> inference_loop
+        inference_loop -->|iterate subjects| step[\compute.step\]
     end
 ```
