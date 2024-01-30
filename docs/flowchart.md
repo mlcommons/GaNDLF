@@ -129,9 +129,14 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph GANDLF.data.ImagesFromDataFrame
-        df[(DataFrame)] --> ImagesFromDataFrame[\GANDLF.data.ImagesFromDataFrame\]
         parameters([parameters]) --> ImagesFromDataFrame
-        ImagesFromDataFrame -->|Training| tioq[[torchio.Queue]]
-        ImagesFromDataFrame -->|Not Training| tiosd[[torchio.SubjectsDataset]]
+        parameters --> data_augmentation[[data.augmentation]]
+        parameters --> data_processing[[data.pre/post_processing]]
+        df[(DataFrame)] --> ImagesFromDataFrame[\GANDLF.data.ImagesFromDataFrame\]
+        data_augmentation -->|Training| tioq[[patch_based_queue]]
+        data_processing -->|Training| tioq
+        data_processing -->|Not Training| tiosd[[non-patched_queue]]
+        ImagesFromDataFrame -->|Training| tioq
+        ImagesFromDataFrame -->|Not Training| tiosd
     end
 ```
