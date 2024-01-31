@@ -65,15 +65,9 @@ flowchart TD
         step -->|latest model| save_model[\utils.modelio.save_model\]
         step -->|loss and metrics| log_metrics[[training_logger]]
     end
-     
-    subgraph ObjectCreation
-        parameters([parameters]) <-->|updated| create_pytorch_objects
-        create_pytorch_objects --> Data_Training[(Data_Training)]
-        create_pytorch_objects --> Data_Validation[(Data_Validation)] 
-        create_pytorch_objects --> model[[model]]
-    end
-     
+    
     subgraph Validation
+        create_pytorch_objects --> Data_Validation[(Data_Validation)] 
         Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
     end
 ```
