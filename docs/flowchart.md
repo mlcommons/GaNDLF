@@ -38,12 +38,12 @@ flowchart TD
 
 ### Creating PyTorch Compute Objects
 ```mermaid
-flowchart TD
+flowchart LR
     Data_Full[(Data_Full)] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
     parameters([parameters]) <==>|updated| create_pytorch_objects
     create_pytorch_objects -->|cross-validation| Data_Training[(Data_Training)]
     create_pytorch_objects -->|cross-validation| Data_Validation[(Data_Validation)] 
-    create_pytorch_objects -->|cross-validation| Data_Testing[(Data_Testing)]
+    create_pytorch_objects -->|cross-validation or inference| Data_Testing[(Data_Testing)]
     create_pytorch_objects -->|weights are either initialized or loaded| model[[model]]
     create_pytorch_objects --> optimizer[[optimizer]]
     create_pytorch_objects --> scheduler[[scheduler]]
@@ -74,7 +74,12 @@ flowchart TD
      
     subgraph Validation
         create_pytorch_objects --> Data_Validation[(Data_Validation)] 
-        Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
+        Data_Validation -->|validation mode| validate_network[\validate_network\]
+    end
+     
+    subgraph Testing
+        create_pytorch_objects --> Data_Testing[(Data_Testing)] 
+        Data_Testing -->|testing mode| validate_network[\validate_network\]
     end
 ```
 
@@ -94,19 +99,22 @@ flowchart TD
 
 ### Inference
 ```mermaid
-flowchart
-    subgraph Inference
-        inference_loop -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        model[[model]] --> step
-        DataLoader_Testing[(DataLoader_Testing)] -->|inference mode| step[\compute.step\]
-        step --> Predictions[(Predictions)]
-    end
-     
+flowchart     
     subgraph ObjectCreation
         parameters([parameters]) --> create_pytorch_objects
         create_pytorch_objects --> DataLoader_Testing[(Data_Testing)]
         create_pytorch_objects --> model[[model]]
         model -->|load| weights[[weights]]
+    end
+    subgraph Inference
+        inference_loop -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+        Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\validate_network\]
+        model[[model]] --> validate_network
+        optimizer[[optimizer]] --> validate_network
+        parameters([parameters]) --> validate_network
+        validate_network -->|testing mode| step[\compute.step\]
+        DataLoader_Testing[(DataLoader_Testing)] -->|inference mode| step[\compute.step\]
+        step --> Predictions[(Predictions)]
     end
 ```
 
