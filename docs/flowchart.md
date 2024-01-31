@@ -82,15 +82,13 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph Validation
-        Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
-        parameters([parameters]) --> validate_network
-        model[[model]] --> validate_network
-        optimizer[[optimizer]] --> validate_network
-        validate_network -->|validate mode| step[\compute.step\]
-        validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
-        step -->|loss and metrics| log_metrics[[validation_logger]]
-    end
+    Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
+    model[[model]] --> validate_network
+    optimizer[[optimizer]] --> validate_network
+    parameters([parameters]) --> validate_network
+    validate_network -->|validate mode| step[\compute.step\]
+    validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
+    step -->|loss and metrics| log_metrics[[validation_logger]]
 ```
 
 
