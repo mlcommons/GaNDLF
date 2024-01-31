@@ -44,7 +44,7 @@ flowchart TD
     create_pytorch_objects -->|cross-validation| Data_Training[(Data_Training)]
     create_pytorch_objects -->|cross-validation| Data_Validation[(Data_Validation)] 
     create_pytorch_objects -->|cross-validation| Data_Testing[(Data_Testing)]
-    create_pytorch_objects -->|weights and either initialized or loaded| model[[model]]
+    create_pytorch_objects -->|weights are either initialized or loaded| model[[model]]
     create_pytorch_objects --> optimizer[[optimizer]]
     create_pytorch_objects --> scheduler[[scheduler]]
 ```
