@@ -31,10 +31,8 @@ flowchart TD
     Data_Testing --> create_pytorch_objects
     inference_loop -->|only forward pass| Inference[\Inference\]
     inference_loop <--> create_pytorch_objects
-    Training --> model[[model]]
+    Training --> model[(trained model & associated metrics)]
     Validation --> model
-    Training --> metrics[[metrics]]
-    Validation --> metrics
     Inference --> Predictions[(Predictions)]
 ```
 
@@ -94,7 +92,7 @@ flowchart TD
     model[[model]] --> validate_network
     optimizer[[optimizer]] --> validate_network
     parameters([parameters]) --> validate_network
-    validate_network -->|validate mode| step[\compute.step\]
+    validate_network -->|validation mode| step[\compute.step\]
     validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
     step -->|loss and metrics| log_metrics[[validation_logger]]
 ```
@@ -105,10 +103,10 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Data_Testing[(Data_Testing)] -->|inference mode| validate_network[\validate_network\]
-    model[[model]] -->|inference mode| validate_network
+    Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\validate_network\]
+    model[[model]] -->|testing mode| validate_network
     parameters([parameters]) --> validate_network
-    validate_network -->|inference mode| step[\compute.step\]
+    validate_network -->|testing mode| step[\compute.step\]
         step --> Predictions[(Predictions)]
 ```
 
@@ -122,8 +120,8 @@ flowchart TD
     model --> Prediction[(Prediction)]
     Prediction --> type{compute.loss_and_metric}
     parameters([parameters]) --> type
-    type -->|training/validation| loss(Return Loss, Metrics, & Prediction)
-    type -->|testing| inferences_metrics(Return Only Prediction because no GT)
+    type -->|training/validation mode| loss(Return Loss, Metrics, & Prediction)
+    type -->|testing mode| inferences_metrics(Return Only Prediction because no GT)
     Prediction --> inferences_metrics
 ```
 
