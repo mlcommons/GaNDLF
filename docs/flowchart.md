@@ -25,12 +25,12 @@ flowchart TD
     parameters --> InferenceManager
     training_loop -->|actual training including backpropagation| Training[\Training\]
     training_loop -->|validate model performance without backpropagation| Validation[\Validation\]
-    training_loop <--> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
+    training_loop <==> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
     Data_Training_And_Validation --> create_pytorch_objects
     parameters --> create_pytorch_objects
     Data_Testing --> create_pytorch_objects
     inference_loop -->|only forward pass| Inference[\Inference\]
-    inference_loop <--> create_pytorch_objects
+    inference_loop <==> create_pytorch_objects
     Training --> model[(trained model & associated metrics)]
     Validation --> model
     Inference --> Predictions[(Predictions)]
@@ -65,22 +65,15 @@ flowchart TD
         scheduler -->|update learning rate| optimizer
         step -->|latest model| save_model[\utils.modelio.save_model\]
         step -->|loss and metrics| log_metrics[[training_logger]]
-    end
-     
-    subgraph ObjectCreation
-        parameters([parameters]) <-->|updated| create_pytorch_objects
+        
+        parameters([parameters]) <==>|updated| create_pytorch_objects
         create_pytorch_objects --> Data_Training[(Data_Training)]
         create_pytorch_objects --> model[[model]]
     end
      
-    subgraph Validation
-        create_pytorch_objects --> Data_Validation[(Data_Validation)] 
-        Data_Validation -->|validation mode| validate_network[\validate_network\]
-    end
-     
-    subgraph Testing
-        create_pytorch_objects --> Data_Testing[(Data_Testing)] 
-        Data_Testing -->|testing mode| validate_network[\validate_network\]
+    subgraph Validation and Testing
+        create_pytorch_objects --> Data_Validation[(Data_Validation)] -->|validation mode| validate_network[\validate_network\]
+        create_pytorch_objects --> Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\validate_network\]
     end
 ```
 
