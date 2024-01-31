@@ -116,29 +116,28 @@ flowchart
 
 ```mermaid
 flowchart TD
-    subgraph Step Function
-        Each_Sample[(Each_Sample)] -->|forward pass| model[[model]]
-        model --> Predictions[(Predictions)]
-        Predictions[(Predictions)] --> type{compute.loss_and_metric}
-        parameters([parameters]) --> type
-        type -->|training/validation| loss(Return Loss, Metrics, & Prediction)
-        type -->|inference| inferences_metrics(Return Only Prediction because no GT)
-    end
+    Each_Sample --> Input_GroundTruth[(Input_GroundTruth)] -->type{compute.loss_and_metric}
+    Each_Sample[(Each Sample)] -->Input_DataPoint
+    Input_DataPoint[(Input_DataPoint)] -->|forward pass| model[[model]]
+    model --> Prediction[(Prediction)]
+    Prediction --> type{compute.loss_and_metric}
+    parameters([parameters]) --> type
+    type -->|training/validation| loss(Return Loss, Metrics, & Prediction)
+    type -->|inference| inferences_metrics(Return Only Prediction because no GT)
+    Prediction --> inferences_metrics
 ```
 
 ### The `GANDLF.data` Submodule
 
 ```mermaid
 flowchart TD
-    subgraph GANDLF.data.ImagesFromDataFrame
-        parameters([parameters]) --> ImagesFromDataFrame
-        parameters --> data_augmentation[[data.augmentation]]
-        parameters --> data_processing[[data.pre/post_processing]]
-        df[(DataFrame)] --> ImagesFromDataFrame[\GANDLF.data.ImagesFromDataFrame\]
-        data_augmentation -->|Training| tioq[[patch_based_queue]]
-        data_processing -->|Training| tioq
-        data_processing -->|Not Training| tiosd[[non-patched_queue]]
-        ImagesFromDataFrame -->|Training| tioq
-        ImagesFromDataFrame -->|Not Training| tiosd
-    end
+    parameters([parameters]) --> ImagesFromDataFrame
+    parameters --> data_augmentation[[data.augmentation]]
+    parameters --> data_processing[[data.pre/post_processing]]
+    df[(DataFrame)] --> ImagesFromDataFrame[\GANDLF.data.ImagesFromDataFrame\]
+    data_augmentation -->|Training| tioq[[patch_based_queue]]
+    data_processing -->|Training| tioq
+    data_processing -->|Not Training| tiosd[[non-patched_queue]]
+    ImagesFromDataFrame -->|Training| tioq
+    ImagesFromDataFrame -->|Not Training| tiosd
 ```
