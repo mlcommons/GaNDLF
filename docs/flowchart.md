@@ -20,7 +20,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_Training_And_Validation[(Data_Training_And_Validation)] --> training_loop[\training_loop\]
-    df --> |Inference| InferenceManager[/InferenceManager/] --> Data_Testing[(Data_Testing)] --> inference_loop[\inference_loop\]
+    df --> |Inference or Testing| InferenceManager[/InferenceManager/] --> Data_Testing[(Data_Testing)] --> inference_loop[\inference_loop\]
     parameters([parameters]) --> TrainingManager
     parameters --> InferenceManager
     training_loop -->|actual training including backpropagation| Training[\Training\]
@@ -31,12 +31,15 @@ flowchart TD
     Data_Testing --> create_pytorch_objects
     inference_loop -->|only forward pass| Inference[\Inference\]
     inference_loop <--> create_pytorch_objects
-    Training -->|complete| model[[model]]
-    Validation -->|complete| model
-    Inference -->|complete| Predictions[(Predictions)]
+    Training --> model[[model]]
+    Validation --> model
+    Training --> metrics[[metrics]]
+    Validation --> metrics
+    Inference --> Predictions[(Predictions)]
 ```
 
-### Creating PyTorch Compute Objects
+### Creating PyTorch Compute Objects using `GANDLF.compute.generic.create_pytorch_objects`
+
 ```mermaid
 flowchart LR
     Data_Full[(Data_Full)] --> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
@@ -97,25 +100,16 @@ flowchart TD
 ```
 
 
+
 ### Inference
+
 ```mermaid
-flowchart     
-    subgraph ObjectCreation
-        parameters([parameters]) --> create_pytorch_objects
-        create_pytorch_objects --> DataLoader_Testing[(Data_Testing)]
-        create_pytorch_objects --> model[[model]]
-        model -->|load| weights[[weights]]
-    end
-    subgraph Inference
-        inference_loop -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\validate_network\]
-        model[[model]] --> validate_network
-        optimizer[[optimizer]] --> validate_network
-        parameters([parameters]) --> validate_network
-        validate_network -->|testing mode| step[\compute.step\]
-        DataLoader_Testing[(DataLoader_Testing)] -->|inference mode| step[\compute.step\]
+flowchart TD
+    Data_Testing[(Data_Testing)] -->|inference mode| validate_network[\validate_network\]
+    model[[model]] -->|inference mode| validate_network
+    parameters([parameters]) --> validate_network
+    validate_network -->|inference mode| step[\compute.step\]
         step --> Predictions[(Predictions)]
-    end
 ```
 
 ### The Actual `compute.step` Routine
