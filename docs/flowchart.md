@@ -123,7 +123,7 @@ flowchart TD
     Prediction --> type{compute.loss_and_metric}
     parameters([parameters]) --> type
     type -->|training/validation| loss(Return Loss, Metrics, & Prediction)
-    type -->|inference| inferences_metrics(Return Only Prediction because no GT)
+    type -->|testing| inferences_metrics(Return Only Prediction because no GT)
     Prediction --> inferences_metrics
 ```
 
