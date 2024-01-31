@@ -74,7 +74,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install wheel
         python -m pip install openvino-dev==2023.0.1 mlcube_docker
-        pip install torch==2.1.0+cpu torchvision==0.16.0+cpu torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cpu
+        pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cpu
         pip install -e .
     - name: Run generic unit tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change

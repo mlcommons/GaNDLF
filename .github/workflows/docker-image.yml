@@ -25,6 +25,8 @@ jobs:
       fail-fast: false # So that remaining jobs don't instantly quit if one fails (e.g, CPU/ROCm don't upload if CUDA just fails to push to ghcr...)
       matrix:
         include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), docker tag has to be all lowercase alphanumeric for mysterious docker reasons
+          - platform: CUDA12.1
+            dockertag: cuda121
           - platform: CUDA11.8
             dockertag: cuda118
           - platform: CPU
