@@ -54,7 +54,7 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Training
-        parameters([parameters]) --> train_network
+        parameters([parameters]) --> train_network[\compute.training_loop.train_network\]
         train_network -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
         Data_Training[(Data_Training)] --> step[\compute.step\]
         model[[model]] --> step
@@ -81,7 +81,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Data_Validation[(Data_Validation)] --> validate_network[\validate_network\]
+    Data_Validation[(Data_Validation)] --> validate_network[\compute.forward_pass.validate_network\]
     model[[model]] --> validate_network
     optimizer[[optimizer]] --> validate_network
     parameters([parameters]) --> validate_network
@@ -96,7 +96,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\validate_network\]
+    Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\compute.forward_pass.validate_network\]
     model[[model]] -->|testing mode| validate_network
     parameters([parameters]) --> validate_network
     validate_network -->|testing mode| step[\compute.step\]
@@ -125,7 +125,7 @@ flowchart TD
     parameters([parameters]) --> ImagesFromDataFrame
     parameters --> data_augmentation[[data.augmentation]]
     parameters --> data_processing[[data.pre/post_processing]]
-    df[(DataFrame)] --> ImagesFromDataFrame[\GANDLF.data.ImagesFromDataFrame\]
+    df[(DataFrame)] --> ImagesFromDataFrame[\data.ImagesFromDataFrame\]
     data_augmentation -->|Training| tioq[[patch_based_queue]]
     data_processing -->|Training| tioq
     data_processing -->|Not Training| tiosd[[non-patched_queue]]
