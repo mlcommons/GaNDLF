@@ -3,6 +3,7 @@
 - The flowcharts have been created using the [mermaid](https://mermaid-js.github.io/mermaid/#/) library. Documentation for the flowchart section can be found [here](https://mermaid.js.org/syntax/flowchart.html).
 
 ### I/O
+
 ```mermaid
 flowchart TD
     subgraph Input Files
@@ -17,6 +18,7 @@ flowchart TD
 ```
 
 ### Top-Level Parsing
+
 ```mermaid
 flowchart TD
     df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_Training_And_Validation[(Data_Training_And_Validation)] --> training_loop[\training_loop\]
@@ -51,6 +53,7 @@ flowchart LR
 ```
 
 ### Training
+
 ```mermaid
 flowchart TD
     subgraph Training
@@ -89,8 +92,6 @@ flowchart TD
     validate_network -->|if validation loss improves| save_model[\utils.modelio.save_model\]
     step -->|loss and metrics| log_metrics[[validation_logger]]
 ```
-
-
 
 ### Inference
 
