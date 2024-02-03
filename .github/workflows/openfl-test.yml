@@ -97,9 +97,9 @@ jobs:
         pip install -e .
         cd ..
         echo "Copying files to appropriate directories and updated headers"
-        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
-        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
-        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/train.csv
+        head -n 1 testing/data/train_2d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
+        tail -n +9 testing/data/train_2d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
+        head -n 8 testing/data/train_2d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/train.csv
         sed -i 's/# n_channels: 3/num_channels: 3/g' testing/config_segmentation.yaml
         cd openfl
         ### this should not be there
