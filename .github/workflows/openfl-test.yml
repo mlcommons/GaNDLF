@@ -102,4 +102,8 @@ jobs:
         head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/train.csv
         sed -i 's/# n_channels: 3/num_channels: 3/g' testing/config_segmentation.yaml
         cd openfl
+        ### this should not be there
+        sed -i "s/from GANDLF.parseConfig import parseConfig/from GANDLF.config_manager import ConfigManager/" openfl/federated/task/runner_gandlf.py
+        sed -i "s/parseConfig/ConfigManager/" openfl/federated/task/runner_gandlf.py
+        ### this should not be there
         python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1 --gandlf_config ../testing/config_segmentation.yaml
