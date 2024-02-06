@@ -27,7 +27,7 @@ flowchart TD
     Loop_Train -->|Training| Trainer[/Trainer/] --> Model[(Trained Model & Metrics)]
     Loop_Train -->|Validation| Validator[/Validator/] --> Model
     Loop_Inference -->|Inference| InferenceEngine[/InferenceEngine/] --> Predictions[(Predictions)]
-    Loop_Train <==> CommonObjects[/Create Common Objects\]
+    Loop_Train <==> CommonObjects[\compute.generic.create_pytorch_objects\]
     Loop_Train -->|Validation| CommonObjects
     Loop_Train -->|Training| CommonObjects
     Loop_Train -->|Validation| CommonObjects
@@ -53,8 +53,8 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Training
-        parameters([Parameters]) --> train_network[Train Network]
-        train_network -->|Create Compute Objects| create_pytorch_objects[Create PyTorch Objects]
+        parameters([Parameters]) --> train_network[\compute.training_loop.train_network\]
+        train_network -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
         Data_Training[(Data for Training)] --> step[Compute Step]
         model[Model] --> step
         optimizer[Optimizer] --> step
@@ -62,7 +62,7 @@ flowchart TD
         create_pytorch_objects --> optimizer
         create_pytorch_objects --> scheduler[Scheduler]
         scheduler -->|Update Learning Rate| optimizer
-        step -->|Latest Model| save_model[Save Model]
+        step -->|Latest Model| save_model[\utils.modelio.save_model\]
         step -->|Loss and Metrics| log_metrics[Training Logger]
         
         parameters <==>|Updated| create_pytorch_objects
