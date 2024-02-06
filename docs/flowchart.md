@@ -23,14 +23,12 @@ flowchart TD
 flowchart TD
     df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_TV[(Data for Training & Validation)] --> Loop_Train[\Training Loop\]
     df --> |Inference or Testing| InferenceManager[/InferenceManager/] --> Data_Test[(Data for Testing)] --> Loop_Inference[\Inference Loop\]
-    parameters([parameters]) --> ManagerCommon
+    parameters([parameters]) -->|Configuration| TrainingManager
+    parameters([parameters]) -->|Configuration| InferenceManager
     Loop_Train -->|Training| Trainer[/Trainer/] --> Model[(Trained Model & Metrics)]
     Loop_Train -->|Validation| Validator[/Validator/] --> Model
+    Loop_Train <==>|Training & Validation| CommonObjects[\compute.generic.create_pytorch_objects\]
     Loop_Inference -->|Inference| InferenceEngine[/InferenceEngine/] --> Predictions[(Predictions)]
-    Loop_Train <==> CommonObjects[\compute.generic.create_pytorch_objects\]
-    Loop_Train -->|Validation| CommonObjects
-    Loop_Train -->|Training| CommonObjects
-    Loop_Train -->|Validation| CommonObjects
     Loop_Inference <==> CommonObjects
 ```
 
@@ -97,7 +95,7 @@ flowchart TD
     model[[model]] -->|testing mode| validate_network
     parameters([parameters]) --> validate_network
     validate_network -->|testing mode| step[\compute.step\]
-        step --> Predictions[(Predictions)]
+    step --> Predictions[(Predictions)]
 ```
 
 ### The Actual `compute.step` Routine
@@ -118,8 +116,8 @@ flowchart TD
     end
     
     subgraph Output
-        type -->|Training/Validation Mode| Loss_Return{Return Loss, Metrics, & Prediction}
-        type -->|Testing Mode| Inference_Return{Return Only Prediction because no GT}
+        type -->|Training/Validation Mode| Loss_Return([Return Loss, Metrics, & Prediction])
+        type -->|Testing Mode| Inference_Return([Return Only Prediction because no GT])
         Prediction --> Inference_Return
     end
 
