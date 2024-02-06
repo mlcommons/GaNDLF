@@ -288,62 +288,6 @@ def patch_artifact_check(img, intensity_thresh = 250, intensity_thresh_saturatio
     # assume that the patch is valid
     return True
 
-def patch_artifact_check_20x(patch_array, intensity_high_thresh=225, intensity_low_thresh=50):
-    """
-    Processes a single RGB image patch and determines whether it should be excluded based on memory-efficient computations.
-
-    Args:
-        patch_array (np.array): The image patch as an RGB numpy array.
-        intensity_high_thresh (int): The high-intensity threshold for filtering (default is 225).
-        intensity_low_thresh (int): The low-intensity threshold for filtering (default is 50).
-
-    Returns:
-        bool: True if the patch should be excluded, False otherwise.
-    """
-    # Calculate the percentage of white pixels using a boolean mask for memory efficiency.
-    white_pixel_mask = np.all(patch_array > intensity_high_thresh, axis=-1)
-    percent_white_pixels = np.mean(white_pixel_mask)
-
-    # Convert RGB to HED and rescale the Eosin channel without storing additional arrays.
-    eosin_channel = rescale_intensity(
-        rgb2hed(patch_array)[:, :, 1],
-        out_range=(0, 255),
-        in_range=(0, np.percentile(rgb2hed(patch_array)[:, :, 1], 99)),
-    )
-    dark_eosin_pixels_ratio = np.mean(eosin_channel < 50)
-
-    # Convert to HSV and calculate metrics using memory views.
-    patch_hsv = cv2.cvtColor(patch_array, cv2.COLOR_RGB2HSV)
-    hue_channel = patch_hsv[:, :, 0]
-    saturation_channel = patch_hsv[:, :, 1]
-    value_channel = patch_hsv[:, :, 2]
-
-    # Calculate the metrics using boolean masks.
-    dark_hue_pixels_ratio = np.mean(hue_channel < 128)
-    dark_saturation_pixels_ratio = np.mean(
-        saturation_channel < intensity_low_thresh
-    )
-    bright_value_pixels_ratio = np.mean(value_channel > intensity_high_thresh)
-
-    # Determine if the patch should be excluded based on the calculated metrics.
-    if (
-        dark_eosin_pixels_ratio > 0.9
-        or dark_hue_pixels_ratio > 0.95
-        or dark_saturation_pixels_ratio > 0.96
-        or np.mean(saturation_channel) < 5
-        or bright_value_pixels_ratio > 0.96
-    ):
-        return True
-
-    # Additional criteria for exclusion.
-    if (
-        dark_saturation_pixels_ratio > 0.9 and bright_value_pixels_ratio > 0.9
-    ) or percent_white_pixels > 0.65:
-        return True
-
-    return False
-
-
 def parse_config(config_file):
     """
     Parse config file and return a dictionary of config values.
