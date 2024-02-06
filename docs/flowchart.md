@@ -18,7 +18,7 @@ flowchart TD
 ```
 
 ### Top-Level Parsing
-
+  
 ```mermaid
 flowchart TD
     df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_TV[(Data for Training & Validation)] --> Loop_Train[\Training Loop\]
