@@ -8,6 +8,7 @@ from .imaging import (
     resample_image,
     perform_sanity_check_on_subject,
     write_training_patches,
+    get_correct_padding_size,
 )
 
 from .tensor import (
@@ -50,6 +51,7 @@ from .generic import (
     suppress_stdout_stderr,
     set_determinism,
     print_and_format_metrics,
+    determine_classification_task_type,
 )
 
 from .modelio import (

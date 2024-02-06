@@ -155,13 +155,14 @@ def save_model(
     model_dict["parameters"] = params
 
     try:
+        # this will try to encode the git hash of the current GaNDLF codebase, and reverts to "None" if not found
         model_dict["git_hash"] = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=os.getcwd())
             .decode("ascii")
             .strip()
         )
-    except subprocess.CalledProcessError:
-        model_dict["git_hash"] = None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        model_dict["git_hash"] = "None"
 
     torch.save(model_dict, path)
 

@@ -21,7 +21,7 @@ metrics:
   - recall
   - specificity
   - iou: {
-      reduction: sum,
+      average: micro,
     }
     
 modality: rad
@@ -55,7 +55,7 @@ save_output: false
 scaling_factor: 1
 scheduler: triangle
 version:
-  maximum: 0.0.17
+  maximum: 0.0.18
   minimum: 0.0.14
 weighted_loss: True
 

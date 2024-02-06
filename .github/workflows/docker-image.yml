@@ -25,8 +25,10 @@ jobs:
       fail-fast: false # So that remaining jobs don't instantly quit if one fails (e.g, CPU/ROCm don't upload if CUDA just fails to push to ghcr...)
       matrix:
         include: # Platform locates Dockerfile ("Dockerfile-{PLATFORM}"), docker tag has to be all lowercase alphanumeric for mysterious docker reasons
-          - platform: CUDA11.6
-            dockertag: cuda116
+          - platform: CUDA12.1
+            dockertag: cuda121
+          - platform: CUDA11.8
+            dockertag: cuda118
           - platform: CPU
             dockertag: cpu
           # - platform: ROCm
@@ -57,10 +59,7 @@ jobs:
     # Install the cosign tool except on PR
     # https://github.com/sigstore/cosign-installer
     - name: Install cosign
-      if: github.event_name != 'pull_request'
-      uses: sigstore/cosign-installer@1e95c1de343b5b0c23352d6417ee3e48d5bcd422
-      with:
-        cosign-release: 'v1.4.0'
+      uses: sigstore/cosign-installer@v3.2.0
         
     - name: Log into GitHub Packages registry (ghcr.io)
       if: github.event_name != 'pull_request'

@@ -1,6 +1,7 @@
 import torch.nn as nn
 import sys
 import torchvision
+import traceback
 
 
 def brainage(parameters):
@@ -18,11 +19,15 @@ def brainage(parameters):
     """
 
     # Check that the input data is 2D
-    if parameters["model"]["dimension"] != 2:
-        sys.exit("Brain Age predictions only works on 2D data")
+    assert (
+        parameters["model"]["dimension"] == 2
+    ), "Brain Age predictions only work on 2D data"
 
-    # Load the pretrained VGG16 model
-    model = torchvision.models.vgg16(pretrained=True)
+    try:
+        # Load the pretrained VGG16 model
+        model = torchvision.models.vgg16(pretrained=True)
+    except Exception:
+        sys.exit("Error: Failed to load VGG16 model: " + traceback.format_exc())
 
     # Remove the final convolutional layer
     model.final_convolution_layer = None

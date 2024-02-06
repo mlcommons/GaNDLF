@@ -28,7 +28,8 @@ def recover_config(modelDir, outputFile):
             "testing_data",
             "device",
             "subject_spacing",
-            "weights",
+            "penalty_weights",
+            "sampling_weights",
             "class_weights",
         ]
 

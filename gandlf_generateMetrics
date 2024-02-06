@@ -32,7 +32,7 @@ if __name__ == "__main__":
         metavar="",
         type=str,
         required=True,
-        help="CSV file that is used to generate the metrics; should contain 3 columns: 'subjectid, prediction, target'",
+        help="The CSV file of input data that is used to generate the metrics; should contain 3 columns: 'SubjectID,Target,Prediction'",
     )
     parser.add_argument(
         "-o",

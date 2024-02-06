@@ -1,7 +1,9 @@
+from typing import Union
 import os
 from pathlib import Path
 import numpy as np
 
+import pandas
 import torch
 import torchio
 from torchio.transforms import Pad
@@ -12,6 +14,7 @@ from GANDLF.utils import (
     perform_sanity_check_on_subject,
     resize_image,
     get_filename_extension_sanitized,
+    get_correct_padding_size,
 )
 from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
@@ -31,30 +34,27 @@ global_sampler_dict = {
 
 # This function takes in a dataframe, with some other parameters and returns the dataloader
 def ImagesFromDataFrame(
-    dataframe, parameters, train, apply_zero_crop=False, loader_type=""
-):
+    dataframe: pandas.DataFrame,
+    parameters: dict,
+    train: bool,
+    apply_zero_crop: bool = False,
+    loader_type: str = "",
+) -> Union[torchio.SubjectsDataset, torchio.Queue]:
     """
-    Reads the pandas dataframe and gives the dataloader to use for training/validation/testing
+    Reads the pandas dataframe and gives the dataloader to use for training/validation/testing.
 
-    Parameters
-    ----------
-    dataframe : pandas.DataFrame
-        The main input dataframe which is calculated after splitting the data CSV
-    parameters : dict
-        The parameters dictionary
-    train : bool
-        If the dataloader is for training or not. For training, the patching infrastructure and data augmentation is applied.
-    apply_zero_crop : bool
-        If enabled, the crop_external_zero_plane is applied.
-    loader_type : str
-        Type of loader for printing.
+    Args:
+        dataframe (pandas.DataFrame): The main input dataframe which is calculated after splitting the data CSV.
+        parameters (dict): The parameters dictionary.
+        train (bool): If the dataloader is for training or not.
+        apply_zero_crop (bool, optional): If zero crop is to be applied. Defaults to False.
+        loader_type (str, optional): The type of loader to use for printing. Defaults to "".
 
-    Returns
-    -------
-    subjects_dataset: torchio.SubjectsDataset
-        This is the output for validation/testing, where patching and data augmentation is disregarded
-    patches_queue: torchio.Queue
-        This is the output for training, which is the subjects_dataset queue after patching and data augmentation is taken into account
+    Raises:
+        ValueError: If the subject cannot be loaded.
+
+    Returns:
+        Union[torchio.SubjectsDataset, torchio.Queue]: The dataloader queue for validation/testing (where patching and data augmentation is not required) or the subjects dataset for training.
     """
     # store in previous variable names
     patch_size = parameters["patch_size"]
@@ -63,11 +63,10 @@ def ImagesFromDataFrame(
     q_samples_per_volume = parameters["q_samples_per_volume"]
     q_num_workers = parameters["q_num_workers"]
     q_verbose = parameters["q_verbose"]
-    sampler = parameters["patch_sampler"]
     augmentations = parameters["data_augmentation"]
     preprocessing = parameters["data_preprocessing"]
     in_memory = parameters["in_memory"]
-    enable_padding = parameters["enable_padding"]
+    sampler = parameters["patch_sampler"]
 
     # Finding the dimension of the dataframe for computational purposes later
     num_row, num_col = dataframe.shape
@@ -82,14 +81,6 @@ def ImagesFromDataFrame(
     labelHeader = headers["labelHeader"]
     predictionHeaders = headers["predictionHeaders"]
     subjectIDHeader = headers["subjectIDHeader"]
-
-    # this basically means that label sampler is selected with padding
-    if isinstance(sampler, dict):
-        sampler_padding = sampler["label"]["padding_type"]
-        sampler = "label"
-    else:
-        sampler = sampler.lower()  # for easier parsing
-        sampler_padding = "symmetric"
 
     resize_images_flag = False
     # if resize has been defined but resample is not (or is none)
@@ -251,14 +242,12 @@ def ImagesFromDataFrame(
                 )
 
             # # padding image, but only for label sampler, because we don't want to pad for uniform
-            if "label" in sampler or "weight" in sampler:
-                if enable_padding:
-                    psize_pad = list(
-                        np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int)
-                    )
-                    # for modes: https://numpy.org/doc/stable/reference/generated/numpy.pad.html
-                    padder = Pad(psize_pad, padding_mode=sampler_padding)
-                    subject = padder(subject)
+            if sampler["enable_padding"]:
+                psize_pad = get_correct_padding_size(
+                    patch_size, parameters["model"]["dimension"]
+                )
+                padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
+                subject = padder(subject)
 
             # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
             if in_memory:
@@ -291,16 +280,32 @@ def ImagesFromDataFrame(
     subjects_dataset = torchio.SubjectsDataset(subjects_list, transform=transform)
     if not train:
         return subjects_dataset
-    if sampler in ("weighted", "weightedsampler", "weightedsample"):
-        sampler = global_sampler_dict[sampler](patch_size, probability_map="label")
-    else:
-        sampler = global_sampler_dict[sampler](patch_size)
+
+    # initialize the sampler
+    sampler_obj = global_sampler_dict[sampler["type"]](patch_size)
+    if sampler["type"] in ("weighted", "weightedsampler", "weightedsample"):
+        sampler_obj = global_sampler_dict[sampler["type"]](
+            patch_size, probability_map="label"
+        )
+    elif sampler["type"] in ("label", "labelsampler", "labelsample"):
+        # if biased sampling is detected, then we need to pass the class probabilities
+        if train and sampler["biased_sampling"]:
+            # initialize the class probabilities dict
+            label_probabilities = {}
+            if "sampling_weights" in parameters:
+                for class_index in parameters["sampling_weights"]:
+                    label_probabilities[class_index] = parameters["sampling_weights"][
+                        class_index
+                    ]
+            sampler_obj = global_sampler_dict[sampler["type"]](
+                patch_size, label_probabilities=label_probabilities
+            )
     # all of these need to be read from model.yaml
     patches_queue = torchio.Queue(
         subjects_dataset,
         max_length=q_max_length,
         samples_per_volume=q_samples_per_volume,
-        sampler=sampler,
+        sampler=sampler_obj,
         num_workers=q_num_workers,
         shuffle_subjects=True,
         shuffle_patches=True,

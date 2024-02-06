@@ -14,7 +14,9 @@ try:
         readme = readme_file.read()
 except Exception as error:
     readme = "No README information found."
-    sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
+    sys.stderr.write(
+        "Warning: Could not open '%s' due %s\n" % ("README.md", error)
+    )
 
 
 class CustomInstallCommand(install):
@@ -39,7 +41,9 @@ try:
 
 except Exception as error:
     __version__ = "0.0.1"
-    sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
+    sys.stderr.write(
+        "Warning: Could not open '%s' due %s\n" % (filepath, error)
+    )
 
 # Handle cases where specific files need to be bundled into the final package as installed via PyPI
 dockerfiles = [
@@ -54,7 +58,9 @@ entrypoint_files = [
 ]
 setup_files = ["setup.py", ".dockerignore", "pyproject.toml", "MANIFEST.in"]
 all_extra_files = dockerfiles + entrypoint_files + setup_files
-all_extra_files_pathcorrected = [os.path.join("../", item) for item in all_extra_files]
+all_extra_files_pathcorrected = [
+    os.path.join("../", item) for item in all_extra_files
+]
 # find_packages should only ever find these as subpackages of gandlf, not as top-level packages
 # generate this dynamically?
 # GANDLF.GANDLF is needed to prevent recursion madness in deployments
@@ -75,16 +81,16 @@ toplevel_package_excludes = [
 
 
 requirements = [
-    "torch==1.13.1",
-    "black",
-    "numpy==1.22.0",
+    "torch==2.1.2",
+    "black==23.11.0",
+    "numpy==1.25.0",
     "scipy",
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
     "torchvision",
     "tqdm",
-    "torchio==0.18.75",
-    "pandas<2.0.0",
+    "torchio==0.19.5",
+    "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
     "setuptools",
@@ -92,25 +98,26 @@ requirements = [
     "pyyaml",
     "tiffslide",
     "matplotlib",
-    "gdown",
+    "gdown==4.6.3",
     "pytest",
     "coverage",
     "pytest-cov",
     "psutil",
     "medcam",
     "opencv-python",
-    "torchmetrics==0.8.1",
+    "torchmetrics==1.1.2",
     "zarr==2.10.3",
     "pydicom",
     "onnx",
     "torchinfo==1.7.0",
-    "segmentation-models-pytorch==0.3.2",
+    "segmentation-models-pytorch==0.3.3",
     "ACSConv==0.1.1",
     "docker",
     "dicom-anonymizer",
     "twine",
     "zarr",
     "keyring",
+    "monai==1.3.0",
 ]
 
 if __name__ == "__main__":
@@ -119,7 +126,7 @@ if __name__ == "__main__":
         version=__version__,
         author="MLCommons",
         author_email="gandlf@mlcommons.org",
-        python_requires=">=3.8",
+        python_requires=">3.8, <3.12",
         packages=find_packages(
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
@@ -149,9 +156,9 @@ if __name__ == "__main__":
             "License :: OSI Approved :: Apache Software License",
             "Natural Language :: English",
             "Operating System :: OS Independent",
-            "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
             "Topic :: Scientific/Engineering :: Medical Science Apps.",
         ],
         description=(

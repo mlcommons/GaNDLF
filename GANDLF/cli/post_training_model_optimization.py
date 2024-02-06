@@ -1,6 +1,6 @@
 import os
 from GANDLF.compute import create_pytorch_objects
-from GANDLF.parseConfig import parseConfig
+from GANDLF.config_manager import ConfigManager
 from GANDLF.utils import version_check, load_model, optimize_and_save_model
 
 
@@ -21,7 +21,7 @@ def post_training_model_optimization(model_path: str, config_path: str) -> bool:
 
     # If parameters are not available in the model file, parse them from the config file
     parameters = (
-        parseConfig(config_path, version_check_flag=False)
+        ConfigManager(config_path, version_check_flag=False)
         if parameters is None
         else parameters
     )

@@ -45,6 +45,18 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
         parameters = populate_header_in_parameters(
             parameters, headers_to_populate_train
         )
+
+        # Calculate the weights here
+        (
+            parameters["penalty_weights"],
+            parameters["sampling_weights"],
+            parameters["class_weights"],
+        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
+
+        print("Penalty weights : ", parameters["penalty_weights"])
+        print("Sampling weights: ", parameters["sampling_weights"])
+        print("Class weights   : ", parameters["class_weights"])
+
         # get the train loader
         train_loader = get_train_loader(parameters)
         parameters["training_samples_size"] = len(train_loader)
@@ -90,15 +102,6 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
             )
 
         scheduler = get_scheduler(parameters)
-
-        # Calculate the weights here
-        (
-            parameters["weights"],
-            parameters["class_weights"],
-        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
-
-        print("Class weights  : ", parameters["class_weights"])
-        print("Penalty weights: ", parameters["weights"])
 
     else:
         scheduler = None

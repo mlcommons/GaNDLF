@@ -20,14 +20,14 @@ def CEL(prediction, target, params):
         target = torch.squeeze(target, -1)
 
     weights = None
-    if params.get("weights") is not None:
+    if params.get("penalty_weights") is not None:
         # Check that the number of classes matches the number of weights
-        num_classes = len(params["weights"])
+        num_classes = len(params["penalty_weights"])
         assert (
             prediction.shape[-1] == num_classes
         ), f"Number of classes {num_classes} does not match prediction shape {prediction.shape[-1]}"
 
-        weights = torch.FloatTensor(list(params["weights"].values()))
+        weights = torch.FloatTensor(list(params["penalty_weights"].values()))
         weights = weights.float().to(target.device)
 
     cel = CrossEntropyLoss(weight=weights)
@@ -93,12 +93,12 @@ def CCE_Generic(prediction, target, params, CCE_Type):
 
     for i in range(0, len(params["model"]["class_list"])):
         curr_ce_loss = CCE_Type(prediction[:, i, ...], target[:, i, ...])
-        if params["weights"] is not None:
-            curr_ce_loss = curr_ce_loss * params["weights"][i]
+        if params["penalty_weights"] is not None:
+            curr_ce_loss = curr_ce_loss * params["penalty_weights"][i]
         acc_ce_loss += curr_ce_loss
 
     # Take the mean of the loss if weights are not provided.
-    if params["weights"] is None:
+    if params["penalty_weights"] is None:
         acc_ce_loss = torch.mean(acc_ce_loss)
 
     return acc_ce_loss

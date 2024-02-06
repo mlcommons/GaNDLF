@@ -3,7 +3,7 @@ from pathlib import Path
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
 from GANDLF.inference_manager import InferenceManager
-from GANDLF.parseConfig import parseConfig
+from GANDLF.config_manager import ConfigManager
 from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
@@ -34,7 +34,7 @@ def main_run(
     file_data_full = data_csv
     model_parameters = config_file
     device = device
-    parameters = parseConfig(model_parameters)
+    parameters = ConfigManager(model_parameters)
     parameters["device_id"] = -1
 
     if train_mode:

@@ -6,6 +6,7 @@ import torch
 import SimpleITK as sitk
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from os import devnull
+from typing import Dict, Any, Union
 
 
 @contextmanager
@@ -46,6 +47,20 @@ def checkPatchDivisibility(patch_size, number=16):
     if (unique.shape[0] == 1) and (unique[0] < number):
         return False
     return True
+
+
+def determine_classification_task_type(
+    params: Dict[str, Union[Dict[str, Any], Any]]
+) -> str:
+    """Determine the task (binary or multiclass) from the model config.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        str: A string that denotes the classification task type.
+    """
+    task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
+    return task
 
 
 def get_date_time():
@@ -266,3 +281,34 @@ def print_and_format_metrics(
     )
 
     return output_metrics_dict
+
+
+def define_average_type_key(
+    params: Dict[str, Union[Dict[str, Any], Any]], metric_name: str
+) -> str:
+    """Determine if the the 'average' filed is defined in the metric config.
+    If not, fallback to the default 'macro'
+    values.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+        metric_name (str): The name of the metric.
+
+    Returns:
+        str: The average type key.
+    """
+    average_type_key = params["metrics"][metric_name].get("average", "macro")
+    return average_type_key
+
+
+def define_multidim_average_type_key(params, metric_name) -> str:
+    """Determine if the the 'multidim_average' filed is defined in the metric config.
+    If not, fallback to the default 'global'.
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+        metric_name (str): The name of the metric.
+
+    Returns:
+        str: The average type key.
+    """
+    average_type_key = params["metrics"][metric_name].get("multidim_average", "global")
+    return average_type_key
