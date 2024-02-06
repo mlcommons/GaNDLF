@@ -21,21 +21,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_Training_And_Validation[(Data_Training_And_Validation)] --> training_loop[\training_loop\]
-    df --> |Inference or Testing| InferenceManager[/InferenceManager/] --> Data_Testing[(Data_Testing)] --> inference_loop[\inference_loop\]
-    parameters([parameters]) --> TrainingManager
-    parameters --> InferenceManager
-    training_loop -->|actual training including backpropagation| Training[\Training\]
-    training_loop -->|validate model performance without backpropagation| Validation[\Validation\]
-    training_loop <==> create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-    Data_Training_And_Validation --> create_pytorch_objects
-    parameters --> create_pytorch_objects
-    Data_Testing --> create_pytorch_objects
-    inference_loop -->|only forward pass| Inference[\Inference\]
-    inference_loop <==> create_pytorch_objects
-    Training --> model[(trained model & associated metrics)]
-    Validation --> model
-    Inference --> Predictions[(Predictions)]
+    df[(DataFrame)] --> |Training| TrainingManager[/TrainingManager/] --> Data_TV[(Data for Training & Validation)] --> Loop_Train[\Training Loop\]
+    df --> |Inference or Testing| InferenceManager[/InferenceManager/] --> Data_Test[(Data for Testing)] --> Loop_Inference[\Inference Loop\]
+    parameters([parameters]) --> ManagerCommon
+    Loop_Train -->|Training| Trainer[/Trainer/] --> Model[(Trained Model & Metrics)]
+    Loop_Train -->|Validation| Validator[/Validator/] --> Model
+    Loop_Inference -->|Inference| InferenceEngine[/InferenceEngine/] --> Predictions[(Predictions)]
+    Loop_Train <==> CommonObjects[\compute.generic.create_pytorch_objects\]
+    Loop_Train -->|Validation| CommonObjects
+    Loop_Train -->|Training| CommonObjects
+    Loop_Train -->|Validation| CommonObjects
+    Loop_Inference <==> CommonObjects
 ```
 
 ### Creating PyTorch Compute Objects using `GANDLF.compute.generic.create_pytorch_objects`
@@ -57,26 +53,26 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Training
-        parameters([parameters]) --> train_network[\compute.training_loop.train_network\]
+        parameters([Parameters]) --> train_network[\compute.training_loop.train_network\]
         train_network -->|Create Compute Objects| create_pytorch_objects[\compute.generic.create_pytorch_objects\]
-        Data_Training[(Data_Training)] --> step[\compute.step\]
-        model[[model]] --> step
-        optimizer[[optimizer]] --> step
-        step -->|loss backpropagation| optimizer
-        create_pytorch_objects --> optimizer[[optimizer]]
-        create_pytorch_objects --> scheduler[[scheduler]]
-        scheduler -->|update learning rate| optimizer
-        step -->|latest model| save_model[\utils.modelio.save_model\]
-        step -->|loss and metrics| log_metrics[[training_logger]]
+        Data_Training[(Data for Training)] --> step[Compute Step]
+        model[Model] --> step
+        optimizer[Optimizer] --> step
+        step -->|Loss Backpropagation| optimizer
+        create_pytorch_objects --> optimizer
+        create_pytorch_objects --> scheduler[Scheduler]
+        scheduler -->|Update Learning Rate| optimizer
+        step -->|Latest Model| save_model[\utils.modelio.save_model\]
+        step -->|Loss and Metrics| log_metrics[Training Logger]
         
-        parameters([parameters]) <==>|updated| create_pytorch_objects
-        create_pytorch_objects --> Data_Training[(Data_Training)]
-        create_pytorch_objects --> model[[model]]
+        parameters <==>|Updated| create_pytorch_objects
+        create_pytorch_objects --> Data_Training
+        create_pytorch_objects --> model
     end
      
     subgraph Validation and Testing
-        create_pytorch_objects --> Data_Validation[(Data_Validation)] -->|validation mode| validate_network[\validate_network\]
-        create_pytorch_objects --> Data_Testing[(Data_Testing)] -->|testing mode| validate_network[\validate_network\]
+        create_pytorch_objects --> Data_Validation[(Data for Validation)] -->|Validation Mode| validate_network[Validate Network]
+        create_pytorch_objects --> Data_Testing[(Data for Testing)] -->|Testing Mode| validate_network
     end
 ```
 
@@ -108,15 +104,25 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Each_Sample --> Input_GroundTruth[(Input_GroundTruth)] -->type{compute.loss_and_metric}
-    Each_Sample[(Each Sample)] -->Input_DataPoint
-    Input_DataPoint[(Input_DataPoint)] -->|forward pass| model[[model]]
-    model --> Prediction[(Prediction)]
-    Prediction --> type{compute.loss_and_metric}
-    parameters([parameters]) --> type
-    type -->|training/validation mode| loss(Return Loss, Metrics, & Prediction)
-    type -->|testing mode| inferences_metrics(Return Only Prediction because no GT)
-    Prediction --> inferences_metrics
+    subgraph Input
+        Each_Sample[Each Sample] --> Input_GroundTruth[Input Ground Truth]
+        Each_Sample --> Input_DataPoint[Input Data Point]
+        Input_DataPoint -->|Forward Pass| model[Model]
+    end
+    
+    subgraph Compute
+        Input_GroundTruth -->|Compute Loss and Metric| type{Compute Loss and Metric}
+        model --> Prediction[Prediction]
+        Prediction -->|Compute Loss and Metric| type
+        parameters([Parameters]) --> type
+    end
+    
+    subgraph Output
+        type -->|Training/Validation Mode| Loss_Return{Return Loss, Metrics, & Prediction}
+        type -->|Testing Mode| Inference_Return{Return Only Prediction because no GT}
+        Prediction --> Inference_Return
+    end
+
 ```
 
 ### The `GANDLF.data` Submodule
