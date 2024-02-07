@@ -1,6 +1,6 @@
 Documentation: start with [index.md](../docs/index.md).
 
-## Top-level flowcharts
+## Related flowcharts
 
 ### I/O
 

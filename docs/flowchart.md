@@ -120,7 +120,6 @@ flowchart TD
         type -->|Testing Mode| Inference_Return([Return Only Prediction because no GT])
         Prediction --> Inference_Return
     end
-
 ```
 
 ### The `GANDLF.data` Submodule
