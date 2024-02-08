@@ -1,8 +1,8 @@
 import sys
 
 import torch.nn.functional as nnf
-from GANDLF.losses import global_losses_dict
-from GANDLF.metrics import global_metrics_dict
+from GANDLF.losses.loss_dict import global_losses_dict
+from GANDLF.metrics.metrics_dict import global_metrics_dict
 from GANDLF.utils.tensor import get_linear_interpolation_mode, one_hot, reverse_one_hot
 
 
