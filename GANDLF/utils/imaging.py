@@ -278,6 +278,13 @@ def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: in
 def preprocess_label_for_segmentation(label, params):
     """
     Preprocess label for segmentation problems.
+
+    Args:
+        label (torch.Tensor): The input label.
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        torch.Tensor: The preprocessed label.
     """
     if label.shape[1] == 3:
         label = label[:, 0, ...].unsqueeze(1)
@@ -288,3 +295,22 @@ def preprocess_label_for_segmentation(label, params):
             )
             params["print_rgb_label_warning"] = False
     return torch.squeeze(label, -1) if params["model"]["dimension"] == 2 else label
+
+
+def adjust_output_dimensions(output, attention_map, params):
+    """
+    Adjust the dimensions of the model output and attention map for 2D models.
+
+    Args:
+        output (torch.Tensor): The model output.
+        attention_map (torch.Tensor): The attention map.
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        torch.Tensor: The adjusted model output.
+        torch.Tensor: The adjusted attention map.
+    """
+    output = torch.unsqueeze(output, -1)
+    if "medcam_enabled" in params and params["medcam_enabled"]:
+        attention_map = torch.unsqueeze(attention_map, -1)
+    return output, attention_map
