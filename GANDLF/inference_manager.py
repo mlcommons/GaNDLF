@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
+
 import pandas as pd
 import torch
 import torch.nn.functional as F
-
 from GANDLF.compute import inference_loop
-from GANDLF.utils import get_unique_timestamp
+from GANDLF.utils.generic import get_unique_timestamp
 
 
 def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
