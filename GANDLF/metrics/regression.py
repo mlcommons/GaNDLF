@@ -4,9 +4,8 @@ All the metrics are to be called from here
 import numpy as np
 import torch
 import torchmetrics as tm
+from GANDLF.utils.tensor import get_output_from_calculator
 from sklearn.metrics import balanced_accuracy_score
-
-from ..utils.tensor import get_output_from_calculator
 
 
 def classification_accuracy(output, label, params):
