@@ -1,12 +1,16 @@
-import os, datetime, sys
-from copy import deepcopy
+import datetime
+import os
 import random
-import numpy as np
-import torch
-import SimpleITK as sitk
+import sys
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from copy import deepcopy
 from os import devnull
-from typing import Dict, Any, Union
+from typing import Any, Dict, Union
+
+import numpy as np
+import psutil
+import SimpleITK as sitk
+import torch
 
 
 @contextmanager
@@ -50,7 +54,7 @@ def checkPatchDivisibility(patch_size, number=16):
 
 
 def determine_classification_task_type(
-    params: Dict[str, Union[Dict[str, Any], Any]]
+    params: Dict[str, Union[Dict[str, Any], Any]],
 ) -> str:
     """Determine the task (binary or multiclass) from the model config.
     Args:
@@ -312,3 +316,22 @@ def define_multidim_average_type_key(params, metric_name) -> str:
     """
     average_type_key = params["metrics"][metric_name].get("multidim_average", "global")
     return average_type_key
+
+
+def print_system_utilization():
+    """
+    Print system utilization statistics.
+    """
+    if torch.cuda.is_available():
+        print(torch.cuda.memory_summary())
+    print(
+        "|===========================================================================|"
+    )
+    print(
+        "|                              CPU Utilization                              |"
+    )
+    print("Load_Percent   :", psutil.cpu_percent(interval=None))
+    print("MemUtil_Percent:", psutil.virtual_memory()[2])
+    print(
+        "|===========================================================================|"
+    )
