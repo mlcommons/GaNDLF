@@ -1,0 +1,51 @@
+#!usr/bin/env python
+# -*- coding: utf-8 -*-
+import argparse, os, fileinput
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_UpdateVersion",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Update versions when creating a new release of GaNDLF, also useful when updating the version for development.\n\n",
+    )
+    parser.add_argument(
+        "-ov",
+        "--old_version",
+        metavar="",
+        type=str,
+        required=True,
+        help="The old version number",
+    )
+    parser.add_argument(
+        "-nv",
+        "--new_version",
+        metavar="",
+        type=str,
+        required=True,
+        help="The new version number",
+    )
+
+    args = parser.parse_args()
+
+    files_where_version_is_stored = [
+        os.path.join(os.getcwd(), "GANDLF/version.py"),
+    ]
+
+    # find all yaml files in samples and testing directories
+    folders_to_iterate = [
+        os.path.join(os.getcwd(), "samples"),
+        os.path.join(os.getcwd(), "testing"),
+    ]
+    for folder in folders_to_iterate:
+        if os.path.isdir(folder):
+            files_in_dir = os.listdir(folder)
+            for file in files_in_dir:
+                if file.endswith(".yaml"):
+                    files_where_version_is_stored.append(os.path.join(folder, file))
+
+    # update the version.py file
+    for filename in files_where_version_is_stored:
+        with fileinput.FileInput(filename, inplace=True, backup=".bak") as file:
+            for line in file:
+                print(line.replace(args.old_version, args.new_version), end="")
