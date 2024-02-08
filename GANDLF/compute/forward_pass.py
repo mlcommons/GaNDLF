@@ -9,16 +9,17 @@ import torchio
 from GANDLF.compute.loss_and_metric import get_loss_and_metrics
 from GANDLF.compute.step import step
 from GANDLF.data.post_process import global_postprocessing_dict
-from GANDLF.utils import (
+from GANDLF.metrics import overall_stats
+from GANDLF.utils.generic import (
     get_date_time,
-    get_filename_extension_sanitized,
     get_unique_timestamp,
-    resample_image,
-    reverse_one_hot,
-    get_ground_truths_and_predictions_tensor,
     print_and_format_metrics,
 )
-from GANDLF.metrics import overall_stats
+from GANDLF.utils.imaging import get_filename_extension_sanitized, resample_image
+from GANDLF.utils.tensor import (
+    get_ground_truths_and_predictions_tensor,
+    reverse_one_hot,
+)
 from tqdm import tqdm
 
 
