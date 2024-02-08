@@ -1,10 +1,14 @@
-import pandas as pd
-import os, sys, pickle, subprocess, shutil
-from sklearn.model_selection import KFold
+import os
+import pickle
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
+import pandas as pd
 from GANDLF.compute import training_loop
-from GANDLF.utils import get_dataframe
+from GANDLF.utils.write_parse import get_dataframe
+from sklearn.model_selection import KFold
 
 
 def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
