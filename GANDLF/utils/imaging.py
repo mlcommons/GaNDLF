@@ -1,7 +1,12 @@
+import copy
+import math
+import os
+import pathlib
 from typing import Union
-import os, pathlib, math, copy
+
 import numpy as np
 import SimpleITK as sitk
+import torch
 import torchio
 
 from .generic import get_filename_extension_sanitized
@@ -73,8 +78,8 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
         if "resize" in output_size:
             output_size_parsed = output_size["resize"]
 
-    assert len(output_size_parsed) == len(
-        inputSpacing
+    assert (
+        len(output_size_parsed) == len(inputSpacing)
     ), "The output size dimension is inconsistent with the input dataset, please check parameters."
 
     for i, n in enumerate(output_size_parsed):
@@ -258,3 +263,18 @@ def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: in
         psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
 
     return psize_pad
+
+
+def preprocess_label_for_segmentation(label, params):
+    """
+    Preprocess label for segmentation problems.
+    """
+    if label.shape[1] == 3:
+        label = label[:, 0, ...].unsqueeze(1)
+        if params.get("print_rgb_label_warning", False):
+            print(
+                "WARNING: The label image is an RGB image, only the first channel will be used.",
+                flush=True,
+            )
+            params["print_rgb_label_warning"] = False
+    return torch.squeeze(label, -1) if params["model"]["dimension"] == 2 else label
