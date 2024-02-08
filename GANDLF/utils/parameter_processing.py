@@ -1,5 +1,5 @@
+from GANDLF.metrics.metrics_dict import surface_distance_ids
 from GANDLF.utils.modelbase import get_modelbase_final_layer
-from GANDLF.metrics import surface_distance_ids
 
 
 def populate_header_in_parameters(parameters, headers):

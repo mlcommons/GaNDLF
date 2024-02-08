@@ -9,7 +9,7 @@ import torchio
 from GANDLF.compute.loss_and_metric import get_loss_and_metrics
 from GANDLF.compute.step import step
 from GANDLF.data.post_process import global_postprocessing_dict
-from GANDLF.metrics import overall_stats
+from GANDLF.metrics.metrics_dict import overall_stats
 from GANDLF.utils.generic import (
     get_date_time,
     get_unique_timestamp,

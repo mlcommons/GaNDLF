@@ -9,7 +9,7 @@ import torchio
 import yaml
 from GANDLF.config_manager import ConfigManager
 from GANDLF.losses.segmentation import dice
-from GANDLF.metrics import overall_stats
+from GANDLF.metrics.metrics_dict import overall_stats
 from GANDLF.metrics.segmentation import (
     _calculator_generic_all_surface_distances,
     _calculator_jaccard,

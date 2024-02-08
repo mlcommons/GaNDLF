@@ -9,7 +9,7 @@ from GANDLF.data import get_testing_loader
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.logger import Logger
-from GANDLF.metrics import overall_stats
+from GANDLF.metrics.metrics_dict import overall_stats
 from GANDLF.utils.generic import get_date_time, print_and_format_metrics, version_check
 from GANDLF.utils.imaging import write_training_patches
 from GANDLF.utils.modelio import (
