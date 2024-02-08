@@ -321,6 +321,13 @@ def define_multidim_average_type_key(params, metric_name) -> str:
 def print_system_utilization():
     """
     Print system utilization statistics.
+
+    Args:
+        None
+
+    Returns:
+        None
+
     """
     if torch.cuda.is_available():
         print(torch.cuda.memory_summary())
