@@ -1,22 +1,19 @@
-import os, warnings
+import os
+import warnings
 from functools import partial
 from pathlib import Path
-
-from PIL import Image
 
 from GANDLF.data.patch_miner.opm.patch_manager import PatchManager
 from GANDLF.data.patch_miner.opm.utils import (
     alpha_rgb_2d_channel_check,
-    patch_size_check,
-    parse_config,
     generate_initial_mask,
     get_patch_size_in_microns,
+    parse_config,
     patch_artifact_check,
-    # pen_marking_check,
+    patch_size_check,
 )
-from GANDLF.utils import (
-    parseTrainingCSV,
-)
+from GANDLF.utils.write_parse import parseTrainingCSV
+from PIL import Image
 
 
 def parse_gandlf_csv(fpath):
@@ -26,7 +23,7 @@ def parse_gandlf_csv(fpath):
     # we want to keep them because we want the user to check the CSV instead
     # there might be cases where labels are accidentally removed for some subjects, but not all
     assert (
-        df.isnull().values.any() == False
+        df.isnull().values.any() is False
     ), "Data CSV contains null/nan values, please check."
     for _, row in df.iterrows():
         if "Label" in row:
