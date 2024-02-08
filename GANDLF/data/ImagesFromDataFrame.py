@@ -1,23 +1,23 @@
-from typing import Union
 import os
 from pathlib import Path
-import numpy as np
+from typing import Union
 
+import numpy as np
 import pandas
+import SimpleITK as sitk
 import torch
 import torchio
-from torchio.transforms import Pad
-import SimpleITK as sitk
-from tqdm import tqdm
-
-from GANDLF.utils import (
+from GANDLF.utils.generic import get_filename_extension_sanitized
+from GANDLF.utils.imaging import (
+    get_correct_padding_size,
     perform_sanity_check_on_subject,
     resize_image,
-    get_filename_extension_sanitized,
-    get_correct_padding_size,
 )
-from .preprocessing import get_transforms_for_preprocessing
+from torchio.transforms import Pad
+from tqdm import tqdm
+
 from .augmentation import global_augs_dict
+from .preprocessing import get_transforms_for_preprocessing
 
 global_sampler_dict = {
     "uniform": torchio.data.UniformSampler,
@@ -84,11 +84,11 @@ def ImagesFromDataFrame(
 
     resize_images_flag = False
     # if resize has been defined but resample is not (or is none)
-    if not (preprocessing is None):
+    if preprocessing is not None:
         for key in preprocessing.keys():
             # check for different resizing keys
             if key in ["resize", "resize_image", "resize_images"]:
-                if not (preprocessing[key] is None):
+                if preprocessing[key] is not None:
                     resize_images_flag = True
                     preprocessing["resize_image"] = preprocessing[key]
                     break
@@ -265,7 +265,7 @@ def ImagesFromDataFrame(
     transformations_list = []
 
     # augmentations are applied to the training set only
-    if train and not (augmentations is None):
+    if train and augmentations is not None:
         for aug in augmentations:
             aug_lower = aug.lower()
             if aug_lower in global_augs_dict:
