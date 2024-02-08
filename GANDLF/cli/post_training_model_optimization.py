@@ -1,7 +1,9 @@
 import os
+
 from GANDLF.compute import create_pytorch_objects
 from GANDLF.config_manager import ConfigManager
-from GANDLF.utils import version_check, load_model, optimize_and_save_model
+from GANDLF.utils.generic import version_check
+from GANDLF.utils.modelio import load_model, optimize_and_save_model
 
 
 def post_training_model_optimization(model_path: str, config_path: str) -> bool:
