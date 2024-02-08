@@ -104,7 +104,7 @@ jobs:
         config_to_use=$(pwd)/testing/config_segmentation.yaml
         cd openfl
         ### this should not be there
-        sed -i "s/from GANDLF.parseConfig import parseConfig/from GANDLF.config_manager import ConfigManager/" openfl/federated/task/runner_gandlf.py
-        sed -i "s/parseConfig/ConfigManager/" openfl/federated/task/runner_gandlf.py
+        # sed -i "s/from GANDLF.parseConfig import parseConfig/from GANDLF.config_manager import ConfigManager/" openfl/federated/task/runner_gandlf.py
+        # sed -i "s/parseConfig/ConfigManager/" openfl/federated/task/runner_gandlf.py
         ### this should not be there
         python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1 --gandlf_config $config_to_use
