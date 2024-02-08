@@ -1,33 +1,34 @@
 import sys
-import yaml
 from pprint import pprint
+
+import numpy as np
 import pandas as pd
-from tqdm import tqdm
+import SimpleITK as sitk
 import torch
 import torchio
-import SimpleITK as sitk
-import numpy as np
-
+import yaml
 from GANDLF.config_manager import ConfigManager
-from GANDLF.utils import find_problem_type_from_parameters, one_hot
-from GANDLF.metrics import (
-    overall_stats,
-    structural_similarity_index,
-    mean_squared_error,
-    peak_signal_noise_ratio,
-    mean_squared_log_error,
-    mean_absolute_error,
-    ncc_mean,
-    ncc_std,
-    ncc_max,
-    ncc_min,
-)
 from GANDLF.losses.segmentation import dice
+from GANDLF.metrics import overall_stats
 from GANDLF.metrics.segmentation import (
     _calculator_generic_all_surface_distances,
-    _calculator_sensitivity_specificity,
     _calculator_jaccard,
+    _calculator_sensitivity_specificity,
 )
+from GANDLF.metrics.synthesis import (
+    mean_absolute_error,
+    mean_squared_error,
+    mean_squared_log_error,
+    ncc_max,
+    ncc_mean,
+    ncc_min,
+    ncc_std,
+    peak_signal_noise_ratio,
+    structural_similarity_index,
+)
+from GANDLF.utils.parameter_processing import find_problem_type_from_parameters
+from GANDLF.utils.tensor import one_hot
+from tqdm import tqdm
 
 
 def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -> dict:
