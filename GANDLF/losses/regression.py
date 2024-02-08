@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
-from GANDLF.utils import one_hot
+from GANDLF.utils.tensor import one_hot
+from torch.nn import CrossEntropyLoss
 
 
 def CEL(prediction, target, params):
