@@ -1,8 +1,8 @@
+from GANDLF.utils.parameter_processing import populate_channel_keys_in_params
+from GANDLF.utils.write_parse import get_dataframe
 from torch.utils.data import DataLoader
 
 from .ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils.write_parse import get_dataframe
-from GANDLF.utils import populate_channel_keys_in_params
 
 
 def get_train_loader(params):
@@ -75,7 +75,7 @@ def get_testing_loader(params):
             train=False,
             loader_type="testing",
         )
-        if not ("channel_keys" in params):
+        if "channel_keys" not in params:
             params = populate_channel_keys_in_params(queue_from_dataframe, params)
         return DataLoader(
             queue_from_dataframe,
