@@ -1,21 +1,23 @@
-import os, sys, pickle
+import os
+import pickle
+import sys
 from pathlib import Path
-import numpy as np
-import SimpleITK as sitk
 
-from GANDLF.utils import (
-    get_filename_extension_sanitized,
-    parseTrainingCSV,
-    populate_header_in_parameters,
-    get_dataframe,
-    get_correct_padding_size,
-)
+import SimpleITK as sitk
+import torchio
 from GANDLF.config_manager import ConfigManager
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.utils.generic import (
+    get_filename_extension_sanitized,
+)
+from GANDLF.utils.imaging import get_correct_padding_size
+from GANDLF.utils.parameter_processing import populate_header_in_parameters
+from GANDLF.utils.write_parse import (
+    get_dataframe,
+    parseTrainingCSV,
+)
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
-import torchio
 
 
 def preprocess_and_save(
