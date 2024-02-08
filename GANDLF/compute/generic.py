@@ -1,18 +1,14 @@
-from pandas.util import hash_pandas_object
-
-from GANDLF.models import get_model
-from GANDLF.schedulers import get_scheduler
-from GANDLF.optimizers import get_optimizer
 from GANDLF.data import (
     get_train_loader,
     get_validation_loader,
 )
-from GANDLF.utils import (
-    populate_header_in_parameters,
-    parseTrainingCSV,
-    send_model_to_device,
-    get_class_imbalance_weights,
-)
+from GANDLF.models import get_model
+from GANDLF.optimizers import get_optimizer
+from GANDLF.schedulers import get_scheduler
+from GANDLF.utils.parameter_processing import populate_header_in_parameters
+from GANDLF.utils.tensor import get_class_imbalance_weights, send_model_to_device
+from GANDLF.utils.write_parse import parseTrainingCSV
+from pandas.util import hash_pandas_object
 
 
 def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu"):
