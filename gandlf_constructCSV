@@ -1,13 +1,14 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse, sys, ast
-from datetime import date
-from GANDLF.utils import writeTrainingCSV
-
-from GANDLF.cli import copyrightMessage
+import argparse
+import ast
+import os
+import sys
 
 import yaml
+from GANDLF.cli import copyrightMessage
+from GANDLF.utils.write_parse import writeTrainingCSV
 
 
 def main():
