@@ -1,6 +1,3 @@
-For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
-
-
 ## Environment
 
 Before starting to work on the code-level on GaNDLF, please follow the [instructions to install GaNDLF from sources](./setup.md#install-from-sources). Once that's done, please verify the installation using the following command:
@@ -12,6 +9,11 @@ Before starting to work on the code-level on GaNDLF, please follow the [instruct
 (venv_gandlf) $> python ./gandlf_verifyInstall
 ```
 
+
+## Submodule flowcharts
+
+- The following flowcharts are intended to provide a high-level overview of the different submodules in GaNDLF. 
+- Navigate to the `README.md` file in each submodule folder for details.
 
 ## Overall Architecture
 
@@ -74,6 +76,11 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - Update [Inference Function](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/compute/inference_loop.py)
 - Update [Inference Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/inference_manager.py), if any inference API has changed
 - [Update Tests](#update-tests)
+
+
+## Update parameters
+
+For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
 
 ## Update Tests
