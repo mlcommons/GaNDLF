@@ -1,7 +1,7 @@
 import torch
 
 from ..utils.generic import print_system_utilization
-from ..utils.imaging import preprocess_label_for_segmentation
+from ..utils.imaging import adjust_dimensions, preprocess_label_for_segmentation
 from .loss_and_metric import get_loss_and_metrics
 
 
@@ -37,12 +37,9 @@ def step(model, image, label, params, train=True):
     if label is not None and params["problem_type"] == "segmentation":
         label = preprocess_label_for_segmentation(label, params)
 
+    # Adjust image and label dimensions if necessary
     if params["model"]["dimension"] == 2:
-        image = torch.squeeze(image, -1)
-        if "value_keys" in params:
-            if label is not None:
-                if len(label.shape) > 1:
-                    label = torch.squeeze(label, -1)
+        image, label = adjust_dimensions(image, label, params)
 
     if not (train) and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(

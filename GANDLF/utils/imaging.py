@@ -92,6 +92,16 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     )
 
 
+def adjust_dimensions(image, label, params):
+    """
+    Adjust image and label dimensions for 2D models.
+    """
+    image = torch.squeeze(image, -1)
+    if label is not None and "value_keys" in params and len(label.shape) > 1:
+        label = torch.squeeze(label, -1)
+    return image, label
+
+
 def softer_sanity_check(base_property, new_property, threshold=0.00001):
     """
     This function checks if the new property is within the threshold of the base property.
