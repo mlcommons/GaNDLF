@@ -1,11 +1,11 @@
 import torch
-
-from ..utils.generic import print_system_utilization
-from ..utils.imaging import (
+from GANDLF.utils.generic import print_system_utilization
+from GANDLF.utils.imaging import (
     adjust_dimensions,
     adjust_output_dimensions,
     preprocess_label_for_segmentation,
 )
+
 from .loss_and_metric import get_loss_and_metrics
 
 

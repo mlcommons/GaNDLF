@@ -1,7 +1,10 @@
+import argparse
 import os
+import pickle
 import time
 
 import numpy as np
+import pandas
 import psutil
 import torch
 import torchio
@@ -562,11 +565,6 @@ def training_loop(
 
 
 if __name__ == "__main__":
-    import argparse
-    import pickle
-
-    import pandas
-
     torch.multiprocessing.freeze_support()
     # parse the cli arguments here
     parser = argparse.ArgumentParser(description="Training Loop of GANDLF")

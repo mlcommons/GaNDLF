@@ -502,7 +502,7 @@ def test_train_regression_brainage_rad_2d(device):
     parameters["model"]["architecture"] = "brain_age"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters_temp = copy.deepcopy(parameters)
+    copy.deepcopy(parameters)
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -518,7 +518,7 @@ def test_train_regression_brainage_rad_2d(device):
     model_path = os.path.join(outputDir, "brain_age_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
     optimization_result = post_training_model_optimization(model_path, config_path)
-    assert optimization_result == False, "Optimization should fail"
+    assert optimization_result is False, "Optimization should fail"
 
     sanitize_outputDir()
 
@@ -774,7 +774,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     parameters["model"]["architecture"] = all_models_regression[0]
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters_temp = copy.deepcopy(parameters)
+    copy.deepcopy(parameters)
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -789,7 +789,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
     optimization_result = post_training_model_optimization(model_path, config_path)
-    assert optimization_result == True, "Optimization should pass"
+    assert optimization_result is True, "Optimization should pass"
 
     ## testing inference
     for model_type in all_model_type:
@@ -1851,7 +1851,7 @@ def test_generic_augmentation_functions():
     )
     output_tensor = None
     output_tensor = temp(input_tensor)
-    assert output_tensor != None, "RGB Augmentation should work"
+    assert output_tensor is not None, "RGB Augmentation should work"
 
     # ensuring all code paths are covered
     for key in ["brightness", "contrast", "saturation", "hue"]:
@@ -1863,7 +1863,7 @@ def test_generic_augmentation_functions():
     )
     output_tensor = None
     output_tensor = temp(input_tensor)
-    assert output_tensor != None, "RGB Augmentation should work"
+    assert output_tensor is not None, "RGB Augmentation should work"
 
     # testing HED transforms with different options
     input_tensor = torch.rand(3, 128, 128, 1)
@@ -1909,7 +1909,7 @@ def test_generic_augmentation_functions():
     )
     output_tensor = None
     output_tensor = temp(input_tensor)
-    assert output_tensor != None, "HED Augmentation should work"
+    assert output_tensor is not None, "HED Augmentation should work"
 
     # this is for all other augmentations
     input_tensor = torch.rand(3, 128, 128, 128)
@@ -1920,7 +1920,7 @@ def test_generic_augmentation_functions():
             output_tensor = global_augs_dict[aug](
                 params_all_preprocessing_and_augs["data_augmentation"][aug_lower]
             )(input_tensor)
-            assert output_tensor != None, "Augmentation should work"
+            assert output_tensor is not None, "Augmentation should work"
 
     # additional test for elastic
     params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
@@ -1931,7 +1931,9 @@ def test_generic_augmentation_functions():
     ]:
         params_elastic.pop(key_to_pop, None)
     output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
-    assert output_tensor != None, "Augmentation for base elastic transform should work"
+    assert (
+        output_tensor is not None
+    ), "Augmentation for base elastic transform should work"
 
     sanitize_outputDir()
 
