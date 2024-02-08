@@ -1,33 +1,36 @@
-import os, time, psutil
-import torch
-from tqdm import tqdm
-import numpy as np
-import torchio
-from medcam import medcam
+import os
+import time
 
+import numpy as np
+import psutil
+import torch
+import torchio
 from GANDLF.data import get_testing_loader
-from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
-from GANDLF.utils import (
-    get_date_time,
+from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.logger import Logger
+from GANDLF.metrics import overall_stats
+from GANDLF.utils.generic import get_date_time, print_and_format_metrics, version_check
+from GANDLF.utils.imaging import write_training_patches
+from GANDLF.utils.modelio import (
     best_model_path_end,
-    latest_model_path_end,
     initial_model_path_end,
-    save_model,
-    optimize_and_save_model,
+    latest_model_path_end,
     load_model,
-    version_check,
-    write_training_patches,
-    print_model_summary,
+    optimize_and_save_model,
+    save_model,
+)
+from GANDLF.utils.tensor import (
     get_ground_truths_and_predictions_tensor,
     get_model_dict,
-    print_and_format_metrics,
+    print_model_summary,
 )
-from GANDLF.metrics import overall_stats
-from GANDLF.logger import Logger
-from .step import step
+from medcam import medcam
+from tqdm import tqdm
+
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
+from .step import step
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -124,10 +127,9 @@ def train_network(model, train_dataloader, optimizer, params):
         # store predictions for classification
         if calculate_overall_metrics:
             predictions_array[
-                batch_idx
-                * params["batch_size"] : (batch_idx + 1)
+                batch_idx * params["batch_size"] : (batch_idx + 1)
                 * params["batch_size"]
-            ] = (torch.argmax(output[0], 0).cpu().item())
+            ] = torch.argmax(output[0], 0).cpu().item()
 
         nan_loss = torch.isnan(loss)
         second_order = (
@@ -560,7 +562,10 @@ def training_loop(
 
 
 if __name__ == "__main__":
-    import argparse, pickle, pandas
+    import argparse
+    import pickle
+
+    import pandas
 
     torch.multiprocessing.freeze_support()
     # parse the cli arguments here
