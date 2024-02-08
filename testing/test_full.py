@@ -20,6 +20,7 @@ from GANDLF.data.patch_miner.opm.utils import (
     convert_to_tiff,
 )
 from GANDLF.config_manager import ConfigManager
+from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
 from GANDLF.inference_manager import InferenceManager
 from GANDLF.cli import (
@@ -237,7 +238,7 @@ def write_temp_config_path(parameters_to_write):
 def test_train_segmentation_rad_2d(device):
     print("03: Starting 2D Rad segmentation tests")
     # read and parse csv
-    parameters = ConfigManager(
+    parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(
