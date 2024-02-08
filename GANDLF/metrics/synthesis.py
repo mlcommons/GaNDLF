@@ -1,15 +1,15 @@
-import SimpleITK as sitk
-import PIL.Image
 import numpy as np
+import PIL.Image
+import SimpleITK as sitk
 import torch
+from GANDLF.utils.tensor import get_image_from_tensor
 from torchmetrics import (
-    StructuralSimilarityIndexMeasure,
+    MeanAbsoluteError,
     MeanSquaredError,
     MeanSquaredLogError,
-    MeanAbsoluteError,
     PeakSignalNoiseRatio,
+    StructuralSimilarityIndexMeasure,
 )
-from GANDLF.utils import get_image_from_tensor
 
 
 def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
