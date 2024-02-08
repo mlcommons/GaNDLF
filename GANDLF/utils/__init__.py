@@ -18,6 +18,7 @@ from .generic import (
 from .imaging import (
     get_correct_padding_size,
     perform_sanity_check_on_subject,
+    preprocess_label_for_segmentation,
     resample_image,
     resize_image,
     write_training_patches,

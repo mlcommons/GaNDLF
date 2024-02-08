@@ -1,5 +1,7 @@
 import torch
-import psutil
+
+from ..utils.generic import print_system_utilization
+from ..utils.imaging import preprocess_label_for_segmentation
 from .loss_and_metric import get_loss_and_metrics
 
 
@@ -29,35 +31,11 @@ def step(model, image, label, params, train=True):
 
     """
     if params["verbose"]:
-        if torch.cuda.is_available():
-            print(torch.cuda.memory_summary())
-        print(
-            "|===========================================================================|"
-        )
-        print(
-            "|                              CPU Utilization                              |"
-        )
-        print("Load_Percent   :", psutil.cpu_percent(interval=None))
-        print("MemUtil_Percent:", psutil.virtual_memory()[2])
-        print(
-            "|===========================================================================|"
-        )
+        print_system_utilization()
 
-    # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
-    if label is not None:
-        if params["problem_type"] == "segmentation":
-            if label.shape[1] == 3:
-                label = label[:, 0, ...].unsqueeze(1)
-                # this warning should only come up once
-                if params["print_rgb_label_warning"]:
-                    print(
-                        "WARNING: The label image is an RGB image, only the first channel will be used.",
-                        flush=True,
-                    )
-                    params["print_rgb_label_warning"] = False
-
-            if params["model"]["dimension"] == 2:
-                label = torch.squeeze(label, -1)
+    # Handle label preprocessing for segmentation problems
+    if label is not None and params["problem_type"] == "segmentation":
+        label = preprocess_label_for_segmentation(label, params)
 
     if params["model"]["dimension"] == 2:
         image = torch.squeeze(image, -1)
