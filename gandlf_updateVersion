@@ -28,15 +28,35 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    files_where_version_is_stored = [
+    def in_place_string_replace(
+        filename: str, old_string: str, new_string: str
+    ) -> None:
+        """
+        Replace a string in a file in place.
+
+        Args:
+            filename (str): The file to replace the string in
+            old_string (str): The string to replace
+            new_string (str): The string to replace with
+        """
+        with fileinput.FileInput(filename, inplace=True) as file:
+            for line in file:
+                print(line.replace(old_string, new_string), end="")
+
+    in_place_string_replace(
         os.path.join(os.getcwd(), "GANDLF/version.py"),
-    ]
+        args.old_version,
+        args.new_version,
+    )
 
     # find all yaml files in samples and testing directories
     folders_to_iterate = [
         os.path.join(os.getcwd(), "samples"),
         os.path.join(os.getcwd(), "testing"),
     ]
+
+    files_where_version_is_stored = []
+
     for folder in folders_to_iterate:
         if os.path.isdir(folder):
             files_in_dir = os.listdir(folder)
@@ -44,8 +64,11 @@ if __name__ == "__main__":
                 if file.endswith(".yaml"):
                     files_where_version_is_stored.append(os.path.join(folder, file))
 
+    args.old_version = args.old_version.replace("-dev", "")
+    args.new_version = args.new_version.replace("-dev", "")
+
     # update the version.py file
     for filename in files_where_version_is_stored:
-        with fileinput.FileInput(filename, inplace=True, backup=".bak") as file:
-            for line in file:
-                print(line.replace(args.old_version, args.new_version), end="")
+        in_place_string_replace(filename, args.old_version, args.new_version)
+
+    print("Version updated successfully in `version.py` and all configuration files!")
