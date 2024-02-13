@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import List
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -31,7 +31,7 @@ def validate_network(
     params: dict,
     epoch: int = 0,
     mode: str = "validation",
-) -> List[float, dict]:
+) -> Tuple[float, dict]:
     """
     Function to validate a network for a single epoch.
 
