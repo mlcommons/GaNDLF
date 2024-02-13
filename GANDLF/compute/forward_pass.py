@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import SimpleITK as sitk
 import torch
+from torch.utils.data import DataLoader
 import torchio
 from GANDLF.compute.loss_and_metric import get_loss_and_metrics
 from GANDLF.compute.step import step
@@ -23,29 +24,29 @@ from tqdm import tqdm
 
 
 def validate_network(
-    model, valid_dataloader, scheduler, params, epoch=0, mode="validation"
+    model: torch.nn.Module,
+    valid_dataloader: DataLoader,
+    scheduler: object,
+    params: dict,
+    epoch: int = 0,
+    mode: str = "validation",
 ):
     """
-    Function to validate a network for a single epoch
+    Function to validate a network for a single epoch.
 
-    Parameters
-    ----------
-    model : if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net
-        The model to process the input image with, it should support appropriate dimensions.
-    valid_dataloader : torch.DataLoader
-        The dataloader for the validation epoch
-    params : dict
-        The parameters passed by the user yaml
-    mode: str
-        The mode of validation, used to write outputs, if requested
+    Args:
+        model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions. if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net.
+        valid_dataloader (DataLoader): The dataloader for the validation epoch.
+        scheduler (object): The scheduler to use for training.
+        params (dict): The parameters passed by the user yaml.
+        epoch (int, optional): The current epoch number. Defaults to 0.
+        mode (str, optional): The mode of operation. Defaults to "validation".
 
-    Returns
-    -------
-    average_epoch_valid_loss : float
-        Validation loss for the current epoch
-    average_epoch_valid_metric : dict
-        Validation metrics for the current epoch
+    Raises:
+        NotImplementedError: If the model type is not supported.
 
+    Returns:
+        float, dict: The average validation loss and the average validation metrics.
     """
     print("*" * 20)
     print("Starting " + mode + " : ")
@@ -182,7 +183,7 @@ def validate_network(
                         )[params["model"]["IO"][1][0]]
                     )
                 else:
-                    raise Exception(
+                    raise NotImplementedError(
                         "Model type not supported. Please only use 'torch' or 'openvino'."
                     )
 
