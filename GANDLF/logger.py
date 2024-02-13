@@ -1,30 +1,15 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 11 14:55:44 2021
-
-@author: siddhesh
-"""
-
 import os
 import torch
 
 
 class Logger:
-    def __init__(self, logger_csv_filename, metrics):
+    def __init__(self, logger_csv_filename: str, metrics: list) -> None:
         """
+        Logger class to log the training and validation metrics to a csv file.
 
-        Parameters
-        ----------
-        logger_csv_filename : String
-            Path to a filename where the csv has to be stored
-        metric : list
-            Should be a list of the metrics
-
-        Returns
-        -------
-        None.
-
+        Args:
+            logger_csv_filename (str): Path to a filename where the csv has to be stored.
+            metrics (list): The list of metrics to be logged.
         """
         self.filename = logger_csv_filename
         self.metrics = metrics
@@ -44,22 +29,14 @@ class Logger:
         #     print("Found a pre-existing file for logging, now appending logs to that file!")
         self.csv.close()
 
-    def write(self, epoch_number, loss, epoch_metrics):
+    def write(self, epoch_number: int, loss: float, epoch_metrics: list) -> None:
         """
+        Write the epoch number, loss and metrics to the csv file.
 
-        Parameters
-        ----------
-        epoch_number : TYPE
-            DESCRIPTION.
-        loss : TYPE
-            DESCRIPTION.
-        metrics : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
+        Args:
+            epoch_number (int): The epoch number.
+            loss (float): The loss value.
+            epoch_metrics (list): The list of metrics to be logged.
         """
         self.csv = open(self.filename, "a")
         row = ""
