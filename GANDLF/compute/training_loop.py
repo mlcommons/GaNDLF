@@ -1,5 +1,7 @@
 import os, time, psutil
+from typing import Tuple
 import torch
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 import torchio
@@ -33,28 +35,23 @@ from .generic import create_pytorch_objects
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 
-def train_network(model, train_dataloader, optimizer, params):
+def train_network(
+    model: torch.nn.Module,
+    train_dataloader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    params: dict,
+) -> Tuple[float, dict]:
     """
-    Function to train a network for a single epoch
+    This function performs the training of the network.
 
-    Parameters
-    ----------
-    model : torch.model
-        The model to process the input image with, it should support appropriate dimensions.
-    train_dataloader : torch.DataLoader
-        The dataloader for the training epoch
-    optimizer : torch.optim
-        Optimizer for optimizing network
-    params : dict
-        the parameters passed by the user yaml
+    Args:
+        model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions.
+        train_dataloader (DataLoader): The dataloader for the training epoch.
+        optimizer (torch.optim.Optimizer): Optimizer for optimizing network.
+        params (dict): The parameters dictionary.
 
-    Returns
-    -------
-    average_epoch_train_loss : float
-        Train loss for the current epoch
-    average_epoch_train_metric : dict
-        Train metrics for the current epoch
-
+    Returns:
+        Tuple[float, dict]: The average epoch training loss and metrics.
     """
     print("*" * 20)
     print("Starting Training : ")
@@ -217,14 +214,14 @@ def train_network(model, train_dataloader, optimizer, params):
 
 
 def training_loop(
-    training_data,
-    validation_data,
-    device,
-    params,
-    output_dir,
-    testing_data=None,
-    epochs=None,
-):
+    training_data: pandas.DataFrame,
+    validation_data: pandas.DataFrame,
+    device: str,
+    params: dict,
+    output_dir: str,
+    testing_data: bool = None,
+    epochs: bool = None,
+) -> None:
     """
     The main training loop.
 
