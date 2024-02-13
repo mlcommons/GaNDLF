@@ -1,32 +1,28 @@
+from typing import Tuple
 import torch
 import psutil
 from .loss_and_metric import get_loss_and_metrics
 
 
-def step(model, image, label, params, train=True):
+def step(
+    model: torch.nn.Module,
+    image: torch.Tensor,
+    label: torch.Tensor,
+    params: dict,
+    train: bool = True,
+) -> Tuple[float, dict, torch.Tensor, torch.Tensor]:
     """
-    Function that steps the model for a single batch
+    This function performs a single step of training or validation.
 
-    Parameters
-    ----------
-    model : torch.model
-        The model to process the input image with, it should support appropriate dimensions.
-    image : torch.Tensor
-        The input image stack according to requirements
-    label : torch.Tensor
-        The input label for the corresponding image label
-    params : dict
-        The parameters passed by the user yaml
+    Args:
+        model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions.
+        image (torch.Tensor): The input image stack according to requirements.
+        label (torch.Tensor): The input label for the corresponding image tensor.
+        params (dict): The parameters dictionary.
+        train (bool, optional): The flag to indicate if the step is for training or validation. Defaults to True.
 
-    Returns
-    -------
-    loss : torch.Tensor
-        The computed loss from the label and the output
-    metric_output : torch.Tensor
-        The computed metric from the label and the output
-    output: torch.Tensor
-        The final output of the model
-
+    Returns:
+        Tuple[float, dict, torch.Tensor, torch.Tensor]: The loss, metrics, output, and attention map.
     """
     if params["verbose"]:
         if torch.cuda.is_available():
