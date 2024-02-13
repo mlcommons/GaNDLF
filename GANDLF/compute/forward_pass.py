@@ -1,5 +1,6 @@
 import os
 import pathlib
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -30,7 +31,7 @@ def validate_network(
     params: dict,
     epoch: int = 0,
     mode: str = "validation",
-):
+) -> List[float, dict]:
     """
     Function to validate a network for a single epoch.
 
@@ -46,7 +47,7 @@ def validate_network(
         NotImplementedError: If the model type is not supported.
 
     Returns:
-        float, dict: The average validation loss and the average validation metrics.
+        List[float, dict]: The average validation loss and the average validation metrics.
     """
     print("*" * 20)
     print("Starting " + mode + " : ")
