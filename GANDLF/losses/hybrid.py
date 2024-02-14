@@ -4,54 +4,60 @@ from .segmentation import MCD_loss, FocalLoss
 from .regression import CCE_Generic, CE, CE_Logits
 
 
-def DCCE(predicted_mask, ground_truth, params) -> torch.Tensor:
+def DCCE(
+    prediction: torch.Tensor, ground_truth: torch.Tensor, params: dict
+) -> torch.Tensor:
     """
     Calculates the Dice-Cross-Entropy loss.
 
     Args:
-        predicted_mask (torch.Tensor): The predicted mask.
+        prediction (torch.Tensor): The predicted mask.
         ground_truth (torch.Tensor): The ground truth mask.
         params (dict): The parameters.
 
     Returns:
         torch.Tensor: The calculated loss.
     """
-    dcce_loss = MCD_loss(predicted_mask, ground_truth, params) + CCE_Generic(
-        predicted_mask, ground_truth, params, CE
+    dcce_loss = MCD_loss(prediction, ground_truth, params) + CCE_Generic(
+        prediction, ground_truth, params, CE
     )
     return dcce_loss
 
 
-def DCCE_Logits(predicted_mask, ground_truth, params):
+def DCCE_Logits(
+    prediction: torch.Tensor, ground_truth: torch.Tensor, params: dict
+) -> torch.Tensor:
     """
     Calculates the Dice-Cross-Entropy loss using logits.
 
     Args:
-        predicted_mask (torch.Tensor): The predicted mask.
+        prediction (torch.Tensor): The predicted mask.
         ground_truth (torch.Tensor): The ground truth mask.
         params (dict): The parameters.
 
     Returns:
         torch.Tensor: The calculated loss.
     """
-    dcce_loss = MCD_loss(predicted_mask, ground_truth, params) + CCE_Generic(
-        predicted_mask, ground_truth, params, CE_Logits
+    dcce_loss = MCD_loss(prediction, ground_truth, params) + CCE_Generic(
+        prediction, ground_truth, params, CE_Logits
     )
     return dcce_loss
 
 
-def DC_Focal(predicted_mask, ground_truth, params):
+def DC_Focal(
+    prediction: torch.Tensor, ground_truth: torch.Tensor, params: dict
+) -> torch.Tensor:
     """
     Calculates the Dice-Focal loss.
 
     Args:
-        predicted_mask (torch.Tensor): The predicted mask.
+        prediction (torch.Tensor): The predicted mask.
         ground_truth (torch.Tensor): The ground truth mask.
         params (dict): The parameters.
 
     Returns:
         torch.Tensor: The calculated loss.
     """
-    return MCD_loss(predicted_mask, ground_truth, params) + FocalLoss(
-        predicted_mask, ground_truth, params
+    return MCD_loss(prediction, ground_truth, params) + FocalLoss(
+        prediction, ground_truth, params
     )
