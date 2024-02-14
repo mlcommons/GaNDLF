@@ -1,7 +1,10 @@
+from typing import Union
 from .config_manager import ConfigManager
 
 
-def parseConfig(config_file_path, version_check_flag=True) -> None:
+def parseConfig(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
     """
     This function parses the configuration file and returns a dictionary of parameters.
 

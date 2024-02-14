@@ -1,3 +1,4 @@
+from typing import Union
 import sys, yaml, ast, pkg_resources
 import numpy as np
 from copy import deepcopy
@@ -98,7 +99,9 @@ def initialize_key(parameters, key, value=None):
     return parameters
 
 
-def _parseConfig(config_file_path, version_check_flag=True):
+def _parseConfig(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
@@ -370,9 +373,11 @@ def _parseConfig(config_file_path, version_check_flag=True):
                     default_range = (
                         [-0.1, 0.1]
                         if augmentation_type == "hed_transform"
-                        else [-0.03, 0.03]
-                        if augmentation_type == "hed_transform_light"
-                        else [-0.95, 0.95]
+                        else (
+                            [-0.03, 0.03]
+                            if augmentation_type == "hed_transform_light"
+                            else [-0.95, 0.95]
+                        )
                     )
 
                     for key in ranges:
@@ -716,7 +721,9 @@ def _parseConfig(config_file_path, version_check_flag=True):
     return params
 
 
-def ConfigManager(config_file_path, version_check_flag=True) -> None:
+def ConfigManager(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
