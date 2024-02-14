@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
+from torch.nn import CrossEntropyLoss
 from GANDLF.utils import one_hot
 
 
