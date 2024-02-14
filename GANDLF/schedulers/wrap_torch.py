@@ -1,19 +1,23 @@
+import math
+
 from torch.optim.lr_scheduler import (
-    LambdaLR,
+    CosineAnnealingWarmRestarts,
     CyclicLR,
     ExponentialLR,
-    StepLR,
+    LambdaLR,
     ReduceLROnPlateau,
-    CosineAnnealingWarmRestarts,
+    StepLR,
 )
-import math
 
 
 def cyclical_lr(stepsize, min_lr, max_lr):
     # Scaler : we can adapt this if we do not want the triangular LR
-    scaler = lambda x: 1
+    def scaler(x):
+        return 1
+
     # Lambda function to calculate the LR
-    lr_lambda = lambda it: max_lr - (max_lr - min_lr) * relative(it, stepsize)
+    def lr_lambda(it):
+        return max_lr - (max_lr - min_lr) * relative(it, stepsize)
 
     # Additional function to see where on the cycle we are
     def relative(it, stepsize):
@@ -27,11 +31,13 @@ def cyclical_lr(stepsize, min_lr, max_lr):
 def cyclical_lr_modified(cycle_length, min_lr, max_lr, max_lr_multiplier):
     min_lr_multiplier = min_lr / max_lr
     max_lr_multiplier = 1.0
+
     # Lambda function to calculate what to multiply the initial learning rate by
     # The beginning and end of the cycle result in highest multipliers (lowest at the center)
-    mult = lambda it: max_lr_multiplier * rel_dist(
-        it, cycle_length
-    ) + min_lr_multiplier * (1 - rel_dist(it, cycle_length))
+    def mult(it):
+        return max_lr_multiplier * rel_dist(it, cycle_length) + min_lr_multiplier * (
+            1 - rel_dist(it, cycle_length)
+        )
 
     def rel_dist(iteration, cycle_length):
         # relative_distance from iteration to the center of the cycle
@@ -50,9 +56,9 @@ def base_triangle(parameters):
     """
 
     # pick defaults
-    if not ("min_lr" in parameters["scheduler"]):
+    if "min_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["min_lr"] = 10**-3
-    if not ("max_lr" in parameters["scheduler"]):
+    if "max_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["max_lr"] = 1
 
     clr = cyclical_lr(
@@ -65,11 +71,11 @@ def base_triangle(parameters):
 
 def triangle_modified(parameters):
     # pick defaults
-    if not ("min_lr" in parameters["scheduler"]):
+    if "min_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["min_lr"] = 0.000001
-    if not ("max_lr" in parameters["scheduler"]):
+    if "max_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["max_lr"] = 0.001
-    if not ("max_lr_multiplier" in parameters["scheduler"]):
+    if "max_lr_multiplier" not in parameters["scheduler"]:
         parameters["scheduler"]["max_lr_multiplier"] = 1.0
 
     clr = cyclical_lr_modified(
@@ -83,19 +89,19 @@ def triangle_modified(parameters):
 
 def cyclic_lr_base(parameters, mode="triangular"):
     # pick defaults for "min_lr", "max_lr", "max_lr_multiplier" if not present in parameters
-    if not ("min_lr" in parameters["scheduler"]):
+    if "min_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
-    if not ("max_lr" in parameters["scheduler"]):
+    if "max_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["max_lr"] = parameters["learning_rate"]
-    if not ("gamma" in parameters["scheduler"]):
+    if "gamma" not in parameters["scheduler"]:
         parameters["scheduler"]["gamma"] = 0.1
-    if not ("scale_mode" in parameters["scheduler"]):
+    if "scale_mode" not in parameters["scheduler"]:
         parameters["scheduler"]["scale_mode"] = "cycle"
-    if not ("cycle_momentum" in parameters["scheduler"]):
+    if "cycle_momentum" not in parameters["scheduler"]:
         parameters["scheduler"]["cycle_momentum"] = False
-    if not ("base_momentum" in parameters["scheduler"]):
+    if "base_momentum" not in parameters["scheduler"]:
         parameters["scheduler"]["base_momentum"] = 0.8
-    if not ("max_momentum" in parameters["scheduler"]):
+    if "max_momentum" not in parameters["scheduler"]:
         parameters["scheduler"]["max_momentum"] = 0.9
 
     return CyclicLR(
@@ -124,7 +130,7 @@ def cyclic_lr_exp_range(parameters):
 
 
 def exp(parameters):
-    if not ("gamma" in parameters["scheduler"]):
+    if "gamma" not in parameters["scheduler"]:
         parameters["scheduler"]["gamma"] = 0.1
     return ExponentialLR(
         parameters["optimizer_object"], parameters["scheduler"]["gamma"]
@@ -132,7 +138,7 @@ def exp(parameters):
 
 
 def step(parameters):
-    if not ("gamma" in parameters["scheduler"]):
+    if "gamma" not in parameters["scheduler"]:
         parameters["scheduler"]["gamma"] = 0.1
     return StepLR(
         parameters["optimizer_object"],
@@ -142,21 +148,21 @@ def step(parameters):
 
 
 def reduce_on_plateau(parameters):
-    if not ("min_lr" in parameters["scheduler"]):
+    if "min_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
-    if not ("gamma" in parameters["scheduler"]):
+    if "gamma" not in parameters["scheduler"]:
         parameters["scheduler"]["gamma"] = 0.1
-    if not ("mode" in parameters["scheduler"]):
+    if "mode" not in parameters["scheduler"]:
         parameters["scheduler"]["mde"] = "min"
-    if not ("threshold_mode" in parameters["scheduler"]):
+    if "threshold_mode" not in parameters["scheduler"]:
         parameters["scheduler"]["threshold_mode"] = "rel"
-    if not ("factor" in parameters["scheduler"]):
+    if "factor" not in parameters["scheduler"]:
         parameters["scheduler"]["factor"] = 0.1
-    if not ("patience" in parameters["scheduler"]):
+    if "patience" not in parameters["scheduler"]:
         parameters["scheduler"]["patience"] = 10
-    if not ("threshold" in parameters["scheduler"]):
+    if "threshold" not in parameters["scheduler"]:
         parameters["scheduler"]["threshold"] = 0.0001
-    if not ("cooldown" in parameters["scheduler"]):
+    if "cooldown" not in parameters["scheduler"]:
         parameters["scheduler"]["cooldown"] = 0
 
     return ReduceLROnPlateau(
@@ -172,11 +178,11 @@ def reduce_on_plateau(parameters):
 
 
 def cosineannealing(parameters):
-    if not ("T_0" in parameters["scheduler"]):
+    if "T_0" not in parameters["scheduler"]:
         parameters["scheduler"]["T_0"] = 5
-    if not ("T_mult" in parameters["scheduler"]):
+    if "T_mult" not in parameters["scheduler"]:
         parameters["scheduler"]["T_mult"] = 1
-    if not ("min_lr" in parameters["scheduler"]):
+    if "min_lr" not in parameters["scheduler"]:
         parameters["scheduler"]["min_lr"] = parameters["learning_rate"] * 0.001
 
     return CosineAnnealingWarmRestarts(
