@@ -1,16 +1,17 @@
+from typing import Union
 import torch
 import torch.nn.functional as F
 
 
-def get_modelbase_final_layer(final_convolution_layer):
+def get_modelbase_final_layer(final_convolution_layer: str) -> Union[object, None]:
     """
-    This function gets the final layer of the model.
+    This function returns the final convolution layer based on the input string.
 
     Args:
-        final_convolution_layer (str): The final layer of the model as a string.
+        final_convolution_layer (str): The string representing the final convolution layer.
 
     Returns:
-        Functional: sigmoid, softmax, or None
+        Union[object, None]: The final convolution layer.
     """
     none_list = [
         "none",
