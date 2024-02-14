@@ -1,4 +1,5 @@
 import os, warnings
+from typing import Union
 from functools import partial
 from pathlib import Path
 
@@ -35,16 +36,17 @@ def parse_gandlf_csv(fpath):
             yield row["SubjectID"], row["Channel_0"], None
 
 
-def patch_extraction(input_path, output_path, config=None):
+def patch_extraction(
+    input_path: str, output_path: str, config: Union[str, dict, None] = None
+) -> None:
     """
-    This function extracts patches from WSIs.
+    Extract patches from whole slide images.
 
     Args:
-        input_path (str): The input CSV.
-        config (Union[str, dict, none]): The input yaml config.
-        output_path (_type_): _description_
+        input_path (str): The path to the input CSV file.
+        output_path (str): The path to the output directory.
+        config (Union[str, dict, None], optional): The path to the configuration file or the configuration dictionary. Defaults to None.
     """
-
     Image.MAX_IMAGE_PIXELS = None
     warnings.simplefilter("ignore")
 
