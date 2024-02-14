@@ -3,14 +3,15 @@
 Implementation of UNet with deep supervision and residual connections
 """
 
+from GANDLF.models.seg_modules.DecodingModule import DecodingModule
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
-from GANDLF.models.seg_modules.DecodingModule import DecodingModule
-from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.models.seg_modules.InitialConv import InitialConv
 from GANDLF.models.seg_modules.out_conv import out_conv
-from .modelBase import ModelBase
+from GANDLF.models.seg_modules.UpsamplingModule import UpsamplingModule
 from GANDLF.utils.generic import checkPatchDivisibility
+
+from .modelBase import ModelBase
 
 
 class deep_unet(ModelBase):
@@ -29,7 +30,7 @@ class deep_unet(ModelBase):
         self.network_kwargs = {"res": residualConnections}
         super(deep_unet, self).__init__(parameters)
 
-        assert checkPatchDivisibility(parameters["patch_size"]) == True, (
+        assert checkPatchDivisibility(parameters["patch_size"]) is True, (
             "The patch size is not divisible by 16, which is required for "
             + parameters["model"]["architecture"]
         )
