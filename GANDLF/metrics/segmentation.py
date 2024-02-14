@@ -1,6 +1,8 @@
 """
 All the segmentation metrics are to be called from here
 """
+
+from typing import Union
 import sys
 import torch
 import numpy as np
@@ -13,7 +15,7 @@ from scipy.ndimage.morphology import (
 )
 
 
-def _convert_tensor_to_int_label_array(input_tensor):
+def _convert_tensor_to_int_label_array(input_tensor: torch.Tensor) -> np.ndarray:
     """
     This function converts a tensor of labels to a numpy array of labels.
 
@@ -32,18 +34,23 @@ def _convert_tensor_to_int_label_array(input_tensor):
     return result_array.astype(np.int64)
 
 
-def multi_class_dice(output, label, params, per_label=False):
+def multi_class_dice(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    params: dict,
+    per_label: bool = False,
+) -> Union[torch.Tensor, list]:
     """
     This function computes a multi-class dice.
 
     Args:
-        output (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        label (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): The input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): The input ground truth containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
-        per_label (bool, optional): Whether the dice needs to be calculated per label or not. Defaults to False.
+        per_label (bool, optional): Whether to return per-label dice scores. Defaults to False.
 
     Returns:
-        float or list: The average dice for all labels or a list of per-label dice scores.
+        Union[torch.Tensor, list]: The multi-class dice score or the list of per-label dice scores.
     """
     total_dice = 0
     avg_counter = 0
@@ -51,7 +58,7 @@ def multi_class_dice(output, label, params, per_label=False):
     for i in range(0, params["model"]["num_classes"]):
         # this check should only happen during validation
         if i != params["model"]["ignore_label_validation"]:
-            current_dice = dice(output[:, i, ...], label[:, i, ...])
+            current_dice = dice(prediction[:, i, ...], target[:, i, ...])
             total_dice += current_dice
             per_label_dice.append(current_dice.item())
             avg_counter += 1
@@ -64,37 +71,44 @@ def multi_class_dice(output, label, params, per_label=False):
         return total_dice
 
 
-def multi_class_dice_per_label(output, label, params):
+def multi_class_dice_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> list:
     """
     This function computes a multi-class dice.
 
     Args:
-        output (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        label (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
 
     Returns:
         list: The list of per-label dice scores.
     """
-    return multi_class_dice(output, label, params, per_label=True)
+    return multi_class_dice(prediction, target, params, per_label=True)
 
 
-def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
+def __surface_distances(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    voxelspacing: tuple = None,
+    connectivity: int = 1,
+) -> float:
     """
     The distances between the surface voxel of binary objects in result and their
     nearest partner surface voxel of a binary object in reference. Adapted from https://github.com/loli/medpy/blob/39131b94f0ab5328ab14a874229320efc2f74d98/medpy/metric/binary.py#L1195.
 
     Args:
-        result (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        reference (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         voxelspacing (tuple): The size of each voxel, defaults to isotropic spacing of 1mm.
         connectivity (int): The connectivity of regions. See scipy.ndimage.generate_binary_structure for more information.
 
     Returns:
         float: The symmetric Hausdorff Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
     """
-    result = np.atleast_1d(result.astype(bool))
-    reference = np.atleast_1d(reference.astype(bool))
+    result = np.atleast_1d(prediction.astype(bool))
+    reference = np.atleast_1d(target.astype(bool))
     if voxelspacing is not None:
         voxelspacing = _ni_support._normalize_sequence(voxelspacing, result.ndim)
         voxelspacing = np.asarray(voxelspacing, dtype=np.float64)
@@ -125,7 +139,7 @@ def __surface_distances(result, reference, voxelspacing=None, connectivity=1):
     return sds
 
 
-def _nsd_base(a_to_b, b_to_a, threshold):
+def _nsd_base(a_to_b: np.ndarray, b_to_a: np.ndarray, threshold: float) -> float:
     """
     This implementation differs from the official surface dice implementation! These two are not comparable!!!!!
     The normalized surface dice is symmetric, so it should not matter whether a or b is the reference image
@@ -154,16 +168,16 @@ def _nsd_base(a_to_b, b_to_a, threshold):
 
 
 def _calculator_jaccard(
-    inp,
-    target,
-    params,
-    per_label=False,
-):
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    params: dict,
+    per_label: bool = False,
+) -> torch.Tensor:
     """
     This function returns sensitivity and specificity.
 
     Args:
-        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
         per_label (bool): Whether to return per-label dice scores.
@@ -171,7 +185,7 @@ def _calculator_jaccard(
     Returns:
         float: The Jaccard score between the object(s) in ```inp``` and the object(s) in ```target```.
     """
-    result_array = _convert_tensor_to_int_label_array(inp)
+    result_array = _convert_tensor_to_int_label_array(prediction)
     target_array = _convert_tensor_to_int_label_array(target)
 
     jaccard, avg_counter = 0, 0
@@ -194,16 +208,16 @@ def _calculator_jaccard(
 
 
 def _calculator_sensitivity_specificity(
-    inp,
-    target,
-    params,
-    per_label=False,
-):
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    params: dict,
+    per_label: bool = False,
+) -> torch.Tensor:
     """
     This function returns sensitivity and specificity.
 
     Args:
-        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
         per_label (bool): Whether to return per-label dice scores.
@@ -237,7 +251,7 @@ def _calculator_sensitivity_specificity(
 
         return Sens, Spec
 
-    result_array = _convert_tensor_to_int_label_array(inp)
+    result_array = _convert_tensor_to_int_label_array(prediction)
     target_array = _convert_tensor_to_int_label_array(target)
 
     sensitivity, specificity, avg_counter = 0, 0, 0
@@ -264,23 +278,23 @@ def _calculator_sensitivity_specificity(
 
 
 def _calculator_generic_all_surface_distances(
-    inp,
-    target,
-    params,
-    per_label=False,
-):
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    params: dict,
+    per_label: bool = False,
+) -> torch.Tensor:
     """
     This function returns hd100, hd95, and nsd.
 
     Args:
-        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
 
     Returns:
         float, float, float: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance.
     """
-    result_array = _convert_tensor_to_int_label_array(inp)
+    result_array = _convert_tensor_to_int_label_array(prediction)
     target_array = _convert_tensor_to_int_label_array(target)
 
     avg_counter = 0
@@ -330,18 +344,18 @@ def _calculator_generic_all_surface_distances(
 
 
 def _calculator_generic(
-    inp,
-    target,
-    params,
-    percentile=95,
-    surface_dice=False,
-    per_label=False,
-):
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    params: dict,
+    percentile: int = 95,
+    surface_dice: bool = False,
+    per_label: bool = False,
+) -> Union[torch.Tensor, list]:
     """
     Generic Surface Dice (SD)/Hausdorff (HD) Distance calculation from 2 tensors. Compared to the standard Hausdorff Distance, this metric is slightly more stable to small outliers and is commonly used in Biomedical Segmentation challenges.
 
     Args:
-        inp (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
         percentile (int, optional): The percentile of surface distances to include during HD calculation. Defaults to 95.
@@ -349,13 +363,13 @@ def _calculator_generic(
         per_label (bool, optional): Whether the hausdorff needs to be calculated per label or not. Defaults to False.
 
     Returns:
-        float or list: The symmetric Hausdorff Distance or Normalized Surface Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
+        torch.Tensor or list: The symmetric Hausdorff Distance or Normalized Surface Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
 
     See also:
         :func:`hd`
     """
     _nsd, _hd100, _hd95 = _calculator_generic_all_surface_distances(
-        inp, target, params, per_label=per_label
+        prediction, target, params, per_label=per_label
     )
     if surface_dice:
         return _nsd
@@ -365,57 +379,67 @@ def _calculator_generic(
         return _hd100
 
 
-def hd95(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=95)
+def hd95(prediction, target, params):
+    return _calculator_generic(prediction, target, params, percentile=95)
 
 
-def hd95_per_label(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=95, per_label=True)
-
-
-def hd100(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=100)
-
-
-def hd100_per_label(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=100, per_label=True)
-
-
-def nsd(inp, target, params):
-    return _calculator_generic(inp, target, params, percentile=100, surface_dice=True)
-
-
-def nsd_per_label(inp, target, params):
+def hd95_per_label(prediction, target, params):
     return _calculator_generic(
-        inp, target, params, percentile=100, per_label=True, surface_dice=True
+        prediction, target, params, percentile=95, per_label=True
     )
 
 
-def sensitivity(inp, target, params):
-    s, _ = _calculator_sensitivity_specificity(inp, target, params)
+def hd100(prediction, target, params):
+    return _calculator_generic(prediction, target, params, percentile=100)
+
+
+def hd100_per_label(prediction, target, params):
+    return _calculator_generic(
+        prediction, target, params, percentile=100, per_label=True
+    )
+
+
+def nsd(prediction, target, params):
+    return _calculator_generic(
+        prediction, target, params, percentile=100, surface_dice=True
+    )
+
+
+def nsd_per_label(prediction, target, params):
+    return _calculator_generic(
+        prediction, target, params, percentile=100, per_label=True, surface_dice=True
+    )
+
+
+def sensitivity(prediction, target, params):
+    s, _ = _calculator_sensitivity_specificity(prediction, target, params)
     return s
 
 
-def sensitivity_per_label(inp, target, params):
-    s, _ = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
+def sensitivity_per_label(prediction, target, params):
+    s, _ = _calculator_sensitivity_specificity(
+        prediction, target, params, per_label=True
+    )
     return s
 
 
-def specificity_segmentation(inp, target, params):
-    _, p = _calculator_sensitivity_specificity(inp, target, params)
+def specificity_segmentation(prediction, target, params):
+    _, p = _calculator_sensitivity_specificity(prediction, target, params)
     return p
 
 
-def specificity_segmentation_per_label(inp, target, params):
-    _, p = _calculator_sensitivity_specificity(inp, target, params, per_label=True)
+def specificity_segmentation_per_label(prediction, target, params):
+    _, p = _calculator_sensitivity_specificity(
+        prediction, target, params, per_label=True
+    )
     return p
 
 
-def jaccard(inp, target, params):
-    j = _calculator_jaccard(inp, target, params)
+def jaccard(prediction, target, params):
+    j = _calculator_jaccard(prediction, target, params)
     return j
 
 
-def jaccard_per_label(inp, target, params):
-    j = _calculator_jaccard(inp, target, params, per_label=True)
+def jaccard_per_label(prediction, target, params):
+    j = _calculator_jaccard(prediction, target, params, per_label=True)
     return j
