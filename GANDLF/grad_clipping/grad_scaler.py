@@ -9,12 +9,12 @@ class GradScaler:
 
     def __call__(
         self,
-        loss,
-        optimizer,
-        clip_grad=None,
-        clip_mode="norm",
-        parameters=None,
-        create_graph=False,
+        loss: torch.Tensor,
+        optimizer: torch.optim.Optimizer,
+        clip_grad: float = None,
+        clip_mode: str = "norm",
+        parameters: torch.Tensor = None,
+        create_graph: bool = False,
     ):
         """
         Scales the loss and performs backward pass through the computation graph.
@@ -24,7 +24,7 @@ class GradScaler:
             optimizer (torch.optim.Optimizer): The optimizer to step after backpropagation.
             clip_grad (float): The clipping value/factor/norm, mode dependent (default: None).
             clip_mode (str): The clipping mode, one of 'norm', 'value', 'agc' (default: 'norm').
-            parameters (Iterable): The model parameters to clip (default: None).
+            parameters (torch.Tensor): The model parameters to clip (default: None).
             create_graph (bool): Whether to create a new graph for backpropagation (default: False).
         """
         self._scaler.scale(loss).backward(create_graph=create_graph)
@@ -54,7 +54,7 @@ class GradScaler:
         self._scaler.load_state_dict(state_dict)
 
 
-def model_parameters_exclude_head(model, clip_mode=None):
+def model_parameters_exclude_head(model: torch.nn.Module, clip_mode: str = None):
     """
     Returns the parameters of a PyTorch model excluding the last two layers (the head).
 
@@ -66,9 +66,9 @@ def model_parameters_exclude_head(model, clip_mode=None):
         Iterable: The model parameters excluding the last two layers if clip_mode is 'agc', otherwise all parameters.
     """
     exclude_head = False
-    if clip_mode is not None:
-        if clip_mode == "agc":
-            exclude_head = True
+    clip_mode = str(clip_mode).lower() if clip_mode is not None else None
+    if clip_mode == "agc":
+        exclude_head = True
     if exclude_head:
         return [p for p in model.parameters()][:-2]
     else:

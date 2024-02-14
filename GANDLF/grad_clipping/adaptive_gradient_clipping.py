@@ -6,7 +6,7 @@ Implementation of Adaptive gradient clipping
 import torch
 
 
-def unitwise_norm(x, norm_type=2.0):
+def unitwise_norm(x: torch.Tensor, norm_type: float = 2.0) -> torch.Tensor:
     """
     Computes the norm of a tensor x, where the norm is applied across all dimensions except the first one.
 
@@ -28,7 +28,12 @@ def unitwise_norm(x, norm_type=2.0):
         return x.norm(norm_type, dim=tuple(range(1, x.ndim)), keepdim=True)
 
 
-def adaptive_gradient_clip_(parameters, clip_factor=0.01, eps=1e-3, norm_type=2.0):
+def adaptive_gradient_clip_(
+    parameters: list,
+    clip_factor: float = 0.01,
+    eps: float = 1e-3,
+    norm_type: float = 2.0,
+) -> None:
     """
     Performs adaptive gradient clipping on the parameters of a PyTorch model.
 

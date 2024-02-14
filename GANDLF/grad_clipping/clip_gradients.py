@@ -8,13 +8,13 @@ from GANDLF.grad_clipping.adaptive_gradient_clipping import adaptive_gradient_cl
 
 
 def dispatch_clip_grad_(
-    parameters, value: float, mode: str = "norm", norm_type: float = 2.0
+    parameters: torch.Tensor, value: float, mode: str = "norm", norm_type: float = 2.0
 ):
     """
     Dispatches the gradient clipping method to the corresponding function based on the mode.
 
     Args:
-        parameters (Iterable): The model parameters to be clipped.
+        parameters (torch.Tensor): The model parameters to be clipped.
         value (float): The clipping value/factor/norm, mode dependent.
         mode (str): The clipping mode, one of 'norm', 'value', 'agc' (default: 'norm').
         norm_type (float): The p-norm to use for computing the norm of the gradients (default: 2.0).
