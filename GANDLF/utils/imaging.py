@@ -1,5 +1,9 @@
+import copy
+import math
+import os
+import pathlib
 from typing import Union
-import os, pathlib, math, copy
+
 import numpy as np
 import SimpleITK as sitk
 import torchio
@@ -73,8 +77,8 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
         if "resize" in output_size:
             output_size_parsed = output_size["resize"]
 
-    assert len(output_size_parsed) == len(
-        inputSpacing
+    assert (
+        len(output_size_parsed) == len(inputSpacing)
     ), "The output size dimension is inconsistent with the input dataset, please check parameters."
 
     for i, n in enumerate(output_size_parsed):
