@@ -84,11 +84,11 @@ def ImagesFromDataFrame(
 
     resize_images_flag = False
     # if resize has been defined but resample is not (or is none)
-    if not (preprocessing is None):
+    if preprocessing is not None:
         for key in preprocessing.keys():
             # check for different resizing keys
             if key in ["resize", "resize_image", "resize_images"]:
-                if not (preprocessing[key] is None):
+                if preprocessing[key] is not None:
                     resize_images_flag = True
                     preprocessing["resize_image"] = preprocessing[key]
                     break
@@ -265,7 +265,7 @@ def ImagesFromDataFrame(
     transformations_list = []
 
     # augmentations are applied to the training set only
-    if train and not (augmentations is None):
+    if train and augmentations is not None:
         for aug in augmentations:
             aug_lower = aug.lower()
             if aug_lower in global_augs_dict:
