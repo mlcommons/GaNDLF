@@ -30,7 +30,9 @@ latest_model_path_end = "_latest.pth.tar"
 initial_model_path_end = "_initial.pth.tar"
 
 
-def optimize_and_save_model(model, params, path, onnx_export=True):
+def optimize_and_save_model(
+    model: torch.nn.Module, params: dict, path: str, onnx_export: bool = True
+) -> None:
     """
     Perform post-training optimization and save it to a file.
 
@@ -191,21 +193,21 @@ def load_model(
         incomplete_keys = [
             key for key in model_dict_full.keys() if key not in model_dict.keys()
         ]
-        if len(incomplete_keys) > 0:
-            raise RuntimeWarning(
-                "Model dictionary is incomplete; the following keys are missing:",
-                incomplete_keys,
-            )
+        assert (
+            len(incomplete_keys) == 0
+        ), "Model dictionary is incomplete; the following keys are missing: " + str(
+            incomplete_keys
+        )
 
     # check if required keys are absent, and if so raise an error
     incomplete_required_keys = [
         key for key in model_dict_required.keys() if key not in model_dict.keys()
     ]
-    if len(incomplete_required_keys) > 0:
-        raise KeyError(
-            "Model dictionary is incomplete; the following keys are missing:",
-            incomplete_required_keys,
-        )
+    assert (
+        len(incomplete_required_keys) == 0
+    ), "Model dictionary is incomplete; the following keys are missing: " + str(
+        incomplete_required_keys
+    )
 
     return model_dict
 
