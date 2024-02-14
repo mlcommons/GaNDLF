@@ -77,7 +77,7 @@ class out_conv(nn.Module):
         """
         x = self.conv0(self.act(self.in_0(x)))
 
-        if not (self.final_convolution_layer is None):
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 x = self.final_convolution_layer(x, dim=1)
             elif self.final_convolution_layer == torch.sigmoid:
