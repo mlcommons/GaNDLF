@@ -1,11 +1,15 @@
 import yaml
+from typing import Union
 from pathlib import Path
 from copy import deepcopy
 
 
 def generate_new_configs_from_key_and_value(
-    base_config, key, value, upper_level_key=None
-):
+    base_config: dict,
+    key: str,
+    value: Union[str, list, int],
+    upper_level_key: str = None,
+) -> list:
     """
     Generate new configs based on a base config and a strategy.
 
@@ -59,7 +63,7 @@ def generate_new_configs_from_key_and_value(
     return configs_to_return
 
 
-def remove_duplicates(configs_list):
+def remove_duplicates(configs_list: list) -> list:
     """
     Remove duplicate configs from a list of configs.
 
@@ -76,7 +80,9 @@ def remove_duplicates(configs_list):
     return configs_to_return
 
 
-def config_generator(base_config_path, strategy_path, output_dir):
+def config_generator(
+    base_config_path: str, strategy_path: str, output_dir: str
+) -> None:
     """
     Main function that runs the training and inference.
 
