@@ -570,7 +570,11 @@ if __name__ == "__main__":
         "-val_loader_pickle", type=str, help="Validation loader pickle", required=True
     )
     parser.add_argument(
-        "-testing_loader_pickle", type=str, help="Testing loader pickle", required=True
+        "-testing_loader_pickle",
+        type=str,
+        help="Testing loader pickle",
+        required=False,
+        default=None,
     )
     parser.add_argument(
         "-parameter_pickle", type=str, help="Parameters pickle", required=True
@@ -585,10 +589,7 @@ if __name__ == "__main__":
     trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
     validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
     testingData_str = args.testing_loader_pickle
-    if testingData_str == "None":
-        testingDataFromPickle = None
-    else:
-        testingDataFromPickle = pd.read_pickle(testingData_str)
+    testingDataFromPickle = pd.read_pickle(testingData_str) if testingData_str else None
 
     training_loop(
         training_data=trainingDataFromPickle,
