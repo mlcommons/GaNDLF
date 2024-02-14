@@ -127,7 +127,7 @@ def L1(
         scaling_factor (float, optional): The scaling factor to multiply the target with. Defaults to 1.
 
     Returns:
-        torch.Tensor: _description_
+        torch.Tensor: The mean absolute error loss.
     """
     scaling_factor = torch.as_tensor(
         scaling_factor, dtype=target.dtype, device=target.device
@@ -143,7 +143,7 @@ def L1_loss(
     """
     Computes the L1 loss between the prediction tensor and the target tensor.
 
-    Parameters:
+    Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
         params (dict, optional): A dictionary of hyperparameters. Defaults to None.
@@ -203,7 +203,7 @@ def MSE(
         scaling_factor (float, optional): The scaling factor to multiply the target with. Defaults to 1.
 
     Returns:
-        torch.Tensor: _description_
+        torch.Tensor: The computed mean squared error loss.
     """
     scaling_factor = torch.as_tensor(scaling_factor, dtype=torch.float32)
     target = target.float() * scaling_factor
