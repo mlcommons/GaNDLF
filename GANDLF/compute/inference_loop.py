@@ -96,7 +96,7 @@ def inference_loop(
                     file_to_load = best_file
                     break
 
-            assert file_to_load != None, "The 'best_file' was not found"
+            assert file_to_load is not None, "The 'best_file' was not found"
 
         main_dict = torch.load(file_to_load, map_location=parameters["device"])
         model.load_state_dict(main_dict["model_state_dict"])
