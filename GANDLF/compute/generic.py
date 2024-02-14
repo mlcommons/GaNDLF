@@ -96,7 +96,7 @@ def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu
 
     # only need to create scheduler if training
     if train_csv is not None:
-        if not ("step_size" in parameters["scheduler"]):
+        if "step_size" not in parameters["scheduler"]:
             parameters["scheduler"]["step_size"] = (
                 parameters["training_samples_size"] / parameters["learning_rate"]
             )
