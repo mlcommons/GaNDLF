@@ -28,9 +28,9 @@ def resample_image(
     Returns:
         sitk.Image: The resampled image.
     """
-    assert len(spacing) == input_image.GetDimension(), "len(spacing) != " + str(
-        input_image.GetDimension()
-    )
+    assert (
+        len(spacing) == input_image.GetDimension()
+    ), "The spacing dimension is inconsistent with the input dataset, please check parameters."
 
     # Set Size
     if size is None:
@@ -40,10 +40,10 @@ def resample_image(
             int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
             for i in range(input_image.GetDimension())
         ]
-    else:
-        assert len(size) == input_image.GetDimension(), "len(size) != " + str(
-            input_image.GetDimension()
-        )
+
+    assert (
+        len(size) == input_image.GetDimension()
+    ), "The size dimension is inconsistent with the input dataset, please check parameters."
 
     # Resample input image
     return sitk.Resample(
