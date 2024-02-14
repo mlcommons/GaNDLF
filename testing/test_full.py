@@ -1,48 +1,56 @@
+import copy
+import csv
+import os
+import random
+import shutil
+import zipfile
 from pathlib import Path
-import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
-import SimpleITK as sitk
+
+import cv2
+import gdown
 import numpy as np
 import pandas as pd
-
-from pydicom.data import get_testdata_file
-import cv2
-
-from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
-from GANDLF.utils import *
-from GANDLF.utils import parseTestingCSV, get_tensor_from_image
-from GANDLF.data.preprocessing import global_preprocessing_dict
-from GANDLF.data.augmentation import global_augs_dict
-from GANDLF.data.patch_miner.opm.utils import (
-    generate_initial_mask,
-    alpha_rgb_2d_channel_check,
-    get_nonzero_percent,
-    get_patch_size_in_microns,
-    convert_to_tiff,
+import pytest
+import SimpleITK as sitk
+import torch
+import yaml
+from GANDLF.anonymize import run_anonymizer
+from GANDLF.cli import (
+    config_generator,
+    generate_metrics_dict,
+    main_run,
+    patch_extraction,
+    post_training_model_optimization,
+    preprocess_and_save,
+    recover_config,
+    run_deployment,
 )
 from GANDLF.config_manager import ConfigManager
-from GANDLF.parseConfig import parseConfig
-from GANDLF.training_manager import TrainingManager
-from GANDLF.inference_manager import InferenceManager
-from GANDLF.cli import (
-    main_run,
-    preprocess_and_save,
-    patch_extraction,
-    config_generator,
-    run_deployment,
-    recover_config,
-    post_training_model_optimization,
-    generate_metrics_dict,
+from GANDLF.data.augmentation import global_augs_dict
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
+from GANDLF.data.patch_miner.opm.utils import (
+    alpha_rgb_2d_channel_check,
+    convert_to_tiff,
+    generate_initial_mask,
+    get_nonzero_percent,
+    get_patch_size_in_microns,
 )
-from GANDLF.schedulers import global_schedulers_dict
-from GANDLF.optimizers import global_optimizer_dict
-from GANDLF.models import global_models_dict
 from GANDLF.data.post_process import (
-    torch_morphological,
+    cca,
     fill_holes,
     get_mapped_label,
-    cca,
+    torch_morphological,
 )
-from GANDLF.anonymize import run_anonymizer
+from GANDLF.data.preprocessing import global_preprocessing_dict
+from GANDLF.inference_manager import InferenceManager
+from GANDLF.models import global_models_dict
+from GANDLF.optimizers import global_optimizer_dict
+from GANDLF.parseConfig import parseConfig
+from GANDLF.schedulers import global_schedulers_dict
+from GANDLF.training_manager import TrainingManager
+from GANDLF.utils import *
+from GANDLF.utils import get_tensor_from_image, parseTestingCSV
+from pydicom.data import get_testdata_file
 
 device = "cpu"
 ## global defines
@@ -1396,7 +1404,9 @@ def test_generic_cli_function_preprocess():
     ), "Number of subjects in dataframe is not same as that of input dataframe"
     assert (
         len(training_data.columns) == len(input_data_df.columns) + 1
-    ), "Number of columns in output dataframe is not same as that of input dataframe"  # the +1 is for the added index column
+    ), (
+        "Number of columns in output dataframe is not same as that of input dataframe"
+    )  # the +1 is for the added index column
     sanitize_outputDir()
 
     ## regression/classification preprocess
@@ -1438,7 +1448,9 @@ def test_generic_cli_function_preprocess():
     ), "Number of subjects in dataframe is not same as that of input dataframe"
     assert (
         len(training_data.columns) == len(input_data_df.columns) + 1
-    ), "Number of columns in output dataframe is not same as that of input dataframe"  # the +1 is for the added index column
+    ), (
+        "Number of columns in output dataframe is not same as that of input dataframe"
+    )  # the +1 is for the added index column
     sanitize_outputDir()
 
     print("passed")
