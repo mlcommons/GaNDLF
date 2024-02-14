@@ -3,16 +3,17 @@
 Implementation of UNet with Inception Convolutions - UInc
 """
 
-import torch.nn.functional as F
 import torch
-from GANDLF.models.seg_modules.ResNetModule import ResNetModule
-from GANDLF.models.seg_modules.InceptionModule import InceptionModule
-from GANDLF.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
-from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
+import torch.nn.functional as F
 from GANDLF.models.seg_modules.IncConv import IncConv
+from GANDLF.models.seg_modules.IncDownsamplingModule import IncDownsamplingModule
 from GANDLF.models.seg_modules.IncDropout import IncDropout
-from .modelBase import ModelBase
+from GANDLF.models.seg_modules.InceptionModule import InceptionModule
+from GANDLF.models.seg_modules.IncUpsamplingModule import IncUpsamplingModule
+from GANDLF.models.seg_modules.ResNetModule import ResNetModule
 from GANDLF.utils.generic import checkPatchDivisibility
+
+from .modelBase import ModelBase
 
 
 class uinc(ModelBase):
@@ -241,7 +242,7 @@ class uinc(ModelBase):
         x6 = self.rn_10(torch.cat((x1, x6), dim=1))
         x6 = self.dropout(x6)
 
-        if not self.final_convolution_layer is None:
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 x6 = self.final_convolution_layer(x6, dim=1)
             else:
