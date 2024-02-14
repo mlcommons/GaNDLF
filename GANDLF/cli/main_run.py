@@ -1,4 +1,3 @@
-import os, pickle
 from pathlib import Path
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
@@ -8,7 +7,6 @@ from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     parseTestingCSV,
-    set_determinism,
 )
 
 
