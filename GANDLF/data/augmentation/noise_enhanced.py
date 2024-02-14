@@ -36,7 +36,7 @@ class RandomNoiseEnhanced(RandomTransform, IntensityTransform):
         self,
         mean: Union[float, Tuple[float, float]] = 0,
         std: Union[float, Tuple[float, float]] = (0, 0.25),
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.mean_range = self._parse_range(mean, "mean")
