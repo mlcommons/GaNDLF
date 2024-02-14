@@ -17,14 +17,14 @@ import yaml
 from GANDLF.anonymize import run_anonymizer
 from GANDLF.cli import (
     config_generator,
-    generate_metrics_dict,
     main_run,
     patch_extraction,
     post_training_model_optimization,
     preprocess_and_save,
     recover_config,
-    run_deployment,
 )
+from GANDLF.cli.deploy import run_deployment
+from GANDLF.cli.generate_metrics import generate_metrics_dict
 from GANDLF.config_manager import ConfigManager
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
