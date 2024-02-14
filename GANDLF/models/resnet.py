@@ -1,8 +1,9 @@
 import sys
+from collections import OrderedDict
+
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from collections import OrderedDict
-import numpy as np
 
 from .modelBase import ModelBase
 
@@ -47,7 +48,7 @@ class ResNet(ModelBase):
         block_config = block_config[:allowedLay]
 
         # Define defaults if not already defined
-        if not ("num_init_features" in parameters):
+        if "num_init_features" not in parameters:
             parameters["num_init_features"] = 64
 
         # Set output size based on number of dimensions
@@ -141,7 +142,7 @@ class ResNet(ModelBase):
         out = self.classifier(out)
 
         # Apply the final convolutional layer if it is defined
-        if not self.final_convolution_layer is None:
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 out = self.final_convolution_layer(out, dim=1)
             else:
