@@ -1,10 +1,14 @@
-import pandas as pd
-import os, sys, pickle, subprocess, shutil
-from sklearn.model_selection import KFold
+import os
+import pickle
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
+import pandas as pd
 from GANDLF.compute import training_loop
 from GANDLF.utils import get_dataframe
+from sklearn.model_selection import KFold
 
 
 def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
@@ -264,7 +268,7 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
                     "parallel_compute_command"
                 ].replace("${outputDir}", currentValOutputFolder)
 
-                if not ("python" in parallel_compute_command_actual):
+                if "python" not in parallel_compute_command_actual:
                     sys.exit(
                         "The 'parallel_compute_command_actual' needs to have the python from the virtual environment, which is usually '${GANDLF_dir}/venv/bin/python'"
                     )
