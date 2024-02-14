@@ -4,6 +4,7 @@ Modified from https://github.com/pytorch/vision.git
 """
 
 import math
+
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -70,7 +71,7 @@ class VGG(ModelBase):
         """
         out = self.features(x)
         out = self.classifier(out)
-        if not self.final_convolution_layer is None:
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 # Apply softmax activation to the output tensor if specified in the configuration
                 out = self.final_convolution_layer(out, dim=1)
