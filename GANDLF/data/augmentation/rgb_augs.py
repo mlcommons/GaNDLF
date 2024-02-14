@@ -42,7 +42,7 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
         contrast: Union[float, Tuple[float, float]] = 0,
         saturation: Union[float, Tuple[float, float]] = 0,
         hue: Union[float, Tuple[float, float]] = 0.2,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.brightness_range = self._parse_range(
