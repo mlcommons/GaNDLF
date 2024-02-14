@@ -1,5 +1,6 @@
 import os, time, psutil
 from typing import Tuple
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -214,8 +215,8 @@ def train_network(
 
 
 def training_loop(
-    training_data: pandas.DataFrame,
-    validation_data: pandas.DataFrame,
+    training_data: pd.DataFrame,
+    validation_data: pd.DataFrame,
     device: str,
     params: dict,
     output_dir: str,
@@ -226,12 +227,12 @@ def training_loop(
     The main training loop.
 
     Args:
-        training_data (pandas.DataFrame): The data to use for training.
-        validation_data (pandas.DataFrame): The data to use for validation.
+        training_data (pd.DataFrame): The data to use for training.
+        validation_data (pd.DataFrame): The data to use for validation.
         device (str): The device to perform computations on.
         params (dict): The parameters dictionary.
         output_dir (str): The output directory.
-        testing_data (pandas.DataFrame): The data to use for testing.
+        testing_data (pd.DataFrame): The data to use for testing.
         epochs (int): The number of epochs to train; if None, take from params.
     """
     # Some autodetermined factors
@@ -557,7 +558,7 @@ def training_loop(
 
 
 if __name__ == "__main__":
-    import argparse, pickle, pandas
+    import argparse, pickle
 
     torch.multiprocessing.freeze_support()
     # parse the cli arguments here
@@ -581,13 +582,13 @@ if __name__ == "__main__":
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
     parameters = pickle.load(open(args.parameter_pickle, "rb"))
-    trainingDataFromPickle = pandas.read_pickle(args.train_loader_pickle)
-    validationDataFromPickle = pandas.read_pickle(args.val_loader_pickle)
+    trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
+    validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
     testingData_str = args.testing_loader_pickle
     if testingData_str == "None":
         testingDataFromPickle = None
     else:
-        testingDataFromPickle = pandas.read_pickle(testingData_str)
+        testingDataFromPickle = pd.read_pickle(testingData_str)
 
     training_loop(
         training_data=trainingDataFromPickle,
