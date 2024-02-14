@@ -3,12 +3,13 @@
 Implementation of Fully Convolutional Network - FCN
 """
 
-import torch.nn.functional as F
 import torch
+import torch.nn.functional as F
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
 from GANDLF.models.seg_modules.EncodingModule import EncodingModule
 from GANDLF.models.seg_modules.FCNUpsamplingModule import FCNUpsamplingModule
 from GANDLF.models.seg_modules.InitialConv import InitialConv
+
 from .modelBase import ModelBase
 
 
@@ -157,7 +158,7 @@ class fcn(ModelBase):
         x = torch.cat([u5, u4, u3, u2, u1], dim=1)
         x = self.conv_0(x)
 
-        if not self.final_convolution_layer is None:
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 x = self.final_convolution_layer(x, dim=1)
             else:
