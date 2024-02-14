@@ -23,10 +23,9 @@ def classification_accuracy(
     Returns:
         torch.Tensor: The classification accuracy.
     """
+    predicted_classes = prediction
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(prediction, 1)
-    else:
-        predicted_classes = prediction
 
     acc = torch.sum(predicted_classes == target.squeeze()) / len(target)
     return acc
@@ -46,10 +45,9 @@ def balanced_acc_score(
     Returns:
         torch.Tensor: The balanced accuracy.
     """
+    predicted_classes = prediction
     if params["problem_type"] == "classification":
         predicted_classes = torch.argmax(prediction, 1)
-    else:
-        predicted_classes = prediction
 
     return torch.from_numpy(
         np.array(balanced_accuracy_score(predicted_classes.cpu(), target.cpu()))
@@ -115,9 +113,9 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
             "cosinesimilarity": tm.CosineSimilarity(reduction=reduction_type_key),
         }
         for metric_name, calculator in calculators.items():
-            output_metrics[
-                f"{metric_name}_{reduction_type}"
-            ] = get_output_from_calculator(prediction, target, calculator)
+            output_metrics[f"{metric_name}_{reduction_type}"] = (
+                get_output_from_calculator(prediction, target, calculator)
+            )
     # metrics that do not have any "reduction" parameter
     calculators = {
         "mse": tm.MeanSquaredError(),
