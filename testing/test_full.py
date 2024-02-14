@@ -15,16 +15,14 @@ import SimpleITK as sitk
 import torch
 import yaml
 from GANDLF.anonymize import run_anonymizer
-from GANDLF.cli import (
-    config_generator,
-    main_run,
-    patch_extraction,
-    post_training_model_optimization,
-    preprocess_and_save,
-    recover_config,
-)
+from GANDLF.cli.config_generator import config_generator
 from GANDLF.cli.deploy import run_deployment
 from GANDLF.cli.generate_metrics import generate_metrics_dict
+from GANDLF.cli.main_run import main_run
+from GANDLF.cli.patch_extraction import patch_extraction
+from GANDLF.cli.post_training_model_optimization import post_training_model_optimization
+from GANDLF.cli.preprocess_and_save import preprocess_and_save
+from GANDLF.cli.recover_config import recover_config
 from GANDLF.config_manager import ConfigManager
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
