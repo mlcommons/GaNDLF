@@ -131,7 +131,7 @@ def get_transforms_for_preprocessing(
     preprocessing_params_dict = parameters["data_preprocessing"]
     # first, we want to do thresholding, followed by clipping, if it is present - required for inference as well
     normalize_to_apply = None
-    if not (preprocessing_params_dict is None):
+    if preprocessing_params_dict is not None:
         # go through preprocessing in the order they are specified
         for preprocess in preprocessing_params_dict:
             preprocess_lower = preprocess.lower()
