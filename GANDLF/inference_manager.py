@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
+
 import pandas as pd
 import torch
 import torch.nn.functional as F
-
 from GANDLF.compute import inference_loop
 from GANDLF.utils import get_unique_timestamp
 
@@ -66,7 +66,7 @@ def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
         is_classification = parameters["problem_type"] == "classification"
 
         # initialize model type for processing: if not defined, default to torch
-        if not ("type" in parameters["model"]):
+        if "type" not in parameters["model"]:
             parameters["model"]["type"] = "torch"
 
         for fold_dir in fold_dirs:
