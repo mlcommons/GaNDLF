@@ -1,9 +1,10 @@
 import os
+from typing import Tuple
 
 import pandas as pd
 
 
-def handle_collisions(df: pd.DataFrame, headers: dict, output_path: str) -> tuple:
+def handle_collisions(df: pd.DataFrame, headers: dict, output_path: str) -> Tuple[bool, pd.DataFrame]:
     """
     This function checks for collisions in the subject IDs and updates the subject IDs in the dataframe to avoid collisions.
 
@@ -20,7 +21,7 @@ def handle_collisions(df: pd.DataFrame, headers: dict, output_path: str) -> tupl
         output_path (str): The path to the output directory where the updated dataframe and the collision.csv file will be written.
 
     Returns:
-        tuple: A tuple containing a boolean indicating whether any collisions were found, and the updated dataframe.
+        Tuple[bool, pd.DataFrame]: A tuple containing a boolean indicating whether any collisions were found, and the updated dataframe.
     """
 
     # Find the subjectID header

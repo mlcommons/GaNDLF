@@ -1,5 +1,5 @@
 import os, sys
-from typing import Union
+from typing import Tuple, Union
 from pandas.util import hash_pandas_object
 import numpy as np
 import SimpleITK as sitk
@@ -241,7 +241,7 @@ def get_model_dict(model: torch.nn.Module, device_id: Union[str, list]) -> dict:
 
 def get_class_imbalance_weights_classification(
     training_df: pd.DataFrame, params: dict
-) -> tuple:
+) -> Tuple[dict, dict, dict]:
     """
     This function calculates the penalty used for loss functions in multi-class problems.
     It looks at the column "valuesToPredict" and identifies unique classes, fetches the class distribution
@@ -253,7 +253,7 @@ def get_class_imbalance_weights_classification(
         parameters (dict) : The parameters passed by the user yaml.
 
     Returns:
-        tuple: The penalty weights for different classes under consideration for classification.
+        Tuple[dict, dict, dict]: The penalty weights, sampling weights, and class weights for different classes under consideration.
     """
     predictions_array = (
         training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
@@ -295,7 +295,7 @@ def get_class_imbalance_weights_classification(
 
 def get_class_imbalance_weights_segmentation(
     training_data_loader: DataLoader, parameters: dict
-) -> tuple:
+) -> Tuple[dict, dict, dict]:
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
 
@@ -304,7 +304,7 @@ def get_class_imbalance_weights_segmentation(
         parameters (dict): The parameters passed by the user yaml.
 
     Returns:
-        tuple: The penalty weights for different classes under consideration.
+        Tuple[dict, dict, dict]: The penalty weights, sampling weights, and class weights for different classes under consideration.
     """
     abs_dict = {}  # absolute counts for each class
     weights_dict = {}  # average for "weighted averaging"
@@ -361,7 +361,9 @@ def get_class_imbalance_weights_segmentation(
     return penalty_dict, penalty_dict, weights_dict
 
 
-def get_class_imbalance_weights(training_df: pd.DataFrame, params: dict) -> tuple:
+def get_class_imbalance_weights(
+    training_df: pd.DataFrame, params: dict
+) -> Tuple[dict, dict, dict]:
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
 
@@ -370,7 +372,7 @@ def get_class_imbalance_weights(training_df: pd.DataFrame, params: dict) -> tupl
         params (dict): The parameters passed by the user yaml.
 
     Returns:
-        tuple: The penalty weights for different classes under consideration.
+        Tuple[dict, dict, dict]: The penalty weights, sampling weights, and class weights for different classes under consideration.
     """
     penalty_weights, sampling_weights, class_weights = None, None, None
     if params["weighted_loss"] or params["patch_sampler"]["biased_sampling"]:
@@ -494,7 +496,9 @@ def print_model_summary(
         print("Failed to generate model summary with error: ", e)
 
 
-def get_ground_truths_and_predictions_tensor(params: dict, loader_type: str) -> tuple:
+def get_ground_truths_and_predictions_tensor(
+    params: dict, loader_type: str
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     This function is used to get the ground truths and predictions for a given loader type.
 
@@ -503,7 +507,7 @@ def get_ground_truths_and_predictions_tensor(params: dict, loader_type: str) -> 
         loader_type (str): The loader type for which the ground truths and predictions are to be returned.
 
     Returns:
-        torch.Tensor, torch.Tensor: The ground truths and base predictions for the given loader type.
+        Tuple[torch.Tensor, torch.Tensor]: The ground truths and predictions for the given loader type.
     """
     ground_truth_array = torch.from_numpy(
         params[loader_type][
