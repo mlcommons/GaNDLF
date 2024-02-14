@@ -1,6 +1,7 @@
-import os, sys, pickle
+import os
+import sys
+import pickle
 from pathlib import Path
-import numpy as np
 import SimpleITK as sitk
 
 from GANDLF.utils import (
