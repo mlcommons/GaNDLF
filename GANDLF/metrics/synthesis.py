@@ -1,15 +1,15 @@
-import SimpleITK as sitk
-import PIL.Image
 import numpy as np
+import PIL.Image
+import SimpleITK as sitk
 import torch
+from GANDLF.utils import get_image_from_tensor
 from torchmetrics import (
-    StructuralSimilarityIndexMeasure,
+    MeanAbsoluteError,
     MeanSquaredError,
     MeanSquaredLogError,
-    MeanAbsoluteError,
     PeakSignalNoiseRatio,
+    StructuralSimilarityIndexMeasure,
 )
-from GANDLF.utils import get_image_from_tensor
 
 
 def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
@@ -61,16 +61,16 @@ def peak_signal_noise_ratio(
         epsilon (float, optional): If not None, this epsilon is added to the denominator of the fraction to avoid infinity as output. Defaults to None.
     """
 
-    if epsilon == None:
+    if epsilon is None:
         psnr = (
             PeakSignalNoiseRatio()
-            if data_range == None
+            if data_range is None
             else PeakSignalNoiseRatio(data_range=data_range[1] - data_range[0])
         )
         return psnr(preds=prediction, target=target)
     else:  # implementation of PSNR that does not give 'inf'/'nan' when 'mse==0'
         mse = mean_squared_error(target, prediction)
-        if data_range == None:  # compute data_range like torchmetrics if not given
+        if data_range is None:  # compute data_range like torchmetrics if not given
             min_v = (
                 0 if torch.min(target) > 0 else torch.min(target)
             )  # look at this line
