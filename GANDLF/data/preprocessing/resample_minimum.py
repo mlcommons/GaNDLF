@@ -10,7 +10,7 @@ class Resample_Minimum(Resample):
     This performs resampling of an image to the minimum spacing specified by a single number. Otherwise, it will perform standard resampling.
 
     Args:
-        Resample (_type_): _description_
+        Resample (SpatialTransform): The parent class for resampling.
     """
 
     def __init__(self, target: float = 1, **kwargs):
