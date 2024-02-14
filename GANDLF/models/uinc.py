@@ -32,7 +32,7 @@ class uinc(ModelBase):
     ):
         super(uinc, self).__init__(parameters)
 
-        assert checkPatchDivisibility(parameters["patch_size"]) == True, (
+        assert checkPatchDivisibility(parameters["patch_size"]) is True, (
             "The patch size is not divisible by 16, which is required for "
             + parameters["model"]["architecture"]
         )
