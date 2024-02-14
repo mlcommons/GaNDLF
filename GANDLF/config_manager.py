@@ -1,11 +1,14 @@
-import sys, yaml, ast, pkg_resources
-import numpy as np
+import ast
+import sys
 from copy import deepcopy
 
-from .utils import version_check
+import numpy as np
+import pkg_resources
+import yaml
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
-
 from GANDLF.metrics import surface_distance_ids
+
+from .utils import version_check
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -169,9 +172,9 @@ def _parseConfig(config_file_path, version_check_flag=True):
             if len(params["loss_function"]) > 0:  # only proceed if something is defined
                 for key in params["loss_function"]:  # iterate through all keys
                     if key == "mse":
-                        if (params["loss_function"][key] is None) or not (
-                            "reduction" in params["loss_function"][key]
-                        ):
+                        if (
+                            params["loss_function"][key] is None
+                        ) or "reduction" not in params["loss_function"][key]:
                             params["loss_function"][key] = {}
                             params["loss_function"][key]["reduction"] = "mean"
                     else:
@@ -263,7 +266,7 @@ def _parseConfig(config_file_path, version_check_flag=True):
         "data_augmentation"
     ].get("default_probability", 0.5)
 
-    if not (params["data_augmentation"] is None):
+    if params["data_augmentation"] is not None:
         if len(params["data_augmentation"]) > 0:  # only when augmentations are defined
             # special case for random swapping and elastic transformations - which takes a patch size for computation
             for key in ["swap", "elastic"]:
@@ -390,7 +393,7 @@ def _parseConfig(config_file_path, version_check_flag=True):
 
             # special case for anisotropic
             if "anisotropic" in params["data_augmentation"]:
-                if not ("downsampling" in params["data_augmentation"]["anisotropic"]):
+                if "downsampling" not in params["data_augmentation"]["anisotropic"]:
                     default_downsampling = 1.5
                 else:
                     default_downsampling = params["data_augmentation"]["anisotropic"][
@@ -428,7 +431,7 @@ def _parseConfig(config_file_path, version_check_flag=True):
 
     # this is NOT a required parameter - a user should be able to train with NO built-in pre-processing
     params = initialize_key(params, "data_preprocessing", {})
-    if not (params["data_preprocessing"] is None):
+    if params["data_preprocessing"] is not None:
         # perform this only when pre-processing is defined
         if len(params["data_preprocessing"]) > 0:
             thresholdOrClip = False
@@ -482,11 +485,11 @@ def _parseConfig(config_file_path, version_check_flag=True):
 
                         # if one of the required parameters is not present, initialize with lowest/highest possible values
                         # this ensures the absence of a field doesn't affect processing
-                        if not "min" in params["data_preprocessing"][key]:
+                        if "min" not in params["data_preprocessing"][key]:
                             params["data_preprocessing"][key][
                                 "min"
                             ] = sys.float_info.min
-                        if not "max" in params["data_preprocessing"][key]:
+                        if "max" not in params["data_preprocessing"][key]:
                             params["data_preprocessing"][key][
                                 "max"
                             ] = sys.float_info.max
@@ -548,10 +551,10 @@ def _parseConfig(config_file_path, version_check_flag=True):
 
         if "norm_type" in params["model"]:
             if (
-                params["model"]["norm_type"] == None
+                params["model"]["norm_type"] is None
                 or params["model"]["norm_type"].lower() == "none"
             ):
-                if not ("vgg" in params["model"]["architecture"]):
+                if "vgg" not in params["model"]["architecture"]:
                     raise ValueError(
                         "Normalization type cannot be 'None' for non-VGG architectures"
                     )
@@ -559,13 +562,13 @@ def _parseConfig(config_file_path, version_check_flag=True):
             print("WARNING: Initializing 'norm_type' as 'batch'", flush=True)
             params["model"]["norm_type"] = "batch"
 
-        if not ("base_filters" in params["model"]):
+        if "base_filters" not in params["model"]:
             base_filters = 32
             params["model"]["base_filters"] = base_filters
             print("Using default 'base_filters' in 'model': ", base_filters)
-        if not ("class_list" in params["model"]):
+        if "class_list" not in params["model"]:
             params["model"]["class_list"] = []  # ensure that this is initialized
-        if not ("ignore_label_validation" in params["model"]):
+        if "ignore_label_validation" not in params["model"]:
             params["model"]["ignore_label_validation"] = None
         if "batch_norm" in params["model"]:
             print(
@@ -581,15 +584,15 @@ def _parseConfig(config_file_path, version_check_flag=True):
                 break
 
         # initialize model type for processing: if not defined, default to torch
-        if not ("type" in params["model"]):
+        if "type" not in params["model"]:
             params["model"]["type"] = "torch"
 
         # initialize openvino model data type for processing: if not defined, default to FP32
-        if not ("data_type" in params["model"]):
+        if "data_type" not in params["model"]:
             params["model"]["data_type"] = "FP32"
 
         # set default save strategy for model
-        if not ("save_at_every_epoch" in params["model"]):
+        if "save_at_every_epoch" not in params["model"]:
             params["model"]["save_at_every_epoch"] = False
 
         if params["model"]["save_at_every_epoch"]:
@@ -682,7 +685,7 @@ def _parseConfig(config_file_path, version_check_flag=True):
         temp_dict["type"] = params["scheduler"]
         params["scheduler"] = temp_dict
 
-    if not ("step_size" in params["scheduler"]):
+    if "step_size" not in params["scheduler"]:
         params["scheduler"]["step_size"] = params["learning_rate"] / 5.0
         print(
             "WARNING: Setting default step_size to:", params["scheduler"]["step_size"]
@@ -701,13 +704,13 @@ def _parseConfig(config_file_path, version_check_flag=True):
         "patch_overlap": 0,
     }
     initialize_inference_mechanism = False
-    if not ("inference_mechanism" in params):
+    if "inference_mechanism" not in params:
         initialize_inference_mechanism = True
     elif not (isinstance(params["inference_mechanism"], dict)):
         initialize_inference_mechanism = True
     else:
         for key in inference_mechanism:
-            if not (key in params["inference_mechanism"]):
+            if key not in params["inference_mechanism"]:
                 params["inference_mechanism"][key] = inference_mechanism[key]
 
     if initialize_inference_mechanism:
