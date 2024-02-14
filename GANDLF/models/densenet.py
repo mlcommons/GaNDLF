@@ -14,7 +14,7 @@ class _DenseLayer(nn.Sequential):
         """
         Constructor for _DenseLayer class.
 
-        Parameters:
+        Args:
             num_input_features (int): Number of input channels to the layer.
             growth_rate (int): Number of output channels of each convolution operation in the layer.
             bn_size (int): Factor to scale the number of intermediate channels between the 1x1 and 3x3 convolutions.
@@ -61,7 +61,7 @@ class _DenseLayer(nn.Sequential):
         """
         Forward pass through the _DenseLayer.
 
-        Parameters:
+        Args:
             x (torch.Tensor): Input tensor.
 
         Returns:
@@ -94,7 +94,7 @@ class _DenseBlock(nn.Sequential):
         """
         Constructor for _DenseBlock class.
 
-        Parameters:
+        Args:
             num_layers (int): Number of dense layers to be added to the block.
             num_input_features (int): Number of input channels to the block.
             bn_size (int): Factor to scale the number of intermediate channels between the 1x1 and 3x3 convolutions in each dense layer.
