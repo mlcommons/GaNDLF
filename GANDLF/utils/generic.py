@@ -1,12 +1,15 @@
-import os, datetime, sys
-from copy import deepcopy
+import datetime
+import os
 import random
-import numpy as np
-import torch
-import SimpleITK as sitk
+import sys
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from copy import deepcopy
 from os import devnull
-from typing import Dict, Any, Union
+from typing import Any, Dict, Union
+
+import numpy as np
+import SimpleITK as sitk
+import torch
 
 
 @contextmanager
@@ -50,7 +53,7 @@ def checkPatchDivisibility(patch_size, number=16):
 
 
 def determine_classification_task_type(
-    params: Dict[str, Union[Dict[str, Any], Any]]
+    params: Dict[str, Union[Dict[str, Any], Any]],
 ) -> str:
     """Determine the task (binary or multiclass) from the model config.
     Args:
