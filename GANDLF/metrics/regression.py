@@ -84,9 +84,7 @@ def per_label_accuracy(
         return balanced_acc_score(prediction, target, params)
 
 
-def overall_stats(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
+def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> dict:
     """
     Generates a dictionary of metrics calculated on the overall predictions and ground truths.
 
@@ -98,7 +96,7 @@ def overall_stats(
     Returns:
         dict: A dictionary of metrics.
     """
-    predictions = predictions.type(torch.float)
+    prediction = prediction.type(torch.float)
     target = target.type(torch.float) * params["scaling_factor"]
     assert (
         params["problem_type"] == "regression"
@@ -117,9 +115,9 @@ def overall_stats(
             "cosinesimilarity": tm.CosineSimilarity(reduction=reduction_type_key),
         }
         for metric_name, calculator in calculators.items():
-            output_metrics[f"{metric_name}_{reduction_type}"] = (
-                get_output_from_calculator(predictions, target, calculator)
-            )
+            output_metrics[
+                f"{metric_name}_{reduction_type}"
+            ] = get_output_from_calculator(prediction, target, calculator)
     # metrics that do not have any "reduction" parameter
     calculators = {
         "mse": tm.MeanSquaredError(),
@@ -129,7 +127,7 @@ def overall_stats(
     }
     for metric_name, calculator in calculators.items():
         output_metrics[metric_name] = get_output_from_calculator(
-            predictions, target, calculator
+            prediction, target, calculator
         )
 
     return output_metrics

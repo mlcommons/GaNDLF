@@ -82,7 +82,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
                     prediction, target, calculator
                 )
 
-    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCRAD IT ####
+    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCARD IT ####
     # what is AUC metric telling at all? Computing it for prediction and ground truth
     # is not making sense
     # metrics that do not have any "average" parameter
