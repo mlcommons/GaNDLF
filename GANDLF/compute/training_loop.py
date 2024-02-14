@@ -1,33 +1,39 @@
-import os, time, psutil
-import torch
-from tqdm import tqdm
-import numpy as np
-import torchio
-from medcam import medcam
+import argparse
+import os
+import pickle
+import time
 
+import numpy as np
+import pandas
+import psutil
+import torch
+import torchio
 from GANDLF.data import get_testing_loader
-from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
+from GANDLF.grad_clipping.grad_scaler import GradScaler, model_parameters_exclude_head
+from GANDLF.logger import Logger
+from GANDLF.metrics import overall_stats
 from GANDLF.utils import (
-    get_date_time,
     best_model_path_end,
-    latest_model_path_end,
-    initial_model_path_end,
-    save_model,
-    optimize_and_save_model,
-    load_model,
-    version_check,
-    write_training_patches,
-    print_model_summary,
+    get_date_time,
     get_ground_truths_and_predictions_tensor,
     get_model_dict,
+    initial_model_path_end,
+    latest_model_path_end,
+    load_model,
+    optimize_and_save_model,
     print_and_format_metrics,
+    print_model_summary,
+    save_model,
+    version_check,
+    write_training_patches,
 )
-from GANDLF.metrics import overall_stats
-from GANDLF.logger import Logger
-from .step import step
+from medcam import medcam
+from tqdm import tqdm
+
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
+from .step import step
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -124,10 +130,9 @@ def train_network(model, train_dataloader, optimizer, params):
         # store predictions for classification
         if calculate_overall_metrics:
             predictions_array[
-                batch_idx
-                * params["batch_size"] : (batch_idx + 1)
+                batch_idx * params["batch_size"] : (batch_idx + 1)
                 * params["batch_size"]
-            ] = (torch.argmax(output[0], 0).cpu().item())
+            ] = torch.argmax(output[0], 0).cpu().item()
 
         nan_loss = torch.isnan(loss)
         second_order = (
@@ -328,7 +333,7 @@ def training_loop(
     # Start training time here
     start_time = time.time()
 
-    if not (os.environ.get("HOSTNAME") is None):
+    if os.environ.get("HOSTNAME") is not None:
         print("Hostname :", os.environ.get("HOSTNAME"))
 
     # datetime object containing current date and time
@@ -560,8 +565,6 @@ def training_loop(
 
 
 if __name__ == "__main__":
-    import argparse, pickle, pandas
-
     torch.multiprocessing.freeze_support()
     # parse the cli arguments here
     parser = argparse.ArgumentParser(description="Training Loop of GANDLF")
