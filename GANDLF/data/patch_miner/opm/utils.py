@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 from pathlib import Path
 import numpy as np
 import skimage.io
