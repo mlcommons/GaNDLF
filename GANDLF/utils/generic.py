@@ -17,12 +17,12 @@ def suppress_stdout_stderr():
             yield (err, out)
 
 
-def checkPatchDivisibility(patch_size, number=16):
+def checkPatchDivisibility(patch_size: np.ndarray, number: int = 16) -> bool:
     """
     This function checks the divisibility of a numpy array or integer for architectural integrity
 
     Args:
-        patch_size (numpy.array): The patch size for checking.
+        patch_size (np.ndarray): The patch size for checking.
         number (int, optional): The number to check divisibility for. Defaults to 16.
 
     Returns:
@@ -49,21 +49,7 @@ def checkPatchDivisibility(patch_size, number=16):
     return True
 
 
-def determine_classification_task_type(
-    params: Dict[str, Union[Dict[str, Any], Any]]
-) -> str:
-    """Determine the task (binary or multiclass) from the model config.
-    Args:
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        str: A string that denotes the classification task type.
-    """
-    task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
-    return task
-
-
-def get_date_time():
+def get_date_time() -> str:
     """
     Get a well-parsed date string
 
@@ -74,7 +60,7 @@ def get_date_time():
     return now
 
 
-def get_unique_timestamp():
+def get_unique_timestamp() -> str:
     """
     Get a well-parsed timestamp string to be used for unique filenames
 
@@ -85,7 +71,7 @@ def get_unique_timestamp():
     return now
 
 
-def get_filename_extension_sanitized(filename):
+def get_filename_extension_sanitized(filename: str) -> str:
     """
     This function returns the extension of the filename with leading and trailing characters removed.
     Args:
@@ -100,7 +86,7 @@ def get_filename_extension_sanitized(filename):
     return ext
 
 
-def parse_version(version_string):
+def parse_version(version_string: str) -> int:
     """
     Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
 
@@ -117,7 +103,7 @@ def parse_version(version_string):
     return int("".join(version_string_split))
 
 
-def version_check(version_from_config, version_to_check):
+def version_check(version_from_config: str, version_to_check: str) -> bool:
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
@@ -141,12 +127,12 @@ def version_check(version_from_config, version_to_check):
     return True
 
 
-def checkPatchDimensions(patch_size, numlay):
+def checkPatchDimensions(patch_size: np.ndarray, numlay: int) -> int:
     """
     This function checks the divisibility of a numpy array or integer for architectural integrity
 
     Args:
-        patch_size (numpy.array): The patch size for checking.
+        patch_size (np.ndarray): The patch size for checking.
         number (int, optional): The number to check divisibility for. Defaults to 16.
 
     Returns:
@@ -173,7 +159,16 @@ def checkPatchDimensions(patch_size, numlay):
         return int(np.min(layers))
 
 
-def getBase2(num):
+def getBase2(num: int) -> int:
+    """
+    Compute the base 2 logarithm of a number.
+
+    Args:
+        num (int): the number
+
+    Returns:
+        int: the base 2 logarithm of the number
+    """
     # helper for checkPatchDimensions (returns the largest multiple of 2 that num is evenly divisible by)
     base = 0
     while num % 2 == 0:
@@ -182,13 +177,15 @@ def getBase2(num):
     return base
 
 
-def get_array_from_image_or_tensor(input_tensor_or_image):
+def get_array_from_image_or_tensor(
+    input_tensor_or_image: Union[torch.Tensor, sitk.Image]
+) -> np.ndarray:
     """
     This function returns the numpy array from a tensor or image.
     Args:
         input_tensor_or_image (torch.Tensor or sitk.Image): The input tensor or image.
     Returns:
-        numpy.array: The numpy array from the tensor or image.
+        np.ndarray: The numpy array from the tensor or image.
     """
     if isinstance(input_tensor_or_image, torch.Tensor):
         return input_tensor_or_image.detach().cpu().numpy()
@@ -200,11 +197,12 @@ def get_array_from_image_or_tensor(input_tensor_or_image):
         raise ValueError("Input must be a torch.Tensor or sitk.Image or np.ndarray")
 
 
-def set_determinism(seed=42):
+def set_determinism(seed: int = 42) -> None:
     """
-    This function controls the randomness of the program. It sets the seed both for torch and numpy.
+    This function sets the determinism for the random number generators.
+
     Args:
-        seed (int, optional): Seed to set. Defaults to 42.
+        seed (int, optional): The seed for the random number generators. Defaults to 42.
     """
     random.seed(seed)
     np.random.seed(seed)
@@ -220,12 +218,12 @@ def set_determinism(seed=42):
 
 
 def print_and_format_metrics(
-    cohort_level_metrics,
-    sample_level_metrics,
-    metrics_dict_from_parameters,
-    mode,
-    length_of_dataloader,
-):
+    cohort_level_metrics: dict,
+    sample_level_metrics: dict,
+    metrics_dict_from_parameters: dict,
+    mode: str,
+    length_of_dataloader: int,
+) -> dict:
     """
     This function prints and formats the metrics.
 
@@ -240,14 +238,15 @@ def print_and_format_metrics(
         dict: The metrics dictionary populated with the metrics.
     """
 
-    def __update_metric_from_list_to_single_string(input_metrics_dict) -> dict:
+    def __update_metric_from_list_to_single_string(input_metrics_dict: dict) -> dict:
         """
-        Helper function updates the metrics dictionary to have a single string for each metric.
+        Helper function to update the metric from list to single string.
 
         Args:
             input_metrics_dict (dict): The input metrics dictionary.
+
         Returns:
-            dict: The updated metrics dictionary.
+            dict: The output metrics dictionary.
         """
         print(input_metrics_dict)
         output_metrics_dict = deepcopy(input_metrics_dict)
@@ -283,12 +282,10 @@ def print_and_format_metrics(
     return output_metrics_dict
 
 
-def define_average_type_key(
-    params: Dict[str, Union[Dict[str, Any], Any]], metric_name: str
-) -> str:
-    """Determine if the the 'average' filed is defined in the metric config.
-    If not, fallback to the default 'macro'
-    values.
+def define_average_type_key(params: dict, metric_name: str) -> str:
+    """
+    Determine the average type key from the metric config.
+
     Args:
         params (dict): The parameter dictionary containing training and data information.
         metric_name (str): The name of the metric.
@@ -300,15 +297,30 @@ def define_average_type_key(
     return average_type_key
 
 
-def define_multidim_average_type_key(params, metric_name) -> str:
-    """Determine if the the 'multidim_average' filed is defined in the metric config.
-    If not, fallback to the default 'global'.
+def define_multidim_average_type_key(params: dict, metric_name: str) -> str:
+    """
+    Determine the multidimensional average type key from the metric config.
+
     Args:
         params (dict): The parameter dictionary containing training and data information.
         metric_name (str): The name of the metric.
 
     Returns:
-        str: The average type key.
+        str: The multidimensional average type key.
     """
     average_type_key = params["metrics"][metric_name].get("multidim_average", "global")
     return average_type_key
+
+
+def determine_classification_task_type(params: dict) -> str:
+    """
+    This function determines the classification task type from the parameters.
+
+    Args:
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        str: The classification task type (binary or multiclass).
+    """
+    task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
+    return task
