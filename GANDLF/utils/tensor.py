@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 from typing import Union
 from pandas.util import hash_pandas_object
 import numpy as np
@@ -198,7 +199,7 @@ def send_model_to_device(model, amp, device, optimizer):
             )
         )
 
-        if not (optimizer is None):
+        if optimizer is not None:
             # ensuring optimizer is in correct device - https://github.com/pytorch/pytorch/issues/8741
             optimizer.load_state_dict(optimizer.state_dict())
 
