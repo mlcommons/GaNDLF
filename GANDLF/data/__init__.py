@@ -75,7 +75,7 @@ def get_testing_loader(params):
             train=False,
             loader_type="testing",
         )
-        if not ("channel_keys" in params):
+        if "channel_keys" not in params:
             params = populate_channel_keys_in_params(queue_from_dataframe, params)
         return DataLoader(
             queue_from_dataframe,
