@@ -3,8 +3,10 @@ import os
 import pandas as pd
 
 
-def handle_collisions(df, headers, output_path):
+def handle_collisions(df: pd.DataFrame, headers: dict, output_path: str) -> tuple:
     """
+    This function checks for collisions in the subject IDs and updates the subject IDs in the dataframe to avoid collisions.
+
     This function takes a dataframe as input and checks if there are any pairs of subject IDs
     that are similar to each other. If it finds any such pairs, it renames the subject IDs by
     adding a suffix of '_v1', '_v2', or '_v3' to differentiate them. The function then creates
@@ -13,9 +15,12 @@ def handle_collisions(df, headers, output_path):
     of any subject ID collisions that were detected during the process.
 
     Args:
-        df (pandas.DataFrame): The input dataframe.
-        headers (dict): The parsed headers.
-        output_path (str): The output directory.
+        df (pd.DataFrame): The dataframe containing the subject IDs to be checked for collisions.
+        headers (dict): The headers dictionary containing the subjectIDHeader key.
+        output_path (str): The path to the output directory where the updated dataframe and the collision.csv file will be written.
+
+    Returns:
+        tuple: A tuple containing a boolean indicating whether any collisions were found, and the updated dataframe.
     """
 
     # Find the subjectID header
