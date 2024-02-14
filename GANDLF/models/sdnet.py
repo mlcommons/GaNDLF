@@ -1,15 +1,17 @@
-import typing, sys
+import sys
+import typing
+from copy import deepcopy
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from GANDLF.models.seg_modules.add_conv_block import add_conv_block
 from GANDLF.models.seg_modules.add_downsample_conv_block import (
     add_downsample_conv_block,
 )
 from GANDLF.models.unet import unet
+
 from .modelBase import ModelBase
-from copy import deepcopy
 
 
 class Decoder(ModelBase):
