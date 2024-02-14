@@ -8,7 +8,7 @@ import torchio
 import SimpleITK as sitk
 import numpy as np
 
-from GANDLF.parseConfig import parseConfig
+from GANDLF.config_manager import ConfigManager
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
 from GANDLF.metrics import (
     overall_stats,
@@ -58,7 +58,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         assert column in headers, f"The input csv should have a column named {column}"
 
     overall_stats_dict = {}
-    parameters = parseConfig(config)
+    parameters = ConfigManager(config)
     problem_type = parameters.get("problem_type", None)
     problem_type = (
         find_problem_type_from_parameters(parameters)

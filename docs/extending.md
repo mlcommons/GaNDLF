@@ -1,6 +1,3 @@
-For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
-
-
 ## Environment
 
 Before starting to work on the code-level on GaNDLF, please follow the [instructions to install GaNDLF from sources](./setup.md#install-from-sources). Once that's done, please verify the installation using the following command:
@@ -13,10 +10,15 @@ Before starting to work on the code-level on GaNDLF, please follow the [instruct
 ```
 
 
+## Submodule flowcharts
+
+- The following flowcharts are intended to provide a high-level overview of the different submodules in GaNDLF. 
+- Navigate to the `README.md` file in each submodule folder for details.
+
 ## Overall Architecture
 
 - Command-line parsing: [gandlf_run](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_run)
-- Parameters from [training configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) get passed as a `dict` via [parameter parser](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/parseConfig.py)
+- Parameters from [training configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml) get passed as a `dict` via the [config manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/config_manager.py)
 - [Training Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/training_manager.py): 
     - Handles k-fold training 
     - Main entry point from CLI
@@ -74,6 +76,11 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - Update [Inference Function](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/compute/inference_loop.py)
 - Update [Inference Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/inference_manager.py), if any inference API has changed
 - [Update Tests](#update-tests)
+
+
+## Update parameters
+
+For any new feature, please ensure the corresponding option in the [sample configuration](https://github.com/mlcommons/GaNDLF/blob/master/samples/sample_training.yaml) is added, so that others can review/use/extend it as needed.
 
 
 ## Update Tests
