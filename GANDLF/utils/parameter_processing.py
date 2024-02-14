@@ -1,8 +1,9 @@
+from torch.utils.data import DataLoader
 from GANDLF.utils.modelbase import get_modelbase_final_layer
 from GANDLF.metrics import surface_distance_ids
 
 
-def populate_header_in_parameters(parameters, headers):
+def populate_header_in_parameters(parameters: dict, headers: dict) -> dict:
     """
     This function populates the parameters with information from the header in a common manner
 
@@ -49,13 +50,13 @@ def populate_header_in_parameters(parameters, headers):
     return parameters
 
 
-def find_problem_type(parameters, model_final_layer):
+def find_problem_type(parameters: dict, model_final_layer: str) -> str:
     """
     This function determines the type of problem at hand - regression, classification or segmentation
 
     Args:
         parameters (dict): The parameters passed by the user yaml.
-        model_final_layer (model_final_layer): The final layer of the model. If None, the model is for regression.
+        model_final_layer (str): The final layer of the model. If None, the model is for regression.
 
     Returns:
         str: The problem type (regression/classification/segmentation).
@@ -84,7 +85,7 @@ def find_problem_type(parameters, model_final_layer):
         return "segmentation"
 
 
-def find_problem_type_from_parameters(parameters):
+def find_problem_type_from_parameters(parameters: dict) -> str:
     """
     This function determines the type of problem at hand - regression, classification or segmentation
 
@@ -124,12 +125,12 @@ def find_problem_type_from_parameters(parameters):
         return "regression"
 
 
-def populate_channel_keys_in_params(data_loader, parameters):
+def populate_channel_keys_in_params(data_loader: DataLoader, parameters: dict):
     """
     Function to read channel key information from specified data loader
 
     Args:
-        data_loader (torch.DataLoader): The data loader to query key information from.
+        data_loader (DataLoader): The data loader to query key information from.
         parameters (dict): The parameters passed by the user yaml.
 
     Returns:
