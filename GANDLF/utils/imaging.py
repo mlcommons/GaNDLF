@@ -72,7 +72,7 @@ def resize_image(
         interpolator (Enum, optional): The desired interpolator. Defaults to sitk.sitkLinear.
 
     Returns:
-        sitk.Image: _description_
+        sitk.Image: The resized image.
     """
     output_size_parsed = None
     inputSize = input_image.GetSize()
