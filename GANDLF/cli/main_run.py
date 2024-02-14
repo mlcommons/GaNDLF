@@ -13,8 +13,15 @@ from GANDLF.utils import (
 
 
 def main_run(
-    data_csv, config_file, model_dir, train_mode, device, resume, reset, output_dir=None
-):
+    data_csv: str,
+    config_file: str,
+    model_dir: str,
+    train_mode: bool,
+    device: str,
+    resume: bool,
+    reset: bool,
+    output_dir: str = None,
+) -> None:
     """
     Main function that runs the training and inference.
 
