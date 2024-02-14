@@ -195,18 +195,18 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 return input_tensor
 
         def __percentile_clip(
-            input_tensor,
-            reference_tensor=None,
-            p_min=0.5,
-            p_max=99.5,
-            strictlyPositive=True,
+            input_tensor: torch.Tensor,
+            reference_tensor: torch.Tensor=None,
+            p_min: float=0.5,
+            p_max: float=99.5,
+            strictlyPositive: bool=True,
         ):
-            """Normalizes a tensor based on percentiles. Clips values below and above the percentile.
+            """
+            Normalizes a tensor based on percentiles. Clips values below and above the percentile.
             Percentiles for normalization can come from another tensor.
 
             Args:
-                input_tensor (torch.Tensor): Tensor to be normalized based on the data from the reference_tensor.
-                    If reference_tensor is None, the percentiles from this tensor will be used.
+                input_tensor (torch.Tensor): Tensor to be normalized based on the data from the reference_tensor. If reference_tensor is None, the percentiles from this tensor will be used.
                 reference_tensor (torch.Tensor, optional): The tensor used for obtaining the percentiles.
                 p_min (float, optional): Lower end percentile. Defaults to 0.5.
                 p_max (float, optional): Upper end percentile. Defaults to 99.5.
