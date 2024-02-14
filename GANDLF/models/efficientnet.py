@@ -1,9 +1,10 @@
+import math
 import sys
+from collections import OrderedDict
+
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from collections import OrderedDict
-import math
-import numpy as np
 
 from .modelBase import ModelBase
 
@@ -517,7 +518,7 @@ class EfficientNet(ModelBase):
         out = self.classifier(out)
 
         # Apply the final convolution layer if not None
-        if not self.final_convolution_layer is None:
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 out = self.final_convolution_layer(out, dim=1)
             else:
