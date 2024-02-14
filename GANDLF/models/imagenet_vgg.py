@@ -3,9 +3,9 @@
 Modified from https://github.com/pytorch/vision.git
 """
 
-import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision
 
 from .modelBase import ModelBase
 
@@ -76,7 +76,7 @@ def apply_activation_function(activation_function, input_tensor):
         torch.Tensor: Output tensor after applying the activation function.
     """
     out = input_tensor
-    if not activation_function is None:
+    if activation_function is not None:
         if activation_function == F.softmax:
             out = activation_function(out, dim=1)
         else:
