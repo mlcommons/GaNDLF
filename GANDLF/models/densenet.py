@@ -1,10 +1,11 @@
 # adapted from https://github.com/kenshohara/3D-ResNets-PyTorch
 
 import sys
+from collections import OrderedDict
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from collections import OrderedDict
 
 from .modelBase import ModelBase
 
@@ -167,27 +168,28 @@ class DenseNet(ModelBase):
 
         super(DenseNet, self).__init__(parameters)
 
-        # defining some defaults
-        if not ("num_init_features" in parameters):
-            parameters["num_init_features"] = 64
-        if not ("growth_rate" in parameters):
-            parameters["growth_rate"] = 32
-        if not ("bn_size" in parameters):
-            parameters["bn_size"] = 4
-        if not ("drop_rate" in parameters):
-            parameters["drop_rate"] = 0
-        if not ("conv1_t_stride" in parameters):
-            parameters["conv1_t_stride"] = 1
-        if not ("conv1_t_size" in parameters):
-            parameters["conv1_t_size"] = 7
-        if not ("no_max_pool" in parameters):
-            parameters["no_max_pool"] = False
+        # defining default values for parameters
+        default_parameters = {
+            "num_init_features": 64,
+            "growth_rate": 32,
+            "bn_size": 4,
+            "drop_rate": 0,
+            "conv1_t_stride": 1,
+            "conv1_t_size": 7,
+            "no_max_pool": False,
+        }
+
+        # updating parameters with default values
+        parameters = {**default_parameters, **parameters}
+
+        # setting default normalization layer if not defined
         if self.Norm is None:
             sys.stderr.write(
                 "Warning: densenet is not defined without a normalization layer"
             )
             self.Norm = self.BatchNorm
 
+        # setting output size and convolution stride based on dimensions
         if self.n_dimensions == 2:
             self.output_size = (1, 1)
             self.conv_stride = (parameters["conv1_t_stride"], 2)
@@ -294,7 +296,7 @@ class DenseNet(ModelBase):
         out = self.classifier(out)
 
         # Apply the final convolutional operation, if specified
-        if not self.final_convolution_layer is None:
+        if self.final_convolution_layer is not None:
             if self.final_convolution_layer == F.softmax:
                 out = self.final_convolution_layer(out, dim=1)
             else:
