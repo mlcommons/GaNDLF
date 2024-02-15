@@ -2,7 +2,7 @@
 """
 Implementation of Adaptive gradient clipping
 """
-
+from typing import List
 import torch
 
 
@@ -29,7 +29,7 @@ def unitwise_norm(x: torch.Tensor, norm_type: float = 2.0) -> torch.Tensor:
 
 
 def adaptive_gradient_clip_(
-    parameters: list,
+    parameters: List[torch.Tensor],
     clip_factor: float = 0.01,
     eps: float = 1e-3,
     norm_type: float = 2.0,
@@ -38,7 +38,7 @@ def adaptive_gradient_clip_(
     Performs adaptive gradient clipping on the parameters of a PyTorch model.
 
     Args:
-        parameters (list of torch.Tensor): The parameters to be clipped.
+        parameters (List[torch.Tensor]): The parameters to be clipped.
         clip_factor (float): The factor by which to clip the gradients (default: 0.01).
         eps (float): A small value added to the norm to avoid division by zero (default: 1e-3).
         norm_type (float): The type of norm to compute (default: 2.0).
