@@ -1,5 +1,5 @@
 import yaml
-from typing import List, Union
+from typing import List, Optional, Union
 from pathlib import Path
 from copy import deepcopy
 
@@ -8,7 +8,7 @@ def generate_new_configs_from_key_and_value(
     base_config: dict,
     key: str,
     value: Union[str, list, int],
-    upper_level_key: Union[str, None] = None,
+    upper_level_key: Optional[str] = None,
 ) -> List[dict]:
     """
     Generate new configs based on a base config and a strategy.
@@ -17,7 +17,7 @@ def generate_new_configs_from_key_and_value(
         base_config (dict): The base configuration to generate new configs from.
         key (str): The key to change in the base config.
         value (Union[str, list, int]): The value to change the key to.
-        upper_level_key (str, optional): The upper level key to change in the base config; useful for dict. Defaults to None.
+        upper_level_key (Optional[str]): The upper level key in the base config; useful for dict. Defaults to None.
 
     Returns:
         List[dict]: A list of new configs.
