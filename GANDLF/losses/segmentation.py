@@ -1,4 +1,5 @@
 import sys
+from typing import List, Optional
 import torch
 
 
@@ -61,9 +62,9 @@ def generic_loss_calculator(
     target: torch.Tensor,
     num_class: int,
     loss_criteria,
-    weights: list = None,
-    ignore_class: int = None,
-    loss_type: int = 0,
+    weights: Optional[List[float]] = None,
+    ignore_class: Optional[int] = None,
+    loss_type: Optional[int] = 0,
 ) -> torch.Tensor:
     """
     This function computes the mean class dice score between two tensors
@@ -73,9 +74,9 @@ def generic_loss_calculator(
         target (torch.Tensor): Required target label to match the predicted with
         num_class (int): Number of classes (including the background class)
         loss_criteria (function): Loss function to use
-        weights (list, optional): Dice weights for each class (excluding the background class), defaults to None
-        ignore_class (int, optional): Class to ignore, defaults to None
-        loss_type (int, optional): Type of loss to compute, defaults to 0. The options are:
+        weights (Optional[List[float]], optional): Dice weights for each class (excluding the background class), defaults to None
+        ignore_class (Optional[int], optional): Class to ignore, defaults to None
+        loss_type (Optional[int], optional): Type of loss to compute, defaults to 0. The options are:
             0: no loss, normal dice calculation
             1: dice loss, (1-dice)
             2: log dice, -log(dice)
