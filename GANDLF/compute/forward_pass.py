@@ -47,7 +47,7 @@ def validate_network(
         NotImplementedError: If the model type is not supported.
 
     Returns:
-        List[float, dict]: The average validation loss and the average validation metrics.
+        Tuple[float, dict]: The average validation loss and the average validation metrics.
     """
     print("*" * 20)
     print("Starting " + mode + " : ")
