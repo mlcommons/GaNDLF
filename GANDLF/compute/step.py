@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 import torch
 import psutil
 from .loss_and_metric import get_loss_and_metrics
@@ -9,7 +9,7 @@ def step(
     image: torch.Tensor,
     label: torch.Tensor,
     params: dict,
-    train: bool = True,
+    train: Optional[bool] = True,
 ) -> Tuple[float, dict, torch.Tensor, torch.Tensor]:
     """
     This function performs a single step of training or validation.
@@ -19,7 +19,7 @@ def step(
         image (torch.Tensor): The input image stack according to requirements.
         label (torch.Tensor): The input label for the corresponding image tensor.
         params (dict): The parameters dictionary.
-        train (bool, optional): The flag to indicate if the step is for training or validation. Defaults to True.
+        train (Optional[bool], optional): Whether the step is for training or validation. Defaults to True.
 
     Returns:
         Tuple[float, dict, torch.Tensor, torch.Tensor]: The loss, metrics, output, and attention map.

@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -29,8 +29,8 @@ def validate_network(
     valid_dataloader: DataLoader,
     scheduler: object,
     params: dict,
-    epoch: int = 0,
-    mode: str = "validation",
+    epoch: Optional[int] = 0,
+    mode: Optional[str] = "validation",
 ) -> Tuple[float, dict]:
     """
     Function to validate a network for a single epoch.
