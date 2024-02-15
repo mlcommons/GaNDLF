@@ -1,5 +1,6 @@
 import sys
 import yaml
+from typing import Optional
 from pprint import pprint
 import pandas as pd
 from tqdm import tqdm
@@ -30,7 +31,9 @@ from GANDLF.metrics.segmentation import (
 )
 
 
-def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -> dict:
+def generate_metrics_dict(
+    input_csv: str, config: str, outputfile: Optional[str] = None
+) -> dict:
     """
     This function generates metrics from the input csv and the config.
 
@@ -196,10 +199,10 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
 
         def __percentile_clip(
             input_tensor: torch.Tensor,
-            reference_tensor: torch.Tensor=None,
-            p_min: float=0.5,
-            p_max: float=99.5,
-            strictlyPositive: bool=True,
+            reference_tensor: torch.Tensor = None,
+            p_min: Optional[float] = 0.5,
+            p_max: Optional[float] = 99.5,
+            strictlyPositive: Optional[bool] = True,
         ):
             """
             Normalizes a tensor based on percentiles. Clips values below and above the percentile.
@@ -276,9 +279,9 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                     strictlyPositive=True,
                 )
 
-            overall_stats_dict[current_subject_id][
-                "ssim"
-            ] = structural_similarity_index(gt_image_infill, output_infill, mask).item()
+            overall_stats_dict[current_subject_id]["ssim"] = (
+                structural_similarity_index(gt_image_infill, output_infill, mask).item()
+            )
 
             # ncc metrics
             compute_ncc = parameters.get("compute_ncc", True)
@@ -319,30 +322,30 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             ).item()
 
             # same as above but with epsilon for robustness
-            overall_stats_dict[current_subject_id][
-                "psnr_eps"
-            ] = peak_signal_noise_ratio(
-                gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
-            ).item()
+            overall_stats_dict[current_subject_id]["psnr_eps"] = (
+                peak_signal_noise_ratio(
+                    gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
+                ).item()
+            )
 
             # only use fix data range to [0;1] if the data was normalized before
             if normalize:
                 # torchmetrics PSNR but with fixed data range of 0 to 1
-                overall_stats_dict[current_subject_id][
-                    "psnr_01"
-                ] = peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, data_range=(0, 1)
-                ).item()
+                overall_stats_dict[current_subject_id]["psnr_01"] = (
+                    peak_signal_noise_ratio(
+                        gt_image_infill, output_infill, data_range=(0, 1)
+                    ).item()
+                )
 
                 # same as above but with epsilon for robustness
-                overall_stats_dict[current_subject_id][
-                    "psnr_01_eps"
-                ] = peak_signal_noise_ratio(
-                    gt_image_infill,
-                    output_infill,
-                    data_range=(0, 1),
-                    epsilon=sys.float_info.epsilon,
-                ).item()
+                overall_stats_dict[current_subject_id]["psnr_01_eps"] = (
+                    peak_signal_noise_ratio(
+                        gt_image_infill,
+                        output_infill,
+                        data_range=(0, 1),
+                        epsilon=sys.float_info.epsilon,
+                    ).item()
+                )
 
     pprint(overall_stats_dict)
     if outputfile is not None:

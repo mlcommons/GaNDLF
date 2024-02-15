@@ -3,7 +3,7 @@ import pickle
 import os
 
 
-def recover_config(modelDir:str, outputFile:str) -> bool:
+def recover_config(modelDir: str, outputFile: str) -> bool:
     """
     This function recovers the configuration file from a model directory.
 

@@ -1,5 +1,5 @@
 import os, warnings
-from typing import Union
+from typing import Optional, Union
 from functools import partial
 from pathlib import Path
 
@@ -37,7 +37,7 @@ def parse_gandlf_csv(fpath):
 
 
 def patch_extraction(
-    input_path: str, output_path: str, config: Union[str, dict, None] = None
+    input_path: str, output_path: str, config: Optional[Union[str, dict]] = None
 ) -> None:
     """
     Extract patches from whole slide images.
@@ -45,7 +45,7 @@ def patch_extraction(
     Args:
         input_path (str): The path to the input CSV file.
         output_path (str): The path to the output directory.
-        config (Union[str, dict, None], optional): The path to the configuration file or the configuration dictionary. Defaults to None.
+        config (Optional[Union[str, dict]], optional): The path to the configuration file. Defaults to None.
     """
     Image.MAX_IMAGE_PIXELS = None
     warnings.simplefilter("ignore")
