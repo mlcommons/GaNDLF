@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 import torch.nn.functional as F
 from torch.nn import MSELoss, CrossEntropyLoss, L1Loss
@@ -80,7 +81,7 @@ def CCE_Generic(
     prediction: torch.Tensor,
     target: torch.Tensor,
     params: dict,
-    CCE_Type: torch.nn = CrossEntropyLoss(),
+    CCE_Type: Optional[torch.nn.modules.loss._Loss] = CrossEntropyLoss,
 ) -> torch.Tensor:
     """
     Generic function to calculate CCE loss
@@ -89,7 +90,7 @@ def CCE_Generic(
         prediction (torch.tensor): The predicted output value for each pixel. dimension: [batch, class, x, y, z].
         target (torch.tensor): The ground truth target for each pixel. dimension: [batch, class, x, y, z] factorial_class_list.
         params (dict): The parameter dictionary.
-        CCE_Type (torch.nn): The CE loss function type.
+        CCE_Type (Optional[torch.nn.modules.loss._Loss]): The CE loss function type.
 
     Returns:
         torch.tensor: The final loss value after taking multiple classes into consideration
@@ -114,8 +115,8 @@ def CCE_Generic(
 def L1(
     prediction: torch.Tensor,
     target: torch.Tensor,
-    reduction: str = "mean",
-    scaling_factor: float = 1,
+    reduction: Optional[str] = "mean",
+    scaling_factor: Optional[float] = 1,
 ) -> torch.Tensor:
     """
     Calculate the mean absolute error between the output variable from the network and the target.
@@ -190,8 +191,8 @@ def L1_loss(
 def MSE(
     prediction: torch.Tensor,
     target: torch.Tensor,
-    reduction: str = "mean",
-    scaling_factor: float = 1,
+    reduction: Optional[str] = "mean",
+    scaling_factor: Optional[float] = 1,
 ) -> torch.Tensor:
     """
     Compute the mean squared error loss for the prediction and target
@@ -212,7 +213,7 @@ def MSE(
 
 
 def MSE_loss(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict = None
+    prediction: torch.Tensor, target: torch.Tensor, params: Optional[dict] = None
 ) -> torch.Tensor:
     """
     Compute the mean squared error loss for the prediction and target.
