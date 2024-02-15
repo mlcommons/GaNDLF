@@ -1,5 +1,5 @@
 import yaml
-from typing import Union
+from typing import List, Union
 from pathlib import Path
 from copy import deepcopy
 
@@ -8,8 +8,8 @@ def generate_new_configs_from_key_and_value(
     base_config: dict,
     key: str,
     value: Union[str, list, int],
-    upper_level_key: str = None,
-) -> list:
+    upper_level_key: Union[str, None] = None,
+) -> List[dict]:
     """
     Generate new configs based on a base config and a strategy.
 
@@ -20,7 +20,7 @@ def generate_new_configs_from_key_and_value(
         upper_level_key (str, optional): The upper level key to change in the base config; useful for dict. Defaults to None.
 
     Returns:
-        list: A list of new configs.
+        List[dict]: A list of new configs.
     """
     configs_to_return = []
     if key == "patch_size":
@@ -63,7 +63,7 @@ def generate_new_configs_from_key_and_value(
     return configs_to_return
 
 
-def remove_duplicates(configs_list: list) -> list:
+def remove_duplicates(configs_list: List[object, type]) -> List[dict]:
     """
     Remove duplicate configs from a list of configs.
 
@@ -71,7 +71,7 @@ def remove_duplicates(configs_list: list) -> list:
         configs_list (list): A list of configs.
 
     Returns:
-        list: A list of configs with duplicates removed.
+        List[dict]: A list of configs with duplicates removed.
     """
     configs_to_return = []
     for config in configs_list:
