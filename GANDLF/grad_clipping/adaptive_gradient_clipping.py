@@ -2,20 +2,20 @@
 """
 Implementation of Adaptive gradient clipping
 """
-from typing import List
+from typing import List, Optional
 import torch
 
 
-def unitwise_norm(x: torch.Tensor, norm_type: float = 2.0) -> torch.Tensor:
+def unitwise_norm(x: torch.Tensor, norm_type: Optional[float] = 2.0) -> torch.Tensor:
     """
-    Computes the norm of a tensor x, where the norm is applied across all dimensions except the first one.
+    Compute norms of each weight tensor in a model, and return the global norm.
 
     Args:
-        x (torch.Tensor): Input tensor.
-        norm_type (float): The type of norm to compute (default: 2.0).
+        x (torch.Tensor): The input tensor.
+        norm_type (Optional[float], optional): The type of norm to compute. Defaults to 2.0.
 
     Returns:
-        torch.Tensor: The norm of the tensor.
+        torch.Tensor: The global norm.
     """
     if x.ndim <= 1:
         return x.norm(norm_type)
@@ -30,18 +30,18 @@ def unitwise_norm(x: torch.Tensor, norm_type: float = 2.0) -> torch.Tensor:
 
 def adaptive_gradient_clip_(
     parameters: List[torch.Tensor],
-    clip_factor: float = 0.01,
-    eps: float = 1e-3,
-    norm_type: float = 2.0,
+    clip_factor: Optional[float] = 0.01,
+    eps: Optional[float] = 1e-3,
+    norm_type: Optional[float] = 2.0,
 ) -> None:
     """
     Performs adaptive gradient clipping on the parameters of a PyTorch model.
 
     Args:
         parameters (List[torch.Tensor]): The parameters to be clipped.
-        clip_factor (float): The factor by which to clip the gradients (default: 0.01).
-        eps (float): A small value added to the norm to avoid division by zero (default: 1e-3).
-        norm_type (float): The type of norm to compute (default: 2.0).
+        clip_factor (Optional[float], optional): The clipping factor. Defaults to 0.01.
+        eps (Optional[float], optional): The epsilon value. Defaults to 1e-3.
+        norm_type (Optional[float], optional): The type of norm to compute. Defaults to 2.0.
 
     Adaptive Gradient Clipping
     Original implementation of Adaptive Gradient Clipping derived from
