@@ -6,7 +6,7 @@ import torch
 import SimpleITK as sitk
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from os import devnull
-from typing import Dict, Any, Union
+from typing import Optional, Union
 
 
 @contextmanager
@@ -17,13 +17,13 @@ def suppress_stdout_stderr():
             yield (err, out)
 
 
-def checkPatchDivisibility(patch_size: np.ndarray, number: int = 16) -> bool:
+def checkPatchDivisibility(patch_size: np.ndarray, number: Optional[int] = 16) -> bool:
     """
     This function checks the divisibility of a numpy array or integer for architectural integrity
 
     Args:
         patch_size (np.ndarray): The patch size for checking.
-        number (int, optional): The number to check divisibility for. Defaults to 16.
+        number (Optional[int], optional): The number to check divisibility for. Defaults to 16.
 
     Returns:
         bool: If all elements of array are divisible or not, after taking 2D patches into account.
@@ -181,28 +181,33 @@ def get_array_from_image_or_tensor(
     input_tensor_or_image: Union[torch.Tensor, sitk.Image]
 ) -> np.ndarray:
     """
-    This function returns the numpy array from a tensor or image.
+    This function returns the numpy array from a torch.Tensor or sitk.Image.
+
     Args:
-        input_tensor_or_image (torch.Tensor or sitk.Image): The input tensor or image.
+        input_tensor_or_image (Union[torch.Tensor, sitk.Image]): The input tensor or image.
+
     Returns:
-        np.ndarray: The numpy array from the tensor or image.
+        np.ndarray: The numpy array.
     """
+    assert isinstance(
+        input_tensor_or_image, (torch.Tensor, sitk.Image, np.ndarray)
+    ), "Input must be a torch.Tensor or sitk.Image or np.ndarray, but got " + str(
+        type(input_tensor_or_image)
+    )
     if isinstance(input_tensor_or_image, torch.Tensor):
         return input_tensor_or_image.detach().cpu().numpy()
     elif isinstance(input_tensor_or_image, sitk.Image):
         return sitk.GetArrayFromImage(input_tensor_or_image)
     elif isinstance(input_tensor_or_image, np.ndarray):
         return input_tensor_or_image
-    else:
-        raise ValueError("Input must be a torch.Tensor or sitk.Image or np.ndarray")
 
 
-def set_determinism(seed: int = 42) -> None:
+def set_determinism(seed: Optional[int] = 42) -> None:
     """
     This function sets the determinism for the random number generators.
 
     Args:
-        seed (int, optional): The seed for the random number generators. Defaults to 42.
+        seed (Optional[int], optional): The seed for the random number generators. Defaults to 42.
     """
     random.seed(seed)
     np.random.seed(seed)

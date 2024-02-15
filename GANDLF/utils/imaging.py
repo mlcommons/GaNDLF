@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 import os, pathlib, math, copy
 from enum import Enum
 import numpy as np
@@ -12,9 +12,9 @@ from .generic import get_filename_extension_sanitized
 def resample_image(
     input_image: sitk.Image,
     spacing: Union[np.ndarray, list, tuple],
-    size: Union[np.ndarray, list, tuple] = None,
-    interpolator: Enum = sitk.sitkLinear,
-    outsideValue: int = 0,
+    size: Optional[Union[np.ndarray, list, tuple]] = None,
+    interpolator: Optional[Enum] = sitk.sitkLinear,
+    outsideValue: Optional[int] = 0,
 ) -> sitk.Image:
     """
     This function resamples the input image based on the spacing and size.
@@ -22,9 +22,9 @@ def resample_image(
     Args:
         input_image (sitk.Image): The input image to be resampled.
         spacing (Union[np.ndarray, list, tuple]): The desired spacing for the resampled image.
-        size (Union[np.ndarray, list, tuple], optional): The desired size for the resampled image. Defaults to None, in which case the size is calculated based on the input image and spacing.
-        interpolator (Enum, optional): The desired interpolator. Defaults to sitk.sitkLinear.
-        outsideValue (int, optional): The value to be used for resampling outside the image. Defaults to 0.
+        size (Optional[Union[np.ndarray, list, tuple]], optional): The desired size for the resampled image. Defaults to None.
+        interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
+        outsideValue (Optional[int], optional): The value to be used for the outside of the image. Defaults to 0.
 
     Returns:
         sitk.Image: The resampled image.
@@ -62,7 +62,7 @@ def resample_image(
 def resize_image(
     input_image: sitk.Image,
     output_size: Union[np.ndarray, list, tuple],
-    interpolator: Enum = sitk.sitkLinear,
+    interpolator: Optional[Enum] = sitk.sitkLinear,
 ) -> sitk.Image:
     """
     This function resizes the input image based on the output size.
@@ -70,7 +70,7 @@ def resize_image(
     Args:
         input_image (sitk.Image): The input image to be resized.
         output_size (Union[np.ndarray, list, tuple]): The desired output size for the resized image.
-        interpolator (Enum, optional): The desired interpolator. Defaults to sitk.sitkLinear.
+        interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
 
     Returns:
         sitk.Image: The resized image.
@@ -102,7 +102,7 @@ def resize_image(
 def softer_sanity_check(
     base_property: Union[np.ndarray, list, tuple],
     new_property: Union[np.ndarray, list, tuple],
-    threshold: float = 0.00001,
+    threshold: Optional[float] = 0.00001,
 ) -> bool:
     """
     This function performs a softer sanity check on the input properties.
@@ -110,7 +110,7 @@ def softer_sanity_check(
     Args:
         base_property (Union[np.ndarray, list, tuple]): The original value of the property to be compared.
         new_property (Union[np.ndarray, list, tuple]): The new value of the property to be compared.
-        threshold (float, optional): The threshold for comparison. Defaults to 0.00001.
+        threshold (Optional[float], optional): The threshold for comparison. Defaults to 0.00001.
 
     Returns:
         bool: True if the properties are consistent within the threshold.
@@ -144,12 +144,14 @@ def perform_sanity_check_on_subject(subject: torchio.Subject, parameters: dict) 
     if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
 
-    def _get_itkimage_or_filereader(subject_str_key):
+    def _get_itkimage_or_filereader(
+        subject_str_key: Union[str, sitk.Image]
+    ) -> Union[sitk.ImageFileReader, sitk.Image]:
         """
         Helper function to get the itk image or file reader from the subject.
 
         Args:
-            subject_str_key (Union[str, sitk.Image]): The subject string key.
+            subject_str_key (Union[str, sitk.Image]): The subject string key or itk image.
 
         Returns:
             Union[sitk.ImageFileReader, sitk.Image]: The itk image or file reader.

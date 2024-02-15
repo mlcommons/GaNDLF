@@ -1,5 +1,5 @@
 import os, sys
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 from pandas.util import hash_pandas_object
 import numpy as np
 import SimpleITK as sitk
@@ -463,7 +463,7 @@ def print_model_summary(
     input_batch_size: int,
     input_num_channels: int,
     input_patch_size: tuple,
-    device: torch.device = None,
+    device: Optional[torch.device] = None,
 ) -> None:
     """
     This function prints the model summary.
@@ -473,7 +473,7 @@ def print_model_summary(
         input_batch_size (int): The input batch size.
         input_num_channels (int): The input number of channels.
         input_patch_size (tuple): The input patch size.
-        device (torch.device, optional): The device to use. Defaults to None.
+        device (Optional[torch.device], optional): The device. Defaults to None.
     """
     input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
     if input_size[-1] == 1:

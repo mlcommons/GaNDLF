@@ -1,7 +1,7 @@
 import os
 import pathlib
 import sys
-from typing import Union, Tuple
+from typing import Optional, Tuple, Union
 
 import pandas as pd
 
@@ -13,7 +13,7 @@ def writeTrainingCSV(
     channelsID: str,
     labelID: str,
     outputFile: str,
-    relativizePathsToOutput: bool = False,
+    relativizePathsToOutput: Optional[bool] = False,
 ) -> None:
     """
     This function writes a CSV file containing the paths to the training data.
@@ -23,7 +23,7 @@ def writeTrainingCSV(
         channelsID (str): The channel IDs.
         labelID (str): The label ID.
         outputFile (str): The output CSV file.
-        relativizePathsToOutput (bool, optional): Whether to relativize the paths to the output file. Defaults to False.
+        relativizePathsToOutput (Optional[bool], optional): Whether to relativize the paths to the output file. Defaults to False.
     """
     channelsID_list = channelsID.split(",")  # split into list
 
@@ -71,14 +71,14 @@ def writeTrainingCSV(
 
 
 def parseTrainingCSV(
-    inputTrainingCSVFile: str, train: bool = True
+    inputTrainingCSVFile: str, train: Optional[bool] = True
 ) -> Tuple[pd.DataFrame, dict]:
     """
     This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
 
     Args:
         inputTrainingCSVFile (str): The input data CSV file which contains all training data.
-        train (bool, optional): Whether performing training. Defaults to True.
+        train (Optional[bool], optional): Whether to train the model. Defaults to True.
 
     Returns:
         Tuple[pd.DataFrame, dict]: The full dataset for computation and the dictionary containing all relevant CSV headers.
