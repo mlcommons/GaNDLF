@@ -325,7 +325,7 @@ def patch_artifact_check(
     intensity_thresh: int = 250,
     intensity_thresh_saturation: int = 5,
     intensity_thresh_b: int = 128,
-    patch_size: List[int, int] = [256, 256],
+    patch_size: List[int] = [256, 256],
 ) -> bool:
     """
     This function is used to curate patches from the input image. It is used to remove patches that have artifacts.
@@ -335,7 +335,7 @@ def patch_artifact_check(
         intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 250.
         intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 5.
         intensity_thresh_b (int, optional): Threshold to check blackness in the patch. Defaults to 128.
-        patch_size (List[int, int], optional): Tiling Size of the WSI/patch size. Defaults to [256, 256].
+        patch_size (List[int], optional): Tiling Size of the WSI/patch size. Defaults to [256, 256].
 
     Returns:
         bool: Whether the patch is valid or not.
@@ -448,7 +448,7 @@ def generate_initial_mask(slide_path: str, scale: int) -> Tuple[np.ndarray, tupl
 
 def get_patch_size_in_microns(
     input_slide_path: str, patch_size_from_config: str, verbose: bool = False
-) -> List[int, int]:
+) -> List[int]:
     """
     Function that returns the patch size in pixels.
 
@@ -458,7 +458,7 @@ def get_patch_size_in_microns(
         verbose (bool, optional): Whether to print verbose output. Defaults to False.
 
     Returns:
-        List[int, int]: The patch size after getting converted to pixels.
+        List[int]: The patch size after getting converted to pixels.
     """
     return_patch_size = [0, 0]
     patch_size = None
