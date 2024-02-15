@@ -256,9 +256,7 @@ def ImagesFromDataFrame(
 
     assert (
         subjects_with_error is not None
-    ), "The following subjects could not be loaded, please recheck or remove and retry:".format(
-        subjects_with_error
-    )
+    ), f"The following subjects could not be loaded, please recheck or remove and retry: {subjects_with_error}"
 
     transformations_list = []
 
