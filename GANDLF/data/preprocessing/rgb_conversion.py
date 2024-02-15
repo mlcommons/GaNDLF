@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 
 import PIL.Image
@@ -59,7 +60,7 @@ class RGBA2RGB(IntensityTransform):
         return subject
 
 
-def rgba2rgb_transform(parameters:dict=None) -> RGBA2RGB:
+def rgba2rgb_transform(parameters: Optional[dict] = None) -> RGBA2RGB:
     """
     This function returns the transform to convert RGBA to RGB.
 
@@ -72,7 +73,7 @@ def rgba2rgb_transform(parameters:dict=None) -> RGBA2RGB:
     return RGBA2RGB()
 
 
-def rgb2rgba_transform(parameters:dict=None) -> RGB2RGBA:
+def rgb2rgba_transform(parameters: Optional[dict] = None) -> RGB2RGBA:
     """
     This function returns the transform to convert RGB to RGBA.
 
