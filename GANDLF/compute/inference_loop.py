@@ -1,7 +1,9 @@
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
 import os, sys
+from typing import Optional
 from pathlib import Path
+import pandas as pd
 
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
@@ -20,24 +22,20 @@ from GANDLF.utils import (
     latest_model_path_end,
     load_ov_model,
     print_model_summary,
+    applyCustomColorMap,
 )
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
 from GANDLF.data.preprocessing import get_transforms_for_preprocessing
 
 
-def applyCustomColorMap(im_gray):
-    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
-    lut = np.zeros((256, 1, 3), dtype=np.uint8)
-    lut[:, 0, 0] = np.zeros((256)).tolist()
-    lut[:, 0, 1] = np.zeros((256)).tolist()
-    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
-    return cv2.LUT(img_bgr, lut)
-
-
 def inference_loop(
-    inferenceDataFromPickle, device, parameters, modelDir, outputDir=None
-):
+    inferenceDataFromPickle: pd.DataFrame,
+    device: str,
+    parameters: dict,
+    modelDir: str,
+    outputDir: Optional[str] = None,
+) -> None:
     """
     The main training loop.
 

@@ -4,6 +4,7 @@ from enum import Enum
 import numpy as np
 import SimpleITK as sitk
 import torchio
+import cv2
 
 from .generic import get_filename_extension_sanitized
 
@@ -266,3 +267,21 @@ def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: in
         psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
 
     return psize_pad
+
+
+def applyCustomColorMap(im_gray: np.ndarray) -> np.ndarray:
+    """
+    Internal function to apply a custom color map to the input image.
+
+    Args:
+        im_gray (np.ndarray): The input image.
+
+    Returns:
+        np.ndarray: The image with the custom color map applied.
+    """
+    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
+    lut = np.zeros((256, 1, 3), dtype=np.uint8)
+    lut[:, 0, 0] = np.zeros((256)).tolist()
+    lut[:, 0, 1] = np.zeros((256)).tolist()
+    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
+    return cv2.LUT(img_bgr, lut)
