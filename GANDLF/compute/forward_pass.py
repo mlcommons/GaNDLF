@@ -43,9 +43,6 @@ def validate_network(
         epoch (int, optional): The current epoch number. Defaults to 0.
         mode (str, optional): The mode of operation. Defaults to "validation".
 
-    Raises:
-        NotImplementedError: If the model type is not supported.
-
     Returns:
         Tuple[float, dict]: The average validation loss and the average validation metrics.
     """
@@ -173,6 +170,10 @@ def validate_network(
                 image = image.unsqueeze(0)
                 image = image.float().to(params["device"])
                 ## special case for 2D
+                assert params["model"]["type"] in [
+                    "torch",
+                    "openvino",
+                ], "Model type not supported. Please only use 'torch' or 'openvino'."
                 if image.shape[-1] == 1:
                     image = torch.squeeze(image, -1)
                 if params["model"]["type"] == "torch":
@@ -182,10 +183,6 @@ def validate_network(
                         model(
                             inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
                         )[params["model"]["IO"][1][0]]
-                    )
-                else:
-                    raise NotImplementedError(
-                        "Model type not supported. Please only use 'torch' or 'openvino'."
                     )
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]
