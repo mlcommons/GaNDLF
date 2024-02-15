@@ -16,7 +16,10 @@ class NormalizeRGB(IntensityTransform):
     """
 
     def __init__(
-        self, mean: Optional[list] = None, std: Optional[list] = None, **kwargs
+        self,
+        mean: Optional[List[float]] = None,
+        std: Optional[List[float]] = None,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.mean, self.std = mean, std
