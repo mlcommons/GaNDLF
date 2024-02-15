@@ -569,13 +569,6 @@ class unetr(ModelBase):
 
         Args:
             parameters (dict): A dictionary containing the model parameters.
-
-        Raises:
-        -------
-        AssertionError
-            If the input image size is not divisible by the patch size in at least 1 dimension, or if the inner patch size is not smaller than the input image.
-            If the embedding dimension is not divisible by the number of self-attention heads.
-
         """
         super(unetr, self).__init__(parameters)
 

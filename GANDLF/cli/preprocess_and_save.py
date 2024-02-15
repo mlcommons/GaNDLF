@@ -36,9 +36,6 @@ def preprocess_and_save(
         label_pad_mode (Optional[str], optional): The padding mode for the label. Defaults to "constant".
         applyaugs (Optional[bool], optional): Whether to apply augmentations. Defaults to False.
         apply_zero_crop (Optional[bool], optional): Whether to apply zero crop. Defaults to False.
-
-    Raises:
-        ValueError: Parameter check from previous
     """
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -51,10 +48,9 @@ def preprocess_and_save(
     parameter_file = os.path.join(output_dir, "parameters.pkl")
     if os.path.exists(parameter_file):
         parameters_prev = pickle.load(open(parameter_file, "rb"))
-        if parameters != parameters_prev:
-            raise ValueError(
-                "The parameters are not the same as the ones stored in the previous run, please re-check."
-            )
+        assert (
+            parameters == parameters_prev
+        ), "The parameters are not the same as the ones stored in the previous run, please re-check."
     else:
         with open(parameter_file, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)

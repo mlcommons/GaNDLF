@@ -50,9 +50,6 @@ def ImagesFromDataFrame(
         apply_zero_crop (Optional[bool], optional): Whether to apply zero crop or not. Defaults to False.
         loader_type (Optional[str], optional): The type of loader. Defaults to None.
 
-    Raises:
-        ValueError: If the subject cannot be loaded.
-
     Returns:
         Union[torchio.SubjectsDataset, torchio.Queue]: The dataloader queue for validation/testing (where patching and data augmentation is not required) or the subjects dataset for training.
     """
@@ -257,11 +254,11 @@ def ImagesFromDataFrame(
             # Appending this subject to the list of subjects
             subjects_list.append(subject)
 
-    if subjects_with_error:
-        raise ValueError(
-            "The following subjects could not be loaded, please recheck or remove and retry:",
-            subjects_with_error,
-        )
+    assert (
+        subjects_with_error is not None
+    ), "The following subjects could not be loaded, please recheck or remove and retry:".format(
+        subjects_with_error
+    )
 
     transformations_list = []
 

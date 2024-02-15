@@ -95,16 +95,16 @@ class ModelBase(nn.Module):
                 )
             )
 
-    def get_final_layer(self, final_convolution_layer):
+    def get_final_layer(self, final_convolution_layer: str) -> nn.Module:
         return get_modelbase_final_layer(final_convolution_layer)
 
-    def get_norm_type(self, norm_type, dimensions):
+    def get_norm_type(self, norm_type: str, dimensions: int) -> nn.Module:
         """
         This function gets the normalization type for the model.
 
         Args:
             norm_type (str): Normalization type as a string.
-            dimensions (str): The dimensionality of the model.
+            dimensions (int): The dimensionality of the model.
 
         Returns:
             _InstanceNorm or _BatchNorm: The normalization type for the model.
@@ -126,7 +126,7 @@ class ModelBase(nn.Module):
 
         return norm_type
 
-    def model_depth_check(self, parameters):
+    def model_depth_check(self, parameters: dict) -> int:
         """
         This function checks if the patch size is large enough for the model.
 
@@ -135,9 +135,6 @@ class ModelBase(nn.Module):
 
         Returns:
             int: The model depth to use.
-
-        Raises:
-            AssertionError: If the patch size is not large enough for the model.
         """
         model_depth = checkPatchDimensions(
             parameters["patch_size"], numlay=parameters["model"]["depth"]
