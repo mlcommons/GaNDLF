@@ -90,7 +90,7 @@ def CCE_Generic(
         prediction (torch.tensor): The predicted output value for each pixel. dimension: [batch, class, x, y, z].
         target (torch.tensor): The ground truth target for each pixel. dimension: [batch, class, x, y, z] factorial_class_list.
         params (dict): The parameter dictionary.
-        CCE_Type (Optional[torch.nn.modules.loss._Loss]): The CE loss function type.
+        CCE_Type (torch.nn.modules.loss._Loss, optional): The type of cross entropy loss to use. Defaults to CrossEntropyLoss.
 
     Returns:
         torch.tensor: The final loss value after taking multiple classes into consideration
@@ -124,8 +124,8 @@ def L1(
     Args:
         prediction (torch.Tensor): The prediction generated usually by the network.
         target (torch.Tensor): The target for the corresponding Tensor for which the output was generated.
-        reduction (str, optional): The reduction method for the loss. Defaults to 'mean'.
-        scaling_factor (float, optional): The scaling factor to multiply the target with. Defaults to 1.
+        reduction (Optional[str], optional): The reduction method for the loss. Defaults to 'mean'.
+        scaling_factor (Optional[float], optional): The scaling factor to multiply the target with. Defaults to 1.
 
     Returns:
         torch.Tensor: The mean absolute error loss.
@@ -139,7 +139,7 @@ def L1(
 
 
 def L1_loss(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
+    prediction: torch.Tensor, target: torch.Tensor, params: Optional[dict] = None
 ) -> torch.Tensor:
     """
     Computes the L1 loss between the prediction tensor and the target tensor.
@@ -147,7 +147,7 @@ def L1_loss(
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
-        params (dict, optional): A dictionary of hyperparameters. Defaults to None.
+        params (Optional[dict], optional): The dictionary of parameters. Defaults to None.
 
     Returns:
         loss (torch.Tensor): The computed L1 loss.
@@ -200,8 +200,8 @@ def MSE(
     Args:
         prediction (torch.Tensor): The prediction generated usually by the network.
         target (torch.Tensor): The target for the corresponding Tensor for which the output was generated.
-        reduction (str, optional): The reduction method for the loss. Defaults to 'mean'.
-        scaling_factor (float, optional): The scaling factor to multiply the target with. Defaults to 1.
+        reduction (Optional[str], optional): The reduction method for the loss. Defaults to 'mean'.
+        scaling_factor (Optional[float], optional): The scaling factor to multiply the target with. Defaults to 1.
 
     Returns:
         torch.Tensor: The computed mean squared error loss.
@@ -221,7 +221,7 @@ def MSE_loss(
     Args:
         prediction (torch.Tensor): The prediction generated usually by the network.
         target (torch.Tensor): The target for the corresponding Tensor for which the output was generated.
-        params (dict, optional): A dictionary of hyperparameters. Defaults to None.
+        params (Optional[dict], optional): The dictionary of parameters. Defaults to None.
 
     Returns:
         torch.Tensor: The computed mean squared error loss.
