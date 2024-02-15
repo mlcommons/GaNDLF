@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 import SimpleITK as sitk
 
@@ -13,7 +14,7 @@ class Resample_Minimum(Resample):
         Resample (SpatialTransform): The parent class for resampling.
     """
 
-    def __init__(self, target: float = 1, **kwargs):
+    def __init__(self, target: Optional[float] = 1, **kwargs):
         super().__init__(**kwargs)
 
     @staticmethod

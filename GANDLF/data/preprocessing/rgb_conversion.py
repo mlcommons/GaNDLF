@@ -59,9 +59,27 @@ class RGBA2RGB(IntensityTransform):
         return subject
 
 
-def rgba2rgb_transform(parameters=None):
+def rgba2rgb_transform(parameters:dict=None) -> RGBA2RGB:
+    """
+    This function returns the transform to convert RGBA to RGB.
+
+    Args:
+        parameters (dict, optional): The parameters for the transform. Defaults to None.
+
+    Returns:
+        RGBA2RGB: The transform to convert RGBA to RGB.
+    """
     return RGBA2RGB()
 
 
-def rgb2rgba_transform(parameters=None):
+def rgb2rgba_transform(parameters:dict=None) -> RGB2RGBA:
+    """
+    This function returns the transform to convert RGB to RGBA.
+
+    Args:
+        parameters (dict, optional): The parameters for the transform. Defaults to None.
+
+    Returns:
+        RGB2RGBA: The transform to convert RGB to RGBA.
+    """
     return RGB2RGBA()

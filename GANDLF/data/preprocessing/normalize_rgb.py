@@ -1,5 +1,5 @@
 import torch
-from typing import List
+from typing import List, Optional
 
 from torchio.transforms.intensity_transform import IntensityTransform
 from torchio.data.subject import Subject
@@ -15,7 +15,9 @@ class NormalizeRGB(IntensityTransform):
 
     """
 
-    def __init__(self, mean: list = None, std: list = None, **kwargs):
+    def __init__(
+        self, mean: Optional[list] = None, std: Optional[list] = None, **kwargs
+    ):
         super().__init__(**kwargs)
         self.mean, self.std = mean, std
         self.args_names = "mean", "std"
