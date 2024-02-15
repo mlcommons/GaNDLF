@@ -1,595 +1,291 @@
-"""
-All the segmentation metrics are to be called from here
-"""
-
 from typing import List, Optional, Tuple, Union
-import sys
-import torch
+import os, pathlib, math, copy
+from enum import Enum
 import numpy as np
-from GANDLF.losses.segmentation import dice
-from scipy.ndimage import _ni_support
-from scipy.ndimage.morphology import (
-    distance_transform_edt,
-    binary_erosion,
-    generate_binary_structure,
-)
+import SimpleITK as sitk
+import torchio
+import cv2
+
+from .generic import get_filename_extension_sanitized
 
 
-def _convert_tensor_to_int_label_array(input_tensor: torch.Tensor) -> np.ndarray:
+def resample_image(
+    input_image: sitk.Image,
+    spacing: Union[np.ndarray, List[float], Tuple[float]],
+    size: Optional[Union[np.ndarray, List[float], Tuple[float]]] = None,
+    interpolator: Optional[Enum] = sitk.sitkLinear,
+    outsideValue: Optional[int] = 0,
+) -> sitk.Image:
     """
-    This function converts a tensor of labels to a numpy array of labels.
+    This function resamples the input image based on the spacing and size.
 
     Args:
-        input_tensor (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        input_image (sitk.Image): The input image to be resampled.
+        spacing (Union[np.ndarray, List[float], Tuple[float]]): The desired spacing for the resampled image.
+        size (Optional[Union[np.ndarray, List[float], Tuple[float]]], optional): The desired size for the resampled image. Defaults to None.
+        interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
+        outsideValue (Optional[int], optional): The value to be used for the outside of the image. Defaults to 0.
 
     Returns:
-        numpy.ndarray: The numpy array of labels.
+        sitk.Image: The resampled image.
     """
-    result_array = input_tensor.detach().cpu().numpy()
-    if result_array.shape[-1] == 1:
-        result_array = result_array.squeeze(-1)
-    # ensure that we are dealing with a binary array
-    result_array[result_array < 0.5] = 0
-    result_array[result_array >= 0.5] = 1
-    return result_array.astype(np.int64)
+    assert (
+        len(spacing) == input_image.GetDimension()
+    ), "The spacing dimension is inconsistent with the input dataset, please check parameters."
 
+    # Set Size
+    if size is None:
+        inSpacing = input_image.GetSpacing()
+        inSize = input_image.GetSize()
+        size = [
+            int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
+            for i in range(input_image.GetDimension())
+        ]
 
-def multi_class_dice(
-    prediction: torch.Tensor,
-    target: torch.Tensor,
-    params: dict,
-    per_label: Optional[bool] = False,
-) -> torch.Tensor:
-    """
-    This function computes a multi-class dice.
+    assert (
+        len(size) == input_image.GetDimension()
+    ), "The size dimension is inconsistent with the input dataset, please check parameters."
 
-    Args:
-        prediction (torch.Tensor): The input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): The input ground truth containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-        per_label (Optional[bool], optional): Whether to return per-label scores. Defaults to False.
-
-    Returns:
-        torch.Tensor: The multi-class dice score or a tensor of per-label dice scores.
-    """
-    total_dice = 0
-    avg_counter = 0
-    per_label_dice = []
-    for i in range(0, params["model"]["num_classes"]):
-        # this check should only happen during validation
-        if i != params["model"]["ignore_label_validation"]:
-            current_dice = dice(prediction[:, i, ...], target[:, i, ...])
-            total_dice += current_dice
-            per_label_dice.append(current_dice.item())
-            avg_counter += 1
-        # currentDiceLoss = 1 - currentDice # subtract from 1 because this is a loss
-    total_dice /= avg_counter
-
-    if per_label:
-        return torch.tensor(per_label_dice)
-    else:
-        return total_dice
-
-
-def multi_class_dice_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function computes a multi-class dice.
-
-    Args:
-        prediction (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input data containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label dice scores.
-    """
-    return multi_class_dice(prediction, target, params, per_label=True)
-
-
-def __surface_distances(
-    prediction: torch.Tensor,
-    target: torch.Tensor,
-    voxel_spacing: Optional[Tuple[float]] = None,
-    connectivity: Optional[int] = 1,
-) -> float:
-    """
-    The distances between the surface voxel of binary objects in result and their
-    nearest partner surface voxel of a binary object in reference. Adapted from https://github.com/loli/medpy/blob/39131b94f0ab5328ab14a874229320efc2f74d98/medpy/metric/binary.py#L1195.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        voxel_spacing (Optional[Tuple[float]], optional): The voxel spacing. Defaults to None.
-        connectivity (Optional[int], optional): The voxel connectivity. Defaults to 1.
-
-    Returns:
-        float: The symmetric Hausdorff Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
-    """
-    result = np.atleast_1d(prediction.astype(bool))
-    reference = np.atleast_1d(target.astype(bool))
-    if voxel_spacing is not None:
-        voxel_spacing = _ni_support._normalize_sequence(voxel_spacing, result.ndim)
-        voxel_spacing = np.asarray(voxel_spacing, dtype=np.float64)
-        if not voxel_spacing.flags.contiguous:
-            voxel_spacing = voxel_spacing.copy()
-
-    # binary structure
-    footprint = generate_binary_structure(result.ndim, connectivity)
-
-    # test for emptiness
-    if 0 == np.count_nonzero(result):
-        return 0
-    if 0 == np.count_nonzero(reference):
-        return 0
-
-    # extract only 1-pixel border line of objects
-    result_border = result ^ binary_erosion(result, structure=footprint, iterations=1)
-    reference_border = reference ^ binary_erosion(
-        reference, structure=footprint, iterations=1
+    # Resample input image
+    return sitk.Resample(
+        input_image,
+        size,
+        sitk.Transform(),
+        interpolator,
+        input_image.GetOrigin(),
+        spacing,
+        input_image.GetDirection(),
+        outsideValue,
     )
 
-    # compute average surface distance
-    # Note: scipys distance transform is calculated only inside the borders of the
-    #       foreground objects, therefore the input has to be reversed
-    dt = distance_transform_edt(~reference_border, sampling=voxel_spacing)
-    sds = dt[result_border]
 
-    return sds
-
-
-def _nsd_base(a_to_b: np.ndarray, b_to_a: np.ndarray, threshold: float) -> float:
+def resize_image(
+    input_image: sitk.Image,
+    output_size: Union[np.ndarray, list, tuple],
+    interpolator: Optional[Enum] = sitk.sitkLinear,
+) -> sitk.Image:
     """
-    This implementation differs from the official surface dice implementation! These two are not comparable!!!!!
-    The normalized surface dice is symmetric, so it should not matter whether a or b is the reference image
-    This implementation natively supports 2D and 3D images.
+    This function resizes the input image based on the output size.
 
     Args:
-        a_to_b (np.ndarray): Surface distances from a to b
-        b_to_a (np.ndarray): Surface distances from b to a
-        threshold (float): distances below this threshold will be counted as true positives. Threshold is in mm, not voxels!
+        input_image (sitk.Image): The input image to be resized.
+        output_size (Union[np.ndarray, list, tuple]): The desired output size for the resized image.
+        interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
 
     Returns:
-        float: the normalized surface dice between a and b
+        sitk.Image: The resized image.
     """
-    if isinstance(a_to_b, int):
-        return 0
-    if isinstance(b_to_a, int):
-        return 0
-    numel_a = len(a_to_b)
-    numel_b = len(b_to_a)
-    tp_a = np.sum(a_to_b <= threshold) / numel_a
-    tp_b = np.sum(b_to_a <= threshold) / numel_b
-    fp = np.sum(a_to_b > threshold) / numel_a
-    fn = np.sum(b_to_a > threshold) / numel_b
-    dc = (tp_a + tp_b) / (tp_a + tp_b + fp + fn + sys.float_info.min)
-    return dc
+    output_size_parsed = None
+    inputSize = input_image.GetSize()
+    inputSpacing = np.array(input_image.GetSpacing())
+    outputSpacing = np.array(inputSpacing)
+
+    output_size_parsed = output_size
+    if isinstance(output_size, dict):
+        if "resize" in output_size:
+            output_size_parsed = output_size["resize"]
+
+    assert len(output_size_parsed) == len(
+        inputSpacing
+    ), "The output size dimension is inconsistent with the input dataset, please check parameters."
+
+    for i, n in enumerate(output_size_parsed):
+        outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
+
+    return resample_image(
+        input_image,
+        outputSpacing,
+        interpolator=interpolator,
+    )
 
 
-def _calculator_jaccard(
-    prediction: torch.Tensor,
-    target: torch.Tensor,
-    params: dict,
-    per_label: Optional[bool] = False,
-) -> torch.Tensor:
+def softer_sanity_check(
+    base_property: Union[np.ndarray, List[float], Tuple[float]],
+    new_property: Union[np.ndarray, List[float], Tuple[float]],
+    threshold: Optional[float] = 0.00001,
+) -> bool:
     """
-    This function returns sensitivity and specificity.
+    This function performs a softer sanity check on the input properties.
 
     Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-        per_label (Optional[bool], optional): Whether to return per-label scores. Defaults to False.
+        base_property (Union[np.ndarray, List[float], Tuple[float]]): The base property.
+        new_property (Union[np.ndarray, List[float], Tuple[float]]): The new property.
+        threshold (Optional[float], optional): The threshold for comparison. Defaults to 0.00001.
 
     Returns:
-        torch.Tensor: The Jaccard score between the object(s) in ```inp``` and the object(s) in ```target```.
+        bool: True if the properties are consistent within the threshold.
     """
-    result_array = _convert_tensor_to_int_label_array(prediction)
-    target_array = _convert_tensor_to_int_label_array(target)
+    arr_1 = np.array(base_property)
+    arr_2 = np.array(new_property)
+    diff = np.sum(arr_1 - arr_2)
 
-    jaccard, avg_counter = 0, 0
-    jaccard_per_label = []
-    for i in range(0, params["model"]["num_classes"]):
-        # this check should only happen during validation
-        if i != params["model"]["ignore_label_validation"]:
-            dice_score = dice(result_array[:, i, ...], target_array[:, i, ...])
-            # https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient#Difference_from_Jaccard
-            j_score = dice_score / (2 - dice_score)
-            jaccard += j_score
-            if per_label:
-                jaccard_per_label.append(jaccard)
-            avg_counter += 1
+    result = False
+    if diff <= threshold:
+        result = True
 
-    if per_label:
-        return torch.tensor(jaccard_per_label)
-    else:
-        return torch.tensor(jaccard / avg_counter)
+    return result
 
 
-def _calculator_sensitivity_specificity(
-    prediction: torch.Tensor,
-    target: torch.Tensor,
-    params: dict,
-    per_label: Optional[bool] = False,
-) -> torch.Tensor:
+def perform_sanity_check_on_subject(subject: torchio.Subject, parameters: dict) -> bool:
     """
-    This function returns sensitivity and specificity.
+    This function performs a sanity check on the image modalities in input subject to ensure that they are consistent.
 
     Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-        per_label (Optional[bool], optional): Whether to return per-label scores. Defaults to False.
+        subject (torchio.Subject): The input subject.
+        parameters (dict): The parameters passed by the user yaml.
 
     Returns:
-        torch.Tensor: The sensitivity and specificity between the object(s) in ```inp``` and the object(s) in ```target```.
+        bool: True if the sanity check passes.
     """
-    # inMask is mask of input array equal to a certain tissue (ie. all one's in tumor core)
-    # Ref mask is mask of certain tissue in ground truth (ie. all one's in refernce core )
-    # overlap is mask where the two equal each other
-    # They are of the total number of voxels of the ground truth brain mask
+    # read the first image and save that for comparison
+    file_reader_base = None
 
-    def get_sensitivity_and_specificity(result_array, target_array):
-        iC = np.sum(result_array)
-        rC = np.sum(target_array)
+    list_for_comparison = copy.deepcopy(parameters["headers"]["channelHeaders"])
+    if parameters["headers"]["labelHeader"] is not None:
+        list_for_comparison.append("label")
 
-        overlap = np.where((result_array == target_array), 1, 0)
+    def _get_itkimage_or_filereader(
+        subject_str_key: Union[str, sitk.Image]
+    ) -> Union[sitk.ImageFileReader, sitk.Image]:
+        """
+        Helper function to get the itk image or file reader from the subject.
 
-        # Where they agree are both equal to that value
-        TP = overlap[result_array == 1].sum()
-        FP = iC - TP
-        FN = rC - TP
-        TN = np.count_nonzero((result_array != 1) & (target_array != 1))
+        Args:
+            subject_str_key (Union[str, sitk.Image]): The subject string key or itk image.
 
-        Sens = 1.0 * TP / (TP + FN + sys.float_info.min)
-        Spec = 1.0 * TN / (TN + FP + sys.float_info.min)
+        Returns:
+            Union[sitk.ImageFileReader, sitk.Image]: The itk image or file reader.
+        """
+        if subject_str_key["path"] != "":
+            file_reader = sitk.ImageFileReader()
+            file_reader.SetFileName(subject_str_key["path"])
+            file_reader.ReadImageInformation()
+            return file_reader
+        else:
+            # this case is required if any tensor/imaging operation has been applied in dataloader
+            file_reader = subject_str_key.as_sitk()
 
-        # Make Changes if both input and reference are 0 for the tissue type
-        if (iC == 0) and (rC == 0):
-            Sens = 1.0
+    if len(list_for_comparison) > 1:
+        for key in list_for_comparison:
+            if file_reader_base is None:
+                file_reader_base = _get_itkimage_or_filereader(subject[str(key)])
+            else:
+                file_reader_current = _get_itkimage_or_filereader(subject[str(key)])
 
-        return Sens, Spec
-
-    result_array = _convert_tensor_to_int_label_array(prediction)
-    target_array = _convert_tensor_to_int_label_array(target)
-
-    sensitivity, specificity, avg_counter = 0, 0, 0
-    sensitivity_per_label, specificity_per_label = [], []
-    for b in range(0, result_array.shape[0]):
-        for i in range(0, params["model"]["num_classes"]):
-            if i != params["model"]["ignore_label_validation"]:
-                s, p = get_sensitivity_and_specificity(
-                    result_array[b, i, ...], target_array[b, i, ...]
+                # this check needs to be absolute
+                assert (
+                    file_reader_base.GetDimension()
+                    == file_reader_current.GetDimension()
+                ), (
+                    "Dimensions for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
                 )
-                sensitivity += s
-                specificity += p
-                if per_label:
-                    sensitivity_per_label.append(s)
-                    specificity_per_label.append(p)
-                avg_counter += 1
 
-    if per_label:
-        return torch.tensor(sensitivity_per_label), torch.tensor(specificity_per_label)
-    else:
-        return torch.tensor(sensitivity / avg_counter), torch.tensor(
-            specificity / avg_counter
+                # other checks can be softer
+                assert softer_sanity_check(
+                    file_reader_base.GetOrigin(), file_reader_current.GetOrigin()
+                ), (
+                    "Origin for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+                assert softer_sanity_check(
+                    file_reader_base.GetDirection(), file_reader_current.GetDirection()
+                ), (
+                    "Orientation for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+                assert softer_sanity_check(
+                    file_reader_base.GetSpacing(), file_reader_current.GetSpacing()
+                ), (
+                    "Spacing for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
+
+    return True
+
+
+def write_training_patches(subject: torchio.Subject, params: dict) -> None:
+    """
+    This function writes the training patches to disk.
+
+    Args:
+        subject (torchio.Subject): The input subject.
+        params (dict): The parameters passed by the user yaml; needs the "output_dir" and "current_epoch" keys to be present.
+    """
+    # create folder tree for saving the patches
+    training_output_dir = os.path.join(params["output_dir"], "training_patches")
+    pathlib.Path(training_output_dir).mkdir(parents=True, exist_ok=True)
+    training_output_dir_epoch = os.path.join(
+        training_output_dir, str(params["current_epoch"])
+    )
+    pathlib.Path(training_output_dir_epoch).mkdir(parents=True, exist_ok=True)
+    training_output_dir_current_subject = os.path.join(
+        training_output_dir_epoch, subject["subject_id"][0]
+    )
+    pathlib.Path(training_output_dir_current_subject).mkdir(parents=True, exist_ok=True)
+
+    # write the training patches to disk
+    ext = get_filename_extension_sanitized(subject["path_to_metadata"][0])
+    for key in params["channel_keys"]:
+        img_to_write = torchio.ScalarImage(
+            tensor=subject[key][torchio.DATA][0], affine=subject[key]["affine"][0]
+        ).as_sitk()
+        sitk.WriteImage(
+            img_to_write,
+            os.path.join(training_output_dir_current_subject, "modality_" + key + ext),
+        )
+
+    if params["label_keys"] is not None:
+        img_to_write = torchio.ScalarImage(
+            tensor=subject[params["label_keys"][0]][torchio.DATA][0],
+            affine=subject[key]["affine"][0],
+        ).as_sitk()
+        sitk.WriteImage(
+            img_to_write,
+            os.path.join(training_output_dir_current_subject, "label_" + key + ext),
         )
 
 
-def _calculator_generic_all_surface_distances(
-    prediction: torch.Tensor,
-    target: torch.Tensor,
-    params: dict,
-    per_label: Optional[bool] = False,
-) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def get_correct_padding_size(
+    patch_size: Union[List[int], Tuple[int]], model_dimension: int
+):
     """
-    This function returns hd100, hd95, and nsd.
+    This function returns the correct padding size based on the patch size and overlap.
 
     Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-        per_label (Optional[bool], optional): Whether to return per-label scores. Defaults to False.
-
+        patch_size (Union[List[int], Tuple[int]]): The patch size.
+        model_dimension (int): The model dimension.
 
     Returns:
-        Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance, or the list of per-label scores for each metric.
+        Union[list, tuple]: The correct padding size.
     """
-    result_array = _convert_tensor_to_int_label_array(prediction)
-    target_array = _convert_tensor_to_int_label_array(target)
+    psize_pad = list(np.asarray(np.ceil(np.divide(patch_size, 2)), dtype=int))
+    # ensure that the patch size for z-axis is not 1 for 2d images
+    if model_dimension == 2:
+        psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
 
-    avg_counter = 0
-    if per_label:
-        return_hd100, return_hd95, return_nsd = [], [], []
-    else:
-        return_hd100, return_hd95, return_nsd = 0, 0, 0
-    for b in range(0, result_array.shape[0]):
-        for i in range(0, params["model"]["num_classes"]):
-            if i != params["model"]["ignore_label_validation"]:
-                hd1 = __surface_distances(
-                    result_array[b, i, ...],
-                    target_array[b, i, ...],
-                    params["subject_spacing"][b],
-                )
-                hd2 = __surface_distances(
-                    target_array[b, i, ...],
-                    result_array[b, i, ...],
-                    params["subject_spacing"][b],
-                )
-                threshold = max(min(params["subject_spacing"][0]), 1).item()
-                temp_nsd = _nsd_base(hd1, hd2, threshold)
-                temp_hd100 = np.percentile(np.hstack((hd1, hd2)), 100)
-                temp_hd95 = np.percentile(np.hstack((hd1, hd2)), 95)
-                if per_label:
-                    return_nsd.append(temp_nsd)
-                    return_hd100.append(temp_hd100)
-                    return_hd95.append(temp_hd95)
-                else:
-                    return_nsd += temp_nsd
-                    return_hd100 += temp_hd100
-                    return_hd95 += temp_hd95
-                    avg_counter += 1
-
-    if per_label:
-        return (
-            torch.tensor(return_nsd),
-            torch.tensor(return_hd100),
-            torch.tensor(return_hd95),
-        )
-    else:
-        return (
-            torch.tensor(return_nsd / avg_counter),
-            torch.tensor(return_hd100 / avg_counter),
-            torch.tensor(return_hd95 / avg_counter),
-        )
+    return psize_pad
 
 
-def _calculator_generic(
-    prediction: torch.Tensor,
-    target: torch.Tensor,
-    params: dict,
-    percentile: int = 95,
-    surface_dice: Optional[bool] = False,
-    per_label: Optional[bool] = False,
-) -> torch.Tensor:
+def applyCustomColorMap(im_gray: np.ndarray) -> np.ndarray:
     """
-    Generic Surface Dice (SD)/Hausdorff (HD) Distance calculation from 2 tensors. Compared to the standard Hausdorff Distance, this metric is slightly more stable to small outliers and is commonly used in Biomedical Segmentation challenges.
+    Internal function to apply a custom color map to the input image.
 
     Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-        percentile (int, optional): The percentile to calculate the Hausdorff Distance. Defaults to 95.
-        surface_dice (Optional[bool], optional): Whether to return the surface dice. Defaults to False.
-        per_label (Optional[bool], optional): Whether to return per-label scores. Defaults to False.
-
+        im_gray (np.ndarray): The input image.
 
     Returns:
-        torch.Tensor: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance, or the tensor of per-label scores for each metric.
+        np.ndarray: The image with the custom color map applied.
     """
-    _nsd, _hd100, _hd95 = _calculator_generic_all_surface_distances(
-        prediction, target, params, per_label=per_label
-    )
-    if surface_dice:
-        return _nsd
-    elif percentile == 95:
-        return _hd95
-    else:
-        return _hd100
-
-
-def hd95(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> torch.Tensor:
-    """
-    This function returns the 95th percentile Hausdorff Distance.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The 95th percentile Hausdorff Distance.
-    """
-    return _calculator_generic(prediction, target, params, percentile=95)
-
-
-def hd95_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the per-label 95th percentile Hausdorff Distance.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label 95th percentile Hausdorff Distances.
-    """
-    return _calculator_generic(
-        prediction, target, params, percentile=95, per_label=True
-    )
-
-
-def hd100(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> torch.Tensor:
-    """
-    This function returns the 100th percentile Hausdorff Distance.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The 100th percentile Hausdorff Distance.
-    """
-    return _calculator_generic(prediction, target, params, percentile=100)
-
-
-def hd100_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the per-label 100th percentile Hausdorff Distance.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label 100th percentile Hausdorff Distances.
-    """
-    return _calculator_generic(
-        prediction, target, params, percentile=100, per_label=True
-    )
-
-
-def nsd(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> torch.Tensor:
-    """
-    This function returns the Normalized Surface Dice.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The Normalized Surface Dice.
-    """
-    return _calculator_generic(
-        prediction, target, params, percentile=100, surface_dice=True
-    )
-
-
-def nsd_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the per-label Normalized Surface Dice.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label Normalized Surface Dice scores.
-    """
-    return _calculator_generic(
-        prediction, target, params, percentile=100, per_label=True, surface_dice=True
-    )
-
-
-def sensitivity(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the sensitivity.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The sensitivity.
-    """
-    s, _ = _calculator_sensitivity_specificity(prediction, target, params)
-    return s
-
-
-def sensitivity_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the per-label sensitivity.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label sensitivity scores.
-    """
-    s, _ = _calculator_sensitivity_specificity(
-        prediction, target, params, per_label=True
-    )
-    return s
-
-
-def specificity_segmentation(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the specificity.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The specificity.
-    """
-    _, p = _calculator_sensitivity_specificity(prediction, target, params)
-    return p
-
-
-def specificity_segmentation_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the per-label specificity.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label specificity scores.
-    """
-    _, p = _calculator_sensitivity_specificity(
-        prediction, target, params, per_label=True
-    )
-    return p
-
-
-def jaccard(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the Jaccard score.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The Jaccard score.
-    """
-    j = _calculator_jaccard(prediction, target, params)
-    return j
-
-
-def jaccard_per_label(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> torch.Tensor:
-    """
-    This function returns the per-label Jaccard score.
-
-    Args:
-        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
-        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
-        params (dict): The parameter dictionary containing training and data information.
-
-    Returns:
-        torch.Tensor: The tensor of per-label Jaccard scores.
-    """
-    j = _calculator_jaccard(prediction, target, params, per_label=True)
-    return j
+    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
+    lut = np.zeros((256, 1, 3), dtype=np.uint8)
+    lut[:, 0, 0] = np.zeros((256)).tolist()
+    lut[:, 0, 1] = np.zeros((256)).tolist()
+    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
+    return cv2.LUT(img_bgr, lut)
