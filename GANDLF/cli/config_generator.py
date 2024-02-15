@@ -63,7 +63,7 @@ def generate_new_configs_from_key_and_value(
     return configs_to_return
 
 
-def remove_duplicates(configs_list: List[object, type]) -> List[dict]:
+def remove_duplicates(configs_list: List[dict]) -> List[dict]:
     """
     Remove duplicate configs from a list of configs.
 
