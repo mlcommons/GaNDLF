@@ -7,7 +7,14 @@ from GANDLF.compute import training_loop
 from GANDLF.utils import get_dataframe
 
 
-def TrainingManager(dataframe: pd.DataFrame, outputDir: str, parameters:dict, device:str, resume:bool, reset:bool) -> None:
+def TrainingManager(
+    dataframe: pd.DataFrame,
+    outputDir: str,
+    parameters: dict,
+    device: str,
+    resume: bool,
+    reset: bool,
+) -> None:
     """
     This is the training manager that ties all the training functionality together
 
