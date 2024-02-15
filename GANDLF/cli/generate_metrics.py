@@ -280,23 +280,23 @@ def generate_metrics_dict(
                 )
 
             overall_stats_dict[current_subject_id]["ssim"] = (
-                structural_similarity_index(gt_image_infill, output_infill, mask).item()
+                structural_similarity_index(output_infill, gt_image_infill, mask).item()
             )
 
             # ncc metrics
             compute_ncc = parameters.get("compute_ncc", True)
             if compute_ncc:
                 overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
                 overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
                 overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
                 overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
 
             # only voxels that are to be inferred (-> flat array)
@@ -305,26 +305,26 @@ def generate_metrics_dict(
             output_infill = output_infill[mask]
 
             overall_stats_dict[current_subject_id]["mse"] = mean_squared_error(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             overall_stats_dict[current_subject_id]["msle"] = mean_squared_log_error(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             overall_stats_dict[current_subject_id]["mae"] = mean_absolute_error(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             # torchmetrics PSNR using "max"
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             # same as above but with epsilon for robustness
             overall_stats_dict[current_subject_id]["psnr_eps"] = (
                 peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
+                    output_infill, gt_image_infill, epsilon=sys.float_info.epsilon
                 ).item()
             )
 
@@ -333,15 +333,15 @@ def generate_metrics_dict(
                 # torchmetrics PSNR but with fixed data range of 0 to 1
                 overall_stats_dict[current_subject_id]["psnr_01"] = (
                     peak_signal_noise_ratio(
-                        gt_image_infill, output_infill, data_range=(0, 1)
+                        output_infill, gt_image_infill, data_range=(0, 1)
                     ).item()
                 )
 
                 # same as above but with epsilon for robustness
                 overall_stats_dict[current_subject_id]["psnr_01_eps"] = (
                     peak_signal_noise_ratio(
-                        gt_image_infill,
                         output_infill,
+                        gt_image_infill,
                         data_range=(0, 1),
                         epsilon=sys.float_info.epsilon,
                     ).item()
