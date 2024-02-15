@@ -1,5 +1,5 @@
 import sys, os
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from pathlib import Path
 import numpy as np
 import skimage.io
@@ -61,7 +61,9 @@ def print_sorted_dict(dictionary: dict) -> str:
 
 
 def convert_to_tiff(
-    filename: str, output_dir: str, updated_file_name_identifier: str = "converted"
+    filename: str,
+    output_dir: str,
+    updated_file_name_identifier: Optional[str] = "converted",
 ) -> str:
     """
     Convert an image to tiff.
@@ -152,15 +154,17 @@ def map_values(image: np.ndarray, dictionary: dict) -> np.ndarray:
 #     plt.show()
 
 
-def hue_range_mask(image: np.ndarray, min_hue, max_hue, sat_min=0.05) -> np.ndarray:
+def hue_range_mask(
+    image: np.ndarray, min_hue: float, max_hue: float, sat_min: Optional[float] = 0.05
+) -> np.ndarray:
     """
     Mask based on hue range.
 
     Args:
         image (np.ndarray): RGB numpy image
-        min_hue (_type_): The minimum hue value.
-        max_hue (_type_): The maximum hue value.
-        sat_min (float, optional): The minimum saturation value. Defaults to 0.05.
+        min_hue (float): Minimum hue value
+        max_hue (float): Maximum hue value
+        sat_min (Optional[float], optional): Minimum saturation value. Defaults to 0.05.
 
     Returns:
         np.ndarray: image mask, True pixels are within the hue range.
@@ -325,7 +329,7 @@ def patch_artifact_check(
     intensity_thresh: int = 250,
     intensity_thresh_saturation: int = 5,
     intensity_thresh_b: int = 128,
-    patch_size: List[int] = [256, 256],
+    patch_size: Optional[List[int]] = [256, 256],
 ) -> bool:
     """
     This function is used to curate patches from the input image. It is used to remove patches that have artifacts.
@@ -335,7 +339,7 @@ def patch_artifact_check(
         intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 250.
         intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 5.
         intensity_thresh_b (int, optional): Threshold to check blackness in the patch. Defaults to 128.
-        patch_size (List[int], optional): Tiling Size of the WSI/patch size. Defaults to [256, 256].
+        patch_size (Optional[List[int]], optional): Tiling Size of the WSI/patch size. Defaults to [256, 256].
 
     Returns:
         bool: Whether the patch is valid or not.
@@ -447,7 +451,7 @@ def generate_initial_mask(slide_path: str, scale: int) -> Tuple[np.ndarray, tupl
 
 
 def get_patch_size_in_microns(
-    input_slide_path: str, patch_size_from_config: str, verbose: bool = False
+    input_slide_path: str, patch_size_from_config: str, verbose: Optional[bool] = False
 ) -> List[int]:
     """
     Function that returns the patch size in pixels.
@@ -455,7 +459,7 @@ def get_patch_size_in_microns(
     Args:
         input_slide_path (str): The path to the slide.
         patch_size_from_config (str): The patch size from the config file.
-        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+        verbose (Optional[bool], optional): Whether to print verbose output. Defaults to False.
 
     Returns:
         List[int]: The patch size after getting converted to pixels.
