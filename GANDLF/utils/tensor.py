@@ -1,5 +1,5 @@
 import os, sys
-from typing import Tuple, Union
+from typing import List, Tuple, Union
 from pandas.util import hash_pandas_object
 import numpy as np
 import SimpleITK as sitk
@@ -17,13 +17,15 @@ from GANDLF.utils.generic import get_array_from_image_or_tensor
 special_cases_to_check = ["||"]
 
 
-def one_hot(segmask_tensor: torch.Tensor, class_list: list) -> torch.Tensor:
+def one_hot(
+    segmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]
+) -> torch.Tensor:
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
         segmask_tensor (torch.Tensor): The segmentation mask Tensor.
-        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+        class_list (Union[List[int], List[str]]): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
@@ -82,13 +84,13 @@ def one_hot(segmask_tensor: torch.Tensor, class_list: list) -> torch.Tensor:
     return batch_stack
 
 
-def reverse_one_hot(predmask_tensor: torch.Tensor, class_list: list) -> np.array:
+def reverse_one_hot(predmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]) -> np.array:
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
     Args:
         predmask_tensor (torch.Tensor): The predicted segmentation mask Tensor.
-        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+        class_list (Union[List[int], List[str]]): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         numpy.array: The final mask as numpy array.
@@ -216,13 +218,13 @@ def send_model_to_device(
     return model, amp, device, dev
 
 
-def get_model_dict(model: torch.nn.Module, device_id: Union[str, list]) -> dict:
+def get_model_dict(model: torch.nn.Module, device_id: Union[str, List[str]]) -> dict:
     """
     This function returns the model dictionary
 
     Args:
         model (torch.nn.Module): The model for which the dictionary is to be returned.
-        device_id (Union[str, list]): The device id as string or list.
+        device_id (Union[str, List[str]]): The device id as string or list of devices.
 
     Returns:
         dict: The model dictionary.
