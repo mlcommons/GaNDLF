@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 import os
 from pathlib import Path
 import numpy as np
@@ -37,8 +37,8 @@ def ImagesFromDataFrame(
     dataframe: pandas.DataFrame,
     parameters: dict,
     train: bool,
-    apply_zero_crop: bool = False,
-    loader_type: str = "",
+    apply_zero_crop: Optional[bool] = False,
+    loader_type: Optional[str] = None,
 ) -> Union[torchio.SubjectsDataset, torchio.Queue]:
     """
     Reads the pandas dataframe and gives the dataloader to use for training/validation/testing.
@@ -47,8 +47,8 @@ def ImagesFromDataFrame(
         dataframe (pandas.DataFrame): The main input dataframe which is calculated after splitting the data CSV.
         parameters (dict): The parameters dictionary.
         train (bool): If the dataloader is for training or not.
-        apply_zero_crop (bool, optional): If zero crop is to be applied. Defaults to False.
-        loader_type (str, optional): The type of loader to use for printing. Defaults to "".
+        apply_zero_crop (Optional[bool], optional): Whether to apply zero crop or not. Defaults to False.
+        loader_type (Optional[str], optional): The type of loader. Defaults to None.
 
     Raises:
         ValueError: If the subject cannot be loaded.
@@ -56,6 +56,7 @@ def ImagesFromDataFrame(
     Returns:
         Union[torchio.SubjectsDataset, torchio.Queue]: The dataloader queue for validation/testing (where patching and data augmentation is not required) or the subjects dataset for training.
     """
+    loader_type = loader_type if loader_type is not None else ""
     # store in previous variable names
     patch_size = parameters["patch_size"]
     headers = parameters["headers"]
