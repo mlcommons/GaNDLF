@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Tuple, Union
 import os, pathlib, math, copy
 from enum import Enum
 import numpy as np
@@ -11,8 +11,8 @@ from .generic import get_filename_extension_sanitized
 
 def resample_image(
     input_image: sitk.Image,
-    spacing: Union[np.ndarray, list, tuple],
-    size: Optional[Union[np.ndarray, list, tuple]] = None,
+    spacing: Union[np.ndarray, List[float], Tuple[float]],
+    size: Optional[Union[np.ndarray, List[float], Tuple[float]]] = None,
     interpolator: Optional[Enum] = sitk.sitkLinear,
     outsideValue: Optional[int] = 0,
 ) -> sitk.Image:
@@ -21,8 +21,8 @@ def resample_image(
 
     Args:
         input_image (sitk.Image): The input image to be resampled.
-        spacing (Union[np.ndarray, list, tuple]): The desired spacing for the resampled image.
-        size (Optional[Union[np.ndarray, list, tuple]], optional): The desired size for the resampled image. Defaults to None.
+        spacing (Union[np.ndarray, List[float], Tuple[float]]): The desired spacing for the resampled image.
+        size (Optional[Union[np.ndarray, List[float], Tuple[float]]], optional): The desired size for the resampled image. Defaults to None.
         interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
         outsideValue (Optional[int], optional): The value to be used for the outside of the image. Defaults to 0.
 
@@ -100,16 +100,16 @@ def resize_image(
 
 
 def softer_sanity_check(
-    base_property: Union[np.ndarray, list, tuple],
-    new_property: Union[np.ndarray, list, tuple],
+    base_property: Union[np.ndarray, List[float], Tuple[float]],
+    new_property: Union[np.ndarray, List[float], Tuple[float]],
     threshold: Optional[float] = 0.00001,
 ) -> bool:
     """
     This function performs a softer sanity check on the input properties.
 
     Args:
-        base_property (Union[np.ndarray, list, tuple]): The original value of the property to be compared.
-        new_property (Union[np.ndarray, list, tuple]): The new value of the property to be compared.
+        base_property (Union[np.ndarray, List[float], Tuple[float]]): The base property.
+        new_property (Union[np.ndarray, List[float], Tuple[float]]): The new property.
         threshold (Optional[float], optional): The threshold for comparison. Defaults to 0.00001.
 
     Returns:
@@ -252,12 +252,14 @@ def write_training_patches(subject: torchio.Subject, params: dict) -> None:
         )
 
 
-def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: int):
+def get_correct_padding_size(
+    patch_size: Union[List[int], Tuple[int]], model_dimension: int
+):
     """
     This function returns the correct padding size based on the patch size and overlap.
 
     Args:
-        patch_size (Union[list, tuple]): The patch size.
+        patch_size (Union[List[int], Tuple[int]]): The patch size.
         model_dimension (int): The model dimension.
 
     Returns:
