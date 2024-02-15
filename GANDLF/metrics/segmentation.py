@@ -2,7 +2,7 @@
 All the segmentation metrics are to be called from here
 """
 
-from typing import Union
+from typing import List, Union
 import sys
 import torch
 import numpy as np
@@ -39,7 +39,7 @@ def multi_class_dice(
     target: torch.Tensor,
     params: dict,
     per_label: bool = False,
-) -> Union[torch.Tensor, list]:
+) -> Union[torch.Tensor, List[float]]:
     """
     This function computes a multi-class dice.
 
@@ -50,7 +50,7 @@ def multi_class_dice(
         per_label (bool, optional): Whether to return per-label dice scores. Defaults to False.
 
     Returns:
-        Union[torch.Tensor, list]: The multi-class dice score or the list of per-label dice scores.
+        Union[torch.Tensor, List[float]]: The multi-class dice score or the list of per-label dice scores.
     """
     total_dice = 0
     avg_counter = 0
@@ -350,7 +350,7 @@ def _calculator_generic(
     percentile: int = 95,
     surface_dice: bool = False,
     per_label: bool = False,
-) -> Union[torch.Tensor, list]:
+) -> Union[torch.Tensor, List[float]]:
     """
     Generic Surface Dice (SD)/Hausdorff (HD) Distance calculation from 2 tensors. Compared to the standard Hausdorff Distance, this metric is slightly more stable to small outliers and is commonly used in Biomedical Segmentation challenges.
 
@@ -358,15 +358,12 @@ def _calculator_generic(
         prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
         target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
         params (dict): The parameter dictionary containing training and data information.
-        percentile (int, optional): The percentile of surface distances to include during HD calculation. Defaults to 95.
-        surface_dice (bool, optional): Whether the SD needs to be calculated or not. Defaults to False.
-        per_label (bool, optional): Whether the hausdorff needs to be calculated per label or not. Defaults to False.
+        percentile (int, optional): The percentile to calculate the Hausdorff Distance. Defaults to 95.
+        surface_dice (bool, optional): Whether to return the surface dice. Defaults to False.
+        per_label (bool, optional): Whether to return per-label dice scores. Defaults to False.
 
     Returns:
-        torch.Tensor or list: The symmetric Hausdorff Distance or Normalized Surface Distance between the object(s) in ```result``` and the object(s) in ```reference```. The distance unit is the same as for the spacing of elements along each dimension, which is usually given in mm.
-
-    See also:
-        :func:`hd`
+        Union[torch.Tensor, List[float]]: The Normalized Surface Dice, 100th percentile Hausdorff Distance, and the 95th percentile Hausdorff Distance, or the list of per-label scores for each metric.
     """
     _nsd, _hd100, _hd95 = _calculator_generic_all_surface_distances(
         prediction, target, params, per_label=per_label
@@ -379,67 +376,217 @@ def _calculator_generic(
         return _hd100
 
 
-def hd95(prediction, target, params):
+def hd95(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> torch.Tensor:
+    """
+    This function returns the 95th percentile Hausdorff Distance.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        torch.Tensor: The 95th percentile Hausdorff Distance.
+    """
     return _calculator_generic(prediction, target, params, percentile=95)
 
 
-def hd95_per_label(prediction, target, params):
+def hd95_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> List[float]:
+    """
+    This function returns the per-label 95th percentile Hausdorff Distance.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        List[float]: The list of per-label 95th percentile Hausdorff Distances.
+    """
     return _calculator_generic(
         prediction, target, params, percentile=95, per_label=True
     )
 
 
-def hd100(prediction, target, params):
+def hd100(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> torch.Tensor:
+    """
+    This function returns the 100th percentile Hausdorff Distance.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        torch.Tensor: The 100th percentile Hausdorff Distance.
+    """
     return _calculator_generic(prediction, target, params, percentile=100)
 
 
-def hd100_per_label(prediction, target, params):
+def hd100_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> List[float]:
+    """
+    This function returns the per-label 100th percentile Hausdorff Distance.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        List[float]: The list of per-label 100th percentile Hausdorff Distances.
+    """
     return _calculator_generic(
         prediction, target, params, percentile=100, per_label=True
     )
 
 
-def nsd(prediction, target, params):
+def nsd(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> torch.Tensor:
+    """
+    This function returns the Normalized Surface Dice.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        torch.Tensor: The Normalized Surface Dice.
+    """
     return _calculator_generic(
         prediction, target, params, percentile=100, surface_dice=True
     )
 
 
-def nsd_per_label(prediction, target, params):
+def nsd_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> List[float]:
+    """
+    This function returns the per-label Normalized Surface Dice.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        List[float]: The list of per-label Normalized Surface Dice scores.
+    """
     return _calculator_generic(
         prediction, target, params, percentile=100, per_label=True, surface_dice=True
     )
 
 
-def sensitivity(prediction, target, params):
+def sensitivity(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
+    """
+    This function returns the sensitivity.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        torch.Tensor: The sensitivity.
+    """
     s, _ = _calculator_sensitivity_specificity(prediction, target, params)
     return s
 
 
-def sensitivity_per_label(prediction, target, params):
+def sensitivity_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> List[float]:
+    """
+    This function returns the per-label sensitivity.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        List[float]: The list of per-label sensitivity scores.
+    """
     s, _ = _calculator_sensitivity_specificity(
         prediction, target, params, per_label=True
     )
     return s
 
 
-def specificity_segmentation(prediction, target, params):
+def specificity_segmentation(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
+    """
+    This function returns the specificity.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        torch.Tensor: The specificity.
+    """
     _, p = _calculator_sensitivity_specificity(prediction, target, params)
     return p
 
 
-def specificity_segmentation_per_label(prediction, target, params):
+def specificity_segmentation_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> List[float]:
+    """
+    This function returns the per-label specificity.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        List[float]: The list of per-label specificity scores.
+    """
     _, p = _calculator_sensitivity_specificity(
         prediction, target, params, per_label=True
     )
     return p
 
 
-def jaccard(prediction, target, params):
+def jaccard(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> torch.Tensor:
+    """
+    This function returns the Jaccard score.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        torch.Tensor: The Jaccard score.
+    """
     j = _calculator_jaccard(prediction, target, params)
     return j
 
 
-def jaccard_per_label(prediction, target, params):
+def jaccard_per_label(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> List[float]:
+    """
+    This function returns the per-label Jaccard score.
+
+    Args:
+        prediction (torch.Tensor): Input prediction containing objects. Can be any type but will be converted into binary: background where 0, object everywhere else.
+        target (torch.Tensor): Input ground truth containing objects. Can be any type but will be converted into binary: binary: background where 0, object everywhere else.
+        params (dict): The parameter dictionary containing training and data information.
+
+    Returns:
+        List[float]: The list of per-label Jaccard scores.
+    """
     j = _calculator_jaccard(prediction, target, params, per_label=True)
     return j
