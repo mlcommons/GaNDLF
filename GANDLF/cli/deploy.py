@@ -1,10 +1,5 @@
-import os
-import shutil
-import yaml
-import docker
-import tarfile
-import io
-import sysconfig
+import os, shutil, yaml, docker, tarfile, io, sysconfig
+from typing import Optional
 
 # import copy
 
@@ -22,10 +17,10 @@ def run_deployment(
     outputdir: str,
     target: str,
     mlcube_type: str,
-    entrypoint_script: str = None,
-    configfile: str = None,
-    modeldir: str = None,
-    requires_gpu: bool = None,
+    entrypoint_script: Optional[str] = None,
+    configfile: Optional[str] = None,
+    modeldir: Optional[str] = None,
+    requires_gpu: Optional[bool] = None,
 ) -> bool:
     """
     This function runs the deployment of the mlcube.
@@ -88,10 +83,10 @@ def run_deployment(
 def deploy_docker_mlcube(
     mlcubedir: str,
     outputdir: str,
-    entrypoint_script: str = None,
-    config: str = None,
-    modeldir: str = None,
-    requires_gpu: bool = None,
+    entrypoint_script: Optional[str] = None,
+    config: Optional[str] = None,
+    modeldir: Optional[str] = None,
+    requires_gpu: Optional[bool] = None,
 ) -> bool:
     """
     This function deploys the mlcube as a docker container.
@@ -242,7 +237,7 @@ def deploy_docker_mlcube(
 
 
 def get_metrics_mlcube_config(
-    mlcube_config_file: str, entrypoint_script: str = None
+    mlcube_config_file: str, entrypoint_script: Optional[str] = None
 ) -> dict:
     """
     This function returns the mlcube config for the metrics.
@@ -265,7 +260,7 @@ def get_metrics_mlcube_config(
 
 
 def get_model_mlcube_config(
-    mlcube_config_file: str, requires_gpu: bool, entrypoint_script: str = None
+    mlcube_config_file: str, requires_gpu: bool, entrypoint_script: Optional[str] = None
 ) -> dict:
     """
     This function returns the mlcube config for the model.
