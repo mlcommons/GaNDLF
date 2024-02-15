@@ -1,3 +1,4 @@
+from typing import Optional
 import SimpleITK as sitk
 import PIL.Image
 import numpy as np
@@ -13,7 +14,7 @@ from GANDLF.utils import get_image_from_tensor
 
 
 def structural_similarity_index(
-    prediction: torch.Tensor, target: torch.Tensor, mask: torch.Tensor = None
+    prediction: torch.Tensor, target: torch.Tensor, mask: Optional[torch.Tensor] = None
 ) -> torch.Tensor:
     """
     Computes the structural similarity index between the target and prediction.
@@ -21,7 +22,7 @@ def structural_similarity_index(
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
-        mask (torch.Tensor, optional): The mask tensor. Defaults to None.
+        mask (Optional[torch.Tensor], optional): The mask tensor. Defaults to None.
 
     Returns:
         torch.Tensor: The structural similarity index.
@@ -53,8 +54,8 @@ def mean_squared_error(prediction: torch.Tensor, target: torch.Tensor) -> torch.
 def peak_signal_noise_ratio(
     target: torch.Tensor,
     prediction: torch.Tensor,
-    data_range: tuple = None,
-    epsilon: float = None,
+    data_range: Optional[tuple] = None,
+    epsilon: Optional[float] = None,
 ) -> torch.Tensor:
     """
     Computes the peak signal to noise ratio between the target and prediction.
@@ -62,10 +63,12 @@ def peak_signal_noise_ratio(
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
-        data_range (tuple, optional): If not None, this data range (min, max) is used as enumerator instead of computing it from the given data. Defaults to None.
-        epsilon (float, optional): If not None, this epsilon is added to the denominator of the fraction to avoid infinity as output. Defaults to None.
-    """
+        data_range (Optional[tuple], optional): The data range. Defaults to None.
+        epsilon (Optional[float], optional): The epsilon value. Defaults to None.
 
+    Returns:
+        torch.Tensor: The peak signal to noise ratio.
+    """
     if epsilon == None:
         psnr = (
             PeakSignalNoiseRatio()
@@ -94,6 +97,9 @@ def mean_squared_log_error(
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
+
+    Returns:
+        torch.Tensor: The mean squared log error.
     """
     mle = MeanSquaredLogError()
     return mle(preds=prediction, target=target)
@@ -106,6 +112,9 @@ def mean_absolute_error(prediction: torch.Tensor, target: torch.Tensor) -> torch
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
+
+    Returns:
+        torch.Tensor: The mean absolute error.
     """
     mae = MeanAbsoluteError()
     return mae(preds=prediction, target=target)
@@ -120,7 +129,7 @@ def _get_ncc_image(prediction: torch.Tensor, target: torch.Tensor) -> sitk.Image
         target (torch.Tensor): The target tensor.
 
     Returns:
-        torch.Tensor: The normalized cross correlation image.
+        sitk.Image: The normalized cross correlation image.
     """
 
     def __convert_to_grayscale(image: sitk.Image) -> sitk.Image:
