@@ -54,6 +54,7 @@ from .generic import (
     print_and_format_metrics,
     determine_classification_task_type,
     getBase2,
+    get_git_hash,
 )
 
 from .modelio import (

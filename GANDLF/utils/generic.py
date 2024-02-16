@@ -1,4 +1,4 @@
-import os, datetime, sys
+import os, datetime, subprocess, sys
 from copy import deepcopy
 import random
 import numpy as np
@@ -329,3 +329,21 @@ def determine_classification_task_type(params: dict) -> str:
     """
     task = "binary" if params["model"]["num_classes"] == 2 else "multiclass"
     return task
+
+
+def get_git_hash() -> str:
+    """
+    Get the git hash of the current commit.
+
+    Returns:
+        str: The git hash of the current commit.
+    """
+    try:
+        git_hash = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=os.getcwd())
+            .decode("ascii")
+            .strip()
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        git_hash = "None"
+    return git_hash
