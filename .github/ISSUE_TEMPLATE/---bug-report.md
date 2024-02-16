@@ -7,31 +7,27 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+### Describe the bug
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+### To Reproduce
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Use the data `'...'`
+2. Run command `'...'`
+3. Scroll down to `'...'`
+4. See error (it would be helpful to include the error message and stack trace)
 
-**Expected behavior**
+### Expected behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### Media
+If applicable, add images, screenshots or other relevant media to help explain your problem.
 
-**GaNDLF Version**
+### Environment information
 <!-- Put the output of the following command:
-python -c 'import GANDLF as g;print(g.__version__)'
+python ./gandlf_debugInfo
 -->
-Version information of the GaNDLF package in the virtual environment.
+GaNDLF version, OS, and any other relevant information.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. Windows/Linux (include detailed distro information)/macOS]
- - Version (including Build information, if any): [e.g. Fedora 22 or Windows 10.1803]
-
-**Additional context**
+### Additional context
 Add any other context about the problem here.
