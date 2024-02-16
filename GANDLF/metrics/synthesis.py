@@ -1,3 +1,4 @@
+from typing import Optional
 import SimpleITK as sitk
 import PIL.Image
 import numpy as np
@@ -12,14 +13,16 @@ from torchmetrics import (
 from GANDLF.utils import get_image_from_tensor
 
 
-def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
+def structural_similarity_index(
+    prediction: torch.Tensor, target: torch.Tensor, mask: Optional[torch.Tensor] = None
+) -> torch.Tensor:
     """
     Computes the structural similarity index between the target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
-        mask (torch.Tensor, optional): The mask tensor. Defaults to None.
+        target (torch.Tensor): The target tensor.
+        mask (Optional[torch.Tensor], optional): The mask tensor. Defaults to None.
 
     Returns:
         torch.Tensor: The structural similarity index.
@@ -36,31 +39,36 @@ def structural_similarity_index(target, prediction, mask=None) -> torch.Tensor:
     return ssim_idx.mean()
 
 
-def mean_squared_error(target, prediction) -> torch.Tensor:
+def mean_squared_error(prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """
     Computes the mean squared error between the target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
     """
     mse = MeanSquaredError()
     return mse(preds=prediction, target=target)
 
 
 def peak_signal_noise_ratio(
-    target, prediction, data_range=None, epsilon=None
+    target: torch.Tensor,
+    prediction: torch.Tensor,
+    data_range: Optional[tuple] = None,
+    epsilon: Optional[float] = None,
 ) -> torch.Tensor:
     """
     Computes the peak signal to noise ratio between the target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
-        data_range (tuple, optional): If not None, this data range (min, max) is used as enumerator instead of computing it from the given data. Defaults to None.
-        epsilon (float, optional): If not None, this epsilon is added to the denominator of the fraction to avoid infinity as output. Defaults to None.
-    """
+        target (torch.Tensor): The target tensor.
+        data_range (Optional[tuple], optional): The data range. Defaults to None.
+        epsilon (Optional[float], optional): The epsilon value. Defaults to None.
 
+    Returns:
+        torch.Tensor: The peak signal to noise ratio.
+    """
     if epsilon == None:
         psnr = (
             PeakSignalNoiseRatio()
@@ -80,40 +88,48 @@ def peak_signal_noise_ratio(
         return 10.0 * torch.log10(((max_v - min_v) ** 2) / (mse + epsilon))
 
 
-def mean_squared_log_error(target, prediction) -> torch.Tensor:
+def mean_squared_log_error(
+    prediction: torch.Tensor, target: torch.Tensor
+) -> torch.Tensor:
     """
     Computes the mean squared log error between the target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
+
+    Returns:
+        torch.Tensor: The mean squared log error.
     """
     mle = MeanSquaredLogError()
     return mle(preds=prediction, target=target)
 
 
-def mean_absolute_error(target, prediction) -> torch.Tensor:
+def mean_absolute_error(prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """
     Computes the mean absolute error between the target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
+
+    Returns:
+        torch.Tensor: The mean absolute error.
     """
     mae = MeanAbsoluteError()
     return mae(preds=prediction, target=target)
 
 
-def _get_ncc_image(target, prediction) -> sitk.Image:
+def _get_ncc_image(prediction: torch.Tensor, target: torch.Tensor) -> sitk.Image:
     """
     Computes normalized cross correlation image between target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
 
     Returns:
-        torch.Tensor: The normalized cross correlation image.
+        sitk.Image: The normalized cross correlation image.
     """
 
     def __convert_to_grayscale(image: sitk.Image) -> sitk.Image:
@@ -142,13 +158,13 @@ def _get_ncc_image(target, prediction) -> sitk.Image:
     return correlation_filter.Execute(target_image, pred_image)
 
 
-def ncc_mean(target, prediction) -> float:
+def ncc_mean(prediction: torch.Tensor, target: torch.Tensor) -> float:
     """
     Computes normalized cross correlation mean between target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
 
     Returns:
         float: The normalized cross correlation mean.
@@ -159,13 +175,13 @@ def ncc_mean(target, prediction) -> float:
     return stats_filter.GetMean()
 
 
-def ncc_std(target, prediction) -> float:
+def ncc_std(prediction: torch.Tensor, target: torch.Tensor) -> float:
     """
     Computes normalized cross correlation standard deviation between target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
 
     Returns:
         float: The normalized cross correlation standard deviation.
@@ -176,13 +192,13 @@ def ncc_std(target, prediction) -> float:
     return stats_filter.GetSigma()
 
 
-def ncc_max(target, prediction) -> float:
+def ncc_max(prediction: torch.Tensor, target: torch.Tensor) -> float:
     """
     Computes normalized cross correlation maximum between target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
 
     Returns:
         float: The normalized cross correlation maximum.
@@ -193,13 +209,13 @@ def ncc_max(target, prediction) -> float:
     return stats_filter.GetMaximum()
 
 
-def ncc_min(target, prediction) -> float:
+def ncc_min(prediction: torch.Tensor, target: torch.Tensor) -> float:
     """
     Computes normalized cross correlation minimum between target and prediction.
 
     Args:
-        target (torch.Tensor): The target tensor.
         prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
 
     Returns:
         float: The normalized cross correlation minimum.

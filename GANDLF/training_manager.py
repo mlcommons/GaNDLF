@@ -7,7 +7,14 @@ from GANDLF.compute import training_loop
 from GANDLF.utils import get_dataframe
 
 
-def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
+def TrainingManager(
+    dataframe: pd.DataFrame,
+    outputDir: str,
+    parameters: dict,
+    device: str,
+    resume: bool,
+    reset: bool,
+) -> None:
     """
     This is the training manager that ties all the training functionality together
 
@@ -303,22 +310,22 @@ def TrainingManager(dataframe, outputDir, parameters, device, resume, reset):
 
 
 def TrainingManager_split(
-    dataframe_train,
-    dataframe_validation,
-    dataframe_testing,
-    outputDir,
-    parameters,
-    device,
-    resume,
-    reset,
+    dataframe_train: pd.DataFrame,
+    dataframe_validation: pd.DataFrame,
+    dataframe_testing: pd.DataFrame,
+    outputDir: str,
+    parameters: dict,
+    device: str,
+    resume: bool,
+    reset: bool,
 ):
     """
     This is the training manager that ties all the training functionality together
 
     Args:
-        dataframe_train (pandas.DataFrame): The training data from CSV.
-        dataframe_validation (pandas.DataFrame): The validation data from CSV.
-        dataframe_testing (pandas.DataFrame): The testing data from CSV.
+        dataframe_train (pd.DataFrame): The training data from CSV.
+        dataframe_validation (pd.DataFrame): The validation data from CSV.
+        dataframe_testing (pd.DataFrame): The testing data from CSV.
         outputDir (str): The main output directory.
         parameters (dict): The parameters dictionary.
         device (str): The device to perform computations on.

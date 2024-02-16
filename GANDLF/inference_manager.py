@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from pathlib import Path
 import pandas as pd
 import torch
@@ -8,19 +9,22 @@ from GANDLF.compute import inference_loop
 from GANDLF.utils import get_unique_timestamp
 
 
-def InferenceManager(dataframe, modelDir, parameters, device, outputDir=None):
+def InferenceManager(
+    dataframe: pd.DataFrame,
+    modelDir: str,
+    parameters: dict,
+    device: str,
+    outputDir: Optional[str] = None,
+) -> None:
     """
-    This function takes in a dataframe, with some other parameters and performs the inference on the data in the dataframe.
+    This function is used to perform inference on a model using a dataframe.
 
     Args:
-        dataframe (pandas.DataFrame): The dataframe containing the data to be used for inference.
-        modelDir (str): The path to the directory containing the model to be used for inference.
-        outputDir (str): The path to the directory where the output of the inference will be stored.
-        parameters (dict): The dictionary containing the parameters for the inference.
-        device (str): The device type.
-
-    Returns:
-        None
+        dataframe (pd.DataFrame): The dataframe containing the data to be used for inference.
+        modelDir (str): The path to the model directory.
+        parameters (dict): The parameters to be used for inference.
+        device (str): The device to be used for inference.
+        outputDir (Optional[str], optional): The output directory for the inference results. Defaults to None.
     """
     # get the indeces for kfold splitting
     inferenceData_full = dataframe

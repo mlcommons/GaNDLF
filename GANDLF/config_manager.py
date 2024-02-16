@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import sys, yaml, ast, pkg_resources
 import numpy as np
 from copy import deepcopy
@@ -43,18 +44,23 @@ parameter_defaults_string = {
 }
 
 
-def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=True):
+def initialize_parameter(
+    params: dict,
+    parameter_to_initialize: str,
+    value: Optional[Union[str, list, int, dict]] = None,
+    evaluate: Optional[bool] = True,
+) -> dict:
     """
-    Initializes the specified parameter with supplied value
+    This function will initialize the parameter in the parameters dict to the value if it is absent.
 
     Args:
         params (dict): The parameter dictionary.
         parameter_to_initialize (str): The parameter to initialize.
-        value ((Union[str, list, int]), optional): The value to initialize. Defaults to None.
-        evaluate (bool, optional): String evaluate. Defaults to True.
+        value (Optional[Union[str, list, int, dict]], optional): The value to initialize. Defaults to None.
+        evaluate (Optional[bool], optional): Whether to evaluate the value. Defaults to True.
 
     Returns:
-        [type]: [description]
+        dict: The parameter dictionary.
     """
     if parameter_to_initialize in params:
         if evaluate:
@@ -72,17 +78,19 @@ def initialize_parameter(params, parameter_to_initialize, value=None, evaluate=T
     return params
 
 
-def initialize_key(parameters, key, value=None):
+def initialize_key(
+    parameters: dict, key: str, value: Optional[Union[str, float, list, dict]] = None
+) -> dict:
     """
-    This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
+    This function initializes a key in the parameters dictionary to a value if it is absent.
 
     Args:
         parameters (dict): The parameter dictionary.
-        key (str): The parameter to initialize.
-        value (n.a.): The value to initialize.
+        key (str): The key to initialize.
+        value (Optional[Union[str, float, list, dict]], optional): The value to initialize. Defaults to None.
 
     Returns:
-        dict: The final parameter dictionary.
+        dict: The parameter dictionary.
     """
     if parameters is None:
         parameters = {}
@@ -98,7 +106,9 @@ def initialize_key(parameters, key, value=None):
     return parameters
 
 
-def _parseConfig(config_file_path, version_check_flag=True):
+def _parseConfig(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
@@ -370,9 +380,11 @@ def _parseConfig(config_file_path, version_check_flag=True):
                     default_range = (
                         [-0.1, 0.1]
                         if augmentation_type == "hed_transform"
-                        else [-0.03, 0.03]
-                        if augmentation_type == "hed_transform_light"
-                        else [-0.95, 0.95]
+                        else (
+                            [-0.03, 0.03]
+                            if augmentation_type == "hed_transform_light"
+                            else [-0.95, 0.95]
+                        )
                     )
 
                     for key in ranges:
@@ -716,7 +728,9 @@ def _parseConfig(config_file_path, version_check_flag=True):
     return params
 
 
-def ConfigManager(config_file_path, version_check_flag=True) -> None:
+def ConfigManager(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
     """
     This function parses the configuration file and returns a dictionary of parameters.
 

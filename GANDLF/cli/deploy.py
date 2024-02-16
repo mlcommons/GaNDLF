@@ -1,10 +1,5 @@
-import os
-import shutil
-import yaml
-import docker
-import tarfile
-import io
-import sysconfig
+import os, shutil, yaml, docker, tarfile, io, sysconfig
+from typing import Optional
 
 # import copy
 
@@ -18,30 +13,30 @@ mlcube_types = ["model", "metrics"]
 
 
 def run_deployment(
-    mlcubedir,
-    outputdir,
-    target,
-    mlcube_type,
-    entrypoint_script=None,
-    configfile=None,
-    modeldir=None,
-    requires_gpu=None,
-):
+    mlcubedir: str,
+    outputdir: str,
+    target: str,
+    mlcube_type: str,
+    entrypoint_script: Optional[str] = None,
+    configfile: Optional[str] = None,
+    modeldir: Optional[str] = None,
+    requires_gpu: Optional[bool] = None,
+) -> bool:
     """
-    Run the deployment of the model.
+    This function runs the deployment of the mlcube.
 
     Args:
         mlcubedir (str): The path to the mlcube directory.
         outputdir (str): The path to the output directory.
-        target (str): The target to deploy to.
-        mlcube_type (str): Either 'model' or 'metrics'
-        entrypoint_script (str): The path of entrypoint script. Only used for metrics and inference
-        configfile (str, Optional): The path to the configuration file. Required for models
-        modeldir (str, Optional): The path to the model directory. Required for models
-        requires_gpu (str, Optional): Whether the model requires GPU. Required for models
+        target (str): The deployment target.
+        mlcube_type (str): The type of mlcube.
+        entrypoint_script (str, optional): The path of entrypoint script; only used for metrics and inference. Defaults to None.
+        configfile (str, optional): The path of the configuration file; required for models. Defaults to None.
+        modeldir (str, optional): The path of the model directory; required for models. Defaults to None.
+        requires_gpu (bool, optional): Whether the model requires GPU; required for models. Defaults to None.
 
     Returns:
-        bool: True if the deployment was successful, False otherwise.
+        bool: True if the deployment is successful.
     """
     assert (
         target in deploy_targets
@@ -86,23 +81,26 @@ def run_deployment(
 
 
 def deploy_docker_mlcube(
-    mlcubedir,
-    outputdir,
-    entrypoint_script=None,
-    config=None,
-    modeldir=None,
-    requires_gpu=None,
-):
+    mlcubedir: str,
+    outputdir: str,
+    entrypoint_script: Optional[str] = None,
+    config: Optional[str] = None,
+    modeldir: Optional[str] = None,
+    requires_gpu: Optional[bool] = None,
+) -> bool:
     """
-    Deploy the docker mlcube of the model or metrics calculator.
+    This function deploys the mlcube as a docker container.
 
     Args:
         mlcubedir (str): The path to the mlcube directory.
         outputdir (str): The path to the output directory.
-        entrypoint_script (str): The path of entrypoint script. Only used for metrics and inference
-        config (str, Optional): The path to the configuration file. Required for models
-        modeldir (str, Optional): The path to the model directory. Required for models
-        requires_gpu (str, Optional): Whether the model requires GPU. Required for models
+        entrypoint_script (str, optional): The path of the entrypoint script; only used for metrics and inference. Defaults to None.
+        config (str, optional): The path of the configuration file; required for models. Defaults to None.
+        modeldir (str, optional): The path of the model directory; required for models. Defaults to None.
+        requires_gpu (bool, optional): Whether the model requires GPU; required for models. Defaults to None.
+
+    Returns:
+        bool: True if the deployment is successful.
     """
     mlcube_config_file = os.path.join(mlcubedir, "mlcube.yaml")
     assert os.path.exists(mlcubedir) and os.path.exists(
@@ -238,13 +236,18 @@ def deploy_docker_mlcube(
     return True
 
 
-def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
+def get_metrics_mlcube_config(
+    mlcube_config_file: str, entrypoint_script: Optional[str] = None
+) -> dict:
     """
-    This function is used to get the metrics from mlcube config file.
+    This function returns the mlcube config for the metrics.
 
     Args:
-        mlcube_config_file (str): The path of mlcube config file.
-        entrypoint_script (str): The path of entrypoint script.
+        mlcube_config_file (str): Path to mlcube config file.
+        entrypoint_script (str, optional): The path of entrypoint script; only used for metrics. Defaults to None.
+
+    Returns:
+        dict: The mlcube config for the metrics.
     """
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
@@ -256,14 +259,19 @@ def get_metrics_mlcube_config(mlcube_config_file, entrypoint_script):
     return mlcube_config
 
 
-def get_model_mlcube_config(mlcube_config_file, requires_gpu, entrypoint_script):
+def get_model_mlcube_config(
+    mlcube_config_file: str, requires_gpu: bool, entrypoint_script: Optional[str] = None
+) -> dict:
     """
     This function returns the mlcube config for the model.
 
     Args:
         mlcube_config_file (str): Path to mlcube config file.
         requires_gpu (bool): Whether the model requires GPU.
-        entrypoint_script (str): The path of entrypoint script. Only used for infer task
+        entrypoint_script (str, optional): The path of entrypoint script; only used for models. Defaults to None.
+
+    Returns:
+        dict: The mlcube config for the model.
     """
     mlcube_config = None
     with open(mlcube_config_file, "r") as f:
@@ -333,7 +341,7 @@ def get_model_mlcube_config(mlcube_config_file, requires_gpu, entrypoint_script)
     # )
 
 
-def embed_asset(asset, container, asset_name):
+def embed_asset(asset: str, container: object, asset_name: str) -> None:
     """
     This function embeds an asset into a container.
 

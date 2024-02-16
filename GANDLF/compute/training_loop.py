@@ -1,5 +1,8 @@
 import os, time, psutil
+from typing import Tuple
+import pandas as pd
 import torch
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
 import torchio
@@ -33,28 +36,23 @@ from .generic import create_pytorch_objects
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 
-def train_network(model, train_dataloader, optimizer, params):
+def train_network(
+    model: torch.nn.Module,
+    train_dataloader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    params: dict,
+) -> Tuple[float, dict]:
     """
-    Function to train a network for a single epoch
+    This function performs the training of the network.
 
-    Parameters
-    ----------
-    model : torch.model
-        The model to process the input image with, it should support appropriate dimensions.
-    train_dataloader : torch.DataLoader
-        The dataloader for the training epoch
-    optimizer : torch.optim
-        Optimizer for optimizing network
-    params : dict
-        the parameters passed by the user yaml
+    Args:
+        model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions.
+        train_dataloader (DataLoader): The dataloader for the training epoch.
+        optimizer (torch.optim.Optimizer): Optimizer for optimizing network.
+        params (dict): The parameters dictionary.
 
-    Returns
-    -------
-    average_epoch_train_loss : float
-        Train loss for the current epoch
-    average_epoch_train_metric : dict
-        Train metrics for the current epoch
-
+    Returns:
+        Tuple[float, dict]: The average epoch training loss and metrics.
     """
     print("*" * 20)
     print("Starting Training : ")
@@ -217,24 +215,24 @@ def train_network(model, train_dataloader, optimizer, params):
 
 
 def training_loop(
-    training_data,
-    validation_data,
-    device,
-    params,
-    output_dir,
-    testing_data=None,
-    epochs=None,
-):
+    training_data: pd.DataFrame,
+    validation_data: pd.DataFrame,
+    device: str,
+    params: dict,
+    output_dir: str,
+    testing_data: bool = None,
+    epochs: bool = None,
+) -> None:
     """
     The main training loop.
 
     Args:
-        training_data (pandas.DataFrame): The data to use for training.
-        validation_data (pandas.DataFrame): The data to use for validation.
+        training_data (pd.DataFrame): The data to use for training.
+        validation_data (pd.DataFrame): The data to use for validation.
         device (str): The device to perform computations on.
         params (dict): The parameters dictionary.
         output_dir (str): The output directory.
-        testing_data (pandas.DataFrame): The data to use for testing.
+        testing_data (pd.DataFrame): The data to use for testing.
         epochs (int): The number of epochs to train; if None, take from params.
     """
     # Some autodetermined factors
@@ -560,7 +558,7 @@ def training_loop(
 
 
 if __name__ == "__main__":
-    import argparse, pickle, pandas
+    import argparse, pickle
 
     torch.multiprocessing.freeze_support()
     # parse the cli arguments here
@@ -572,7 +570,11 @@ if __name__ == "__main__":
         "-val_loader_pickle", type=str, help="Validation loader pickle", required=True
     )
     parser.add_argument(
-        "-testing_loader_pickle", type=str, help="Testing loader pickle", required=True
+        "-testing_loader_pickle",
+        type=str,
+        help="Testing loader pickle",
+        required=False,
+        default=None,
     )
     parser.add_argument(
         "-parameter_pickle", type=str, help="Parameters pickle", required=True
@@ -584,13 +586,10 @@ if __name__ == "__main__":
 
     # # write parameters to pickle - this should not change for the different folds, so keeping is independent
     parameters = pickle.load(open(args.parameter_pickle, "rb"))
-    trainingDataFromPickle = pandas.read_pickle(args.train_loader_pickle)
-    validationDataFromPickle = pandas.read_pickle(args.val_loader_pickle)
+    trainingDataFromPickle = pd.read_pickle(args.train_loader_pickle)
+    validationDataFromPickle = pd.read_pickle(args.val_loader_pickle)
     testingData_str = args.testing_loader_pickle
-    if testingData_str == "None":
-        testingDataFromPickle = None
-    else:
-        testingDataFromPickle = pandas.read_pickle(testingData_str)
+    testingDataFromPickle = pd.read_pickle(testingData_str) if testingData_str else None
 
     training_loop(
         training_data=trainingDataFromPickle,

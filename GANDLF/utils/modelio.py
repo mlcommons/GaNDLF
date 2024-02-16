@@ -1,7 +1,7 @@
 import hashlib
 import os
 import subprocess
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Tuple
 
 import torch
 
@@ -30,7 +30,9 @@ latest_model_path_end = "_latest.pth.tar"
 initial_model_path_end = "_initial.pth.tar"
 
 
-def optimize_and_save_model(model, params, path, onnx_export=True):
+def optimize_and_save_model(
+    model: torch.nn.Module, params: dict, path: str, onnx_export: Optional[bool] = True
+) -> None:
     """
     Perform post-training optimization and save it to a file.
 
@@ -38,7 +40,7 @@ def optimize_and_save_model(model, params, path, onnx_export=True):
         model (torch.nn.Module): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
-        onnx_export (bool): Whether to export to ONNX and OpenVINO.
+        onnx_export (Optional[bool]): Whether to export to ONNX and OpenVINO. Defaults to True.
     """
     # Check if ONNX export is enabled in the parameter dictionary
     onnx_export = params["model"].get("onnx_export", onnx_export)
@@ -135,8 +137,8 @@ def save_model(
     model: torch.nn.Module,
     params: Dict[str, Any],
     path: str,
-    onnx_export: bool = True,
-):
+    onnx_export: Optional[bool] = True,
+) -> None:
     """
     Save the model dictionary to a file.
 
@@ -145,7 +147,7 @@ def save_model(
         model (torch.nn.Module): Trained torch model.
         params (dict): The parameter dictionary.
         path (str): The path to save the model dictionary to.
-        onnx_export (bool): Whether to export to ONNX and OpenVINO.
+        onnx_export (Optional[bool]): Whether to export to ONNX and OpenVINO. Defaults to True.
     """
     model_dict["timestamp"] = get_unique_timestamp()
     model_dict["timestamp_hash"] = hashlib.sha256(
@@ -171,7 +173,7 @@ def save_model(
 
 
 def load_model(
-    path: str, device: torch.device, full_sanity_check: bool = True
+    path: str, device: torch.device, full_sanity_check: Optional[bool] = True
 ) -> Dict[str, Any]:
     """
     Load a model dictionary from a file.
@@ -179,7 +181,7 @@ def load_model(
     Args:
         path (str): The path to save the model dictionary to.
         device (torch.device): The device to run the model on.
-        full_sanity_check (bool): Whether to run full sanity checking on the model.
+        full_sanity_check (Optional[bool]): Whether to perform a full sanity check. Defaults to True.
 
     Returns:
         dict: Model dictionary containing model parameters and metadata.
@@ -191,37 +193,35 @@ def load_model(
         incomplete_keys = [
             key for key in model_dict_full.keys() if key not in model_dict.keys()
         ]
-        if len(incomplete_keys) > 0:
-            raise RuntimeWarning(
-                "Model dictionary is incomplete; the following keys are missing:",
-                incomplete_keys,
-            )
+        assert (
+            len(incomplete_keys) == 0
+        ), "Model dictionary is incomplete; the following keys are missing: " + str(
+            incomplete_keys
+        )
 
     # check if required keys are absent, and if so raise an error
     incomplete_required_keys = [
         key for key in model_dict_required.keys() if key not in model_dict.keys()
     ]
-    if len(incomplete_required_keys) > 0:
-        raise KeyError(
-            "Model dictionary is incomplete; the following keys are missing:",
-            incomplete_required_keys,
-        )
+    assert (
+        len(incomplete_required_keys) == 0
+    ), "Model dictionary is incomplete; the following keys are missing: " + str(
+        incomplete_required_keys
+    )
 
     return model_dict
 
 
-def load_ov_model(path: str, device: str = "CPU"):
+def load_ov_model(path: str, device: Optional[str] = "CPU") -> Tuple[Any, Any, Any]:
     """
     Load an OpenVINO IR model from an .xml file.
 
     Args:
         path (str): The path to the OpenVINO .xml file.
-        device (str): The device to run inference, can be "CPU", "GPU" or "MULTI:CPU,GPU". Default to be "CPU".
+        device (Optional[str]): The device to run the model on, can be "CPU", "GPU" or "MULTI:CPU,GPU". Defaults to "CPU".
 
     Returns:
-        exec_net (OpenVINO executable net): executable OpenVINO model.
-        input_blob (str): Input name.
-        output_blob (str): Output name.
+        Tuple[Any, Any, Any]: The compiled OpenVINO model, input layer name, and output layer name.
     """
 
     try:

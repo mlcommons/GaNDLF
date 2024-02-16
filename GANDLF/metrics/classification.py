@@ -1,16 +1,17 @@
+import torch
 import torchmetrics as tm
 from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
 from GANDLF.utils.generic import determine_classification_task_type
 
 
-def overall_stats(predictions, ground_truth, params):
+def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> dict:
     """
-    Generates a dictionary of metrics calculated on the overall predictions and ground truths.
+    Generates a dictionary of metrics calculated on the overall prediction and ground truths.
 
     Args:
-        predictions (torch.Tensor): The output of the model.
-        ground_truth (torch.Tensor): The ground truth labels.
+        prediction (torch.Tensor): The output of the model.
+        target (torch.Tensor): The ground truth labels.
         params (dict): The parameter dictionary containing training and data information.
 
     Returns:
@@ -70,19 +71,19 @@ def overall_stats(predictions, ground_truth, params):
         for metric_name, calculator in calculators.items():
             if metric_name == "aucroc":
                 one_hot_preds = one_hot(
-                    predictions.long(),
+                    prediction.long(),
                     num_classes=params["model"]["num_classes"],
                 )
                 output_metrics[metric_name] = get_output_from_calculator(
-                    one_hot_preds.float(), ground_truth, calculator
+                    one_hot_preds.float(), target, calculator
                 )
             else:
                 output_metrics[metric_name] = get_output_from_calculator(
-                    predictions, ground_truth, calculator
+                    prediction, target, calculator
                 )
 
-    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCRAD IT ####
-    # what is AUC metric telling at all? Computing it for predictions and ground truth
+    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCARD IT ####
+    # what is AUC metric telling at all? Computing it for prediction and ground truth
     # is not making sense
     # metrics that do not have any "average" parameter
     # calculators = {
@@ -94,14 +95,14 @@ def overall_stats(predictions, ground_truth, params):
     # for metric_name, calculator in calculators.items():
     #     if metric_name == "roc":
     #         one_hot_preds = one_hot(
-    #             predictions.long(), num_classes=params["model"]["num_classes"]
+    #             prediction.long(), num_classes=params["model"]["num_classes"]
     #         )
     #         output_metrics[metric_name] = get_output_from_calculator(
-    #             one_hot_preds.float(), ground_truth, calculator
+    #             one_hot_preds.float(), target, calculator
     #         )
     #     else:
     #         output_metrics[metric_name] = get_output_from_calculator(
-    #             predictions, ground_truth, calculator
+    #             prediction, target, calculator
     #         )
 
     return output_metrics

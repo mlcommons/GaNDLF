@@ -1,16 +1,32 @@
 import sys
+from typing import Dict, Tuple
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
+import torch
 import torch.nn.functional as nnf
 
 from GANDLF.utils import one_hot, reverse_one_hot, get_linear_interpolation_mode
 
 
-def get_metric_output(metric_function, predicted, ground_truth, params):
+def get_metric_output(
+    metric_function: object,
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    params: dict,
+) -> float:
     """
-    This function computes the output of a metric function.
+    This function computes the metric output for a given metric function, prediction and target.
+
+    Args:
+        metric_function (object): The metric function to be used.
+        prediction (torch.Tensor): The input prediction label for the corresponding image label.
+        target (torch.Tensor): The input ground truth for the corresponding image label.
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        float: The computed metric from the label and the prediction.
     """
-    metric_output = metric_function(predicted, ground_truth, params).detach().cpu()
+    metric_output = metric_function(prediction, target, params).detach().cpu()
 
     if metric_output.dim() == 0:
         return metric_output.item()
@@ -23,19 +39,20 @@ def get_metric_output(metric_function, predicted, ground_truth, params):
             return metric_output.item()
 
 
-def get_loss_and_metrics(image, ground_truth, predicted, params):
+def get_loss_and_metrics(
+    image: torch.Tensor, target: torch.Tensor, prediction: torch.Tensor, params: dict
+) -> Tuple[torch.Tensor, Dict[str, float]]:
     """
-    This function computes the loss and metrics for a given image, ground truth and predicted output.
+    This function computes the loss and metrics for a given image, ground truth and prediction output.
 
     Args:
         image (torch.Tensor): The input image stack according to requirements.
-        ground_truth (torch.Tensor): The input ground truth for the corresponding image label.
-        predicted (torch.Tensor): The input predicted label for the corresponding image label.
+        target (torch.Tensor): The input ground truth for the corresponding image label.
+        prediction (torch.Tensor): The input prediction label for the corresponding image label.
         params (dict): The parameters passed by the user yaml.
 
     Returns:
-        torch.Tensor: The computed loss from the label and the prediction.
-        dict: The computed metric from the label and the prediction.
+        Tuple[torch.Tensor, Dict[str,float]]: The computed loss and metrics from the label and the prediction.
     """
     # this is currently only happening for mse_torch
     if isinstance(params["loss_function"], dict):
@@ -53,14 +70,14 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
 
     loss = 0
     # specialized loss function for sdnet
-    sdnet_check = (len(predicted) > 1) and (params["model"]["architecture"] == "sdnet")
+    sdnet_check = (len(prediction) > 1) and (params["model"]["architecture"] == "sdnet")
 
     if params["problem_type"] == "segmentation":
-        ground_truth = one_hot(ground_truth, params["model"]["class_list"])
+        target = one_hot(target, params["model"]["class_list"])
 
     deep_supervision_model = False
     if (
-        (len(predicted) > 1)
+        (len(prediction) > 1)
         and not (sdnet_check)
         and ("deep" in params["model"]["architecture"])
     ):
@@ -69,17 +86,17 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
         # these weights are taken from previous publication (https://arxiv.org/pdf/2103.03759.pdf)
         loss_weights = [0.5, 0.25, 0.175, 0.075]
 
-        assert len(predicted) == len(
+        assert len(prediction) == len(
             loss_weights
         ), "Loss weights must be same length as number of outputs."
 
         ground_truth_resampled = []
-        ground_truth_prev = ground_truth.detach()
-        for i, _ in enumerate(predicted):
-            if ground_truth_prev[0].shape != predicted[i][0].shape:
+        ground_truth_prev = target.detach()
+        for i, _ in enumerate(prediction):
+            if ground_truth_prev[0].shape != prediction[i][0].shape:
                 # we get the expected shape of resampled ground truth
                 expected_shape = reverse_one_hot(
-                    predicted[i][0].detach(), params["model"]["class_list"]
+                    prediction[i][0].detach(), params["model"]["class_list"]
                 ).shape
 
                 # linear interpolation is needed because we want "soft" images for resampled ground truth
@@ -93,22 +110,22 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
 
     if sdnet_check:
         # this is specific for sdnet-style archs
-        loss_seg = loss_function(predicted[0], ground_truth.squeeze(-1), params)
-        loss_reco = global_losses_dict["l1"](predicted[1], image[:, :1, ...], None)
-        loss_kld = global_losses_dict["kld"](predicted[2], predicted[3])
-        loss_cycle = global_losses_dict["mse"](predicted[2], predicted[4], None)
+        loss_seg = loss_function(prediction[0], target.squeeze(-1), params)
+        loss_reco = global_losses_dict["l1"](prediction[1], image[:, :1, ...], None)
+        loss_kld = global_losses_dict["kld"](prediction[2], prediction[3])
+        loss_cycle = global_losses_dict["mse"](prediction[2], prediction[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
     else:
         if deep_supervision_model:
             # this is for models that have deep-supervision
-            for i, _ in enumerate(predicted):
+            for i, _ in enumerate(prediction):
                 # loss is calculated based on resampled "soft" labels using a pre-defined weights array
                 loss += (
-                    loss_function(predicted[i], ground_truth_resampled[i], params)
+                    loss_function(prediction[i], ground_truth_resampled[i], params)
                     * loss_weights[i]
                 )
         else:
-            loss = loss_function(predicted, ground_truth, params)
+            loss = loss_function(prediction, target, params)
     metric_output = {}
 
     # Metrics should be a list
@@ -119,20 +136,20 @@ def get_loss_and_metrics(image, ground_truth, predicted, params):
             metric_function = global_metrics_dict[metric_lower]
             if sdnet_check:
                 metric_output[metric] = get_metric_output(
-                    metric_function, predicted[0], ground_truth.squeeze(-1), params
+                    metric_function, prediction[0], target.squeeze(-1), params
                 )
             else:
                 if deep_supervision_model:
-                    for i, _ in enumerate(predicted):
+                    for i, _ in enumerate(prediction):
                         metric_output[metric] += get_metric_output(
                             metric_function,
-                            predicted[i],
+                            prediction[i],
                             ground_truth_resampled[i],
                             params,
                         )
 
                 else:
                     metric_output[metric] = get_metric_output(
-                        metric_function, predicted, ground_truth, params
+                        metric_function, prediction, target, params
                     )
     return loss, metric_output
