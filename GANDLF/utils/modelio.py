@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Tuple
 import torch
 
 from ..version import __version__
-from .generic import get_unique_timestamp
+from .generic import get_unique_timestamp, get_git_hash
 
 # these are the base keys for the model dictionary to save
 model_dict_full = {
@@ -155,16 +155,7 @@ def save_model(
     ).hexdigest()
     model_dict["version"] = __version__
     model_dict["parameters"] = params
-
-    try:
-        # this will try to encode the git hash of the current GaNDLF codebase, and reverts to "None" if not found
-        model_dict["git_hash"] = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=os.getcwd())
-            .decode("ascii")
-            .strip()
-        )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        model_dict["git_hash"] = "None"
+    model_dict["git_hash"] = get_git_hash()
 
     torch.save(model_dict, path)
 
