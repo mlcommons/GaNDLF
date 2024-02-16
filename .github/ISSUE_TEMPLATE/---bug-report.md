@@ -29,9 +29,11 @@ python -c 'import GANDLF as g;print(g.__version__)'
 -->
 Version information of the GaNDLF package in the virtual environment.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. Windows/Linux (include detailed distro information)/macOS]
- - Version (including Build information, if any): [e.g. Fedora 22 or Windows 10.1803]
+**Environment information:**
+<!-- Put the output of the following command:
+python ./gandlf_debugInfo
+-->
+OS, hardware, and so on.
 
 **Additional context**
 Add any other context about the problem here.
