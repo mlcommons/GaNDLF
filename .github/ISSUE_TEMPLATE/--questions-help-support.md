@@ -1,9 +1,9 @@
 ---
 name: "❓ Questions/Help/Support"
 about: Ask questions to the developers
-title: ''
-labels: ''
-assignees: ''
+title: "[QUESTION] "
+labels: ""
+assignees: ""
 
 ---
 <!-- By proceeding, you acknowledge that you have 
