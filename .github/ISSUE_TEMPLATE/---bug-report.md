@@ -1,39 +1,33 @@
 ---
 name: "\U0001F41B Bug Report"
 about: Help us improve our project
-title: ''
-labels: ''
-assignees: ''
+title: "[BUG] "
+labels: ""
+assignees: ""
 
 ---
 
-**Describe the bug**
+### Describe the bug
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+### To Reproduce
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Use the data `'...'`
+2. Run command `'...'`
+3. Scroll down to `'...'`
+4. See error (it would be helpful to include the error message and stack trace)
 
-**Expected behavior**
+### Expected behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### Media
+If applicable, add images, screenshots or other relevant media to help explain your problem.
 
-**GaNDLF Version**
-<!-- Put the output of the following command:
-python -c 'import GANDLF as g;print(g.__version__)'
--->
-Version information of the GaNDLF package in the virtual environment.
-
-**Environment information:**
+### Environment information
 <!-- Put the output of the following command:
 python ./gandlf_debugInfo
 -->
-OS, hardware, and so on.
+GaNDLF version, OS, and any other relevant information.
 
-**Additional context**
+### Additional context
 Add any other context about the problem here.
