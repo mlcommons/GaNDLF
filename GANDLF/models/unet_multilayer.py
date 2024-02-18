@@ -2,6 +2,7 @@
 """
 Implementation of UNet
 """
+import torch
 from torch.nn import ModuleList
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
@@ -24,15 +25,15 @@ class unet_multilayer(ModelBase):
     def __init__(
         self,
         parameters: dict,
-        residualConnections=False,
+        residualConnections:bool=False,
     ):
         """
-        Parameters
-        ----------
-        parameters (dict): A dictionary containing the model parameters.
-        residualConnections (bool, optional): A flag to control residual connections in the model, by default False.
-        """
+        The constructor for the unet_multilayer class.
 
+        Args:
+            parameters (dict): A dictionary containing the model parameters.
+            residualConnections (bool, optional): Flag to control residual connections. Defaults to False.
+        """
         self.network_kwargs = {"res": residualConnections}
         super(unet_multilayer, self).__init__(parameters)
 
@@ -119,16 +120,15 @@ class unet_multilayer(ModelBase):
                 self.de[i_lay] = self.converter(self.de[i_lay]).model
                 self.en[i_lay] = self.converter(self.en[i_lay]).model
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Forward pass of the UNet model.
+        Forward pass of the U-Net model.
 
         Args:
-            x (Tensor): Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+            x (torch.Tensor): The input tensor.
 
         Returns:
-            x (Tensor): Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
-
+            torch.Tensor: The output tensor.
         """
         # Store intermediate feature maps
 
@@ -167,10 +167,4 @@ class resunet_multilayer(unet_multilayer):
     """
 
     def __init__(self, parameters: dict):
-        """
-        Parameters
-        ----------
-        parameters (dict): A dictionary containing the model parameters.
-
-        """
         super(resunet_multilayer, self).__init__(parameters, residualConnections=True)

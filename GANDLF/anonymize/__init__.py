@@ -8,7 +8,7 @@ from .convert_to_nifti import convert_to_nifti
 
 def run_anonymizer(
     input_path: str, output_path: str, parameters: Union[str, list, int], modality: str
-):
+) -> None:
     """
     This function performs anonymization of a single image or a collection of images.
 
@@ -17,9 +17,6 @@ def run_anonymizer(
         output_path (str): The output file or folder.
         parameters (Union[str, list, int]): The parameters for anonymization; for DICOM scans, the only optional argument is "delete_private_tags", which defaults to True.
         output_path (str): The modality type to process.
-
-    Returns:
-        torch.Tensor: The output image after morphological operations.
     """
     if parameters is None:
         parameters = {}

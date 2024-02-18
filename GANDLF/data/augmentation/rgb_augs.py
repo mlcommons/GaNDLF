@@ -1,5 +1,5 @@
 from torchvision.transforms import ColorJitter
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 from torchio.transforms.augmentation import RandomTransform
 from torchio.transforms import IntensityTransform
 from torchio import Subject
@@ -38,11 +38,11 @@ class RandomColorJitter(RandomTransform, IntensityTransform):
 
     def __init__(
         self,
-        brightness: Union[float, Tuple[float, float]] = 0.1,
-        contrast: Union[float, Tuple[float, float]] = 0,
-        saturation: Union[float, Tuple[float, float]] = 0,
-        hue: Union[float, Tuple[float, float]] = 0.2,
-        **kwargs,
+        brightness: Optional[Union[float, Tuple[float, float]]] = 0.1,
+        contrast: Optional[Union[float, Tuple[float, float]]] = 0,
+        saturation: Optional[Union[float, Tuple[float, float]]] = 0,
+        hue: Optional[Union[float, Tuple[float, float]]] = 0.2,
+        **kwargs
     ):
         super().__init__(**kwargs)
         self.brightness_range = self._parse_range(

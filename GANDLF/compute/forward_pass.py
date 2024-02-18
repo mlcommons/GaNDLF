@@ -1,10 +1,12 @@
 import os
 import pathlib
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
 import torch
+from torch.utils.data import DataLoader
 import torchio
 from GANDLF.compute.loss_and_metric import get_loss_and_metrics
 from GANDLF.compute.step import step
@@ -23,29 +25,26 @@ from tqdm import tqdm
 
 
 def validate_network(
-    model, valid_dataloader, scheduler, params, epoch=0, mode="validation"
-):
+    model: torch.nn.Module,
+    valid_dataloader: DataLoader,
+    scheduler: object,
+    params: dict,
+    epoch: Optional[int] = 0,
+    mode: Optional[str] = "validation",
+) -> Tuple[float, dict]:
     """
-    Function to validate a network for a single epoch
+    Function to validate a network for a single epoch.
 
-    Parameters
-    ----------
-    model : if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net
-        The model to process the input image with, it should support appropriate dimensions.
-    valid_dataloader : torch.DataLoader
-        The dataloader for the validation epoch
-    params : dict
-        The parameters passed by the user yaml
-    mode: str
-        The mode of validation, used to write outputs, if requested
+    Args:
+        model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions. if parameters["model"]["type"] == torch, this is a torch.model, otherwise this is OV exec_net.
+        valid_dataloader (DataLoader): The dataloader for the validation epoch.
+        scheduler (object): The scheduler to use for training.
+        params (dict): The parameters passed by the user yaml.
+        epoch (int, optional): The current epoch number. Defaults to 0.
+        mode (str, optional): The mode of operation. Defaults to "validation".
 
-    Returns
-    -------
-    average_epoch_valid_loss : float
-        Validation loss for the current epoch
-    average_epoch_valid_metric : dict
-        Validation metrics for the current epoch
-
+    Returns:
+        Tuple[float, dict]: The average validation loss and the average validation metrics.
     """
     print("*" * 20)
     print("Starting " + mode + " : ")
@@ -171,6 +170,10 @@ def validate_network(
                 image = image.unsqueeze(0)
                 image = image.float().to(params["device"])
                 ## special case for 2D
+                assert params["model"]["type"] in [
+                    "torch",
+                    "openvino",
+                ], "Model type not supported. Please only use 'torch' or 'openvino'."
                 if image.shape[-1] == 1:
                     image = torch.squeeze(image, -1)
                 if params["model"]["type"] == "torch":
@@ -180,10 +183,6 @@ def validate_network(
                         model(
                             inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
                         )[params["model"]["IO"][1][0]]
-                    )
-                else:
-                    raise Exception(
-                        "Model type not supported. Please only use 'torch' or 'openvino'."
                     )
 
             pred_output = pred_output.cpu() / params["q_samples_per_volume"]

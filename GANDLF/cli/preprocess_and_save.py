@@ -1,6 +1,5 @@
-import os
-import sys
-import pickle
+import os, sys, pickle
+from typing import Optional
 from pathlib import Path
 import SimpleITK as sitk
 
@@ -23,9 +22,9 @@ def preprocess_and_save(
     data_csv: str,
     config_file: str,
     output_dir: str,
-    label_pad_mode: str = "constant",
-    applyaugs: bool = False,
-    apply_zero_crop: bool = False,
+    label_pad_mode: Optional[str] = "constant",
+    applyaugs: Optional[bool] = False,
+    apply_zero_crop: Optional[bool] = False,
 ) -> None:
     """
     This function performs preprocessing based on parameters provided and saves the output.
@@ -34,12 +33,9 @@ def preprocess_and_save(
         data_csv (str): The CSV file of the training data.
         config_file (str): The YAML file of the training configuration.
         output_dir (str): The output directory.
-        label_pad_mode (str): The padding strategy for the label. Defaults to "constant".
-        applyaugs (bool): If data augmentation is to be applied before saving the image. Defaults to False.
-        apply_zero_crop (bool): If zero cropping is to be applied before saving the image. Defaults to False.
-
-    Raises:
-        ValueError: Parameter check from previous
+        label_pad_mode (Optional[str], optional): The padding mode for the label. Defaults to "constant".
+        applyaugs (Optional[bool], optional): Whether to apply augmentations. Defaults to False.
+        apply_zero_crop (Optional[bool], optional): Whether to apply zero crop. Defaults to False.
     """
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -52,10 +48,9 @@ def preprocess_and_save(
     parameter_file = os.path.join(output_dir, "parameters.pkl")
     if os.path.exists(parameter_file):
         parameters_prev = pickle.load(open(parameter_file, "rb"))
-        if parameters != parameters_prev:
-            raise ValueError(
-                "The parameters are not the same as the ones stored in the previous run, please re-check."
-            )
+        assert (
+            parameters == parameters_prev
+        ), "The parameters are not the same as the ones stored in the previous run, please re-check."
     else:
         with open(parameter_file, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)

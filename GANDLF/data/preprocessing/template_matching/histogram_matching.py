@@ -45,12 +45,15 @@ class HistogramMatching(TemplateNormalizeBase):
         image.from_sitk(normalized_img)
 
 
-def histogram_matching(parameters):
+def histogram_matching(parameters: dict) -> HistogramMatching:
     """
-    This function is a wrapper for histogram matching.
+    This function performs histogram matching.
 
     Args:
-        parameters (dict): Dictionary of parameters.
+        parameters (dict): The parameters for the histogram matching.
+
+    Returns:
+        HistogramMatching: The histogram matching object.
     """
     num_hist_level = parameters.get("num_hist_level", 1024)
     num_match_points = parameters.get("num_match_points", 16)

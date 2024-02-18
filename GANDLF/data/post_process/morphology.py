@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 import torch.nn.functional as F
 from skimage.measure import label
@@ -6,25 +7,29 @@ from scipy.ndimage import binary_fill_holes, binary_closing
 from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 
-def torch_morphological(input_image, kernel_size=1, mode="dilation"):
+def torch_morphological(
+    input_image, kernel_size: Optional[int] = 1, mode: Optional[str] = "dilation"
+) -> torch.Tensor:
     """
-    This function enables morphological operations using torch. Adapted from https://github.com/DIVA-DIA/Generating-Synthetic-Handwritten-Historical-Documents/blob/e6a798dc2b374f338804222747c56cb44869af5b/HTR_ctc/utils/auxilary_functions.py#L10.
+    This function performs morphological operations on the input image. Adapted from https://github.com/DIVA-DIA/Generating-Synthetic-Handwritten-Historical-Documents/blob/e6a798dc2b374f338804222747c56cb44869af5b/HTR_ctc/utils/auxilary_functions.py#L10.
 
     Args:
-        input_image (torch.Tensor): The input image.
-        kernel_size (list): The size of the window to take a max over.
-        mode (str): The type of morphological operation to perform.
+        input_image (_type_): The input image.
+        kernel_size (Optional[int], optional): The size of the window to take a max over.
+        mode (Optional[str], optional): The mode of the morphological operation.
 
     Returns:
         torch.Tensor: The output image after morphological operations.
     """
-
+    assert mode in ["dilation", "erosion", "closing", "opening"], "Invalid mode."
+    assert len(input_image.shape) in [
+        4,
+        5,
+    ], "Invalid input shape for morphological operations."
     if len(input_image.shape) == 4:
         max_pool = F.max_pool2d
     elif len(input_image.shape) == 5:
         max_pool = F.max_pool3d
-    else:
-        raise ValueError("Input image has invalid shape for morphological operations.")
 
     if mode == "dilation":
         output_image = max_pool(
@@ -52,13 +57,15 @@ def torch_morphological(input_image, kernel_size=1, mode="dilation"):
     return output_image
 
 
-def fill_holes(input_image, params=None):
+def fill_holes(
+    input_image: torch.Tensor, params: Optional[dict] = None
+) -> torch.Tensor:
     """
     This function fills holes in masks.
 
     Args:
         input_image (torch.Tensor): The input image.
-        params (dict): The parameters dict; unused.
+        params (Optional[dict], optional): The parameters dict. Defaults to None.
 
     Returns:
         torch.Tensor: The output image after morphological operations.
@@ -71,13 +78,13 @@ def fill_holes(input_image, params=None):
     return torch.from_numpy(output_array)
 
 
-def cca(input_image, params=None):
+def cca(input_image: torch.Tensor, params: Optional[dict] = None) -> torch.Tensor:
     """
     This function performs connected component analysis on the input image.
 
     Args:
         input_image (torch.Tensor): The input image.
-        params (dict): The parameters dict;
+        params (Optional[dict], optional): The parameters dict. Defaults to None.
 
     Returns:
         torch.Tensor: The output image after morphological operations.

@@ -1,13 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar  8 20:03:35 2019
-
-@author: siddhesh
-"""
-
 import os
-
+from typing import Optional
 import numpy as np
 import tiffslide
 from GANDLF.data.patch_miner.opm.utils import get_patch_size_in_microns, tissue_mask
@@ -15,16 +7,15 @@ from skimage.transform import resize
 from torch.utils.data.dataset import Dataset
 
 
-def get_tissue_mask(image):
+def get_tissue_mask(image: np.ndarray) -> np.ndarray:
     """
     This function is used to generate tissue masks; works for patches as well
 
     Args:
-        img_rgb (numpy.array): Input image.
-        rgb_min (int, optional): The minimum threshold. Defaults to 50.
+        img_rgb (np.ndarray): Input image.
 
     Returns:
-        numpy.array: The tissue mask.
+        np.ndarray: The tissue mask.
     """
     try:
         resized_image = resize(image, (512, 512), anti_aliasing=True)
@@ -46,7 +37,7 @@ class InferTumorSegDataset(Dataset):
         stride_size,
         selected_level,
         mask_level,
-        transform=None,
+        transform: Optional[object] = None,
     ):
         self.transform = transform
         self._wsi_path = wsi_path

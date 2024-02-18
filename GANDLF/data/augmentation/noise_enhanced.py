@@ -64,7 +64,7 @@ class RandomNoiseEnhanced(RandomTransform, IntensityTransform):
         seed = self._get_random_seed()
         return mean, std, seed
 
-    def calculate_std_ranges(self, image: torch.Tensor) -> tuple:
+    def calculate_std_ranges(self, image: torch.Tensor) -> Tuple[float, float]:
         std_ranges = self.std_original
         if self.std_original is None:
             # calculate the default std range based on 1.5% of the input image std - https://github.com/mlcommons/GaNDLF/issues/518

@@ -1,5 +1,5 @@
-import sys
-import os
+import sys, os
+from typing import List, Optional, Tuple
 from pathlib import Path
 import numpy as np
 import skimage.io
@@ -39,7 +39,16 @@ LAB_B_CHANNEL = 2
 LAB_L_THRESHOLD = 0.80
 
 
-def print_sorted_dict(dictionary):
+def print_sorted_dict(dictionary: dict) -> str:
+    """
+    Print a dictionary with sorted keys.
+
+    Args:
+        dictionary (dict): The input dictionary.
+
+    Returns:
+        str: The sorted dictionary.
+    """
     sorted_keys = sorted(list(dictionary.keys()))
     output_str = "{"
     for index, key in enumerate(sorted_keys):
@@ -51,7 +60,22 @@ def print_sorted_dict(dictionary):
     return output_str
 
 
-def convert_to_tiff(filename, output_dir, img_type="converted"):
+def convert_to_tiff(
+    filename: str,
+    output_dir: str,
+    updated_file_name_identifier: Optional[str] = "converted",
+) -> str:
+    """
+    Convert an image to tiff.
+
+    Args:
+        filename (str): The input filename.
+        output_dir (str): The output directory.
+        updated_file_name_identifier (str, optional): The identifier to use for the updated file name. Defaults to "converted".
+
+    Returns:
+        str: The path to the converted image.
+    """
     base, ext = os.path.splitext(filename)
     # for png or jpg images, write image back to tiff
     if ext in [".png", ".jpg", ".jpeg"]:
@@ -59,7 +83,7 @@ def convert_to_tiff(filename, output_dir, img_type="converted"):
         Path(converted_img_path).mkdir(parents=True, exist_ok=True)
         temp_file = os.path.join(
             converted_img_path,
-            os.path.basename(base) + "_" + img_type + ".tiff",
+            os.path.basename(base) + "_" + updated_file_name_identifier + ".tiff",
         )
         temp_img = skimage.io.imread(filename)
         skimage.io.imsave(temp_file, temp_img)
@@ -68,31 +92,34 @@ def convert_to_tiff(filename, output_dir, img_type="converted"):
         return filename
 
 
-def pass_method(*args):
-    """
-    Method which takes any number of arguments and returns and empty string. Like 'pass' reserved word, but as a func.
-    @param args: Any number of arguments.
-    @return: An empty string.
-    """
+def pass_method(*args: object) -> str:
     return ""
 
 
-def get_nonzero_percent(image):
+def get_nonzero_percent(image: np.ndarray) -> float:
     """
-    Return what percentage of image is non-zero. Useful for finding percentage of labels for binary classification.
-    @param image: label map patch.
-    @return: fraction of image that is not zero.
+    Get the percentage of non-zero pixels in an image.
+
+    Args:
+        image (np.ndarray): The input image.
+
+    Returns:
+        float: The percentage of non-zero pixels.
     """
     np_img = np.asarray(image)
     non_zero = np.count_nonzero(np_img)
     return non_zero / (np_img.shape[0] * np_img.shape[1])
 
 
-def get_patch_class_proportions(image):
+def get_patch_class_proportions(image: np.ndarray) -> dict:
     """
-    Return what percentage of image is non-zero. Useful for finding percentage of labels for binary classification.
-    @param image: label map patch.
-    @return: fraction of image that is not zero.
+    Get the class proportions of a patch.
+
+    Args:
+        image (np.ndarray): The input image.
+
+    Returns:
+        dict: The class proportions
     """
     np_img = np.asarray(image)
     unique, counts = np.unique(image, return_counts=True)
@@ -101,12 +128,16 @@ def get_patch_class_proportions(image):
     return print_sorted_dict(prop_dict)
 
 
-def map_values(image, dictionary):
+def map_values(image: np.ndarray, dictionary: dict) -> np.ndarray:
     """
-    Modify image by swapping dictionary keys to dictionary values.
-    @param image: Numpy ndarray of an image (usually label map patch).
-    @param dictionary: dict(int => int). Keys in image are swapped to corresponding values.
-    @return:
+    Map values in an image to a new set of values.
+
+    Args:
+        image (np.ndarray): The input image.
+        dictionary (dict): The dictionary to use for mapping.
+
+    Returns:
+        np.ndarray: The mapped image.
     """
     template = image.copy()  # Copy image so all values not in dict are unmodified
     for key, value in dictionary.items():
@@ -123,7 +154,21 @@ def map_values(image, dictionary):
 #     plt.show()
 
 
-def hue_range_mask(image, min_hue, max_hue, sat_min=0.05):
+def hue_range_mask(
+    image: np.ndarray, min_hue: float, max_hue: float, sat_min: Optional[float] = 0.05
+) -> np.ndarray:
+    """
+    Mask based on hue range.
+
+    Args:
+        image (np.ndarray): RGB numpy image
+        min_hue (float): Minimum hue value
+        max_hue (float): Maximum hue value
+        sat_min (Optional[float], optional): Minimum saturation value. Defaults to 0.05.
+
+    Returns:
+        np.ndarray: image mask, True pixels are within the hue range.
+    """
     hsv_image = rgb2hsv(image)
     h_channel = gaussian(hsv_image[:, :, HSV_HUE_CHANNEL])
     above_min = h_channel > min_hue
@@ -134,10 +179,15 @@ def hue_range_mask(image, min_hue, max_hue, sat_min=0.05):
     return np.logical_and(np.logical_and(above_min, below_max), above_sat)
 
 
-def tissue_mask(image):
+def tissue_mask(image: np.ndarray) -> np.ndarray:
     """
-    Quick and dirty hue range mask for OPM. Works well on H&E.
-    TODO: Improve this
+    Mask based on low saturation and value (gray-black colors)
+
+    Args:
+        image (np.ndarray): RGB numpy image
+
+    Returns:
+        np.ndarray: image mask, True pixels are gray-black.
     """
     hue_mask = hue_range_mask(image, 0.8, 0.99)
     final_mask = remove_small_holes(hue_mask)
@@ -201,7 +251,18 @@ def tissue_mask(image):
 #     return mask_copy
 
 
-def patch_size_check(img, patch_height, patch_width):
+def patch_size_check(img: np.ndarray, patch_height: int, patch_width: int) -> bool:
+    """
+    This function checks if the patch size is valid.
+
+    Args:
+        img (np.ndarray): Input image.
+        patch_height (int): The height of the patch.
+        patch_width (int): The width of the patch.
+
+    Returns:
+        bool: Whether or not the patch size is valid.
+    """
     img = np.asarray(img)
 
     return_val = False
@@ -211,7 +272,7 @@ def patch_size_check(img, patch_height, patch_width):
     return return_val
 
 
-def alpha_rgb_2d_channel_check(img):
+def alpha_rgb_2d_channel_check(img: np.ndarray) -> bool:
     """
     This function checks if an image has a valid alpha channel.
 
@@ -264,22 +325,24 @@ def alpha_rgb_2d_channel_check(img):
 
 
 def patch_artifact_check(
-    img,
-    intensity_thresh=250,
-    intensity_thresh_saturation=5,
-    intensity_thresh_b=128,
-    patch_size=(256, 256),
-):
+    img: np.ndarray,
+    intensity_thresh: int = 250,
+    intensity_thresh_saturation: int = 5,
+    intensity_thresh_b: int = 128,
+    patch_size: Optional[List[int]] = [256, 256],
+) -> bool:
     """
-    This function is used to curate patches from the input image. It is used to remove patches that are mostly background.
+    This function is used to curate patches from the input image. It is used to remove patches that have artifacts.
+
     Args:
         img (np.ndarray): Input Patch Array to check the artifact/background.
-        intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 225.
-        intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 50.
-        intensity_thresh_b (int, optional) : Threshold to check blackness in the patch
-        patch_size (int, optional): Tiling Size of the WSI/patch size. Defaults to 256. patch_size=config["patch_size"]
+        intensity_thresh (int, optional): Threshold to check whiteness in the patch. Defaults to 250.
+        intensity_thresh_saturation (int, optional): Threshold to check saturation in the patch. Defaults to 5.
+        intensity_thresh_b (int, optional): Threshold to check blackness in the patch. Defaults to 128.
+        patch_size (Optional[List[int]], optional): Tiling Size of the WSI/patch size. Defaults to [256, 256].
+
     Returns:
-        bool: Whether the patch is valid (True) or not (False)
+        bool: Whether the patch is valid or not.
     """
     # patch_size = config["patch_size"]
     patch_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
@@ -311,11 +374,15 @@ def patch_artifact_check(
     return True
 
 
-def parse_config(config_file):
+def parse_config(config_file: str) -> dict:
     """
-    Parse config file and return a dictionary of config values.
-    :param config_file: path to config file
-    :return: dictionary of config values
+    Function that parses the config file.
+
+    Args:
+        config_file (str): The path to the config file.
+
+    Returns:
+        dict: The parsed config file.
     """
     config = yaml.safe_load(open(config_file, "r"))
 
@@ -332,7 +399,7 @@ def parse_config(config_file):
     return config
 
 
-def is_mask_too_big(mask):
+def is_mask_too_big(mask: np.ndarray) -> bool:
     """
     Function that returns a boolean value indicating whether the mask is too big to make processing slow.
 
@@ -349,12 +416,16 @@ def is_mask_too_big(mask):
         return False
 
 
-def generate_initial_mask(slide_path, scale):
+def generate_initial_mask(slide_path: str, scale: int) -> Tuple[np.ndarray, tuple]:
     """
-    Helper method to generate random coordinates within a slide
-    :param slide_path: Path to slide (str)
-    :param num_patches: Number of patches you want to generate
-    :return: list of n (x,y) coordinates
+    Function that generates the initial mask for the slide.
+
+    Args:
+        slide_path (str): The path to the slide.
+        scale (int): The scale to use for the mask.
+
+    Returns:
+        Tuple[np.ndarray, tuple]: The valid mask and the real scale.
     """
     # Open slide and get properties
     slide = tiffslide.open_slide(slide_path)
@@ -379,24 +450,26 @@ def generate_initial_mask(slide_path, scale):
     return valid_mask, real_scale
 
 
-def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=False):
+def get_patch_size_in_microns(
+    input_slide_path: str, patch_size_from_config: str, verbose: Optional[bool] = False
+) -> List[int]:
     """
-    This function takes a slide path and a patch size in microns and returns the patch size in pixels.
+    Function that returns the patch size in pixels.
 
     Args:
-        input_slide_path (str): The input WSI path.
-        patch_size_from_config (str): The patch size in microns.
-        verbose (bool): Whether to provide verbose prints.
-
-    Raises:
-        ValueError: If the patch size is not a valid number in microns.
+        input_slide_path (str): The path to the slide.
+        patch_size_from_config (str): The patch size from the config file.
+        verbose (Optional[bool], optional): Whether to print verbose output. Defaults to False.
 
     Returns:
-        list: The patch size in pixels.
+        List[int]: The patch size after getting converted to pixels.
     """
-
     return_patch_size = [0, 0]
     patch_size = None
+
+    assert isinstance(
+        patch_size_from_config, (str, list, tuple)
+    ), "Patch size must be a list or string."
 
     if isinstance(patch_size_from_config, str):
         # first remove all spaces and square brackets
@@ -411,16 +484,13 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
             patch_size = patch_size_from_config.split("X")
         if len(patch_size) == 1:
             patch_size = patch_size_from_config.split("*")
-        if len(patch_size) == 1:
-            raise ValueError(
-                "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
-            )
+        assert (
+            len(patch_size) == 2
+        ), "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
     elif isinstance(patch_size_from_config, list) or isinstance(
         patch_size_from_config, tuple
     ):
         patch_size = patch_size_from_config
-    else:
-        raise ValueError("Patch size must be a list or string.")
 
     magnification_prev = -1
     for i, _ in enumerate(patch_size):

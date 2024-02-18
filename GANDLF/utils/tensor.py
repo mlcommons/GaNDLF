@@ -1,13 +1,14 @@
-import os
-import sys
-from typing import Union
+import os, sys
+from typing import List, Optional, Tuple, Union
 from pandas.util import hash_pandas_object
 import numpy as np
 import SimpleITK as sitk
+import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchio
+import torchmetrics
 from tqdm import tqdm
 from torchinfo import summary
 from GANDLF.utils.generic import get_array_from_image_or_tensor
@@ -16,13 +17,15 @@ from GANDLF.utils.generic import get_array_from_image_or_tensor
 special_cases_to_check = ["||"]
 
 
-def one_hot(segmask_tensor, class_list):
+def one_hot(
+    segmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]
+) -> torch.Tensor:
     """
     This function creates a one-hot-encoded mask from the segmentation mask Tensor and specified class list
 
     Args:
         segmask_tensor (torch.Tensor): The segmentation mask Tensor.
-        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+        class_list (Union[List[int], List[str]]): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         torch.Tensor: The one-hot encoded torch.Tensor
@@ -81,13 +84,13 @@ def one_hot(segmask_tensor, class_list):
     return batch_stack
 
 
-def reverse_one_hot(predmask_tensor, class_list):
+def reverse_one_hot(predmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]) -> np.array:
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
     Args:
         predmask_tensor (torch.Tensor): The predicted segmentation mask Tensor.
-        class_list (list): The list of classes based on which one-hot encoding needs to happen.
+        class_list (Union[List[int], List[str]]): The list of classes based on which one-hot encoding needs to happen.
 
     Returns:
         numpy.array: The final mask as numpy array.
@@ -126,7 +129,9 @@ def reverse_one_hot(predmask_tensor, class_list):
     return final_mask
 
 
-def send_model_to_device(model, amp, device, optimizer):
+def send_model_to_device(
+    model: torch.nn.Module, amp: bool, device: str, optimizer: torch.optim
+) -> Union[torch.nn.Module, bool, torch.device, int]:
     """
     This function reads the environment variable(s) and send model to correct device
 
@@ -142,10 +147,10 @@ def send_model_to_device(model, amp, device, optimizer):
         torch.device: Device type.
     """
     if device == "cuda":
-        if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
-            sys.exit(
-                "Please set the environment variable 'CUDA_VISIBLE_DEVICES' correctly before trying to run GANDLF on GPU"
-            )
+        assert torch.cuda.is_available(), "CUDA is either not available or not enabled"
+        assert (
+            os.environ.get("CUDA_VISIBLE_DEVICES") is not None
+        ), "CUDA_VISIBLE_DEVICES is not set"
 
         dev = os.environ.get("CUDA_VISIBLE_DEVICES")
         # multi-gpu support
@@ -213,13 +218,13 @@ def send_model_to_device(model, amp, device, optimizer):
     return model, amp, device, dev
 
 
-def get_model_dict(model, device_id):
+def get_model_dict(model: torch.nn.Module, device_id: Union[str, List[str]]) -> dict:
     """
     This function returns the model dictionary
 
     Args:
         model (torch.nn.Module): The model for which the dictionary is to be returned.
-        device_id (Union[str, list]): The device id as string or list.
+        device_id (Union[str, List[str]]): The device id as string or list of devices.
 
     Returns:
         dict: The model dictionary.
@@ -236,7 +241,9 @@ def get_model_dict(model, device_id):
     return model_dict
 
 
-def get_class_imbalance_weights_classification(training_df, params):
+def get_class_imbalance_weights_classification(
+    training_df: pd.DataFrame, params: dict
+) -> Tuple[dict, dict, dict]:
     """
     This function calculates the penalty used for loss functions in multi-class problems.
     It looks at the column "valuesToPredict" and identifies unique classes, fetches the class distribution
@@ -248,7 +255,7 @@ def get_class_imbalance_weights_classification(training_df, params):
         parameters (dict) : The parameters passed by the user yaml.
 
     Returns:
-        dict: The penalty weights for different classes under consideration for classification.
+        Tuple[dict, dict, dict]: The penalty weights, sampling weights, and class weights for different classes under consideration.
     """
     predictions_array = (
         training_df[training_df.columns[params["headers"]["predictionHeaders"]]]
@@ -288,7 +295,9 @@ def get_class_imbalance_weights_classification(training_df, params):
     return penalty_dict, None, weight_dict
 
 
-def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
+def get_class_imbalance_weights_segmentation(
+    training_data_loader: DataLoader, parameters: dict
+) -> Tuple[dict, dict, dict]:
     """
     This function calculates the penalty that is used for validation loss in multi-class problems
 
@@ -297,7 +306,7 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
         parameters (dict): The parameters passed by the user yaml.
 
     Returns:
-        dict: The penalty weights for different classes under consideration.
+        Tuple[dict, dict, dict]: The penalty weights, sampling weights, and class weights for different classes under consideration.
     """
     abs_dict = {}  # absolute counts for each class
     weights_dict = {}  # average for "weighted averaging"
@@ -354,16 +363,18 @@ def get_class_imbalance_weights_segmentation(training_data_loader, parameters):
     return penalty_dict, penalty_dict, weights_dict
 
 
-def get_class_imbalance_weights(training_df, params):
+def get_class_imbalance_weights(
+    training_df: pd.DataFrame, params: dict
+) -> Tuple[dict, dict, dict]:
     """
-    This is a wrapper function that calculates the penalty used for loss functions in classification/segmentation problems.
+    This function calculates the penalty that is used for validation loss in multi-class problems
 
     Args:
-        training_Df (pd.DataFrame): The training data frame.
-        parameters (dict) : The parameters passed by the user yaml.
+        training_df (pd.DataFrame): The training data frame.
+        params (dict): The parameters passed by the user yaml.
 
     Returns:
-        float, float: The penalty and class weights for different classes under consideration for classification.
+        Tuple[dict, dict, dict]: The penalty weights, sampling weights, and class weights for different classes under consideration.
     """
     penalty_weights, sampling_weights, class_weights = None, None, None
     if params["weighted_loss"] or params["patch_sampler"]["biased_sampling"]:
@@ -427,7 +438,7 @@ def get_class_imbalance_weights(training_df, params):
     return penalty_weights, sampling_weights, class_weights
 
 
-def get_linear_interpolation_mode(dimensionality):
+def get_linear_interpolation_mode(dimensionality: int) -> str:
     """
     Get linear interpolation mode.
 
@@ -448,18 +459,21 @@ def get_linear_interpolation_mode(dimensionality):
 
 
 def print_model_summary(
-    model, input_batch_size, input_num_channels, input_patch_size, device=None
-):
+    model: torch.nn.Module,
+    input_batch_size: int,
+    input_num_channels: int,
+    input_patch_size: tuple,
+    device: Optional[torch.device] = None,
+) -> None:
     """
-    _summary_
-    Estimates the size of PyTorch models in memory
-    for a given input size
+    This function prints the model summary.
+
     Args:
-        model (torch.nn.Module): The model to be summarized.
-        input_batch_size (int): The batch size of the input.
-        input_num_channels (int): The number of channels of the input.
-        input_patch_size (tuple): The patch size of the input.
-        device (torch.device, optional): The device on which the model is run. Defaults to None.
+        model (torch.nn.Module): The model for which the summary is to be printed.
+        input_batch_size (int): The input batch size.
+        input_num_channels (int): The input number of channels.
+        input_patch_size (tuple): The input patch size.
+        device (Optional[torch.device], optional): The device. Defaults to None.
     """
     input_size = (input_batch_size, input_num_channels) + tuple(input_patch_size)
     if input_size[-1] == 1:
@@ -484,7 +498,9 @@ def print_model_summary(
         print("Failed to generate model summary with error: ", e)
 
 
-def get_ground_truths_and_predictions_tensor(params, loader_type):
+def get_ground_truths_and_predictions_tensor(
+    params: dict, loader_type: str
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     This function is used to get the ground truths and predictions for a given loader type.
 
@@ -493,7 +509,7 @@ def get_ground_truths_and_predictions_tensor(params, loader_type):
         loader_type (str): The loader type for which the ground truths and predictions are to be returned.
 
     Returns:
-        torch.Tensor, torch.Tensor: The ground truths and base predictions for the given loader type.
+        Tuple[torch.Tensor, torch.Tensor]: The ground truths and predictions for the given loader type.
     """
     ground_truth_array = torch.from_numpy(
         params[loader_type][
@@ -507,7 +523,9 @@ def get_ground_truths_and_predictions_tensor(params, loader_type):
     return ground_truth_array, predictions_array
 
 
-def get_output_from_calculator(predictions, ground_truth, calculator):
+def get_output_from_calculator(
+    prediction: torch.Tensor, target: torch.tensor, calculator: torchmetrics.Metric
+) -> float:
     """
     Helper function to get the output from a calculator.
 
@@ -519,7 +537,7 @@ def get_output_from_calculator(predictions, ground_truth, calculator):
     Returns:
         float: The output from the calculator.
     """
-    temp_output = calculator(predictions, ground_truth)
+    temp_output = calculator(prediction, target)
     if temp_output.dim() > 0:
         temp_output = temp_output.cpu().tolist()
     else:

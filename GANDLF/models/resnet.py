@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .modelBase import ModelBase
+from GANDLF.utils import getBase2
 
 
 class ResNet(ModelBase):
@@ -486,23 +487,6 @@ def checkPatchDimensions(patch_size, numlay):
         layers = np.where(remain == 1, base2 - 1, base2)
         numlay = np.min(layers) - 1
         return numlay
-
-
-def getBase2(num):
-    """
-    Compute the base 2 logarithm of a number.
-
-    Args:
-        num (int): the number
-
-    Returns:
-        int: the base 2 logarithm of the number
-    """
-    base = 0
-    while num % 2 == 0:
-        num = num / 2
-        base = base + 1
-    return base
 
 
 def resnet18(parameters):

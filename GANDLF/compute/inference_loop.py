@@ -1,6 +1,9 @@
-import os
-import sys
+from .forward_pass import validate_network
+from .generic import create_pytorch_objects
+import os, sys
+from typing import Optional
 from pathlib import Path
+import pandas as pd
 
 import cv2
 import numpy as np
@@ -14,6 +17,7 @@ from GANDLF.utils import (
     latest_model_path_end,
     load_ov_model,
     print_model_summary,
+    applyCustomColorMap,
 )
 from skimage.io import imsave
 from torch.cuda.amp import autocast
@@ -27,18 +31,13 @@ from .generic import create_pytorch_objects
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 
-def applyCustomColorMap(im_gray):
-    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
-    lut = np.zeros((256, 1, 3), dtype=np.uint8)
-    lut[:, 0, 0] = np.zeros((256)).tolist()
-    lut[:, 0, 1] = np.zeros((256)).tolist()
-    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
-    return cv2.LUT(img_bgr, lut)
-
-
 def inference_loop(
-    inferenceDataFromPickle, device, parameters, modelDir, outputDir=None
-):
+    inferenceDataFromPickle: pd.DataFrame,
+    device: str,
+    parameters: dict,
+    modelDir: str,
+    outputDir: Optional[str] = None,
+) -> None:
     """
     The main training loop.
 

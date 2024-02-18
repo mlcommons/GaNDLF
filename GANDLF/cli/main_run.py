@@ -1,3 +1,5 @@
+import os, pickle
+from typing import Optional
 from pathlib import Path
 
 from GANDLF.training_manager import TrainingManager, TrainingManager_split
@@ -11,8 +13,15 @@ from GANDLF.utils import (
 
 
 def main_run(
-    data_csv, config_file, model_dir, train_mode, device, resume, reset, output_dir=None
-):
+    data_csv: str,
+    config_file: str,
+    model_dir: str,
+    train_mode: bool,
+    device: str,
+    resume: bool,
+    reset: bool,
+    output_dir: Optional[str] = None,
+) -> None:
     """
     Main function that runs the training and inference.
 
@@ -24,7 +33,7 @@ def main_run(
         device (str): The device type.
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
-        output_dir (str): The output directory for the inference session.
+        output_dir (str): The output directory for the inference session. Defaults to None.
 
     Returns:
         None
