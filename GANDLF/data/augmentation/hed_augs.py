@@ -88,7 +88,7 @@ class HedColorAugmenter(ColorAugmenterBase):
             cutoff_range (Union[tuple, None]): Patches with mean value outside the cutoff interval will not be augmented. Values from the [0.0, 1.0] range. The RGB channel values are from the same range.
 
         Returns:
-            ColorAugmenterBase: _description_
+            ColorAugmenterBase: The color augmenter object.
         """
 
         # Initialize base class.

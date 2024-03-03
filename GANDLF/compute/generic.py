@@ -1,4 +1,7 @@
+from typing import Optional, Tuple
 from pandas.util import hash_pandas_object
+import torch
+from torch.utils.data import DataLoader
 
 from GANDLF.models import get_model
 from GANDLF.schedulers import get_scheduler
@@ -15,23 +18,30 @@ from GANDLF.utils import (
 )
 
 
-def create_pytorch_objects(parameters, train_csv=None, val_csv=None, device="cpu"):
+def create_pytorch_objects(
+    parameters: dict,
+    train_csv: Optional[str] = None,
+    val_csv: Optional[str] = None,
+    device: Optional[str] = "cpu",
+) -> Tuple[
+    torch.nn.Module,
+    torch.optim.Optimizer,
+    DataLoader,
+    DataLoader,
+    torch.optim.lr_scheduler.LRScheduler,
+    dict,
+]:
     """
-    This function creates all the PyTorch objects needed for training.
+    This function creates the PyTorch objects needed for training and validation.
 
     Args:
-        parameters (dict): The parameters dictionary.
-        train_csv (str): The path to the training CSV file.
-        val_csv (str): The path to the validation CSV file.
-        device (str): The device to perform computations on.
+        parameters (dict): The parameters for the model and training.
+        train_csv (Optional[str], optional): The path to the training CSV file. Defaults to None.
+        val_csv (Optional[str], optional): The path to the validation CSV file. Defaults to None.
+        device (Optional[str], optional): The device to use for training. Defaults to "cpu".
 
     Returns:
-        model (torch.nn.Module): The model to use for training.
-        optimizer (Optimizer): The optimizer to use for training.
-        train_loader (torch.utils.data.DataLoader): The training data loader.
-        val_loader (torch.utils.data.DataLoader): The validation data loader.
-        scheduler (object): The scheduler to use for training.
-        parameters (dict): The updated parameters dictionary.
+        Tuple[ torch.nn.Module, torch.optim.Optimizer, DataLoader, DataLoader, torch.optim.lr_scheduler.LRScheduler, dict, ]: The model, optimizer, train loader, validation loader, scheduler, and parameters.
     """
     # initialize train and val loaders
     train_loader, val_loader = None, None

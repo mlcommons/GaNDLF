@@ -2,6 +2,7 @@
 """
 Implementation of Light UNet
 """
+import torch
 from torch.nn import ModuleList
 
 from GANDLF.models.seg_modules.DownsamplingModule import DownsamplingModule
@@ -103,18 +104,15 @@ class light_unet_multilayer(ModelBase):
                 self.de[i_lay] = self.converter(self.de[i_lay]).model
                 self.en[i_lay] = self.converter(self.en[i_lay]).model
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Parameters
-        ----------
-        x : Tensor
-            Should be a 5D Tensor as [batch_size, channels, x_dims, y_dims, z_dims].
+        Forward pass of the network.
 
-        Returns
-        -------
-        x : Tensor
-            Returns a 5D Output Tensor as [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Args:
+            x (torch.Tensor): The input tensor.
 
+        Returns:
+            torch.Tensor: The output tensor.
         """
         y = []
         y.append(self.ins(x))

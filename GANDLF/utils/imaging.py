@@ -1,67 +1,79 @@
-from typing import Union
+from typing import List, Optional, Tuple, Union
 import os, pathlib, math, copy
+from enum import Enum
 import numpy as np
 import SimpleITK as sitk
 import torchio
+import cv2
 
 from .generic import get_filename_extension_sanitized
 
 
 def resample_image(
-    img, spacing, size=None, interpolator=sitk.sitkLinear, outsideValue=0
-):
+    input_image: sitk.Image,
+    spacing: Union[np.ndarray, List[float], Tuple[float]],
+    size: Optional[Union[np.ndarray, List[float], Tuple[float]]] = None,
+    interpolator: Optional[Enum] = sitk.sitkLinear,
+    outsideValue: Optional[int] = 0,
+) -> sitk.Image:
     """
-    Resample image to certain spacing and size.
+    This function resamples the input image based on the spacing and size.
+
     Args:
-        img (SimpleITK.Image): The input image to resample.
-        spacing (list): List of length 3 indicating the voxel spacing as [x, y, z].
-        size (list, optional): List of length 3 indicating the number of voxels per dim [x, y, z], which will use compute the appropriate size based on the spacing. Defaults to [].
-        interpolator (SimpleITK.InterpolatorEnum, optional): The interpolation type to use. Defaults to SimpleITK.sitkLinear.
-        origin (list, optional): The location in physical space representing the [0,0,0] voxel in the input image.  Defaults to [0,0,0].
-        outsideValue (int, optional): value used to pad are outside image.  Defaults to 0.
-    Raises:
-        Exception: Spacing/resolution mismatch.
-        Exception: Size mismatch.
+        input_image (sitk.Image): The input image to be resampled.
+        spacing (Union[np.ndarray, List[float], Tuple[float]]): The desired spacing for the resampled image.
+        size (Optional[Union[np.ndarray, List[float], Tuple[float]]], optional): The desired size for the resampled image. Defaults to None.
+        interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
+        outsideValue (Optional[int], optional): The value to be used for the outside of the image. Defaults to 0.
+
     Returns:
-        SimpleITK.Image: The resampled input image.
+        sitk.Image: The resampled image.
     """
-    if len(spacing) != img.GetDimension():
-        raise Exception("len(spacing) != " + str(img.GetDimension()))
+    assert (
+        len(spacing) == input_image.GetDimension()
+    ), "The spacing dimension is inconsistent with the input dataset, please check parameters."
 
     # Set Size
     if size is None:
-        inSpacing = img.GetSpacing()
-        inSize = img.GetSize()
+        inSpacing = input_image.GetSpacing()
+        inSize = input_image.GetSize()
         size = [
             int(math.ceil(inSize[i] * (inSpacing[i] / spacing[i])))
-            for i in range(img.GetDimension())
+            for i in range(input_image.GetDimension())
         ]
-    else:
-        if len(size) != img.GetDimension():
-            raise Exception("len(size) != " + str(img.GetDimension()))
+
+    assert (
+        len(size) == input_image.GetDimension()
+    ), "The size dimension is inconsistent with the input dataset, please check parameters."
 
     # Resample input image
     return sitk.Resample(
-        img,
+        input_image,
         size,
         sitk.Transform(),
         interpolator,
-        img.GetOrigin(),
+        input_image.GetOrigin(),
         spacing,
-        img.GetDirection(),
+        input_image.GetDirection(),
         outsideValue,
     )
 
 
-def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
+def resize_image(
+    input_image: sitk.Image,
+    output_size: Union[np.ndarray, list, tuple],
+    interpolator: Optional[Enum] = sitk.sitkLinear,
+) -> sitk.Image:
     """
-    This function resizes the input image based on the output size and interpolator.
+    This function resizes the input image based on the output size.
+
     Args:
-        input_image (SimpleITK.Image): The input image to be resized.
-        output_size (Union[numpy.ndarray, list, tuple]): The output size to resample input_image to.
-        interpolator (SimpleITK.sitkInterpolator): The desired interpolator.
+        input_image (sitk.Image): The input image to be resized.
+        output_size (Union[np.ndarray, list, tuple]): The desired output size for the resized image.
+        interpolator (Optional[Enum], optional): The desired interpolator. Defaults to sitk.sitkLinear.
+
     Returns:
-        SimpleITK.Image: The output image after resizing.
+        sitk.Image: The resized image.
     """
     output_size_parsed = None
     inputSize = input_image.GetSize()
@@ -87,15 +99,21 @@ def resize_image(input_image, output_size, interpolator=sitk.sitkLinear):
     )
 
 
-def softer_sanity_check(base_property, new_property, threshold=0.00001):
+def softer_sanity_check(
+    base_property: Union[np.ndarray, List[float], Tuple[float]],
+    new_property: Union[np.ndarray, List[float], Tuple[float]],
+    threshold: Optional[float] = 0.00001,
+) -> bool:
     """
-    This function checks if the new property is within the threshold of the base property.
+    This function performs a softer sanity check on the input properties.
+
     Args:
-        base_property (float): The base property to check.
-        new_property (float): The new property to check
-        threshold (float, optional): The threshold to check if the new property is within the base property. Defaults to 0.00001.
+        base_property (Union[np.ndarray, List[float], Tuple[float]]): The base property.
+        new_property (Union[np.ndarray, List[float], Tuple[float]]): The new property.
+        threshold (Optional[float], optional): The threshold for comparison. Defaults to 0.00001.
+
     Returns:
-        bool: Whether the new property is within the threshold of the base property.
+        bool: True if the properties are consistent within the threshold.
     """
     arr_1 = np.array(base_property)
     arr_2 = np.array(new_property)
@@ -108,21 +126,16 @@ def softer_sanity_check(base_property, new_property, threshold=0.00001):
     return result
 
 
-def perform_sanity_check_on_subject(subject, parameters):
+def perform_sanity_check_on_subject(subject: torchio.Subject, parameters: dict) -> bool:
     """
-    This function performs sanity check on the subject to ensure presence of consistent header information WITHOUT loading images into memory.
+    This function performs a sanity check on the image modalities in input subject to ensure that they are consistent.
 
     Args:
         subject (torchio.Subject): The input subject.
         parameters (dict): The parameters passed by the user yaml.
 
     Returns:
-        bool: True if everything is okay.
-
-    Raises:
-        ValueError: Dimension mismatch in the images.
-        ValueError: Origin mismatch in the images.
-        ValueError: Orientation mismatch in the images.
+        bool: True if the sanity check passes.
     """
     # read the first image and save that for comparison
     file_reader_base = None
@@ -131,12 +144,14 @@ def perform_sanity_check_on_subject(subject, parameters):
     if parameters["headers"]["labelHeader"] is not None:
         list_for_comparison.append("label")
 
-    def _get_itkimage_or_filereader(subject_str_key):
+    def _get_itkimage_or_filereader(
+        subject_str_key: Union[str, sitk.Image]
+    ) -> Union[sitk.ImageFileReader, sitk.Image]:
         """
         Helper function to get the itk image or file reader from the subject.
 
         Args:
-            subject_str_key (Union[str, sitk.Image]): The subject string key.
+            subject_str_key (Union[str, sitk.Image]): The subject string key or itk image.
 
         Returns:
             Union[sitk.ImageFileReader, sitk.Image]: The itk image or file reader.
@@ -158,48 +173,44 @@ def perform_sanity_check_on_subject(subject, parameters):
                 file_reader_current = _get_itkimage_or_filereader(subject[str(key)])
 
                 # this check needs to be absolute
-                if (
+                assert (
                     file_reader_base.GetDimension()
-                    != file_reader_current.GetDimension()
-                ):
-                    raise ValueError(
-                        "Dimensions for Subject '"
-                        + subject["subject_id"]
-                        + "' are not consistent."
-                    )
+                    == file_reader_current.GetDimension()
+                ), (
+                    "Dimensions for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
 
                 # other checks can be softer
-                if not softer_sanity_check(
+                assert softer_sanity_check(
                     file_reader_base.GetOrigin(), file_reader_current.GetOrigin()
-                ):
-                    raise ValueError(
-                        "Origin for Subject '"
-                        + subject["subject_id"]
-                        + "' are not consistent."
-                    )
+                ), (
+                    "Origin for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
 
-                if not softer_sanity_check(
+                assert softer_sanity_check(
                     file_reader_base.GetDirection(), file_reader_current.GetDirection()
-                ):
-                    raise ValueError(
-                        "Orientation for Subject '"
-                        + subject["subject_id"]
-                        + "' are not consistent."
-                    )
+                ), (
+                    "Orientation for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
 
-                if not softer_sanity_check(
+                assert softer_sanity_check(
                     file_reader_base.GetSpacing(), file_reader_current.GetSpacing()
-                ):
-                    raise ValueError(
-                        "Spacing for Subject '"
-                        + subject["subject_id"]
-                        + "' are not consistent."
-                    )
+                ), (
+                    "Spacing for Subject '"
+                    + subject["subject_id"]
+                    + "' are not consistent."
+                )
 
     return True
 
 
-def write_training_patches(subject, params):
+def write_training_patches(subject: torchio.Subject, params: dict) -> None:
     """
     This function writes the training patches to disk.
 
@@ -241,12 +252,14 @@ def write_training_patches(subject, params):
         )
 
 
-def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: int):
+def get_correct_padding_size(
+    patch_size: Union[List[int], Tuple[int]], model_dimension: int
+):
     """
     This function returns the correct padding size based on the patch size and overlap.
 
     Args:
-        patch_size (Union[list, tuple]): The patch size.
+        patch_size (Union[List[int], Tuple[int]]): The patch size.
         model_dimension (int): The model dimension.
 
     Returns:
@@ -258,3 +271,21 @@ def get_correct_padding_size(patch_size: Union[list, tuple], model_dimension: in
         psize_pad[-1] = 0 if psize_pad[-1] == 1 else psize_pad[-1]
 
     return psize_pad
+
+
+def applyCustomColorMap(im_gray: np.ndarray) -> np.ndarray:
+    """
+    Internal function to apply a custom color map to the input image.
+
+    Args:
+        im_gray (np.ndarray): The input image.
+
+    Returns:
+        np.ndarray: The image with the custom color map applied.
+    """
+    img_bgr = cv2.cvtColor(im_gray.astype(np.uint8), cv2.COLOR_BGR2RGB)
+    lut = np.zeros((256, 1, 3), dtype=np.uint8)
+    lut[:, 0, 0] = np.zeros((256)).tolist()
+    lut[:, 0, 1] = np.zeros((256)).tolist()
+    lut[:, 0, 2] = np.arange(0, 256, 1).tolist()
+    return cv2.LUT(img_bgr, lut)

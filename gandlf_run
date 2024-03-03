@@ -76,7 +76,6 @@ if __name__ == "__main__":
         type=ast.literal_eval,
         help="Resume previous training by only keeping model dict in 'modeldir'",
     )
-
     parser.add_argument(
         "-o",
         "--outputdir",
@@ -85,7 +84,6 @@ if __name__ == "__main__":
         type=str,
         help="Location to save the output of the inference session. Not used for training.",
     )
-
     parser.add_argument(
         "-v",
         "--version",

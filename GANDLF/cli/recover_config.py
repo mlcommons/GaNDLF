@@ -3,7 +3,17 @@ import pickle
 import os
 
 
-def recover_config(modelDir, outputFile):
+def recover_config(modelDir: str, outputFile: str) -> bool:
+    """
+    This function recovers the configuration file from a model directory.
+
+    Args:
+        modelDir (str): The model directory with the configuration file and the model.
+        outputFile (str): The output file for the configuration.
+
+    Returns:
+        bool: True if the configuration file was successfully recovered.
+    """
     assert os.path.exists(
         modelDir
     ), "The model directory does not appear to exist. Please check parameters."

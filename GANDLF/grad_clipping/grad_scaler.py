@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 from GANDLF.grad_clipping.clip_gradients import dispatch_clip_grad_
 
@@ -9,12 +10,12 @@ class GradScaler:
 
     def __call__(
         self,
-        loss,
-        optimizer,
-        clip_grad=None,
-        clip_mode="norm",
-        parameters=None,
-        create_graph=False,
+        loss: torch.Tensor,
+        optimizer: torch.optim.Optimizer,
+        clip_grad: Optional[float] = None,
+        clip_mode: Optional[str] = "norm",
+        parameters: Optional[torch.Tensor] = None,
+        create_graph: Optional[bool] = False,
     ):
         """
         Scales the loss and performs backward pass through the computation graph.
@@ -22,10 +23,10 @@ class GradScaler:
         Args:
             loss (torch.Tensor): The loss tensor to scale and backpropagate.
             optimizer (torch.optim.Optimizer): The optimizer to step after backpropagation.
-            clip_grad (float): The clipping value/factor/norm, mode dependent (default: None).
-            clip_mode (str): The clipping mode, one of 'norm', 'value', 'agc' (default: 'norm').
-            parameters (Iterable): The model parameters to clip (default: None).
-            create_graph (bool): Whether to create a new graph for backpropagation (default: False).
+            clip_grad (Optional[float], optional): The clipping value/factor/norm, mode dependent. Defaults to None.
+            clip_mode (Optional[str], optional): The mode of clipping. Defaults to "norm".
+            parameters (Optional[torch.Tensor], optional): The model parameters to be clipped. Defaults to None.
+            create_graph (Optional[bool], optional): Whether to create the graph. Defaults to False.
         """
         self._scaler.scale(loss).backward(create_graph=create_graph)
         if clip_grad is not None:
@@ -54,21 +55,23 @@ class GradScaler:
         self._scaler.load_state_dict(state_dict)
 
 
-def model_parameters_exclude_head(model, clip_mode=None):
+def model_parameters_exclude_head(
+    model: torch.nn.Module, clip_mode: Optional[str] = None
+):
     """
     Returns the parameters of a PyTorch model excluding the last two layers (the head).
 
     Args:
         model (torch.nn.Module): The PyTorch model to get the parameters from.
-        clip_mode (str): The clipping mode, one of 'norm', 'value', 'agc' (default: None).
+        clip_mode (Optional[str], optional): The mode of clipping. Defaults to None.
 
     Returns:
         Iterable: The model parameters excluding the last two layers if clip_mode is 'agc', otherwise all parameters.
     """
     exclude_head = False
-    if clip_mode is not None:
-        if clip_mode == "agc":
-            exclude_head = True
+    clip_mode = str(clip_mode).lower() if clip_mode is not None else None
+    if clip_mode == "agc":
+        exclude_head = True
     if exclude_head:
         return [p for p in model.parameters()][:-2]
     else:

@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 
 
-def convert_to_nifti(input_dicom_directory, output_file):
+def convert_to_nifti(input_dicom_directory: str, output_file: str) -> None:
     """
     This function performs NIfTI conversion of a DICOM image series.
 

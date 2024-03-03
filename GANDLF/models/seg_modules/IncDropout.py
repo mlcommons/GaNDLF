@@ -4,34 +4,33 @@ import torch.nn as nn
 class IncDropout(nn.Module):
     def __init__(
         self,
-        input_channels,
-        output_channels,
-        Conv,
-        Dropout,
-        InstanceNorm,
-        dropout_p=0.3,
-        leakiness=1e-2,
-        conv_bias=True,
-        inst_norm_affine=True,
-        res=False,
-        lrelu_inplace=True,
+        input_channels: int,
+        output_channels: int,
+        Conv: nn.Module = nn.Conv2d,
+        Dropout: nn.Module = nn.Dropout2d,
+        InstanceNorm: nn.Module = nn.InstanceNorm2d,
+        dropout_p: float = 0.3,
+        leakiness: float = 1e-2,
+        conv_bias: bool = True,
+        inst_norm_affine: bool = True,
+        res: bool = False,
+        lrelu_inplace: bool = True,
     ):
         """
-        Incremental Dropout module with a 1x1 convolutional layer.
+        Incremental dropout module.
 
-        Parameters
-        ----------
-        input_channels (int): Number of input channels.
-        output_channels (int): Number of output channels.
-        Conv (torch.nn.Module, optional): Convolutional layer to use.
-        Dropout (torch.nn.Module, optional): Dropout layer to use.
-        InstanceNorm (torch.nn.Module, optional): Instance normalization layer to use.
-        dropout_p (float, optional): Probability of an element to be zeroed. Default is 0.3.
-        leakiness (float, optional): Negative slope coefficient for LeakyReLU activation. Default is 1e-2.
-        conv_bias (bool, optional): If True, add a bias term to the convolutional layer. Default is True.
-        inst_norm_affine (bool, optional): If True, learn two affine parameters per channel in the instance normalization layer. Default is True.
-        res (bool, optional): If True, add a residual connection to the module. Default is False.
-        lrelu_inplace (bool, optional): If True, perform the LeakyReLU operation in place. Default is True.
+        Args:
+            input_channels (int): Number of input channels.
+            output_channels (int): Number of output channels.
+            Conv (nn.Module, optional): The convolutional layer type. Defaults to nn.Conv2d.
+            Dropout (nn.Module, optional): The dropout layer type. Defaults to nn.Dropout2d.
+            InstanceNorm (nn.Module, optional): The instance normalization layer type. Defaults to nn.InstanceNorm2d.
+            dropout_p (float, optional): The dropout probability. Defaults to 0.3.
+            leakiness (float, optional): The leakiness of the leaky ReLU. Defaults to 1e-2.
+            conv_bias (bool, optional): The bias in the convolutional layer. Defaults to True.
+            inst_norm_affine (bool, optional): Whether to use the affine transformation in the instance normalization layer. Defaults to True.
+            res (bool, optional): Whether to use residual connections. Defaults to False.
+            lrelu_inplace (bool, optional): Whether to use the inplace version of the leaky ReLU. Defaults to True.
         """
         nn.Module.__init__(self)
 
