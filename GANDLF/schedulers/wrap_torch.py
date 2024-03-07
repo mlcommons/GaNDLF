@@ -139,7 +139,7 @@ def reduce_on_plateau(parameters):
 
     return ReduceLROnPlateau(
         parameters["optimizer_object"],
-        mode=parameters["scheduler"]["mde"],
+        mode=parameters["scheduler"]["mode"],
         factor=parameters["scheduler"]["factor"],
         patience=parameters["scheduler"]["patience"],
         threshold=parameters["scheduler"]["threshold"],
