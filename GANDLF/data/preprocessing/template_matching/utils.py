@@ -1,31 +1,24 @@
 """ adapted from https://github.com/TissueImageAnalytics/tiatoolbox/blob/master/tiatoolbox/tools/stainextract.py """
+
+from typing import Optional
 import numpy as np
 from skimage import exposure
 import cv2
 
 
-def contrast_enhancer(img, low_p=2, high_p=98):
+def contrast_enhancer(
+    img: np.ndarray, low_p: Optional[int] = 2, high_p: Optional[int] = 98
+) -> np.ndarray:
     """
-    Enhancing contrast of the input image using intensity adjustment.
-    This method uses both image low and high percentiles.
+    Enhance contrast of an image using percentile rescaling.
 
     Args:
-        img (:class:`numpy.ndarray`): input image used to obtain tissue mask.
-            Image should be uint8.
-        low_p (scalar): low percentile of image values to be saturated to 0.
-        high_p (scalar): high percentile of image values to be saturated to 255.
-            high_p should always be greater than low_p.
+        img (np.ndarray): The input image.
+        low_p (Optional[int], optional): The low percentile. Defaults to 2.
+        high_p (Optional[int], optional): The high percentile. Defaults to 98.
 
     Returns:
-        img (:class:`numpy.ndarray`): Image (uint8) with contrast enhanced.
-
-    Raises:
-        AssertionError: Internal errors due to invalid img type.
-
-    Examples:
-        >>> from tiatoolbox import utils
-        >>> img = utils.misc.contrast_enhancer(img, low_p=2, high_p=98)
-
+        np.ndarray: The contrast enhanced image.
     """
     # check if image is not uint8
     assert img.dtype == np.uint8, "Image should be uint8"
@@ -40,20 +33,16 @@ def contrast_enhancer(img, low_p=2, high_p=98):
     return np.uint8(img_out)
 
 
-def get_luminosity_tissue_mask(img, threshold):
-    """Get tissue mask based on the luminosity of the input image.
+def get_luminosity_tissue_mask(img: np.ndarray, threshold: float) -> np.ndarray:
+    """
+    Compute tissue mask based on luminosity thresholding.
 
     Args:
-        img (:class:`numpy.ndarray`): input image used to obtain tissue mask.
-        threshold (float): luminosity threshold used to determine tissue area.
+        img (np.ndarray): The input image.
+        threshold (float): The threshold for luminosity.
 
     Returns:
-        tissue_mask (:class:`numpy.ndarray`): binary tissue mask.
-
-    Examples:
-        >>> from tiatoolbox import utils
-        >>> tissue_mask = utils.misc.get_luminosity_tissue_mask(img, threshold=0.8)
-
+        np.ndarray: The tissue mask.
     """
     img = img.astype("uint8")  # ensure input image is uint8
     img = contrast_enhancer(img, low_p=2, high_p=98)  # Contrast  enhancement
@@ -67,59 +56,44 @@ def get_luminosity_tissue_mask(img, threshold):
     return tissue_mask
 
 
-def rgb2od(img):
-    """Convert from RGB to optical density (OD_RGB) space.
-    RGB = 255 * exp(-1*OD_RGB).
+def rgb2od(img: np.ndarray) -> np.ndarray:
+    """
+    Convert from RGB to optical density (OD_RGB).
 
     Args:
-        img (:class:`numpy.ndarray` of type :class:`numpy.uint8`): Image RGB
+        img (np.ndarray): The input image.
 
     Returns:
-        :class:`numpy.ndarray`: Optical density RGB image.
-
-    Examples:
-        >>> from tiatoolbox.utils import transforms, misc
-        >>> rgb_img = misc.imread('path/to/image')
-        >>> od_img = transforms.rgb2od(rgb_img)
-
+        np.ndarray: The optical density RGB image.
     """
     mask = img == 0
     img[mask] = 1
     return np.maximum(-1 * np.log(img / 255), 1e-6)
 
 
-def od2rgb(od):
-    """Convert from optical density (OD_RGB) to RGB.
-    RGB = 255 * exp(-1*OD_RGB)
+def od2rgb(od: np.ndarray) -> np.ndarray:
+    """
+    Convert from optical density to RGB.
 
     Args:
-        od (:class:`numpy.ndarray`): Optical density RGB image
+        od (np.ndarray): The optical density image.
 
     Returns:
-        numpy.ndarray: Image RGB
-
-    Examples:
-        >>> from tiatoolbox.utils import transforms, misc
-        >>> rgb_img = misc.imread('path/to/image')
-        >>> od_img = transforms.rgb2od(rgb_img)
-        >>> rgb_img = transforms.od2rgb(od_img)
-
+        np.ndarray: The RGB image.
     """
     od = np.maximum(od, 1e-6)
     return (255 * np.exp(-1 * od)).astype(np.uint8)
 
 
-def dl_output_for_h_and_e(dictionary):
-    """Return correct value for H and E from dictionary learning output.
+def dl_output_for_h_and_e(dictionary: np.ndarray) -> np.ndarray:
+    """
+    Rearrange dictionary for H&E in correct order with H as first output.
 
     Args:
-        dictionary (:class:`numpy.ndarray`):
-            :class:`sklearn.decomposition.DictionaryLearning` output
+        dictionary (np.ndarray): The input dictionary.
 
     Returns:
-        :class:`numpy.ndarray`:
-            With correct values for H and E.
-
+        np.ndarray: The dictionary in the correct order.
     """
     return_dictionary = dictionary
     if dictionary[0, 0] < dictionary[1, 0]:
@@ -128,19 +102,16 @@ def dl_output_for_h_and_e(dictionary):
     return return_dictionary
 
 
-def h_and_e_in_right_order(v1, v2):
-    """Rearrange input vectors for H&E in correct order with H as first output.
+def h_and_e_in_right_order(v1: np.ndarray, v2: np.ndarray) -> np.ndarray:
+    """
+    Rearrange vectors for H&E in correct order with H as first output.
 
     Args:
-        v1 (:class:`numpy.ndarray`):
-            Input vector for stain extraction.
-        v2 (:class:`numpy.ndarray`):
-            Input vector for stain extraction.
+        v1 (np.ndarray): The first vector for stain extraction.
+        v2 (np.ndarray): The second vector for stain extraction.
 
     Returns:
-        :class:`numpy.ndarray`:
-            Input vectors in the correct order.
-
+        np.ndarray: The vectors in the correct order.
     """
     return_arr = np.array([v2, v1])
     if v1[0] > v2[0]:
@@ -149,17 +120,15 @@ def h_and_e_in_right_order(v1, v2):
     return return_arr
 
 
-def vectors_in_correct_direction(e_vectors):
-    """Points the eigen vectors in the right direction.
+def vectors_in_correct_direction(e_vectors: np.ndarray) -> np.ndarray:
+    """
+    Ensure that the vectors are in the correct direction.
 
     Args:
-        e_vectors (:class:`numpy.ndarray`):
-            Eigen vectors.
+        e_vectors (np.ndarray): The input vectors.
 
     Returns:
-        :class:`numpy.ndarray`:
-            Pointing in the correct direction.
-
+        np.ndarray: The vectors in the correct direction.
     """
     if e_vectors[0, 0] < 0:
         e_vectors[:, 0] *= -1

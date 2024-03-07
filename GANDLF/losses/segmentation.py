@@ -1,4 +1,5 @@
 import sys
+from typing import List, Optional
 import torch
 
 
@@ -61,9 +62,9 @@ def generic_loss_calculator(
     target: torch.Tensor,
     num_class: int,
     loss_criteria,
-    weights: list = None,
-    ignore_class: int = None,
-    loss_type: int = 0,
+    weights: Optional[List[float]] = None,
+    ignore_class: Optional[int] = None,
+    loss_type: Optional[int] = 0,
 ) -> torch.Tensor:
     """
     This function computes the mean class dice score between two tensors
@@ -73,9 +74,9 @@ def generic_loss_calculator(
         target (torch.Tensor): Required target label to match the predicted with
         num_class (int): Number of classes (including the background class)
         loss_criteria (function): Loss function to use
-        weights (list, optional): Dice weights for each class (excluding the background class), defaults to None
-        ignore_class (int, optional): Class to ignore, defaults to None
-        loss_type (int, optional): Type of loss to compute, defaults to 0. The options are:
+        weights (Optional[List[float]], optional): Dice weights for each class (excluding the background class), defaults to None
+        ignore_class (Optional[int], optional): Class to ignore, defaults to None
+        loss_type (Optional[int], optional): Type of loss to compute, defaults to 0. The options are:
             0: no loss, normal dice calculation
             1: dice loss, (1-dice)
             2: log dice, -log(dice)
@@ -214,16 +215,19 @@ def MCC_log_loss(
 
 
 def tversky_loss(
-    predicted: torch.Tensor, target: torch.Tensor, alpha: float = 0.5, beta: float = 0.5
+    predicted: torch.Tensor,
+    target: torch.Tensor,
+    alpha: Optional[float] = 0.5,
+    beta: Optional[float] = 0.5,
 ) -> torch.Tensor:
     """
     This function calculates the Tversky loss between two tensors.
 
     Args:
-        predicted (torch.Tensor): Predicted generally by the network
-        target (torch.Tensor): Required target label to match the predicted with
-        alpha (float, optional): Weight of false positives. Defaults to 0.5.
-        beta (float, optional): Weight of false negatives. Defaults to 0.5.
+        predicted (torch.Tensor): Predicted generally by the network.
+        target (torch.Tensor): Required target label to match the predicted with.
+        alpha (Optional[float], optional): The alpha value for Tversky loss. Defaults to 0.5.
+        beta (Optional[float], optional): The beta value for Tversky loss. Defaults to 0.5.
 
     Returns:
         torch.Tensor: Computed Tversky Loss
@@ -249,14 +253,14 @@ def tversky_loss(
 
 
 def MCT_loss(
-    predicted: torch.Tensor, target: torch.Tensor, params: dict = None
+    predicted: torch.Tensor, target: torch.Tensor, params: Optional[dict] = None
 ) -> torch.Tensor:
     """
     This function calculates the Multi-Class Tversky loss between two tensors.
 
     Args:
-        predicted (torch.Tensor): Predicted generally by the network
-        target (torch.Tensor): Required target label to match the predicted with
+        predicted (torch.Tensor): Predicted generally by the network.
+        target (torch.Tensor): Required target label to match the predicted with.
         params (dict, optional): Additional parameters for computing loss function, including weights for each class
 
     Returns:
@@ -278,14 +282,14 @@ def MCT_loss(
     return acc_tv_loss
 
 
-def KullbackLeiblerDivergence(mu, logvar, params=None):
+def KullbackLeiblerDivergence(mu, logvar, params: Optional[dict] = None):
     """
     Calculates the Kullback-Leibler divergence between two Gaussian distributions.
 
     Args:
-        mu (torch.Tensor): The mean of the first Gaussian distribution
-        logvar (torch.Tensor): The logarithm of the variance of the first Gaussian distribution
-        params (dict, optional): A dictionary of optional parameters
+        mu (torch.Tensor): The mean of the first Gaussian distribution.
+        logvar (torch.Tensor): The logarithm of the variance of the first Gaussian distribution.
+        params (Optional[dict], optional): The dictionary of parameters. Defaults to None.
 
     Returns:
         torch.Tensor: The computed Kullback-Leibler divergence
@@ -295,15 +299,15 @@ def KullbackLeiblerDivergence(mu, logvar, params=None):
 
 
 def FocalLoss(
-    predicted: torch.Tensor, target: torch.Tensor, params: dict = None
+    predicted: torch.Tensor, target: torch.Tensor, params: Optional[dict] = None
 ) -> torch.Tensor:
     """
     This function calculates the Focal loss between two tensors.
 
     Args:
-        predicted (torch.Tensor): Predicted generally by the network
-        target (torch.Tensor): Required target label to match the predicted with
-        params (dict, optional): Additional parameters for computing loss function, including weights for each class
+        predicted (torch.Tensor): Predicted generally by the network.
+        target (torch.Tensor): Required target label to match the predicted with.
+        params (Optional[dict], optional): Additional parameters for computing loss function, including gamma and size_average. Defaults to None.
 
     Returns:
         torch.Tensor: Computed Focal Loss
@@ -314,7 +318,9 @@ def FocalLoss(
         gamma = params["loss_function"].get("gamma", 2.0)
         size_average = params["loss_function"].get("size_average", True)
 
-    def _focal_loss(preds, target, gamma, size_average=True):
+    def _focal_loss(
+        preds, target, gamma, size_average: Optional[bool] = True
+    ) -> torch.Tensor:
         """
         Internal helper function to calculate focal loss for a single class.
 

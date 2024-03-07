@@ -73,7 +73,7 @@ jobs:
         sudo apt-get install libvips libvips-tools -y
         python -m pip install --upgrade pip
         python -m pip install wheel
-        pip install torch==2.1.0+cpu torchvision==0.16.0+cpu torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cpu
+        pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cpu
         pip install -e .
     - name: Run generic unit tests to download data and construct CSVs
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
@@ -90,15 +90,17 @@ jobs:
         git clone --depth=1 https://github.com/securefederatedai/openfl.git
         cd openfl
         git fetch --tags
-        echo "Checkout the latest OpenFL tag"
-        latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-        git checkout $latestTag
-        sed -i -e 's/protobuf==3.19.6/protobuf/g' setup.py ## this should NOT be there
+        # echo "Checkout the latest OpenFL tag"
+        # latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+        # git checkout $latestTag
+        # sed -i -e 's/protobuf==3.19.6/protobuf/g' setup.py ## this should NOT be there
         pip install -e .
         cd ..
         echo "Copying files to appropriate directories and updated headers"
-        head -n 1 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
-        tail -n +9 testing/data/train_3d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
-        head -n 8 testing/data/train_3d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/train.csv
+        head -n 1 testing/data/train_2d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
+        tail -n +9 testing/data/train_2d_rad_segmentation.csv >> /home/runner/work/GaNDLF/GaNDLF/openfl/valid.csv
+        head -n 8 testing/data/train_2d_rad_segmentation.csv > /home/runner/work/GaNDLF/GaNDLF/openfl/train.csv
+        sed -i 's/# n_channels: 3/num_channels: 3/g' testing/config_segmentation.yaml
+        config_to_use=$(pwd)/testing/config_segmentation.yaml
         cd openfl
-        python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1
+        python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1 --gandlf_config $config_to_use

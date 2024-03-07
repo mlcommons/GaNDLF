@@ -450,7 +450,7 @@ class _Transformer(nn.Sequential):
     """
     A transformer module that consists of an embedding layer followed by a series of transformer layers.
 
-    Parameters:
+    Args:
         img_size (tuple): The dimensions of the input image (height, width, depth).
         patch_size (int): The size of the patches to be extracted from the input image.
         in_feats (int): The number of input features.
@@ -515,7 +515,7 @@ class _Transformer(nn.Sequential):
         """
         Processes the input through the transformer and returns the output.
 
-        Parameters:
+        Args:
             x (tensor): The input tensor.
 
         Returns:
@@ -569,13 +569,6 @@ class unetr(ModelBase):
 
         Args:
             parameters (dict): A dictionary containing the model parameters.
-
-        Raises:
-        -------
-        AssertionError
-            If the input image size is not divisible by the patch size in at least 1 dimension, or if the inner patch size is not smaller than the input image.
-            If the embedding dimension is not divisible by the number of self-attention heads.
-
         """
         super(unetr, self).__init__(parameters)
 
@@ -713,21 +706,16 @@ class unetr(ModelBase):
             ),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Perform the forward pass of the UNet model.
+        Forward pass of the U-Net model.
 
-        Parameters
-        ----------
-        x : torch.Tensor
-            The input tensor of shape [batch_size, channels, x_dims, y_dims, z_dims].
+        Args:
+            x (torch.Tensor): The input tensor.
 
-        Returns
-        -------
-        torch.Tensor
-            The output tensor of shape [batch_size, n_classes, x_dims, y_dims, z_dims].
+        Returns:
+            torch.Tensor: The output tensor.
         """
-
         # Perform transformer encoding of input tensor
         transformer_out = self.transformer(x)
 

@@ -1,9 +1,9 @@
 ---
 name: "❓ Questions/Help/Support"
 about: Ask questions to the developers
-title: ''
-labels: ''
-assignees: ''
+title: "[QUESTION] "
+labels: ""
+assignees: ""
 
 ---
 <!-- By proceeding, you acknowledge that you have 
@@ -11,21 +11,20 @@ taken a look at the FAQ section in the documentation:
 https://mlcommons.github.io/GaNDLF/faq
 -->
 
-**GaNDLF Version**
+### Environment information
 <!-- Put the output of the following command:
-python -c 'import GANDLF as g;print(g.__version__)'
+python ./gandlf_debugInfo
 -->
-Version information of the GaNDLF package in the virtual environment.
+GaNDLF version, OS, and any other relevant information.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. Windows/Linux (include detailed distro information)/macOS]
- - Version (including Build information, if any): [e.g. Fedora 22 or Windows 10.1803]
-
-**How did you install GaNDLF**
+### How did you install GaNDLF
 Please provide all steps followed during installation.
 
-**Dataset description**
-Describe the data (radiology/histology/so on, dimensions, etc.).
+### Dataset description
+Describe the data (radiology/histology/so on, dimensions, etc.) with as much detail as possible.
 
-**Describe your question/problem**
+### Describe your question/problem
 A clear and concise description of what issue you are facing.
+
+### Additional context
+Add any other context about the problem here.

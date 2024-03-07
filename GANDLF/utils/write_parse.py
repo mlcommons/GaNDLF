@@ -1,6 +1,7 @@
 import os
 import pathlib
 import sys
+from typing import Optional, Tuple, Union
 
 import pandas as pd
 
@@ -8,16 +9,21 @@ from .handle_collisions import handle_collisions
 
 
 def writeTrainingCSV(
-    inputDir, channelsID, labelID, outputFile, relativizePathsToOutput=False
+    inputDir: str,
+    channelsID: str,
+    labelID: str,
+    outputFile: str,
+    relativizePathsToOutput: Optional[bool] = False,
 ) -> None:
     """
-    This function writes the CSV file based on the input directory, channelsID + labelsID strings
+    This function writes a CSV file containing the paths to the training data.
 
     Args:
-        inputDir (str): The input directory.
-        channelsID (str): The channel header(s) identifiers.
-        labelID (str): The label header identifier.
-        outputFile (str): The output files to write
+        inputDir (str): The input directory containing all the training data.
+        channelsID (str): The channel IDs.
+        labelID (str): The label ID.
+        outputFile (str): The output CSV file.
+        relativizePathsToOutput (Optional[bool], optional): Whether to relativize the paths to the output file. Defaults to False.
     """
     channelsID_list = channelsID.split(",")  # split into list
 
@@ -64,17 +70,18 @@ def writeTrainingCSV(
     file.close()
 
 
-def parseTrainingCSV(inputTrainingCSVFile, train=True) -> (pd.DataFrame, dict):
+def parseTrainingCSV(
+    inputTrainingCSVFile: str, train: Optional[bool] = True
+) -> Tuple[pd.DataFrame, dict]:
     """
     This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
 
     Args:
         inputTrainingCSVFile (str): The input data CSV file which contains all training data.
-        train (bool, optional): Whether performing training. Defaults to True.
+        train (Optional[bool], optional): Whether to train the model. Defaults to True.
 
     Returns:
-        pandas.DataFrame: The full dataset for computation.
-        dict: The dictionary containing all relevant CSV headers.
+        Tuple[pd.DataFrame, dict]: The full dataset for computation and the dictionary containing all relevant CSV headers.
     """
     ## read training dataset into data frame
     data_full = get_dataframe(inputTrainingCSVFile)
@@ -125,20 +132,19 @@ def parseTrainingCSV(inputTrainingCSVFile, train=True) -> (pd.DataFrame, dict):
     return data_full, headers
 
 
-def parseTestingCSV(inputTrainingCSVFile, output_dir) -> (bool, pd.DataFrame, dict):
+def parseTestingCSV(
+    inputTrainingCSVFile, output_dir
+) -> Tuple[bool, pd.DataFrame, dict]:
     """
-    This function parses the input training CSV and returns a dictionary of headers and the full (randomized) data frame
+    This function parses the input testing CSV and returns a dictionary of headers and the full (randomized) data frame
 
     Args:
-        inputTrainingCSVFile (str): The input data CSV file which contains all training data.
-        train (bool, optional): Whether performing training. Defaults to True.
+        inputTrainingCSVFile (str): The input data CSV file which contains all testing data.
+        output_dir (str): The output directory for the updated_test_mapping.csv and the collision.csv.
 
     Returns:
-        bool: Whether collisions were found or not.
-        pandas.DataFrame: The full dataset for computation.
-        dict: The dictionary containing all relevant CSV headers.
+        Tuple[bool, pd.DataFrame, dict]: A boolean indicating whether any collisions were found, the full dataset for computation, and the dictionary containing all relevant CSV headers.
     """
-
     data_full, headers = parseTrainingCSV(inputTrainingCSVFile, train=False)
 
     collision_status, data_full = handle_collisions(data_full, headers, output_dir)
@@ -159,7 +165,7 @@ def parseTestingCSV(inputTrainingCSVFile, output_dir) -> (bool, pd.DataFrame, di
     return collision_status, data_full, headers
 
 
-def get_dataframe(input_file) -> pd.DataFrame:
+def get_dataframe(input_file: Union[str, pd.DataFrame]) -> pd.DataFrame:
     """
     This function parses the input and returns a data frame
 
@@ -182,7 +188,7 @@ def get_dataframe(input_file) -> pd.DataFrame:
 
 
 def convert_relative_paths_in_dataframe(
-    input_dataframe, headers, path_root
+    input_dataframe: pd.DataFrame, headers: dict, path_root: str
 ) -> pd.DataFrame:
     """
     This function takes a dataframe containing paths and a root path (usually to a data CSV file).

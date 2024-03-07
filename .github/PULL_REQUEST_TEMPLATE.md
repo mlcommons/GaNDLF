@@ -2,7 +2,7 @@
 Fixes #ISSUE_NUMBER
 
 ## Proposed Changes
-<!-- Bullet pointed list of changes, please try to keep code changes as small as possible-->
+<!-- Bullet pointed list of changes; **PLEASE** try to keep code changes as small as possible-->
 - 
 
 ## Checklist
@@ -13,11 +13,11 @@ but PRs are more likely to be merged quickly if all the tasks are done. -->
 <!-- Replace `[ ]` with `[x]` in all the boxes that apply.
 Note that if a box is left unchecked, PR merges will take longer than usual.
 -->
-- [ ] I have read the [`CONTRIBUTING`](https://github.com/mlcommons/GaNDLF/blob/master/CONTRIBUTING.md) guide.
-- [ ] My PR is based from the [current GaNDLF master ](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/keeping-your-local-repository-in-sync-with-github/syncing-your-branch-in-github-desktop?platform=windows).
+- [ ] [`CONTRIBUTING`](https://github.com/mlcommons/GaNDLF/blob/master/CONTRIBUTING.md) guide has been followed.
+- [ ] PR is based on the [current GaNDLF master ](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/keeping-your-local-repository-in-sync-with-github/syncing-your-branch-in-github-desktop?platform=windows).
 - [ ] Non-breaking change (does **not** break existing functionality): provide **as many** details as possible for _any_ breaking change.
-- [ ] Function/class source code documentation added/updated.
-- [ ] Code has been [blacked](https://github.com/psf/black#usage) for style consistency.
+- [ ] Function/class source code documentation added/updated (ensure `typing` is used to provide type hints, including and not limited to using `Optional` if a variable has a pre-defined value).
+- [ ] Code has been [blacked](https://github.com/psf/black#usage) for style consistency and linting.
 - [ ] If applicable, version information [has been updated in GANDLF/version.py](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/version.py).
 - [ ] If adding a git submodule, add to list of exceptions for black styling in [pyproject.toml](https://github.com/mlcommons/GaNDLF/blob/master/pyproject.toml) file.
 - [ ] [Usage documentation](https://github.com/mlcommons/GaNDLF/blob/master/docs) has been updated, if appropriate.

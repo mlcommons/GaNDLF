@@ -1,5 +1,6 @@
 import sys
 import yaml
+from typing import Optional
 from pprint import pprint
 import pandas as pd
 from tqdm import tqdm
@@ -8,7 +9,7 @@ import torchio
 import SimpleITK as sitk
 import numpy as np
 
-from GANDLF.parseConfig import parseConfig
+from GANDLF.config_manager import ConfigManager
 from GANDLF.utils import find_problem_type_from_parameters, one_hot
 from GANDLF.metrics import (
     overall_stats,
@@ -30,7 +31,9 @@ from GANDLF.metrics.segmentation import (
 )
 
 
-def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -> dict:
+def generate_metrics_dict(
+    input_csv: str, config: str, outputfile: Optional[str] = None
+) -> dict:
     """
     This function generates metrics from the input csv and the config.
 
@@ -58,7 +61,7 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
         assert column in headers, f"The input csv should have a column named {column}"
 
     overall_stats_dict = {}
-    parameters = parseConfig(config)
+    parameters = ConfigManager(config)
     problem_type = parameters.get("problem_type", None)
     problem_type = (
         find_problem_type_from_parameters(parameters)
@@ -195,18 +198,18 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                 return input_tensor
 
         def __percentile_clip(
-            input_tensor,
-            reference_tensor=None,
-            p_min=0.5,
-            p_max=99.5,
-            strictlyPositive=True,
+            input_tensor: torch.Tensor,
+            reference_tensor: torch.Tensor = None,
+            p_min: Optional[float] = 0.5,
+            p_max: Optional[float] = 99.5,
+            strictlyPositive: Optional[bool] = True,
         ):
-            """Normalizes a tensor based on percentiles. Clips values below and above the percentile.
+            """
+            Normalizes a tensor based on percentiles. Clips values below and above the percentile.
             Percentiles for normalization can come from another tensor.
 
             Args:
-                input_tensor (torch.Tensor): Tensor to be normalized based on the data from the reference_tensor.
-                    If reference_tensor is None, the percentiles from this tensor will be used.
+                input_tensor (torch.Tensor): Tensor to be normalized based on the data from the reference_tensor. If reference_tensor is None, the percentiles from this tensor will be used.
                 reference_tensor (torch.Tensor, optional): The tensor used for obtaining the percentiles.
                 p_min (float, optional): Lower end percentile. Defaults to 0.5.
                 p_max (float, optional): Upper end percentile. Defaults to 99.5.
@@ -276,24 +279,24 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
                     strictlyPositive=True,
                 )
 
-            overall_stats_dict[current_subject_id][
-                "ssim"
-            ] = structural_similarity_index(gt_image_infill, output_infill, mask).item()
+            overall_stats_dict[current_subject_id]["ssim"] = (
+                structural_similarity_index(output_infill, gt_image_infill, mask).item()
+            )
 
             # ncc metrics
             compute_ncc = parameters.get("compute_ncc", True)
             if compute_ncc:
                 overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
                 overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
                 overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
                 overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
-                    gt_image_infill, output_infill
+                    output_infill, gt_image_infill
                 )
 
             # only voxels that are to be inferred (-> flat array)
@@ -302,47 +305,47 @@ def generate_metrics_dict(input_csv: str, config: str, outputfile: str = None) -
             output_infill = output_infill[mask]
 
             overall_stats_dict[current_subject_id]["mse"] = mean_squared_error(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             overall_stats_dict[current_subject_id]["msle"] = mean_squared_log_error(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             overall_stats_dict[current_subject_id]["mae"] = mean_absolute_error(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             # torchmetrics PSNR using "max"
             overall_stats_dict[current_subject_id]["psnr"] = peak_signal_noise_ratio(
-                gt_image_infill, output_infill
+                output_infill, gt_image_infill
             ).item()
 
             # same as above but with epsilon for robustness
-            overall_stats_dict[current_subject_id][
-                "psnr_eps"
-            ] = peak_signal_noise_ratio(
-                gt_image_infill, output_infill, epsilon=sys.float_info.epsilon
-            ).item()
+            overall_stats_dict[current_subject_id]["psnr_eps"] = (
+                peak_signal_noise_ratio(
+                    output_infill, gt_image_infill, epsilon=sys.float_info.epsilon
+                ).item()
+            )
 
             # only use fix data range to [0;1] if the data was normalized before
             if normalize:
                 # torchmetrics PSNR but with fixed data range of 0 to 1
-                overall_stats_dict[current_subject_id][
-                    "psnr_01"
-                ] = peak_signal_noise_ratio(
-                    gt_image_infill, output_infill, data_range=(0, 1)
-                ).item()
+                overall_stats_dict[current_subject_id]["psnr_01"] = (
+                    peak_signal_noise_ratio(
+                        output_infill, gt_image_infill, data_range=(0, 1)
+                    ).item()
+                )
 
                 # same as above but with epsilon for robustness
-                overall_stats_dict[current_subject_id][
-                    "psnr_01_eps"
-                ] = peak_signal_noise_ratio(
-                    gt_image_infill,
-                    output_infill,
-                    data_range=(0, 1),
-                    epsilon=sys.float_info.epsilon,
-                ).item()
+                overall_stats_dict[current_subject_id]["psnr_01_eps"] = (
+                    peak_signal_noise_ratio(
+                        output_infill,
+                        gt_image_infill,
+                        data_range=(0, 1),
+                        epsilon=sys.float_info.epsilon,
+                    ).item()
+                )
 
     pprint(overall_stats_dict)
     if outputfile is not None:

@@ -1,5 +1,5 @@
+from typing import List, Tuple
 import numpy as np
-
 import torch
 import nibabel as nib
 
@@ -7,26 +7,23 @@ from torchio.transforms import SpatialTransform
 
 
 # adapted from https://codereview.stackexchange.com/questions/132914/crop-black-border-of-image-using-numpy/132933#132933
-def crop_image_outside_zeros(array, patch_size):
+def crop_image_outside_zeros(
+    array: np.ndarray, patch_size: List[int]
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     This function rotates an image by 90 degrees around the specified axis.
 
     Args:
         array (numpy.array): The input array.
-        patch_size (list): The patch size.
-
-    Raises:
-        ValueError: Array needs to be 4D.
+        patch_size (List[int]): The patch size.
 
     Returns:
-        numpy.array: The new corner indeces.
-        numpy.array: The new cropped array.
+        Tuple[np.ndarray, np.ndarray]: The new corner indices and the new array.
     """
     dimensions = len(array.shape)
-    if dimensions != 4:
-        raise ValueError(
-            "Array expected to be 4D but got {} dimensions.".format(dimensions)
-        )
+    assert dimensions == 4, "Array expected to be 4D but got {} dimensions.".format(
+        dimensions
+    )
 
     # collapse to single channel and get the mask of non-zero voxels
     mask = array.sum(axis=0) > 0

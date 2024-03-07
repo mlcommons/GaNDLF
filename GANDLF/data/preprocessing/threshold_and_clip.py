@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 
 from torchio.data.subject import Subject
@@ -35,7 +36,7 @@ class Threshold(IntensityTransform):
 
     """
 
-    def __init__(self, out_min: float = None, out_max: float = None, **kwargs):
+    def __init__(self, out_min: Optional[float] = None, out_max: Optional[float] = None, **kwargs):
         super().__init__(**kwargs)
         self.out_min, self.out_max = out_min, out_max
         self.args_names = "out_min", "out_max"
@@ -56,9 +57,27 @@ class Threshold(IntensityTransform):
 
 
 # the "_transform" functions return lambdas that can be used to wrap into a Compose class
-def threshold_transform(parameters):
+def threshold_transform(parameters:dict) -> Threshold:
+    """
+    This function returns a lambda function that can be used to wrap into a Compose class.
+
+    Args:
+        parameters (dict): The parameters dictionary.
+
+    Returns:
+        Threshold: The transform to threshold the image.
+    """
     return Threshold(out_min=parameters["min"], out_max=parameters["max"])
 
 
-def clip_transform(parameters):
+def clip_transform(parameters:dict) -> Clamp:
+    """
+    This function returns a lambda function that can be used to wrap into a Compose class.
+
+    Args:
+        parameters (dict): The parameters dictionary.
+
+    Returns:
+        Clamp: The transform to clip the image.
+    """
     return Clamp(out_min=parameters["min"], out_max=parameters["max"])
