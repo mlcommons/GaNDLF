@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import sys, yaml, ast, pkg_resources
 import numpy as np
 from copy import deepcopy
@@ -19,7 +20,6 @@ parameter_defaults = {
     "save_output": False,  # save outputs during validation/testing
     "in_memory": False,  # pin data to cpu memory
     "pin_memory_dataloader": False,  # pin data to gpu memory
-    "enable_padding": False,  # if padding needs to be done when "patch_sampler" is "label"
     "scaling_factor": 1,  # scaling factor for regression problems
     "q_max_length": 100,  # the max length of queue
     "q_samples_per_volume": 10,  # number of samples per volume
@@ -36,32 +36,34 @@ parameter_defaults = {
     "grid_aggregator_overlap": "crop",  # default grid aggregator overlap strategy
     "determinism": False,  # using deterministic version of computation
     "previous_parameters": None,  # previous parameters to be used for resuming training and perform sanity checking
-    "seed": 0,  # seed for random number generation
+    "seed": 0,  # seed for reproducibility
 }
 
 ## dictionary to define string defaults for appropriate options
 parameter_defaults_string = {
     "optimizer": "adam",  # the optimizer
-    "patch_sampler": "uniform",  # type of sampling strategy
     "scheduler": "triangle_modified",  # the default scheduler
     "clip_mode": None,  # default clip mode
 }
 
 
 def initialize_parameter(
-    params, parameter_to_initialize, value=None, evaluate=True
-):
+    params: dict,
+    parameter_to_initialize: str,
+    value: Optional[Union[str, list, int, dict]] = None,
+    evaluate: Optional[bool] = True,
+) -> dict:
     """
-    Initializes the specified parameter with supplied value
+    This function will initialize the parameter in the parameters dict to the value if it is absent.
 
     Args:
         params (dict): The parameter dictionary.
         parameter_to_initialize (str): The parameter to initialize.
-        value ((Union[str, list, int]), optional): The value to initialize. Defaults to None.
-        evaluate (bool, optional): String evaluate. Defaults to True.
+        value (Optional[Union[str, list, int, dict]], optional): The value to initialize. Defaults to None.
+        evaluate (Optional[bool], optional): Whether to evaluate the value. Defaults to True.
 
     Returns:
-        [type]: [description]
+        dict: The parameter dictionary.
     """
     if parameter_to_initialize in params:
         if evaluate:
@@ -82,17 +84,21 @@ def initialize_parameter(
     return params
 
 
-def initialize_key(parameters, key, value=None):
+def initialize_key(
+    parameters: dict,
+    key: str,
+    value: Optional[Union[str, float, list, dict]] = None,
+) -> dict:
     """
-    This function will initialize the key in the parameters dict to 'None' if it is absent or length is zero.
+    This function initializes a key in the parameters dictionary to a value if it is absent.
 
     Args:
         parameters (dict): The parameter dictionary.
-        key (str): The parameter to initialize.
-        value (n.a.): The value to initialize.
+        key (str): The key to initialize.
+        value (Optional[Union[str, float, list, dict]], optional): The value to initialize. Defaults to None.
 
     Returns:
-        dict: The final parameter dictionary.
+        dict: The parameter dictionary.
     """
     if parameters is None:
         parameters = {}
@@ -108,7 +114,9 @@ def initialize_key(parameters, key, value=None):
     return parameters
 
 
-def parseConfigGAN(config_file_path, version_check_flag=True):
+def parseConfigGAN(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
     """
     This function parses the configuration file and returns a dictionary of parameters.
 
@@ -376,12 +384,10 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
                     params["data_augmentation"], "colorjitter", {}
                 )
                 for key in ["brightness", "contrast", "saturation"]:
-                    params["data_augmentation"]["colorjitter"] = (
-                        initialize_key(
-                            params["data_augmentation"]["colorjitter"],
-                            key,
-                            [0, 1],
-                        )
+                    params["data_augmentation"][
+                        "colorjitter"
+                    ] = initialize_key(
+                        params["data_augmentation"]["colorjitter"], key, [0, 1]
                     )
                 params["data_augmentation"]["colorjitter"] = initialize_key(
                     params["data_augmentation"]["colorjitter"],
@@ -420,20 +426,20 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
                     )
 
                     for key in ranges:
-                        params["data_augmentation"]["hed_transform"] = (
-                            initialize_key(
-                                params["data_augmentation"]["hed_transform"],
-                                key,
-                                default_range,
-                            )
+                        params["data_augmentation"][
+                            "hed_transform"
+                        ] = initialize_key(
+                            params["data_augmentation"]["hed_transform"],
+                            key,
+                            default_range,
                         )
 
-                    params["data_augmentation"]["hed_transform"] = (
-                        initialize_key(
-                            params["data_augmentation"]["hed_transform"],
-                            "cutoff_range",
-                            [0, 1],
-                        )
+                    params["data_augmentation"][
+                        "hed_transform"
+                    ] = initialize_key(
+                        params["data_augmentation"]["hed_transform"],
+                        "cutoff_range",
+                        [0, 1],
                     )
 
             # special case for anisotropic
@@ -711,12 +717,39 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
         parallel_compute_command = parallel_compute_command.replace('"', "")
     params["parallel_compute_command"] = parallel_compute_command
 
+    if "opt" in params:
+        print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
+        params["optimizer"] = params["opt"]
     if "opt_g" in params:
         print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer_g"] = params["opt_g"]
     if "opt_d" in params:
         print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer_d"] = params["opt_d"]
+
+    # initialize defaults for patch sampler
+    temp_patch_sampler_dict = {
+        "type": "uniform",
+        "enable_padding": False,
+        "padding_mode": "symmetric",
+        "biased_sampling": False,
+    }
+    # check if patch_sampler is defined in the config
+    if "patch_sampler" in params:
+        # if "patch_sampler" is a string, then it is the type of sampler
+        if isinstance(params["patch_sampler"], str):
+            print(
+                "WARNING: Defining 'patch_sampler' as a string will be deprecated in a future release, please use a dictionary instead"
+            )
+            temp_patch_sampler_dict["type"] = params["patch_sampler"].lower()
+        elif isinstance(params["patch_sampler"], dict):
+            # dict requires special handling
+            for key in params["patch_sampler"]:
+                temp_patch_sampler_dict[key] = params["patch_sampler"][key]
+
+    # now assign the dict back to the params
+    params["patch_sampler"] = temp_patch_sampler_dict
+    del temp_patch_sampler_dict
 
     # define defaults
     for current_parameter in parameter_defaults:
@@ -736,6 +769,17 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
         )
 
     # ensure that the scheduler and optimizer are dicts
+    if isinstance(params["scheduler"], str):
+        temp_dict = {}
+        temp_dict["type"] = params["scheduler"]
+        params["scheduler"] = temp_dict
+
+    if not ("step_size" in params["scheduler"]):
+        params["scheduler"]["step_size"] = params["learning_rate"] / 5.0
+        print(
+            "WARNING: Setting default step_size to:",
+            params["scheduler"]["step_size"],
+        )
     if isinstance(params["scheduler_g"], str):
         temp_dict = {}
         temp_dict["type"] = params["scheduler_g"]
@@ -759,6 +803,12 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
         )
 
     # initialize default optimizer
+    params["optimizer"] = params.get("optimizer", {})
+    if isinstance(params["optimizer"], str):
+        temp_dict = {}
+        temp_dict["type"] = params["optimizer"]
+        params["optimizer"] = temp_dict
+
     params["optimizer_g"] = params.get("optimizer_g", {})
     params["optimizer_d"] = params.get("optimizer_d", {})
     if isinstance(params["optimizer_g"], str):
@@ -769,7 +819,6 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
         temp_dict = {}
         temp_dict["type"] = params["optimizer_d"]
         params["optimizer_d"] = temp_dict
-
     # initialize defaults for inference mechanism
     inference_mechanism = {
         "grid_aggregator_overlap": "crop",
@@ -789,3 +838,19 @@ def parseConfigGAN(config_file_path, version_check_flag=True):
         params["inference_mechanism"] = inference_mechanism
 
     return params
+
+
+def ConfigManager(
+    config_file_path: Union[str, dict], version_check_flag: bool = True
+) -> None:
+    """
+    This function parses the configuration file and returns a dictionary of parameters.
+
+    Args:
+        config_file_path (Union[str, dict]): The filename of the configuration file.
+        version_check_flag (bool, optional): Whether to check the version in configuration file. Defaults to True.
+
+    Returns:
+        dict: The parameter dictionary.
+    """
+    return parseConfigGAN(config_file_path, version_check_flag)
