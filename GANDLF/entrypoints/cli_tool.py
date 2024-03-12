@@ -11,7 +11,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import patch_miner command
 # import preprocess command
 # import verify_install command
-# import config_generator command
+from GANDLF.entrypoints.config_generator import new_way as config_generator_command
 # import recover_config command
 # import deploy command
 # import optimize_model command
@@ -48,7 +48,7 @@ def gandlf(ctx, loglevel):
 # TODO: add path-miner command
 # TODO: add preprocess command
 # TODO: add verify-install command
-# TODO: add config-generator command
+gandlf.add_command(config_generator_command, "config-generator")
 # TODO: add recover-config command
 # TODO: add deploy command
 # TODO: add optimize-model command
