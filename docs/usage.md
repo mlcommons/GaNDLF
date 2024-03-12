@@ -308,11 +308,11 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 
 ## Plot the final results
 
-After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/collect_stats.py) can be used for plotting:
+After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf collect-stats](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/collect_stats.py) command can be used for plotting:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_collectStats \
+(venv_gandlf) $> gandlf collect-stats \
   -m /path/to/trained/models \  # directory which contains testing and validation models
   -o ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
