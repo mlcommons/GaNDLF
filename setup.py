@@ -14,9 +14,7 @@ try:
         readme = readme_file.read()
 except Exception as error:
     readme = "No README information found."
-    sys.stderr.write(
-        "Warning: Could not open '%s' due %s\n" % ("README.md", error)
-    )
+    sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
 
 
 class CustomInstallCommand(install):
@@ -41,9 +39,7 @@ try:
 
 except Exception as error:
     __version__ = "0.0.1"
-    sys.stderr.write(
-        "Warning: Could not open '%s' due %s\n" % (filepath, error)
-    )
+    sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 # Handle cases where specific files need to be bundled into the final package as installed via PyPI
 dockerfiles = [
@@ -53,9 +49,7 @@ dockerfiles = [
 ]
 setup_files = ["setup.py", ".dockerignore", "pyproject.toml", "MANIFEST.in"]
 all_extra_files = dockerfiles + setup_files
-all_extra_files_pathcorrected = [
-    os.path.join("../", item) for item in all_extra_files
-]
+all_extra_files_pathcorrected = [os.path.join("../", item) for item in all_extra_files]
 # find_packages should only ever find these as subpackages of gandlf, not as top-level packages
 # generate this dynamically?
 # GANDLF.GANDLF is needed to prevent recursion madness in deployments
@@ -134,23 +128,23 @@ if __name__ == "__main__":
             "egg_info": CustomEggInfoCommand,
         },
         entry_points={
-            'console_scripts': [
-                'gandlf=GANDLF.cli_tool:gandlf',
+            "console_scripts": [
+                "gandlf=GANDLF.cli_tool:gandlf",
                 # old entrypoints
-                'gandlf_run=GANDLF.entrypoints.run:main',
-                'gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main',
-                'gandlf_collectStats=GANDLF.entrypoints.collect_stats:main',
-                'gandlf_patchMiner=GANDLF.entrypoints.patch_miner:main',
-                'gandlf_preprocess=GANDLF.entrypoints.preprocess:main',
-                'gandlf_anonymizer=GANDLF.entrypoints.anonymizer:main',
-                'gandlf_verifyInstall=GANDLF.entrypoints.verify_install:main',
-                'gandlf_configGenerator=GANDLF.entrypoints.config_generator:main',
-                'gandlf_recoverConfig=GANDLF.entrypoints.recover_config:main',
-                'gandlf_deploy=GANDLF.entrypoints.deploy:main',
-                'gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:main',
-                'gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:main',
-                'gandlf_debugInfo=GANDLF.entrypoints.debug_info:main',
-                'gandlf_updateVersion=GANDLF.entrypoints.update_version:main',
+                "gandlf_run=GANDLF.entrypoints.run:main",
+                "gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main",
+                "gandlf_collectStats=GANDLF.entrypoints.collect_stats:main",
+                "gandlf_patchMiner=GANDLF.entrypoints.patch_miner:main",
+                "gandlf_preprocess=GANDLF.entrypoints.preprocess:main",
+                "gandlf_anonymizer=GANDLF.entrypoints.anonymizer:main",
+                "gandlf_verifyInstall=GANDLF.entrypoints.verify_install:main",
+                "gandlf_configGenerator=GANDLF.entrypoints.config_generator:main",
+                "gandlf_recoverConfig=GANDLF.entrypoints.recover_config:main",
+                "gandlf_deploy=GANDLF.entrypoints.deploy:main",
+                "gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:main",
+                "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:main",
+                "gandlf_debugInfo=GANDLF.entrypoints.debug_info:main",
+                "gandlf_updateVersion=GANDLF.entrypoints.update_version:main",
             ],
         },
         classifiers=[

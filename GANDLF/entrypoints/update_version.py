@@ -59,7 +59,9 @@ def main():
 
     files_where_version_is_stored = [
         os.path.join(cwd, "../../mlcube/model_mlcube/workspace/config.yml"),
-        os.path.join(cwd, "../../tutorials/classification_medmnist_notebook/config.yaml"),
+        os.path.join(
+            cwd, "../../tutorials/classification_medmnist_notebook/config.yaml"
+        ),
     ]
 
     for folder in folders_to_iterate:
