@@ -2,7 +2,7 @@ import argparse
 from GANDLF.cli import config_generator, copyrightMessage
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_ConfigGenerator",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -40,3 +40,7 @@ if __name__ == "__main__":
     config_generator(args.config, args.strategy, args.output)
 
     print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

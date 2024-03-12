@@ -6,7 +6,7 @@ Before starting to work on the code-level on GaNDLF, please follow the [instruct
 # continue from previous shell
 (venv_gandlf) $> 
 # you should be in the "GaNDLF" git repo
-(venv_gandlf) $> python ./gandlf_verifyInstall
+(venv_gandlf) $> gandlf_verifyInstall
 ```
 
 
@@ -97,7 +97,7 @@ Once you have the virtual environment set up, tests can be run using the followi
 (venv_gandlf) $> pytest --device cuda # can be cuda or cpu, defaults to cpu
 ```
 
-Any failures will be reported in the file [`${GaNDLF_HOME}/testing/failures.log`](https://github.com/mlcommons/GaNDLF/blob/5030ff83a38947c1583b58a08598308886ee9a0a/testing/conftest.py#L25).
+Any failures will be reported in the file [`${GANDLF_HOME}/testing/failures.log`](https://github.com/mlcommons/GaNDLF/blob/5030ff83a38947c1583b58a08598308886ee9a0a/testing/conftest.py#L25).
 
 
 ### Code coverage

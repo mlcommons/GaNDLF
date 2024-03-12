@@ -11,7 +11,7 @@ from GANDLF import version
 from GANDLF.cli import main_run, copyrightMessage
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -137,3 +137,7 @@ if __name__ == "__main__":
         sys.exit("ERROR: " + traceback.format_exc())
 
     print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

@@ -10,5 +10,5 @@ then
 fi
 
 pip install -e .
-python ./gandlf_verifyInstall
+gandlf_verifyInstall
 gzip -dk -r tutorials/classification_medmnist_notebook/medmnist/dataset

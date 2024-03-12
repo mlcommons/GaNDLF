@@ -51,13 +51,8 @@ dockerfiles = [
     for item in os.listdir(os.path.dirname(os.path.abspath(__file__)))
     if (os.path.isfile(item) and item.startswith("Dockerfile-"))
 ]
-entrypoint_files = [
-    item
-    for item in os.listdir(os.path.dirname(os.path.abspath(__file__)))
-    if (os.path.isfile(item) and item.startswith("gandlf_"))
-]
 setup_files = ["setup.py", ".dockerignore", "pyproject.toml", "MANIFEST.in"]
-all_extra_files = dockerfiles + entrypoint_files + setup_files
+all_extra_files = dockerfiles + setup_files
 all_extra_files_pathcorrected = [
     os.path.join("../", item) for item in all_extra_files
 ]
@@ -136,20 +131,25 @@ if __name__ == "__main__":
             "develop": CustomDevelopCommand,
             "egg_info": CustomEggInfoCommand,
         },
-        scripts=[
-            "gandlf_run",
-            "gandlf_constructCSV",
-            "gandlf_collectStats",
-            "gandlf_patchMiner",
-            "gandlf_preprocess",
-            "gandlf_anonymizer",
-            "gandlf_verifyInstall",
-            "gandlf_configGenerator",
-            "gandlf_recoverConfig",
-            "gandlf_deploy",
-            "gandlf_optimizeModel",
-            "gandlf_generateMetrics",
-        ],
+        entry_points={
+            'console_scripts': [
+                # old entrypoints
+                'gandlf_run=GANDLF.entrypoints.run:main',
+                'gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main',
+                'gandlf_collectStats=GANDLF.entrypoints.collect_stats:main',
+                'gandlf_patchMiner=GANDLF.entrypoints.patch_miner:main',
+                'gandlf_preprocess=GANDLF.entrypoints.preprocess:main',
+                'gandlf_anonymizer=GANDLF.entrypoints.anonymizer:main',
+                'gandlf_verifyInstall=GANDLF.entrypoints.verify_install:main',
+                'gandlf_configGenerator=GANDLF.entrypoints.config_generator:main',
+                'gandlf_recoverConfig=GANDLF.entrypoints.recover_config:main',
+                'gandlf_deploy=GANDLF.entrypoints.deploy:main',
+                'gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:main',
+                'gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:main',
+                'gandlf_debugInfo=GANDLF.entrypoints.debug_info:main',
+                'gandlf_updateVersion=GANDLF.entrypoints.update_version:main',
+            ],
+        },
         classifiers=[
             "Development Status :: 3 - Alpha",
             "Intended Audience :: Science/Research",

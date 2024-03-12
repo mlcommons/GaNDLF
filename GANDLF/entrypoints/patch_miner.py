@@ -7,7 +7,7 @@ from GANDLF.cli.patch_extraction import patch_extraction
 from GANDLF.cli import copyrightMessage
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_PatchMiner",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -44,3 +44,7 @@ if __name__ == "__main__":
     patch_extraction(args.input_path, args.output_path, args.config)
 
     print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

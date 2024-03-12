@@ -49,7 +49,7 @@ def run_gandlf(output_path, parameters_file):
         parameters_file (str): The path to the parameters file
     """
     exit_status = os.system(
-        f"python3.9 gandlf_generateMetrics -c {parameters_file} -i ./data.csv -o {output_path}"
+        f"gandlf_generateMetrics -c {parameters_file} -i ./data.csv -o {output_path}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
     sys.exit(exit_code)

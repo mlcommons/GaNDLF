@@ -13,7 +13,7 @@ from GANDLF.cli import (
 )
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Deploy",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -115,3 +115,7 @@ if __name__ == "__main__":
         args.requires_gpu,
     )
     assert result, "Deployment to the target platform failed."
+
+
+if __name__ == "__main__":
+    main()

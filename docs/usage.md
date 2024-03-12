@@ -28,7 +28,7 @@ A major reason why one would want to anonymize data is to ensure that trained mo
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_anonymizer
+(venv_gandlf) $> gandlf_anonymizer
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
@@ -73,7 +73,7 @@ Once these files are present, the patch miner can be run using the following com
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_patchMiner \ 
+(venv_gandlf) $> gandlf_patchMiner \ 
   # -h, --help         Show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
@@ -86,7 +86,7 @@ Running preprocessing before training/inference is optional, but recommended. It
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_preprocess \
+(venv_gandlf) $> gandlf_preprocess \
   # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
@@ -148,7 +148,7 @@ The following command shows how the script works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_constructCSV \
+(venv_gandlf) $> gandlf_constructCSV \
   # -h, --help         Show help message and exit
   -i $DATA_DIRECTORY # this is the main data directory 
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
@@ -186,7 +186,7 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_configGenerator \
+(venv_gandlf) $> gandlf_configGenerator \
   # -h, --help         Show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration
   -s ./samples/config_generator_strategy.yaml \ # strategy file
@@ -208,7 +208,7 @@ You can use the following code snippet to run GaNDLF:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_run \
+(venv_gandlf) $> gandlf_run \
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
@@ -232,7 +232,7 @@ GaNDLF provides a script to generate metrics after an inference process is done.
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_generateMetrics \
+(venv_gandlf) $> gandlf_generateMetrics \
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
@@ -308,11 +308,11 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 
 ## Plot the final results
 
-After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_collectStats) can be used for plotting:
+After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/collect_stats.py) can be used for plotting:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_collectStats \
+(venv_gandlf) $> gandlf_collectStats \
   -m /path/to/trained/models \  # directory which contains testing and validation models
   -o ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
@@ -345,11 +345,11 @@ All generated attention maps can be found in the experiment's output directory. 
 
 ## Post-Training Model Optimization
 
-If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimize` script to do so. The following command shows how it works:
+If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimizeModel` script to do so. The following command shows how it works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_optimizeModel \
+(venv_gandlf) $> gandlf_optimizeModel \
   -m /path/to/trained/${architecture_name}_best.pth.tar  # directory which contains testing and validation models
 ```
 
@@ -368,7 +368,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_deploy \
+(venv_gandlf) $> gandlf_deploy \
   # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
@@ -383,7 +383,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 You can also deploy GaNDLF as a metrics generator (see the [Generate Metrics](#generate-metrics) section) as follows:
 
 ```bash
-(venv_gandlf) $> python gandlf_deploy \
+(venv_gandlf) $> gandlf_deploy \
   ## -h, --help         show help message and exit
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)

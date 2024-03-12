@@ -1,5 +1,4 @@
 [tool.black]
-include = 'gandlf_*'
 extend-exclude = '''
 /(
   testing/data
