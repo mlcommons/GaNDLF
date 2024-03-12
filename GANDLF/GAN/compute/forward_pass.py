@@ -366,29 +366,22 @@ def validate_network_gan(
         elif params["save_grid"] and params["model"]["dimension"] == 3:
             warn("Cannot save grid for 3D images, this step will be omitted.")
     if scheduler_d is not None:
-        if params["scheduler_d"]["type"] in [
+        assert params["scheduler_d"]["type"] in [
             "reduce_on_plateau",
             "reduce-on-plateau",
             "plateau",
             "reduceonplateau",
-        ]:
-            raise NotImplementedError(
-                "Reduce on plateau scheduler not implemented for GAN"
-            )
-        else:
-            scheduler_d.step()
+        ], "Reduce on plateau scheduler not implemented for GAN, but passed for discriminator"
+
+        scheduler_d.step()
     if scheduler_g is not None:
-        if params["scheduler_g"]["type"] in [
+        assert params["scheduler_g"]["type"] in [
             "reduce_on_plateau",
             "reduce-on-plateau",
             "plateau",
             "reduceonplateau",
-        ]:
-            raise NotImplementedError(
-                "Reduce on plateau scheduler not implemented for GAN"
-            )
-        else:
-            scheduler_g.step()
+        ], "Reduce on plateau scheduler not implemented for GAN, but passed for generator"
+        scheduler_g.step()
     return (
         total_epoch_discriminator_fake_loss,
         total_epoch_discriminator_real_loss,
