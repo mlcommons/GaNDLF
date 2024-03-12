@@ -52,8 +52,7 @@ def get_fixed_latent_vector(
     Args:
         batch_size (int): The batch size.
         latent_vector_size (int): The latent vector size.
-        dimension (int): The dimension of the images in a given problem.
-    can be 2 for 2D or 3 for 3D.
+        dimension (int): The dimension of the images in a given problem. Can be `2` for 2D or `3` for 3D.
         device (str): The device to perform computations on.
         seed (int): The seed to use for reproducibility.
     Returns:
