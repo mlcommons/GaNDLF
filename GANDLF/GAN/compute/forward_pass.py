@@ -11,11 +11,11 @@ from GANDLF.utils import (
     resample_image,
 )
 from tqdm import tqdm
-from typing import Tuple
-from GANDLF.models.modelBase import ModelBase
+from typing import Tuple, Optional
 from .generic import get_fixed_latent_vector, generate_latent_vector
 from warnings import warn
 import torchvision.utils as vutils
+from torch.utils.data import DataLoader
 
 
 def norm_range(t: torch.Tensor):
@@ -40,34 +40,32 @@ def norm_range(t: torch.Tensor):
 
 
 def validate_network_gan(
-    model: ModelBase,
-    dataloader: torch.utils.data.DataLoader,
-    scheduler_d: torch.optim.lr_scheduler,
-    scheduler_g: torch.optim.lr_scheduler,
+    model: torch.nn.Module,
+    valid_dataloader: DataLoader,
+    scheduler_d: object,
+    scheduler_g: object,
     params: dict,
-    epoch: int = 0,
-    mode: str = "validation",
+    epoch: Optional[int] = 0,
+    mode: Optional[str] = "validation",
 ) -> Tuple[float, float, dict]:
     """
     Function to validate the network for a single epoch for GANs.
 
-    Parameters
-    ----------
-        model (ModelBase): The model to validate. If params["model"]["type"]
-    is torch, then this is a torch.nn.Module wrapped in a ModelBase class.
-    Otherwise this is OV exec_net.
-        dataloader (torch.utils.data.DataLoader): The dataloader to use.
-        scheduler_d (torch.optim.lr_scheduler): The scheduler for the discriminator.
-        scheduler_g (torch.optim.lr_scheduler): The scheduler for the generator.
+    Args:
+        model (torch.nn.Module): The model to process the input image with,
+    it should support appropriate dimensions. if parameters["model"]["type"] == torch,
+    this is a torch.model, otherwise this is OV exec_net.
+        valid_dataloader (torch.utils.data.DataLoader): The dataloader to use.
+        scheduler_d (object): The scheduler for the discriminator.
+        scheduler_g (object): The scheduler for the generator.
         params (dict): The parameters for the run.
-        epoch (int): The epoch number.
-        mode (str): The mode of operation, either 'validation' or 'inference'.
-    used to write outputs if requested.
-    Returns
-    ----------
-        average_epoch_generator_loss (float): The average loss for the generator.
-        average_epoch_discriminator_loss (float): The average loss for the discriminator.
-        average_epoch_metrics (dict): The average metrics for the epoch.
+        epoch (int, optional): The epoch number. Defaults to 0.
+        mode (str, optional): The mode of operation, either 'validation' or 'inference'.
+    Defaults to 'validation'.
+
+    Returns:
+        Tuple[float, float, dict]: The average loss for the generator, the average
+    loss for the discriminator, and the average metrics for the epoch.
     """
     assert mode in [
         "validation",
@@ -110,7 +108,7 @@ def validate_network_gan(
         model.eval()
 
     for batch_idx, (subject) in enumerate(
-        tqdm(dataloader, desc="Looping over " + mode + " data")
+        tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
         if params["verbose"]:
             print("== Current subject:", subject["subject_id"], flush=True)
@@ -229,12 +227,12 @@ def validate_network_gan(
             )
 
     average_epoch_metrics = {
-        metric_name: total_epoch_metrics[metric_name] / len(dataloader)
+        metric_name: total_epoch_metrics[metric_name] / len(valid_dataloader)
         for metric_name in total_epoch_metrics
     }
     # average the losses over all validation batches
-    total_epoch_discriminator_fake_loss /= len(dataloader)
-    total_epoch_discriminator_real_loss /= len(dataloader)
+    total_epoch_discriminator_fake_loss /= len(valid_dataloader)
+    total_epoch_discriminator_real_loss /= len(valid_dataloader)
     # TODO Aggregator is currently not used and invalid - no way
     # to get the generator to output spatially consistent results, to be implemented
 
