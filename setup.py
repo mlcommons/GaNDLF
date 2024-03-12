@@ -132,7 +132,7 @@ if __name__ == "__main__":
                 "gandlf=GANDLF.cli_tool:gandlf",
                 # old entrypoints
                 "gandlf_run=GANDLF.entrypoints.run:main",
-                "gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main",
+                "gandlf_constructCSV=GANDLF.entrypoints.construct_csv:old_way",
                 "gandlf_collectStats=GANDLF.entrypoints.collect_stats:main",
                 "gandlf_patchMiner=GANDLF.entrypoints.patch_miner:main",
                 "gandlf_preprocess=GANDLF.entrypoints.preprocess:main",

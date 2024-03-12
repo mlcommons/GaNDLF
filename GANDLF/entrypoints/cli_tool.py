@@ -6,7 +6,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 
 # import anonymizer command
 # import run command
-# import construct_csv command
+from GANDLF.entrypoints.construct_csv import new_way as construct_csv_command
 # import collect_stats command
 # import patch_miner command
 # import preprocess command
@@ -43,7 +43,7 @@ def gandlf(ctx, loglevel):
 
 # TODO: add anonymizer command
 # TODO: add run command
-# TODO: add construct-csv command
+gandlf.add_command(construct_csv_command, "construct-csv")
 # TODO: add collect-stats command
 # TODO: add path-miner command
 # TODO: add preprocess command
