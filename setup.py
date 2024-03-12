@@ -113,6 +113,8 @@ requirements = [
     "zarr",
     "keyring",
     "monai==1.3.0",
+    "click==8.1.7",
+    "deprecated",
 ]
 
 if __name__ == "__main__":
@@ -133,6 +135,7 @@ if __name__ == "__main__":
         },
         entry_points={
             'console_scripts': [
+                'gandlf=GANDLF.cli_tool:gandlf',
                 # old entrypoints
                 'gandlf_run=GANDLF.entrypoints.run:main',
                 'gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main',
