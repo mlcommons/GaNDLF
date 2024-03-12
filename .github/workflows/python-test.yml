@@ -79,7 +79,7 @@ jobs:
     - name: Run generic unit tests
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
-        pytest --cov=. --cov-report=xml -k "generic"        
+        pytest --cov=. --cov-report=xml -k "generic"
     - name: Run classification unit tests with histology
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
