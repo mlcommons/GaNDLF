@@ -3,6 +3,7 @@ import logging
 import click
 
 from GANDLF.entrypoints import append_copyright_to_help
+
 from GANDLF.entrypoints.anonymizer import new_way as anonymizer_command
 # import run command
 # import construct_csv command
@@ -25,15 +26,18 @@ def setup_logging(loglevel):
 
 
 @click.group()
-@click.version_option(version, '--version', '-v', message='GANDLF Version: %(version)s')
-@click.option('--loglevel', default='INFO', help='Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+@click.version_option(version, "--version", "-v", message="GANDLF Version: %(version)s")
+@click.option(
+    "--loglevel",
+    default="INFO",
+    help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+)
 @click.pass_context  # Pass the context to subcommands
 @append_copyright_to_help
 def gandlf(ctx, loglevel):
-    """GANDLF command-line tool.
-    """
+    """GANDLF command-line tool."""
     ctx.ensure_object(dict)
-    ctx.obj['LOGLEVEL'] = loglevel
+    ctx.obj["LOGLEVEL"] = loglevel
     setup_logging(loglevel)
 
 
@@ -52,5 +56,5 @@ gandlf.add_command(anonymizer_command, 'anonymizer')
 # TODO: add debug-info command
 # TODO: add update-version command
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gandlf()
