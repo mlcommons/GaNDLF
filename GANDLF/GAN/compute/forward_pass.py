@@ -136,6 +136,7 @@ def validate_network_gan(
             params["patch_size"],
             patch_overlap=params["inference_mechanism"]["patch_overlap"],
         )
+        # Caution - now, only full image validation is supported
         patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
         # aggregator = torchio.inference.GridAggregator(
         #     grid_sampler,
