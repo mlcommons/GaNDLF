@@ -5,6 +5,7 @@ import click
 from GANDLF.entrypoints import append_copyright_to_help
 
 from GANDLF.entrypoints.anonymizer import new_way as anonymizer_command
+
 # import run command
 # import construct_csv command
 # import collect_stats command
@@ -41,7 +42,7 @@ def gandlf(ctx, loglevel):
     setup_logging(loglevel)
 
 
-gandlf.add_command(anonymizer_command, 'anonymizer')
+gandlf.add_command(anonymizer_command, "anonymizer")
 # TODO: add run command
 # TODO: add construct-csv command
 # TODO: add collect-stats command

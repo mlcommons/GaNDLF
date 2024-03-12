@@ -14,7 +14,9 @@ from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
 
 
-def _anonymize_images(input_dir: str, output_file: str, config_path: Optional[str], modality: str):
+def _anonymize_images(
+    input_dir: str, output_file: str, config_path: Optional[str], modality: str
+):
     input_dir = os.path.normpath(input_dir)
     output_file = os.path.normpath(output_file)
     # TODO: raise an error if config pass provided but not exist (user made a typo?)
@@ -23,10 +25,10 @@ def _anonymize_images(input_dir: str, output_file: str, config_path: Optional[st
     else:
         config = None
 
-    logging.debug(f'{input_dir=}')
-    logging.debug(f'{output_file=}')
-    logging.debug(f'{config=}')
-    logging.debug(f'{modality=}')
+    logging.debug(f"{input_dir=}")
+    logging.debug(f"{output_file=}")
+    logging.debug(f"{config=}")
+    logging.debug(f"{modality=}")
     run_anonymizer(input_dir, output_file, config, modality)
 
     logging.info("Finished successfully.")
@@ -34,21 +36,33 @@ def _anonymize_images(input_dir: str, output_file: str, config_path: Optional[st
 
 # new way of defining params via click
 @click.command()
-@click.option('--input-dir', '-i',
-              required=True,
-              type=click.Path(exists=True),
-              help='Input directory or file which contains images to be anonymized.')
-@click.option('--config', '-c',
-              help="Config (in YAML) for running anonymization, optionally, specify modality using '-m' for defaults.",
-              type=click.Path(exists=True, file_okay=True, dir_okay=False))
-@click.option('--modality', '-m',
-              default='rad',
-              type=click.Choice(['rad', 'histo']),
-              help="The modality type, can be 'rad' or 'histo'.")
-@click.option('--output-file', '-o',
-              required=True,
-              type=click.Path(),
-              help='Output directory or file which will contain the image(s) after anonymization.')
+@click.option(
+    "--input-dir",
+    "-i",
+    required=True,
+    type=click.Path(exists=True),
+    help="Input directory or file which contains images to be anonymized.",
+)
+@click.option(
+    "--config",
+    "-c",
+    help="Config (in YAML) for running anonymization, optionally, specify modality using '-m' for defaults.",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+)
+@click.option(
+    "--modality",
+    "-m",
+    default="rad",
+    type=click.Choice(["rad", "histo"]),
+    help="The modality type, can be 'rad' or 'histo'.",
+)
+@click.option(
+    "--output-file",
+    "-o",
+    required=True,
+    type=click.Path(),
+    help="Output directory or file which will contain the image(s) after anonymization.",
+)
 @append_copyright_to_help
 def new_way(input_dir, config, modality, output_file):
     """Anonymize images/scans in the data directory."""
@@ -56,17 +70,19 @@ def new_way(input_dir, config, modality, output_file):
 
 
 # old-fashioned way of running gandlf via `gandlf_anonymizer`.
-@deprecated("This is a deprecated way of running GanDLF. Please, use `gandlf anonymizer` cli command " +
-            "instead of `gandlf_anonymizer`. Note that in new CLI tool some params were renamed:\n" +
-            "  --inputDir to --input-dir\n" +
-            "  --outputFile to --output-file\n" +
-            "`gandlf_anonymizer` script would be deprecated soon.")
+@deprecated(
+    "This is a deprecated way of running GanDLF. Please, use `gandlf anonymizer` cli command "
+    + "instead of `gandlf_anonymizer`. Note that in new CLI tool some params were renamed:\n"
+    + "  --inputDir to --input-dir\n"
+    + "  --outputFile to --output-file\n"
+    + "`gandlf_anonymizer` script would be deprecated soon."
+)
 def old_way():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Anonymize",
         formatter_class=argparse.RawTextHelpFormatter,
         description="Anonymize images/scans in the data directory.\n\n"
-                    + copyrightMessage,
+        + copyrightMessage,
     )
     parser.add_argument(
         "-i",
@@ -101,7 +117,7 @@ def old_way():
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_name in ['inputDir', 'outputFile']:
+    for param_name in ["inputDir", "outputFile"]:
         param_none_check = getattr(args, param_name)
         if param_none_check is None:
             sys.exit(f"ERROR: Missing required parameter: {param_name}")

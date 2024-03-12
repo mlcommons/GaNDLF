@@ -41,8 +41,8 @@ test_cases = [
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("output/"),
             "parameters": {"foo": "bar"},
-            "modality": "rad"
-        }
+            "modality": "rad",
+        },
     ),
     CliCase(
         should_succeed=True,
@@ -57,8 +57,8 @@ test_cases = [
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("path_na"),
             "parameters": None,
-            "modality": "rad"
-        }
+            "modality": "rad",
+        },
     ),
     CliCase(
         should_succeed=True,
@@ -73,8 +73,8 @@ test_cases = [
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("output.csv"),
             "parameters": None,
-            "modality": "rad"
-        }
+            "modality": "rad",
+        },
     ),
     CliCase(
         should_succeed=True,
@@ -89,8 +89,8 @@ test_cases = [
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("output.csv"),
             "parameters": None,
-            "modality": "histo"
-        }
+            "modality": "histo",
+        },
     ),
     CliCase(
         should_succeed=False,
@@ -113,7 +113,7 @@ test_cases = [
             # "-i . -c path_na -o output.csv",  # <- in old way if config file does not exist, it just skipped silently
             # "-i . -m fake_modality -o output.csv",  # <- in old way there is no such a validation in cli part
         ],
-    )
+    ),
 ]
 
 
