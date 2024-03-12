@@ -99,8 +99,10 @@ def inference_loop_gans(
             "The dataframe was passed, but it's usage is not yet implemented in inference. Ignoring it."
         )
 
-    if parameters["model"]["type"].lower() == "openvino":
-        raise NotImplementedError("OpenVINO inference is not yet implemented")
+    assert (
+        parameters["model"]["type"].lower() != "openvino"
+    ), "OpenVINO not yet implemented"
+
     pytorch_objects = create_pytorch_objects_gan(parameters, device=device)
     model, parameters = pytorch_objects[0], pytorch_objects[-1]
     main_dict = None
@@ -133,8 +135,6 @@ def inference_loop_gans(
         model.load_state_dict(main_dict["model_state_dict"])
         parameters["previous_parameters"] = main_dict.get("parameters", None)
         model.eval()
-    elif parameters["model"]["type"].lower() == "openvino":
-        raise NotImplementedError("OpenVINO inference is not yet implemented")
 
     n_generated_samples = parameters["inference_config"]["n_generated_samples"]
     latent_vector_size = parameters["model"]["latent_vector_size"]

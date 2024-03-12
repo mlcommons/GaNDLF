@@ -366,7 +366,7 @@ def validate_network_gan(
         elif params["save_grid"] and params["model"]["dimension"] == 3:
             warn("Cannot save grid for 3D images, this step will be omitted.")
     if scheduler_d is not None:
-        assert params["scheduler_d"]["type"] in [
+        assert params["scheduler_d"]["type"] not in [
             "reduce_on_plateau",
             "reduce-on-plateau",
             "plateau",
@@ -375,7 +375,7 @@ def validate_network_gan(
 
         scheduler_d.step()
     if scheduler_g is not None:
-        assert params["scheduler_g"]["type"] in [
+        assert params["scheduler_g"]["type"] not in [
             "reduce_on_plateau",
             "reduce-on-plateau",
             "plateau",
