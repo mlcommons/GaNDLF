@@ -25,7 +25,7 @@ If applicable, add images, screenshots or other relevant media to help explain y
 
 ### Environment information
 <!-- Put the output of the following command:
-gandlf_debugInfo
+gandlf debug-info
 -->
 GaNDLF version, OS, and any other relevant information.
 
