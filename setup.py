@@ -143,7 +143,7 @@ if __name__ == "__main__":
                 "gandlf_deploy=GANDLF.entrypoints.deploy:main",
                 "gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:main",
                 "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:main",
-                "gandlf_debugInfo=GANDLF.entrypoints.debug_info:main",
+                "gandlf_debugInfo=GANDLF.entrypoints.debug_info:old_way",
                 "gandlf_updateVersion=GANDLF.entrypoints.update_version:main",
             ],
         },
