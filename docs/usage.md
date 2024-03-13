@@ -345,11 +345,11 @@ All generated attention maps can be found in the experiment's output directory. 
 
 ## Post-Training Model Optimization
 
-If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimizeModel` script to do so. The following command shows how it works:
+If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf optimize-model` command to do so. The following command shows how it works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_optimizeModel \
+(venv_gandlf) $> gandlf optimize-model \
   -m /path/to/trained/${architecture_name}_best.pth.tar  # directory which contains testing and validation models
 ```
 

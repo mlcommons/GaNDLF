@@ -14,7 +14,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import config_generator command
 # import recover_config command
 # import deploy command
-# import optimize_model command
+from GANDLF.entrypoints.optimize_model import new_way as optimize_model_command
 # import generate_metrics command
 # import debug_info command
 # import update_version command
@@ -51,7 +51,7 @@ def gandlf(ctx, loglevel):
 # TODO: add config-generator command
 # TODO: add recover-config command
 # TODO: add deploy command
-# TODO: add optimize-model command
+gandlf.add_command(optimize_model_command, "optimize-model")
 # TODO: add generate-metrics command
 # TODO: add debug-info command
 # TODO: add update-version command
