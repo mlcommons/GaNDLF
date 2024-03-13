@@ -53,7 +53,7 @@ def gandlf(ctx, loglevel):
 # TODO: add deploy command
 # TODO: add optimize-model command
 # TODO: add generate-metrics command
-gandlf.add_command(debug_info_command, 'debug-info')
+gandlf.add_command(debug_info_command, "debug-info")
 # TODO: add update-version command
 
 if __name__ == "__main__":

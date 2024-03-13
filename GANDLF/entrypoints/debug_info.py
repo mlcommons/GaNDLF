@@ -31,12 +31,14 @@ def new_way():
 
 
 # main function
-@deprecated("This is a deprecated way of running GanDLF. Please, use `gandlf debug-info` cli command " +
-            "instead of `gandlf_debugInfo`.\n" +
-            "`gandlf_debugInfo` script would be deprecated soon.")
+@deprecated(
+    "This is a deprecated way of running GanDLF. Please, use `gandlf debug-info` cli command "
+    + "instead of `gandlf_debugInfo`.\n"
+    + "`gandlf_debugInfo` script would be deprecated soon."
+)
 def old_way():
     _debug_info()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     old_way()
