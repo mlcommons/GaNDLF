@@ -2,7 +2,7 @@
 a custom entrypoint is needed to create a temporary csv file before calling GaNDLF's run command.
 This script should expect the same arguments passed to the command `mlcube run --task infer`,
 i.e. it should expect the inputs and outputs defined in `mlcube.yaml` in the `infer` task.
-Note that the device argument will be set by gandlf_deploy (gandlf_deploy will run the entrypoint
+Note that the device argument will be set by `gandlf deploy` (`gandlf deploy` will run the entrypoint
 with --device)."""
 
 import os

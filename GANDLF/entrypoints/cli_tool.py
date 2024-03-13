@@ -13,7 +13,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import verify_install command
 # import config_generator command
 # import recover_config command
-# import deploy command
+from GANDLF.entrypoints.deploy import new_way as deploy_command
 # import optimize_model command
 # import generate_metrics command
 # import debug_info command
@@ -50,7 +50,7 @@ def gandlf(ctx, loglevel):
 # TODO: add verify-install command
 # TODO: add config-generator command
 # TODO: add recover-config command
-# TODO: add deploy command
+gandlf.add_command(deploy_command, "deploy")
 # TODO: add optimize-model command
 # TODO: add generate-metrics command
 # TODO: add debug-info command

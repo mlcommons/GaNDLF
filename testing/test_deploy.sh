@@ -60,21 +60,21 @@ rm data.csv
 mkdir model_mlcube
 cp $MODEL_MLCUBE_TEMPLATE model_mlcube/mlcube.yaml
 
-gandlf_deploy \
+gandlf deploy \
   -c ./config_getting_started_segmentation_rad3d.yaml \
   -m ./trained_model_output \
   --target docker \
   --mlcube-root ./model_mlcube \
   -o ./built_model_mlcube \
   --mlcube-type model \
-  -g False \
+  --no-gpu \
   --entrypoint $MODEL_MLCUBE_ENTRYPOINT
 
 # deploy metrics
 mkdir metrics_mlcube
 cp $METRICS_MLCUBE_TEMPLATE metrics_mlcube/mlcube.yaml
 
-gandlf_deploy \
+gandlf deploy \
   --target docker \
   --mlcube-root ./metrics_mlcube \
   -o ./built_metrics_mlcube \
