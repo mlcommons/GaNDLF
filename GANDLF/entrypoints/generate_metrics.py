@@ -1,16 +1,72 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import argparse
-import ast
 import sys
+import click
+from deprecated import deprecated
+from typing import Optional
 
 from GANDLF import version
-from GANDLF.cli import generate_metrics, copyrightMessage
+from GANDLF.cli import copyrightMessage
+from GANDLF.cli.generate_metrics import generate_metrics_dict
+from GANDLF.entrypoints import append_copyright_to_help
 
 
-def main():
+def _generate_metrics(input_data: str, config: str, output_file: Optional[str]):
+    try:
+        generate_metrics_dict(
+            input_data,
+            config,
+            output_file,
+        )
+    except Exception as e:
+        # TODO: why catch this? why not rely on normal python behavior?
+        sys.exit("ERROR: " + str(e))
+
+    print("Finished.")
+
+
+@click.command()
+@click.option(
+    "--config",
+    "-c",
+    required=True,
+    help="The configuration file (contains all the information related to the training/inference session)",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+)
+@click.option(
+    "--input-data",
+    "-i",
+    required=True,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    help="The CSV file of input data that is used to generate the metrics; "
+    "should contain 3 columns: 'SubjectID,Target,Prediction'",
+)
+@click.option(
+    "--output-file",
+    "-o",
+    type=click.Path(file_okay=True, dir_okay=False),
+    help="Location to save the output dictionary. If not provided, will print to stdout.",
+)
+@click.option("--raw-input", hidden=True)
+@append_copyright_to_help
+def new_way(config: str, input_data: str, output_file: Optional[str], raw_input: str):
+    """Metrics calculator."""
+    _generate_metrics(input_data=input_data, config=config, output_file=output_file)
+
+
+@deprecated(
+    "This is a deprecated way of running GanDLF. Please, use `gandlf generate-metrics` cli command "
+    + "instead of `gandlf_generateMetrics`. Note that in new CLI tool some params were renamed or "
+    "changed its behavior:\n"
+    + "  --parameters_file to --config\n"
+    + "  --inputdata/--data_path to --input-data\n"
+    + "  --outputfile/--output_path to --output-file\n"
+    + "  --version removed; use `gandlf --version` instead\n"
+    + "`gandlf_generateMetrics` script would be deprecated soon."
+)
+def old_way():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Metrics",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -59,17 +115,10 @@ def main():
     assert args.config is not None, "Missing required parameter: config"
     assert args.inputdata is not None, "Missing required parameter: inputdata"
 
-    try:
-        generate_metrics.generate_metrics_dict(
-            args.inputdata,
-            args.config,
-            args.outputfile,
-        )
-    except Exception as e:
-        sys.exit("ERROR: " + str(e))
-
-    print("Finished.")
+    _generate_metrics(
+        input_data=args.inputdata, config=args.config, output_file=args.outputfile
+    )
 
 
 if __name__ == "__main__":
-    main()
+    old_way()

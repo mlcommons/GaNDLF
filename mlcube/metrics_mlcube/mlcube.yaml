@@ -42,11 +42,11 @@ singularity:
 tasks:
   evaluate:
   # Runs metrics calculation on predictions
-    entrypoint: "gandlf_generateMetrics"
+    entrypoint: "gandlf generate-metrics"
     parameters:
       inputs: {
-        data_path: data/,
+        input-data: data/,
         # GaNDLF config file
-        parameters_file: {type: file, default: config.yaml}
+        config: {type: file, default: config.yaml}
       }
       outputs: { output_path: { type: "file", default: "results.yaml" } }
