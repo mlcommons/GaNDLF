@@ -34,9 +34,7 @@ def generate_latent_vector(
         latent_vector (torch.Tensor): The latent vector.
     """
     assert dimension in [2, 3], "Dimension should be `2` (2D) or `3` (3D)"
-    latent_vector = torch.randn(
-        (batch_size, latent_vector_size, 1, 1), device=device
-    )
+    latent_vector = torch.randn((batch_size, latent_vector_size, 1, 1), device=device)
     if dimension == 3:
         latent_vector = latent_vector.unsqueeze(-1)
     return latent_vector
@@ -162,13 +160,11 @@ def create_pytorch_objects_gan(
     if train_csv is not None:
         if not ("step_size" in parameters["scheduler_g"]):
             parameters["scheduler_g"]["step_size"] = (
-                parameters["training_samples_size"]
-                / parameters["learning_rate_g"]
+                parameters["training_samples_size"] / parameters["learning_rate_g"]
             )
         if not ("step_size" in parameters["scheduler_d"]):
             parameters["scheduler_g"]["step_size"] = (
-                parameters["training_samples_size"]
-                / parameters["learning_rate_d"]
+                parameters["training_samples_size"] / parameters["learning_rate_d"]
             )
 
         scheduler_gen, scheduler_disc = get_scheduler_gan(parameters)
@@ -177,9 +173,7 @@ def create_pytorch_objects_gan(
         (
             parameters["weights"],
             parameters["class_weights"],
-        ) = get_class_imbalance_weights(
-            parameters["training_data"], parameters
-        )
+        ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
         print("Class weights  : ", parameters["class_weights"])
         print("Penalty weights: ", parameters["weights"])

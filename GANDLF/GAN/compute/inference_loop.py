@@ -117,13 +117,11 @@ def inference_loop_gans(
             files_to_check = [
                 os.path.join(
                     modelDir,
-                    str(parameters["model"]["architecture"])
-                    + best_model_path_end,
+                    str(parameters["model"]["architecture"]) + best_model_path_end,
                 ),
                 os.path.join(
                     modelDir,
-                    str(parameters["model"]["architecture"])
-                    + latest_model_path_end,
+                    str(parameters["model"]["architecture"]) + latest_model_path_end,
                 ),
             ]
 
@@ -144,13 +142,9 @@ def inference_loop_gans(
     latent_vector_size = parameters["model"]["latent_vector_size"]
     batch_size = parameters["inference_config"]["batch_size"]
     # how many iterations to run
-    n_iterations = (
-        n_generated_samples // batch_size
-    )  
+    n_iterations = n_generated_samples // batch_size
     # remaining samples for last iteration
-    remaining_samples = (
-        n_generated_samples % batch_size
-    )  
+    remaining_samples = n_generated_samples % batch_size
 
     print(
         f"Running {n_iterations} generator iterations to generate {n_generated_samples} samples with batch size {batch_size}.",

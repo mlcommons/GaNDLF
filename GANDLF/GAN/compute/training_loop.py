@@ -193,9 +193,11 @@ def generator_step(
 
     optimizer.zero_grad()
     current_batch_size = fake_images.shape[0]
+    # here, we are passing the fake images to the discriminator
+    # with REAL label, as we want to 'fool' the discriminator
     label_fake = torch.full(
         size=(current_batch_size,),
-        fill_value=0,
+        fill_value=1,
         dtype=torch.float,
         device=params["device"],
     )
@@ -302,20 +304,14 @@ def train_network_gan(
                             calculated_metrics[metric]
                         )
                 else:
-                    total_epoch_train_metric[metric] += calculated_metrics[
-                        metric
-                    ]
+                    total_epoch_train_metric[metric] += calculated_metrics[metric]
 
-    average_epoch_train_loss_gen = total_epoch_train_loss_gen / len(
-        train_dataloader
-    )
+    average_epoch_train_loss_gen = total_epoch_train_loss_gen / len(train_dataloader)
     print(
         "     Epoch Final generator train loss : ",
         average_epoch_train_loss_gen,
     )
-    average_epoch_train_loss_disc = total_epoch_train_loss_disc / len(
-        train_dataloader
-    )
+    average_epoch_train_loss_disc = total_epoch_train_loss_disc / len(train_dataloader)
     print(
         "     Epoch Final discriminator train loss : ",
         average_epoch_train_loss_disc,
@@ -339,9 +335,7 @@ def train_network_gan(
                         total_epoch_train_metric[metric] / (batch_idx + 1)
                     ).tolist()
                 else:
-                    to_print = total_epoch_train_metric[metric] / (
-                        batch_idx + 1
-                    )
+                    to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
                 print(
                     "Half-Epoch Average train " + metric + " : ",
                     to_print,
@@ -437,9 +431,7 @@ def training_loop_gans(
         scheduler_g,
         scheduler_d,
         params,
-    ) = create_pytorch_objects_gan(
-        params, training_data, validation_data, device
-    )
+    ) = create_pytorch_objects_gan(params, training_data, validation_data, device)
     # save the initial model
     if not os.path.exists(model_paths["initial"]):
         # TODO check if the saving is indeed correct
@@ -470,9 +462,7 @@ def training_loop_gans(
             params["previous_parameters"] = main_dict.get("parameters", None)
             print("Previous model successfully loaded.")
         except RuntimeWarning:
-            RuntimeWarning(
-                "Previous model could not be loaded, initializing model"
-            )
+            RuntimeWarning("Previous model could not be loaded, initializing model")
     if params["model"]["print_summary"]:
         print_model_summary(
             model,
@@ -586,9 +576,7 @@ def training_loop_gans(
             epoch_train_loss_gen,
             epoch_train_loss_disc,
             epoch_train_metric,
-        ) = train_network_gan(
-            model, train_dataloader, optimizer_g, optimizer_d, params
-        )
+        ) = train_network_gan(model, train_dataloader, optimizer_g, optimizer_d, params)
         (
             epoch_valid_loss_disc_fake,
             epoch_valid_loss_disc_real,
@@ -699,9 +687,7 @@ def training_loop_gans(
     # for now this will never be executed, as we do not have
     # a concept of best model established for GANs yet
     if os.path.exists(model_paths["best"]):
-        optimize_and_save_model(
-            model, params, model_paths["best"], onnx_export=True
-        )
+        optimize_and_save_model(model, params, model_paths["best"], onnx_export=True)
 
 
 if __name__ == "__main__":
@@ -731,12 +717,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-parameter_pickle", type=str, help="Parameters pickle", required=True
     )
-    parser.add_argument(
-        "-outputDir", type=str, help="Output directory", required=True
-    )
-    parser.add_argument(
-        "-device", type=str, help="Device to train on", required=True
-    )
+    parser.add_argument("-outputDir", type=str, help="Output directory", required=True)
+    parser.add_argument("-device", type=str, help="Device to train on", required=True)
 
     args = parser.parse_args()
 

@@ -67,9 +67,9 @@ def step_gan(
 
     if not (train) and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
-            sub_model(
-                inputs={params["model"]["IO"][0][0]: image.cpu().numpy()}
-            )[params["model"]["IO"][1][0]]
+            sub_model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
+                params["model"]["IO"][1][0]
+            ]
         )
         output = output.to(params["device"])
     else:

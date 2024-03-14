@@ -87,17 +87,13 @@ def validate_network_gan(
     if scheduler_d is None or scheduler_g is None:
         current_output_dir = params["output_dir"]  # this is in inference mode
     else:  # this is useful for inference
-        current_output_dir = os.path.join(
-            params["output_dir"], "output_" + mode
-        )
+        current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
     if ((scheduler_d is None) and (scheduler_g is None)) or is_inference:
-        current_output_dir = params["output_dir"] 
-    else:  
-        current_output_dir = os.path.join(
-            params["output_dir"], "output_" + mode
-        )
+        current_output_dir = params["output_dir"]
+    else:
+        current_output_dir = os.path.join(params["output_dir"], "output_" + mode)
 
     if not is_inference:
         current_output_dir = os.path.join(current_output_dir, str(epoch))
@@ -218,11 +214,11 @@ def validate_network_gan(
                 )
             # accumulating average loss for the real and fake images over the patch loader
 
-            total_epoch_discriminator_real_loss += (
-                loss_disc_real.cpu().item() / len(patch_loader)
+            total_epoch_discriminator_real_loss += loss_disc_real.cpu().item() / len(
+                patch_loader
             )
-            total_epoch_discriminator_fake_loss += (
-                loss_disc_fake.cpu().item() / len(patch_loader)
+            total_epoch_discriminator_fake_loss += loss_disc_fake.cpu().item() / len(
+                patch_loader
             )
 
     average_epoch_metrics = {
@@ -271,13 +267,9 @@ def validate_network_gan(
         norm_range(fake_images_to_save)
         fake_images_to_save *= 255
         if params["model"]["dimension"] == 2:
-            fake_images_to_save = fake_images_to_save.permute(
-                0, 2, 3, 1
-            ).numpy()
+            fake_images_to_save = fake_images_to_save.permute(0, 2, 3, 1).numpy()
         else:
-            fake_images_to_save = fake_images_to_save.permute(
-                0, 2, 3, 4, 1
-            ).numpy()
+            fake_images_to_save = fake_images_to_save.permute(0, 2, 3, 4, 1).numpy()
         if ext in [
             ".jpg",
             ".jpeg",
@@ -288,14 +280,11 @@ def validate_network_gan(
             # Rescale the images 0 - 1. Think if this is the best way to do it
             fake_images_to_save = fake_images_to_save.astype(np.uint8)
         is_2d_rgb = (
-            params["model"]["dimension"] == 2
-            and fake_images_to_save.shape[-1] == 3
+            params["model"]["dimension"] == 2 and fake_images_to_save.shape[-1] == 3
         )
         for i, fake_image_to_save in enumerate(fake_images_to_save):
             if is_2d_rgb:
-                result_image = sitk.GetImageFromArray(
-                    fake_image_to_save, isVector=True
-                )
+                result_image = sitk.GetImageFromArray(fake_image_to_save, isVector=True)
             else:
                 result_image = sitk.GetImageFromArray(fake_image_to_save)
             # TODO - think about proper metadata handling, for now

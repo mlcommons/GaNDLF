@@ -23,9 +23,7 @@ def get_metric_output(
     Returns:
         Union[float, list]: The computed metric from the label and the prediction.
     """
-    metric_output = (
-        metric_function(predicted, ground_truth, params).detach().cpu()
-    )
+    metric_output = metric_function(predicted, ground_truth, params).detach().cpu()
     if metric_output.dim() == 0:
         return metric_output.item()
     else:
@@ -52,9 +50,7 @@ def get_loss_gans(predictions: Tensor, labels: Tensor, params: dict) -> Tensor:
 
     if isinstance(params["loss_function"], dict):
         # check for mse_torch
-        loss_function = global_losses_dict[
-            list(params["loss_function"].keys())[0]
-        ]
+        loss_function = global_losses_dict[list(params["loss_function"].keys())[0]]
     else:
         loss_str_lower = params["loss_function"].lower()
         if loss_str_lower in global_losses_dict:
