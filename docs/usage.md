@@ -370,7 +370,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 # continue from previous shell
 (venv_gandlf) $> gandlf_deploy \
   # -h, --help         Show help message and exit
-  -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
+  -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with `gandlf recover-config` first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)

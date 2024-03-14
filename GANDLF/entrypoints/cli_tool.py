@@ -12,7 +12,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import preprocess command
 # import verify_install command
 # import config_generator command
-# import recover_config command
+from GANDLF.entrypoints.recover_config import new_way as recover_config_command
 # import deploy command
 # import optimize_model command
 # import generate_metrics command
@@ -49,7 +49,7 @@ def gandlf(ctx, loglevel):
 # TODO: add preprocess command
 # TODO: add verify-install command
 # TODO: add config-generator command
-# TODO: add recover-config command
+gandlf.add_command(recover_config_command, "recover-config")
 # TODO: add deploy command
 # TODO: add optimize-model command
 # TODO: add generate-metrics command
