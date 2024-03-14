@@ -3,6 +3,7 @@ import torch
 from tqdm import tqdm
 import numpy as np
 import torchio
+from torch.utils.data import DataLoader
 from pandas import DataFrame
 from GANDLF.data import get_testing_loader
 from GANDLF.grad_clipping.grad_scaler import (
@@ -28,39 +29,33 @@ from GANDLF.logger import LoggerGAN
 from .step import step_gan
 from .forward_pass import validate_network_gan
 from .generic import create_pytorch_objects_gan, generate_latent_vector
-from typing import Union
+from typing import Union, Tuple
 from pathlib import Path
 
 
 def train_network_gan(
-    model, train_dataloader, optimizer_g, optimizer_d, params
-):
+    model: torch.nn.Module,
+    train_dataloader: DataLoader,
+    optimizer_g: torch.optim.Optimizer,
+    optimizer_d: torch.optim.Optimizer,
+    params: dict,
+) -> Tuple[float, float, dict]:
     """
     Function to train a GAN network for a single epoch.
     This function is a modified version of train_network() to support
     usage of two optimizers for the generator and discriminator.
 
-    Parameters
-    ----------
-    model : torch.model
-        The model to process the input image with, it should support appropriate dimensions.
-    train_dataloader : torch.DataLoader
-        The dataloader for the training epoch
-    optimizer_g : torch.optim
-        Optimizer for optimizing generator network
-    optimizer_d : torch.optim
-        Optimizer for optimizing discriminator network
-    params : dict
-        the parameters passed by the user yaml
+    Args:
+        model (torch.nn.Module): The model to train.
+        train_dataloader (DataLoader): The dataloader for the training epoch.
+        optimizer_g (torch.optim.Optimizer): Optimizer for optimizing generator network.
+        optimizer_d (torch.optim.Optimizer): Optimizer for optimizing discriminator network.
+        params (dict): The parameters passed by the user yaml.
 
-    Returns
-    -------
-    average_epoch_train_loss_gen : float
-        Train loss for the current epoch for generator
-    average_epoch_train_loss_disc : float
-        Train loss for the current epoch for discriminator
-    average_epoch_train_metric : dict
-        Train metrics for the current epoch
+    Returns:
+        average_epoch_train_loss_gen (float): Train loss for the current epoch for generator.
+        average_epoch_train_loss_disc (float): Train loss for the current epoch for discriminator.
+        average_epoch_train_metric (dict): Train metrics for the current epoch.
     """
 
     print("*" * 20)
