@@ -10,7 +10,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import collect_stats command
 # import patch_miner command
 # import preprocess command
-# import verify_install command
+from GANDLF.entrypoints.verify_install import new_way as verify_install_command
 # import config_generator command
 # import recover_config command
 # import deploy command
@@ -47,7 +47,7 @@ def gandlf(ctx, loglevel):
 # TODO: add collect-stats command
 # TODO: add path-miner command
 # TODO: add preprocess command
-# TODO: add verify-install command
+gandlf.add_command(verify_install_command, "verify-install")
 # TODO: add config-generator command
 # TODO: add recover-config command
 # TODO: add deploy command
