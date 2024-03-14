@@ -8,7 +8,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import run command
 # import construct_csv command
 # import collect_stats command
-# import patch_miner command
+from GANDLF.entrypoints.patch_miner import new_way as path_miner_command
 # import preprocess command
 # import verify_install command
 # import config_generator command
@@ -45,7 +45,7 @@ def gandlf(ctx, loglevel):
 # TODO: add run command
 # TODO: add construct-csv command
 # TODO: add collect-stats command
-# TODO: add path-miner command
+gandlf.add_command(path_miner_command, "path-miner")
 # TODO: add preprocess command
 # TODO: add verify-install command
 # TODO: add config-generator command
