@@ -20,6 +20,10 @@ debug.log
 vips*
 testing/data/*
 testing/data_output/*
+GANDLF/GAN/testing/data/*
+GANDLF/GAN/testing/data_output/*
+GANDLF/GAN/testing/output/*
+GANDLF/GAN/testing/failures.log
 .coverage
 testing/config_segmentation_temp.yaml
 testing/failures.log
