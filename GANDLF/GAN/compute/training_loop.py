@@ -31,6 +31,194 @@ from .forward_pass import validate_network_gan
 from .generic import create_pytorch_objects_gan, generate_latent_vector
 from typing import Union, Tuple
 from pathlib import Path
+import warnings
+
+
+def backward_pass(
+    loss: torch.Tensor,
+    optimizer: torch.optim.Optimizer,
+    model: torch.nn.Module,
+    params: dict,
+) -> None:
+    """
+    Function to perform the backward pass for a single batch.
+
+    Args:
+        loss (torch.Tensor): The loss to backpropagate.
+        optimizer (torch.optim.Optimizer): The optimizer to use for backpropagation.
+        model (torch.nn.Module): The model to backpropagate through.
+        params (dict): The parameters passed by the user yaml.
+    """
+    nan_loss: torch.Tensor = torch.isnan(loss)
+    second_order: bool = (
+        hasattr(optimizer, "is_second_order") and optimizer.is_second_order
+    )
+    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
+    if params["model"]["amp"]:
+        scaler: GradScaler = GradScaler()
+        with torch.cuda.amp.autocast():
+            # if loss is nan, don't backprop and don't step optimizer
+            if not nan_loss:
+                scaler(
+                    loss=loss,
+                    optimizer=optimizer,
+                    clip_grad=params["clip_grad"],
+                    clip_mode=params["clip_mode"],
+                    parameters=model_parameters_exclude_head(
+                        model, clip_mode=params["clip_mode"]
+                    ),
+                    create_graph=second_order,
+                )
+    else:
+        if not nan_loss:
+            loss.backward(create_graph=second_order)
+            if params["clip_grad"] is not None:
+                dispatch_clip_grad_(
+                    parameters=model_parameters_exclude_head(
+                        model, clip_mode=params["clip_mode"]
+                    ),
+                    value=params["clip_grad"],
+                    mode=params["clip_mode"],
+                )
+
+
+def discriminator_step(
+    model: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    subject: dict,
+    params: dict,
+) -> Union[
+    Tuple[None, torch.Tensor, torch.Tensor],
+    Tuple[float, torch.Tensor, torch.Tensor],
+]:
+    """
+    Compute the discriminator step for a single batch. We are doing passes
+    with both real and fake images, and then backpropagating the loss.
+    In the current setup, this has to be ran BEFORE the generator step,
+    as the generator step requires the fake images to already be there.
+    If the loss will be NaN, there will be no optimizer step.
+    Args:
+        model (torch.nn.Module): The model to train.
+        optimizer (torch.optim.Optimizer): The optimizer to use for backpropagation.
+        subject (dict): The subject dictionary.
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        loss_disc (float): The loss for the discriminator step. If the loss is
+    NaN, returns None.
+        real_images (torch.Tensor): The real images.
+        fake_images (torch.Tensor): The fake images.
+    """
+
+    optimizer.zero_grad()
+    real_images = (
+        torch.cat(
+            [subject[key][torchio.DATA] for key in params["channel_keys"]],
+            dim=1,
+        )
+        .float()
+        .to(params["device"])
+    )
+    current_batch_size = real_images.shape[0]
+    #### DISCRIMINATOR STEP WITH ALL REAL IMAGES ####
+    label_real = torch.full(
+        size=(current_batch_size,),
+        fill_value=1,
+        dtype=torch.float,
+        device=params["device"],
+    )
+    loss_disc_real, _, output_disc_real, _ = step_gan(
+        model, real_images, label_real, params, secondary_images=None
+    )
+    backward_pass(loss_disc_real, optimizer, model, params)
+
+    #### DISCRIMINATOR STEP WITH ALL FAKE LABELS ####
+
+    latent_vector = generate_latent_vector(
+        current_batch_size,
+        params["model"]["latent_vector_size"],
+        params["model"]["dimension"],
+        params["device"],
+    )
+    label_fake = label_real.fill_(0)
+    fake_images = model.generator(latent_vector)
+    loss_disc_fake, _, output_disc_fake, _ = step_gan(
+        model,
+        fake_images.detach(),
+        label_fake,
+        params,
+        secondary_images=None,
+    )
+    backward_pass(loss_disc_fake, optimizer, model, params)
+    is_any_nan = torch.isnan(loss_disc_real) or torch.isnan(loss_disc_fake)
+    if not is_any_nan:
+        loss_disc = loss_disc_real + loss_disc_fake
+        optimizer.step()
+        optimizer.zero_grad()
+        return loss_disc.detach().cpu().item(), real_images, fake_images
+    else:
+        warnings.warn(
+            "NaN loss detected in discriminator step, the step will be skipped",
+            RuntimeWarning,
+        )
+        return None, real_images, fake_images
+
+
+def generator_step(
+    model: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    params: dict,
+    real_images: torch.Tensor,
+    fake_images: torch.Tensor,
+) -> Union[Tuple[None, None], Tuple[float, dict]]:
+    """
+    Compute the generator step for a single batch. We are doing a pass
+    with the fake images, and then backpropagating the loss. If the loss
+    will be NaN, there will be no optimizer step.
+
+    Args:
+        model (torch.nn.Module): The model to train.
+        optimizer (torch.optim.Optimizer): The optimizer to use for
+    backpropagation.
+        params (dict): The parameters passed by the user yaml.
+        real_images (torch.Tensor): The real images.
+        fake_images (torch.Tensor): The fake images.
+
+    Returns:
+        loss_gen (float): The loss for the generator step. If the loss
+    is NaN, returns None.
+        calculated_metrics (dict): The calculated metrics for the generator
+    step. If the loss is NaN, returns None.
+    """
+
+    optimizer.zero_grad()
+    current_batch_size = fake_images.shape[0]
+    label_fake = torch.full(
+        size=(current_batch_size,),
+        fill_value=0,
+        dtype=torch.float,
+        device=params["device"],
+    )
+    # TODO should we really use THE SAME fake images?
+    loss_gen, calculated_metrics, output_gen_step, _ = step_gan(
+        model,
+        fake_images,
+        label_fake,
+        params,
+        secondary_images=real_images,
+    )
+    backward_pass(loss_gen, optimizer, model, params)
+    is_any_nan = torch.isnan(loss_gen)
+    if not is_any_nan:
+        optimizer.step()
+        optimizer.zero_grad()
+        return loss_gen.detach().cpu().item(), calculated_metrics
+    else:
+        warnings.warn(
+            "NaN loss detected in generator step, the step will be skipped",
+            RuntimeWarning,
+        )
+        return None, None
 
 
 def train_network_gan(
@@ -72,36 +260,13 @@ def train_network_gan(
         else:
             total_epoch_train_metric[metric] = 0
 
-    # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
-    if params["model"]["amp"]:
-        scaler = GradScaler()
-        if params["verbose"]:
-            print("Using Automatic mixed precision", flush=True)
-
+    if params["model"]["amp"] and params["verbose"]:
+        print("Using Automatic mixed precision", flush=True)
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(
         tqdm(train_dataloader, desc="Looping over training data")
     ):
-        #### DISCRIMINATOR STEP WITH ALL REAL LABELS ####
-        optimizer_d.zero_grad()
-        image_real = (
-            torch.cat(
-                [subject[key][torchio.DATA] for key in params["channel_keys"]],
-                dim=1,
-            )
-            .float()
-            .to(params["device"])
-        )
-        current_batch_size = image_real.shape[0]
-
-        label_real = torch.full(
-            size=(current_batch_size,),
-            fill_value=1,
-            dtype=torch.float,
-            device=params["device"],
-        )
-
         if params["save_training"]:
             write_training_patches(
                 subject,
@@ -112,144 +277,34 @@ def train_network_gan(
             params["subject_spacing"] = subject["spacing"]
         else:
             params["subject_spacing"] = None
-        loss_disc_real, _, output_disc_real, _ = step_gan(
-            model, image_real, label_real, params, secondary_images=None
+        ### DISCRIMINATOR STEP ###
+        discriminator_loss, real_images, fake_images = discriminator_step(
+            model, optimizer_d, subject, params
         )
-        nan_loss = torch.isnan(loss_disc_real)
-        second_order = (
-            hasattr(optimizer_d, "is_second_order")
-            and optimizer_d.is_second_order
-        )
-        if params["model"]["amp"]:
-            with torch.cuda.amp.autocast():
-                # if loss is nan, don't backprop and don't step optimizer
-                if not nan_loss:
-                    scaler(
-                        loss=loss_disc_real,
-                        optimizer=optimizer_d,
-                        clip_grad=params["clip_grad"],
-                        clip_mode=params["clip_mode"],
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        create_graph=second_order,
-                    )
-        else:
-            if not nan_loss:
-                loss_disc_real.backward(create_graph=second_order)
-                if params["clip_grad"] is not None:
-                    dispatch_clip_grad_(
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        value=params["clip_grad"],
-                        mode=params["clip_mode"],
-                    )
-        #### DISCRIMINATOR STEP WITH ALL FAKE LABELS ####
-        latent_vector = generate_latent_vector(
-            current_batch_size,
-            params["model"]["latent_vector_size"],
-            params["model"]["dimension"],
-            params["device"],
-        )
-        label_fake = label_real.fill_(0)
-        fake_images = model.generator(latent_vector)
-        loss_disc_fake, _, output_disc_fake, _ = step_gan(
-            model,
-            fake_images.detach(),
-            label_fake,
-            params,
-            secondary_images=None,
-        )
-
-        nan_loss = torch.isnan(loss_disc_fake)
-
-        if params["model"]["amp"]:
-            with torch.cuda.amp.autocast():
-                # if loss is nan, don't backprop and don't step optimizer
-                if not nan_loss:
-                    scaler(
-                        loss=loss_disc_fake,
-                        optimizer=optimizer_d,
-                        clip_grad=params["clip_grad"],
-                        clip_mode=params["clip_mode"],
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        create_graph=second_order,
-                    )
-        else:
-            if not nan_loss:
-                loss_disc_fake.backward(create_graph=second_order)
-                if params["clip_grad"] is not None:
-                    dispatch_clip_grad_(
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        value=params["clip_grad"],
-                        mode=params["clip_mode"],
-                    )
-        loss_disc = loss_disc_real + loss_disc_fake
-        if not nan_loss:
-            total_epoch_train_loss_disc += loss_disc.detach().cpu().item()
-        optimizer_d.step()
+        if discriminator_loss is not None:
+            total_epoch_train_loss_disc += discriminator_loss
         ### GENERATOR STEP ###
-        optimizer_g.zero_grad()
-        label_fake = label_real.fill_(1)
-        # TODO should we really use THE SAME fake images?
-        loss_gen, calculated_metrics, output_gen_step, _ = step_gan(
-            model,
-            fake_images,
-            label_fake,
-            params,
-            secondary_images=image_real,
+        loss_gen, calculated_metrics = generator_step(
+            model, optimizer_g, params, real_images, fake_images
         )
-        nan_loss = torch.isnan(loss_gen)
-        second_order = (
-            hasattr(optimizer_g, "is_second_order")
-            and optimizer_g.is_second_order
-        )
-        if params["model"]["amp"]:
-            with torch.cuda.amp.autocast():
-                # if loss is nan, don't backprop and don't step optimizer
-                if not nan_loss:
-                    scaler(
-                        loss=loss_gen,
-                        optimizer=optimizer_g,
-                        clip_grad=params["clip_grad"],
-                        clip_mode=params["clip_mode"],
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        create_graph=second_order,
-                    )
-        else:
-            if not nan_loss:
-                loss_gen.backward(create_graph=second_order)
-                if params["clip_grad"] is not None:
-                    dispatch_clip_grad_(
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        value=params["clip_grad"],
-                        mode=params["clip_mode"],
-                    )
-        optimizer_g.step()
-        optimizer_g.zero_grad()
-        if not nan_loss:
-            total_epoch_train_loss_gen += loss_gen.detach().cpu().item()
-        for metric in calculated_metrics.keys():
-            if isinstance(total_epoch_train_metric[metric], list):
-                if len(total_epoch_train_metric[metric]) == 0:
-                    total_epoch_train_metric[metric] = np.array(
-                        calculated_metrics[metric]
-                    )
+
+        if loss_gen is not None:
+            total_epoch_train_loss_gen += loss_gen
+        if calculated_metrics is not None:
+            for metric in calculated_metrics.keys():
+                if isinstance(total_epoch_train_metric[metric], list):
+                    if len(total_epoch_train_metric[metric]) == 0:
+                        total_epoch_train_metric[metric] = np.array(
+                            calculated_metrics[metric]
+                        )
+                    else:
+                        total_epoch_train_metric[metric] += np.array(
+                            calculated_metrics[metric]
+                        )
                 else:
-                    total_epoch_train_metric[metric] += np.array(
-                        calculated_metrics[metric]
-                    )
-            else:
-                total_epoch_train_metric[metric] += calculated_metrics[metric]
+                    total_epoch_train_metric[metric] += calculated_metrics[
+                        metric
+                    ]
 
     average_epoch_train_loss_gen = total_epoch_train_loss_gen / len(
         train_dataloader
