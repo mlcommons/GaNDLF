@@ -131,7 +131,7 @@ if __name__ == "__main__":
             "console_scripts": [
                 "gandlf=GANDLF.cli_tool:gandlf",
                 # old entrypoints
-                "gandlf_run=GANDLF.entrypoints.run:main",
+                "gandlf_run=GANDLF.entrypoints.run:old_way",
                 "gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main",
                 "gandlf_collectStats=GANDLF.entrypoints.collect_stats:main",
                 "gandlf_patchMiner=GANDLF.entrypoints.patch_miner:main",

@@ -32,8 +32,9 @@ If you have `data_preprocessing` enabled, GaNDLF will load all of the resized im
 ### How can I resume training from a previous checkpoint?
 
 GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
-- By using the `--resume` CLI parameter in `gandlf_run`, only the model weights and state dictionary will be preserved, but parameters and data are taken from the new options in the CLI. This is helpful when you are updated the training data or **some** compatible options in the parameters.
-- If both `--resume` and `--reset` are `False` in `gandlf_run`, the model weights, state dictionary, and all previously saved information (parameters, training/validation/testing data) is used to resume training.
+- By using the `--resume` CLI parameter in `gandlf run`, only the model weights and state dictionary will be preserved, but parameters and data are taken from the new options in the CLI. This is helpful when you are updated the training data or **some** compatible options in the parameters.
+<!-- TODO: Is that true? Do we resume run if both flags are False??-->
+- If both `--resume` and `--reset` are skipped in `gandlf run`, the model weights, state dictionary, and all previously saved information (parameters, training/validation/testing data) is used to resume training.
 
 ### How can I update GaNDLF?
 

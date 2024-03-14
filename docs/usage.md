@@ -208,16 +208,16 @@ You can use the following code snippet to run GaNDLF:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_run \
+(venv_gandlf) $> gandlf run \
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
-  -m ./experiment_0/model_dir/ \ # model directory (i.e., the `modeldir`) where the output of the training will be stored, created if not present
-  -t True \ # True == train, False == inference
+  -m ./experiment_0/model_dir/ \ # model directory (i.e., the `model-dir`) where the output of the training will be stored, created if not present
+  --train \ # --train/-t or --infer
   -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
-  # -rt , --reset # [optional] completely resets the previous run by deleting `modeldir`
-  # -rm , --resume # [optional] resume previous training by only keeping model dict in `modeldir`
+  # -rt , --reset # [optional] completely resets the previous run by deleting `model-dir`
+  # -rm , --resume # [optional] resume previous training by only keeping model dict in `model-dir`
 ```
 
 ### Special notes for Inference for Histology images
@@ -272,7 +272,7 @@ SubjectID,Target,Prediction,Mask
 
 ### Multi-GPU training
 
-GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)] and pass `-d cuda` to the `gandlf_run` script.
+GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf run` command. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)] and pass `-d cuda` to the `gandlf run` command.
 
 ### Distributed training
 
@@ -301,9 +301,9 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 ### Inference
 
 - The output of inference will be predictions based on the model that was trained. 
-- The predictions will be saved in the same directory as the model if `outputdir` is not passed to `gandlf_run`.
+- The predictions will be saved in the same directory as the model if `output-dir` is not passed to `gandlf run`.
 - For segmentation, a directory will be created per subject ID in the input CSV.
-- For classification/regression, the predictions will be generated in the `outputdir` or `modeldir` as a CSV file.
+- For classification/regression, the predictions will be generated in the `output-dir` or `model-dir` as a CSV file.
 
 
 ## Plot the final results
@@ -460,7 +460,7 @@ The previous command will generate a data CSV file that you can safely edit outs
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
   --volume /home/researcher/gandlf_output:/output \ # output data is mounted as read-write
   cbica/gandlf:latest-cpu \ # change to appropriate docker image tag
-  gandlf_run --train True \ # standard training API starts
+  gandlf run --train \ # standard training API starts
   --config /input/config.yml \
   --inputdata /output/data.csv \
   --modeldir /output/model
@@ -471,7 +471,7 @@ Considering that you want to train on an existing model that is inside the GaNDL
 
 ```bash
 # Run training on your new data
-(main) $> docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf_run -m /embedded_model/ [...] # Do not include "--rm" option!
+(main) $> docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf run -m /embedded_model/ [...] # Do not include "--rm" option!
 # Copy the finetuned model out of the container, to a location on the host
 (main) $> docker cp gandlf_training:/embedded_model /home/researcher/extracted_model
 # Now you can remove the container to clean up
@@ -486,7 +486,7 @@ If using CUDA, GaNDLF also expects the environment variable `CUDA_VISIBLE_DEVICE
 
 For example:
 ```bash
-(main) $> docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf_run --device cuda [...]
+(main) $> docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf run --device cuda [...]
 ```
 
 This can be replicated for ROCm for AMD , by following the [instructions to set up the ROCm Container Toolkit](https://rocmdocs.amd.com/en/latest/ROCm_Virtualization_Containers/ROCm-Virtualization-&-Containers.html?highlight=docker).
