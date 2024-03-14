@@ -92,10 +92,9 @@ def validate_network_gan(
         )
     pathlib.Path(current_output_dir).mkdir(parents=True, exist_ok=True)
 
-    # I really do not get it
     if ((scheduler_d is None) and (scheduler_g is None)) or is_inference:
-        current_output_dir = params["output_dir"]  # this is in inference mode
-    else:  # this is useful for inference
+        current_output_dir = params["output_dir"] 
+    else:  
         current_output_dir = os.path.join(
             params["output_dir"], "output_" + mode
         )
