@@ -1,52 +1,46 @@
 import torch
 import psutil
-from typing import Dict, Union, Tuple
+from typing import Union, Tuple, Optional
 from .loss_and_metric import get_loss_and_metrics_gans
-from GANDLF.models.modelBase import ModelBase
 
 
 def step_gan(
-    gan_model: ModelBase,
+    gan_model: torch.nn.Module,
     primary_images: torch.Tensor,
-    label: Union[torch.Tensor, None],
-    params: Dict,
-    secondary_images: Union[torch.Tensor, None] = None,
+    label: Optional[torch.Tensor],
+    params: dict,
+    secondary_images: Optional[torch.Tensor],
     train: bool = True,
 ) -> Tuple[
-    Union[torch.Tensor, None],
+    torch.Tensor,
     Union[torch.Tensor, None],
     torch.Tensor,
     Union[torch.Tensor, None],
 ]:
     """
-    Function that steps the GAN model for a single batch
+    Function that steps the GAN model for a single batch.
 
-    Parameters
-    ----------
-    gan_model : ModelBase derived class
-        The model to process the input image with, it should support
-    appropriate dimensions.
-    image : torch.Tensor
-        The input image stack according to requirements (can be latent
-    vector for generator).
-    label : torch.Tensor or None
-        The input label for the corresponding image label (fake or real).
-    When doing validation or inference, this can be None.
-    params : dict
-        The parameters passed by the user yaml.
-    train : bool
-        Whether the model is in training mode.
+    Args:
+        gan_model (torch.nn.Module): The GAN model to process the input
+    image with, it should support appropriate dimensions.
+        primary_images (torch.Tensor): The input image stack according to
+    requirements (can be latent vector for generator).
+        label (Optional[torch.Tensor]): The input label for the corresponding
+    image label (fake or real). When doing validation or inference, this can
+    be None.
+        params (dict): The parameters passed by the user yaml.
+        secondary_images (Optional[torch.Tensor]): The input secondary image
+    stack used only when computing metrics.
+        train (bool, optional): Whether the model is in training mode.
+    Defaults to True.
 
-    Returns
-    -------
-    loss : torch.Tensor or None
-        The computed loss from the label and the output.
-    metric_output : torch.Tensor or None
-        The computed metric from the label and the output.
-    output: torch.Tensor
-        The final output of the model.
-    attention_map: torch.Tensor or None
-        The attention map for the output, if available.
+    Returns:
+        loss (torch.Tensor): The computed loss from the label and the output.
+        metric_output (Union[torch.Tensor, None]): The computed metric from
+    the label and the output. Available only if secondary_images is not None.
+        output (torch.Tensor): The final output of the model.
+        attention_map (Union[torch.Tensor, None]): The attention map for the
+    output, if available.
 
     """
     if params["verbose"]:
