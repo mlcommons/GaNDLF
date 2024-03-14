@@ -143,12 +143,14 @@ def inference_loop_gans(
     n_generated_samples = parameters["inference_config"]["n_generated_samples"]
     latent_vector_size = parameters["model"]["latent_vector_size"]
     batch_size = parameters["inference_config"]["batch_size"]
+    # how many iterations to run
     n_iterations = (
         n_generated_samples // batch_size
-    )  # how many iterations to run
+    )  
+    # remaining samples for last iteration
     remaining_samples = (
         n_generated_samples % batch_size
-    )  # remaining samples for last iteration
+    )  
 
     print(
         f"Running {n_iterations} generator iterations to generate {n_generated_samples} samples with batch size {batch_size}.",
