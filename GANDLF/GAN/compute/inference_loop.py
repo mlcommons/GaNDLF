@@ -26,16 +26,20 @@ from warnings import warn
 
 
 ## TODO move this function into some utils file
-def norm_range(t: torch.Tensor):
-    """Normalizes the input tensor to be in the range [0, 1]. Operation is
+def norm_range(t: torch.Tensor) -> None:
+    """
+    Normalizes the input tensor to be in the range [0, 1]. Operation is
     performed in place.
+
     Args:
         t (torch.Tensor): The input tensor to normalize.
     """
 
-    def norm_ip(img: torch.Tensor, low: float, high: float):
-        """Utility function to normalize the input image, the same as in
+    def norm_ip(img: torch.Tensor, low: float, high: float) -> None:
+        """
+        Utility function to normalize the input image, the same as in
         torchvision. Operation is performed in place.
+
         Args:
             img (torch.Tensor): The image to normalize.
             low (float): The lower bound of the normalization.
