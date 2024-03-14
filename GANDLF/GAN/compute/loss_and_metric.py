@@ -2,12 +2,26 @@ import sys
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 from torch import Tensor
-from typing import Union
+from typing import Union, Optional, Tuple
 
 
-def get_metric_output(metric_function, predicted, ground_truth, params):
+def get_metric_output(
+    metric_function: object,
+    predicted: Tensor,
+    ground_truth: Tensor,
+    params: dict,
+) -> Union[float, list]:
     """
     This function computes the output of a metric function.
+
+    Args:
+        metric_function (object): The metric function to be used.
+        predicted (torch.Tensor): The predicted output from the model.
+        ground_truth (torch.Tensor): The ground truth label.
+        params (dict): The parameters passed by the user yaml.
+
+    Returns:
+        Union[float, list]: The computed metric from the label and the prediction.
     """
     metric_output = (
         metric_function(predicted, ground_truth, params).detach().cpu()
@@ -26,12 +40,14 @@ def get_metric_output(metric_function, predicted, ground_truth, params):
 def get_loss_gans(predictions: Tensor, labels: Tensor, params: dict) -> Tensor:
     """
     Compute the loss value for adversatial generative networks.
+
     Args:
-        predictions (Tensor): The predicted output from the model.
-        labels (Tensor): The ground truth label.
+        predictions (torch.Tensor): The predicted output from the model.
+        labels (torch.Tensor): The ground truth label.
         params (dict): The parameters passed by the user yaml.
+
     Returns:
-        loss (Tensor): The computed loss from the label and the prediction.
+        loss (torch.Tensor): The computed loss from the label and the prediction.
     """
 
     if isinstance(params["loss_function"], dict):
@@ -55,18 +71,18 @@ def get_loss_gans(predictions: Tensor, labels: Tensor, params: dict) -> Tensor:
 
 def get_loss_and_metrics_gans(
     images: Tensor,
-    secondary_images: Union[Tensor, None],
+    secondary_images: Optional[Tensor],
     labels: Tensor,
     predictions: Tensor,
     params: dict,
-):
+) -> Tuple[Tensor, Union[None, dict]]:
     """
     A function to compute the loss and optionally the metrics for generative
     adversarial networks.
 
     Args:
         images (torch.Tensor): The input image stack according to requirements.
-        secondary_images (torch.Tensor or None): The input secondary image stack
+        secondary_images (optional, torch.Tensor): The input secondary image stack
     used only when computing metrics.
         predictions (torch.Tensor) : discriminator output
         labels (torch.Tensor) : ground truth
@@ -74,7 +90,8 @@ def get_loss_and_metrics_gans(
 
     Returns:
         loss (torch.Tensor): The computed loss from the label and the prediction.
-        dict: The computed metric from the label and the prediction.
+        Union[None, dict]: The computed metric from the label and the prediction.
+    Metric is returned only if secondary_images is not None.
     """
     loss = get_loss_gans(predictions, labels, params)
     metric_output = {}
