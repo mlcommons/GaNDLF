@@ -86,7 +86,7 @@ Running preprocessing before training/inference is optional, but recommended. It
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_preprocess \
+(venv_gandlf) $> gandlf preprocess \
   # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
