@@ -79,4 +79,5 @@ jobs:
     - name: Run all entrypoints to check they exist
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
+        git update-index --chmod=+x ./testing/test_entrypoints_existence.sh
         ./testing/test_entrypoints_existence.sh
