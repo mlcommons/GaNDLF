@@ -1,4 +1,5 @@
 [tool.black]
+line-length = 88
 include = 'gandlf_*'
 extend-exclude = '''
 /(
