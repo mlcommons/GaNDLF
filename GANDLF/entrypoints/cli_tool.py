@@ -58,4 +58,5 @@ gandlf.add_command(anonymizer_command, "anonymizer")
 # TODO: add update-version command
 
 if __name__ == "__main__":
+    # pylint: disable=E1120
     gandlf()
