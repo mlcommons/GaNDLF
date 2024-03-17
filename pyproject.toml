@@ -12,6 +12,9 @@ extend-exclude = '''
   | /GANDLF/models/unet_multilayer.py
   | /GANDLF/cli/generate_metrics.py
   | /GANDLF/utils/tensor.py
+  | /GANDLF/schedulers/wrap_monai.py
+  | /GANDLF/schedulers/wrap_torch.py
+
 )
 '''
 
