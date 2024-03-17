@@ -57,4 +57,5 @@ gandlf.add_command(config_generator_command, "config-generator")
 # TODO: add update-version command
 
 if __name__ == "__main__":
+    # pylint: disable=E1120
     gandlf()
