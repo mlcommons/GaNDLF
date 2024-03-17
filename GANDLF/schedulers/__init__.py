@@ -9,6 +9,7 @@ from .wrap_torch import (
     cosineannealing,
 )
 
+from .wrap_monai import warmupcosineschedule
 
 # defining dict for schedulers - key is the string and the value is the transform object
 global_schedulers_dict = {
@@ -24,6 +25,8 @@ global_schedulers_dict = {
     "plateau": reduce_on_plateau,
     "reduceonplateau": reduce_on_plateau,
     "cosineannealing": cosineannealing,
+    "warmupcosineschedule": warmupcosineschedule,
+    "wcs": warmupcosineschedule,
 }
 
 
