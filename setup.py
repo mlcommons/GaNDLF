@@ -129,7 +129,7 @@ if __name__ == "__main__":
         },
         entry_points={
             "console_scripts": [
-                "gandlf=GANDLF.cli_tool:gandlf",
+                "gandlf=GANDLF.entrypoints.cli_tool:gandlf",
                 # old entrypoints
                 "gandlf_run=GANDLF.entrypoints.run:old_way",
                 "gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main",
