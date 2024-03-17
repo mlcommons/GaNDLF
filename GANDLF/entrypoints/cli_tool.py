@@ -57,4 +57,5 @@ gandlf.add_command(construct_csv_command, "construct-csv")
 # TODO: add update-version command
 
 if __name__ == "__main__":
+    # pylint: disable=E1120
     gandlf()
