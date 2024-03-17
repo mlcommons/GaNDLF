@@ -57,4 +57,5 @@ gandlf.add_command(recover_config_command, "recover-config")
 # TODO: add update-version command
 
 if __name__ == "__main__":
+    # pylint: disable=E1120
     gandlf()
