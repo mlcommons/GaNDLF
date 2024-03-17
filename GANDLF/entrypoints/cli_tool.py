@@ -57,4 +57,5 @@ def gandlf(ctx, loglevel):
 gandlf.add_command(update_version_command, "update-version")
 
 if __name__ == "__main__":
+    # pylint: disable=E1120
     gandlf()
