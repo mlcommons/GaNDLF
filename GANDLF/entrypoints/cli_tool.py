@@ -57,4 +57,5 @@ gandlf.add_command(optimize_model_command, "optimize-model")
 # TODO: add update-version command
 
 if __name__ == "__main__":
+    # pylint: disable=E1120
     gandlf()
