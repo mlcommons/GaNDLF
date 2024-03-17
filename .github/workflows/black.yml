@@ -11,17 +11,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: psf/black@stable
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install black==23.11.0
-      
-      - name: Run tests
-        run: |
-          python -m black --check .
+          version: "23.11.0"
+
+#      - name: Set up Python ${{ matrix.python-version }}
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          python -m pip install black==23.11.0
+#
+#      - name: Run tests
+#        run: |
+#          python -m black --check .
