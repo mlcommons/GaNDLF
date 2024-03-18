@@ -9,6 +9,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import construct_csv command
 # import collect_stats command
 from GANDLF.entrypoints.patch_miner import new_way as path_miner_command
+
 # import preprocess command
 # import verify_install command
 # import config_generator command
