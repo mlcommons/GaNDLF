@@ -1,6 +1,6 @@
 The website for GaNDLF; start with [index.md](./index.md).
 
-## Flowchart
+## Flowchart !
 
 ![Flowchart](./images/flowchart.png)
 
