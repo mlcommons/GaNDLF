@@ -16,6 +16,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import deploy command
 # import optimize_model command
 from GANDLF.entrypoints.generate_metrics import new_way as generate_metrics_command
+
 # import debug_info command
 # import update_version command
 from GANDLF import version
