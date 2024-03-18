@@ -6,6 +6,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 
 # import anonymizer command
 from GANDLF.entrypoints.run import new_way as run_command
+
 # import construct_csv command
 # import collect_stats command
 # import patch_miner command
