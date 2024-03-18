@@ -11,6 +11,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import patch_miner command
 # import preprocess command
 from GANDLF.entrypoints.verify_install import new_way as verify_install_command
+
 # import config_generator command
 # import recover_config command
 # import deploy command
