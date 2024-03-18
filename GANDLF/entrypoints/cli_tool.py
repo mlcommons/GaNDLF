@@ -7,6 +7,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import anonymizer command
 # import run command
 from GANDLF.entrypoints.construct_csv import new_way as construct_csv_command
+
 # import collect_stats command
 # import patch_miner command
 # import preprocess command
