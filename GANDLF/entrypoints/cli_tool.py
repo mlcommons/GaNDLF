@@ -12,6 +12,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import preprocess command
 # import verify_install command
 from GANDLF.entrypoints.config_generator import new_way as config_generator_command
+
 # import recover_config command
 # import deploy command
 # import optimize_model command
