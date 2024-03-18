@@ -10,6 +10,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 # import collect_stats command
 # import patch_miner command
 from GANDLF.entrypoints.preprocess import new_way as preprocess_command
+
 # import verify_install command
 # import config_generator command
 # import recover_config command
