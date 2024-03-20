@@ -49,4 +49,4 @@ tasks:
         # GaNDLF config file
         config: {type: file, default: config.yaml}
       }
-      outputs: { output_path: { type: "file", default: "results.yaml" } }
+      outputs: { output-file: { type: "file", default: "results.yaml" } }
