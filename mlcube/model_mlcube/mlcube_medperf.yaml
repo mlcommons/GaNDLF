@@ -100,8 +100,8 @@ tasks:
     
   recover_config:
   # Extracts the config file from the embedded model (if any) in the MLCube.
-    entrypoint: "gandlf_recoverConfig --mlcube internal"
+    entrypoint: "gandlf recover-config --mlcube"
     parameters: 
       outputs: {
-        outputFile: {type: "file", default: "recovered_config.yml"},
+        output-file: {type: "file", default: "recovered_config.yml"},
       }
