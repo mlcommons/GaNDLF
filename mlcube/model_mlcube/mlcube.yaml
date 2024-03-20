@@ -89,12 +89,12 @@ tasks:
       inputs: {
         # Do NOT change the position of the inputDir parameter! It is relevant due to MLCube mounting rules.
         # Path to a directory containing input data. Each subject should be a subdirectory, with consistent filenaming conventions.
-        inputDir: {type: "directory", default: "data/"},
+        input-dir: {type: "directory", default: "data/"},
         # Path to a file containing identifying strings for each channel (and label, if performing segmentation).
-        channelsID: {type: "file", default: "channelIDs.yml"},
+        channels-id: {type: "file", default: "channelIDs.yml"},
       }
       outputs: {
-        outputFile: {type: "file", default: "data.csv"}
+        output-file: {type: "file", default: "data.csv"}
         }
 
   recover_config:
