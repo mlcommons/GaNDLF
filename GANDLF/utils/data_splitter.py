@@ -23,7 +23,8 @@ def split_data(
     ), "`nested_training` key missing in parameters"
     # populate the headers
     _, parameters["headers"] = (
-        parseTrainingCSV(full_dataset) if "headers" not in parameters else (_, _)
+        parseTrainingCSV(full_dataset) if "headers" not in parameters else full_dataset,
+        parameters["headers"],
     )
 
     parameters = (
