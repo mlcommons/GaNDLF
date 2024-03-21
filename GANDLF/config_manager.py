@@ -634,6 +634,9 @@ def _parseConfig(
         "nested_training" in params
     ), "The parameter 'nested_training' needs to be defined"
     # initialize defaults for nested training
+    params["nested_training"]["stratified"] = params["nested_training"].get(
+        "stratified", False
+    )
     params["nested_training"]["testing"] = params["nested_training"].get("testing", -5)
     params["nested_training"]["validation"] = params["nested_training"].get(
         "validation", -5
