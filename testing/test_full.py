@@ -212,6 +212,13 @@ def prerequisites_constructTrainingCSV():
                 i += 1
 
 
+def test_prepare_data_for_ci():
+    # is used to run pytest session (i.e. to prepare environment, download data etc)
+    # without any real test execution
+    # to see what happens, refer to `conftest.py:pytest_sessionstart`
+    pass
+
+
 # # these are helper functions to be used in other tests
 def sanitize_outputDir():
     print("02_1: Sanitizing outputDir")
