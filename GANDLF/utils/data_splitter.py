@@ -167,15 +167,15 @@ def split_data(
                     ]
                 )
 
-            current_training_subject_indeces_full = (
-                trainingAndValidationData[
-                    trainingAndValidationData.columns[
-                        parameters["headers"]["subjectIDHeader"]
-                    ]
+        current_training_subject_indeces_full = (
+            trainingAndValidationData[
+                trainingAndValidationData.columns[
+                    parameters["headers"]["subjectIDHeader"]
                 ]
-                .unique()
-                .tolist()
-            )
+            ]
+            .unique()
+            .tolist()
+        )
 
         # start the kFold train for validation
         for train_index, val_index in kf_validation.split(
