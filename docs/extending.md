@@ -90,6 +90,23 @@ Once you have made changes to functionality, it is imperative that the unit test
 
 ## Run Tests
 
+### Prerequisites
+
+Some additional steps are required for running tests.
+
+Firstly, install optional dependencies (if still not):
+
+```shell
+pip install mlcube_docker openvino==2023.0.1
+```
+
+Second, tests are using [sample data.zip](https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT). The data is downloaded and prepared automatically when you run unit tests. Prepared data is stored at `testing/data/` folder. However, you may want to download & explore data manually.
+
+
+There are two types of tests: unit tests for GaNDLF code, and integration tests for deploying and running mlcubes.
+
+### Unit tests
+
 Once you have the virtual environment set up, tests can be run using the following command:
 
 ```bash
@@ -99,10 +116,19 @@ Once you have the virtual environment set up, tests can be run using the followi
 
 Any failures will be reported in the file [`${GaNDLF_HOME}/testing/failures.log`](https://github.com/mlcommons/GaNDLF/blob/5030ff83a38947c1583b58a08598308886ee9a0a/testing/conftest.py#L25).
 
+### Integration tests
+
+All integration tests are combined to one shell script:
+
+```shell
+# it's assumed you are in `GaNDLF/` repo root directory
+cd testing/
+./test_deploy.sh
+```
 
 ### Code coverage
 
-The code coverage for the tests can be obtained by the following command:
+The code coverage for the unit tests can be obtained by the following command:
 
 ```powershell
 bash
