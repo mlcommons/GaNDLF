@@ -637,6 +637,9 @@ def _parseConfig(
     params["nested_training"]["stratified"] = params["nested_training"].get(
         "stratified", False
     )
+    params["nested_training"]["stratified"] = params["nested_training"].get(
+        "proportional", False
+    )
     params["nested_training"]["testing"] = params["nested_training"].get("testing", -5)
     params["nested_training"]["validation"] = params["nested_training"].get(
         "validation", -5
