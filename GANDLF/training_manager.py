@@ -69,7 +69,11 @@ def TrainingManager(
         # put 2 just so that the first for-loop does not fail
         parameters["nested_training"]["testing"] = 2
 
-    # initialize the kfold structures
+    # check if stratified k-fold is requested
+    assert not parameters["nested_training"].get(
+        "stratified"
+    ), "Stratified k-fold can only be performed through offline data splitting - see gandlf_dataSplitter for more information."
+
     kf_testing = KFold(n_splits=parameters["nested_training"]["testing"])
     kf_validation = KFold(n_splits=parameters["nested_training"]["validation"])
 
