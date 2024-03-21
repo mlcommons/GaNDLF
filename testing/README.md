@@ -10,14 +10,8 @@ Firstly, install optional dependencies (if still not):
 pip install mlcube_docker openvino==2023.0.1
 ```
 
-Second, download and unpack the following testing data to `testing/` subfolder:
+Second, tests are using [sample data.zip](https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT). The data is downloaded and prepared automatically when you run unit tests. Prepared data is stored at `testing/data/` folder.
 
-```shell
-# it's assumed you are in `GaNDLF/` repo root directory
-cd testing/
-wget https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip
-unzip $FILENAME
-```
  
 ## Running tests
 
