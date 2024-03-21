@@ -837,6 +837,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["final_layer"] = "logits"
+    parameters["nested_training"]["stratified"] = True
 
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
