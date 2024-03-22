@@ -225,3 +225,5 @@ def split_data(
         if singleFoldTesting:
             break
         currentTestingFold += 1  # go to next fold
+
+    return return_data
