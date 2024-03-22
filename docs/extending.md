@@ -92,18 +92,10 @@ Once you have made changes to functionality, it is imperative that the unit test
 
 ### Prerequisites
 
-Some additional steps are required for running tests.
+There are two types of tests: unit tests for GaNDLF code, which tests the functionality, and integration tests for deploying and running mlcubes. Some additional steps are required for running tests:
 
-Firstly, install optional dependencies (if still not):
-
-```shell
-pip install mlcube_docker openvino==2023.0.1
-```
-
-Second, tests are using [sample data.zip](https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT). The data is downloaded and prepared automatically when you run unit tests. Prepared data is stored at `testing/data/` folder. However, you may want to download & explore data manually.
-
-
-There are two types of tests: unit tests for GaNDLF code, and integration tests for deploying and running mlcubes.
+1. Ensure that the install optional dependencies [[ref](https://mlcommons.github.io/GaNDLF/setup/#optional-dependencies)] have been installed.
+2. Tests are using [sample data](https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT), which gets downloaded and prepared automatically when you run unit tests. Prepared data is stored at `${GaNDLF_root_dir}/testing/data/` folder. However, you may want to download & explore data by yourself.
 
 ### Unit tests
 
