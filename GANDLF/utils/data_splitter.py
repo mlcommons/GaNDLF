@@ -122,113 +122,113 @@ def split_data(
                         testingData,
                     )
                 )
+                currentValidationFold += 1  # increment the validation fold
                 if singleFoldValidation:
                     break
-                currentValidationFold += 1  # increment the validation fold
 
+            currentTestingFold += 1  # increment the testing fold
             if singleFoldTesting:
                 break
-            currentTestingFold += 1  # increment the testing fold
+    else:
+        # start the kFold train for testing
+        for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
+            # ensure the validation fold is initialized per-testing split
+            currentValidationFold = 0
 
-    # start the kFold train for testing
-    for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
-        # ensure the validation fold is initialized per-testing split
-        currentValidationFold = 0
-
-        trainingAndValidationData, testingData = (
-            pd.DataFrame(),
-            pd.DataFrame(),
-        )  # initialize the variables
-        # get the current training and testing data
-        if noTestingData:
-            # don't consider the split indeces for this case
-            trainingAndValidationData = full_dataset
-            testingData = None  # this should be None to ensure downstream code does not fail
-        else:
-            # loop over all trainAndVal_index and construct new dataframe
-            for subject_idx in trainAndVal_index:
-                trainingAndValidationData = trainingAndValidationData._append(
-                    full_dataset[
+            trainingAndValidationData, testingData = (
+                pd.DataFrame(),
+                pd.DataFrame(),
+            )  # initialize the variables
+            # get the current training and testing data
+            if noTestingData:
+                # don't consider the split indeces for this case
+                trainingAndValidationData = full_dataset
+                testingData = None  # this should be None to ensure downstream code does not fail
+            else:
+                # loop over all trainAndVal_index and construct new dataframe
+                for subject_idx in trainAndVal_index:
+                    trainingAndValidationData = trainingAndValidationData._append(
                         full_dataset[
-                            full_dataset.columns[
-                                parameters["headers"]["subjectIDHeader"]
+                            full_dataset[
+                                full_dataset.columns[
+                                    parameters["headers"]["subjectIDHeader"]
+                                ]
                             ]
+                            == subjectIDs_full[subject_idx]
                         ]
-                        == subjectIDs_full[subject_idx]
-                    ]
-                )
+                    )
 
-            # loop over all testing_index and construct new dataframe
-            for subject_idx in testing_index:
-                testingData = testingData._append(
-                    full_dataset[
+                # loop over all testing_index and construct new dataframe
+                for subject_idx in testing_index:
+                    testingData = testingData._append(
                         full_dataset[
-                            full_dataset.columns[
-                                parameters["headers"]["subjectIDHeader"]
+                            full_dataset[
+                                full_dataset.columns[
+                                    parameters["headers"]["subjectIDHeader"]
+                                ]
                             ]
+                            == subjectIDs_full[subject_idx]
                         ]
-                        == subjectIDs_full[subject_idx]
-                    ]
-                )
+                    )
 
-        current_training_subject_indeces_full = (
-            trainingAndValidationData[
-                trainingAndValidationData.columns[
-                    parameters["headers"]["subjectIDHeader"]
+            current_training_subject_indeces_full = (
+                trainingAndValidationData[
+                    trainingAndValidationData.columns[
+                        parameters["headers"]["subjectIDHeader"]
+                    ]
                 ]
-            ]
-            .unique()
-            .tolist()
-        )
-
-        # start the kFold train for validation
-        for train_index, val_index in kf_validation.split(
-            current_training_subject_indeces_full
-        ):
-            trainingData = pd.DataFrame()  # initialize the variable
-            validationData = pd.DataFrame()  # initialize the variable
-
-            # loop over all train_index and construct new dataframe
-            for subject_idx in train_index:
-                trainingData = trainingData._append(
-                    full_dataset[
-                        full_dataset[
-                            full_dataset.columns[
-                                parameters["headers"]["subjectIDHeader"]
-                            ]
-                        ]
-                        == subjectIDs_full[subject_idx]
-                    ]
-                )
-
-            # loop over all val_index and construct new dataframe
-            for subject_idx in val_index:
-                validationData = validationData._append(
-                    full_dataset[
-                        full_dataset[
-                            full_dataset.columns[
-                                parameters["headers"]["subjectIDHeader"]
-                            ]
-                        ]
-                        == subjectIDs_full[subject_idx]
-                    ]
-                )
-
-            return_data.append(
-                (
-                    (currentTestingFold, currentValidationFold),
-                    trainingData,
-                    validationData,
-                    testingData,
-                )
+                .unique()
+                .tolist()
             )
 
-            if singleFoldValidation:
-                break
-            currentValidationFold += 1  # go to next fold
+            # start the kFold train for validation
+            for train_index, val_index in kf_validation.split(
+                current_training_subject_indeces_full
+            ):
+                trainingData = pd.DataFrame()  # initialize the variable
+                validationData = pd.DataFrame()  # initialize the variable
 
-        if singleFoldTesting:
-            break
-        currentTestingFold += 1  # go to next fold
+                # loop over all train_index and construct new dataframe
+                for subject_idx in train_index:
+                    trainingData = trainingData._append(
+                        full_dataset[
+                            full_dataset[
+                                full_dataset.columns[
+                                    parameters["headers"]["subjectIDHeader"]
+                                ]
+                            ]
+                            == subjectIDs_full[subject_idx]
+                        ]
+                    )
+
+                # loop over all val_index and construct new dataframe
+                for subject_idx in val_index:
+                    validationData = validationData._append(
+                        full_dataset[
+                            full_dataset[
+                                full_dataset.columns[
+                                    parameters["headers"]["subjectIDHeader"]
+                                ]
+                            ]
+                            == subjectIDs_full[subject_idx]
+                        ]
+                    )
+
+                return_data.append(
+                    (
+                        (currentTestingFold, currentValidationFold),
+                        trainingData,
+                        validationData,
+                        testingData,
+                    )
+                )
+
+                currentValidationFold += 1  # go to next fold
+                if singleFoldValidation:
+                    break
+
+            currentTestingFold += 1  # go to next fold
+            if singleFoldTesting:
+                break
 
     return return_data
