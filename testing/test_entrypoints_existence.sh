@@ -7,7 +7,7 @@ commands=(
   # subcommands
 #  "gandlf anonymizer --help"
 #  "gandlf collect-stats --help"
-#  "gandlf config-generator --help"
+  "gandlf config-generator --help"
 #  "gandlf construct-csv --help"
 #  "gandlf debug-info --help"
 #  "gandlf deploy --help"
