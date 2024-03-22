@@ -128,10 +128,8 @@ def split_data(
                 break
             currentTestingFold += 1  # increment the testing fold
 
-    currentTestingFold = 0
-
     # start the kFold train for testing
-    for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full, target):
+    for trainAndVal_index, testing_index in kf_testing.split(subjectIDs_full):
         # ensure the validation fold is initialized per-testing split
         currentValidationFold = 0
 
