@@ -9,7 +9,7 @@ commands=(
 #  "gandlf collect-stats --help"
 #  "gandlf config-generator --help"
 #  "gandlf construct-csv --help"
-#  "gandlf debug-info --help"
+  "gandlf debug-info --help"
 #  "gandlf deploy --help"
 #  "gandlf generate-metrics --help"
 #  "gandlf optimize-model --help"
