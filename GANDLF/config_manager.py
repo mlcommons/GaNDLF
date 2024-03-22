@@ -1,3 +1,5 @@
+import json
+import logging
 from typing import Optional, Union
 import sys, yaml, ast, pkg_resources
 import numpy as np
@@ -741,4 +743,7 @@ def ConfigManager(
     Returns:
         dict: The parameter dictionary.
     """
-    return _parseConfig(config_file_path, version_check_flag)
+    parsed_config = _parseConfig(config_file_path, version_check_flag)
+    logging.info("gandlf config:")
+    logging.info(json.dumps(parsed_config, indent=2))
+    return parsed_config
