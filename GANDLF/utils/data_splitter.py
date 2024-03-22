@@ -75,11 +75,12 @@ def split_data(
     ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
 
     # get the targets for prediction for classification
-    target = False  # initialize this so that the downstream code does not fail - for KFold, this is shuffle
+    target_testing = False  # initialize this so that the downstream code does not fail - for KFold, this is shuffle
     if parameters["problem_type"] == "classification":
-        target = full_dataset.loc[
+        target_testing = full_dataset.loc[
             :, full_dataset.columns[parameters["headers"]["predictionHeaders"]]
         ]
+    target_validation = target_testing
 
     folding_type = KFold
     if parameters["nested_training"]["stratified"]:
@@ -91,7 +92,9 @@ def split_data(
     # start StratifiedKFold splitting
     currentTestingFold = 0
     if parameters["nested_training"]["stratified"]:
-        for trainAndVal_index, testing_index in kf_testing.split(full_dataset, target):
+        for trainAndVal_index, testing_index in kf_testing.split(
+            full_dataset, target_testing
+        ):
             # ensure the validation fold is initialized per-testing split
             currentValidationFold = 0
 
@@ -103,13 +106,20 @@ def split_data(
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = None  # this should be None to ensure downstream code does not fail
+                testingData = (
+                    None  # this should be None to ensure downstream code does not fail
+                )
             else:
                 trainingAndValidationData = full_dataset.loc[trainAndVal_index, :]
+                trainingAndValidationData.reset_index(drop=True, inplace=True)
                 testingData = full_dataset.loc[testing_index, :]
+                # update the targets after the split
+                target_validation = trainingAndValidationData.loc[
+                    :, full_dataset.columns[parameters["headers"]["predictionHeaders"]]
+                ]
 
             for train_index, val_index in kf_validation.split(
-                trainingAndValidationData, target
+                trainingAndValidationData, target_validation
             ):
                 # get the current training and validation data
                 trainingData = trainingAndValidationData.loc[train_index, :]
@@ -143,7 +153,9 @@ def split_data(
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = None  # this should be None to ensure downstream code does not fail
+                testingData = (
+                    None  # this should be None to ensure downstream code does not fail
+                )
             else:
                 # loop over all trainAndVal_index and construct new dataframe
                 for subject_idx in trainAndVal_index:
