@@ -18,7 +18,7 @@ commands=(
 #  "gandlf recover-config --help"
 #  "gandlf run --help"
 #  "gandlf update-version --help"
-#  "gandlf verify-install --help"
+  "gandlf verify-install --help"
   # old entrypoints
   "gandlf_anonymizer --help"
   "gandlf_collectStats --help"
