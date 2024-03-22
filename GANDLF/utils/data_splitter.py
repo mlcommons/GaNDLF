@@ -71,7 +71,7 @@ def split_data(
     all_subjects_are_unique = len(subjectIDs_full) == len(full_dataset.index)
 
     assert (
-        all_subjects_are_unique and parameters["nested_training"]["stratified"]
+        all_subjects_are_unique or not parameters["nested_training"]["stratified"]
     ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
 
     # get the targets for prediction for classification
