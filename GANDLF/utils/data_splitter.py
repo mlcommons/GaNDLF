@@ -95,13 +95,15 @@ def split_data(
             # ensure the validation fold is initialized per-testing split
             currentValidationFold = 0
 
-            trainingAndValidationData = pd.DataFrame()  # initialize the variable
-            testingData = pd.DataFrame()  # initialize the variable
+            trainingAndValidationData, testingData = (
+                pd.DataFrame(),
+                pd.DataFrame(),
+            )  # initialize the variables
             # get the current training and testing data
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = None
+                testingData = None  # this should be None to ensure downstream code does not fail
             else:
                 trainingAndValidationData = full_dataset.loc[trainAndVal_index, :]
                 testingData = full_dataset.loc[testing_index, :]
@@ -133,12 +135,15 @@ def split_data(
         # ensure the validation fold is initialized per-testing split
         currentValidationFold = 0
 
-        trainingAndValidationData = pd.DataFrame()  # initialize the variable
-        testingData = pd.DataFrame()  # initialize the variable
+        trainingAndValidationData, testingData = (
+            pd.DataFrame(),
+            pd.DataFrame(),
+        )  # initialize the variables
         # get the current training and testing data
         if noTestingData:
             # don't consider the split indeces for this case
             trainingAndValidationData = full_dataset
+            testingData = None  # this should be None to ensure downstream code does not fail
         else:
             # loop over all trainAndVal_index and construct new dataframe
             for subject_idx in trainAndVal_index:
