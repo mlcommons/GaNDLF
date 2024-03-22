@@ -77,16 +77,18 @@ def TrainingManager(
         }
         data_dict_files = {}
         for data_type, data in data_dict.items():
-            currentDataPickle = os.path.join(
-                currentValidationOutputFolder, "data_" + data_type + ".pkl"
-            )
-            data_dict_files[data_type] = currentDataPickle
-            if (not os.path.exists(currentDataPickle)) or reset or resume:
-                data.to_pickle(currentDataPickle)
-                data.to_csv(currentDataPickle.replace(".pkl", ".csv"), index=False)
-            else:
-                # read the data from the pickle if present
-                data_dict[data_type] = get_dataframe(currentDataPickle)
+            data_dict_files[data_type] = ""
+            if data is not None:
+                currentDataPickle = os.path.join(
+                    currentValidationOutputFolder, "data_" + data_type + ".pkl"
+                )
+                data_dict_files[data_type] = currentDataPickle
+                if (not os.path.exists(currentDataPickle)) or reset or resume:
+                    data.to_pickle(currentDataPickle)
+                    data.to_csv(currentDataPickle.replace(".pkl", ".csv"), index=False)
+                else:
+                    # read the data from the pickle if present
+                    data_dict[data_type] = get_dataframe(currentDataPickle)
 
         # parallel_compute_command is an empty string, thus no parallel computing requested
         if not parameters["parallel_compute_command"]:

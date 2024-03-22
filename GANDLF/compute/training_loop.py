@@ -244,7 +244,7 @@ def training_loop(
     params["validation_data"] = validation_data
     params["testing_data"] = testing_data
     testingDataDefined = True
-    if params["testing_data"] is None:
+    if (params["testing_data"] is None) or (params["testing_data"] == ""):
         # testing_data = validation_data
         testingDataDefined = False
 
