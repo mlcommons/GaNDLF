@@ -13,7 +13,7 @@ commands=(
 #  "gandlf deploy --help"
 #  "gandlf generate-metrics --help"
 #  "gandlf optimize-model --help"
-#  "gandlf patch-miner --help"
+  "gandlf patch-miner --help"
 #  "gandlf preprocess --help"
 #  "gandlf recover-config --help"
 #  "gandlf run --help"
