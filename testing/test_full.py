@@ -837,6 +837,12 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["final_layer"] = "logits"
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    ## add stratified splitting
     parameters["nested_training"]["stratified"] = True
 
     # read and parse csv
@@ -845,20 +851,30 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    model = all_models_regression[0]
-    parameters["model"]["architecture"] = model
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    sanitize_outputDir()
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        resume=False,
-        reset=True,
-    )
+    # duplicate the data to test stratified sampling
+    training_data_duplicate = training_data._append(training_data)
+    for _ in range(1):
+        training_data_duplicate = training_data_duplicate._append(
+            training_data_duplicate
+        )
+    training_data_duplicate.reset_index(drop=True, inplace=True)
+    # ensure subjects are not duplicated
+    training_data_duplicate["SubjectID"] = training_data_duplicate.index
+
+    # ensure every part of the code is tested
+    for folds in [-5, 2]:
+        ## add stratified folding information
+        parameters["nested_training"]["testing"] = folds
+        parameters["nested_training"]["validation"] = folds
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data_duplicate,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
     ## this is to test if inference can run without having ground truth column
     training_data.drop("ValueToPredict", axis=1, inplace=True)
     training_data.drop("Label", axis=1, inplace=True)
