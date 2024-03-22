@@ -15,7 +15,7 @@ commands=(
 #  "gandlf optimize-model --help"
 #  "gandlf patch-miner --help"
 #  "gandlf preprocess --help"
-#  "gandlf recover-config --help"
+  "gandlf recover-config --help"
 #  "gandlf run --help"
 #  "gandlf update-version --help"
 #  "gandlf verify-install --help"
