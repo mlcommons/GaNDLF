@@ -218,11 +218,11 @@ def assert_called_properly(mock_func, expected_args: dict, args_normalizer):
 
 
 def run_test_case(
-    cli_runner: CliRunner,
+    cli_runner: Optional[CliRunner],
     file_system_config: List[_TmpPath],
     case: CliCase,
     real_code_function_path: str,
-    new_way: BaseCommand,
+    new_way: Optional[BaseCommand],
     old_way: Callable,
     old_script_name: str,
     patched_return_value: Any = None,
