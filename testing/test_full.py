@@ -869,7 +869,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     training_data_duplicate["SubjectID"] = training_data_duplicate.index
 
     # ensure every part of the code is tested
-    for folds in [-5, 2]:
+    for folds in [2, -5]:
         ## add stratified folding information
         parameters["nested_training"]["testing"] = folds
         parameters["nested_training"]["validation"] = folds
@@ -892,8 +892,6 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
-    parameters["output_dir"] = outputDir  # this is in inference mode
-    parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
