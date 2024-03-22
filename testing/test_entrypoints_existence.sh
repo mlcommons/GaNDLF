@@ -11,7 +11,7 @@ commands=(
 #  "gandlf construct-csv --help"
 #  "gandlf debug-info --help"
 #  "gandlf deploy --help"
-#  "gandlf generate-metrics --help"
+  "gandlf generate-metrics --help"
 #  "gandlf optimize-model --help"
 #  "gandlf patch-miner --help"
 #  "gandlf preprocess --help"
