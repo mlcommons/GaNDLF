@@ -5,9 +5,7 @@ import os
 import fileinput
 
 
-def in_place_string_replace(
-        filename: str, old_string: str, new_string: str
-) -> None:
+def in_place_string_replace(filename: str, old_string: str, new_string: str) -> None:
     """
     Replace a string in a file in place.
 
