@@ -77,7 +77,7 @@ def TrainingManager(
         }
         data_dict_files = {}
         for data_type, data in data_dict.items():
-            data_dict_files[data_type] = ""
+            data_dict_files[data_type] = None
             if data is not None:
                 currentDataPickle = os.path.join(
                     currentValidationOutputFolder, "data_" + data_type + ".pkl"
