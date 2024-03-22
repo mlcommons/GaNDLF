@@ -70,8 +70,8 @@ def split_data(
 
     all_subjects_are_unique = len(subjectIDs_full) == len(full_dataset.index)
 
-    assert (
-        all_subjects_are_unique or not parameters["nested_training"]["stratified"]
+    assert all_subjects_are_unique or not parameters["nested_training"].get(
+        "stratified"
     ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
 
     # get the targets for prediction for classification
@@ -83,7 +83,7 @@ def split_data(
     target_validation = target_testing
 
     folding_type = KFold
-    if parameters["nested_training"]["stratified"]:
+    if parameters["nested_training"].get("stratified"):
         folding_type = StratifiedKFold
 
     kf_testing = folding_type(n_splits=testing_folds)
@@ -91,7 +91,7 @@ def split_data(
 
     # start StratifiedKFold splitting
     currentTestingFold = 0
-    if parameters["nested_training"]["stratified"]:
+    if parameters["nested_training"].get("stratified"):
         for trainAndVal_index, testing_index in kf_testing.split(
             full_dataset, target_testing
         ):
