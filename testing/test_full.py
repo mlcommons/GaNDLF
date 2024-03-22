@@ -108,7 +108,7 @@ steps to follow to write tests:
 """
 
 
-def test_generic_download_data():
+def prerequisites_hook_download_data():
     print("00: Downloading the sample data")
     urlToDownload = "https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT"
 
@@ -132,7 +132,7 @@ def test_generic_download_data():
     print("passed")
 
 
-def test_generic_constructTrainingCSV():
+def prerequisites_constructTrainingCSV():
     print("01: Constructing training CSVs")
     # delete previous csv files
     files = os.listdir(inputDir)
@@ -210,6 +210,13 @@ def test_generic_constructTrainingCSV():
                     csv_writer_1.writerow(row_regression)
                     csv_writer_2.writerow(row_classification)
                 i += 1
+
+
+def test_prepare_data_for_ci():
+    # is used to run pytest session (i.e. to prepare environment, download data etc)
+    # without any real test execution
+    # to see what happens, refer to `conftest.py:pytest_sessionstart`
+    pass
 
 
 # # these are helper functions to be used in other tests
