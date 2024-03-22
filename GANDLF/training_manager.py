@@ -49,6 +49,7 @@ def TrainingManager(
 
     # check the last indeces to see if single fold training is requested
     singleFoldTesting = True if last_indeces[0] == 0 else False
+    singleFoldValidation = True if last_indeces[1] == 0 else False
 
     for (
         testing_and_valid_indeces,
@@ -64,10 +65,12 @@ def TrainingManager(
             )
             Path(currentTestingOutputFolder).mkdir(parents=True, exist_ok=True)
 
-        currentValidationOutputFolder = os.path.join(
-            currentTestingOutputFolder, str(testing_and_valid_indeces[1])
-        )
-        Path(currentValidationOutputFolder).mkdir(parents=True, exist_ok=True)
+        currentValidationOutputFolder = currentTestingOutputFolder
+        if not singleFoldValidation:
+            currentValidationOutputFolder = os.path.join(
+                currentTestingOutputFolder, str(testing_and_valid_indeces[1])
+            )
+            Path(currentValidationOutputFolder).mkdir(parents=True, exist_ok=True)
 
         # initialize the dataframes and save them to disk
         data_dict = {
