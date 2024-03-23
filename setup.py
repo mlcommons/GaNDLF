@@ -107,7 +107,7 @@ requirements = [
     "zarr",
     "keyring",
     "monai==1.3.0",
-    "click==8.1.7",
+    "click>=8.0.0",
     "deprecated",
 ]
 
