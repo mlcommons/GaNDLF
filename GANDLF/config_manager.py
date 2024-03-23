@@ -743,7 +743,11 @@ def ConfigManager(
     Returns:
         dict: The parameter dictionary.
     """
-    parsed_config = _parseConfig(config_file_path, version_check_flag)
-    logging.info("gandlf config:")
-    logging.info(json.dumps(parsed_config, indent=2))
-    return parsed_config
+    try:
+        parsed_config = _parseConfig(config_file_path, version_check_flag)
+        logging.info("gandlf config:")
+        logging.info(json.dumps(parsed_config, indent=2))
+        return parsed_config
+    except Exception as e:
+        logging.info(f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, {str(e)}")
+        raise
