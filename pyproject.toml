@@ -15,8 +15,8 @@ extend-exclude = '''
   | /GANDLF/utils/tensor.py
   | /GANDLF/schedulers/wrap_monai.py
   | /GANDLF/schedulers/wrap_torch.py
-
 )
+skip_magic_trailing_comma = true`
 '''
 
 [tool.coverage.run]
