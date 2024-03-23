@@ -112,13 +112,10 @@ def generate_metrics_dict(
                 parameters["model"]["class_list"] = [1]
                 parameters["model"]["num_classes"] = 1
                 overall_stats_dict[current_subject_id][str(class_index)]["dice"] = dice(
-                    current_prediction,
-                    current_target,
+                    current_prediction, current_target
                 ).item()
                 nsd, hd100, hd95 = _calculator_generic_all_surface_distances(
-                    current_prediction,
-                    current_target,
-                    parameters,
+                    current_prediction, current_target, parameters
                 )
                 overall_stats_dict[current_subject_id][str(class_index)][
                     "nsd"
@@ -130,13 +127,8 @@ def generate_metrics_dict(
                     "hd95"
                 ] = hd95.item()
 
-                (
-                    s,
-                    p,
-                ) = _calculator_sensitivity_specificity(
-                    current_prediction,
-                    current_target,
-                    parameters,
+                (s, p) = _calculator_sensitivity_specificity(
+                    current_prediction, current_target, parameters
                 )
                 overall_stats_dict[current_subject_id][str(class_index)][
                     "sensitivity"
@@ -147,9 +139,7 @@ def generate_metrics_dict(
                 overall_stats_dict[current_subject_id][
                     "jaccard_" + str(class_index)
                 ] = _calculator_jaccard(
-                    current_prediction,
-                    current_target,
-                    parameters,
+                    current_prediction, current_target, parameters
                 ).item()
                 current_target_image = sitk.GetImageFromArray(
                     current_target[0, 0, ...].long()

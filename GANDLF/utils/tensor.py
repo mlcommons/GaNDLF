@@ -413,17 +413,11 @@ def get_class_imbalance_weights(
                 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
                 penalty_data = ImagesFromDataFrame(
-                    training_df,
-                    parameters=params,
-                    train=False,
-                    loader_type="penalty",
+                    training_df, parameters=params, train=False, loader_type="penalty"
                 )
 
                 penalty_loader = DataLoader(
-                    penalty_data,
-                    batch_size=1,
-                    shuffle=True,
-                    pin_memory=False,
+                    penalty_data, batch_size=1, shuffle=True, pin_memory=False
                 )
 
                 (

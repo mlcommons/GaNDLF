@@ -13,12 +13,7 @@ from copy import deepcopy
 
 
 class Decoder(ModelBase):
-    def __init__(
-        self,
-        parameters,
-        anatomy_factors,
-        num_layers=5,
-    ):
+    def __init__(self, parameters, anatomy_factors, num_layers=5):
         """
         Decoder module for SDNet.
 
@@ -155,11 +150,7 @@ class Decoder(ModelBase):
 
 
 class Segmentor(ModelBase):
-    def __init__(
-        self,
-        parameters,
-        anatomy_factors,
-    ):
+    def __init__(self, parameters, anatomy_factors):
         """
         Segmentor module for SDNet.
 
@@ -228,13 +219,7 @@ class Segmentor(ModelBase):
 
 
 class ModalityEncoder(ModelBase):
-    def __init__(
-        self,
-        parameters,
-        anatomy_factors,
-        modality_factors,
-        num_layers=4,
-    ):
+    def __init__(self, parameters, anatomy_factors, modality_factors, num_layers=4):
         """
         Modality Encoder module for SDNet.
 
@@ -311,10 +296,7 @@ class ModalityEncoder(ModelBase):
 
 
 class SDNet(ModelBase):
-    def __init__(
-        self,
-        parameters: dict,
-    ):
+    def __init__(self, parameters: dict):
         """
         SDNet (Structure-Disentangled Network) module.
 
@@ -354,18 +336,10 @@ class SDNet(ModelBase):
 
         self.cencoder = unet(parameters_unet)
         self.mencoder = ModalityEncoder(
-            parameters,
-            self.anatomy_factors,
-            self.modality_factors,
+            parameters, self.anatomy_factors, self.modality_factors
         )
-        self.decoder = Decoder(
-            parameters,
-            self.anatomy_factors,
-        )
-        self.segmentor = Segmentor(
-            parameters,
-            self.anatomy_factors,
-        )
+        self.decoder = Decoder(parameters, self.anatomy_factors)
+        self.segmentor = Segmentor(parameters, self.anatomy_factors)
 
     @staticmethod
     def reparameterize(mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
@@ -404,10 +378,4 @@ class SDNet(ModelBase):
         reco = self.decoder(anatomy_factors, modality_factors)
         modality_factors_reencoded, _ = self.mencoder(reco, anatomy_factors)
         # sm, anatomy_factors, mu, logvar, modality_factors_reencoded
-        return (
-            sm,
-            reco,
-            mu,
-            logvar,
-            modality_factors_reencoded,
-        )
+        return (sm, reco, mu, logvar, modality_factors_reencoded)

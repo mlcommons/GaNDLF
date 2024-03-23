@@ -55,9 +55,7 @@ class RandomNoiseEnhanced(RandomTransform, IntensityTransform):
         return transformed
 
     def get_params(
-        self,
-        mean_range: Tuple[float, float],
-        std_range: Tuple[float, float],
+        self, mean_range: Tuple[float, float], std_range: Tuple[float, float]
     ) -> Tuple[float, float]:
         mean = self.sample_uniform(*mean_range)
         std = self.sample_uniform(*std_range)
