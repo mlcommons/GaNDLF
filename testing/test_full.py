@@ -869,10 +869,10 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     training_data_duplicate["SubjectID"] = training_data_duplicate.index
 
     # ensure every part of the code is tested
-    for folds in [2, -5]:
+    for folds in [2, 1, -5]:
         ## add stratified folding information
         parameters["nested_training"]["testing"] = folds
-        parameters["nested_training"]["validation"] = folds
+        parameters["nested_training"]["validation"] = folds if folds != 1 else -5
         sanitize_outputDir()
         TrainingManager(
             dataframe=training_data_duplicate,
