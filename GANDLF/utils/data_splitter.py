@@ -106,9 +106,8 @@ def split_data(
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = (
-                    None  # this should be None to ensure downstream code does not fail
-                )
+                # this should be None to ensure downstream code does not fail
+                testingData = None
             else:
                 trainingAndValidationData = full_dataset.loc[trainAndVal_index, :]
                 trainingAndValidationData.reset_index(drop=True, inplace=True)
@@ -153,9 +152,8 @@ def split_data(
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = (
-                    None  # this should be None to ensure downstream code does not fail
-                )
+                # this should be None to ensure downstream code does not fail
+                testingData = None
             else:
                 # loop over all trainAndVal_index and construct new dataframe
                 for subject_idx in trainAndVal_index:
