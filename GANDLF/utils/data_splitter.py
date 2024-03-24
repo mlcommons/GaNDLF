@@ -74,6 +74,12 @@ def split_data(
         "stratified"
     ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
 
+    assert (parameters["problem_type"] == "classification") and parameters[
+        "nested_training"
+    ].get(
+        "stratified"
+    ), "Stratified splitting is only possible for classification problems."
+
     # get the targets for prediction for classification
     target_testing = False  # initialize this so that the downstream code does not fail - for KFold, this is shuffle
     if parameters["problem_type"] == "classification":
@@ -106,9 +112,8 @@ def split_data(
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = (
-                    None  # this should be None to ensure downstream code does not fail
-                )
+                # this should be None to ensure downstream code does not fail
+                testingData = None
             else:
                 trainingAndValidationData = full_dataset.loc[trainAndVal_index, :]
                 trainingAndValidationData.reset_index(drop=True, inplace=True)
@@ -153,9 +158,8 @@ def split_data(
             if noTestingData:
                 # don't consider the split indeces for this case
                 trainingAndValidationData = full_dataset
-                testingData = (
-                    None  # this should be None to ensure downstream code does not fail
-                )
+                # this should be None to ensure downstream code does not fail
+                testingData = None
             else:
                 # loop over all trainAndVal_index and construct new dataframe
                 for subject_idx in trainAndVal_index:
