@@ -6,7 +6,7 @@ from GANDLF.utils import get_dataframe, split_data
 
 
 def split_data_and_save_csvs(
-    input_data: Union[pd.Dataframe, str], output_dir: str, parameters: dict
+    input_data: Union[pd.DataFrame, str], output_dir: str, parameters: dict
 ) -> None:
     """
     Split the data into training, validation, and testing sets and save them as csvs in the output directory
