@@ -17,21 +17,23 @@ def main():
         "--inputCSV",
         metavar="",
         type=str,
+        required=True,
         help="Input CSV file which contains the data to be split.",
     )
     parser.add_argument(
         "-c",
         "--config",
         metavar="",
-        default="",
+        default=None,
         type=str,
-        help="The GaNDLF config (in YAML) with the `nested_training` key specified",
+        help="The GaNDLF config (in YAML) with the `nested_training` key specified. Defaults to 5 folds for testing and validation.",
     )
     parser.add_argument(
         "-o",
         "--outputDir",
         metavar="",
         type=str,
+        required=True,
         help="Output directory to save the split data.",
     )
 
@@ -48,7 +50,7 @@ def main():
     config = {"nested_training": {"testing": 5, "validation": 5}}
     if os.path.isfile(args.config):
         config = yaml.safe_load(open(args.config, "r"))
-    
+
     print("Config used for split:", config)
 
     split_data_and_save_csvs(inputCSV, outputDir, config)
