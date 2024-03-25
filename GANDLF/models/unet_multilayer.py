@@ -22,11 +22,7 @@ class unet_multilayer(ModelBase):
     smaller modules please have a look at the seg_modules file.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        residualConnections:bool=False,
-    ):
+    def __init__(self, parameters: dict, residualConnections: bool = False):
         """
         The constructor for the unet_multilayer class.
 

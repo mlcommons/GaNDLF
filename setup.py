@@ -14,9 +14,7 @@ try:
         readme = readme_file.read()
 except Exception as error:
     readme = "No README information found."
-    sys.stderr.write(
-        "Warning: Could not open '%s' due %s\n" % ("README.md", error)
-    )
+    sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
 
 
 class CustomInstallCommand(install):
@@ -41,9 +39,7 @@ try:
 
 except Exception as error:
     __version__ = "0.0.1"
-    sys.stderr.write(
-        "Warning: Could not open '%s' due %s\n" % (filepath, error)
-    )
+    sys.stderr.write("Warning: Could not open '%s' due %s\n" % (filepath, error))
 
 # Handle cases where specific files need to be bundled into the final package as installed via PyPI
 dockerfiles = [
@@ -58,9 +54,7 @@ entrypoint_files = [
 ]
 setup_files = ["setup.py", ".dockerignore", "pyproject.toml", "MANIFEST.in"]
 all_extra_files = dockerfiles + entrypoint_files + setup_files
-all_extra_files_pathcorrected = [
-    os.path.join("../", item) for item in all_extra_files
-]
+all_extra_files_pathcorrected = [os.path.join("../", item) for item in all_extra_files]
 # find_packages should only ever find these as subpackages of gandlf, not as top-level packages
 # generate this dynamically?
 # GANDLF.GANDLF is needed to prevent recursion madness in deployments

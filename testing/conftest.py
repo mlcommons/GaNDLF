@@ -1,7 +1,10 @@
 import os, pathlib, pytest
 from pytest import fixture
 
-from .test_full import prerequisites_hook_download_data, prerequisites_constructTrainingCSV
+from .test_full import (
+    prerequisites_hook_download_data,
+    prerequisites_constructTrainingCSV,
+)
 
 
 def pytest_addoption(parser):

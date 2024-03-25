@@ -84,7 +84,9 @@ def one_hot(
     return batch_stack
 
 
-def reverse_one_hot(predmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]) -> np.array:
+def reverse_one_hot(
+    predmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]
+) -> np.array:
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 

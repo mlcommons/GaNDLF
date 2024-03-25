@@ -10,7 +10,7 @@ jobs:
         python-version: [3.9]
     steps:
       - uses: actions/checkout@v2
-        
+
       - name: Extract black version from setup.py
         run: |
           echo "BLACK_VERSION=$(python -c 'from setup import black_version; print(black_version)')" >> $GITHUB_ENV

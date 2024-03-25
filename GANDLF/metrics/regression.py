@@ -109,9 +109,9 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
             "cosinesimilarity": tm.CosineSimilarity(reduction=reduction_type_key)
         }
         for metric_name, calculator in calculators.items():
-            output_metrics[f"{metric_name}_{reduction_type}"] = (
-                get_output_from_calculator(prediction, target, calculator)
-            )
+            output_metrics[
+                f"{metric_name}_{reduction_type}"
+            ] = get_output_from_calculator(prediction, target, calculator)
     # metrics that do not have any "reduction" parameter
     calculators = {
         "mse": tm.MeanSquaredError(),
