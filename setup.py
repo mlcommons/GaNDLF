@@ -79,10 +79,10 @@ toplevel_package_excludes = [
     "utils",
 ]
 
-
+black_version = "23.11.0"
 requirements = [
     "torch==2.1.2",
-    "black==23.11.0",
+    f"black=={black_version}",
     "numpy==1.25.0",
     "scipy",
     "SimpleITK!=2.0.*",
