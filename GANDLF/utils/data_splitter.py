@@ -33,6 +33,8 @@ def split_data(
         else parameters
     )
 
+    stratified_splitting = parameters["nested_training"].get("stratified")
+
     return_data = []
 
     # check for single fold training
@@ -70,15 +72,16 @@ def split_data(
 
     all_subjects_are_unique = len(subjectIDs_full) == len(full_dataset.index)
 
-    assert all_subjects_are_unique or not parameters["nested_training"].get(
-        "stratified"
+    assert (
+        all_subjects_are_unique or not stratified_splitting
     ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
 
-    assert (parameters["problem_type"] == "classification") and parameters[
-        "nested_training"
-    ].get(
-        "stratified"
-    ), "Stratified splitting is only possible for classification problems."
+    # assert for Stratified splitting is only possible for classification problems
+    assert (
+        parameters["problem_type"] == "classification"
+    ) or not stratified_splitting, (
+        "Stratified splitting is only possible for classification problems."
+    )
 
     # get the targets for prediction for classification
     target_testing = False  # initialize this so that the downstream code does not fail - for KFold, this is shuffle
@@ -89,7 +92,7 @@ def split_data(
     target_validation = target_testing
 
     folding_type = KFold
-    if parameters["nested_training"].get("stratified"):
+    if stratified_splitting:
         folding_type = StratifiedKFold
 
     kf_testing = folding_type(n_splits=testing_folds)
@@ -97,7 +100,7 @@ def split_data(
 
     # start StratifiedKFold splitting
     currentTestingFold = 0
-    if parameters["nested_training"].get("stratified"):
+    if stratified_splitting:
         for trainAndVal_index, testing_index in kf_testing.split(
             full_dataset, target_testing
         ):
