@@ -72,16 +72,16 @@ def split_data(
 
     all_subjects_are_unique = len(subjectIDs_full) == len(full_dataset.index)
 
-    assert (
-        all_subjects_are_unique or not stratified_splitting
-    ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
-
-    # assert for Stratified splitting is only possible for classification problems
-    assert (
-        parameters["problem_type"] == "classification"
-    ) or not stratified_splitting, (
-        "Stratified splitting is only possible for classification problems."
-    )
+    # checks for stratified splitting
+    if stratified_splitting:
+        # it can only be done for classification problems
+        assert (
+            parameters["problem_type"] == "classification"
+        ), "Stratified splitting is only possible for classification problems."
+        # it can only be done when all subjects are unique
+        assert (
+            all_subjects_are_unique
+        ), "Stratified splitting is not possible when duplicate subjects IDs are present in the dataset."
 
     # get the targets for prediction for classification
     target_testing = False  # initialize this so that the downstream code does not fail - for KFold, this is shuffle
