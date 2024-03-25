@@ -3147,3 +3147,42 @@ def test_generic_deploy_metrics_docker():
     sanitize_outputDir()
 
     print("passed")
+
+
+def test_generic_data_split():
+    print("51: Starting test for splitting and saving CSVs")
+    # read and initialize parameters for specific data dimension
+    parameters = ConfigManager(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["nested_training"] = {
+        "testing": 5,
+        "validation": 5,
+        "stratified": True,
+    }
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # duplicate the data to test stratified sampling
+    training_data_duplicate = training_data._append(training_data)
+    for _ in range(1):
+        training_data_duplicate = training_data_duplicate._append(
+            training_data_duplicate
+        )
+    training_data_duplicate.reset_index(drop=True, inplace=True)
+    # ensure subjects are not duplicated
+    training_data_duplicate["SubjectID"] = training_data_duplicate.index
+
+    sanitize_outputDir()
+
+    split_data_and_save_csvs(training_data_duplicate, outputDir, parameters)
+
+    files_in_outputDir = os.listdir(outputDir)
+    assert len(files_in_outputDir) == 15, "CSVs were not split correctly"
+
+    sanitize_outputDir()
+
+    print("passed")
