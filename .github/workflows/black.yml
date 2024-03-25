@@ -9,14 +9,12 @@ jobs:
       matrix:
         python-version: [3.9]
     steps:
-      - name: Debug
-        run: |
-          python -c "import os; print(os.getcwd()); print(os.listdir(os.getcwd())); import sys; print(sys.path)"
+      - uses: actions/checkout@v2
+        
       - name: Extract black version from setup.py
         run: |
           echo "BLACK_VERSION=$(python -c 'from setup import black_version; print(black_version)')" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v2
       - uses: psf/black@stable
         with:
           version: ${{ env.BLACK_VERSION }}
