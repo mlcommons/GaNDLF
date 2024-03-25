@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Extract black version from setup.py
         run: |
-          echo "BLACK_VERSION=$(python -c 'import black_version from setup; print(black_version)')" >> $GITHUB_ENV
+          echo "BLACK_VERSION=$(python -c 'from setup import black_version; print(black_version)')" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
       - uses: psf/black@stable
