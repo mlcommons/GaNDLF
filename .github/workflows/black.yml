@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Debug
         run: |
-          python -c "import os; print(os.getcwd()); import sys; print(sys.path)"
+          python -c "import os; print(os.getcwd()); print(os.listdir(os.getcwd())); import sys; print(sys.path)"
       - name: Extract black version from setup.py
         run: |
           echo "BLACK_VERSION=$(python -c 'from setup import black_version; print(black_version)')" >> $GITHUB_ENV
