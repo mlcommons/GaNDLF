@@ -32,6 +32,7 @@ from GANDLF.cli import (
     recover_config,
     post_training_model_optimization,
     generate_metrics_dict,
+    split_data_and_save_csvs,
 )
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
