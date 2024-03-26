@@ -18,7 +18,6 @@ from GANDLF.entrypoints.config_generator import new_way as config_generator_comm
 # import optimize_model command
 # import generate_metrics command
 # import debug_info command
-# import update_version command
 from GANDLF import version
 
 
@@ -55,7 +54,6 @@ gandlf.add_command(config_generator_command, "config-generator")
 # TODO: add optimize-model command
 # TODO: add generate-metrics command
 # TODO: add debug-info command
-# TODO: add update-version command
 
 if __name__ == "__main__":
     # pylint: disable=E1120

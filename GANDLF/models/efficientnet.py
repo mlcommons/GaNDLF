@@ -385,11 +385,7 @@ class EfficientNet(ModelBase):
         scale_params (dict) - A dictionary defining scaling of depth and width for the model.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        scale_params,  # how to scale depth and width
-    ):
+    def __init__(self, parameters: dict, scale_params):  # how to scale depth and width
         super(EfficientNet, self).__init__(parameters)
 
         # check/define defaults

@@ -15,9 +15,7 @@ from GANDLF.data.patch_miner.opm.utils import (
     patch_artifact_check,
     # pen_marking_check,
 )
-from GANDLF.utils import (
-    parseTrainingCSV,
-)
+from GANDLF.utils import parseTrainingCSV
 
 
 def parse_gandlf_csv(fpath):
