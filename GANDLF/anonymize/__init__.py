@@ -43,7 +43,7 @@ def run_anonymizer(
                 input_path,
                 output_path,
                 anonymization_actions={},
-                deletePrivateTags=parameters["delete_private_tags"],
+                delete_private_tags=parameters["delete_private_tags"],
             )
     elif parameters["modality"] in ["histo", "path"]:
         # anonymize_slide(
