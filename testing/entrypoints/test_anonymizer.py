@@ -48,11 +48,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # tests that config is optional, and that output may not exist
-            "-i . -o path_na",
+            "-i . -o path_na"
         ],
-        old_way_lines=[
-            "-i . -o path_na",
-        ],
+        old_way_lines=["-i . -o path_na"],
         expected_args={
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("path_na"),
@@ -64,11 +62,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # tests that output may be an existing file
-            "-i . -o output.csv",
+            "-i . -o output.csv"
         ],
-        old_way_lines=[
-            "-i . -o output.csv",
-        ],
+        old_way_lines=["-i . -o output.csv"],
         expected_args={
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("output.csv"),
@@ -80,11 +76,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # tests that modality 'histo' is supported also
-            "-i . -m histo -o output.csv",
+            "-i . -m histo -o output.csv"
         ],
-        old_way_lines=[
-            "-i . -m histo -o output.csv",
-        ],
+        old_way_lines=["-i . -m histo -o output.csv"],
         expected_args={
             "input_path": os.path.normpath("."),
             "output_path": os.path.normpath("output.csv"),
