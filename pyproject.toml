@@ -15,6 +15,6 @@ omit = [
   ".devcontainer/*",
   "./setup.py",
   "./gandlf_*",
-  "./testing/conftest.py",
+  "./testing/**/*.py",
   "./tutorials/*",
 ]
