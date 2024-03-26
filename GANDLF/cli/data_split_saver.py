@@ -27,7 +27,6 @@ def split_data_and_save_csvs(
         validationData,
         testingData,
     ) in dataframe_split:
-
         # training and validation dataframes use the same index, since they are based on the validation split
         training_data_path = os.path.join(
             output_dir, f"training_{testing_and_valid_indeces[1]}.csv"
