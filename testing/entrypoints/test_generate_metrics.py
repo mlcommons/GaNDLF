@@ -49,11 +49,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # output is optional
-            "-i input.csv -c config.yaml",
+            "-i input.csv -c config.yaml"
         ],
-        old_way_lines=[
-            "-i input.csv -c config.yaml",
-        ],
+        old_way_lines=["-i input.csv -c config.yaml"],
         expected_args={
             "input_csv": "input.csv",
             "config": "config.yaml",
@@ -64,11 +62,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # output may not exist yet
-            "-i input.csv -o output_na.json -c config.yaml",
+            "-i input.csv -o output_na.json -c config.yaml"
         ],
-        old_way_lines=[
-            "-i input.csv -o output_na.json -c config.yaml",
-        ],
+        old_way_lines=["-i input.csv -o output_na.json -c config.yaml"],
         expected_args={
             "input_csv": "input.csv",
             "config": "config.yaml",

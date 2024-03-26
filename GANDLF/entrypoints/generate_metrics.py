@@ -15,11 +15,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 
 def _generate_metrics(input_data: str, config: str, output_file: Optional[str]):
     try:
-        generate_metrics_dict(
-            input_data,
-            config,
-            output_file,
-        )
+        generate_metrics_dict(input_data, config, output_file)
     except Exception as e:
         # TODO: why catch this? why not rely on normal python behavior?
         sys.exit("ERROR: " + str(e))
