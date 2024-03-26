@@ -20,10 +20,9 @@ def _anonymize_images(
     input_dir = os.path.normpath(input_dir)
     output_file = os.path.normpath(output_file)
     # TODO: raise an error if config pass provided but not exist (user made a typo?)
+    config = None
     if config_path and os.path.isfile(config_path):
         config = yaml.safe_load(open(config_path, "r"))
-    else:
-        config = None
 
     logging.debug(f"{input_dir=}")
     logging.debug(f"{output_file=}")
