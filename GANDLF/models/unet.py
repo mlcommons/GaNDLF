@@ -20,11 +20,7 @@ class unet(ModelBase):
     smaller modules please have a look at the seg_modules file.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
-    ):
+    def __init__(self, parameters: dict, residualConnections=False):
         self.network_kwargs = {"res": residualConnections}
         super(unet, self).__init__(parameters)
 

@@ -18,10 +18,7 @@ model_dict_full = {
     "version": None,
 }
 
-model_dict_required = {
-    "model_state_dict": None,
-    "optimizer_state_dict": None,
-}
+model_dict_required = {"model_state_dict": None, "optimizer_state_dict": None}
 
 best_model_path_end = "_best.pth.tar"
 latest_model_path_end = "_latest.pth.tar"
