@@ -52,11 +52,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # test that it works without testing log
-            "-m model_no_test -o output/",
+            "-m model_no_test -o output/"
         ],
-        old_way_lines=[
-            "-m model_no_test/ -o output/",
-        ],
+        old_way_lines=["-m model_no_test/ -o output/"],
         expected_args={
             "training_logs_path": "model_no_test/logs_training.csv",
             "validation_logs_path": "model_no_test/logs_validation.csv",
@@ -68,11 +66,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # test that output folder may not exist
-            "-m model_full -o output_na/",
+            "-m model_full -o output_na/"
         ],
-        old_way_lines=[
-            "-m model_full/ -o output_na/",
-        ],
+        old_way_lines=["-m model_full/ -o output_na/"],
         expected_args={
             "training_logs_path": "model_full/logs_training.csv",
             "validation_logs_path": "model_full/logs_validation.csv",
