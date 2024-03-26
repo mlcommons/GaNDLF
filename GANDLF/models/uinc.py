@@ -25,10 +25,7 @@ class uinc(ModelBase):
     since the initial input and the final one do not have the same dimensions.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-    ):
+    def __init__(self, parameters: dict):
         super(uinc, self).__init__(parameters)
 
         assert checkPatchDivisibility(parameters["patch_size"]) == True, (
