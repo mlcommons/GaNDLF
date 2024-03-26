@@ -43,11 +43,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # config is optional
-            "-i input.csv -o output/",
+            "-i input.csv -o output/"
         ],
-        old_way_lines=[
-            "-i input.csv -o output/",
-        ],
+        old_way_lines=["-i input.csv -o output/"],
         expected_args={
             "input_path": "input.csv",
             "config": None,
@@ -58,11 +56,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # output may not exist yet
-            "-i input.csv -o output_na/",
+            "-i input.csv -o output_na/"
         ],
-        old_way_lines=[
-            "-i input.csv -o output_na/",
-        ],
+        old_way_lines=["-i input.csv -o output_na/"],
         expected_args={
             "input_path": "input.csv",
             "config": None,
