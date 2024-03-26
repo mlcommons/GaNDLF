@@ -145,7 +145,7 @@ if __name__ == "__main__":
                 "gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:main",
                 "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:main",
                 "gandlf_debugInfo=GANDLF.entrypoints.debug_info:old_way",
-            ],
+            ]
         },
         classifiers=[
             "Development Status :: 3 - Alpha",
