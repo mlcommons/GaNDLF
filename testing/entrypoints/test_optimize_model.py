@@ -36,24 +36,16 @@ test_cases = [
             "--model model.pth.tar --config config.yaml",
             "-m model.pth.tar -c config.yaml",
         ],
-        expected_args={
-            "model_path": "model.pth.tar",
-            "config_path": "config.yaml",
-        },
+        expected_args={"model_path": "model.pth.tar", "config_path": "config.yaml"},
     ),
     CliCase(
         should_succeed=True,
         new_way_lines=[
             # config is optional
-            "-m model.pth.tar",
+            "-m model.pth.tar"
         ],
-        old_way_lines=[
-            "-m model.pth.tar",
-        ],
-        expected_args={
-            "model_path": "model.pth.tar",
-            "config_path": None,
-        },
+        old_way_lines=["-m model.pth.tar"],
+        expected_args={"model_path": "model.pth.tar", "config_path": None},
     ),
     CliCase(
         should_succeed=False,
