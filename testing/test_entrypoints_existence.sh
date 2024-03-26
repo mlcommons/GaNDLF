@@ -17,7 +17,6 @@ commands=(
 #  "gandlf preprocess --help"
 #  "gandlf recover-config --help"
 #  "gandlf run --help"
-#  "gandlf update-version --help"
   "gandlf verify-install --help"
   # old entrypoints
   "gandlf_anonymizer --help"
@@ -32,7 +31,6 @@ commands=(
   "gandlf_preprocess --help"
   "gandlf_recoverConfig --help"
   "gandlf_run --help"
-  "gandlf_updateVersion --help"
   "gandlf_verifyInstall --help"
 )
 

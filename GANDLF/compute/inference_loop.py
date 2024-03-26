@@ -62,14 +62,7 @@ def inference_loop(
         or parameters["model"]["type"].lower() == "openvino"
     ), f"The model type is not recognized: {parameters['model']['type']}"
 
-    (
-        model,
-        _,
-        _,
-        _,
-        _,
-        parameters,
-    ) = create_pytorch_objects(parameters, device=device)
+    (model, _, _, _, _, parameters) = create_pytorch_objects(parameters, device=device)
 
     # Loading the weights into the model
     main_dict = None
@@ -103,12 +96,10 @@ def inference_loop(
         # Loading the executable OpenVINO model
         if os.path.isdir(modelDir):
             xml_to_check = os.path.join(
-                modelDir,
-                str(parameters["model"]["architecture"]) + "_best.xml",
+                modelDir, str(parameters["model"]["architecture"]) + "_best.xml"
             )
             bin_to_check = os.path.join(
-                modelDir,
-                str(parameters["model"]["architecture"]) + "_best.bin",
+                modelDir, str(parameters["model"]["architecture"]) + "_best.bin"
             )
             if not os.path.isfile(xml_to_check):
                 raise ValueError(
@@ -312,10 +303,7 @@ def inference_loop(
                 )
 
             if parameters["problem_type"] != "segmentation":
-                output_file = os.path.join(
-                    subject_dest_dir,
-                    "predictions.csv",
-                )
+                output_file = os.path.join(subject_dest_dir, "predictions.csv")
                 with open(output_file, "w") as f:
                     f.write(output_to_write)
 
@@ -323,17 +311,12 @@ def inference_loop(
             if probs_map is not None:
                 try:
                     for n in range(parameters["model"]["num_classes"]):
-                        heatmap_gray = np.array(
-                            probs_map[n, ...] * 255,
-                            dtype=np.uint8,
-                        )
+                        heatmap_gray = np.array(probs_map[n, ...] * 255, dtype=np.uint8)
                         heatmaps[str(n) + "_jet"] = cv2.applyColorMap(
-                            heatmap_gray,
-                            cv2.COLORMAP_JET,
+                            heatmap_gray, cv2.COLORMAP_JET
                         )
                         heatmaps[str(n) + "_turbo"] = cv2.applyColorMap(
-                            heatmap_gray,
-                            cv2.COLORMAP_TURBO,
+                            heatmap_gray, cv2.COLORMAP_TURBO
                         )
                         heatmaps[str(n) + "_agni"] = applyCustomColorMap(heatmap_gray)
 
@@ -367,8 +350,7 @@ def inference_loop(
                         )
 
                         file_to_write = os.path.join(
-                            subject_dest_dir,
-                            "probability_map_blended_" + key + ".png",
+                            subject_dest_dir, "probability_map_blended_" + key + ".png"
                         )
                         cv2.imwrite(file_to_write, blended_image)
                 except Exception as ex:

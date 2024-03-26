@@ -18,11 +18,7 @@ class light_unet(ModelBase):
     This is the LIGHT U-Net architecture.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
-    ):
+    def __init__(self, parameters: dict, residualConnections=False):
         self.network_kwargs = {"res": residualConnections}
         super(light_unet, self).__init__(parameters)
 

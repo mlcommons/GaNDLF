@@ -95,10 +95,7 @@ class transunet(ModelBase):
         out (out_conv): Final output convolutional layer.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-    ):
+    def __init__(self, parameters: dict):
         super(transunet, self).__init__(parameters)
 
         # Initialize default parameters if not found

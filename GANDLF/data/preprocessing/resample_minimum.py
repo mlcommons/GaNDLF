@@ -19,8 +19,7 @@ class Resample_Minimum(Resample):
 
     @staticmethod
     def get_reference_image(
-        floating_sitk: sitk.Image,
-        spacing: TypeTripletFloat,
+        floating_sitk: sitk.Image, spacing: TypeTripletFloat
     ) -> sitk.Image:
         old_spacing = np.array(floating_sitk.GetSpacing())
         new_spacing = np.array(spacing)

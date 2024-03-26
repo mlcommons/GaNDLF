@@ -6,10 +6,7 @@ from torch.utils.data import DataLoader
 from GANDLF.models import get_model
 from GANDLF.schedulers import get_scheduler
 from GANDLF.optimizers import get_optimizer
-from GANDLF.data import (
-    get_train_loader,
-    get_validation_loader,
-)
+from GANDLF.data import get_train_loader, get_validation_loader
 from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
