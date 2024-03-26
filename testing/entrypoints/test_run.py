@@ -89,7 +89,7 @@ test_cases = [
             "-c config.yaml -i input.csv --infer -m model/ -d cuda -o output/",
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t False -m model/ -d cuda -o output/",
+            "-c config.yaml -i input.csv -t False -m model/ -d cuda -o output/"
         ],
         expected_args={
             "data_csv": "input.csv",
@@ -158,10 +158,10 @@ test_cases = [
     CliCase(  # reset + resume simultaneously => disabling reset in favor of resume
         should_succeed=True,
         new_way_lines=[
-            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output/ -rt -rm",
+            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output/ -rt -rm"
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output/ -rt True -rm True",
+            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output/ -rt True -rm True"
         ],
         expected_args={
             "data_csv": "input.csv",
@@ -176,12 +176,8 @@ test_cases = [
     ),
     CliCase(  # input data may point to folder with 'data.csv'
         should_succeed=True,
-        new_way_lines=[
-            "-c config.yaml -i input/ --train -m model/ -d cpu",
-        ],
-        old_way_lines=[
-            "-c config.yaml -i input/ -t True -m model/ -d cpu",
-        ],
+        new_way_lines=["-c config.yaml -i input/ --train -m model/ -d cpu"],
+        old_way_lines=["-c config.yaml -i input/ -t True -m model/ -d cpu"],
         expected_args={
             "data_csv": "input/data.csv",
             "config_file": "config.yaml",
@@ -195,12 +191,8 @@ test_cases = [
     ),
     CliCase(  # input data may point to comma-separated list of csvs
         should_succeed=True,
-        new_way_lines=[
-            "-c config.yaml -i train.csv,val.csv --train -m model/ -d cpu",
-        ],
-        old_way_lines=[
-            "-c config.yaml -i train.csv,val.csv -t True -m model/ -d cpu",
-        ],
+        new_way_lines=["-c config.yaml -i train.csv,val.csv --train -m model/ -d cpu"],
+        old_way_lines=["-c config.yaml -i train.csv,val.csv -t True -m model/ -d cpu"],
         expected_args={
             "data_csv": "train.csv,val.csv",
             "config_file": "config.yaml",
@@ -215,10 +207,10 @@ test_cases = [
     CliCase(  # output-path may point to non-existent path
         should_succeed=True,
         new_way_lines=[
-            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output_na/",
+            "-c config.yaml -i input.csv --train -m model/ -d cpu -o output_na/"
         ],
         old_way_lines=[
-            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output_na/",
+            "-c config.yaml -i input.csv -t True -m model/ -d cpu -o output_na/"
         ],
         expected_args={
             "data_csv": "input.csv",
