@@ -108,7 +108,7 @@ steps to follow to write tests:
 """
 
 
-def test_generic_download_data():
+def prerequisites_hook_download_data():
     print("00: Downloading the sample data")
     urlToDownload = "https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT"
 
@@ -132,7 +132,7 @@ def test_generic_download_data():
     print("passed")
 
 
-def test_generic_constructTrainingCSV():
+def prerequisites_constructTrainingCSV():
     print("01: Constructing training CSVs")
     # delete previous csv files
     files = os.listdir(inputDir)
@@ -183,9 +183,7 @@ def test_generic_constructTrainingCSV():
         with open(
             inputDir + "/train_" + application_data + ".csv", "r"
         ) as read_f, open(
-            inputDir + "/train_" + application_data_regression + ".csv",
-            "w",
-            newline="",
+            inputDir + "/train_" + application_data_regression + ".csv", "w", newline=""
         ) as write_reg, open(
             inputDir + "/train_" + application_data_classification + ".csv",
             "w",
@@ -210,6 +208,13 @@ def test_generic_constructTrainingCSV():
                     csv_writer_1.writerow(row_regression)
                     csv_writer_2.writerow(row_classification)
                 i += 1
+
+
+def test_prepare_data_for_ci():
+    # is used to run pytest session (i.e. to prepare environment, download data etc)
+    # without any real test execution
+    # to see what happens, refer to `conftest.py:pytest_sessionstart`
+    pass
 
 
 # # these are helper functions to be used in other tests
@@ -943,8 +948,7 @@ def test_train_scheduler_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters = ConfigManager(
-            testingDir + "/config_classification.yaml",
-            version_check_flag=False,
+            testingDir + "/config_classification.yaml", version_check_flag=False
         )
         parameters["modality"] = "rad"
         parameters["patch_size"] = patch_size["2D"]
@@ -1266,8 +1270,7 @@ def test_train_losses_segmentation_rad_2d(device):
 def test_generic_config_read():
     print("24: Starting testing reading configuration")
     parameters = ConfigManager(
-        os.path.join(baseConfigDir, "config_all_options.yaml"),
-        version_check_flag=False,
+        os.path.join(baseConfigDir, "config_all_options.yaml"), version_check_flag=False
     )
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
@@ -1459,9 +1462,7 @@ def test_generic_cli_function_mainrun(device):
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = [
-        "dice",
-    ]
+    parameters["metrics"] = ["dice"]
     parameters["model"]["architecture"] = "unet"
 
     file_config_temp = write_temp_config_path(parameters)
@@ -1469,13 +1470,7 @@ def test_generic_cli_function_mainrun(device):
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     main_run(
-        file_data,
-        file_config_temp,
-        outputDir,
-        True,
-        device,
-        resume=False,
-        reset=True,
+        file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
     )
     sanitize_outputDir()
 
@@ -1690,21 +1685,11 @@ def test_generic_preprocess_functions():
 
     cropper = global_preprocessing_dict["crop"]([64, 64, 64])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (
-        1,
-        128,
-        128,
-        128,
-    ), "Cropping should work"
+    assert input_transformed.shape == (1, 128, 128, 128), "Cropping should work"
 
     cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (
-        1,
-        128,
-        128,
-        128,
-    ), "Center-crop should work"
+    assert input_transformed.shape == (1, 128, 128, 128), "Center-crop should work"
 
     # test pure morphological operations
     input_tensor_3d = torch.rand(1, 1, 256, 256, 256)
@@ -1893,11 +1878,7 @@ def test_generic_augmentation_functions():
 
     # additional test for elastic
     params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
-    for key_to_pop in [
-        "num_control_points",
-        "max_displacement",
-        "locked_borders",
-    ]:
+    for key_to_pop in ["num_control_points", "max_displacement", "locked_borders"]:
         params_elastic.pop(key_to_pop, None)
     output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
     assert output_tensor != None, "Augmentation for base elastic transform should work"
@@ -2043,8 +2024,7 @@ def test_generic_one_hot_logic():
 
     # check combined foreground
     combined_array = np.logical_or(
-        np.logical_or((random_array == 1), (random_array == 2)),
-        (random_array == 3),
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
@@ -2090,8 +2070,7 @@ def test_generic_one_hot_logic():
 
     # check combined foreground
     combined_array = np.logical_or(
-        np.logical_or((random_array == 1), (random_array == 2)),
-        (random_array == 3),
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
@@ -2987,9 +2966,7 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = [
-        "dice",
-    ]
+    parameters["metrics"] = ["dice"]
     parameters["model"]["architecture"] = "unet"
     outputDir = os.path.join(testingDir, "data_output")
 
@@ -3051,11 +3028,7 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
 def test_generic_cli_function_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
     for dim in ["2d", "3d"]:
-        for problem_type in [
-            "segmentation",
-            "classification",
-            "synthesis",
-        ]:
+        for problem_type in ["segmentation", "classification", "synthesis"]:
             synthesis_detected = problem_type == "synthesis"
             problem_type_wrap = problem_type
             if synthesis_detected:

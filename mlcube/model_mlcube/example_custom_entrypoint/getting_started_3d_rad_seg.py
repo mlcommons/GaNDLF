@@ -15,10 +15,7 @@ def create_csv(data_path):
             continue
         image_path = os.path.join(folder_path, "image.nii.gz")
         image_path = os.path.abspath(image_path)
-        record = {
-            "SubjectID": subjectID,
-            "Channel_0": image_path,
-        }
+        record = {"SubjectID": subjectID, "Channel_0": image_path}
         input_data.append(record)
 
     input_data_df = pd.DataFrame(input_data)

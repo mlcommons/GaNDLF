@@ -102,20 +102,16 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
 
     output_metrics = {}
 
-    reduction_types_keys = {
-        "mean": "mean",
-        "sum": "sum",
-        "none": "none",
-    }
+    reduction_types_keys = {"mean": "mean", "sum": "sum", "none": "none"}
     # metrics that need the "reduction" parameter
     for reduction_type, reduction_type_key in reduction_types_keys.items():
         calculators = {
-            "cosinesimilarity": tm.CosineSimilarity(reduction=reduction_type_key),
+            "cosinesimilarity": tm.CosineSimilarity(reduction=reduction_type_key)
         }
         for metric_name, calculator in calculators.items():
-            output_metrics[f"{metric_name}_{reduction_type}"] = (
-                get_output_from_calculator(prediction, target, calculator)
-            )
+            output_metrics[
+                f"{metric_name}_{reduction_type}"
+            ] = get_output_from_calculator(prediction, target, calculator)
     # metrics that do not have any "reduction" parameter
     calculators = {
         "mse": tm.MeanSquaredError(),

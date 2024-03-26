@@ -23,10 +23,7 @@ class fcn(ModelBase):
     DOI: 10.1109/TPAMI.2016.2572683
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-    ):
+    def __init__(self, parameters: dict):
         super(fcn, self).__init__(parameters)
         self.ins = InitialConv(
             input_channels=self.n_channels,
