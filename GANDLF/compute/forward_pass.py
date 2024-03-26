@@ -345,11 +345,7 @@ def validate_network(
 
                     # if jpg detected, convert to 8-bit arrays
                     ext = get_filename_extension_sanitized(subject["1"]["path"][0])
-                    if ext in [
-                        ".jpg",
-                        ".jpeg",
-                        ".png",
-                    ]:
+                    if ext in [".jpg", ".jpeg", ".png"]:
                         pred_mask = pred_mask.astype(np.uint8)
 
                     ## special case for 2D
@@ -369,8 +365,7 @@ def validate_network(
                     # Create the subject directory if it doesn't exist in the
                     # current_output_dir directory
                     os.makedirs(
-                        os.path.join(current_output_dir, "testing"),
-                        exist_ok=True,
+                        os.path.join(current_output_dir, "testing"), exist_ok=True
                     )
                     os.makedirs(
                         os.path.join(
@@ -386,10 +381,7 @@ def validate_network(
                         subject["subject_id"][0] + "_seg" + ext,
                     )
 
-                    sitk.WriteImage(
-                        result_image,
-                        path_to_save,
-                    )
+                    sitk.WriteImage(result_image, path_to_save)
             else:
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)

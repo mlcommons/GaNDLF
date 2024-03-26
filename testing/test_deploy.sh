@@ -15,8 +15,8 @@ mkdir -p test_deploy
 cd test_deploy
 
 # Download the data
-FILENAME=y8162xkq1zz5555ye3pwadry2m2e39bs.zip
-wget https://upenn.box.com/shared/static/$FILENAME
+FILENAME=data.zip
+wget https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT --output-document=$FILENAME
 unzip $FILENAME
 mv data/3d_rad_segmentation .
 rm $FILENAME

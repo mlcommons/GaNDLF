@@ -112,13 +112,10 @@ def generate_metrics_dict(
                 parameters["model"]["class_list"] = [1]
                 parameters["model"]["num_classes"] = 1
                 overall_stats_dict[current_subject_id][str(class_index)]["dice"] = dice(
-                    current_prediction,
-                    current_target,
+                    current_prediction, current_target
                 ).item()
                 nsd, hd100, hd95 = _calculator_generic_all_surface_distances(
-                    current_prediction,
-                    current_target,
-                    parameters,
+                    current_prediction, current_target, parameters
                 )
                 overall_stats_dict[current_subject_id][str(class_index)][
                     "nsd"
@@ -130,13 +127,8 @@ def generate_metrics_dict(
                     "hd95"
                 ] = hd95.item()
 
-                (
-                    s,
-                    p,
-                ) = _calculator_sensitivity_specificity(
-                    current_prediction,
-                    current_target,
-                    parameters,
+                (s, p) = _calculator_sensitivity_specificity(
+                    current_prediction, current_target, parameters
                 )
                 overall_stats_dict[current_subject_id][str(class_index)][
                     "sensitivity"
@@ -147,9 +139,7 @@ def generate_metrics_dict(
                 overall_stats_dict[current_subject_id][
                     "jaccard_" + str(class_index)
                 ] = _calculator_jaccard(
-                    current_prediction,
-                    current_target,
-                    parameters,
+                    current_prediction, current_target, parameters
                 ).item()
                 current_target_image = sitk.GetImageFromArray(
                     current_target[0, 0, ...].long()
@@ -279,9 +269,9 @@ def generate_metrics_dict(
                     strictlyPositive=True,
                 )
 
-            overall_stats_dict[current_subject_id]["ssim"] = (
-                structural_similarity_index(output_infill, gt_image_infill, mask).item()
-            )
+            overall_stats_dict[current_subject_id][
+                "ssim"
+            ] = structural_similarity_index(output_infill, gt_image_infill, mask).item()
 
             # ncc metrics
             compute_ncc = parameters.get("compute_ncc", True)
@@ -322,30 +312,30 @@ def generate_metrics_dict(
             ).item()
 
             # same as above but with epsilon for robustness
-            overall_stats_dict[current_subject_id]["psnr_eps"] = (
-                peak_signal_noise_ratio(
-                    output_infill, gt_image_infill, epsilon=sys.float_info.epsilon
-                ).item()
-            )
+            overall_stats_dict[current_subject_id][
+                "psnr_eps"
+            ] = peak_signal_noise_ratio(
+                output_infill, gt_image_infill, epsilon=sys.float_info.epsilon
+            ).item()
 
             # only use fix data range to [0;1] if the data was normalized before
             if normalize:
                 # torchmetrics PSNR but with fixed data range of 0 to 1
-                overall_stats_dict[current_subject_id]["psnr_01"] = (
-                    peak_signal_noise_ratio(
-                        output_infill, gt_image_infill, data_range=(0, 1)
-                    ).item()
-                )
+                overall_stats_dict[current_subject_id][
+                    "psnr_01"
+                ] = peak_signal_noise_ratio(
+                    output_infill, gt_image_infill, data_range=(0, 1)
+                ).item()
 
                 # same as above but with epsilon for robustness
-                overall_stats_dict[current_subject_id]["psnr_01_eps"] = (
-                    peak_signal_noise_ratio(
-                        output_infill,
-                        gt_image_infill,
-                        data_range=(0, 1),
-                        epsilon=sys.float_info.epsilon,
-                    ).item()
-                )
+                overall_stats_dict[current_subject_id][
+                    "psnr_01_eps"
+                ] = peak_signal_noise_ratio(
+                    output_infill,
+                    gt_image_infill,
+                    data_range=(0, 1),
+                    epsilon=sys.float_info.epsilon,
+                ).item()
 
     pprint(overall_stats_dict)
     if outputfile is not None:
