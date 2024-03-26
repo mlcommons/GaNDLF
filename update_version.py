@@ -1,17 +1,18 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
-import argparse, os, fileinput
+import argparse
+import os
+import fileinput
 
-
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="GANDLF_UpdateVersion",
+        prog="Update GaNDLF version",
         formatter_class=argparse.RawTextHelpFormatter,
         description="Update versions when creating a new release of GaNDLF, also useful when updating the version for development.\n\n",
     )
     parser.add_argument(
         "-ov",
-        "--old_version",
+        "--old-version",
         metavar="",
         type=str,
         required=True,
@@ -19,7 +20,7 @@ def main():
     )
     parser.add_argument(
         "-nv",
-        "--new_version",
+        "--new-version",
         metavar="",
         type=str,
         required=True,
@@ -46,22 +47,15 @@ def main():
 
     cwd = os.getcwd()
     in_place_string_replace(
-        os.path.join(cwd, "../version.py"),
-        args.old_version,
-        args.new_version,
+        os.path.join(cwd, "GANDLF/version.py"), args.old_version, args.new_version
     )
 
     # find all yaml files in samples and testing directories
-    folders_to_iterate = [
-        os.path.join(cwd, "../../samples"),
-        os.path.join(cwd, "../../testing"),
-    ]
+    folders_to_iterate = [os.path.join(cwd, "samples"), os.path.join(cwd, "testing")]
 
     files_where_version_is_stored = [
-        os.path.join(cwd, "../../mlcube/model_mlcube/workspace/config.yml"),
-        os.path.join(
-            cwd, "../../tutorials/classification_medmnist_notebook/config.yaml"
-        ),
+        os.path.join(cwd, "mlcube/model_mlcube/workspace/config.yml"),
+        os.path.join(cwd, "tutorials/classification_medmnist_notebook/config.yaml"),
     ]
 
     for folder in folders_to_iterate:
@@ -79,7 +73,3 @@ def main():
         in_place_string_replace(filename, args.old_version, args.new_version)
 
     print("Version updated successfully in `version.py` and all configuration files!")
-
-
-if __name__ == "__main__":
-    main()

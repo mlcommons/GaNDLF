@@ -1,3 +1,5 @@
+import logging
+import traceback
 from typing import Optional, Union
 import sys, yaml, ast, pkg_resources
 import numpy as np
@@ -445,11 +447,7 @@ def _parseConfig(
         if len(params["data_preprocessing"]) > 0:
             thresholdOrClip = False
             # this can be extended, as required
-            thresholdOrClipDict = [
-                "threshold",
-                "clip",
-                "clamp",
-            ]
+            thresholdOrClipDict = ["threshold", "clip", "clamp"]
 
             resize_requested = False
             temp_dict = deepcopy(params["data_preprocessing"])
@@ -708,10 +706,7 @@ def _parseConfig(
         params["optimizer"] = temp_dict
 
     # initialize defaults for inference mechanism
-    inference_mechanism = {
-        "grid_aggregator_overlap": "crop",
-        "patch_overlap": 0,
-    }
+    inference_mechanism = {"grid_aggregator_overlap": "crop", "patch_overlap": 0}
     initialize_inference_mechanism = False
     if not ("inference_mechanism" in params):
         initialize_inference_mechanism = True
@@ -741,4 +736,10 @@ def ConfigManager(
     Returns:
         dict: The parameter dictionary.
     """
-    return _parseConfig(config_file_path, version_check_flag)
+    try:
+        return _parseConfig(config_file_path, version_check_flag)
+    except Exception as e:
+        logging.info(
+            f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        )
+        raise

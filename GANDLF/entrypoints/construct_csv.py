@@ -147,11 +147,7 @@ def old_way():
         help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
     )
     parser.add_argument(
-        "-o",
-        "--outputFile",
-        metavar="",
-        type=str,
-        help="Output CSV file",
+        "-o", "--outputFile", metavar="", type=str, help="Output CSV file"
     )
     parser.add_argument(
         "-r",

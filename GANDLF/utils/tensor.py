@@ -84,7 +84,9 @@ def one_hot(
     return batch_stack
 
 
-def reverse_one_hot(predmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]) -> np.array:
+def reverse_one_hot(
+    predmask_tensor: torch.Tensor, class_list: Union[List[int], List[str]]
+) -> np.array:
     """
     This function creates a full segmentation mask Tensor from a one-hot-encoded mask and specified class list
 
@@ -413,17 +415,11 @@ def get_class_imbalance_weights(
                 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 
                 penalty_data = ImagesFromDataFrame(
-                    training_df,
-                    parameters=params,
-                    train=False,
-                    loader_type="penalty",
+                    training_df, parameters=params, train=False, loader_type="penalty"
                 )
 
                 penalty_loader = DataLoader(
-                    penalty_data,
-                    batch_size=1,
-                    shuffle=True,
-                    pin_memory=False,
+                    penalty_data, batch_size=1, shuffle=True, pin_memory=False
                 )
 
                 (
