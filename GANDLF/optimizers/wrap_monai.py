@@ -1,6 +1,5 @@
-from monai.optimizers import (
-    Novograd
-)
+from monai.optimizers import Novograd
+
 
 def novograd_wrapper(parameters):
     return Novograd(

@@ -4,7 +4,9 @@ from typing import Tuple
 import pandas as pd
 
 
-def handle_collisions(df: pd.DataFrame, headers: dict, output_path: str) -> Tuple[bool, pd.DataFrame]:
+def handle_collisions(
+    df: pd.DataFrame, headers: dict, output_path: str
+) -> Tuple[bool, pd.DataFrame]:
     """
     This function checks for collisions in the subject IDs and updates the subject IDs in the dataframe to avoid collisions.
 

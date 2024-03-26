@@ -1,13 +1,12 @@
 [tool.black]
 line-length = 88
-include = 'gandlf_*'
 extend-exclude = '''
-/(
+(
   testing/data
   | .*.md
-)/
-skip_magic_trailing_comma = true`
+)
 '''
+skip_magic_trailing_comma = true
 
 [tool.coverage.run]
 source = ["./GANDLF"]

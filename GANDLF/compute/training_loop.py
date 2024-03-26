@@ -100,18 +100,14 @@ def train_network(
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
-                min(params["batch_size"], len(label)),
-                len(params["value_keys"]),
+                min(params["batch_size"], len(label)), len(params["value_keys"])
             )
         else:
             label = subject["label"][torchio.DATA]
         label = label.to(params["device"])
 
         if params["save_training"]:
-            write_training_patches(
-                subject,
-                params,
-            )
+            write_training_patches(subject, params)
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
@@ -190,10 +186,7 @@ def train_network(
                         ).tolist()
                     else:
                         to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
-                    print(
-                        "Half-Epoch Average train " + metric + " : ",
-                        to_print,
-                    )
+                    print("Half-Epoch Average train " + metric + " : ", to_print)
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   train loss : ", average_epoch_train_loss)
@@ -343,9 +336,7 @@ def training_loop(
         # this is just used to generate the headers for the overall stats
         temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
         overall_metrics = overall_stats(
-            temp_tensor.to(dtype=torch.int32),
-            temp_tensor.to(dtype=torch.int32),
-            params,
+            temp_tensor.to(dtype=torch.int32), temp_tensor.to(dtype=torch.int32), params
         )
 
     metrics_log = params["metrics"].copy()
