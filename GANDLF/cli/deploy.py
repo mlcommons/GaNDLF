@@ -113,9 +113,7 @@ def deploy_docker_mlcube(
     os.makedirs(output_workspace_folder, exist_ok=True)
     if os.path.exists(mlcube_workspace_folder):
         shutil.copytree(
-            mlcube_workspace_folder,
-            output_workspace_folder,
-            dirs_exist_ok=True,
+            mlcube_workspace_folder, output_workspace_folder, dirs_exist_ok=True
         )
 
     if config is not None:
