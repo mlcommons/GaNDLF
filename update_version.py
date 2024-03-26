@@ -47,16 +47,11 @@ if __name__ == "__main__":
 
     cwd = os.getcwd()
     in_place_string_replace(
-        os.path.join(cwd, "GANDLF/version.py"),
-        args.old_version,
-        args.new_version,
+        os.path.join(cwd, "GANDLF/version.py"), args.old_version, args.new_version
     )
 
     # find all yaml files in samples and testing directories
-    folders_to_iterate = [
-        os.path.join(cwd, "samples"),
-        os.path.join(cwd, "testing"),
-    ]
+    folders_to_iterate = [os.path.join(cwd, "samples"), os.path.join(cwd, "testing")]
 
     files_where_version_is_stored = [
         os.path.join(cwd, "mlcube/model_mlcube/workspace/config.yml"),

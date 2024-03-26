@@ -739,5 +739,7 @@ def ConfigManager(
     try:
         return _parseConfig(config_file_path, version_check_flag)
     except Exception as e:
-        logging.info(f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}")
+        logging.info(
+            f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        )
         raise
