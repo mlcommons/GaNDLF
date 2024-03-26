@@ -74,11 +74,7 @@ def old_way():
     )
 
     parser.add_argument(
-        "-m",
-        "--modeldir",
-        metavar="",
-        type=str,
-        help="Path to the model directory.",
+        "-m", "--modeldir", metavar="", type=str, help="Path to the model directory."
     )
     # TODO: despite of `str` type, real value is never used (only checks if it is filled or not)
     #  Thus, caveats:

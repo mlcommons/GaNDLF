@@ -34,10 +34,7 @@ test_cases = [
             "--modeldir model/ --outputFile output.yaml",
             "-m model/ -o output.yaml",
         ],
-        expected_args={
-            "modelDir": "model/",
-            "outputFile": "output.yaml",
-        },
+        expected_args={"modelDir": "model/", "outputFile": "output.yaml"},
     ),
     CliCase(
         should_succeed=True,
@@ -48,41 +45,29 @@ test_cases = [
             "-c -o output.yaml",
         ],
         old_way_lines=[
+            # same as for new way
             "--mlcube true -o output.yaml",
             "-c true -o output.yaml",
         ],
-        expected_args={
-            "modelDir": "/embedded_model/",
-            "outputFile": "output.yaml",
-        },
+        expected_args={"modelDir": "/embedded_model/", "outputFile": "output.yaml"},
     ),
     CliCase(
         should_succeed=True,
         new_way_lines=[
             # tests model is ignored when mlcube is passed
-            "-m model/ -c -o output.yaml",
+            "-m model/ -c -o output.yaml"
         ],
-        old_way_lines=[
-            "-m model/ -c true -o output.yaml",
-        ],
-        expected_args={
-            "modelDir": "/embedded_model/",
-            "outputFile": "output.yaml",
-        },
+        old_way_lines=["-m model/ -c true -o output.yaml"],
+        expected_args={"modelDir": "/embedded_model/", "outputFile": "output.yaml"},
     ),
     CliCase(
         should_succeed=True,
         new_way_lines=[
             # tests output may not exist
-            "-m model/ -o output_na.yaml",
+            "-m model/ -o output_na.yaml"
         ],
-        old_way_lines=[
-            "-m model/ -o output_na.yaml",
-        ],
-        expected_args={
-            "modelDir": "model/",
-            "outputFile": "output_na.yaml",
-        },
+        old_way_lines=["-m model/ -o output_na.yaml"],
+        expected_args={"modelDir": "model/", "outputFile": "output_na.yaml"},
     ),
     CliCase(
         should_succeed=False,
