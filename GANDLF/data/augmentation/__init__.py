@@ -12,10 +12,7 @@ from .wrap_torchio import (
     flip,
     anisotropy,
 )
-from .rotations import (
-    rotate_90,
-    rotate_180,
-)
+from .rotations import rotate_90, rotate_180
 from .rgb_augs import colorjitter_transform
 from .hed_augs import hed_transform
 
