@@ -21,11 +21,7 @@ class deep_unet(ModelBase):
     smaller modules please have a look at the seg_modules file.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        residualConnections=False,
-    ):
+    def __init__(self, parameters: dict, residualConnections=False):
         self.network_kwargs = {"res": residualConnections}
         super(deep_unet, self).__init__(parameters)
 

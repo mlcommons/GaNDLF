@@ -18,7 +18,6 @@ from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.entrypoints.generate_metrics import new_way as generate_metrics_command
 
 # import debug_info command
-# import update_version command
 from GANDLF import version
 
 
@@ -55,7 +54,6 @@ def gandlf(ctx, loglevel):
 # TODO: add optimize-model command
 gandlf.add_command(generate_metrics_command, "generate-metrics")
 # TODO: add debug-info command
-# TODO: add update-version command
 
 if __name__ == "__main__":
     # pylint: disable=E1120

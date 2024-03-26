@@ -24,8 +24,7 @@ from .noise_enhanced import RandomNoiseEnhanced
 # define individual functions/lambdas for augmentations to handle properties
 def mri_artifact(parameters):
     return OneOf(
-        {RandomGhosting(): 0.5, RandomSpike(): 0.5},
-        p=parameters["probability"],
+        {RandomGhosting(): 0.5, RandomSpike(): 0.5}, p=parameters["probability"]
     )
 
 

@@ -68,10 +68,11 @@ toplevel_package_excludes = [
     "utils",
 ]
 
-
+# specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
+black_version = "23.11.0"
 requirements = [
     "torch==2.1.2",
-    "black==23.11.0",
+    f"black=={black_version}",
     "numpy==1.25.0",
     "scipy",
     "SimpleITK!=2.0.*",
@@ -107,7 +108,7 @@ requirements = [
     "zarr",
     "keyring",
     "monai==1.3.0",
-    "click==8.1.7",
+    "click>=8.0.0",
     "deprecated",
 ]
 
@@ -144,8 +145,7 @@ if __name__ == "__main__":
                 "gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:main",
                 "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:old_way",
                 "gandlf_debugInfo=GANDLF.entrypoints.debug_info:main",
-                "gandlf_updateVersion=GANDLF.entrypoints.update_version:main",
-            ],
+            ]
         },
         classifiers=[
             "Development Status :: 3 - Alpha",
