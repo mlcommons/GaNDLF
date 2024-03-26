@@ -113,12 +113,7 @@ class _DenseBlock(nn.Sequential):
 
             # Create an instance of _DenseLayer with the calculated number of input features and other parameters
             layer = _DenseLayer(
-                num_input_features_i,
-                growth_rate,
-                bn_size,
-                drop_rate,
-                norm,
-                conv,
+                num_input_features_i, growth_rate, bn_size, drop_rate, norm, conv
             )
 
             # Add the _DenseLayer object to the block
@@ -144,11 +139,7 @@ class _Transition(nn.Sequential):
 
 
 class DenseNet(ModelBase):
-    def __init__(
-        self,
-        parameters: dict,
-        block_config=(6, 12, 24, 16),
-    ):
+    def __init__(self, parameters: dict, block_config=(6, 12, 24, 16)):
         """
         Densenet-BC model class
 
@@ -305,10 +296,7 @@ class DenseNet(ModelBase):
 
 
 def densenet121(parameters):
-    return DenseNet(
-        parameters,
-        block_config=(6, 12, 24, 16),
-    )
+    return DenseNet(parameters, block_config=(6, 12, 24, 16))
 
 
 def densenet169(parameters):
