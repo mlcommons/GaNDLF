@@ -52,7 +52,7 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # -r by default False
-            "-i input/ -c _t1.nii.gz,_t2.nii.gz -l _seg.nii.gz -o output.csv",
+            "-i input/ -c _t1.nii.gz,_t2.nii.gz -l _seg.nii.gz -o output.csv"
         ],
         old_way_lines=[
             "-i input/ -c _t1.nii.gz,_t2.nii.gz -l _seg.nii.gz -o output.csv -r False",
@@ -131,11 +131,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # output may not exist
-            "-i input/ -c _t1.nii.gz,_t2.nii.gz -o output_na.csv",
+            "-i input/ -c _t1.nii.gz,_t2.nii.gz -o output_na.csv"
         ],
-        old_way_lines=[
-            "-i input/ -c _t1.nii.gz,_t2.nii.gz -o output_na.csv",
-        ],
+        old_way_lines=["-i input/ -c _t1.nii.gz,_t2.nii.gz -o output_na.csv"],
         expected_args={
             "inputDir": os.path.normpath("input/"),
             "channelsID": "_t1.nii.gz,_t2.nii.gz",
