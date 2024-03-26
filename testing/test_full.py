@@ -109,7 +109,7 @@ steps to follow to write tests:
 """
 
 
-def prerequisites_hook_download_data():
+def test_generic_download_data():
     print("00: Downloading the sample data")
     urlToDownload = "https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT"
 
@@ -133,7 +133,7 @@ def prerequisites_hook_download_data():
     print("passed")
 
 
-def prerequisites_constructTrainingCSV():
+def test_generic_constructTrainingCSV():
     print("01: Constructing training CSVs")
     # delete previous csv files
     files = os.listdir(inputDir)
@@ -209,13 +209,6 @@ def prerequisites_constructTrainingCSV():
                     csv_writer_1.writerow(row_regression)
                     csv_writer_2.writerow(row_classification)
                 i += 1
-
-
-def test_prepare_data_for_ci():
-    # is used to run pytest session (i.e. to prepare environment, download data etc)
-    # without any real test execution
-    # to see what happens, refer to `conftest.py:pytest_sessionstart`
-    pass
 
 
 # # these are helper functions to be used in other tests
@@ -891,6 +884,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
+    parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
@@ -3121,11 +3115,7 @@ def test_generic_data_split():
     parameters = ConfigManager(
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
-    parameters["nested_training"] = {
-        "testing": 5,
-        "validation": 5,
-        "stratified": True,
-    }
+    parameters["nested_training"] = {"testing": 5, "validation": 5, "stratified": True}
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_3d_rad_classification.csv"
