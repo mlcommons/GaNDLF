@@ -23,16 +23,11 @@ def in_place_string_replace(filename: str, old_string: str, new_string: str) -> 
 def _update_version(old_version: str, new_version: str):
     cwd = os.getcwd()
     in_place_string_replace(
-        os.path.join(cwd, "GANDLF/version.py"),
-        old_version,
-        new_version,
+        os.path.join(cwd, "GANDLF/version.py"), old_version, new_version
     )
 
     # find all yaml files in samples and testing directories
-    folders_to_iterate = [
-        os.path.join(cwd, "samples"),
-        os.path.join(cwd, "testing"),
-    ]
+    folders_to_iterate = [os.path.join(cwd, "samples"), os.path.join(cwd, "testing")]
 
     files_where_version_is_stored = [
         os.path.join(cwd, "mlcube/model_mlcube/workspace/config.yml"),

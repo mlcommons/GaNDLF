@@ -21,6 +21,7 @@ test_cases = [
     CliCase(
         should_succeed=True,
         old_way_lines=[
+            # long and short versions
             "--old-version 0.18 --new-version 0.19",
             "-ov 0.18 -nv 0.19",
         ],
@@ -29,6 +30,7 @@ test_cases = [
     CliCase(
         should_succeed=False,
         old_way_lines=[
+            # both args are required
             "-ov 0.18",
             "-nv 0.19",
         ],
