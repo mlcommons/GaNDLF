@@ -2,10 +2,7 @@ import numpy as np
 
 from .crop_zero_planes import CropExternalZeroplanes
 from .non_zero_normalize import NonZeroNormalizeOnMaskedRegion
-from .threshold_and_clip import (
-    threshold_transform,
-    clip_transform,
-)
+from .threshold_and_clip import threshold_transform, clip_transform
 from .normalize_rgb import (
     normalize_by_val_transform,
     normalize_imagenet_transform,
@@ -40,12 +37,7 @@ def generic_3d_check(patch_size):
     """
     patch_size_new = np.array(patch_size)
     if len(patch_size) == 2:
-        patch_size_new = tuple(
-            np.append(
-                np.array(patch_size),
-                1,
-            )
-        )
+        patch_size_new = tuple(np.append(np.array(patch_size), 1))
 
     return patch_size_new
 

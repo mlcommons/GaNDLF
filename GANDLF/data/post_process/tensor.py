@@ -3,7 +3,7 @@ import torch
 from GANDLF.utils.generic import get_array_from_image_or_tensor
 
 
-def get_mapped_label(input_tensor: torch.Tensor, params:dict) -> np.ndarray:
+def get_mapped_label(input_tensor: torch.Tensor, params: dict) -> np.ndarray:
     """
     This function maps the input tensor to the output tensor based on the mapping provided in the params.
 

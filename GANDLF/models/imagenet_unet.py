@@ -4,10 +4,7 @@ from typing import Optional, Union, List
 import torch
 import torch.nn as nn
 
-from segmentation_models_pytorch.base import (
-    SegmentationHead,
-    ClassificationHead,
-)
+from segmentation_models_pytorch.base import SegmentationHead, ClassificationHead
 from segmentation_models_pytorch.encoders import get_encoder
 from segmentation_models_pytorch.decoders.unet.decoder import UnetDecoder
 from segmentation_models_pytorch.base import initialization as init
@@ -188,10 +185,7 @@ class ImageNet_UNet(ModelBase):
         ModelBase (nn.Module): The base model class.
     """
 
-    def __init__(
-        self,
-        parameters,
-    ) -> None:
+    def __init__(self, parameters) -> None:
         super(ImageNet_UNet, self).__init__(parameters)
 
         # https://github.com/qubvel/segmentation_models.pytorch/issues/745
