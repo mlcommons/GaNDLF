@@ -61,9 +61,7 @@ def main():
 
     try:
         generate_metrics.generate_metrics_dict(
-            args.inputdata,
-            args.config,
-            args.outputfile,
+            args.inputdata, args.config, args.outputfile
         )
     except Exception as e:
         sys.exit("ERROR: " + str(e))

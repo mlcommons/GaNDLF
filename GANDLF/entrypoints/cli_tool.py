@@ -18,7 +18,6 @@ from GANDLF.entrypoints.anonymizer import new_way as anonymizer_command
 # import optimize_model command
 # import generate_metrics command
 # import debug_info command
-# import update_version command
 from GANDLF import version
 
 
@@ -55,7 +54,6 @@ gandlf.add_command(anonymizer_command, "anonymizer")
 # TODO: add optimize-model command
 # TODO: add generate-metrics command
 # TODO: add debug-info command
-# TODO: add update-version command
 
 if __name__ == "__main__":
     # pylint: disable=E1120

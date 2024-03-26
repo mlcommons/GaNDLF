@@ -19,12 +19,7 @@ class ResNet(ModelBase):
         in each block of the model.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        blockType,
-        block_config,
-    ):
+    def __init__(self, parameters: dict, blockType, block_config):
         super(ResNet, self).__init__(parameters)
 
         # Check the patch size and get the number of allowed layers
@@ -195,14 +190,7 @@ class _BasicLayer(nn.Sequential):
         downsample (bool): whether to downsample input
     """
 
-    def __init__(
-        self,
-        num_in_feats,
-        num_out_feats,
-        Norm,
-        Conv,
-        downsample,
-    ):
+    def __init__(self, num_in_feats, num_out_feats, Norm, Conv, downsample):
         super().__init__()
 
         # check if size needs to be changed

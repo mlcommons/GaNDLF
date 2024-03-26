@@ -404,10 +404,10 @@ Once you have a model definition, it is easy to perform federated learning using
 
 Once you have a trained model, you can perform [federated evaluation](https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html#Federated-evaluation) using [MedPerf](https://medperf.org/). Follow the tutorial in [this page](https://docs.medperf.org/mlcubes/gandlf_mlcube/) to get started.
 
-!!! note
-  Please note that in order to create a GaNDLF MLCube, for technical reasons, you need write access to the GaNDLF package. With a virtual environment this should be automatic. See the [installation instructions](./setup.md#installation).
+**Notes**:
+-  To create a GaNDLF MLCube, for technical reasons, you need write access to the GaNDLF package. This should be automatic while using a virtual environment that you have set up. See the [installation instructions](./setup.md#installation) for details.
+-  This needs GaNDLF to be initialized as an MLCube. See [the mlcube instructions](https://docs.medperf.org/mlcubes/gandlf_mlcube/) for details.
 
-https://docs.medperf.org/mlcubes/gandlf_mlcube/
 ## Running with Docker
 
 The usage of GaNDLF remains generally the same even from Docker, but there are a few extra considerations.

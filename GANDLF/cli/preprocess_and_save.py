@@ -66,9 +66,7 @@ def preprocess_and_save(
     )
 
     dataloader_for_processing = DataLoader(
-        data_for_processing,
-        batch_size=1,
-        pin_memory=False,
+        data_for_processing, batch_size=1, pin_memory=False
     )
 
     # initialize a new dict for the preprocessed data
