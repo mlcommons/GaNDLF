@@ -505,10 +505,7 @@ class _Transformer(nn.Sequential):
         self.layers = ModuleList([])
 
         for _ in range(0, num_layers):
-            layer = _TransformerLayer(
-                embed_size,
-                num_heads,
-            )
+            layer = _TransformerLayer(embed_size, num_heads)
             self.layers.append(layer)
 
     def forward(self, x):
@@ -560,10 +557,7 @@ class unetr(ModelBase):
     and some other hyperparameters, which remain constant all the modules. For more details on the smaller modules please have a look at the seg_modules file.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-    ):
+    def __init__(self, parameters: dict):
         """
         Initializes an instance of the `unetr` class.
 

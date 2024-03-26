@@ -92,11 +92,7 @@ def resize_image(
     for i, n in enumerate(output_size_parsed):
         outputSpacing[i] = outputSpacing[i] * (inputSize[i] / n)
 
-    return resample_image(
-        input_image,
-        outputSpacing,
-        interpolator=interpolator,
-    )
+    return resample_image(input_image, outputSpacing, interpolator=interpolator)
 
 
 def softer_sanity_check(
