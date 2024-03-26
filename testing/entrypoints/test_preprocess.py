@@ -49,7 +49,7 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # tests flags (--apply-augs, --crop-zero)
-            "-c config.yaml -i input.csv -o output/",
+            "-c config.yaml -i input.csv -o output/"
         ],
         old_way_lines=[
             "-c config.yaml -i input.csv -o output/",
@@ -70,11 +70,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # tests --label-pad
-            "-c config.yaml -i input.csv -o output/ -l mean",
+            "-c config.yaml -i input.csv -o output/ -l mean"
         ],
-        old_way_lines=[
-            "-c config.yaml -i input.csv -o output/ -l mean",
-        ],
+        old_way_lines=["-c config.yaml -i input.csv -o output/ -l mean"],
         expected_args={
             "config_file": "config.yaml",
             "data_csv": "input.csv",
@@ -88,11 +86,9 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # output may not exist yet
-            "-i input.csv -o output_na/ -c config.yaml",
+            "-i input.csv -o output_na/ -c config.yaml"
         ],
-        old_way_lines=[
-            "-i input.csv -o output_na/ -c config.yaml",
-        ],
+        old_way_lines=["-i input.csv -o output_na/ -c config.yaml"],
         expected_args={
             "config_file": "config.yaml",
             "data_csv": "input.csv",
