@@ -71,8 +71,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
         for metric_name, calculator in calculators.items():
             if metric_name == "aucroc":
                 one_hot_preds = one_hot(
-                    prediction.long(),
-                    num_classes=params["model"]["num_classes"],
+                    prediction.long(), num_classes=params["model"]["num_classes"]
                 )
                 output_metrics[metric_name] = get_output_from_calculator(
                     one_hot_preds.float(), target, calculator

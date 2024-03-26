@@ -4,20 +4,9 @@ extend-exclude = '''
 (
   testing/data
   | .*.md
-  | /GANDLF/optimizers/wrap_monai.py
-  | /GANDLF/data/post_process/tensor.py
-  | /GANDLF/optimizers/__init__.py
-  | /GANDLF/utils/handle_collisions.py
-  | /GANDLF/data/preprocessing/threshold_and_clip.py
-  | /GANDLF/metrics/regression.py
-  | /GANDLF/models/unet_multilayer.py
-  | /GANDLF/cli/generate_metrics.py
-  | /GANDLF/utils/tensor.py
-  | /GANDLF/schedulers/wrap_monai.py
-  | /GANDLF/schedulers/wrap_torch.py
 )
-skip_magic_trailing_comma = true`
 '''
+skip_magic_trailing_comma = true
 
 [tool.coverage.run]
 source = ["./GANDLF"]
