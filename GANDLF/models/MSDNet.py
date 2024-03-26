@@ -35,11 +35,7 @@ class MSDNet(ModelBase):
         if isinstance(layer, nn.Linear):
             nn.init.kaiming_normal_(layer, layer.weight.data)
 
-    def __init__(
-        self,
-        parameters: dict,
-        num_layers=4,
-    ):
+    def __init__(self, parameters: dict, num_layers=4):
         """
         A multi-scale dense neural network architecture that consists of multiple convolutional layers with different dilation rates.
 

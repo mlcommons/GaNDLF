@@ -1,6 +1,11 @@
 import os, pathlib, pytest
 from pytest import fixture
 
+from .test_full import (
+    prerequisites_hook_download_data,
+    prerequisites_constructTrainingCSV,
+)
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -27,3 +32,11 @@ def pytest_runtest_makereport(item, call):
         mode = "a" if os.path.exists(log_filename) else "w"
         with open(log_filename, mode) as f:
             f.write(rep.longreprtext + "\n")
+
+
+def pytest_sessionstart(session):
+    """
+    This hook is executed before the pytest session starts.
+    """
+    prerequisites_hook_download_data()
+    prerequisites_constructTrainingCSV()
