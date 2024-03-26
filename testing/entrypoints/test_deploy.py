@@ -156,10 +156,10 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # for model_type=model entrypoint is optional
-            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/",
+            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/"
         ],
         old_way_lines=[
-            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/",
+            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/"
         ],
         expected_args={
             "mlcubedir": "mlcube_root/",
@@ -176,10 +176,10 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # for model_type=model config may be skipped; is restored from model then (`parameters.pkl`)
-            "-m model/ -t docker --mlcube-type model -r mlcube_root/ -o output/",
+            "-m model/ -t docker --mlcube-type model -r mlcube_root/ -o output/"
         ],
         old_way_lines=[
-            "-m model/ -t docker --mlcube-type model -r mlcube_root/ -o output/",
+            "-m model/ -t docker --mlcube-type model -r mlcube_root/ -o output/"
         ],
         expected_args={
             "mlcubedir": "mlcube_root/",
@@ -198,11 +198,11 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # for model_type=metrics, model, config and entrypoint may be skipped
-            "--mlcube-type metrics -t docker -r mlcube_root/ -o output/",
+            "--mlcube-type metrics -t docker -r mlcube_root/ -o output/"
         ],
         old_way_lines=[
             # for model_type=metrics, model, config and entrypoint may be skipped
-            "--mlcube-type metrics -t docker -r mlcube_root/ -o output/",
+            "--mlcube-type metrics -t docker -r mlcube_root/ -o output/"
         ],
         expected_args={
             "mlcubedir": "mlcube_root/",
@@ -281,10 +281,10 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # gpu may be disabled by passing --no-gpu
-            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/ --no-gpu",
+            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/ --no-gpu"
         ],
         old_way_lines=[
-            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/ -g False",
+            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output/ -g False"
         ],
         expected_args={
             "mlcubedir": "mlcube_root/",
@@ -301,10 +301,10 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # gpu may be disabled by passing --no-gpu
-            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output_na/",
+            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output_na/"
         ],
         old_way_lines=[
-            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output_na/",
+            "-m model/ -c config.yaml -t docker --mlcube-type model -r mlcube_root/ -o output_na/"
         ],
         expected_args={
             "mlcubedir": "mlcube_root/",
