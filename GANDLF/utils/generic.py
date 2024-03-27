@@ -253,7 +253,6 @@ def print_and_format_metrics(
         Returns:
             dict: The output metrics dictionary.
         """
-        print(input_metrics_dict)
         output_metrics_dict = deepcopy(input_metrics_dict)
         for metric in input_metrics_dict.keys():
             if isinstance(input_metrics_dict[metric], list):
@@ -265,7 +264,6 @@ def print_and_format_metrics(
                     .split(",")
                 )
 
-        print(output_metrics_dict)
         return output_metrics_dict
 
     output_metrics_dict = deepcopy(cohort_level_metrics)
