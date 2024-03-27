@@ -481,7 +481,7 @@ def test_train_regression_brainage_rad_2d(device):
     parameters["model"]["architecture"] = "brain_age"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-   # parameters_temp = copy.deepcopy(parameters)
+    # parameters_temp = copy.deepcopy(parameters)
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -753,7 +753,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     parameters["model"]["architecture"] = all_models_regression[0]
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    #parameters_temp = copy.deepcopy(parameters)
+    # parameters_temp = copy.deepcopy(parameters)
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
