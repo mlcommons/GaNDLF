@@ -32,6 +32,7 @@ from GANDLF.cli import (
     recover_config,
     post_training_model_optimization,
     generate_metrics_dict,
+    split_data_and_save_csvs,
 )
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
@@ -842,6 +843,13 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["final_layer"] = "logits"
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    ## add stratified splitting
+    parameters["nested_training"]["stratified"] = True
 
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
@@ -849,20 +857,30 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    model = all_models_regression[0]
-    parameters["model"]["architecture"] = model
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    sanitize_outputDir()
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        resume=False,
-        reset=True,
-    )
+    # duplicate the data to test stratified sampling
+    training_data_duplicate = training_data._append(training_data)
+    for _ in range(1):
+        training_data_duplicate = training_data_duplicate._append(
+            training_data_duplicate
+        )
+    training_data_duplicate.reset_index(drop=True, inplace=True)
+    # ensure subjects are not duplicated
+    training_data_duplicate["SubjectID"] = training_data_duplicate.index
+
+    # ensure every part of the code is tested
+    for folds in [2, 1, -5]:
+        ## add stratified folding information
+        parameters["nested_training"]["testing"] = folds
+        parameters["nested_training"]["validation"] = folds if folds != 1 else -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data_duplicate,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
     ## this is to test if inference can run without having ground truth column
     training_data.drop("ValueToPredict", axis=1, inplace=True)
     training_data.drop("Label", axis=1, inplace=True)
@@ -873,7 +891,6 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
-    parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -3097,6 +3114,37 @@ def test_generic_deploy_metrics_docker():
     sanitize_outputDir()
 
     print("passed")
+
+
+def test_generic_data_split():
+    print("51: Starting test for splitting and saving CSVs")
+    # read and initialize parameters for specific data dimension
+    parameters = ConfigManager(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["nested_training"] = {"testing": 5, "validation": 5, "stratified": True}
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_3d_rad_classification.csv"
+    )
+    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    # duplicate the data to test stratified sampling
+    training_data_duplicate = training_data._append(training_data)
+    for _ in range(1):
+        training_data_duplicate = training_data_duplicate._append(
+            training_data_duplicate
+        )
+    training_data_duplicate.reset_index(drop=True, inplace=True)
+    # ensure subjects are not duplicated
+    training_data_duplicate["SubjectID"] = training_data_duplicate.index
+
+    sanitize_outputDir()
+
+    split_data_and_save_csvs(training_data_duplicate, outputDir, parameters)
+
+    files_in_outputDir = os.listdir(outputDir)
+    assert len(files_in_outputDir) == 15, "CSVs were not split correctly"
 
     sanitize_outputDir()
 
