@@ -1,6 +1,5 @@
 import os, datetime, subprocess, sys
 from copy import deepcopy
-from pprint import pprint
 import random
 import numpy as np
 import torch
@@ -265,7 +264,6 @@ def print_and_format_metrics(
                     .split(",")
                 )
 
-        pprint(output_metrics_dict)
         return output_metrics_dict
 
     output_metrics_dict = deepcopy(cohort_level_metrics)
