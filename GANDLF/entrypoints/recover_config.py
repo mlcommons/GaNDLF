@@ -8,7 +8,7 @@ import os, sys
 import yaml
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_RecoverConfig",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -48,3 +48,7 @@ if __name__ == "__main__":
 
     result = recover_config(search_dir, args.outputFile)
     assert result, "Config file recovery failed."
+
+
+if __name__ == "__main__":
+    main()

@@ -5,7 +5,7 @@ import os, argparse, sys
 
 
 # main function
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -30,3 +30,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("GaNDLF is ready. See https://mlcommons.github.io/GaNDLF/usage")
+
+
+if __name__ == "__main__":
+    main()

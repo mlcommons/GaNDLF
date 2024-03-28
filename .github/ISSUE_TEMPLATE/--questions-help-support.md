@@ -13,7 +13,7 @@ https://mlcommons.github.io/GaNDLF/faq
 
 ### Environment information
 <!-- Put the output of the following command:
-python ./gandlf_debugInfo
+gandlf_debugInfo
 -->
 GaNDLF version, OS, and any other relevant information.
 

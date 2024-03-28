@@ -11,7 +11,7 @@ This means that GaNDLF was not installed correctly. Please ensure you have follo
 
 ### Why is GaNDLF not working?
 
-Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has been done correctly by running `python ./gandlf_verifyInstall` after activating the correct virtual environment. If you are still having issues, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has been done correctly by running `gandlf_verifyInstall` after activating the correct virtual environment. If you are still having issues, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 ### Which parts of a GaNDLF configuration are customizable?
 

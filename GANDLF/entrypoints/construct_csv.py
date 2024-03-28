@@ -39,11 +39,7 @@ def main():
         help="Label/mask identifier string to check for in all files in 'input_dir'; for example: --labelID _seg.nii.gz",
     )
     parser.add_argument(
-        "-o",
-        "--outputFile",
-        metavar="",
-        type=str,
-        help="Output CSV file",
+        "-o", "--outputFile", metavar="", type=str, help="Output CSV file"
     )
     parser.add_argument(
         "-r",
@@ -57,11 +53,7 @@ def main():
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [
-        args.inputDir,
-        args.channelsID,
-        args.outputFile,
-    ]:
+    for param_none_check in [args.inputDir, args.channelsID, args.outputFile]:
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
 

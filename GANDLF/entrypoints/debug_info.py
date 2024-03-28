@@ -6,7 +6,7 @@ from GANDLF import __version__
 from GANDLF.utils import get_git_hash
 
 
-if __name__ == "__main__":
+def main():
     print(f"GANDLF version: {__version__}")
     print(f"Git hash: {get_git_hash()}")
     print(f"Platform: {platform.platform()}")
@@ -18,3 +18,7 @@ if __name__ == "__main__":
     print(f"  Implementation: {platform.python_implementation()}")
     print(f"  Compiler: {platform.python_compiler()}")
     print(f"  Build: {(' ').join(list(platform.python_build()))}")
+
+
+if __name__ == "__main__":
+    main()

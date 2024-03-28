@@ -25,7 +25,7 @@ def run_gandlf(output_path, device):
         parameters_file (str): The path to the parameters file
     """
     exit_status = os.system(
-        "python3.9 gandlf_run --train False "
+        "gandlf_run --train False "
         f"--device {device} --config /embedded_config.yml "
         f"--modeldir /embedded_model/ -i ./data.csv -o {output_path}"
     )

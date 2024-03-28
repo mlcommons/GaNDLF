@@ -5,7 +5,7 @@ import argparse
 from GANDLF.cli import copyrightMessage, post_training_model_optimization
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_OptimizeModel",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -37,3 +37,7 @@ if __name__ == "__main__":
         print("Post-training model optimization successful.")
     else:
         print("Post-training model optimization failed.")
+
+
+if __name__ == "__main__":
+    main()
