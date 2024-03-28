@@ -170,7 +170,7 @@ To split the data CSV into training, validation, and testing CSVs, the `gandlf_s
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_splitCSV \
+(venv_gandlf) $> gandlf_splitCSV \
   # -h, --help         Show help message and exit
   -i ./experiment_0/train_data.csv \ # output CSV from the `gandlf_constructCSV` script
   -c $gandlf_config \ # the GaNDLF config (in YAML) with the `nested_training` key specified to the folds needed
