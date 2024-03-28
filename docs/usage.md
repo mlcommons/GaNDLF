@@ -105,6 +105,8 @@ SubjectID,Channel_0,Channel_1,...,Channel_X,Label
 N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/path/N/segmentation.nii.gz
 ```
 
+**Notes:**
+
 - `Channel` can be substituted with `Modality` or `Image`
 - `Label` can be substituted with `Mask` or `Segmentation`and is used to specify the annotation file for segmentation models
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
@@ -160,6 +162,19 @@ The following command shows how the script works:
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 - For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. 
+
+### Using the `gandlf_splitCSV` application
+
+To split the data CSV into training, validation, and testing CSVs, the `gandlf_splitCSV` script can be used. The following command shows how the script works:
+
+```bash
+# continue from previous shell
+(venv_gandlf) $> gandlf_splitCSV \
+  # -h, --help         Show help message and exit
+  -i ./experiment_0/train_data.csv \ # output CSV from the `gandlf_constructCSV` script
+  -c $gandlf_config \ # the GaNDLF config (in YAML) with the `nested_training` key specified to the folds needed
+  -o $output_dir # the output directory to save the split data
+```
 
 
 ## Customize the Training
