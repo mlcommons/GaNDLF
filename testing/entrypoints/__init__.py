@@ -10,7 +10,7 @@ import sys
 import shlex
 import os
 import shutil
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 
 class ArgsExpander:
@@ -22,18 +22,21 @@ class ArgsExpander:
         Say, we have the following function:
         `def orig_func(param1: str, param2: str, train_flag=True)`
         mocked up our orig function with replica. After test is executed we see replica was called with some
-        positional and some keyword args (say, it was `replica(foo, param2=bar)`).
+        positional and some keyword args (say, it was `replica(foo, param2=bar)`). So, we take origin function signature
+        (keeping in mind params' default values) and join it with passed args.
 
-        This function takes
-            the list of positioned args `["foo"]`,
-            dict of keyword args `{"param2": "bar"}`,
-            signature of original function (that includes some params with default value also)
-        and combine it together to receive the normalized dict of args that would be processed:
-        {
-            "param1": "foo",
-            "param2": "bar",
-            "train_flag": True
-        }
+        Args:
+            args (Iterable): the list of positioned args passed to the mock function (ex.: `["foo"]`)
+            kwargs (Mapping): dict of keyword args passed to the mock function (ex.: `{"param2": "bar"}`)
+        Returns:
+            dict: A full mapping of passed arguments, arg_name -> arg_value. Ex.:
+                ```
+                {
+                    "param1": "foo",
+                    "param2": "bar",
+                    "train_flag": True
+                }
+                ```
         """
         # Get parameter names from the original function
         params = inspect.signature(self.orig_func).parameters
@@ -67,16 +70,14 @@ class CliCase:
     behavior and call a real logic function with `expected_args`.
 
     Args:
-        should_succeed: if that console command should succeed or fail
-        new_way_lines: list of str of the following format (in reality are passed as args to `gandlf` cli tool):
+        should_succeed (bool): if that console command should succeed or fail
+        new_way_lines (List[str], optional): command lines of the following format (in reality are passed as args to `gandlf` cli subcommand):
             '--input-dir input/ -c config.yaml -m rad --output-file output/'
-            If skipped, new_way would not be tested.
-        old_way_lines: list of str of the same format, but for old-fashioned format of cmd execution
+        old_way_lines (List[str], optional): list of str of the same format, but for old-fashioned format of cmd execution
             (say, via `gandlf_patchMiner`):
             '--inputDir input/ -c config.yaml -m rad --outputFile output/'
-            If skipped, old_way would not be tested.
-        expected_args: dict or params that should be finally passed to real logics code.
-            Required, if `should_succeed`.
+        expected_args (dict): dict or params that should be finally passed to real logics code.
+            Required if `should_succeed`.
 
     """
 
@@ -195,8 +196,19 @@ def args_diff(expected_args: dict[str, Any], actual_args: dict[str, Any]) -> lis
     return result
 
 
-def assert_called_properly(mock_func, expected_args: dict, args_normalizer):
-    """Check that mock_func was called exactly once and passed args are identical to expected_args"""
+def assert_called_properly(
+    mock_func: MagicMock, expected_args: dict, args_normalizer: ArgsExpander
+) -> None:
+    """
+    Check that mock_func was called exactly once and passed args are identical to expected_args.
+    Args:
+        mock_func (MagicMock): mock object that replaces a real code function.
+        expected_args (dict): a mapping of args that mock_func is expected to be called with
+        args_normalizer (ArgsExpander): wrapper around original function (mocked by mock_func), that can build a dict of
+            actual args passed basing on signature of origin function.
+    Returns:
+        None. If test fails, raises AssertionError
+    """
     mock_func.assert_called_once()
     executed_call = mock_func.mock_calls[0]
     actual_args = args_normalizer.normalize(
@@ -227,6 +239,35 @@ def run_test_case(
     old_script_name: str,
     patched_return_value: Any = None,
 ):
+    """
+    Given a case (list of CLI lines), check if calling all these cli commands would lead to executing main code function
+        with the same expected args.
+    Args:
+        cli_runner (CliRunner): Click test runner. Is used to check new-way commands (via Click CLI tool) parse commands
+            properly.
+        file_system_config (list[_TmpPath]): describes a file/dir system required for the test case. The following
+            entities are supported:
+            - TmpFile: declares the file with given path should exist (and, optionally, filled with given content)
+            - TmpDire: declares the folder with given path should exist
+            - TmpNoEx: declares there should be no objects on given path.
+        case (CliCase): case to be tested.
+        real_code_function_path (str): path to the function that contains a real business code.
+            Ex.: `"GANDLF.entrypoints.anonymizer.run_anonymizer"`. This function would be mocked; test checks mock is
+            called with expected args.
+        new_way (click.BaseCommand): Click function that actually parses CLI args and call
+            `real_code_function_path` finally. May be absent if there is no `new_way_lines` in the case.
+        old_way (Callable): Python function that is used in gandlf_* entrypoints. Should parse its CLI
+            arguments via `argparse` and call `real_code_function_path` finally. May be absent if there is no
+            `old_way_lines` in the case.
+        old_script_name (str): script name that old_way command should be run with via cli (one of `gandlf_*` entrypoint
+            names)
+        patched_return_value (Any, optional): Though normally CLI tools just parse args and run
+            `real_code_function_path`, sometimes its returned result is processed further. So, if given, mock would
+            return this value.
+    Returns:
+        None. Fails if one of tests is failed.
+
+    """
     module_path, func_name = real_code_function_path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     real_code_function = getattr(module, func_name)
