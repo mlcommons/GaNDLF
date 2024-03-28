@@ -237,9 +237,9 @@ def training_loop(
     params["validation_data"] = validation_data
     params["testing_data"] = testing_data
     testingDataDefined = True
-    if params["testing_data"] is None:
-        # testing_data = validation_data
-        testingDataDefined = False
+    if not isinstance(testing_data, pd.DataFrame):
+        if params["testing_data"] is None:
+            testingDataDefined = False
 
     # Setup a few variables for tracking
     best_loss = 1e7
