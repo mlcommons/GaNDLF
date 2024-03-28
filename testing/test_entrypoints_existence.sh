@@ -18,6 +18,7 @@ commands=(
 #  "gandlf recover-config --help"
 #  "gandlf run --help"
 #  "gandlf verify-install --help"
+#  "gandlf split-csv --help"
   # old entrypoints
   "gandlf_anonymizer --help"
   "gandlf_collectStats --help"
@@ -32,6 +33,7 @@ commands=(
   "gandlf_recoverConfig --help"
   "gandlf_run --help"
   "gandlf_verifyInstall --help"
+  "gandlf_splitCSV --help"
 )
 
 for cmd in "${commands[@]}"; do

@@ -1,4 +1,3 @@
-import os, pickle
 from typing import Optional
 from pathlib import Path
 
@@ -9,7 +8,6 @@ from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     parseTestingCSV,
-    set_determinism,
 )
 
 
