@@ -18,6 +18,7 @@ from GANDLF.entrypoints.verify_install import new_way as verify_install_command
 # import optimize_model command
 # import generate_metrics command
 # import debug_info command
+# import split_csv command
 from GANDLF import version
 
 
@@ -54,6 +55,7 @@ gandlf.add_command(verify_install_command, "verify-install")
 # TODO: add optimize-model command
 # TODO: add generate-metrics command
 # TODO: add debug-info command
+# TODO: add split-csv command
 
 if __name__ == "__main__":
     # pylint: disable=E1120
