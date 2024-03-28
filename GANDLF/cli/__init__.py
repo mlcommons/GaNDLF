@@ -6,6 +6,7 @@ from .deploy import deploy_targets, mlcube_types, run_deployment
 from .recover_config import recover_config
 from .post_training_model_optimization import post_training_model_optimization
 from .generate_metrics import generate_metrics_dict
+from .data_split_saver import split_data_and_save_csvs
 
 from datetime import date
 
