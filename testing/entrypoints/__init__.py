@@ -12,6 +12,8 @@ import os
 import shutil
 from unittest.mock import patch, MagicMock
 
+from yaml.scanner import ScannerError
+
 
 class ArgsExpander:
     def __init__(self, orig_func: Callable):
@@ -314,7 +316,15 @@ def run_test_case(
                     with (
                         # here we can list possible errors that are allowed to be raised.
                         # Any other raised exception would be treated as test fail
-                        pytest.raises((SystemExit, AssertionError)) as e,
+                        pytest.raises(
+                            (
+                                SystemExit,
+                                AssertionError,
+                                ScannerError,
+                                IsADirectoryError,
+                                FileNotFoundError,
+                            )
+                        ) as e,
                         patch.object(sys, "argv", argv),
                         TempFileSystem(file_system_config),
                     ):
