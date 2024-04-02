@@ -310,6 +310,8 @@ ${architecture_name}_best.pth.tar # the best model in native PyTorch format
 ${architecture_name}_latest.pth.tar # the latest model in native PyTorch format
 ${architecture_name}_initial.pth.tar # the initial model in native PyTorch format
 ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name} is supported, the graph-optimized best model in ONNX format
+logs/gandlf.log # log file containing logs from the application
+logs/data_loop.log # log file showing looping through data
 # other files dependent on if training/validation/testing output was enabled in configuration
 ```
 
@@ -319,7 +321,12 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 - The predictions will be saved in the same directory as the model if `outputdir` is not passed to `gandlf_run`.
 - For segmentation, a directory will be created per subject ID in the input CSV.
 - For classification/regression, the predictions will be generated in the `outputdir` or `modeldir` as a CSV file.
+- Logs directory will be generated in the `outputdir` or `modeldir` if not specified
 
+### Logging levels
+Logging levels are compatible with the [Python logging library](https://docs.python.org/3/library/logging.html#levels).
+- `std.err` is set to `ERROR` level
+- `gandlf.log` file is set to `DEBUG` level if `verbose` pararameter is `True`, otherwise set to `WARNING`. The default logging level is `WARNING`; `verbose` parameter can be specified in a configuration file.
 
 ## Plot the final results
 

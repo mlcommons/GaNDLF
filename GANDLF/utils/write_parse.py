@@ -1,6 +1,6 @@
 import os
 import pathlib
-import sys
+import warnings
 from typing import Optional, Tuple, Union
 
 import pandas as pd
@@ -124,9 +124,8 @@ def parseTrainingCSV(
             if headers["labelHeader"] is None:
                 headers["labelHeader"] = currentHeaderLoc
             else:
-                print(
-                    "WARNING: Multiple label headers found in training CSV, only the first one will be used",
-                    file=sys.stderr,
+                warnings.warn(
+                    "Multiple label headers found in training CSV, only the first one will be used"
                 )
     convert_relative_paths_in_dataframe(data_full, headers, inputTrainingCSVFile)
     return data_full, headers
@@ -153,13 +152,12 @@ def parseTestingCSV(
     # and a new mapping_csv was created to be used and write the location of the new mapping_csv
     # and the collision_csv to the user
     if collision_status:
-        print(
-            """WARNING: Some patients with colliding subject_id were found.
+        warnings.warn(
+            """Some patients with colliding subject_id were found.
             A new mapping_csv was created to be used and a collision_csv was created
             to be used to map the old subject_id to the new subject_id.
             The location of the updated_test_mapping.csv and the collision.csv are: """
-            + output_dir,
-            file=sys.stderr,
+            + output_dir
         )
 
     return collision_status, data_full, headers

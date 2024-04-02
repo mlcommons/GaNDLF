@@ -1,5 +1,5 @@
 from typing import Optional, Union
-import sys, yaml, ast, pkg_resources
+import sys, yaml, ast, pkg_resources, warnings
 import numpy as np
 from copy import deepcopy
 
@@ -70,8 +70,8 @@ def initialize_parameter(
                         params[parameter_to_initialize]
                     )
     else:
-        print(
-            "WARNING: Initializing '" + parameter_to_initialize + "' as " + str(value)
+        warnings.warn(
+            "Initializing '" + parameter_to_initialize + "' as " + str(value)
         )
         params[parameter_to_initialize] = value
 
@@ -157,9 +157,8 @@ def _parseConfig(
     assert "patch_size" in params, "Patch size needs to be defined in the config file"
 
     if "resize" in params:
-        print(
-            "WARNING: 'resize' should be defined under 'data_processing', this will be skipped",
-            file=sys.stderr,
+        warnings.warn(
+            "'resize' should be defined under 'data_processing', this will be skipped"
         )
 
     assert "modality" in params, "'modality' needs to be defined in the config file"
@@ -413,9 +412,8 @@ def _parseConfig(
                 if isinstance(default_downsampling, list):
                     if len(default_downsampling) != 2:
                         initialize_downsampling = True
-                        print(
-                            "WARNING: 'anisotropic' augmentation needs to be either a single number of a list of 2 numbers: https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomswap#torchio.transforms.RandomAnisotropy.",
-                            file=sys.stderr,
+                        warnings.warn(
+                            "'anisotropic' augmentation needs to be either a single number of a list of 2 numbers: https://torchio.readthedocs.io/transforms/augmentation.html?highlight=randomswap#torchio.transforms.RandomAnisotropy."
                         )
                         default_downsampling = default_downsampling[0]  # only
                 else:
@@ -423,9 +421,8 @@ def _parseConfig(
 
                 if initialize_downsampling:
                     if default_downsampling < 1:
-                        print(
-                            "WARNING: 'anisotropic' augmentation needs the 'downsampling' parameter to be greater than 1, defaulting to 1.5.",
-                            file=sys.stderr,
+                        warnings.warn(
+                            "'anisotropic' augmentation needs the 'downsampling' parameter to be greater than 1, defaulting to 1.5."
                         )
                         # default
                     params["data_augmentation"]["anisotropic"]["downsampling"] = 1.5
@@ -473,9 +470,8 @@ def _parseConfig(
                     if key in params["data_preprocessing"]:
                         params["data_preprocessing"].pop(key)
 
-                print(
-                    "WARNING: Different 'resize' operations are ignored as 'resample' is defined under 'data_processing'",
-                    file=sys.stderr,
+                warnings.warn(
+                    "Different 'resize' operations are ignored as 'resample' is defined under 'data_processing'"
                 )
 
             # iterate through all keys
@@ -551,7 +547,7 @@ def _parseConfig(
         if "amp" in params["model"]:
             pass
         else:
-            print("NOT using Mixed Precision Training")
+            warnings.warn("NOT using Mixed Precision Training")
             params["model"]["amp"] = False
 
         if "norm_type" in params["model"]:
@@ -564,21 +560,20 @@ def _parseConfig(
                         "Normalization type cannot be 'None' for non-VGG architectures"
                     )
         else:
-            print("WARNING: Initializing 'norm_type' as 'batch'", flush=True)
+            warnings.warn("Initializing 'norm_type' as 'batch'", flush=True)
             params["model"]["norm_type"] = "batch"
 
         if not ("base_filters" in params["model"]):
             base_filters = 32
             params["model"]["base_filters"] = base_filters
-            print("Using default 'base_filters' in 'model': ", base_filters)
+            warnings.warn(f"Using default 'base_filters' in 'model': {base_filters}")
         if not ("class_list" in params["model"]):
             params["model"]["class_list"] = []  # ensure that this is initialized
         if not ("ignore_label_validation" in params["model"]):
             params["model"]["ignore_label_validation"] = None
         if "batch_norm" in params["model"]:
-            print(
-                "WARNING: 'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead",
-                flush=True,
+            warnings.warn(
+                "'batch_norm' is no longer supported, please use 'norm_type' in 'model' instead"
             )
         params["model"]["print_summary"] = params["model"].get("print_summary", True)
 
@@ -601,8 +596,8 @@ def _parseConfig(
             params["model"]["save_at_every_epoch"] = False
 
         if params["model"]["save_at_every_epoch"]:
-            print(
-                "WARNING: 'save_at_every_epoch' will result in TREMENDOUS storage usage; use at your own risk."
+            warnings.warn(
+                "'save_at_every_epoch' will result in TREMENDOUS storage usage; use at your own risk."
             )
 
     if isinstance(params["model"]["class_list"], str):
@@ -610,8 +605,8 @@ def _parseConfig(
             "&&" in params["model"]["class_list"]
         ):
             # special case for multi-class computation - this needs to be handled during one-hot encoding mask construction
-            print(
-                "WARNING: This is a special case for multi-class computation, where different labels are processed together, `reverse_one_hot` will need mapping information to work correctly"
+            warnings.warn(
+                "This is a special case for multi-class computation, where different labels are processed together, `reverse_one_hot` will need mapping information to work correctly"
             )
             temp_classList = params["model"]["class_list"]
             # we don't need the brackets
@@ -649,7 +644,7 @@ def _parseConfig(
     params["parallel_compute_command"] = parallel_compute_command
 
     if "opt" in params:
-        print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
+        warnings.warn("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]
 
     # initialize defaults for patch sampler
@@ -663,8 +658,8 @@ def _parseConfig(
     if "patch_sampler" in params:
         # if "patch_sampler" is a string, then it is the type of sampler
         if isinstance(params["patch_sampler"], str):
-            print(
-                "WARNING: Defining 'patch_sampler' as a string will be deprecated in a future release, please use a dictionary instead"
+            warnings.warn(
+                "Defining 'patch_sampler' as a string will be deprecated in a future release, please use a dictionary instead"
             )
             temp_patch_sampler_dict["type"] = params["patch_sampler"].lower()
         elif isinstance(params["patch_sampler"], dict):
@@ -698,8 +693,8 @@ def _parseConfig(
 
     if not ("step_size" in params["scheduler"]):
         params["scheduler"]["step_size"] = params["learning_rate"] / 5.0
-        print(
-            "WARNING: Setting default step_size to:", params["scheduler"]["step_size"]
+        warnings.warn(
+            f"Setting default step_size to: {params['scheduler']['step_size']}"
         )
 
     # initialize default optimizer

@@ -2,6 +2,7 @@ from typing import Optional, Union
 import os
 from pathlib import Path
 import numpy as np
+import logging
 
 import pandas
 import torch
@@ -15,6 +16,7 @@ from GANDLF.utils import (
     resize_image,
     get_filename_extension_sanitized,
     get_correct_padding_size,
+    setup_logger
 )
 from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
@@ -80,6 +82,12 @@ def ImagesFromDataFrame(
     predictionHeaders = headers["predictionHeaders"]
     subjectIDHeader = headers["subjectIDHeader"]
 
+    if "logger_name" in parameters:
+        logger = logging.getLogger(parameters["logger_name"])
+    else:
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters.get("verbose", False))
+
+
     resize_images_flag = False
     # if resize has been defined but resample is not (or is none)
     if not (preprocessing is None):
@@ -118,141 +126,142 @@ def ImagesFromDataFrame(
         if not os.path.isfile(save_path):
             sitk.WriteImage(resized_image, save_path)
 
-    # iterating through the dataframe
-    for patient in tqdm(
-        range(num_row), desc="Constructing queue for " + loader_type + " data"
-    ):
-        # We need this dict for storing the meta data for each subject
-        # such as different image modalities, labels, any other data
-        subject_dict = {}
-        subject_dict["subject_id"] = str(dataframe[subjectIDHeader][patient])
-        skip_subject = False
-        # iterating through the channels/modalities/timepoints of the subject
-        for channel in channelHeaders:
-            # sanity check for malformed csv
-            if not os.path.isfile(str(dataframe[channel][patient])):
-                skip_subject = True
+    # iterating through the dataframe and sending logs to file
+    log_file = os.path.join(parameters["logs_dir"], "data_loop.log")
+    with open(log_file, 'a') as fl:
+        for patient in tqdm(
+            range(num_row), file = fl, desc="Constructing queue for " + loader_type + " data"
+        ):
+            # We need this dict for storing the meta data for each subject
+            # such as different image modalities, labels, any other data
+            subject_dict = {}
+            subject_dict["subject_id"] = str(dataframe[subjectIDHeader][patient])
+            skip_subject = False
+            # iterating through the channels/modalities/timepoints of the subject
+            for channel in channelHeaders:
+                # sanity check for malformed csv
+                if not os.path.isfile(str(dataframe[channel][patient])):
+                    skip_subject = True
 
-            subject_dict[str(channel)] = torchio.ScalarImage(
-                dataframe[channel][patient]
-            )
-
-            # store image spacing information if not present
-            if "spacing" not in subject_dict:
-                file_reader = sitk.ImageFileReader()
-                file_reader.SetFileName(str(dataframe[channel][patient]))
-                file_reader.ReadImageInformation()
-                subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
-
-            # if resize_image is requested, the perform per-image resize with appropriate interpolator
-            if resize_images_flag:
-                img_resized = resize_image(
-                    subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
+                subject_dict[str(channel)] = torchio.ScalarImage(
+                    dataframe[channel][patient]
                 )
-                if parameters["memory_save_mode"]:
-                    _save_resized_images(
-                        img_resized,
-                        parameters["output_dir"],
-                        subject_dict["subject_id"],
-                        str(channel),
-                        loader_type,
-                        get_filename_extension_sanitized(
-                            str(dataframe[channel][patient])
-                        ),
+
+                # store image spacing information if not present
+                if "spacing" not in subject_dict:
+                    file_reader = sitk.ImageFileReader()
+                    file_reader.SetFileName(str(dataframe[channel][patient]))
+                    file_reader.ReadImageInformation()
+                    subject_dict["spacing"] = torch.Tensor(file_reader.GetSpacing())
+
+                # if resize_image is requested, the perform per-image resize with appropriate interpolator
+                if resize_images_flag:
+                    img_resized = resize_image(
+                        subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
                     )
-                else:
-                    # always ensure resized image spacing is used
-                    subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
-                    subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(
-                        img_resized
+                    if parameters["memory_save_mode"]:
+                        _save_resized_images(
+                            img_resized,
+                            parameters["output_dir"],
+                            subject_dict["subject_id"],
+                            str(channel),
+                            loader_type,
+                            get_filename_extension_sanitized(
+                                str(dataframe[channel][patient])
+                            ),
+                        )
+                    else:
+                        # always ensure resized image spacing is used
+                        subject_dict["spacing"] = torch.Tensor(img_resized.GetSpacing())
+                        subject_dict[str(channel)] = torchio.ScalarImage.from_sitk(
+                            img_resized
+                        )
+
+            # # for regression -- this logic needs to be thought through
+            # if predictionHeaders:
+            #     # get the mask
+            #     if (subject_dict['label'] is None) and (class_list is not None):
+            #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
+
+            if labelHeader is not None:
+                if not os.path.isfile(str(dataframe[labelHeader][patient])):
+                    skip_subject = True
+
+                subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
+                subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
+
+                # if resize is requested, the perform per-image resize with appropriate interpolator
+                if resize_images_flag:
+                    img_resized = resize_image(
+                        subject_dict["label"].as_sitk(),
+                        preprocessing["resize_image"],
+                        sitk.sitkNearestNeighbor,
                     )
+                    if parameters["memory_save_mode"]:
+                        _save_resized_images(
+                            img_resized,
+                            parameters["output_dir"],
+                            subject_dict["subject_id"],
+                            "label",
+                            loader_type,
+                            get_filename_extension_sanitized(
+                                str(dataframe[channel][patient])
+                            ),
+                        )
+                    else:
+                        subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
 
-        # # for regression -- this logic needs to be thought through
-        # if predictionHeaders:
-        #     # get the mask
-        #     if (subject_dict['label'] is None) and (class_list is not None):
-        #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
+            else:
+                subject_dict["label"] = "NA"
+                subject_dict["path_to_metadata"] = str(dataframe[channel][patient])
 
-        if labelHeader is not None:
-            if not os.path.isfile(str(dataframe[labelHeader][patient])):
-                skip_subject = True
-
-            subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
-            subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
-
-            # if resize is requested, the perform per-image resize with appropriate interpolator
-            if resize_images_flag:
-                img_resized = resize_image(
-                    subject_dict["label"].as_sitk(),
-                    preprocessing["resize_image"],
-                    sitk.sitkNearestNeighbor,
+            # iterating through the values to predict of the subject
+            valueCounter = 0
+            for values in predictionHeaders:
+                # assigning the dict key to the channel
+                subject_dict["value_" + str(valueCounter)] = np.array(
+                    dataframe[values][patient]
                 )
-                if parameters["memory_save_mode"]:
-                    _save_resized_images(
-                        img_resized,
-                        parameters["output_dir"],
-                        subject_dict["subject_id"],
-                        "label",
-                        loader_type,
-                        get_filename_extension_sanitized(
-                            str(dataframe[channel][patient])
-                        ),
-                    )
-                else:
-                    subject_dict["label"] = torchio.LabelMap.from_sitk(img_resized)
+                valueCounter += 1
 
-        else:
-            subject_dict["label"] = "NA"
-            subject_dict["path_to_metadata"] = str(dataframe[channel][patient])
-
-        # iterating through the values to predict of the subject
-        valueCounter = 0
-        for values in predictionHeaders:
-            # assigning the dict key to the channel
-            subject_dict["value_" + str(valueCounter)] = np.array(
-                dataframe[values][patient]
-            )
-            valueCounter += 1
-
-        # skip subject the condition was tripped
-        if not skip_subject:
-            # Initializing the subject object using the dict
-            subject = torchio.Subject(subject_dict)
-            # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
-            # this is causing memory usage to explode, see https://github.com/mlcommons/GaNDLF/issues/128
-            if parameters["verbose"]:
-                print(
+            # skip subject the condition was tripped
+            if not skip_subject:
+                # Initializing the subject object using the dict
+                subject = torchio.Subject(subject_dict)
+                # https://github.com/fepegar/torchio/discussions/587#discussioncomment-928834
+                # this is causing memory usage to explode, see https://github.com/mlcommons/GaNDLF/issues/128
+                logger.debug(
                     "Checking consistency of images in subject '"
                     + subject["subject_id"]
                     + "'"
                 )
-            try:
-                perform_sanity_check_on_subject(subject, parameters)
-            except Exception as exception:
-                subjects_with_error.append(subject["subject_id"])
-                print(
-                    "Subject '"
-                    + subject["subject_id"]
-                    + "' could not be loaded due to the following exception: {}".format(
-                        type(exception).__name__
+                try:
+                    perform_sanity_check_on_subject(subject, parameters)
+                except Exception as exception:
+                    subjects_with_error.append(subject["subject_id"])
+                    print(
+                        "Subject '"
+                        + subject["subject_id"]
+                        + "' could not be loaded due to the following exception: {}".format(
+                            type(exception).__name__
+                        )
+                        + "; message: {}".format(exception)
                     )
-                    + "; message: {}".format(exception)
-                )
 
-            # # padding image, but only for label sampler, because we don't want to pad for uniform
-            if sampler["enable_padding"]:
-                psize_pad = get_correct_padding_size(
-                    patch_size, parameters["model"]["dimension"]
-                )
-                padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
-                subject = padder(subject)
+                # # padding image, but only for label sampler, because we don't want to pad for uniform
+                if sampler["enable_padding"]:
+                    psize_pad = get_correct_padding_size(
+                        patch_size, parameters["model"]["dimension"]
+                    )
+                    padder = Pad(psize_pad, padding_mode=sampler["padding_mode"])
+                    subject = padder(subject)
 
-            # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
-            if in_memory:
-                subject.load()
+                # load subject into memory: https://github.com/fepegar/torchio/discussions/568#discussioncomment-859027
+                if in_memory:
+                    subject.load()
 
-            # Appending this subject to the list of subjects
-            subjects_list.append(subject)
+                # Appending this subject to the list of subjects
+                subjects_list.append(subject)
 
     assert (
         subjects_with_error is not None

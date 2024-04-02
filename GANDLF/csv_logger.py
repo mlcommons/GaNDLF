@@ -11,10 +11,10 @@ from typing import Dict
 import torch
 
 
-class Logger:
+class CSVLogger:
     def __init__(self, logger_csv_filename: str, metrics: Dict[str, float]) -> None:
         """
-        Logger class to log the training and validation metrics to a csv file.
+        CSVLogger class to log the training and validation metrics to a csv file.
 
         Args:
             logger_csv_filename (str): Path to a filename where the csv has to be stored.

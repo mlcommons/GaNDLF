@@ -1,4 +1,5 @@
 import sys
+import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
@@ -397,8 +398,8 @@ class EfficientNet(ModelBase):
         else:
             sys.exit("Only 2D or 3D convolutions are supported.")
         if self.Norm is None:
-            sys.stderr.write(
-                "Warning: efficientnet is not defined without a normalization layer"
+            warnings.warn(
+                "efficientnet is not defined without a normalization layer"
             )
             self.Norm = self.BatchNorm
 

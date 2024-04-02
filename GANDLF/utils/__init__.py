@@ -68,3 +68,7 @@ from .modelio import (
 )
 
 from .data_splitter import split_data
+
+from .logger import (
+    setup_logger,
+)

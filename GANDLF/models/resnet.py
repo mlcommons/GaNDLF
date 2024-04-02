@@ -1,4 +1,4 @@
-import sys
+import sys, warnings
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
@@ -27,7 +27,7 @@ class ResNet(ModelBase):
 
         # Display warning message if patch size is not large enough for desired number of layers
         if allowedLay != len(block_config) and allowedLay >= 1:
-            print(
+            warnings.warn(
                 "The patch size is not large enough for the desired number of layers.",
                 " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
                 "Only the first %d layers will run." % allowedLay,
@@ -56,8 +56,8 @@ class ResNet(ModelBase):
 
         # If normalization layer is not defined, use Batch Normalization
         if self.Norm is None:
-            sys.stderr.write(
-                "Warning: resnet is not defined without a normalization layer"
+            warnings.warn(
+                "resnet is not defined without a normalization layer"
             )
             self.Norm = self.BatchNorm
 

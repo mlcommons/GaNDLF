@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 from pandas.util import hash_pandas_object
-import torch
+import torch, logging
 from torch.utils.data import DataLoader
 
 from GANDLF.models import get_model
@@ -12,6 +12,7 @@ from GANDLF.utils import (
     parseTrainingCSV,
     send_model_to_device,
     get_class_imbalance_weights,
+    setup_logger
 )
 
 
@@ -39,7 +40,12 @@ def create_pytorch_objects(
 
     Returns:
         Tuple[ torch.nn.Module, torch.optim.Optimizer, DataLoader, DataLoader, torch.optim.lr_scheduler.LRScheduler, dict, ]: The model, optimizer, train loader, validation loader, scheduler, and parameters.
-    """
+    """    
+    if "logger_name" in parameters:
+        logger = logging.getLogger(parameters["logger_name"])
+    else:
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters.get("verbose", False))
+
     # initialize train and val loaders
     train_loader, val_loader = None, None
     headers_to_populate_train, headers_to_populate_val = None, None
@@ -60,9 +66,9 @@ def create_pytorch_objects(
             parameters["class_weights"],
         ) = get_class_imbalance_weights(parameters["training_data"], parameters)
 
-        print("Penalty weights : ", parameters["penalty_weights"])
-        print("Sampling weights: ", parameters["sampling_weights"])
-        print("Class weights   : ", parameters["class_weights"])
+        logger.debug(f"Penalty weights : {parameters['penalty_weights']}")
+        logger.debug(f"Sampling weights: {parameters['sampling_weights']}")
+        logger.debug(f"Class weights   : {parameters['class_weights']}")
 
         # get the train loader
         train_loader = get_train_loader(parameters)

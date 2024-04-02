@@ -10,6 +10,7 @@ os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
 import torch
 import cv2
+import logging
 import numpy as np
 from torch.utils.data import DataLoader
 from skimage.io import imsave
@@ -23,6 +24,7 @@ from GANDLF.utils import (
     load_ov_model,
     print_model_summary,
     applyCustomColorMap,
+    setup_logger
 )
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
@@ -46,12 +48,17 @@ def inference_loop(
         modelDir (str): The path to the directory containing the model to be used for inference.
         outputDir (str): The path to the directory where the output of the inference session will be stored.
     """
+    if "logger_name" in parameters:
+        logger = logging.getLogger(parameters["logger_name"])
+    else:
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters.get("verbose", False))
+
     # Defining our model here according to parameters mentioned in the configuration file
-    print("Current model type : ", parameters["model"]["type"])
-    print("Number of dims     : ", parameters["model"]["dimension"])
+    logger.debug("Current model type : ", parameters["model"]["type"])
+    logger.debug("Number of dims     : ", parameters["model"]["dimension"])
     if "num_channels" in parameters["model"]:
-        print("Number of channels : ", parameters["model"]["num_channels"])
-    print("Number of classes  : ", len(parameters["model"]["class_list"]))
+        logger.debug("Number of channels : ", parameters["model"]["num_channels"])
+    logger.debug("Number of classes  : ", len(parameters["model"]["class_list"]))
     parameters["testing_data"] = inferenceDataFromPickle
 
     # ensure outputs are saved properly
@@ -115,7 +122,7 @@ def inference_loop(
             parameters["model"]["IO"] = [input_blob, output_blob]
 
     if not (os.environ.get("HOSTNAME") is None):
-        print("\nHostname     :" + str(os.environ.get("HOSTNAME")), flush=True)
+        logger.debug("\nHostname     :" + str(os.environ.get("HOSTNAME")))
 
     # radiology inference
     if parameters["modality"] == "rad":
@@ -131,7 +138,7 @@ def inference_loop(
         # Setting up the inference loader
         inference_loader = get_testing_loader(parameters)
 
-        print("Data Samples: ", len(inference_loader.dataset), flush=True)
+        logger.debug("Data Samples: ", len(inference_loader.dataset))
 
         average_epoch_valid_loss, average_epoch_valid_metric = validate_network(
             model, inference_loader, None, parameters, mode="inference"
@@ -287,8 +294,8 @@ def inference_loop(
                 # Check if out_probs_map is greater than 1, print a warning
                 if np.max(probs_map) > 1:
                     # Print a warning
-                    print(
-                        "Warning: Probability map is greater than 1, report the images to GaNDLF developers"
+                    logger.warning(
+                        "Probability map is greater than 1, report the images to GaNDLF developers"
                     )
 
             if count_map is not None:

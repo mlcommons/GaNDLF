@@ -1,7 +1,7 @@
 import os, time, psutil
 from typing import Tuple
 import pandas as pd
-import torch
+import torch, logging
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
@@ -25,9 +25,10 @@ from GANDLF.utils import (
     get_ground_truths_and_predictions_tensor,
     get_model_dict,
     print_and_format_metrics,
+    setup_logger,
 )
 from GANDLF.metrics import overall_stats
-from GANDLF.logger import Logger
+from GANDLF.csv_logger import CSVLogger
 from .step import step
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
@@ -54,6 +55,11 @@ def train_network(
     Returns:
         Tuple[float, dict]: The average epoch training loss and metrics.
     """
+    if "logger_name" in params:
+        logger = logging.getLogger(params["logger_name"])
+    else:
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params.get("verbose", False))
+
     print("*" * 20)
     print("Starting Training : ")
     print("*" * 20)
@@ -74,8 +80,7 @@ def train_network(
     # automatic mixed precision - https://pytorch.org/docs/stable/amp.html
     if params["model"]["amp"]:
         scaler = GradScaler()
-        if params["verbose"]:
-            print("Using Automatic mixed precision", flush=True)
+        logger.debug("Using Automatic mixed precision")
 
     # get ground truths
     if calculate_overall_metrics:
@@ -85,99 +90,98 @@ def train_network(
         ) = get_ground_truths_and_predictions_tensor(params, "training_data")
     # Set the model to train
     model.train()
-    for batch_idx, (subject) in enumerate(
-        tqdm(train_dataloader, desc="Looping over training data")
-    ):
-        optimizer.zero_grad()
-        image = (
-            torch.cat(
-                [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+    log_file = os.path.join(parameters["logs_dir"], "data_loop.log")
+    with open(log_file, 'a') as fl:
+        for batch_idx, (subject) in enumerate(
+            tqdm(train_dataloader, file = fl, desc="Looping over training data")
+        ):
+            optimizer.zero_grad()
+            image = (
+                torch.cat(
+                    [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+                )
+                .float()
+                .to(params["device"])
             )
-            .float()
-            .to(params["device"])
-        )
-        if "value_keys" in params:
-            label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
-            # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
-            label = label.reshape(
-                min(params["batch_size"], len(label)), len(params["value_keys"])
-            )
-        else:
-            label = subject["label"][torchio.DATA]
-        label = label.to(params["device"])
+            if "value_keys" in params:
+                label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
+                # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
+                label = label.reshape(
+                    min(params["batch_size"], len(label)), len(params["value_keys"]),
+                )
+            else:
+                label = subject["label"][torchio.DATA]
+            label = label.to(params["device"])
 
         if params["save_training"]:
             write_training_patches(subject, params)
 
-        # ensure spacing is always present in params and is always subject-specific
-        if "spacing" in subject:
-            params["subject_spacing"] = subject["spacing"]
-        else:
-            params["subject_spacing"] = None
-        loss, calculated_metrics, output, _ = step(model, image, label, params)
-        # store predictions for classification
-        if calculate_overall_metrics:
-            predictions_array[
-                batch_idx
-                * params["batch_size"] : (batch_idx + 1)
-                * params["batch_size"]
-            ] = (torch.argmax(output[0], 0).cpu().item())
-
-        nan_loss = torch.isnan(loss)
-        second_order = (
-            hasattr(optimizer, "is_second_order") and optimizer.is_second_order
-        )
-        if params["model"]["amp"]:
-            with torch.cuda.amp.autocast():
-                # if loss is nan, don't backprop and don't step optimizer
-                if not nan_loss:
-                    scaler(
-                        loss=loss,
-                        optimizer=optimizer,
-                        clip_grad=params["clip_grad"],
-                        clip_mode=params["clip_mode"],
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        create_graph=second_order,
-                    )
-        else:
-            if not nan_loss:
-                loss.backward(create_graph=second_order)
-                if params["clip_grad"] is not None:
-                    dispatch_clip_grad_(
-                        parameters=model_parameters_exclude_head(
-                            model, clip_mode=params["clip_mode"]
-                        ),
-                        value=params["clip_grad"],
-                        mode=params["clip_mode"],
-                    )
-                optimizer.step()
-
-        # Non network training related
-        if not nan_loss:
-            total_epoch_train_loss += loss.detach().cpu().item()
-        for metric in calculated_metrics.keys():
-            if isinstance(total_epoch_train_metric[metric], list):
-                if len(total_epoch_train_metric[metric]) == 0:
-                    total_epoch_train_metric[metric] = np.array(
-                        calculated_metrics[metric]
-                    )
-                else:
-                    total_epoch_train_metric[metric] += np.array(
-                        calculated_metrics[metric]
-                    )
+            # ensure spacing is always present in params and is always subject-specific
+            if "spacing" in subject:
+                params["subject_spacing"] = subject["spacing"]
             else:
-                total_epoch_train_metric[metric] += calculated_metrics[metric]
+                params["subject_spacing"] = None
+            loss, calculated_metrics, output, _ = step(model, image, label, params)
+            # store predictions for classification
+            if calculate_overall_metrics:
+                predictions_array[
+                    batch_idx
+                    * params["batch_size"] : (batch_idx + 1)
+                    * params["batch_size"]
+                ] = (torch.argmax(output[0], 0).cpu().item())
 
-        if params["verbose"]:
-            # For printing information at halftime during an epoch
+            nan_loss = torch.isnan(loss)
+            second_order = (
+                hasattr(optimizer, "is_second_order") and optimizer.is_second_order
+            )
+            if params["model"]["amp"]:
+                with torch.cuda.amp.autocast():
+                    # if loss is nan, don't backprop and don't step optimizer
+                    if not nan_loss:
+                        scaler(
+                            loss=loss,
+                            optimizer=optimizer,
+                            clip_grad=params["clip_grad"],
+                            clip_mode=params["clip_mode"],
+                            parameters=model_parameters_exclude_head(
+                                model, clip_mode=params["clip_mode"]
+                            ),
+                            create_graph=second_order,
+                        )
+            else:
+                if not nan_loss:
+                    loss.backward(create_graph=second_order)
+                    if params["clip_grad"] is not None:
+                        dispatch_clip_grad_(
+                            parameters=model_parameters_exclude_head(
+                                model, clip_mode=params["clip_mode"]
+                            ),
+                            value=params["clip_grad"],
+                            mode=params["clip_mode"],
+                        )
+                    optimizer.step()
+
+            # Non network training related
+            if not nan_loss:
+                total_epoch_train_loss += loss.detach().cpu().item()
+            for metric in calculated_metrics.keys():
+                if isinstance(total_epoch_train_metric[metric], list):
+                    if len(total_epoch_train_metric[metric]) == 0:
+                        total_epoch_train_metric[metric] = np.array(
+                            calculated_metrics[metric]
+                        )
+                    else:
+                        total_epoch_train_metric[metric] += np.array(
+                            calculated_metrics[metric]
+                        )
+                else:
+                    total_epoch_train_metric[metric] += calculated_metrics[metric]
+
             if ((batch_idx + 1) % (len(train_dataloader) / 2) == 0) and (
                 (batch_idx + 1) < len(train_dataloader)
             ):
-                print(
-                    "\nHalf-Epoch Average train loss : ",
-                    total_epoch_train_loss / (batch_idx + 1),
+                logger.debug(
+                    f"\nHalf-Epoch Average train loss : {total_epoch_train_loss / (batch_idx + 1)}"
                 )
                 for metric in params["metrics"]:
                     if isinstance(total_epoch_train_metric[metric], np.ndarray):
@@ -186,10 +190,12 @@ def train_network(
                         ).tolist()
                     else:
                         to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
-                    print("Half-Epoch Average train " + metric + " : ", to_print)
+                    logger.debug(
+                        f"Half-Epoch Average train {metric}: {to_print}"
+                    )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
-    print("     Epoch Final   train loss : ", average_epoch_train_loss)
+    logger.info(f"Epoch Final train loss : {average_epoch_train_loss}")
 
     # get overall stats for classification
     if calculate_overall_metrics:
@@ -228,6 +234,11 @@ def training_loop(
         testing_data (pd.DataFrame): The data to use for testing.
         epochs (int): The number of epochs to train; if None, take from params.
     """
+    if "logger_name" in params:
+        logger = logging.getLogger(params["logger_name"])
+    else:
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params["verbose"])
+
     # Some autodetermined factors
     if epochs is None:
         epochs = params["num_epochs"]
@@ -265,7 +276,7 @@ def training_loop(
         params["previous_parameters"] = main_dict.get("parameters", None)
 
     # Defining our model here according to parameters mentioned in the configuration file
-    print("Number of channels : ", params["model"]["num_channels"])
+    logger.debug(f"Number of channels : {params['model']['num_channels']}")
 
     (
         model,
@@ -290,7 +301,7 @@ def training_loop(
             model_paths["initial"],
             onnx_export=False,
         )
-        print("Initial model saved.")
+        logger.debug("Initial model saved.")
 
     # if previous model file is present, load it up
     if main_dict is not None:
@@ -300,7 +311,7 @@ def training_loop(
             optimizer.load_state_dict(main_dict["optimizer_state_dict"])
             best_loss = main_dict["loss"]
             params["previous_parameters"] = main_dict.get("parameters", None)
-            print("Previous model successfully loaded.")
+            logger.debug("Previous model successfully loaded.")
         except RuntimeWarning:
             RuntimeWarning("Previous model could not be loaded, initializing model")
 
@@ -320,10 +331,10 @@ def training_loop(
     start_time = time.time()
 
     if not (os.environ.get("HOSTNAME") is None):
-        print("Hostname :", os.environ.get("HOSTNAME"))
+        logger.debug(f"Hostname : {os.environ.get('HOSTNAME')}")
 
     # datetime object containing current date and time
-    print("Initializing training at :", get_date_time(), flush=True)
+    print(f"Initializing training at : {get_date_time()}")
 
     calculate_overall_metrics = (params["problem_type"] == "classification") or (
         params["problem_type"] == "regression"
@@ -345,24 +356,24 @@ def training_loop(
             if metric not in metrics_log:
                 metrics_log[metric] = 0
 
-    # Setup a few loggers for tracking
-    train_logger = Logger(
+    # Setup logging to csv files
+    train_csv_logger = CSVLogger(
         logger_csv_filename=os.path.join(output_dir, "logs_training.csv"),
         metrics=metrics_log,
     )
-    valid_logger = Logger(
+    valid_csv_logger = CSVLogger(
         logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=metrics_log,
     )
     if testingDataDefined:
-        test_logger = Logger(
+        test_csv_logger = CSVLogger(
             logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
             metrics=metrics_log,
         )
-    train_logger.write_header(mode="train")
-    valid_logger.write_header(mode="valid")
+    train_csv_logger.write_header(mode="train")
+    valid_csv_logger.write_header(mode="valid")
     if testingDataDefined:
-        test_logger.write_header(mode="test")
+        test_csv_logger.write_header(mode="test")
 
     if "medcam" in params:
         model = medcam.inject(
@@ -378,7 +389,7 @@ def training_loop(
         )
         params["medcam_enabled"] = False
 
-    print("Using device:", device, flush=True)
+    logger.debug(f"Using device: {device}")
 
     # Iterate for number of epochs
     for epoch in range(start_epoch, epochs):
@@ -427,8 +438,7 @@ def training_loop(
         print("*" * 20)
         print("*" * 20)
         print("Starting Epoch : ", epoch)
-        if params["verbose"]:
-            print("Epoch start time : ", get_date_time())
+        logger.debug(f"Epoch start time : {get_date_time()}")
 
         params["current_epoch"] = epoch
 
@@ -441,25 +451,19 @@ def training_loop(
 
         patience += 1
 
-        # Write the losses to a logger
-        train_logger.write(epoch, epoch_train_loss, epoch_train_metric)
-        valid_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
+        # Write the losses to a csv logger
+        train_csv_logger.write(epoch, epoch_train_loss, epoch_train_metric)
+        valid_csv_logger.write(epoch, epoch_valid_loss, epoch_valid_metric)
 
         if testingDataDefined:
             epoch_test_loss, epoch_test_metric = validate_network(
                 model, test_dataloader, scheduler, params, epoch, mode="testing"
             )
-            test_logger.write(epoch, epoch_test_loss, epoch_test_metric)
+            test_csv_logger.write(epoch, epoch_test_loss, epoch_test_metric)
 
-        if params["verbose"]:
-            print("Epoch end time : ", get_date_time())
+        logger.debug(f"Epoch end time : {get_date_time()}")
         epoch_end_time = time.time()
-        print(
-            "Time taken for epoch : ",
-            (epoch_end_time - epoch_start_time) / 60,
-            " mins",
-            flush=True,
-        )
+        logger.info(f"Time taken for epoch : {(epoch_end_time - epoch_start_time) / 60} mins")
 
         model_dict = get_model_dict(model, params["device_id"])
 

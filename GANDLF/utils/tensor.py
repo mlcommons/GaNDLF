@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, warnings
 from typing import List, Optional, Tuple, Union
 from pandas.util import hash_pandas_object
 import numpy as np
@@ -279,8 +279,8 @@ def get_class_imbalance_weights_classification(
     for i in params["model"]["class_list"]:
         i = int(i)
         if i not in weight_dict:
-            print(
-                "WARNING: A class was found in 'class_list' that was not present in the training data, please re-check training data labels"
+            warnings.warn(
+                "A class was found in 'class_list' that was not present in the training data, please re-check training data labels"
             )
             weight_dict[i] = sys.float_info.epsilon
             penalty_dict[i] = (1 + sys.float_info.epsilon) / weight_dict[i]

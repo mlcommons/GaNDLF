@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # adapted from https://github.com/qubvel/segmentation_models.pytorch
 from typing import Optional, Union, List
-import torch
+import torch, warnings
 import torch.nn as nn
 
 from segmentation_models_pytorch.base import SegmentationHead, ClassificationHead
@@ -142,8 +142,8 @@ class Unet(SegmentationModel):
         out_channels = self.encoder.out_channels
         if "mit_" in encoder_name:
             # MixVision Transformers only support 3-channel inputs
-            print(
-                "WARNING: MixVision Transformers only support 3 channels, adding an extra Conv layer for compatibility."
+            warnings.warn(
+                "MixVision Transformers only support 3 channels, adding an extra Conv layer for compatibility."
             )
             self.pre_encoder = nn.Conv2d(in_channels, 3, kernel_size=1, stride=1)
             modules = []

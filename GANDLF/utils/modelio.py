@@ -1,10 +1,11 @@
 import hashlib, os
 from typing import Any, Dict, Optional, Tuple
 
-import torch
+import torch, logging
 
 from ..version import __version__
 from .generic import get_unique_timestamp, get_git_hash
+from GANDLF.utils.logger import setup_logger
 
 # these are the base keys for the model dictionary to save
 model_dict_full = {
@@ -37,6 +38,11 @@ def optimize_and_save_model(
         path (str): The path to save the model dictionary to.
         onnx_export (Optional[bool]): Whether to export to ONNX and OpenVINO. Defaults to True.
     """
+    if "logger_name" in params:
+        logger = logging.getLogger(params["logger_name"])
+    else:
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params.get("verbose", True))
+    
     # Check if ONNX export is enabled in the parameter dictionary
     onnx_export = params["model"].get("onnx_export", onnx_export)
 
@@ -50,12 +56,12 @@ def optimize_and_save_model(
     if not onnx_export:
         # Print a warning if ONNX export is disabled and not already warned
         if "onnx_print" not in params:
-            print("WARNING: Current model is not supported by ONNX/OpenVINO!")
+            logger.warning("Current model is not supported by ONNX/OpenVINO!")
             params["onnx_print"] = True
         return
     else:
         try:
-            print("Optimizing the best model.")
+            logger.debug("Optimizing the best model.")
             num_channel = params["model"]["num_channels"]
             model_dimension = params["model"]["dimension"]
             input_shape = params["patch_size"]
@@ -85,7 +91,7 @@ def optimize_and_save_model(
                     output_names=["output"],
                 )
         except RuntimeWarning:
-            print("WARNING: Cannot export to ONNX model.")
+            logger.warning("Cannot export to ONNX model.")
             return
 
         # Check if OpenVINO is present and try to convert the ONNX model
@@ -100,7 +106,7 @@ def optimize_and_save_model(
             if "2023.0.1" in get_version():
                 openvino_present = True
         except ImportError:
-            print("WARNING: OpenVINO is not present.")
+            logger.warning("OpenVINO is not present.")
 
         if openvino_present:
             xml_path = onnx_path.replace("onnx", "xml")
@@ -124,7 +130,7 @@ def optimize_and_save_model(
                     )
                 ov.runtime.serialize(ov_model, xml_path=xml_path, bin_path=bin_path)
             except Exception as e:
-                print("WARNING: OpenVINO Model Optimizer IR conversion failed: " + e)
+                logger.warning("OpenVINO Model Optimizer IR conversion failed: " + e)
 
 
 def save_model(

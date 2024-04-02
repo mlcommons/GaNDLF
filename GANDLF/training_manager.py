@@ -1,9 +1,9 @@
 import pandas as pd
-import os, pickle, shutil
+import os, pickle, shutil, logging
 from pathlib import Path
 
 from GANDLF.compute import training_loop
-from GANDLF.utils import get_dataframe, split_data
+from GANDLF.utils import get_dataframe, setup_logger, split_data
 
 
 def TrainingManager(
@@ -25,6 +25,12 @@ def TrainingManager(
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
     """
+    
+    if "logger_name" in parameters:
+        logger = logging.getLogger(parameters["logger_name"])
+    else:
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters["verbose"])
+
     if reset:
         shutil.rmtree(outputDir)
         Path(outputDir).mkdir(parents=True, exist_ok=True)
@@ -36,10 +42,8 @@ def TrainingManager(
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
         if os.path.exists(currentModelConfigPickle):
-            print(
-                "Using previously saved parameter file",
-                currentModelConfigPickle,
-                flush=True,
+            logger.debug(
+                f"Using previously saved parameter file {currentModelConfigPickle}"
             )
             parameters = pickle.load(open(currentModelConfigPickle, "rb"))
 

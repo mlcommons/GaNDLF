@@ -1,4 +1,4 @@
-import sys
+import warnings
 from typing import Dict, Tuple
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
@@ -63,8 +63,8 @@ def get_loss_and_metrics(
         if loss_str_lower in global_losses_dict:
             loss_function = global_losses_dict[loss_str_lower]
         else:
-            sys.exit(
-                "WARNING: Could not find the requested loss function '"
+            warnings.warn(
+                "Could not find the requested loss function '"
                 + params["loss_function"]
             )
 

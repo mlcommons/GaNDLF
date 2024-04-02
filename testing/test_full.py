@@ -1,15 +1,16 @@
 from pathlib import Path
-import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
+import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest, logging
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
+from testfixtures import log_capture
 
 from pydicom.data import get_testdata_file
 import cv2
 
 from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils import *
-from GANDLF.utils import parseTestingCSV, get_tensor_from_image
+from GANDLF.utils import parseTestingCSV, get_tensor_from_image, setup_logger
 from GANDLF.data.preprocessing import global_preprocessing_dict
 from GANDLF.data.augmentation import global_augs_dict
 from GANDLF.data.patch_miner.opm.utils import (
@@ -3096,6 +3097,8 @@ def test_generic_cli_function_metrics_cli_rad_nd():
 
             sanitize_outputDir()
 
+    print("passed")
+
 
 def test_generic_deploy_metrics_docker():
     print("50: Testing deployment of a metrics generator to Docker")
@@ -3111,10 +3114,10 @@ def test_generic_deploy_metrics_docker():
     )
 
     assert result, "run_deployment returned false"
+    
     sanitize_outputDir()
-
+    
     print("passed")
-
 
 def test_generic_data_split():
     print("51: Starting test for splitting and saving CSVs")
@@ -3147,5 +3150,26 @@ def test_generic_data_split():
     assert len(files_in_outputDir) == 15, "CSVs were not split correctly"
 
     sanitize_outputDir()
+    
+    print("passed")
 
+@log_capture()
+def test_generic_logging(capture):
+    print("52: Testing logging setup")
+
+    logger, logs_dir, logger_name = setup_logger(outputDir, verbose=True)
+
+    assert os.path.isdir(logs_dir), 'Directory for logs was not generated'
+    assert logger_name in logging.root.manager.loggerDict, f"Logger with name {logger_name} was not created"
+    
+    logger.info('a message')
+    logger.error('an error')
+
+    capture.check(
+        (logger_name, "INFO", "a message"),
+        (logger_name, "ERROR", "an error")
+    )
+
+    sanitize_outputDir()
+    
     print("passed")

@@ -1,7 +1,9 @@
 from typing import Optional, Tuple
 import torch
 import psutil
+import logging
 from .loss_and_metric import get_loss_and_metrics
+from GANDLF.utils import setup_logger
 
 
 def step(
@@ -24,20 +26,23 @@ def step(
     Returns:
         Tuple[float, dict, torch.Tensor, torch.Tensor]: The loss, metrics, output, and attention map.
     """
-    if params["verbose"]:
-        if torch.cuda.is_available():
-            print(torch.cuda.memory_summary())
-        print(
-            "|===========================================================================|"
-        )
-        print(
-            "|                              CPU Utilization                              |"
-        )
-        print("Load_Percent   :", psutil.cpu_percent(interval=None))
-        print("MemUtil_Percent:", psutil.virtual_memory()[2])
-        print(
-            "|===========================================================================|"
-        )
+
+    if "logger_name" in params:
+        logger = logging.getLogger(params["logger_name"])
+    else:
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params["verbose"])
+
+
+    if torch.cuda.is_available():
+        logger.debug(torch.cuda.memory_summary())
+    logger.debug(
+        f"""\n
+            |===========================================================================| \n
+            |                              CPU Utilization                              | \n
+            | Load_Percent   : {psutil.cpu_percent(interval=None)}                      | \n
+            | MemUtil_Percent: {psutil.virtual_memory()[2]}                             | \n
+            |===========================================================================|"""
+    )
 
     # for the weird cases where mask is read as an RGB image, ensure only the first channel is used
     if label is not None:
@@ -46,9 +51,8 @@ def step(
                 label = label[:, 0, ...].unsqueeze(1)
                 # this warning should only come up once
                 if params["print_rgb_label_warning"]:
-                    print(
-                        "WARNING: The label image is an RGB image, only the first channel will be used.",
-                        flush=True,
+                    logger.warning(
+                        "The label image is an RGB image, only the first channel will be used."
                     )
                     params["print_rgb_label_warning"] = False
 

@@ -1,6 +1,7 @@
 # adapted from https://github.com/kenshohara/3D-ResNets-PyTorch
 
 import sys
+import warnings
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -174,8 +175,8 @@ class DenseNet(ModelBase):
         if not ("no_max_pool" in parameters):
             parameters["no_max_pool"] = False
         if self.Norm is None:
-            sys.stderr.write(
-                "Warning: densenet is not defined without a normalization layer"
+            warnings.warn(
+                "densenet is not defined without a normalization layer"
             )
             self.Norm = self.BatchNorm
 
