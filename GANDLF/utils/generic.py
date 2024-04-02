@@ -1,12 +1,14 @@
+from typing import Optional, Union
 import os, datetime, subprocess, sys
 from copy import deepcopy
 import random
+from packaging.version import Version
+
 import numpy as np
 import torch
 import SimpleITK as sitk
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from os import devnull
-from typing import Optional, Union
 
 
 @contextmanager
@@ -86,23 +88,6 @@ def get_filename_extension_sanitized(filename: str) -> str:
     return ext
 
 
-def parse_version(version_string: str) -> int:
-    """
-    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
-
-    Args:
-        version_string (str): The string to be parsed.
-
-    Returns:
-        int: The version number.
-    """
-    version_string_split = version_string.replace("-dev", "")
-    version_string_split = version_string_split.split(".")
-    if len(version_string_split) > 3:
-        del version_string_split[-1]
-    return int("".join(version_string_split))
-
-
 def version_check(version_from_config: str, version_to_check: str) -> bool:
     """
     This function checks if the version of the config file is compatible with the version of the code.
@@ -114,15 +99,21 @@ def version_check(version_from_config: str, version_to_check: str) -> bool:
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
-    version_to_check_int = parse_version(version_to_check)
-    min_ver = parse_version(version_from_config["minimum"])
-    max_ver = parse_version(version_from_config["maximum"])
-    if (min_ver > version_to_check_int) or (max_ver < version_to_check_int):
-        sys.exit(
-            "Incompatible version of GaNDLF detected ("
-            + str(version_to_check_int)
-            + ")"
-        )
+    version_to_check_int = Version(version_to_check)
+    min_ver = Version(version_from_config.get("minimum"), None)
+    max_ver = Version(version_from_config.get("maximum"), None)
+
+    assert min_ver is not None, "Minimum version is not specified in the config file"
+    assert max_ver is not None, "Maximum version is not specified in the config file"
+    assert (
+        min_ver <= max_ver
+    ), "Minimum version is greater than maximum version in the config file"
+    assert (
+        min_ver <= version_to_check_int
+    ), "Minimum version requested in config is greater than the GaNDLF version"
+    assert (
+        max_ver >= version_to_check_int
+    ), "Maximum version requested in config is less than the GaNDLF version"
 
     return True
 
