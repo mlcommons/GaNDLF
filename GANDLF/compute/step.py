@@ -30,7 +30,10 @@ def step(
     if "logger_name" in params:
         logger = logging.getLogger(params["logger_name"])
     else:
-        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params["verbose"])
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(
+            output_dir=params["output_dir"], 
+            verbose=params.get("verbose", False),
+        )
 
 
     if torch.cuda.is_available():

@@ -3096,7 +3096,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             assert os.path.isfile(output_file), "Metrics output file was not generated"
 
             sanitize_outputDir()
-    
+
     print("passed")
 
 
@@ -3114,9 +3114,9 @@ def test_generic_deploy_metrics_docker():
     )
 
     assert result, "run_deployment returned false"
-    
+
     sanitize_outputDir()
-    
+
     print("passed")
 
 def test_generic_data_split():
@@ -3150,7 +3150,7 @@ def test_generic_data_split():
     assert len(files_in_outputDir) == 15, "CSVs were not split correctly"
 
     sanitize_outputDir()
-    
+
     print("passed")
 
 @log_capture()
@@ -3159,17 +3159,18 @@ def test_generic_logging(capture):
 
     logger, logs_dir, logger_name = setup_logger(outputDir, verbose=True)
 
-    assert os.path.isdir(logs_dir), 'Directory for logs was not generated'
-    assert logger_name in logging.root.manager.loggerDict, f"Logger with name {logger_name} was not created"
+    assert os.path.isdir(logs_dir), "Directory for logs was not generated"
+    assert (
+        logger_name in logging.root.manager.loggerDict
+    ), f"Logger with name {logger_name} was not created"
     
-    logger.info('a message')
-    logger.error('an error')
+    logger.info("a message")
+    logger.error("an error")
 
     capture.check(
-        (logger_name, "INFO", "a message"),
-        (logger_name, "ERROR", "an error")
+        (logger_name, "INFO", "a message"), (logger_name, "ERROR", "an error")
     )
 
     sanitize_outputDir()
-    
+
     print("passed")

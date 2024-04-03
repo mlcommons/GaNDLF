@@ -29,7 +29,10 @@ def TrainingManager(
     if "logger_name" in parameters:
         logger = logging.getLogger(parameters["logger_name"])
     else:
-        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters["verbose"])
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
+            output_dir=parameters["output_dir"], 
+            verbose=parameters.get("verbose", False),
+        )
 
     if reset:
         shutil.rmtree(outputDir)

@@ -58,7 +58,10 @@ def train_network(
     if "logger_name" in params:
         logger = logging.getLogger(params["logger_name"])
     else:
-        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params.get("verbose", False))
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(
+            output_dir=params["output_dir"], 
+            verbose=params.get("verbose", False),
+        )
 
     print("*" * 20)
     print("Starting Training : ")
@@ -91,14 +94,15 @@ def train_network(
     # Set the model to train
     model.train()
     log_file = os.path.join(parameters["logs_dir"], "data_loop.log")
-    with open(log_file, 'a') as fl:
+    with open(log_file, "a") as fl:
         for batch_idx, (subject) in enumerate(
             tqdm(train_dataloader, file = fl, desc="Looping over training data")
         ):
             optimizer.zero_grad()
             image = (
                 torch.cat(
-                    [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
+                    [subject[key][torchio.DATA] for key in params["channel_keys"]], 
+                    dim=1,
                 )
                 .float()
                 .to(params["device"])
@@ -107,7 +111,7 @@ def train_network(
                 label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
                 # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
                 label = label.reshape(
-                    min(params["batch_size"], len(label)), len(params["value_keys"]),
+                    min(params["batch_size"], len(label)), len(params["value_keys"])
                 )
             else:
                 label = subject["label"][torchio.DATA]
@@ -190,9 +194,7 @@ def train_network(
                         ).tolist()
                     else:
                         to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
-                    logger.debug(
-                        f"Half-Epoch Average train {metric}: {to_print}"
-                    )
+                    logger.debug(f"Half-Epoch Average train {metric}: {to_print}")
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   train loss : ", average_epoch_train_loss)
@@ -237,7 +239,10 @@ def training_loop(
     if "logger_name" in params:
         logger = logging.getLogger(params["logger_name"])
     else:
-        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params["verbose"])
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(
+            output_dir=params["output_dir"], 
+            verbose=params["verbose"],
+        )
 
     # Some autodetermined factors
     if epochs is None:

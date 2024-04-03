@@ -16,7 +16,7 @@ from GANDLF.utils import (
     resize_image,
     get_filename_extension_sanitized,
     get_correct_padding_size,
-    setup_logger
+    setup_logger,
 )
 from .preprocessing import get_transforms_for_preprocessing
 from .augmentation import global_augs_dict
@@ -85,7 +85,10 @@ def ImagesFromDataFrame(
     if "logger_name" in parameters:
         logger = logging.getLogger(parameters["logger_name"])
     else:
-        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters.get("verbose", False))
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
+            output_dir=parameters["output_dir"], 
+            verbose=parameters.get("verbose", False),
+        )
 
 
     resize_images_flag = False
@@ -128,9 +131,11 @@ def ImagesFromDataFrame(
 
     # iterating through the dataframe and sending logs to file
     log_file = os.path.join(parameters["logs_dir"], "data_loop.log")
-    with open(log_file, 'a') as fl:
+    with open(log_file, "a") as fl:
         for patient in tqdm(
-            range(num_row), file = fl, desc="Constructing queue for " + loader_type + " data"
+            range(num_row), 
+            file = fl, 
+            desc="Constructing queue for " + loader_type + " data",
         ):
             # We need this dict for storing the meta data for each subject
             # such as different image modalities, labels, any other data
@@ -157,7 +162,8 @@ def ImagesFromDataFrame(
                 # if resize_image is requested, the perform per-image resize with appropriate interpolator
                 if resize_images_flag:
                     img_resized = resize_image(
-                        subject_dict[str(channel)].as_sitk(), preprocessing["resize_image"]
+                        subject_dict[str(channel)].as_sitk(), 
+                        preprocessing["resize_image"],
                     )
                     if parameters["memory_save_mode"]:
                         _save_resized_images(
@@ -187,7 +193,9 @@ def ImagesFromDataFrame(
                 if not os.path.isfile(str(dataframe[labelHeader][patient])):
                     skip_subject = True
 
-                subject_dict["label"] = torchio.LabelMap(dataframe[labelHeader][patient])
+                subject_dict["label"] = torchio.LabelMap(
+                    dataframe[labelHeader][patient]
+                )
                 subject_dict["path_to_metadata"] = str(dataframe[labelHeader][patient])
 
                 # if resize is requested, the perform per-image resize with appropriate interpolator

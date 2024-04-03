@@ -56,9 +56,7 @@ class ResNet(ModelBase):
 
         # If normalization layer is not defined, use Batch Normalization
         if self.Norm is None:
-            warnings.warn(
-                "resnet is not defined without a normalization layer"
-            )
+            warnings.warn("resnet is not defined without a normalization layer")
             self.Norm = self.BatchNorm
 
         # Define first convolution layer with 7x7 conv stride 2, 2x2 pool stride 2

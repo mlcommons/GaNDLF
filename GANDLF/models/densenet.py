@@ -175,9 +175,7 @@ class DenseNet(ModelBase):
         if not ("no_max_pool" in parameters):
             parameters["no_max_pool"] = False
         if self.Norm is None:
-            warnings.warn(
-                "densenet is not defined without a normalization layer"
-            )
+            warnings.warn("densenet is not defined without a normalization layer")
             self.Norm = self.BatchNorm
 
         if self.n_dimensions == 2:

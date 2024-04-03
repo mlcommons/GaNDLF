@@ -50,7 +50,10 @@ def validate_network(
     if "logger_name" in params:
         logger = logging.getLogger(params["logger_name"])
     else:
-        logger, params["logs_dir"], params["logger_name"] = setup_logger(output_dir=params["output_dir"], verbose=params.get("verbose", False))
+        logger, params["logs_dir"], params["logger_name"] = setup_logger(
+            output_dir=params["output_dir"], 
+            verbose=params.get("verbose", False),
+        )
 
     print("*" * 20)
     print("Starting " + mode + " : ")
@@ -257,7 +260,7 @@ def validate_network(
                     ", time : ",
                     get_date_time(),
                     ", location :",
-                    patches_batch[torchio.LOCATION]
+                    patches_batch[torchio.LOCATION],
                 )
                 current_patch += 1
                 image = (
@@ -285,7 +288,7 @@ def validate_network(
                         "=== Validation shapes : label:",
                         label.shape,
                         ", image:",
-                        image.shape
+                        image.shape,
                     )
 
                 if is_inference:
@@ -431,7 +434,7 @@ def validate_network(
                     "Full image " + mode + ":: Loss: ",
                     final_loss,
                     "; Metric: ",
-                    final_metric
+                    final_metric,
                 )
 
                 # # Non network validing related
@@ -465,12 +468,9 @@ def validate_network(
                             total_epoch_valid_metric[metric] / (batch_idx + 1)
                         ).tolist()
                     else:
-                        to_print = total_epoch_valid_metric[metric] / (
-                            batch_idx + 1
-                        )
+                        to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
                     logger.debug(
-                        "Half-Epoch Average " + mode + " " + metric + " : ",
-                        to_print,
+                        "Half-Epoch Average " + mode + " " + metric + " : ", to_print
                     )
 
     if params["medcam_enabled"] and params["model"]["type"] == "torch":

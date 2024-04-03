@@ -52,7 +52,7 @@ def main_run(
             )
         parameters["output_dir"] = model_dir
         Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
-    
+
     # if the output directory is not specified, then use the model directory even for the testing data
     # default behavior
     parameters["output_dir"] = parameters.get("output_dir", output_dir)
@@ -61,7 +61,9 @@ def main_run(
     Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # setup logger
-    logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=output_dir, verbose=parameters.get("verbose", False))
+    logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
+        output_dir=output_dir, verbose=parameters.get("verbose", False)
+    )
 
     if "-1" in device:
         device = "cpu"

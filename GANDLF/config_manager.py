@@ -70,9 +70,7 @@ def initialize_parameter(
                         params[parameter_to_initialize]
                     )
     else:
-        warnings.warn(
-            "Initializing '" + parameter_to_initialize + "' as " + str(value)
-        )
+        warnings.warn("Initializing '" + parameter_to_initialize + "' as " + str(value))
         params[parameter_to_initialize] = value
 
     return params

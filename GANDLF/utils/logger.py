@@ -2,6 +2,7 @@ import logging, os, warnings
 from typing import Optional, Tuple
 from pathlib import Path
 
+
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     """
     This function formats warning message according to its type
@@ -9,10 +10,12 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     if category == UserWarning:
         return str(message)
     else:
-        return '%s:%s: %s:%s' % (filename, lineno, category.__name__, message)
+        return "%s:%s: %s:%s" % (filename, lineno, category.__name__, message)
 
 
-def setup_logger(output_dir: str, verbose: Optional[bool] = False) -> Tuple[logging.Logger, str, str]:
+def setup_logger(
+        output_dir: str, verbose: Optional[bool] = False
+    ) -> Tuple[logging.Logger, str, str]:
     """
     This function setups a logger with severity level controlled by verbose parameter from a config file.
 
@@ -26,8 +29,8 @@ def setup_logger(output_dir: str, verbose: Optional[bool] = False) -> Tuple[logg
         logger_dir (str): directory for the logs
         logger_name (str): name of the logger
     """
-    logs_dir = f'{output_dir}/logs'
-    logger_name = 'gandlf'
+    logs_dir = f"{output_dir}/logs"
+    logger_name = "gandlf"
     Path(logs_dir).mkdir(parents=True, exist_ok=True)
 
     warnings.formatwarning = warning_on_one_line
@@ -41,7 +44,9 @@ def setup_logger(output_dir: str, verbose: Optional[bool] = False) -> Tuple[logg
     warnings_logger = logging.getLogger("py.warnings")
 
     # create formatter and add it to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     fh.setFormatter(formatter)
 
     # add the handlers to logger

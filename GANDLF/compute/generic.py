@@ -12,7 +12,7 @@ from GANDLF.utils import (
     parseTrainingCSV,
     send_model_to_device,
     get_class_imbalance_weights,
-    setup_logger
+    setup_logger,
 )
 
 
@@ -40,11 +40,14 @@ def create_pytorch_objects(
 
     Returns:
         Tuple[ torch.nn.Module, torch.optim.Optimizer, DataLoader, DataLoader, torch.optim.lr_scheduler.LRScheduler, dict, ]: The model, optimizer, train loader, validation loader, scheduler, and parameters.
-    """    
+    """
     if "logger_name" in parameters:
         logger = logging.getLogger(parameters["logger_name"])
     else:
-        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters.get("verbose", False))
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
+            output_dir=parameters["output_dir"], 
+            verbose=parameters.get("verbose", False),
+        )
 
     # initialize train and val loaders
     train_loader, val_loader = None, None

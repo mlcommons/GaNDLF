@@ -24,7 +24,7 @@ from GANDLF.utils import (
     load_ov_model,
     print_model_summary,
     applyCustomColorMap,
-    setup_logger
+    setup_logger,
 )
 
 from GANDLF.data.inference_dataloader_histopath import InferTumorSegDataset
@@ -51,7 +51,10 @@ def inference_loop(
     if "logger_name" in parameters:
         logger = logging.getLogger(parameters["logger_name"])
     else:
-        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=parameters["output_dir"], verbose=parameters.get("verbose", False))
+        logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
+            output_dir=parameters["output_dir"], 
+            verbose=parameters.get("verbose", False),
+        )
 
     # Defining our model here according to parameters mentioned in the configuration file
     logger.debug("Current model type : ", parameters["model"]["type"])

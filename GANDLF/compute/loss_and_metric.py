@@ -64,8 +64,7 @@ def get_loss_and_metrics(
             loss_function = global_losses_dict[loss_str_lower]
         else:
             warnings.warn(
-                "Could not find the requested loss function '"
-                + params["loss_function"]
+                "Could not find the requested loss function '" + params["loss_function"]
             )
 
     loss = 0
