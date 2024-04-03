@@ -112,7 +112,7 @@ def version_check(
         max_ver_obj is not None
     ), "Maximum version is not specified in the config file"
     assert (
-        min_ver_obj < max_ver_obj
+        min_ver_obj <= max_ver_obj
     ), f"Minimum version ({min_ver_obj}) is greater than maximum version in the config file. ({max_ver_obj})"
     assert (
         min_ver_obj <= version_to_check_obj
