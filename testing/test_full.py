@@ -3119,6 +3119,7 @@ def test_generic_deploy_metrics_docker():
 
     print("passed")
 
+
 def test_generic_data_split():
     print("51: Starting test for splitting and saving CSVs")
     # read and initialize parameters for specific data dimension
@@ -3153,6 +3154,7 @@ def test_generic_data_split():
 
     print("passed")
 
+
 @log_capture()
 def test_generic_logging(capture):
     print("52: Testing logging setup")
@@ -3163,7 +3165,7 @@ def test_generic_logging(capture):
     assert (
         logger_name in logging.root.manager.loggerDict
     ), f"Logger with name {logger_name} was not created"
-    
+
     logger.info("a message")
     logger.error("an error")
 

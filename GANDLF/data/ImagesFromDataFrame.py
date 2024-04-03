@@ -86,7 +86,7 @@ def ImagesFromDataFrame(
         logger = logging.getLogger(parameters["logger_name"])
     else:
         logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
-            output_dir=parameters["output_dir"], 
+            output_dir=parameters["output_dir"],
             verbose=parameters.get("verbose", False),
         )
 
@@ -133,8 +133,8 @@ def ImagesFromDataFrame(
     log_file = os.path.join(parameters["logs_dir"], "data_loop.log")
     with open(log_file, "a") as fl:
         for patient in tqdm(
-            range(num_row), 
-            file = fl, 
+            range(num_row),
+            file = fl,
             desc="Constructing queue for " + loader_type + " data",
         ):
             # We need this dict for storing the meta data for each subject
@@ -162,7 +162,7 @@ def ImagesFromDataFrame(
                 # if resize_image is requested, the perform per-image resize with appropriate interpolator
                 if resize_images_flag:
                     img_resized = resize_image(
-                        subject_dict[str(channel)].as_sitk(), 
+                        subject_dict[str(channel)].as_sitk(),
                         preprocessing["resize_image"],
                     )
                     if parameters["memory_save_mode"]:

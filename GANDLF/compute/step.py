@@ -31,8 +31,7 @@ def step(
         logger = logging.getLogger(params["logger_name"])
     else:
         logger, params["logs_dir"], params["logger_name"] = setup_logger(
-            output_dir=params["output_dir"], 
-            verbose=params.get("verbose", False),
+            output_dir=params["output_dir"], verbose=params.get("verbose", False)
         )
 
 

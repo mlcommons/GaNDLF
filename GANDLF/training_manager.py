@@ -25,12 +25,12 @@ def TrainingManager(
         resume (bool): Whether the previous run will be resumed or not.
         reset (bool): Whether the previous run will be reset or not.
     """
-    
+
     if "logger_name" in parameters:
         logger = logging.getLogger(parameters["logger_name"])
     else:
         logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
-            output_dir=parameters["output_dir"], 
+            output_dir=parameters["output_dir"],
             verbose=parameters.get("verbose", False),
         )
 

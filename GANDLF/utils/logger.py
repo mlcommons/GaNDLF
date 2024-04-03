@@ -14,8 +14,8 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
 
 
 def setup_logger(
-        output_dir: str, verbose: Optional[bool] = False
-    ) -> Tuple[logging.Logger, str, str]:
+    output_dir: str, verbose: Optional[bool] = False
+) -> Tuple[logging.Logger, str, str]:
     """
     This function setups a logger with severity level controlled by verbose parameter from a config file.
 

@@ -52,7 +52,7 @@ def inference_loop(
         logger = logging.getLogger(parameters["logger_name"])
     else:
         logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(
-            output_dir=parameters["output_dir"], 
+            output_dir=parameters["output_dir"],
             verbose=parameters.get("verbose", False),
         )
 

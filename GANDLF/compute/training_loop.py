@@ -59,8 +59,7 @@ def train_network(
         logger = logging.getLogger(params["logger_name"])
     else:
         logger, params["logs_dir"], params["logger_name"] = setup_logger(
-            output_dir=params["output_dir"], 
-            verbose=params.get("verbose", False),
+            output_dir=params["output_dir"], verbose=params.get("verbose", False)
         )
 
     print("*" * 20)
@@ -101,7 +100,7 @@ def train_network(
             optimizer.zero_grad()
             image = (
                 torch.cat(
-                    [subject[key][torchio.DATA] for key in params["channel_keys"]], 
+                    [subject[key][torchio.DATA] for key in params["channel_keys"]],
                     dim=1,
                 )
                 .float()
@@ -240,8 +239,7 @@ def training_loop(
         logger = logging.getLogger(params["logger_name"])
     else:
         logger, params["logs_dir"], params["logger_name"] = setup_logger(
-            output_dir=params["output_dir"], 
-            verbose=params["verbose"],
+            output_dir=params["output_dir"], verbose=params.get("verbose", False)
         )
 
     # Some autodetermined factors
