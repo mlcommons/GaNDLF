@@ -99,15 +99,17 @@ def version_check(version_from_config: Dict[str, str], version_to_check: str) ->
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
-    version_to_check_obj = Version(version_to_check)
-
+    versions_from_config = {}
     for key_to_check in ["minimum", "maximum"]:
-        version_to_check = version_from_config.get(key_to_check, None)
+        versions_from_config[key_to_check] = version_from_config.get(key_to_check, None)
         assert (
-            version_to_check is not None
+            versions_from_config[key_to_check] is not None
         ), f"Version {key_to_check} is not specified in the config file"
-    min_ver_obj = Version(version_from_config.get("minimum", None))
-    max_ver_obj = Version(version_from_config.get("maximum", None))
+
+    # create Version objects
+    version_to_check_obj = Version(version_to_check)
+    min_ver_obj = Version(versions_from_config["minimum"])
+    max_ver_obj = Version(versions_from_config["maximum"])
 
     assert (
         min_ver_obj <= max_ver_obj
