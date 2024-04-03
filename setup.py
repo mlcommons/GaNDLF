@@ -114,6 +114,7 @@ requirements = [
     "keyring",
     "monai==1.3.0",
     "packaging==24.0",
+    "typer==0.9.0",
 ]
 
 if __name__ == "__main__":
