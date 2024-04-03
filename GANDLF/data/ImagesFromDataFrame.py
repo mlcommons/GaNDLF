@@ -90,7 +90,6 @@ def ImagesFromDataFrame(
             verbose=parameters.get("verbose", False),
         )
 
-
     resize_images_flag = False
     # if resize has been defined but resample is not (or is none)
     if not (preprocessing is None):
@@ -134,7 +133,7 @@ def ImagesFromDataFrame(
     with open(log_file, "a") as fl:
         for patient in tqdm(
             range(num_row),
-            file = fl,
+            file=fl,
             desc="Constructing queue for " + loader_type + " data",
         ):
             # We need this dict for storing the meta data for each subject

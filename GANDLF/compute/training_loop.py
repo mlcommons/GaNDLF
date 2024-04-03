@@ -95,7 +95,7 @@ def train_network(
     log_file = os.path.join(parameters["logs_dir"], "data_loop.log")
     with open(log_file, "a") as fl:
         for batch_idx, (subject) in enumerate(
-            tqdm(train_dataloader, file = fl, desc="Looping over training data")
+            tqdm(train_dataloader, file=fl, desc="Looping over training data")
         ):
             optimizer.zero_grad()
             image = (

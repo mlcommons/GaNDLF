@@ -34,7 +34,6 @@ def step(
             output_dir=params["output_dir"], verbose=params.get("verbose", False)
         )
 
-
     if torch.cuda.is_available():
         logger.debug(torch.cuda.memory_summary())
     logger.debug(
