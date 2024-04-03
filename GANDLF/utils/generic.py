@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 import os, datetime, subprocess, sys
 from copy import deepcopy
 import random
@@ -88,32 +88,38 @@ def get_filename_extension_sanitized(filename: str) -> str:
     return ext
 
 
-def version_check(version_from_config: str, version_to_check: str) -> bool:
+def version_check(
+    version_from_config: Union[Dict[str, int], Dict[str, str]], version_to_check: str
+) -> bool:
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
     Args:
-        version_from_config (str): The version of the config file.
+        version_from_config (Union[Dict[str, int], Dict[str, str]]): The version from the config file which contains minimum and maximum versions.
         version_to_check (str): The version of the code or model to check.
 
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
-    version_to_check_int = Version(version_to_check)
-    min_ver = Version(version_from_config.get("minimum"), None)
-    max_ver = Version(version_from_config.get("maximum"), None)
+    version_to_check_obj = Version(version_to_check)
+    min_ver_obj = Version(version_from_config.get("minimum", None))
+    max_ver_obj = Version(version_from_config.get("maximum", None))
 
-    assert min_ver is not None, "Minimum version is not specified in the config file"
-    assert max_ver is not None, "Maximum version is not specified in the config file"
     assert (
-        min_ver <= max_ver
-    ), "Minimum version is greater than maximum version in the config file"
+        min_ver_obj is not None
+    ), "Minimum version is not specified in the config file"
     assert (
-        min_ver <= version_to_check_int
-    ), "Minimum version requested in config is greater than the GaNDLF version"
+        max_ver_obj is not None
+    ), "Maximum version is not specified in the config file"
     assert (
-        max_ver >= version_to_check_int
-    ), "Maximum version requested in config is less than the GaNDLF version"
+        min_ver_obj < max_ver_obj
+    ), f"Minimum version is greater than maximum version in the config file."
+    assert (
+        min_ver_obj <= version_to_check_obj
+    ), f"Minimum version ({min_ver_obj}) requested in config is greater than the GaNDLF version"
+    assert (
+        max_ver_obj >= version_to_check_obj
+    ), f"Maximum version ({max_ver_obj}) requested in config is less than the GaNDLF version ({version_to_check_obj})"
 
     return True
 
