@@ -1,4 +1,3 @@
-import yaml
 from typing import Optional
 from pathlib import Path
 
@@ -42,6 +41,8 @@ def main_run(
     file_data_full = data_csv
     model_parameters = config_file
     device = device
+    parameters = ConfigManager(model_parameters)
+    parameters["device_id"] = -1
 
     if train_mode:
         if resume:
@@ -49,24 +50,18 @@ def main_run(
                 "Trying to resume training without changing any parameters from previous run.",
                 flush=True,
             )
-        output_dir = model_dir
-    else:
-        if output_dir is None:
-            output_dir = model_dir
+        parameters["output_dir"] = model_dir
+        Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
     
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    
-    with open(config_file, 'r') as f:
-        config_params = yaml.safe_load(f)
+    # if the output directory is not specified, then use the model directory even for the testing data
+    # default behavior
+    parameters["output_dir"] = parameters.get("output_dir", output_dir)
+    if parameters["output_dir"] is None:
+        parameters["output_dir"] = model_dir
+    Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     # setup logger
-    logger, logs_dir, logger_name = setup_logger(output_dir=output_dir, verbose=config_params.get("verbose", False))
-    
-    parameters = ConfigManager(model_parameters)
-    parameters["device_id"] = -1
-    parameters["output_dir"] = output_dir
-    parameters["logs_dir"] = logs_dir
-    parameters["logger_name"] = logger_name
+    logger, parameters["logs_dir"], parameters["logger_name"] = setup_logger(output_dir=output_dir, verbose=parameters.get("verbose", False))
 
     if "-1" in device:
         device = "cpu"
@@ -82,7 +77,7 @@ def main_run(
         )
         assert (
             headers_train == headers_validation
-        ), logger.error("The training and validation CSVs do not have the same header information.")
+        ), "The training and validation CSVs do not have the same header information."
 
         # testing data is present
         data_testing = None
@@ -93,7 +88,7 @@ def main_run(
             )
         assert (
             headers_train == headers_testing
-        ), logger.error("The training and testing CSVs do not have the same header information.")
+        ), "The training and testing CSVs do not have the same header information."
 
         parameters = populate_header_in_parameters(parameters, headers_train)
         logger.debug("if we are here, it is assumed that the user wants to do training")

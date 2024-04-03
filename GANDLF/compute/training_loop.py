@@ -113,8 +113,8 @@ def train_network(
                 label = subject["label"][torchio.DATA]
             label = label.to(params["device"])
 
-        if params["save_training"]:
-            write_training_patches(subject, params)
+            if params["save_training"]:
+                write_training_patches(subject, params)
 
             # ensure spacing is always present in params and is always subject-specific
             if "spacing" in subject:
@@ -195,7 +195,7 @@ def train_network(
                     )
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
-    logger.info(f"Epoch Final train loss : {average_epoch_train_loss}")
+    print("     Epoch Final   train loss : ", average_epoch_train_loss)
 
     # get overall stats for classification
     if calculate_overall_metrics:
@@ -334,7 +334,7 @@ def training_loop(
         logger.debug(f"Hostname : {os.environ.get('HOSTNAME')}")
 
     # datetime object containing current date and time
-    print(f"Initializing training at : {get_date_time()}")
+    print("Initializing training at :", get_date_time(), flush=True)
 
     calculate_overall_metrics = (params["problem_type"] == "classification") or (
         params["problem_type"] == "regression"
@@ -463,7 +463,12 @@ def training_loop(
 
         logger.debug(f"Epoch end time : {get_date_time()}")
         epoch_end_time = time.time()
-        logger.info(f"Time taken for epoch : {(epoch_end_time - epoch_start_time) / 60} mins")
+        print(
+            "Time taken for epoch : ",
+            (epoch_end_time - epoch_start_time) / 60,
+            " mins",
+            flush=True,
+        )
 
         model_dict = get_model_dict(model, params["device_id"])
 

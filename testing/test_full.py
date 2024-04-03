@@ -3096,7 +3096,7 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             assert os.path.isfile(output_file), "Metrics output file was not generated"
 
             sanitize_outputDir()
-
+    
     print("passed")
 
 
