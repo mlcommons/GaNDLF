@@ -113,10 +113,10 @@ def version_check(
     ), "Maximum version is not specified in the config file"
     assert (
         min_ver_obj < max_ver_obj
-    ), f"Minimum version is greater than maximum version in the config file."
+    ), f"Minimum version ({min_ver_obj}) is greater than maximum version in the config file. ({max_ver_obj})"
     assert (
         min_ver_obj <= version_to_check_obj
-    ), f"Minimum version ({min_ver_obj}) requested in config is greater than the GaNDLF version"
+    ), f"Minimum version ({min_ver_obj}) requested in config is greater than the GaNDLF version ({version_to_check_obj})"
     assert (
         max_ver_obj >= version_to_check_obj
     ), f"Maximum version ({max_ver_obj}) requested in config is less than the GaNDLF version ({version_to_check_obj})"
