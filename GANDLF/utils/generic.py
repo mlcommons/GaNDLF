@@ -89,13 +89,13 @@ def get_filename_extension_sanitized(filename: str) -> str:
 
 
 def version_check(
-    version_from_config: Union[Dict[str, int], Dict[str, str]], version_to_check: str
+    version_from_config: Dict[str, str], version_to_check: str
 ) -> bool:
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
     Args:
-        version_from_config (Union[Dict[str, int], Dict[str, str]]): The version from the config file which contains minimum and maximum versions.
+        version_from_config (Dict[str, str]): The version from the config file which contains minimum and maximum versions.
         version_to_check (str): The version of the code or model to check.
 
     Returns:
