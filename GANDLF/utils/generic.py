@@ -88,9 +88,7 @@ def get_filename_extension_sanitized(filename: str) -> str:
     return ext
 
 
-def version_check(
-    version_from_config: Dict[str, str], version_to_check: str
-) -> bool:
+def version_check(version_from_config: Dict[str, str], version_to_check: str) -> bool:
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
