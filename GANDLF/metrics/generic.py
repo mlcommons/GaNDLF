@@ -1,4 +1,4 @@
-import torch
+import torch, warnings
 from torchmetrics import (
     Metric,
     F1Score,
@@ -31,8 +31,8 @@ def generic_function_output_with_check(
         torch.Tensor: The output of the metric function.
     """
     if torch.min(prediction) < 0:
-        print(
-            "WARNING: Negative values detected in prediction, cannot compute torchmetrics calculations."
+        warnings.warn(
+            "Negative values detected in prediction, cannot compute torchmetrics calculations."
         )
         return torch.zeros((1), device=prediction.device)
     else:

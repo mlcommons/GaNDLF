@@ -1,4 +1,5 @@
-import typing, sys
+import typing
+import warnings
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -316,9 +317,8 @@ class SDNet(ModelBase):
         self.modality_factors = 8
 
         if parameters["patch_size"] != [224, 224, 1]:
-            print(
-                "WARNING: The patch size is not 224x224, which is required for sdnet. Using default patch size instead",
-                file=sys.stderr,
+            warnings.warn(
+                "The patch size is not 224x224, which is required for sdnet. Using default patch size instead"
             )
             parameters["patch_size"] = [224, 224, 1]
 

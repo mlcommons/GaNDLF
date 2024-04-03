@@ -113,6 +113,7 @@ requirements = [
     "zarr",
     "keyring",
     "monai==1.3.0",
+    "testfixtures",
 ]
 
 if __name__ == "__main__":

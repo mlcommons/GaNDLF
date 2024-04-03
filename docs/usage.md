@@ -310,6 +310,8 @@ ${architecture_name}_best.pth.tar # the best model in native PyTorch format
 ${architecture_name}_latest.pth.tar # the latest model in native PyTorch format
 ${architecture_name}_initial.pth.tar # the initial model in native PyTorch format
 ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name} is supported, the graph-optimized best model in ONNX format
+logs/gandlf.log # log file containing logs from the application
+logs/data_loop.log # log file showing looping through data
 # other files dependent on if training/validation/testing output was enabled in configuration
 ```
 
@@ -319,7 +321,22 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 - The predictions will be saved in the same directory as the model if `outputdir` is not passed to `gandlf_run`.
 - For segmentation, a directory will be created per subject ID in the input CSV.
 - For classification/regression, the predictions will be generated in the `outputdir` or `modeldir` as a CSV file.
+- Logs directory will be generated in the same directory as the model if `outputdir` is not specified.
 
+### Logging levels
+The log messages produced by a specific component each have their own designated log levels. If a message's log level is equal to or higher in priority than the log level setting of its component, it will be displayed. Otherwise, it will be suppressed. This feature enables you to selectively mute extensive sets of log messages that aren't pertinent and enhance the detail of logs for relevant components. The anticipated log level values, ranked from most to least critical, are as follows:
+* `logging.CRITICAL`
+* `logging.ERROR`
+* `logging.WARNING`
+* `logging.INFO`
+* `logging.DEBUG`
+* `logging.NOTSET`
+
+See documentation for the Python logging module for more information on log levels: https://docs.python.org/3/library/logging.html#levels.
+
+In GaNDLF logs levels are set as follows:
+- `std.err` is set to `ERROR` level
+- `gandlf.log` file is set to `DEBUG` level if `verbose` pararameter is `True`, otherwise set to `WARNING`. The default logging level is `WARNING`; `verbose` parameter can be specified in a configuration file.
 
 ## Plot the final results
 

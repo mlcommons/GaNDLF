@@ -1,4 +1,4 @@
-import os, sys, pickle
+import os, pickle, warnings
 from typing import Optional
 from pathlib import Path
 import SimpleITK as sitk
@@ -88,10 +88,8 @@ def preprocess_and_save(
         (parameters["patch_sampler"] == "label")
         or (isinstance(parameters["patch_sampler"], dict))
     ) and parameters["q_samples_per_volume"] > 1:
-        print(
-            "[WARNING] Label sampling has been enabled but q_samples_per_volume > 1; this has been known to cause issues, so q_samples_per_volume will be hard-coded to 1 during preprocessing. Please contact GaNDLF developers for more information",
-            file=sys.stderr,
-            flush=True,
+        warnings.warn(
+            "Label sampling has been enabled but q_samples_per_volume > 1; this has been known to cause issues, so q_samples_per_volume will be hard-coded to 1 during preprocessing. Please contact GaNDLF developers for more information"
         )
 
     for _, (subject) in enumerate(

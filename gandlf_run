@@ -6,6 +6,7 @@ import argparse
 import ast
 import sys
 import traceback
+import warnings
 
 from GANDLF import version
 from GANDLF.cli import main_run, copyrightMessage
@@ -114,8 +115,8 @@ if __name__ == "__main__":
         args.reset, args.resume = False, False
 
     if args.reset and args.resume:
-        print(
-            "WARNING: 'reset' and 'resume' are mutually exclusive; 'resume' will be used."
+        warnings.warn(
+            "reset' and 'resume' are mutually exclusive; 'resume' will be used."
         )
         args.reset = False
 
