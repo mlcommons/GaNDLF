@@ -1,12 +1,14 @@
+from typing import Optional, Union, Dict
 import os, datetime, subprocess, sys
 from copy import deepcopy
 import random
+from packaging.version import Version
+
 import numpy as np
 import torch
 import SimpleITK as sitk
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from os import devnull
-from typing import Optional, Union
 
 
 @contextmanager
@@ -86,43 +88,38 @@ def get_filename_extension_sanitized(filename: str) -> str:
     return ext
 
 
-def parse_version(version_string: str) -> int:
-    """
-    Parses version string, discards last identifier (NR/alpha/beta) and returns an integer for comparison.
-
-    Args:
-        version_string (str): The string to be parsed.
-
-    Returns:
-        int: The version number.
-    """
-    version_string_split = version_string.replace("-dev", "")
-    version_string_split = version_string_split.split(".")
-    if len(version_string_split) > 3:
-        del version_string_split[-1]
-    return int("".join(version_string_split))
-
-
-def version_check(version_from_config: str, version_to_check: str) -> bool:
+def version_check(version_from_config: Dict[str, str], version_to_check: str) -> bool:
     """
     This function checks if the version of the config file is compatible with the version of the code.
 
     Args:
-        version_from_config (str): The version of the config file.
+        version_from_config (Dict[str, str]): The version from the config file which contains minimum and maximum versions.
         version_to_check (str): The version of the code or model to check.
 
     Returns:
         bool: If the version of the config file is compatible with the version of the code.
     """
-    version_to_check_int = parse_version(version_to_check)
-    min_ver = parse_version(version_from_config["minimum"])
-    max_ver = parse_version(version_from_config["maximum"])
-    if (min_ver > version_to_check_int) or (max_ver < version_to_check_int):
-        sys.exit(
-            "Incompatible version of GaNDLF detected ("
-            + str(version_to_check_int)
-            + ")"
-        )
+    versions_from_config = {}
+    for key_to_check in ["minimum", "maximum"]:
+        versions_from_config[key_to_check] = version_from_config.get(key_to_check, None)
+        assert (
+            versions_from_config[key_to_check] is not None
+        ), f"Version {key_to_check} is not specified in the config file"
+
+    # create Version objects
+    version_to_check_obj = Version(version_to_check)
+    min_ver_obj = Version(versions_from_config["minimum"])
+    max_ver_obj = Version(versions_from_config["maximum"])
+
+    assert (
+        min_ver_obj <= max_ver_obj
+    ), f"Minimum version ({min_ver_obj}) is greater than maximum version in the config file. ({max_ver_obj})"
+    assert (
+        min_ver_obj <= version_to_check_obj
+    ), f"Minimum version ({min_ver_obj}) requested in config is greater than the GaNDLF version ({version_to_check_obj})"
+    assert (
+        max_ver_obj >= version_to_check_obj
+    ), f"Maximum version ({max_ver_obj}) requested in config is less than the GaNDLF version ({version_to_check_obj})"
 
     return True
 
