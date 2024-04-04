@@ -3,7 +3,7 @@
 version:
   {
     minimum: 0.0.14,
-    maximum: 0.0.20
+    maximum: 0.0.20-dev
   }
 model:
   {

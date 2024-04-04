@@ -77,6 +77,11 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - Update [Inference Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/inference_manager.py), if any inference API has changed
 - [Update Tests](#update-tests)
 
+## Adding new CLI command
+Example: `gandlf config-generator` [CLI command](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/config_generator.py)
+- Implement function and wrap it with `@click.command()` + `@click.option()`
+- Add it to `cli_subommands` [dict](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/__init__.py)
+The command would be available under `gandlf your-subcommand-name` CLI command.
 
 ## Update parameters
 
