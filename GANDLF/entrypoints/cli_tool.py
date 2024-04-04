@@ -1,24 +1,9 @@
 import logging
 
 import click
-
+from . import cli_subcommands
 from GANDLF.entrypoints import append_copyright_to_help
 
-# import anonymizer command
-# import run command
-# import construct_csv command
-# import collect_stats command
-# import patch_miner command
-from GANDLF.entrypoints.preprocess import new_way as preprocess_command
-
-# import verify_install command
-# import config_generator command
-# import recover_config command
-# import deploy command
-# import optimize_model command
-# import generate_metrics command
-# import debug_info command
-# import split_csv command
 from GANDLF import version
 
 
@@ -42,20 +27,9 @@ def gandlf(ctx, loglevel):
     setup_logging(loglevel)
 
 
-# TODO: add anonymizer command
-# TODO: add run command
-# TODO: add construct-csv command
-# TODO: add collect-stats command
-# TODO: add path-miner command
-gandlf.add_command(preprocess_command, "preprocess")
-# TODO: add verify-install command
-# TODO: add config-generator command
-# TODO: add recover-config command
-# TODO: add deploy command
-# TODO: add optimize-model command
-# TODO: add generate-metrics command
-# TODO: add debug-info command
-# TODO: add split-csv command
+# registers subcommands: `gandlf anonymizer`, `gandlf run`, etc.
+for command_name, command in cli_subcommands.items():
+    gandlf.add_command(command, command_name)
 
 if __name__ == "__main__":
     # pylint: disable=E1120
