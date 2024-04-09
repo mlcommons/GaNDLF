@@ -170,6 +170,11 @@ def main():
 
     # Check for metrics in columns and do tight plots
     plot_all(df_training, df_validation, df_testing, outputPlot)
+    
+    df_training['split'] = 'train'
+    df_testing['split'] = 'test'
+    df_validation['split'] = 'validation'
+    pd.concat((df_training, df_testing, df_validation)).to_csv(outputFile)
 
 
 if __name__ == "__main__":
