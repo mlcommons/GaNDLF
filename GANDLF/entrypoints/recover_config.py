@@ -3,9 +3,6 @@
 
 import argparse
 from GANDLF.cli import copyrightMessage, recover_config
-import pickle
-import os, sys
-import yaml
 
 
 def main():
