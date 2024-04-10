@@ -46,6 +46,7 @@ test_cases = [
             "validation_logs_path": "model_full/logs_validation.csv",
             "testing_logs_path": "model_full/logs_testing.csv",
             "output_plot_path": "output/plot.png",
+            "output_file": "output/data.csv",
         },
     ),
     CliCase(
@@ -60,6 +61,7 @@ test_cases = [
             "validation_logs_path": "model_no_test/logs_validation.csv",
             "testing_logs_path": None,
             "output_plot_path": "output/plot.png",
+            "output_file": "output/data.csv",
         },
     ),
     CliCase(
@@ -74,6 +76,7 @@ test_cases = [
             "validation_logs_path": "model_full/logs_validation.csv",
             "testing_logs_path": "model_full/logs_testing.csv",
             "output_plot_path": "output_na/plot.png",
+            "output_file": "output_na/data.csv",
         },
     ),
     CliCase(

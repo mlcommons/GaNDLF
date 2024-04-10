@@ -139,6 +139,7 @@ def _read_data_and_plot(
     validation_logs_path: str,
     testing_logs_path: Optional[str],
     output_plot_path: str,
+    output_file: str,
 ):
     # moved out from _collect_stats for easier testing
     # Read all the files
@@ -148,6 +149,11 @@ def _read_data_and_plot(
 
     # Check for metrics in columns and do tight plots
     plot_all(df_training, df_validation, df_testing, output_plot_path)
+
+    df_training["split"] = "train"
+    df_testing["split"] = "test"
+    df_validation["split"] = "validation"
+    pd.concat((df_training, df_testing, df_validation)).to_csv(output_file)
 
 
 def _collect_stats(model_dir: str, output_dir: str):
@@ -165,7 +171,7 @@ def _collect_stats(model_dir: str, output_dir: str):
         logging.info(f"testing logs file was not found: {testing_logs}")
         testing_logs = None
 
-    _read_data_and_plot(training_logs, validation_logs, testing_logs, output_plot)
+    _read_data_and_plot(training_logs, validation_logs, testing_logs, output_plot, output_file)
 
 
 @click.command()
