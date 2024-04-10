@@ -2,11 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import pickle
-import os, sys
 from typing import Optional
 
-import yaml
 import click
 from deprecated import deprecated
 
