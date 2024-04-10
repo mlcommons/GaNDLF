@@ -171,7 +171,9 @@ def _collect_stats(model_dir: str, output_dir: str):
         logging.info(f"testing logs file was not found: {testing_logs}")
         testing_logs = None
 
-    _read_data_and_plot(training_logs, validation_logs, testing_logs, output_plot, output_file)
+    _read_data_and_plot(
+        training_logs, validation_logs, testing_logs, output_plot, output_file
+    )
 
 
 @click.command()
