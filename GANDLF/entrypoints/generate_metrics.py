@@ -1,9 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import argparse
-import ast
 import sys
 
 from GANDLF import version
