@@ -1,8 +1,7 @@
 import shlex
 import subprocess
 import pytest
-from GANDLF.entrypoints import cli_subcommands as gandlf_commands
-
+from GANDLF.entrypoints.subcommands import cli_subcommands as gandlf_commands
 
 old_way_entrypoints = [
     # old-way entrypoints
