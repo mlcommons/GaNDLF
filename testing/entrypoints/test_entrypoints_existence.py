@@ -1,7 +1,7 @@
+import shlex
 import subprocess
 import pytest
-from GANDLF.entrypoints import cli_subcommands as gandlf_commands
-
+from GANDLF.entrypoints.subcommands import cli_subcommands as gandlf_commands
 
 old_way_entrypoints = [
     # old-way entrypoints
@@ -33,13 +33,13 @@ all_commands = old_way_entrypoints + main_cli_command + new_way_cli_commands
 def test_command_execution(command):
     print(f"Running '{command}'...")
     # Run the command and capture output, stderr, and exit status
+    command_split = shlex.split(command)
     result = subprocess.run(
-        command,
+        command_split,
         check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        shell=True,
     )
     assert (
         result.returncode == 0

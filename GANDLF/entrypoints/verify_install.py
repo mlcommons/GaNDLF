@@ -16,18 +16,16 @@ def main():
         import GANDLF as gf
 
         print("GaNDLF installed version:", gf.__version__)
-    except:
+    except Exception as e:
         raise Exception(
             "GaNDLF not properly installed, please see https://mlcommons.github.io/GaNDLF/setup"
-        )
+        ) from e
 
     # we always want to do submodule update to ensure any hash updates are ingested correctly
     try:
         os.system(f"{sys.executable} -m pip install -e .")
-    except:
-        print("Git was not found, please try again.")
-
-    args = parser.parse_args()
+    except Exception as e:
+        raise Exception("Git was not found, please try again.") from e
 
     print("GaNDLF is ready. See https://mlcommons.github.io/GaNDLF/usage")
 
