@@ -3,7 +3,7 @@ from click.testing import CliRunner
 
 from GANDLF.entrypoints.verify_install import new_way, old_way
 
-from . import cli_runner, CliCase, run_test_case
+from . import CliCase, run_test_case
 
 # This function is a place where a real logic is executed.
 # For tests, we replace it with mock up, and check if this function is called

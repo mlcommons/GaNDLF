@@ -59,12 +59,6 @@ class ArgsExpander:
         return passed_args
 
 
-# Fixture for Click's CliRunner to test Click commands
-@pytest.fixture
-def cli_runner():
-    return CliRunner()
-
-
 @dataclass
 class CliCase:
     """

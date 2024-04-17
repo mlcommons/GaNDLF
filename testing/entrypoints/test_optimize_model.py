@@ -1,13 +1,8 @@
-import os
-from unittest.mock import patch
-
 import pytest
 from click.testing import CliRunner
-from future.moves import sys
 
 from GANDLF.entrypoints.optimize_model import new_way, old_way
-
-from . import cli_runner, CliCase, run_test_case, TmpDire, TmpFile, TmpNoEx
+from . import CliCase, run_test_case, TmpDire, TmpFile, TmpNoEx
 
 # This function is a place where a real logic is executed.
 # For tests, we replace it with mock up, and check if this function is called

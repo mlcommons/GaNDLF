@@ -4,7 +4,7 @@ from click.testing import CliRunner
 
 from GANDLF.entrypoints.split_csv import new_way, old_way
 
-from . import cli_runner, CliCase, run_test_case, TmpDire, TmpFile, TmpNoEx
+from . import CliCase, run_test_case, TmpDire, TmpFile, TmpNoEx
 
 # This function is a place where a real logic is executed.
 # For tests, we replace it with mock up, and check if this function is called

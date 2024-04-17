@@ -1,7 +1,7 @@
 import pytest
 import sys
 from pathlib import Path
-from entrypoints import CliCase, run_test_case
+from .entrypoints import CliCase, run_test_case
 
 parent = str(Path(__file__).parent.parent.absolute())
 sys.path.append(parent)
