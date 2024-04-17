@@ -42,12 +42,11 @@ def new_way():
     + "`gandlf_verifyInstall` script would be deprecated soon."
 )
 def old_way():
-    parser = argparse.ArgumentParser(
+    argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
         description="Verify GaNDLF installation.",
     )
-    args = parser.parse_args()
     _verify_install()
 
 
