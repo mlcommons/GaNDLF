@@ -379,11 +379,11 @@ GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use for
 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
-To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
+To deploy a model, simply run the `gandlf deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_deploy \
+(venv_gandlf) $> gandlf deploy \
   # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
@@ -398,7 +398,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 You can also deploy GaNDLF as a metrics generator (see the [Generate Metrics](#generate-metrics) section) as follows:
 
 ```bash
-(venv_gandlf) $> gandlf_deploy \
+(venv_gandlf) $> gandlf deploy \
   ## -h, --help         show help message and exit
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
@@ -482,7 +482,7 @@ The previous command will generate a data CSV file that you can safely edit outs
 ```
 #### Special Case for Training
 
-Considering that you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Since you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward. For example, you can fine-tune a model on your own data using the following commands as a starting point:
+Considering that you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf deploy`), the output will be to a location embedded inside the container. Since you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward. For example, you can fine-tune a model on your own data using the following commands as a starting point:
 
 ```bash
 # Run training on your new data

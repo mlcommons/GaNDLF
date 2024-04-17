@@ -8,7 +8,8 @@
 from GANDLF.entrypoints.config_generator import new_way as config_generator_command
 
 # import recover_config command
-# import deploy command
+from GANDLF.entrypoints.deploy import new_way as deploy_command
+
 # import optimize_model command
 # import generate_metrics command
 # import debug_info command
@@ -24,7 +25,7 @@ cli_subcommands = {
     # TODO: add verify-install command
     "config-generator": config_generator_command,
     # TODO: add recover-config command
-    # TODO: add deploy command
+    "deploy": deploy_command,
     # TODO: add optimize-model command
     # TODO: add generate-metrics command
     # TODO: add debug-info command
