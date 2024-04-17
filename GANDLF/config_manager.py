@@ -7,7 +7,8 @@ from .utils import version_check
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
 
 from GANDLF.metrics import surface_distance_ids
-from GANDLF.version import __version__ as gandlf_version
+from importlib.metadata import version
+
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
     "weighted_loss": False,  # whether weighted loss is to be used or not
@@ -127,10 +128,7 @@ def _parseConfig(
         assert (
             "version" in params
         ), "The 'version' key needs to be defined in config with 'minimum' and 'maximum' fields to determine the compatibility of configuration with code base"
-        version_check(
-            params["version"],
-            version_to_check=gandlf_version,
-        )
+        version_check(params["version"], version_to_check=version("GANDLF"))
 
     if "patch_size" in params:
         # duplicate patch size if it is an int or float
