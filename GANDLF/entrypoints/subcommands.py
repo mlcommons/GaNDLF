@@ -4,7 +4,8 @@ from GANDLF.entrypoints.run import new_way as run_command
 
 from GANDLF.entrypoints.construct_csv import new_way as construct_csv_command
 
-# import collect_stats command
+from GANDLF.entrypoints.collect_stats import new_way as collect_stats_command
+
 from GANDLF.entrypoints.patch_miner import new_way as patch_miner_command
 
 from GANDLF.entrypoints.preprocess import new_way as preprocess_command
@@ -30,7 +31,7 @@ cli_subcommands = {
     "anonymizer": anonymizer_command,
     "run": run_command,
     "construct-csv": construct_csv_command,
-    # TODO: add collect-stats command
+    "collect-stats": collect_stats_command,
     "patch-miner": patch_miner_command,
     "preprocess": preprocess_command,
     "config-generator": config_generator_command,
