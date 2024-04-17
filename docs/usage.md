@@ -247,12 +247,12 @@ GaNDLF provides a script to generate metrics after an inference process is done.
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_generateMetrics \
+(venv_gandlf) $> gandlf generate-metrics \
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
-  -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'SubjectID,Target,Prediction'
-  -o , --outputfile   Location to save the output dictionary. If not provided, will print to stdout.
+  -i , --input-data    CSV file that is used to generate the metrics; should contain 3 columns: 'SubjectID,Target,Prediction'
+  -o , --output-file   Location to save the output dictionary. If not provided, will print to stdout.
 ```
 
 Once you have your CSV in the specific format, you can pass it on to generate the metrics. Here is an example for segmentation:
@@ -264,7 +264,7 @@ SubjectID,Target,Prediction
 ...
 ```
 
-Similarly for classification or regression (`A`, `B`, `C`, `D` are integers for classification and floats for regression):
+Similarly, for classification or regression (`A`, `B`, `C`, `D` are integers for classification and floats for regression):
 
 ```csv
 SubjectID,Target,Prediction

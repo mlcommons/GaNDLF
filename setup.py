@@ -145,7 +145,7 @@ if __name__ == "__main__":
                 "gandlf_recoverConfig=GANDLF.entrypoints.recover_config:main",
                 "gandlf_deploy=GANDLF.entrypoints.deploy:old_way",
                 "gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:old_way",
-                "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:main",
+                "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:old_way",
                 "gandlf_debugInfo=GANDLF.entrypoints.debug_info:main",
                 "gandlf_splitCSV=GANDLF.entrypoints.split_csv:main",
             ]
