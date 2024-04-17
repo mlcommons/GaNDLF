@@ -194,14 +194,14 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 
 ### Running multiple experiments (optional)
 
-1. The `gandlf_configGenerator` script can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
+1. The `gandlf config-generator` command can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
 2. Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
 3. Provide the baseline configuration which has enabled you to successfully train a model for `1` epoch for your dataset and problem at hand (regardless of the efficacy).
 4. Run the following command:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_configGenerator \
+(venv_gandlf) $> gandlf config-generator \
   # -h, --help         Show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration
   -s ./samples/config_generator_strategy.yaml \ # strategy file

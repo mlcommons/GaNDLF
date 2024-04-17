@@ -5,7 +5,8 @@
 # import patch_miner command
 # import preprocess command
 # import verify_install command
-# import config_generator command
+from GANDLF.entrypoints.config_generator import new_way as config_generator_command
+
 # import recover_config command
 # import deploy command
 # import optimize_model command
@@ -21,7 +22,7 @@ cli_subcommands = {
     # TODO: add path-miner command
     # TODO: add preprocess command
     # TODO: add verify-install command
-    # TODO: add config-generator command
+    "config-generator": config_generator_command,
     # TODO: add recover-config command
     # TODO: add deploy command
     # TODO: add optimize-model command
