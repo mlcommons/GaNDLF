@@ -2,7 +2,8 @@
 # import run command
 # import construct_csv command
 # import collect_stats command
-# import patch_miner command
+from GANDLF.entrypoints.patch_miner import new_way as patch_miner_command
+
 # import preprocess command
 # import verify_install command
 from GANDLF.entrypoints.config_generator import new_way as config_generator_command
@@ -21,7 +22,7 @@ cli_subcommands = {
     # TODO: add run command
     # TODO: add construct-csv command
     # TODO: add collect-stats command
-    # TODO: add path-miner command
+    "patch-miner": patch_miner_command,
     # TODO: add preprocess command
     # TODO: add verify-install command
     "config-generator": config_generator_command,

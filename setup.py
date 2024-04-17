@@ -137,7 +137,7 @@ if __name__ == "__main__":
                 "gandlf_run=GANDLF.entrypoints.run:main",
                 "gandlf_constructCSV=GANDLF.entrypoints.construct_csv:main",
                 "gandlf_collectStats=GANDLF.entrypoints.collect_stats:main",
-                "gandlf_patchMiner=GANDLF.entrypoints.patch_miner:main",
+                "gandlf_patchMiner=GANDLF.entrypoints.patch_miner:old_way",
                 "gandlf_preprocess=GANDLF.entrypoints.preprocess:main",
                 "gandlf_anonymizer=GANDLF.entrypoints.anonymizer:main",
                 "gandlf_verifyInstall=GANDLF.entrypoints.verify_install:main",

@@ -73,7 +73,7 @@ Once these files are present, the patch miner can be run using the following com
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_patchMiner \ 
+(venv_gandlf) $> gandlf patch-miner \ 
   # -h, --help         Show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
