@@ -115,9 +115,9 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
     - Multiple segmentation classes should be in a single file with unique label numbers.
     - Multi-label classification/regression is currently not supported.
 
-### Using the `gandlf_constructCSV` application
+### Using the `gandlf construct-csv` command
 
-To make the process of creating the CSV easier, we have provided a utility application called `gandlf_constructCSV`. This script works when the data is arranged in the following format (example shown of the data directory arrangement from the [Brain Tumor Segmentation (BraTS) Challenge](https://www.synapse.org/brats)):
+To make the process of creating the CSV easier, we have provided a `gandlf construct-csv` command. This script works when the data is arranged in the following format (example shown of the data directory arrangement from the [Brain Tumor Segmentation (BraTS) Challenge](https://www.synapse.org/brats)):
 
 ```bash
 $DATA_DIRECTORY
@@ -150,7 +150,7 @@ The following command shows how the script works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_constructCSV \
+(venv_gandlf) $> gandlf construct-csv \
   # -h, --help         Show help message and exit
   -i $DATA_DIRECTORY # this is the main data directory 
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
@@ -454,18 +454,18 @@ For example, you might run:
 (main) $> docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu [command and args go here]
 ```
 
-Remember that the process running in the container only considers the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
+Remember that the process running in the container only considers the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf construct-csv` command will need to be made from the container and with input in the same locations. Expanding on our last example:
 
 ```bash
 (main) $> docker run -it --rm --name dataprep \
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
   --volume /home/researcher/gandlf_output:/output \ # output data is mounted as read-write
   cbica/gandlf:latest-cpu \ # change to appropriate docker image tag
-  gandlf_constructCSV \ # standard construct CSV API starts
-  --inputDir /input/data \
-  --outputFile /output/data.csv \
-  --channelsID _t1.nii.gz \
-  --labelID _seg.nii.gz
+  construct-csv \ # standard construct CSV API starts
+  --input-dir /input/data \
+  --output-file /output/data.csv \
+  --channels-id _t1.nii.gz \
+  --label-id _seg.nii.gz
 ```
 
 The previous command will generate a data CSV file that you can safely edit outside the container (such as by adding a `ValueToPredict` column). Then, you can refer to the same file when running again:
