@@ -80,7 +80,7 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 ## Adding new CLI command
 Example: `gandlf config-generator` [CLI command](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/config_generator.py)
 - Implement function and wrap it with `@click.command()` + `@click.option()`
-- Add it to `cli_subommands` [dict](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/__init__.py)
+- Add it to `cli_subommands` [dict](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/subcommands.py)
 The command would be available under `gandlf your-subcommand-name` CLI command.
 
 ## Update parameters
