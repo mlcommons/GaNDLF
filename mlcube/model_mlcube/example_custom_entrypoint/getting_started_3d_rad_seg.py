@@ -31,9 +31,9 @@ def run_gandlf(output_path, device):
         device (str): device to run on (i.e. CPU or GPU)
     """
     exit_status = os.system(
-        "gandlf_run --train False "
+        "gandlf run --infer "
         f"--device {device} --config /embedded_config.yml "
-        f"--modeldir /embedded_model/ -i ./data.csv -o {output_path}"
+        f"--model-dir /embedded_model/ -i ./data.csv -o {output_path}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
     sys.exit(exit_code)

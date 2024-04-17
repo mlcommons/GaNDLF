@@ -25,9 +25,9 @@ def run_gandlf(output_path, device):
         parameters_file (str): The path to the parameters file
     """
     exit_status = os.system(
-        "gandlf_run --train False "
+        "gandlf run --infer "
         f"--device {device} --config /embedded_config.yml "
-        f"--modeldir /embedded_model/ -i ./data.csv -o {output_path}"
+        f"--model-dir /embedded_model/ -i ./data.csv -o {output_path}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
     sys.exit(exit_code)

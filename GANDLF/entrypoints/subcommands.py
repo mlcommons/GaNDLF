@@ -1,5 +1,6 @@
 # import anonymizer command
-# import run command
+from GANDLF.entrypoints.run import new_way as run_command
+
 # import construct_csv command
 # import collect_stats command
 from GANDLF.entrypoints.patch_miner import new_way as patch_miner_command
@@ -20,7 +21,7 @@ from GANDLF.entrypoints.optimize_model import new_way as optimize_model_command
 
 cli_subcommands = {
     # TODO: add anonymizer command
-    # TODO: add run command
+    "run": run_command,
     # TODO: add construct-csv command
     # TODO: add collect-stats command
     "patch-miner": patch_miner_command,

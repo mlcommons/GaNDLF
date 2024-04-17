@@ -51,34 +51,34 @@ singularity:
 tasks:
   train:
   # Trains a new model, creating a model directory, or resumes training on an existing model.
-    entrypoint: "gandlf_run --train True --device cpu"
+    entrypoint: "gandlf run --train --device cpu"
     parameters:
       inputs: {
         # Path to a data csv such as that constructed by the "construct_csv" task.
-        inputdata: {type: "file", default: "data.csv"},
+        input-data: {type: "file", default: "data.csv"},
         # Path to a GaNDLF config file. See samples for more examples.
         config: {type: "file", default: "config.yml"},
       }
       outputs: {
         # Path to a model directory. Not used if deploying an embedded model.
-        modeldir: {type: "directory", default: "model/"},
+        model-dir: {type: "directory", default: "model/"},
       }
       
       
   infer:
   # Runs inference on some existing model given new data
-    entrypoint: "gandlf_run --train False --device cpu"
+    entrypoint: "gandlf run --infer --device cpu"
     parameters:
       inputs: {
         # Path to a data csv such as that constructed by the "construct_csv" task.
-        inputdata: {type: "file", default: "data.csv"},
+        input-data: {type: "file", default: "data.csv"},
         # Path to a GaNDLF config file. See samples for more examples.
         # Currently disabled -- inference defaults to using the model's config.
         #config: {type: "file", default: "config.yml"},
         # Path to a model directory. Not used if deploying an embedded model.
-        modeldir: {type: "directory", default: "model/"},
+        model-dir: {type: "directory", default: "model/"},
         #device: {type: "str", default: "cpu"},
-        #parameters_file: {type: file, default: parameters.yaml}
+        #config: {type: file, default: parameters.yaml}
       }
       outputs: {output_path: {type: "directory", default: "inference_results"}}
 

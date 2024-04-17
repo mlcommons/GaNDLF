@@ -42,11 +42,11 @@ cp ../../samples/config_getting_started_segmentation_rad3d.yaml .
 #### Training ####
 ##################
 
-gandlf_run \
+gandlf run \
   -c ./config_getting_started_segmentation_rad3d.yaml \
   -i ./data.csv \
   -m ./trained_model_output \
-  -t True \
+  -t \
   -d cpu
 
 # remove data.csv to assume that we need a custom script with gandlf deploy
