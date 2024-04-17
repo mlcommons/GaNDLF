@@ -129,7 +129,7 @@ def plot_all(df_training, df_validation, df_testing, output_plot_dir):
     return df_training, df_validation, df_testing
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_CollectStats",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -170,3 +170,12 @@ if __name__ == "__main__":
 
     # Check for metrics in columns and do tight plots
     plot_all(df_training, df_validation, df_testing, outputPlot)
+
+    df_training["split"] = "train"
+    df_testing["split"] = "test"
+    df_validation["split"] = "validation"
+    pd.concat((df_training, df_testing, df_validation)).to_csv(outputFile)
+
+
+if __name__ == "__main__":
+    main()

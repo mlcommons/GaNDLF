@@ -1,16 +1,14 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import argparse
-import ast
 import sys
 
 from GANDLF import version
 from GANDLF.cli import generate_metrics, copyrightMessage
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Metrics",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -61,11 +59,13 @@ if __name__ == "__main__":
 
     try:
         generate_metrics.generate_metrics_dict(
-            args.inputdata,
-            args.config,
-            args.outputfile,
+            args.inputdata, args.config, args.outputfile
         )
     except Exception as e:
         sys.exit("ERROR: " + str(e))
 
     print("Finished.")
+
+
+if __name__ == "__main__":
+    main()

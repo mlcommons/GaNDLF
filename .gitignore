@@ -35,3 +35,4 @@ tutorials/classification_medmnist_notebook/output_stats
 .jupyter_ystore.db
 tutorials/classification_medmnist_notebook/model
 tutorials/classification_medmnist_notebook/dataset/*.csv
+testing/test_deploy

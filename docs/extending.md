@@ -6,7 +6,7 @@ Before starting to work on the code-level on GaNDLF, please follow the [instruct
 # continue from previous shell
 (venv_gandlf) $> 
 # you should be in the "GaNDLF" git repo
-(venv_gandlf) $> python ./gandlf_verifyInstall
+(venv_gandlf) $> gandlf_verifyInstall
 ```
 
 
@@ -77,6 +77,11 @@ To update/change/add a dependency in [setup](https://github.com/mlcommons/GaNDLF
 - Update [Inference Manager](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/inference_manager.py), if any inference API has changed
 - [Update Tests](#update-tests)
 
+## Adding new CLI command
+Example: `gandlf config-generator` [CLI command](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/config_generator.py)
+- Implement function and wrap it with `@click.command()` + `@click.option()`
+- Add it to `cli_subommands` [dict](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/__init__.py)
+The command would be available under `gandlf your-subcommand-name` CLI command.
 
 ## Update parameters
 
@@ -106,7 +111,7 @@ Once you have the virtual environment set up, tests can be run using the followi
 (venv_gandlf) $> pytest --device cuda # can be cuda or cpu, defaults to cpu
 ```
 
-Any failures will be reported in the file [`${GaNDLF_HOME}/testing/failures.log`](https://github.com/mlcommons/GaNDLF/blob/5030ff83a38947c1583b58a08598308886ee9a0a/testing/conftest.py#L25).
+Any failures will be reported in the file [`${GANDLF_HOME}/testing/failures.log`](https://github.com/mlcommons/GaNDLF/blob/5030ff83a38947c1583b58a08598308886ee9a0a/testing/conftest.py#L25).
 
 ### Integration tests
 

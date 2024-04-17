@@ -5,8 +5,9 @@ import argparse
 
 from GANDLF.cli import preprocess_and_save, copyrightMessage
 
+
 # main function
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Preprocess",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         required=False,
     )
     parser.add_argument(
-        "-a",
+        "-z",
         "--cropzero",
         metavar="",
         type=bool,
@@ -77,3 +78,7 @@ if __name__ == "__main__":
     )
 
     print("Finished.")
+
+
+if __name__ == "__main__":
+    main()
