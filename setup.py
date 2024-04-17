@@ -108,11 +108,13 @@ requirements = [
     "segmentation-models-pytorch==0.3.3",
     "ACSConv==0.1.1",
     "docker",
-    "dicom-anonymizer",
+    "dicom-anonymizer==1.0.12",
     "twine",
     "zarr",
     "keyring",
     "monai==1.3.0",
+    "packaging==24.0",
+    "typer==0.9.0",
 ]
 
 if __name__ == "__main__":
