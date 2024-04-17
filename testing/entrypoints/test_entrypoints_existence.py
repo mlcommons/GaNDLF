@@ -1,5 +1,5 @@
 import shlex
-import subprocess
+import subprocess  # nosec B404
 import pytest
 from GANDLF.entrypoints.subcommands import cli_subcommands as gandlf_commands
 
@@ -34,7 +34,7 @@ def test_command_execution(command):
     print(f"Running '{command}'...")
     # Run the command and capture output, stderr, and exit status
     command_split = shlex.split(command)
-    result = subprocess.run(
+    result = subprocess.run(  # nosec B603
         command_split,
         check=True,
         stdout=subprocess.PIPE,
