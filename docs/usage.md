@@ -163,15 +163,15 @@ The following command shows how the script works:
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 - For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. 
 
-### Using the `gandlf_splitCSV` application
+### Using the `gandlf split-csv` command
 
-To split the data CSV into training, validation, and testing CSVs, the `gandlf_splitCSV` script can be used. The following command shows how the script works:
+To split the data CSV into training, validation, and testing CSVs, the `gandlf split-csv` script can be used. The following command shows how the script works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_splitCSV \
+(venv_gandlf) $> gandlf split-csv \
   # -h, --help         Show help message and exit
-  -i ./experiment_0/train_data.csv \ # output CSV from the `gandlf_constructCSV` script
+  -i ./experiment_0/train_data.csv \ # output CSV from the `gandlf construct-csv` script
   -c $gandlf_config \ # the GaNDLF config (in YAML) with the `nested_training` key specified to the folds needed
   -o $output_dir # the output directory to save the split data
 ```

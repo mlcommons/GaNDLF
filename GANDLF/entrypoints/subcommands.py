@@ -22,7 +22,8 @@ from GANDLF.entrypoints.optimize_model import new_way as optimize_model_command
 from GANDLF.entrypoints.generate_metrics import new_way as generate_metrics_command
 
 # import debug_info command
-# import split_csv command
+from GANDLF.entrypoints.split_csv import new_way as split_csv_command
+
 
 cli_subcommands = {
     "anonymizer": anonymizer_command,
@@ -38,5 +39,5 @@ cli_subcommands = {
     "optimize-model": optimize_model_command,
     "generate-metrics": generate_metrics_command,
     # TODO: add debug-info command
-    # TODO: add split-csv command
+    "split-csv": split_csv_command
 }

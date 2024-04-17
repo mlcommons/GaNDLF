@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 "gandlf_optimizeModel=GANDLF.entrypoints.optimize_model:old_way",
                 "gandlf_generateMetrics=GANDLF.entrypoints.generate_metrics:old_way",
                 "gandlf_debugInfo=GANDLF.entrypoints.debug_info:main",
-                "gandlf_splitCSV=GANDLF.entrypoints.split_csv:main",
+                "gandlf_splitCSV=GANDLF.entrypoints.split_csv:old_way",
             ]
         },
         classifiers=[
