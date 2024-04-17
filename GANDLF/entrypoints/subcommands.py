@@ -4,7 +4,8 @@
 # import collect_stats command
 from GANDLF.entrypoints.patch_miner import new_way as patch_miner_command
 
-# import preprocess command
+from GANDLF.entrypoints.preprocess import new_way as preprocess_command
+
 # import verify_install command
 from GANDLF.entrypoints.config_generator import new_way as config_generator_command
 
@@ -23,7 +24,7 @@ cli_subcommands = {
     # TODO: add construct-csv command
     # TODO: add collect-stats command
     "patch-miner": patch_miner_command,
-    # TODO: add preprocess command
+    "preprocess": preprocess_command,
     # TODO: add verify-install command
     "config-generator": config_generator_command,
     # TODO: add recover-config command
