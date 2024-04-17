@@ -6,7 +6,7 @@ import os, argparse, sys
 
 # main function
 def main():
-    parser = argparse.ArgumentParser(
+    argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,
         description="Verify GaNDLF installation.",
