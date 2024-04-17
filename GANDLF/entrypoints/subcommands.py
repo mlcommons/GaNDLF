@@ -11,7 +11,8 @@ from GANDLF.entrypoints.verify_install import new_way as verify_install_command
 
 from GANDLF.entrypoints.config_generator import new_way as config_generator_command
 
-# import recover_config command
+from GANDLF.entrypoints.recover_config import new_way as recover_config_command
+
 from GANDLF.entrypoints.deploy import new_way as deploy_command
 
 from GANDLF.entrypoints.optimize_model import new_way as optimize_model_command
@@ -30,7 +31,7 @@ cli_subcommands = {
     "preprocess": preprocess_command,
     "config-generator": config_generator_command,
     "verify-install": verify_install_command,
-    # TODO: add recover-config command
+    "recover-config": recover_config_command,
     "deploy": deploy_command,
     "optimize-model": optimize_model_command,
     "generate-metrics": generate_metrics_command,
