@@ -6,7 +6,7 @@ Before starting to work on the code-level on GaNDLF, please follow the [instruct
 # continue from previous shell
 (venv_gandlf) $> 
 # you should be in the "GaNDLF" git repo
-(venv_gandlf) $> gandlf_verifyInstall
+(venv_gandlf) $> gandlf verify-install
 ```
 
 

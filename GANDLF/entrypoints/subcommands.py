@@ -7,7 +7,8 @@ from GANDLF.entrypoints.patch_miner import new_way as patch_miner_command
 
 from GANDLF.entrypoints.preprocess import new_way as preprocess_command
 
-# import verify_install command
+from GANDLF.entrypoints.verify_install import new_way as verify_install_command
+
 from GANDLF.entrypoints.config_generator import new_way as config_generator_command
 
 # import recover_config command
@@ -26,8 +27,8 @@ cli_subcommands = {
     # TODO: add collect-stats command
     "patch-miner": patch_miner_command,
     "preprocess": preprocess_command,
-    # TODO: add verify-install command
     "config-generator": config_generator_command,
+    "verify-install": verify_install_command,
     # TODO: add recover-config command
     "deploy": deploy_command,
     "optimize-model": optimize_model_command,
