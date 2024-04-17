@@ -1,4 +1,5 @@
-# import anonymizer command
+from GANDLF.entrypoints.anonymizer import new_way as anonymizer_command
+
 from GANDLF.entrypoints.run import new_way as run_command
 
 from GANDLF.entrypoints.construct_csv import new_way as construct_csv_command
@@ -24,7 +25,7 @@ from GANDLF.entrypoints.generate_metrics import new_way as generate_metrics_comm
 # import split_csv command
 
 cli_subcommands = {
-    # TODO: add anonymizer command
+    "anonymizer": anonymizer_command,
     "run": run_command,
     "construct-csv": construct_csv_command,
     # TODO: add collect-stats command

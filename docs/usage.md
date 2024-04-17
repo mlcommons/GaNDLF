@@ -24,13 +24,12 @@ Please follow the [installation instructions](./setup.md#installation) to instal
 
 ### Anonymize Data
 
-A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. It can be used as follows:
+A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf anonymizer` command. It can be used as follows:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> gandlf_anonymizer
+(venv_gandlf) $> gandlf anonymizer
   # -h, --help         Show help message and exit
-  # -v, --version      Show program's version number and exit.
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
   -o ./output_dir_or_file # output directory to save anonymized images or a single output image file (for a DICOM to NIfTi conversion specify a .nii.gz file)

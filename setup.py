@@ -139,7 +139,7 @@ if __name__ == "__main__":
                 "gandlf_collectStats=GANDLF.entrypoints.collect_stats:main",
                 "gandlf_patchMiner=GANDLF.entrypoints.patch_miner:old_way",
                 "gandlf_preprocess=GANDLF.entrypoints.preprocess:old_way",
-                "gandlf_anonymizer=GANDLF.entrypoints.anonymizer:main",
+                "gandlf_anonymizer=GANDLF.entrypoints.anonymizer:old_way",
                 "gandlf_configGenerator=GANDLF.entrypoints.config_generator:old_way",
                 "gandlf_verifyInstall=GANDLF.entrypoints.verify_install:old_way",
                 "gandlf_recoverConfig=GANDLF.entrypoints.recover_config:old_way",

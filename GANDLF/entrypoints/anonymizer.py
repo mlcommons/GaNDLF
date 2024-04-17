@@ -1,12 +1,82 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
+import os
+import argparse
+import sys
+import yaml
+from typing import Optional
+import click
+from deprecated import deprecated
 
-import os, argparse, sys, yaml
 from GANDLF.anonymize import run_anonymizer
 from GANDLF.cli import copyrightMessage
+from GANDLF.entrypoints import append_copyright_to_help
 
 
-def main():
+def _anonymize_images(
+    input_dir: str, output_file: str, config_path: Optional[str], modality: str
+):
+    input_dir = os.path.normpath(input_dir)
+    output_file = os.path.normpath(output_file)
+    # TODO: raise an error if config pass provided but not exist (user made a typo?)
+    config = None
+    if config_path and os.path.isfile(config_path):
+        config = yaml.safe_load(open(config_path, "r"))
+
+    logging.debug(f"{input_dir=}")
+    logging.debug(f"{output_file=}")
+    logging.debug(f"{config=}")
+    logging.debug(f"{modality=}")
+    run_anonymizer(input_dir, output_file, config, modality)
+
+    logging.info("Finished successfully.")
+
+
+# new way of defining params via click
+@click.command()
+@click.option(
+    "--input-dir",
+    "-i",
+    required=True,
+    type=click.Path(exists=True),
+    help="Input directory or file which contains images to be anonymized.",
+)
+@click.option(
+    "--config",
+    "-c",
+    help="Config (in YAML) for running anonymization, optionally, specify modality using '-m' for defaults.",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+)
+@click.option(
+    "--modality",
+    "-m",
+    default="rad",
+    type=click.Choice(["rad", "histo"]),
+    help="The modality type, can be 'rad' or 'histo'.",
+)
+@click.option(
+    "--output-file",
+    "-o",
+    required=True,
+    type=click.Path(),
+    help="Output directory or file which will contain the image(s) after anonymization.",
+)
+@append_copyright_to_help
+def new_way(input_dir, config, modality, output_file):
+    """Anonymize images/scans in the data directory."""
+    _anonymize_images(input_dir, output_file, config, modality)
+
+
+# old-fashioned way of running gandlf via `gandlf_anonymizer`.
+@deprecated(
+    "This is a deprecated way of running GanDLF. Please, use `gandlf anonymizer` cli command "
+    + "instead of `gandlf_anonymizer`. Note that in new CLI tool some params were renamed:\n"
+    + "  --inputDir to --input-dir\n"
+    + "  --outputFile to --output-file\n"
+    + "`gandlf_anonymizer` script would be deprecated soon."
+)
+def old_way():
     parser = argparse.ArgumentParser(
         prog="GANDLF_Anonymize",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -43,26 +113,21 @@ def main():
         type=str,
         help="Output directory or file which will contain the image(s) after anonymization.",
     )
-
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [args.inputDir, args.outputFile]:
+    for param_name in ["inputDir", "outputFile"]:
+        param_none_check = getattr(args, param_name)
         if param_none_check is None:
-            sys.exit("ERROR: Missing required parameter:", param_none_check)
+            sys.exit(f"ERROR: Missing required parameter: {param_name}")
 
-    inputDir = os.path.normpath(args.inputDir)
-    outputFile = os.path.normpath(args.outputFile)
-    if os.path.isfile(args.config):
-        config = yaml.safe_load(open(args.config, "r"))
-    else:
-        config = None
+    inputDir = args.inputDir
+    outputFile = args.outputFile
+    config = args.config or None
 
-    run_anonymizer(inputDir, outputFile, config, args.modality)
-
-    print("Finished successfully.")
+    _anonymize_images(inputDir, outputFile, config, args.modality)
 
 
 # main function
 if __name__ == "__main__":
-    main()
+    old_way()
