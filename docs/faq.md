@@ -5,7 +5,7 @@ This page contains answers to frequently asked questions about GaNDLF.
 
 The [usage guide](https://mlcommons.github.io/GaNDLF/usage) provides a good starting point for you to understand the application of GaNDLF. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
-### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
+### Why do I get the error `importlib.metadata.PackageNotFoundError: GANDLF`?
 
 This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
 
