@@ -141,6 +141,7 @@ if __name__ == "__main__":
         "--modeldir",
         metavar="",
         type=str,
+        required=True,
         help="Input directory which contains testing and validation models log files",
     )
     parser.add_argument(
@@ -148,10 +149,17 @@ if __name__ == "__main__":
         "--outputdir",
         metavar="",
         type=str,
+        required=True,
         help="Output directory to save stats and plot",
     )
 
     args = parser.parse_args()
+
+    # check for required parameters - this is needed here to keep the cli clean
+    for param_none_check in [args.modeldir, args.outputdir]:
+        assert (
+            param_none_check is not None
+        ), f"Missing required parameter: {param_none_check}"
 
     inputDir = os.path.normpath(args.modeldir)
     outputDir = os.path.normpath(args.outputdir)

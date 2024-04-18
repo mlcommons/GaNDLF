@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import traceback
 import argparse
 import ast
 import sys
@@ -56,16 +56,18 @@ if __name__ == "__main__":
     parser.add_argument("-rawinput", "--rawinput", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
-    assert args.config is not None, "Missing required parameter: config"
-    assert args.inputdata is not None, "Missing required parameter: inputdata"
+
+    # check for required parameters - this is needed here to keep the cli clean
+    for param_none_check in [args.inputDir, args.config]:
+        assert (
+            param_none_check is not None
+        ), f"Missing required parameter: {param_none_check}"
 
     try:
         generate_metrics.generate_metrics_dict(
-            args.inputdata,
-            args.config,
-            args.outputfile,
+            args.inputdata, args.config, args.outputfile
         )
-    except Exception as e:
-        sys.exit("ERROR: " + str(e))
+    except Exception:
+        sys.exit("ERROR: " + traceback.format_exc())
 
     print("Finished.")

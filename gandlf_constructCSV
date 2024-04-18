@@ -23,6 +23,7 @@ def main():
         metavar="",
         type=str,
         help="Input data directory which contains images in specified format",
+        required=True,
     )
     parser.add_argument(
         "-c",
@@ -30,6 +31,7 @@ def main():
         metavar="",
         type=str,
         help="Channels/modalities identifier string to check for in all files in 'input_dir'; for example: --channelsID _t1.nii.gz,_t2.nii.gz",
+        required=True,
     )
     parser.add_argument(
         "-l",
@@ -45,6 +47,7 @@ def main():
         metavar="",
         type=str,
         help="Output CSV file",
+        required=True,
     )
     parser.add_argument(
         "-r",
@@ -58,13 +61,10 @@ def main():
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [
-        args.inputDir,
-        args.channelsID,
-        args.outputfile,
-    ]:
-        if param_none_check is None:
-            sys.exit("ERROR: Missing required parameter:", param_none_check)
+    for param_none_check in [args.inputDir, args.channelsID, args.outputfile]:
+        assert (
+            param_none_check is not None
+        ), f"Required parameter missing: {param_none_check}"
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputfile)

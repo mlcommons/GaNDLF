@@ -18,6 +18,7 @@ def main():
         "--inputDir",
         metavar="",
         type=str,
+        required=True,
         help="Input directory or file which contains images to be anonymized.",
     )
     parser.add_argument(
@@ -42,6 +43,7 @@ def main():
         "--outputFile",
         metavar="",
         type=str,
+        required=True,
         help="Output directory or file which will contain the image(s) after anonymization.",
     )
 
@@ -49,15 +51,15 @@ def main():
 
     # check for required parameters - this is needed here to keep the cli clean
     for param_none_check in [args.inputDir, args.outputfile]:
-        if param_none_check is None:
-            sys.exit("ERROR: Missing required parameter:", param_none_check)
+        assert (
+            param_none_check is not None
+        ), f"Missing required parameter: {param_none_check}"
 
     inputDir = os.path.normpath(args.inputDir)
     outputFile = os.path.normpath(args.outputfile)
+    config = None
     if os.path.isfile(args.config):
         config = yaml.safe_load(open(args.config, "r"))
-    else:
-        config = None
 
     run_anonymizer(inputDir, outputFile, config, args.modality)
 
