@@ -28,6 +28,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-o",
+        "--outputdir",
         "--output",
         metavar="",
         type=str,
@@ -37,6 +38,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config_generator(args.config, args.strategy, args.output)
+    config_generator(args.config, args.strategy, args.outputdir)
 
     print("Finished.")

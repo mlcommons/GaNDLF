@@ -24,6 +24,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-o",
+        "--outputdir",
         "--output_path",
         dest="output_path",
         default=None,
@@ -41,6 +42,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    patch_extraction(args.input_path, args.output_path, args.config)
+    patch_extraction(args.input_path, args.outputdir, args.config)
 
     print("Finished.")
