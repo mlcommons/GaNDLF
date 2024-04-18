@@ -38,6 +38,7 @@ def main():
     )
     parser.add_argument(
         "-o",
+        "--outputfile",
         "--outputFile",
         metavar="",
         type=str,
@@ -47,12 +48,12 @@ def main():
     args = parser.parse_args()
 
     # check for required parameters - this is needed here to keep the cli clean
-    for param_none_check in [args.inputDir, args.outputFile]:
+    for param_none_check in [args.inputDir, args.outputfile]:
         if param_none_check is None:
             sys.exit("ERROR: Missing required parameter:", param_none_check)
 
     inputDir = os.path.normpath(args.inputDir)
-    outputFile = os.path.normpath(args.outputFile)
+    outputFile = os.path.normpath(args.outputfile)
     if os.path.isfile(args.config):
         config = yaml.safe_load(open(args.config, "r"))
     else:

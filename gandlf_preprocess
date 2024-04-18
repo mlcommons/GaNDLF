@@ -31,6 +31,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-o",
+        "--outputdir",
         "--output",
         metavar="",
         type=str,
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     preprocess_and_save(
         args.inputdata,
         args.config,
-        args.output,
+        args.outputdir,
         args.labelPad,
         args.applyaugs,
         args.cropzero,
