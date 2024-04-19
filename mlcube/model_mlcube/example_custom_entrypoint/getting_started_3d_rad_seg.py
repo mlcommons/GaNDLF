@@ -30,11 +30,11 @@ def run_gandlf(output_path, device):
         output_path (str): The path to the output file/folder
         device (str): device to run on (i.e. CPU or GPU)
     """
-    exit_status = os.system(
-        "python3.9 gandlf_run --train False "
+    cmd = ("python3.9 gandlf_run --train False "
         f"--device {device} --config /embedded_config.yml "
         f"--modeldir /embedded_model/ -i ./data.csv -o {output_path}"
-    )
+           )
+    exit_status = os.system(cmd)
     exit_code = os.WEXITSTATUS(exit_status)
     sys.exit(exit_code)
 
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    print("MLCube custom entrypoint. args received: ", args)
 
     create_csv(args.data_path)
     run_gandlf(args.output_path, args.device)
