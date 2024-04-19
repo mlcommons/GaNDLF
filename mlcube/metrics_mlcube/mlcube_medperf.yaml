@@ -48,6 +48,6 @@ tasks:
         predictions: predictions/,
         labels: labels/,
         # GaNDLF config file. The name should be `parameters.yaml`
-        parameters_file: {type: file, default: parameters.yaml}
+        config: {type: file, default: parameters.yaml}
       }
-      outputs: { output_path: { type: "file", default: "results.yaml" } }
+      outputs: { output-file: { type: "file", default: "results.yaml" } }

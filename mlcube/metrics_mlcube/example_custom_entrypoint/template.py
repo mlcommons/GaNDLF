@@ -15,16 +15,16 @@ def create_csv(predictions, labels):
     raise NotImplementedError
 
 
-def run_gandlf(output_path, parameters_file):
+def run_gandlf(output_file, config):
     """
     A function that calls GaNDLF's generate metrics command with the previously created csv.
 
     Args:
-        output_path (str): The path to the output file/folder
-        parameters_file (str): The path to the parameters file
+        output_file (str): The path to the output file/folder
+        config (str): The path to the parameters file
     """
     exit_status = os.system(
-        f"gandlf generate-metrics -c {parameters_file} -i ./data.csv -o {output_path}"
+        f"gandlf generate-metrics -c {config} -i ./data.csv -o {output_file}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
     sys.exit(exit_code)
@@ -32,12 +32,12 @@ def run_gandlf(output_path, parameters_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--parameters_file", metavar="", type=str, required=True)
+    parser.add_argument("--config", metavar="", type=str, required=True)
     parser.add_argument("--predictions", metavar="", type=str, required=True)
-    parser.add_argument("--output_path", metavar="", type=str, default=None)
+    parser.add_argument("--output-file", metavar="", type=str, default=None)
     parser.add_argument("--labels", metavar="", type=str, required=True)
 
     args = parser.parse_args()
 
     create_csv(args.predictions, args.labels)
-    run_gandlf(args.output_path, args.parameters_file)
+    run_gandlf(args.output_file, args.config)

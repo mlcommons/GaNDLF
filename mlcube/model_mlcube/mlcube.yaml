@@ -80,7 +80,7 @@ tasks:
         #device: {type: "str", default: "cpu"},
         #config: {type: file, default: parameters.yaml}
       }
-      outputs: {output_path: {type: "directory", default: "inference_results"}}
+      outputs: {output-path: {type: "directory", default: "inference_results"}}
 
   construct_csv:
   # Constructs a data csv from a data directory that can be passed to future steps, to prevent issues with path translation between host and container.

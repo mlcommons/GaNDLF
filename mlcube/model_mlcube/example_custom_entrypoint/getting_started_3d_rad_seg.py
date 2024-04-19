@@ -41,13 +41,13 @@ def run_gandlf(output_path, device):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path", metavar="", type=str, required=True)
-    parser.add_argument("--output_path", metavar="", type=str, default=None)
+    parser.add_argument("--input-data", metavar="", type=str, required=True)
+    parser.add_argument("--output-path", metavar="", type=str, default=None)
     parser.add_argument(
         "--device", metavar="", type=str, required=True, choices=["cpu", "cuda"]
     )
 
     args = parser.parse_args()
 
-    create_csv(args.data_path)
+    create_csv(args.input_data)
     run_gandlf(args.output_path, args.device)
