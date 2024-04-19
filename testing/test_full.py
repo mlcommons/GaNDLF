@@ -3124,11 +3124,7 @@ def test_generic_data_split():
     )
     parameters["nested_training"] = {"testing": 5, "validation": 5, "stratified": True}
     # read and parse csv
-    training_data, parameters["headers"] = parseTrainingCSV(
-        inputDir + "/train_3d_rad_classification.csv"
-    )
-    parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
-    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    training_data, _ = parseTrainingCSV(inputDir + "/train_3d_rad_classification.csv")
     # duplicate the data to test stratified sampling
     training_data_duplicate = training_data._append(training_data)
     for _ in range(1):
