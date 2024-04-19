@@ -36,7 +36,7 @@ def _optimize_model(model: str, config: Optional[str]):
 )
 @append_copyright_to_help
 def new_way(model: str, config: Optional[str]):
-    """ "Generate optimized versions of trained GaNDLF models."""
+    """Generate optimized versions of trained GaNDLF models."""
     _optimize_model(model=model, config=config)
 
 
