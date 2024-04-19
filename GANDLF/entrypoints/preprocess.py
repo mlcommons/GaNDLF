@@ -13,21 +13,21 @@ from GANDLF.entrypoints import append_copyright_to_help
 def _preprocess(
     config: str,
     input_data: str,
-    output: str,
+    output_dir: str,
     label_pad: str,
     apply_augs: bool,
     crop_zero: bool,
 ):
     print(f"{config=}")
     print(f"{input_data=}")
-    print(f"{output=}")
+    print(f"{output_dir=}")
     print(f"{label_pad=}")
     print(f"{apply_augs=}")
     print(f"{crop_zero=}")
     preprocess_and_save(
         data_csv=input_data,
         config_file=config,
-        output_dir=output,
+        output_dir=output_dir,
         label_pad_mode=label_pad,
         applyaugs=apply_augs,
         apply_zero_crop=crop_zero,
@@ -54,7 +54,7 @@ def _preprocess(
     help="Data csv file that is used for training/inference",
 )
 @click.option(
-    "--output",
+    "--output-dir",
     "-o",
     type=click.Path(file_okay=False, dir_okay=True),
     required=True,
@@ -84,7 +84,7 @@ def _preprocess(
 def new_way(
     config: str,
     input_data: str,
-    output: str,
+    output_dir: str,
     label_pad: str,
     apply_augs: bool,
     crop_zero: bool,
@@ -93,7 +93,7 @@ def new_way(
     _preprocess(
         config=config,
         input_data=input_data,
-        output=output,
+        output_dir=output_dir,
         label_pad=label_pad,
         apply_augs=apply_augs,
         crop_zero=crop_zero,
