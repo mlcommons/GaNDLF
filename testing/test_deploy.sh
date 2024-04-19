@@ -56,6 +56,7 @@ rm data.csv
 #### deploy ####
 ################
 
+echo "Starting model deploy..."
 # deploy model
 mkdir model_mlcube
 cp $MODEL_MLCUBE_TEMPLATE model_mlcube/mlcube.yaml
@@ -70,6 +71,7 @@ gandlf deploy \
   --no-gpu \
   --entrypoint $MODEL_MLCUBE_ENTRYPOINT
 
+echo "Starting metrics deploy..."
 # deploy metrics
 mkdir metrics_mlcube
 cp $METRICS_MLCUBE_TEMPLATE metrics_mlcube/mlcube.yaml
@@ -85,11 +87,15 @@ gandlf deploy \
 #### run pipeline ####
 ######################
 
+echo "Starting model pipeline run..."
+
 mlcube run \
     --mlcube ./built_model_mlcube \
     --task infer \
     data_path=../../3d_rad_segmentation \
     output_path=../../predictions
+
+echo "Starting metrics pipeline run..."
 
 mlcube run \
     --mlcube ./built_metrics_mlcube \
@@ -103,6 +109,8 @@ mlcube run \
 ###############
 #### check ####
 ###############
+
+echo "Checking results..."
 
 if [ -f "results.yaml" ]; then
     echo "Success"
