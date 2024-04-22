@@ -34,7 +34,7 @@ def run_gandlf(output_path, model_dir, device):
     exit_status = os.system(
         "gandlf run --infer "
         f"--device {device} --config /embedded_config.yml "
-        f"--model-dir {model_dir} -i ./data.csv -o {output_path}"
+        f"--model-dir /embedded_model/ -i ./data.csv -o {output_path}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
     sys.exit(exit_code)
