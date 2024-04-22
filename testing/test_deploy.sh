@@ -92,18 +92,18 @@ echo "Starting model pipeline run..."
 mlcube run \
     --mlcube ./built_model_mlcube \
     --task infer \
-    data_path=./3d_rad_segmentation \
-    output_path=./predictions
+    input-data=../../3d_rad_segmentation \
+    output-path=../../predictions
 
 echo "Starting metrics pipeline run..."
 
 mlcube run \
     --mlcube ./built_metrics_mlcube \
     --task evaluate \
-    predictions=./predictions \
-    labels=./3d_rad_segmentation \
-    output_path=./results.yaml \
-    parameters_file=./config_getting_started_segmentation_rad3d.yaml
+    predictions=../../predictions \
+    labels=../../3d_rad_segmentation \
+    output-file=../../results.yaml \
+    config=../../config_getting_started_segmentation_rad3d.yaml
 
 
 ###############
