@@ -25,7 +25,7 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # full command
-            "--input-csv input.csv --output-path output/ --config config.yaml",
+            "--input-csv input.csv --output-dir output/ --config config.yaml",
             # tests short arg aliases
             "-i input.csv -o output/ -c config.yaml",
         ],

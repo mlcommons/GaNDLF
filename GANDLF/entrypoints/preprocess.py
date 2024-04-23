@@ -184,7 +184,7 @@ def old_way():
     _preprocess(
         config=args.config,
         input_data=args.inputdata,
-        output=args.output,
+        output_dir=args.output,
         label_pad=args.labelPad,
         apply_augs=args.applyaugs,
         crop_zero=args.cropzero,

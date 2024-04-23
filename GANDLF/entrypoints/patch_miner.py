@@ -88,7 +88,7 @@ def old_way():
 
     args = parser.parse_args()
     _mine_patches(
-        input_path=args.input_path, output_path=args.output_path, config=args.config
+        input_path=args.input_path, output_dir=args.output_path, config=args.config
     )
 
 
