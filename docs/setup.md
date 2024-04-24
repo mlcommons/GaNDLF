@@ -30,7 +30,7 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 (venv_gandlf) $> ### subsequent commands go here
 ### PyTorch installation - https://pytorch.org/get-started/previous-versions/#v210
 ## CUDA 12.1
-# (venv_gandlf) $> pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
+# (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu121
 ## CUDA 11.8
 # (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118
 ## ROCm 5.6
