@@ -3,8 +3,7 @@ name: Dev-Container CI
 on:
   push:
     branches: [ master ]
-  # pull_request:
-  #   branches: [ master ]
+  pull_request: {}
 
 jobs:
   dev-container-test:

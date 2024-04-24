@@ -6,8 +6,7 @@ name: OpenFL-Test
 on:
   push:
     branches: [ master ]
-  # pull_request:
-  #   branches: [ master ]
+  pull_request: {}
     
 
 jobs:
