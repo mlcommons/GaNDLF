@@ -36,7 +36,7 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 ## ROCm 5.6
 # (venv_gandlf) $> pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/rocm5.6
 ## CPU-only
-# (venv_gandlf) $> pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cpu
+# (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cpu
 ```
 
 ### Optional Dependencies 

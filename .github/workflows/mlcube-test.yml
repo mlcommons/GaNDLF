@@ -72,7 +72,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install wheel
         python -m pip install openvino-dev==2023.0.1 mlcube_docker
-        pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cpu
+        pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cpu
         pip install -e .
     - name: Run mlcube deploy tests
       working-directory: ./testing
