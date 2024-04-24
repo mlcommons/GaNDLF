@@ -71,7 +71,7 @@ toplevel_package_excludes = [
 # specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
 black_version = "23.11.0"
 requirements = [
-    "torch==2.1.2",
+    "torch==2.2.1",
     f"black=={black_version}",
     "numpy==1.25.0",
     "scipy",
@@ -79,7 +79,7 @@ requirements = [
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
     "torchvision",
     "tqdm",
-    "torchio==0.19.5",
+    "torchio==0.19.6",
     "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
     "scikit-image>=0.19.1",
