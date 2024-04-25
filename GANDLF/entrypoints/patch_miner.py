@@ -12,8 +12,8 @@ from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
 
 
-def _mine_patches(input_path: str, output_path: str, config: Optional[str]):
-    patch_extraction(input_path, output_path, config)
+def _mine_patches(input_path: str, output_dir: str, config: Optional[str]):
+    patch_extraction(input_path, output_dir, config)
     logging.info("Finished.")
 
 
@@ -27,11 +27,11 @@ def _mine_patches(input_path: str, output_path: str, config: Optional[str]):
     help="input path for the tissue",
 )
 @click.option(
-    "--output-path",
+    "--output-dir",
     "-o",
     type=click.Path(file_okay=False, dir_okay=True),
     required=True,
-    help="output path for the patches",
+    help="output directory for the patches",
 )
 @click.option(
     "--config",
@@ -42,9 +42,9 @@ def _mine_patches(input_path: str, output_path: str, config: Optional[str]):
     "otherwise defaults to 16 and (256, 256), respectively.",
 )
 @append_copyright_to_help
-def new_way(input_csv: str, output_path: str, config: Optional[str]):
+def new_way(input_csv: str, output_dir: str, config: Optional[str]):
     """Construct patches from whole slide image(s)."""
-    _mine_patches(input_path=input_csv, output_path=output_path, config=config)
+    _mine_patches(input_path=input_csv, output_dir=output_dir, config=config)
 
 
 @deprecated(
@@ -88,7 +88,7 @@ def old_way():
 
     args = parser.parse_args()
     _mine_patches(
-        input_path=args.input_path, output_path=args.output_path, config=args.config
+        input_path=args.input_path, output_dir=args.output_path, config=args.config
     )
 
 

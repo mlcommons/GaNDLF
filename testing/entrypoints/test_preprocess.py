@@ -25,7 +25,7 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[
             # full command
-            "--config config.yaml --input-data input.csv --output output/ --label-pad constant --apply-augs --crop-zero",
+            "--config config.yaml --input-data input.csv --output-dir output/ --label-pad constant --apply-augs --crop-zero",
             # tests short arg aliases
             "-c config.yaml -i input.csv -o output/ -l constant -a -z",
             # checks --label-pad is optional with `constant` default value
