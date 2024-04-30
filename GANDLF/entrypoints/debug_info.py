@@ -1,6 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 import platform
+from pip import main
 from deprecated import deprecated
 import click
 
@@ -21,6 +22,7 @@ def _debug_info():
     print(f"  Implementation: {platform.python_implementation()}")
     print(f"  Compiler: {platform.python_compiler()}")
     print(f"  Build: {(' ').join(list(platform.python_build()))}")
+    print("  Installed packages:\n", print(main(["list"])))
 
 
 @click.command()
