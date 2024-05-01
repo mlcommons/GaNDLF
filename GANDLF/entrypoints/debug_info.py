@@ -1,6 +1,8 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 import platform
+import argparse
+import ast
 from pip import main
 from deprecated import deprecated
 import click
@@ -8,6 +10,8 @@ import click
 from GANDLF import __version__
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils import get_git_hash
+
+from GANDLF.cli import copyrightMessage
 
 
 def _debug_info(verbose: bool):
