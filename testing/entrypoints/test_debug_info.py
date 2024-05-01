@@ -19,8 +19,14 @@ test_cases = [
         should_succeed=True,
         new_way_lines=[""],
         old_way_lines=[""],
+        expected_args={"verbose": False},
+    ),
+    CliCase(
+        should_succeed=True,
+        new_way_lines=["--verbose", "-v"],
+        old_way_lines=["--verbose", "-v"],
         expected_args={"verbose": True},
-    )
+    ),
 ]
 
 

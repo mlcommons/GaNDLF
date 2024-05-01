@@ -47,6 +47,20 @@ def new_way(verbose: bool):
     + "`gandlf_debugInfo` script would be deprecated soon."
 )
 def old_way():
+    parser = argparse.ArgumentParser(
+        prog="GANDLF_DebugInfo",
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Generate debugging information for maintainers.\n\n"
+        + copyrightMessage,
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        metavar="",
+        type=ast.literal_eval,
+        default=False,
+        help="If True, prints all packages installed as well.",
+    )
     _debug_info()
 
 
