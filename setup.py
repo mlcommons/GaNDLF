@@ -3,7 +3,9 @@
 """The setup script."""
 
 
-import sys, re, os
+import sys
+import re
+import os
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
@@ -115,6 +117,7 @@ requirements = [
     "monai==1.3.0",
     "packaging==24.0",
     "typer==0.9.0",
+    "connected-components-3d",
 ]
 
 if __name__ == "__main__":
@@ -146,6 +149,7 @@ if __name__ == "__main__":
             "gandlf_deploy",
             "gandlf_optimizeModel",
             "gandlf_generateMetrics",
+            "gandlf_generateCompetitionMetrics",
         ],
         classifiers=[
             "Development Status :: 3 - Alpha",
