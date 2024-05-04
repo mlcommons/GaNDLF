@@ -23,8 +23,8 @@ test_cases = [
     ),
     CliCase(
         should_succeed=True,
-        new_way_lines=["--verbose", "-v"],
-        old_way_lines=["--verbose", "-v"],
+        new_way_lines=["-v"],
+        old_way_lines=["-v True"],
         expected_args={"verbose": True},
     ),
 ]
