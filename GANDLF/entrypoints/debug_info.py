@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import platform
 import argparse
-import ast
 from pip import main
 from deprecated import deprecated
 import click
