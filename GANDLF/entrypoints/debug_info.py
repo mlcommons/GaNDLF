@@ -59,7 +59,6 @@ def old_way():
     parser.add_argument(
         "-v",
         "--verbose",
-        metavar="",
         action="store_true",
         default=False,
         help="If True, prints all packages installed as well.",
