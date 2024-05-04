@@ -61,11 +61,12 @@ def old_way():
         "-v",
         "--verbose",
         metavar="",
-        type=ast.literal_eval,
+        action="store_true",
         default=False,
         help="If True, prints all packages installed as well.",
     )
-    _debug_info()
+    args = parser.parse_args()
+    _debug_info(verbose=args.verbose)
 
 
 if __name__ == "__main__":
