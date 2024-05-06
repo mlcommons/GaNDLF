@@ -24,7 +24,7 @@ test_cases = [
     CliCase(
         should_succeed=True,
         new_way_lines=["--verbose", "-v"],
-        old_way_lines=["--verbose True", "-v True"],
+        old_way_lines=["--verbose", "-v"],
         expected_args={"verbose": True},
     ),
 ]
