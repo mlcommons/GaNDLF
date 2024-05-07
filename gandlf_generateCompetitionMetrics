@@ -62,7 +62,7 @@ if __name__ == "__main__":
     assert args.inputdata is not None, "Missing required parameter: inputdata"
 
     try:
-        generate_Competition_metrics.generate_metrics_dict(
+        generate_Competition_metrics.generate_metrics_dict_competition(
             args.inputdata,
             args.competition,
             args.outputfile,
