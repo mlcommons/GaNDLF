@@ -349,7 +349,7 @@ def get_LesionWiseResults(pred_file, gt_file, challenge_name, output=None):
     final_metrics_dict = dict()
     label_values = ["WT", "TC", "ET"]
 
-    for l in range(len(label_values)):
+    for l, _ in enumerate(label_values):
         (
             _,
             fn,
