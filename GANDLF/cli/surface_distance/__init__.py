@@ -13,5 +13,8 @@
 # limitations under the License.
 """Surface distance module: https://github.com/deepmind/surface-distance ."""
 
-from .metrics import compute_surface_distances
-from .metrics import compute_robust_hausdorff
+from .metrics import compute_surface_distances, compute_robust_hausdorff
+
+__all__ = ["compute_surface_distances", "compute_robust_hausdorff"]
+
+__version__ = "0.1"
