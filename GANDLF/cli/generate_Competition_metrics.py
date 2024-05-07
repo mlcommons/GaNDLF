@@ -31,8 +31,7 @@ def dice(im1, im2):
     im2 = np.asarray(im2).astype(bool)
 
     if im1.shape != im2.shape:
-        raise ValueError(
-            "Shape mismatch: im1 and im2 must have the same shape.")
+        raise ValueError("Shape mismatch: im1 and im2 must have the same shape.")
 
     # Compute Dice coefficient
     intersection = np.logical_and(im1, im2)
@@ -68,14 +67,12 @@ def get_TissueWiseSeg(prediction_matrix, gt_matrix, tissue_type):
         )
         np.place(prediction_matrix, (prediction_matrix > 0), 1)
 
-        np.place(gt_matrix, (gt_matrix != 1) & (
-            gt_matrix != 2) & (gt_matrix != 3), 0)
+        np.place(gt_matrix, (gt_matrix != 1) & (gt_matrix != 2) & (gt_matrix != 3), 0)
         np.place(gt_matrix, (gt_matrix > 0), 1)
 
     elif tissue_type == "TC":
         np.place(
-            prediction_matrix, (prediction_matrix != 1) & (
-                prediction_matrix != 3), 0
+            prediction_matrix, (prediction_matrix != 1) & (prediction_matrix != 3), 0
         )
         np.place(prediction_matrix, (prediction_matrix > 0), 1)
 
@@ -202,8 +199,7 @@ def get_LesionWiseScores(prediction_seg, gt_seg, label_value, dil_factor):
     gt_mat_dilation = scipy.ndimage.binary_dilation(
         gt_mat, structure=dilation_struct, iterations=dil_factor
     )
-    gt_mat_dilation_cc = cc3d.connected_components(
-        gt_mat_dilation, connectivity=26)
+    gt_mat_dilation_cc = cc3d.connected_components(gt_mat_dilation, connectivity=26)
 
     gt_mat_combinedByDilation = get_GTseg_combinedByDilation(
         gt_dilated_cc_mat=gt_mat_dilation_cc, gt_label_cc=gt_mat_cc
@@ -264,8 +260,7 @@ def get_LesionWiseScores(prediction_seg, gt_seg, label_value, dil_factor):
         else:
             fn.append(gtcomp)
 
-    fp = np.unique(pred_label_cc[np.isin(
-        pred_label_cc, tp + [0], invert=True)])
+    fp = np.unique(pred_label_cc[np.isin(pred_label_cc, tp + [0], invert=True)])
 
     return (
         tp,
@@ -407,8 +402,7 @@ def get_LesionWiseResults(pred_file, gt_file, challenge_name, output=None):
         ).shape[0]
 
         metric_df["Label"] = [label_values[l]] * len(metric_df)
-        metric_df["hd95_lesionwise"] = metric_df["hd95_lesionwise"].replace(
-            np.inf, 374)
+        metric_df["hd95_lesionwise"] = metric_df["hd95_lesionwise"].replace(np.inf, 374)
 
         # final_lesionwise_metrics_df = final_lesionwise_metrics_df.append(
         #   metric_df)
@@ -417,8 +411,7 @@ def get_LesionWiseResults(pred_file, gt_file, challenge_name, output=None):
             [final_lesionwise_metrics_df, metric_df], ignore_index=True
         )
 
-        metric_df_thresh = metric_df[metric_df["gt_lesion_vol"]
-                                     > lesion_volume_thresh]
+        metric_df_thresh = metric_df[metric_df["gt_lesion_vol"] > lesion_volume_thresh]
 
         try:
             lesion_wise_dice = np.sum(metric_df_thresh["dice_lesionwise"]) / (
@@ -431,7 +424,7 @@ def get_LesionWiseResults(pred_file, gt_file, challenge_name, output=None):
             lesion_wise_hd95 = (
                 np.sum(metric_df_thresh["hd95_lesionwise"]) + len(fp) * 374
             ) / (len(metric_df_thresh) + len(fp))
-        except:
+        except ZeroDivisionError:
             lesion_wise_hd95 = np.nan
 
         if math.isnan(lesion_wise_dice):
