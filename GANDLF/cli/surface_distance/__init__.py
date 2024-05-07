@@ -13,19 +13,5 @@
 # limitations under the License.
 """Surface distance module: https://github.com/deepmind/surface-distance ."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from . import lookup_tables  # pylint: disable=relative-beyond-top-level
-import numpy as np
-from scipy import ndimage
-
 from .metrics import compute_surface_distances
-from .metrics import compute_average_surface_distance
 from .metrics import compute_robust_hausdorff
-from .metrics import compute_surface_overlap_at_tolerance
-from .metrics import compute_surface_dice_at_tolerance
-from .metrics import compute_dice_coefficient
-
-__version__ = "0.1"
