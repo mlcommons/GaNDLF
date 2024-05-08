@@ -7,7 +7,7 @@ from .loss_and_metric import get_loss_and_metrics
 def step(
     model: torch.nn.Module,
     image: torch.Tensor,
-    label: torch.Tensor,
+    label: Optional[torch.Tensor],
     params: dict,
     train: Optional[bool] = True,
 ) -> Tuple[float, dict, torch.Tensor, torch.Tensor]:
@@ -62,7 +62,7 @@ def step(
                 if len(label.shape) > 1:
                     label = torch.squeeze(label, -1)
 
-    if not (train) and params["model"]["type"].lower() == "openvino":
+    if not train and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
                 params["model"]["IO"][1][0]
@@ -86,12 +86,9 @@ def step(
     else:
         loss, metric_output = None, None
 
-    if len(output) > 1:
-        output = output[0]
-
     if params["model"]["dimension"] == 2:
-        output = torch.unsqueeze(output, -1)
         if "medcam_enabled" in params and params["medcam_enabled"]:
             attention_map = torch.unsqueeze(attention_map, -1)
 
+    assert len(output) == len(image), f"Error: output({len(output)}) and batch({len(image)}) have different lengths. Both should be equal to batch size!"
     return loss, metric_output, output, attention_map

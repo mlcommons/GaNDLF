@@ -79,10 +79,8 @@ def train_network(
 
     # get ground truths
     if calculate_overall_metrics:
-        (
-            ground_truth_array,
-            predictions_array,
-        ) = get_ground_truths_and_predictions_tensor(params, "training_data")
+        ground_truth_array = torch.zeros(len(train_dataloader.dataset), dtype=torch.int)
+        predictions_array = torch.zeros_like(ground_truth_array)
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(
@@ -117,11 +115,11 @@ def train_network(
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if calculate_overall_metrics:
-            predictions_array[
-                batch_idx
-                * params["batch_size"] : (batch_idx + 1)
-                * params["batch_size"]
-            ] = (torch.argmax(output[0], 0).cpu().item())
+            batch_idx_slice = slice(batch_idx * params["batch_size"], (batch_idx + 1) * params["batch_size"])
+            ground_truth_array[batch_idx_slice] = label.detach().cpu().ravel()
+            batch_predictions = torch.argmax(output, 1).cpu()
+            assert len(batch_predictions) == len(label)
+            predictions_array[batch_idx_slice] = batch_predictions
 
         nan_loss = torch.isnan(loss)
         second_order = (
