@@ -1,5 +1,14 @@
 from pathlib import Path
-import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
+import gdown
+import zipfile
+import os
+import csv
+import random
+import copy
+import shutil
+import yaml
+import torch
+import pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -33,6 +42,7 @@ from GANDLF.cli import (
     post_training_model_optimization,
     generate_metrics_dict,
     split_data_and_save_csvs,
+    generate_metrics_dict_competition,
 )
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
@@ -46,7 +56,7 @@ from GANDLF.data.post_process import (
 from GANDLF.anonymize import run_anonymizer
 
 device = "cpu"
-## global defines
+# global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
     "lightunet",
@@ -696,7 +706,7 @@ def test_train_resume_inference_classification_rad_3d(device):
         reset=True,
     )
 
-    ## testing resume with parameter updates
+    # testing resume with parameter updates
     parameters["num_epochs"] = 2
     parameters["nested_training"]["testing"] = -5
     parameters["nested_training"]["validation"] = -5
@@ -710,7 +720,7 @@ def test_train_resume_inference_classification_rad_3d(device):
         reset=False,
     )
 
-    ## testing resume without parameter updates
+    # testing resume without parameter updates
     parameters["num_epochs"] = 1
     parameters["nested_training"]["testing"] = -5
     parameters["nested_training"]["validation"] = -5
@@ -770,7 +780,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     optimization_result = post_training_model_optimization(model_path, config_path)
     assert optimization_result == True, "Optimization should pass"
 
-    ## testing inference
+    # testing inference
     for model_type in all_model_type:
         parameters["model"]["type"] = model_type
         parameters["output_dir"] = outputDir  # this is in inference mode
@@ -817,7 +827,7 @@ def test_train_inference_optimize_segmentation_rad_2d(device):
         reset=True,
     )
 
-    ## testing inference
+    # testing inference
     for model_type in all_model_type:
         parameters["model"]["type"] = model_type
         parameters["output_dir"] = outputDir  # this is in inference mode
@@ -848,7 +858,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["model"]["architecture"] = model
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    ## add stratified splitting
+    # add stratified splitting
     parameters["nested_training"]["stratified"] = True
 
     # read and parse csv
@@ -869,7 +879,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
 
     # ensure every part of the code is tested
     for folds in [2, 1, -5]:
-        ## add stratified folding information
+        # add stratified folding information
         parameters["nested_training"]["testing"] = folds
         parameters["nested_training"]["validation"] = folds if folds != 1 else -5
         sanitize_outputDir()
@@ -881,7 +891,7 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
             resume=False,
             reset=True,
         )
-    ## this is to test if inference can run without having ground truth column
+    # this is to test if inference can run without having ground truth column
     training_data.drop("ValueToPredict", axis=1, inplace=True)
     training_data.drop("Label", axis=1, inplace=True)
     temp_infer_csv = os.path.join(outputDir, "temp_infer_csv.csv")
@@ -985,7 +995,7 @@ def test_train_scheduler_classification_rad_2d(device):
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
         sanitize_outputDir()
-        ## ensure parameters are parsed every single time
+        # ensure parameters are parsed every single time
         file_config_temp = write_temp_config_path(parameters)
 
         parameters = ConfigManager(file_config_temp, version_check_flag=False)
@@ -1419,7 +1429,7 @@ def test_generic_cli_function_preprocess():
     ), "Number of columns in output dataframe is not same as that of input dataframe"  # the +1 is for the added index column
     sanitize_outputDir()
 
-    ## regression/classification preprocess
+    # regression/classification preprocess
     file_config = os.path.join(testingDir, "config_regression.yaml")
     parameters = ConfigManager(file_config)
     parameters["modality"] = "rad"
@@ -1632,7 +1642,7 @@ def test_generic_preprocess_functions():
     non_zero_normalizer = global_preprocessing_dict["normalize_nonZero"]
     input_transformed = non_zero_normalizer(input_tensor)
 
-    ## stain_normalization checks
+    # stain_normalization checks
     input_tensor = 2 * torch.rand(3, 256, 256, 1) + 10
     training_data, _ = parseTrainingCSV(inputDir + "/train_2d_rad_segmentation.csv")
     parameters_temp = {}
@@ -1649,7 +1659,7 @@ def test_generic_preprocess_functions():
         )
         input_transformed = non_zero_normalizer(input_tensor)
 
-    ## histogram matching tests
+    # histogram matching tests
     # histogram equalization
     input_tensor = torch.rand(1, 64, 64, 64)
     parameters_temp = {}
@@ -1683,7 +1693,7 @@ def test_generic_preprocess_functions():
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = fill_holes(input_tensor)
 
-    ## CCA tests
+    # CCA tests
     # 3d
     input_tensor = torch.rand(1, 256, 256, 256) > 0.5
     input_transformed = cca(input_tensor)
@@ -1740,7 +1750,7 @@ def test_generic_preprocess_functions():
     exception_raised = exc_info.value
     print("Exception raised: ", exception_raised)
 
-    ## image rescaling test
+    # image rescaling test
     input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
     # try out different options
     for params in [
@@ -3141,6 +3151,32 @@ def test_generic_data_split():
 
     files_in_outputDir = os.listdir(outputDir)
     assert len(files_in_outputDir) == 15, "CSVs were not split correctly"
+
+    sanitize_outputDir()
+
+    print("passed")
+
+
+def test_lesionwise_competition_metrics():
+    print("52: Starting test for Lesionwise Metrics for Competitions")
+    segmentation_csv = os.path.join(inputDir, "train_3d_rad_segmentation.csv")
+    segmentation_df = pd.read_csv(segmentation_csv)
+    labels = segmentation_df["Label"]
+    subjectIDs = segmentation_df["SubjectID"]
+
+    pd.DataFrame(
+        {"subjectid": subjectIDs, "prediction": labels, "target": labels}
+    ).to_csv(os.path.join(outputDir, "comp_metrics.csv"), index=False)
+
+    output_file = os.path.join(outputDir, "output_comp.yaml")
+
+    generate_metrics_dict_competition(
+        os.path.join(outputDir, "comp_metrics.csv"), "FeTS-2024", output_file
+    )
+
+    assert os.path.isfile(
+        output_file
+    ), "Competition Metrics output file was not generated"
 
     sanitize_outputDir()
 
