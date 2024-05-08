@@ -100,6 +100,10 @@ jobs:
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       run: |
         pytest --cov=. --cov-report=xml --cov-append -k "transunet"
+    - name: Run Competition Lesionwise unit tests
+      if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+      run: |
+        pytest --cov=. --cov-report=xml --cov-append -k "lesionwise"
 
 
     - name: Upload coverage
