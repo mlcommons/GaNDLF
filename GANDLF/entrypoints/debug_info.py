@@ -14,6 +14,7 @@ from GANDLF.cli import copyrightMessage
 
 
 def _debug_info(verbose: bool):
+    """Function to display necessary debugging information."""
     print(f"GANDLF version: {__version__}")
     print(f"Git hash: {get_git_hash()}")
     print(f"Platform: {platform.platform()}")
