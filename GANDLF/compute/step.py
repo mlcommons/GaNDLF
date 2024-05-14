@@ -90,5 +90,7 @@ def step(
         if "medcam_enabled" in params and params["medcam_enabled"]:
             attention_map = torch.unsqueeze(attention_map, -1)
 
-    assert len(output) == len(image), f"Error: output({len(output)}) and batch({len(image)}) have different lengths. Both should be equal to batch size!"
+    assert len(output) == len(
+        image
+    ), f"Error: output({len(output)}) and batch({len(image)}) have different lengths. Both should be equal to batch size!"
     return loss, metric_output, output, attention_map

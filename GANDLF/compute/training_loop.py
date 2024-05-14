@@ -1,5 +1,5 @@
 import os, time, psutil
-from typing import Tuple
+from typing import Tuple, Union
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -22,7 +22,6 @@ from GANDLF.utils import (
     version_check,
     write_training_patches,
     print_model_summary,
-    get_ground_truths_and_predictions_tensor,
     get_model_dict,
     print_and_format_metrics,
 )
@@ -59,15 +58,26 @@ def train_network(
     print("*" * 20)
     # Initialize a few things
     total_epoch_train_loss = 0
-    total_epoch_train_metric = {}
+    total_epoch_train_metric: dict[str, Union[float, np.array]] = {}
     average_epoch_train_metric = {}
-    calculate_overall_metrics = (params["problem_type"] == "classification") or (
-        params["problem_type"] == "regression"
-    )
+    # TODO: calculate metrics for segmentation and other problems. btw what are possible problem types?
+    calculate_overall_metrics = params["problem_type"] in {
+        "classification",
+        "regression",
+    }
+
+    # get ground truths
+    if calculate_overall_metrics:
+        # TODO: for regression / segmentation we need different dtypes + different shape
+        ground_truth_array = torch.zeros(len(train_dataloader.dataset), dtype=torch.int)
+        predictions_array = torch.zeros_like(ground_truth_array)
 
     for metric in params["metrics"]:
+        # TODO: can it be per-label for non-classif?
         if "per_label" in metric:
-            total_epoch_train_metric[metric] = []
+            total_epoch_train_metric[metric] = np.zeros(
+                shape=params["model"]["num_classes"]
+            )
         else:
             total_epoch_train_metric[metric] = 0
 
@@ -77,10 +87,6 @@ def train_network(
         if params["verbose"]:
             print("Using Automatic mixed precision", flush=True)
 
-    # get ground truths
-    if calculate_overall_metrics:
-        ground_truth_array = torch.zeros(len(train_dataloader.dataset), dtype=torch.int)
-        predictions_array = torch.zeros_like(ground_truth_array)
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(
@@ -115,13 +121,18 @@ def train_network(
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if calculate_overall_metrics:
-            batch_idx_slice = slice(batch_idx * params["batch_size"], (batch_idx + 1) * params["batch_size"])
+            batch_idx_slice = slice(
+                batch_idx * params["batch_size"], (batch_idx + 1) * params["batch_size"]
+            )
+            # TODO: label = BATCH_SIZE x 1. What if not? Multiclass? classif - OHE?
             ground_truth_array[batch_idx_slice] = label.detach().cpu().ravel()
+            # TODO: output is BATCH_SIZE x N_CLASSES. What if not?
             batch_predictions = torch.argmax(output, 1).cpu()
             assert len(batch_predictions) == len(label)
             predictions_array[batch_idx_slice] = batch_predictions
 
         nan_loss = torch.isnan(loss)
+        # loss backward
         second_order = (
             hasattr(optimizer, "is_second_order") and optimizer.is_second_order
         )
@@ -155,18 +166,8 @@ def train_network(
         # Non network training related
         if not nan_loss:
             total_epoch_train_loss += loss.detach().cpu().item()
-        for metric in calculated_metrics.keys():
-            if isinstance(total_epoch_train_metric[metric], list):
-                if len(total_epoch_train_metric[metric]) == 0:
-                    total_epoch_train_metric[metric] = np.array(
-                        calculated_metrics[metric]
-                    )
-                else:
-                    total_epoch_train_metric[metric] += np.array(
-                        calculated_metrics[metric]
-                    )
-            else:
-                total_epoch_train_metric[metric] += calculated_metrics[metric]
+        for metric, metric_val in calculated_metrics.items():
+            total_epoch_train_metric[metric] += metric_val
 
         if params["verbose"]:
             # For printing information at halftime during an epoch
@@ -194,6 +195,9 @@ def train_network(
         average_epoch_train_metric = overall_stats(
             predictions_array, ground_truth_array, params
         )
+    # TODO: the following not just prints and formats, but updates the dict also. Clean this code
+    #  1. average_epoch_train_metric and total_epoch_train_metric are combined
+    #  2. list values in total_epoch_train_metric are converted to strings by some logic (but not in avg_ep_tr_metr)
     average_epoch_train_metric = print_and_format_metrics(
         average_epoch_train_metric,
         total_epoch_train_metric,
@@ -325,17 +329,24 @@ def training_loop(
 
     metrics_log = list(params["metrics"])
 
-    calculate_overall_metrics = params["problem_type"] in {"classification", "regression"}
+    calculate_overall_metrics = params["problem_type"] in {
+        "classification",
+        "regression",
+    }
 
     if calculate_overall_metrics:
         # get the overall metrics that are calculated automatically for classification/regression problems
         if params["problem_type"] == "regression":
-            overall_metrics = overall_stats(torch.Tensor([1]), torch.Tensor([1]), params)
+            overall_metrics = overall_stats(
+                torch.Tensor([1]), torch.Tensor([1]), params
+            )
         elif params["problem_type"] == "classification":
             # this is just used to generate the headers for the overall stats
             temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
             overall_metrics = overall_stats(
-                temp_tensor.to(dtype=torch.int32), temp_tensor.to(dtype=torch.int32), params
+                temp_tensor.to(dtype=torch.int32),
+                temp_tensor.to(dtype=torch.int32),
+                params,
             )
         else:
             raise NotImplementedError("Problem type not implemented for overall stats")

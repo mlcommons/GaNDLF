@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -51,12 +51,14 @@ def validate_network(
     print("*" * 20)
     # Initialize a few things
     total_epoch_valid_loss = 0
-    total_epoch_valid_metric = {}
+    total_epoch_valid_metric: dict[str, Union[float, np.array]] = {}
     average_epoch_valid_metric = {}
 
     for metric in params["metrics"]:
         if "per_label" in metric:
-            total_epoch_valid_metric[metric] = []
+            total_epoch_valid_metric[metric] = np.zeros(
+                shape=params["model"]["num_classes"]
+            )
         else:
             total_epoch_valid_metric[metric] = 0
 
@@ -64,8 +66,7 @@ def validate_network(
     subject_id_list = []
     is_classification = params.get("problem_type") == "classification"
     calculate_overall_metrics = (
-        (params["problem_type"] == "classification")
-        or (params["problem_type"] == "regression")
+        params["problem_type"] in {"classification", "regression"}
     ) and mode == "validation"
     is_inference = mode == "inference"
 
@@ -193,6 +194,7 @@ def validate_network(
 
             if params["save_output"] or is_inference:
                 # we divide by scaling factor here because we multiply by it during loss/metric calculation
+                # TODO: regression-only, right?
                 outputToWrite += (
                     str(epoch)
                     + ","
@@ -206,23 +208,14 @@ def validate_network(
             )
 
             if calculate_overall_metrics:
+                # TODO: that's for classification only. What about regression?
                 predictions_array[batch_idx] = (
                     torch.argmax(pred_output[0], 0).cpu().item()
                 )
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
-            for metric in final_metric.keys():
-                if isinstance(total_epoch_valid_metric[metric], list):
-                    if len(total_epoch_valid_metric[metric]) == 0:
-                        total_epoch_valid_metric[metric] = np.array(
-                            final_metric[metric]
-                        )
-                    else:
-                        total_epoch_valid_metric[metric] += np.array(
-                            final_metric[metric]
-                        )
-                else:
-                    total_epoch_valid_metric[metric] += final_metric[metric]
+            for metric, metric_val in final_metric.keys():
+                total_epoch_valid_metric[metric] += metric_val
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
@@ -386,6 +379,7 @@ def validate_network(
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
                 if calculate_overall_metrics:
+                    # TOD: what? regression and argmax?
                     predictions_array[batch_idx] = (
                         torch.argmax(output_prediction[0], 0).cpu().item()
                     )
@@ -440,17 +434,7 @@ def validate_network(
                 # loss.cpu().data.item()
                 total_epoch_valid_loss += final_loss.cpu().item()
                 for metric in final_metric.keys():
-                    if isinstance(total_epoch_valid_metric[metric], list):
-                        if len(total_epoch_valid_metric[metric]) == 0:
-                            total_epoch_valid_metric[metric] = np.array(
-                                final_metric[metric]
-                            )
-                        else:
-                            total_epoch_valid_metric[metric] += np.array(
-                                final_metric[metric]
-                            )
-                    else:
-                        total_epoch_valid_metric[metric] += final_metric[metric]
+                    total_epoch_valid_metric[metric] += final_metric[metric]
 
         if label_ground_truth is not None:
             if params["verbose"]:

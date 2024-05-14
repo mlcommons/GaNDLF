@@ -25,15 +25,19 @@ class Logger:
         mode = mode.lower()
         self.mode = mode.lower()
 
-        new_header = ["epoch_no", f"{mode}_loss"] + [f"{mode}_{metric}" for metric in metrics]
+        new_header = ["epoch_no", f"{mode}_loss"] + [
+            f"{mode}_{metric}" for metric in metrics
+        ]
 
         # TODO: do we really need to support appending to existing files?
         if os.path.exists(self.filename):
             with open(self.filename, "r") as f:
                 existing_header = f.readline().strip().split(",")
             if set(existing_header) != set(new_header):
-                raise ValueError(f"Logger file {self.filename} error: existing header does not match new header."
-                                 f" Existing header: {existing_header}. New header: {new_header}")
+                raise ValueError(
+                    f"Logger file {self.filename} error: existing header does not match new header."
+                    f" Existing header: {existing_header}. New header: {new_header}"
+                )
             self.ordered_header = existing_header
         else:
             with open(self.filename, "w") as f:
@@ -41,8 +45,10 @@ class Logger:
             self.ordered_header = new_header
 
     def write(
-            self, epoch_number: int, loss: Union[float, torch.Tensor],
-            epoch_metrics: Dict[str, Union[float, torch.Tensor]]
+        self,
+        epoch_number: int,
+        loss: Union[float, torch.Tensor],
+        epoch_metrics: Dict[str, Union[float, torch.Tensor]],
     ) -> None:
         """
         Write the epoch number, loss and metrics to the csv file.
@@ -56,8 +62,7 @@ class Logger:
         if torch.is_tensor(loss):
             loss = loss.cpu().item()
 
-        row = {"epoch_no": epoch_number,
-               f"{self.mode}_loss": loss}
+        row = {"epoch_no": epoch_number, f"{self.mode}_loss": loss}
 
         for metric, metric_val in epoch_metrics.items():
             if torch.is_tensor(metric_val):
