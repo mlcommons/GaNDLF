@@ -309,7 +309,6 @@ def validate_network(
             # save outputs
             if params["problem_type"] == "segmentation":
                 output_prediction = aggregator.get_output_tensor()
-                output_prediction = output_prediction.unsqueeze(0)
                 if params["save_output"]:
                     img_for_metadata = torchio.ScalarImage(
                         tensor=subject["1"]["data"].squeeze(0),
@@ -389,7 +388,7 @@ def validate_network(
                         + ","
                         + subject["subject_id"][0]
                         + ","
-                        + str(output_prediction)
+                        + str(output_prediction[0])
                         + "\n"
                     )
 
@@ -401,7 +400,6 @@ def validate_network(
                         n.squeeze(), raw_input=image[i].squeeze(-1)
                     )
 
-            output_prediction = output_prediction.squeeze(-1)
             if is_inference and is_classification:
                 logits_list.append(output_prediction)
                 subject_id_list.append(subject.get("subject_id")[0])
@@ -412,9 +410,8 @@ def validate_network(
                 if label_ground_truth.shape[0] == 3:
                     label_ground_truth = label_ground_truth[0, ...].unsqueeze(0)
                 # we always want the ground truth to be in the same format as the prediction
+                # add batch dim
                 label_ground_truth = label_ground_truth.unsqueeze(0)
-                if label_ground_truth.shape[-1] == 1:
-                    label_ground_truth = label_ground_truth.squeeze(-1)
                 final_loss, final_metric = get_loss_and_metrics(
                     image,
                     label_ground_truth,
