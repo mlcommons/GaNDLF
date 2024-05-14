@@ -323,44 +323,44 @@ def training_loop(
     # datetime object containing current date and time
     print("Initializing training at :", get_date_time(), flush=True)
 
-    calculate_overall_metrics = (params["problem_type"] == "classification") or (
-        params["problem_type"] == "regression"
-    )
+    metrics_log = list(params["metrics"])
 
-    # get the overall metrics that are calculated automatically for classification/regression problems
-    if params["problem_type"] == "regression":
-        overall_metrics = overall_stats(torch.Tensor([1]), torch.Tensor([1]), params)
-    elif params["problem_type"] == "classification":
-        # this is just used to generate the headers for the overall stats
-        temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
-        overall_metrics = overall_stats(
-            temp_tensor.to(dtype=torch.int32), temp_tensor.to(dtype=torch.int32), params
-        )
+    calculate_overall_metrics = params["problem_type"] in {"classification", "regression"}
 
-    metrics_log = params["metrics"].copy()
     if calculate_overall_metrics:
+        # get the overall metrics that are calculated automatically for classification/regression problems
+        if params["problem_type"] == "regression":
+            overall_metrics = overall_stats(torch.Tensor([1]), torch.Tensor([1]), params)
+        elif params["problem_type"] == "classification":
+            # this is just used to generate the headers for the overall stats
+            temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
+            overall_metrics = overall_stats(
+                temp_tensor.to(dtype=torch.int32), temp_tensor.to(dtype=torch.int32), params
+            )
+        else:
+            raise NotImplementedError("Problem type not implemented for overall stats")
+
         for metric in overall_metrics:
             if metric not in metrics_log:
-                metrics_log[metric] = 0
+                metrics_log.append(metric)
 
     # Setup a few loggers for tracking
     train_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_training.csv"),
         metrics=metrics_log,
+        mode="train",
     )
     valid_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=metrics_log,
+        mode="valid",
     )
     if testingDataDefined:
         test_logger = Logger(
             logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
             metrics=metrics_log,
+            mode="test",
         )
-    train_logger.write_header(mode="train")
-    valid_logger.write_header(mode="valid")
-    if testingDataDefined:
-        test_logger.write_header(mode="test")
 
     if "medcam" in params:
         model = medcam.inject(
