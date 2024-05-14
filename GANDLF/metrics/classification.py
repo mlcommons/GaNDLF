@@ -69,15 +69,16 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
             # ),
         }
         for metric_name, calculator in calculators.items():
+            avg_typed_metric_name = f"{metric_name}_{average_type_key}"
             if metric_name == "aucroc":
                 one_hot_preds = one_hot(
                     prediction.long(), num_classes=params["model"]["num_classes"]
                 )
-                output_metrics[metric_name] = get_output_from_calculator(
+                output_metrics[avg_typed_metric_name] = get_output_from_calculator(
                     one_hot_preds.float(), target, calculator
                 )
             else:
-                output_metrics[metric_name] = get_output_from_calculator(
+                output_metrics[avg_typed_metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
 
