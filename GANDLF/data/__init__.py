@@ -20,7 +20,7 @@ def get_train_loader(params):
         ImagesFromDataFrame(
             get_dataframe(params["training_data"]),
             params,
-            train=True,
+            train=False,
             loader_type="train",
         ),
         batch_size=params["batch_size"],
