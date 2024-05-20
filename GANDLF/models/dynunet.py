@@ -62,4 +62,4 @@ class DynUnet_wrapper(ModelBase):
                                     trans_bias=)
         
     def forward(self, x):
-        return self.model.forward
+        return self.model.forward()
