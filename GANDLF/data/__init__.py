@@ -20,11 +20,11 @@ def get_train_loader(params):
         ImagesFromDataFrame(
             get_dataframe(params["training_data"]),
             params,
-            train=False,
+            train=True,
             loader_type="train",
         ),
         batch_size=params["batch_size"],
-        shuffle=True,
+        shuffle=False,
         pin_memory=False,  # params["pin_memory_dataloader"], # this is going OOM if True - needs investigation
     )
 
