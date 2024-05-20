@@ -2,7 +2,7 @@
 from .modelBase import ModelBase
 import   monai.networks.nets.dynunet as dynunet 
 
-class DynUnet_wrapper(ModelBase):
+class dynunet_wrapper(ModelBase):
     """
     More info: https://docs.monai.io/en/stable/_modules/monai/networks/nets/dynunet.html#DynUNet
 
