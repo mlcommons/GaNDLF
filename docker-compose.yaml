@@ -1,0 +1,12 @@
+services:
+  gandlf:
+    build: 
+      context: .
+      dockerfile: Dockerfile-CPU
+    entrypoint: ["pytest"]
+    command: 
+      - testing/test_full.py
+    volumes:
+      - .:/GaNDLF
+  
+   
