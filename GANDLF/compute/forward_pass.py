@@ -376,7 +376,7 @@ def validate_network(
                 output_prediction = output_prediction / len(patch_loader)
                 if calculate_overall_metrics:
                     # TOD: what? regression and argmax?
-                    predictions_array[batch_idx] = (
+                    predictions_array.append(
                         torch.argmax(output_prediction[0], 0).cpu().item()
                     )
                 if params["save_output"]:

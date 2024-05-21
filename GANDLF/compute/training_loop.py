@@ -124,6 +124,8 @@ def train_network(
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if calculate_overall_metrics:
+            # TODO: smelly code. if segmentation, in some models output may be a list of tensors rather then a one
+            #  tensor. This is not handled here. However, `calculate_overall_metrics` is set to False for segmentation
             ground_truth_array.extend(label.detach().cpu())
             # TODO: output is BATCH_SIZE x N_CLASSES. What if not?
             batch_predictions = torch.argmax(output, 1).cpu()

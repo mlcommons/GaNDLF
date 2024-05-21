@@ -1,5 +1,5 @@
 import warnings
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 import torch
 import psutil
 from .loss_and_metric import get_loss_and_metrics
@@ -11,14 +11,14 @@ def step(
     label: Optional[torch.Tensor],
     params: dict,
     train: Optional[bool] = True,
-) -> Tuple[float, dict, torch.Tensor, torch.Tensor]:
+) -> Tuple[float, dict, Union[torch.Tensor, list[torch.Tensor]], torch.Tensor]:
     """
     This function performs a single step of training or validation.
 
     Args:
         model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions.
         image (torch.Tensor): The input image stack according to requirements. (B, C, H, W, D)
-        label (torch.Tensor): The input label for the corresponding image tensor.
+        label Optional[torch.Tensor]: The input label for the corresponding image tensor.
             If segmentation, (B, C, H, W, D);
             if classification / regression (not multilabel), (B, 1)
             if classif / reg (multilabel), (B, N_LABELS)
@@ -27,7 +27,8 @@ def step(
         train (Optional[bool], optional): Whether the step is for training or validation. Defaults to True.
 
     Returns:
-        Tuple[float, dict, torch.Tensor, torch.Tensor]: The loss, metrics, output, and attention map.
+        Tuple[float, dict, Union[torch.Tensor, list[torch.Tensor]], torch.Tensor]: The loss, metrics, output,
+            and attention map.
     """
     if params["verbose"]:
         if torch.cuda.is_available():
@@ -80,15 +81,6 @@ def step(
     if "medcam_enabled" in params and params["medcam_enabled"]:
         output, attention_map = output
 
-    if not isinstance(output, torch.Tensor):
-        warnings.warn(
-            f"Model output is not a Tensor: {type(output)}. Say, `deep_resunet` and `deep_unet` may return "
-            f"list of tensors on different scales instead of just one prediction Tensor. However due to "
-            f"GaNDLF architecture it is expected that models return only one tensor. For deep_* models "
-            f"only the biggeest scale is processed. Use these models with caution till fix is implemented."
-        )
-        output = output[0]
-
     # one-hot encoding of 'label' will probably be needed for segmentation
     if label is not None:
         loss, metric_output = get_loss_and_metrics(image, label, output, params)
@@ -99,9 +91,18 @@ def step(
         if "medcam_enabled" in params and params["medcam_enabled"]:
             attention_map = torch.unsqueeze(attention_map, -1)
 
-    if params["model"]["dimension"] == 2 and params["problem_type"] == "segmentation":
+    if not isinstance(output, torch.Tensor):
+        warnings.warn(
+            f"Model output is not a Tensor: {type(output)}. Say, `deep_resunet` and `deep_unet` may return "
+            f"list of tensors on different scales instead of just one prediction Tensor. However due to "
+            f"GaNDLF architecture it is expected that models return only one tensor. For deep_* models "
+            f"only the biggeest scale is processed. Use these models with caution till fix is implemented."
+        )
+        output = output[0]
+
+    if params["model"]["dimension"] == 2:
         # for 2d images where the depth is removed, add it back
-        output = torch.unsqueeze(output, -1)
+        output = output.unsqueeze(-1)
 
     assert len(output) == len(
         image
