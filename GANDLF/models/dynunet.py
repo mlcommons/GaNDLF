@@ -2,6 +2,7 @@
 from .modelBase import ModelBase
 import   monai.networks.nets.dynunet as dynunet 
 
+
 class dynunet_wrapper(ModelBase):
     """
     More info: https://docs.monai.io/en/stable/_modules/monai/networks/nets/dynunet.html#DynUNet
@@ -46,22 +47,60 @@ class dynunet_wrapper(ModelBase):
     
     def __init__(self,parameters:dict ):
         super(dynunet_wrapper, self).__init__(parameters)
-        strides = (1, 1, 1, 1)
-        self.model = dynunet.DynUNet(spatial_dims= 3,
-                                    in_channels=2,
-                                    out_channels=2,
-                                    kernel_size= (3, 3, 3, 1),
-                                    strides=strides,
-                                    upsample_kernel_size=strides[1:],
-                                    # filters=,
-                                    dropout=None,
-                                    norm_name="batch",
-                                    act_name=("leakyrelu", {"inplace": True, "negative_slope": 0.2}),
-                                    deep_supervision=False,
-                                    # deep_supr_num=,
-                                    # res_block=True,
-                                    # trans_bias=)
-        )
+
+        #checking for validation
+        assert  "strides" not in parameters, "\033[31m Warning : The strides is not defined \033[0m"
+        # assert  "kernel_size" in parameters, "\033[0;31m Warning : The kernel_size is not defined \033[0m"
+
+        
+
+       # defining some defaults 
+        if not ("strides" in parameters):
+            parameters["strides"] = (1,1,1,1)
+
+        if not ("kernel_size" in parameters):
+            parameters["kernel_size"] = (1, 1, 1, 1)
+        
+        if not ("upsample_kernel_size" in parameters):
+            parameters["upsample_kernel_size"] = parameters["strides"][1:]
+
+        if not ("filters" in parameters):
+            parameters["filters"] = None
+
+        if not ("act_name" in parameters):
+            parameters["act_name"] = ("leakyrelu", {"inplace": True, "negative_slope": 0.2})
+        
+        if not ("deep_supervision" in parameters):
+            parameters["deep_supervision"] = False
+        
+        if not ("deep_supr_num" in parameters):
+            parameters["deep_supr_num"] = 1 
+        
+        if not ("res_block" in parameters):
+            parameters["res_block"] = False
+        
+        if not ("trans_bias" in parameters):
+            parameters["trans_bias"] = False
+        
+        
+        
+       
+        
+        self.model = dynunet.DynUNet(spatial_dims= self.n_dimensions,
+                                    in_channels=self.n_channels,
+                                    out_channels=self.base_filters,#Is it correct? 
+                                    kernel_size= parameters["kernel_size"],
+                                    strides=parameters["strides"],
+                                    upsample_kernel_size=parameters["upsample_kernel_size"],  #The values should equal to strides[1:]
+                                    filters=parameters["filters"],# self.base_filter??? , number of output channels for each blocks
+                                    dropout=None,#dropout ratio. Defaults to no dropout
+                                    norm_name=self.norm_type,
+                                    act_name=parameters["act_name"],
+                                    deep_supervision=parameters["deep_supervision"],
+                                    deep_supr_num=parameters["deep_supr_num"], # number of feature maps that will output during deep supervision head.
+                                    res_block=parameters["res_block"],
+                                    trans_bias=parameters["trans_bias"])
+        
         
     def forward(self, x):
-        return self.model.forward()
+        return self.model.forward(x)
