@@ -206,13 +206,12 @@ def validate_network(
             )
 
             if calculate_overall_metrics:
+                ground_truth_array.append(label_ground_truth.item())
                 # TODO: that's for classification only. What about regression?
-                predictions_array[batch_idx] = (
-                    torch.argmax(pred_output[0], 0).cpu().item()
-                )
+                predictions_array.append(torch.argmax(pred_output[0], 0).cpu().item())
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
-            for metric, metric_val in final_metric.keys():
+            for metric, metric_val in final_metric.items():
                 total_epoch_valid_metric[metric] += metric_val
 
         else:  # for segmentation problems OR regression/classification when no label is present
@@ -306,7 +305,7 @@ def validate_network(
 
             # save outputs
             if params["problem_type"] == "segmentation":
-                output_prediction = aggregator.get_output_tensor()
+                output_prediction = aggregator.get_output_tensor().unsqueeze(0)
                 if params["save_output"]:
                     img_for_metadata = torchio.ScalarImage(
                         tensor=subject["1"]["data"].squeeze(0),
@@ -465,7 +464,9 @@ def validate_network(
         # get overall stats for classification
         if calculate_overall_metrics:
             average_epoch_valid_metric = overall_stats(
-                predictions_array, ground_truth_array, params
+                torch.Tensor(predictions_array),
+                torch.Tensor(ground_truth_array),
+                params,
             )
         average_epoch_valid_metric = print_and_format_metrics(
             average_epoch_valid_metric,

@@ -70,6 +70,6 @@ class Logger:
             row[f"{self.mode}_{metric}"] = metric_val
 
         with open(self.filename, "a") as f:
-            line = [row[col] for col in self.ordered_header]
+            line = [row.get(col, "") for col in self.ordered_header]
             line = [str(x) for x in line]
             f.write(",".join(line) + "\n")

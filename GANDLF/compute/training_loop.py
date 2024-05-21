@@ -92,21 +92,25 @@ def train_network(
         tqdm(train_dataloader, desc="Looping over training data")
     ):
         optimizer.zero_grad()
-        image = (
+        image = (  # 5D tensor: (B, C, H, W, D)
             torch.cat(
                 [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
             )
             .float()
             .to(params["device"])
         )
-        if "value_keys" in params:
+        if (
+            "value_keys" in params
+        ):  # classification / regression (when label is scalar) or multilabel classif/regression
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
                 min(params["batch_size"], len(label)), len(params["value_keys"])
             )
         else:
-            label = subject["label"][torchio.DATA]
+            label = subject["label"][
+                torchio.DATA
+            ]  # segmentation; label is (B, C, H, W, D) image
         label = label.to(params["device"])
 
         if params["save_training"]:
@@ -120,11 +124,11 @@ def train_network(
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if calculate_overall_metrics:
-            ground_truth_array.extend(list(label.detach().cpu()))
+            ground_truth_array.extend(label.detach().cpu())
             # TODO: output is BATCH_SIZE x N_CLASSES. What if not?
             batch_predictions = torch.argmax(output, 1).cpu()
             assert len(batch_predictions) == len(label)
-            predictions_array.extend(batch_predictions.tolist())
+            predictions_array.extend(batch_predictions.detach().cpu())
 
         nan_loss = torch.isnan(loss)
         # loss backward
