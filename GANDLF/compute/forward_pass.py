@@ -108,10 +108,8 @@ def validate_network(
 
     # get ground truths for classification problem, validation set
     if calculate_overall_metrics:
-        (
-            ground_truth_array,
-            predictions_array,
-        ) = get_ground_truths_and_predictions_tensor(params, "validation_data")
+        ground_truth_array = []
+        predictions_array = []
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")

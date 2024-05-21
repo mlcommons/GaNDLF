@@ -68,9 +68,8 @@ def train_network(
 
     # get ground truths
     if calculate_overall_metrics:
-        # TODO: for regression / segmentation we need different dtypes + different shape
-        ground_truth_array = torch.zeros(len(train_dataloader.dataset), dtype=torch.int)
-        predictions_array = torch.zeros_like(ground_truth_array)
+        ground_truth_array = []
+        predictions_array = []
 
     for metric in params["metrics"]:
         # TODO: can it be per-label for non-classif?
@@ -121,15 +120,11 @@ def train_network(
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if calculate_overall_metrics:
-            batch_idx_slice = slice(
-                batch_idx * params["batch_size"], (batch_idx + 1) * params["batch_size"]
-            )
-            # TODO: label = BATCH_SIZE x 1. What if not? Multiclass? classif - OHE?
-            ground_truth_array[batch_idx_slice] = label.detach().cpu().ravel()
+            ground_truth_array.extend(list(label.detach().cpu()))
             # TODO: output is BATCH_SIZE x N_CLASSES. What if not?
             batch_predictions = torch.argmax(output, 1).cpu()
             assert len(batch_predictions) == len(label)
-            predictions_array[batch_idx_slice] = batch_predictions
+            predictions_array.extend(batch_predictions.tolist())
 
         nan_loss = torch.isnan(loss)
         # loss backward
@@ -193,7 +188,7 @@ def train_network(
     # get overall stats for classification
     if calculate_overall_metrics:
         average_epoch_train_metric = overall_stats(
-            predictions_array, ground_truth_array, params
+            torch.Tensor(predictions_array), torch.Tensor(ground_truth_array), params
         )
     # TODO: the following not just prints and formats, but updates the dict also. Clean this code
     #  1. average_epoch_train_metric and total_epoch_train_metric are combined
