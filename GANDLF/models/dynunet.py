@@ -45,21 +45,23 @@ class dynunet_wrapper(ModelBase):
     """
     
     def __init__(self,parameters:dict ):
-        super(DynUnet_wrapper, self).__init__(parameters)
-        self.model = dynunet.DynUNet(spatial_dims= self.n_dimension,
-                                    in_channels=self.n_classes,
-                                    out_channels=self,
-                                    kernel_size= ,
-                                    strides=,
-                                    upsample_kernel_size=,
-                                    filters=,
-                                    dropout=,
-                                    norm_name=,
-                                    act_name=,
-                                    deep_supervision=,
-                                    deep_supr_num=,
-                                    res_block=,
-                                    trans_bias=)
+        super(dynunet_wrapper, self).__init__(parameters)
+        strides = (1, 1, 1, 1)
+        self.model = dynunet.DynUNet(spatial_dims= 3,
+                                    in_channels=2,
+                                    out_channels=2,
+                                    kernel_size= (3, 3, 3, 1),
+                                    strides=strides,
+                                    upsample_kernel_size=strides[1:],
+                                    # filters=,
+                                    dropout=None,
+                                    norm_name="batch",
+                                    act_name=("leakyrelu", {"inplace": True, "negative_slope": 0.2}),
+                                    deep_supervision=False,
+                                    # deep_supr_num=,
+                                    # res_block=True,
+                                    # trans_bias=)
+        )
         
     def forward(self, x):
         return self.model.forward()
