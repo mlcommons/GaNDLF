@@ -61,7 +61,9 @@ def step(
 
     # for segmentation remove the depth dimension from the label.
     # for classification / regression, flattens class / reg label from list (possible in multilabel) to scalar
-    if label is not None:
+    # TODO: second condition is crutch - in some cases label is passed as 1-d Tensor (B,) and if Batch size is 1,
+    #  it is squeezed to scalar tensor (0-d) and the future logic fails
+    if label is not None and len(label.shape) != 1:
         label = label.squeeze(-1)
 
     if not train and params["model"]["type"].lower() == "openvino":
@@ -100,7 +102,7 @@ def step(
         )
         output = output[0]
 
-    if params["model"]["dimension"] == 2:
+    if params["model"]["dimension"] == 2 and params["problem_type"] == "segmentation":
         # for 2d images where the depth is removed, add it back
         output = output.unsqueeze(-1)
 

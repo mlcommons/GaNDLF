@@ -379,6 +379,7 @@ def validate_network(
                     predictions_array.append(
                         torch.argmax(output_prediction[0], 0).cpu().item()
                     )
+                    ground_truth_array.append(label_ground_truth.item())
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
