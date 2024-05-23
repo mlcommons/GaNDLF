@@ -54,7 +54,7 @@ def step(
                     "The label image is an RGB image, only the first channel will be used."
                 )
 
-    assert len(label) == len(image)
+        assert len(label) == len(image)
 
     if params["model"]["dimension"] == 2:
         image = image.squeeze(-1)  # removing depth
