@@ -9,7 +9,7 @@ from .fcn import fcn
 from .vgg import vgg11, vgg13, vgg16, vgg19
 from .densenet import densenet121, densenet169, densenet201, densenet264
 from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152, resnet200
-from .dynunet import dynunet_wrapper
+from .dynunet_wrapper import dynunet_wrapper
 from .efficientnet import (
     efficientnetB0,
     efficientnetB1,
