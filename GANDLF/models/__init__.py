@@ -103,7 +103,7 @@ global_models_dict = {
     "efficientnetb6": efficientnetB6,
     "efficientnetb7": efficientnetB7,
     # dynunet
-    "dynunet":dynunet_wrapper,
+    "dynunet": dynunet_wrapper,
     # Custom models
     "msdnet": MSDNet,
     "brain_age": brainage,

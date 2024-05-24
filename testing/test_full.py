@@ -3148,12 +3148,12 @@ def test_generic_data_split():
 
 
 def test_dynunet_model(device):
-    #is this test correct ??
+    # is this test correct ??
 
-    #for more info : https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
+    # for more info : https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
     print("51: Starting test for  Dynunet implementation")
-    
-    #Reading the parameters 
+
+    # Reading the parameters
     parameters = parseConfig(
         testingDir + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -3161,37 +3161,38 @@ def test_dynunet_model(device):
         inputDir + "/train_3d_rad_segmentation.csv"
     )
     parameters["model"]["architecture"] = "dynunet"
-    parameters["model"]["dimension"]=3
+    parameters["model"]["dimension"] = 3
     parameters["patch_size"] = patch_size["3D"]
-    parameters["model"]["kernel_size"] = [3,3,3,1]
-    parameters["model"]["strides"] = [1,1,1,1]
+    parameters["model"]["kernel_size"] = [3, 3, 3, 1]
+    parameters["model"]["strides"] = [1, 1, 1, 1]
     sanitize_outputDir()
     TrainingManager(
-            dataframe=training_data,
-            outputDir=outputDir,
-            parameters=parameters,
-            device=device,
-            resume=False,
-            reset=True,
-        )
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
 
     sanitize_outputDir()
 
     print("passed")
 
+
 def test_dynunet_mandatory_input_values():
     """
-    It tests the mandatatory inputs for dynunet model exist in the parameters["model"]. 
+    It tests the mandatatory inputs for dynunet model exist in the parameters["model"].
     Mandotary inputs:
      - kernel_size
      - strides
-    
-     It checks If an AssertionError is raised. 
+
+     It checks If an AssertionError is raised.
     """
-    #Reading the parameters from segmentation config.
+    # Reading the parameters from segmentation config.
 
     with pytest.raises(AssertionError):
-        #Reading the parameters from segmentation config.
+        # Reading the parameters from segmentation config.
         parameters = parseConfig(
             testingDir + "/config_segmentation.yaml", version_check_flag=False
         )
@@ -3204,16 +3205,13 @@ def test_dynunet_mandatory_input_values():
 
         sanitize_outputDir()
         TrainingManager(
-                dataframe=training_data,
-                outputDir=outputDir,
-                parameters=parameters,
-                device=device,
-                resume=False,
-                reset=True,
-            )
+            dataframe=training_data,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
 
         sanitize_outputDir()
         print("Passed")
-
-   
-
