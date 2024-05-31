@@ -144,13 +144,13 @@ def checkPatchDimensions(patch_size: np.ndarray, numlay: int) -> int:
         patch_size_to_check = patch_size_to_check[:-1]
 
     if all(
-        [x >= 2 ** (numlay + 1) and x % 2**numlay == 0 for x in patch_size_to_check]
+        [x >= 2 ** (numlay + 1) and x % 2 ** numlay == 0 for x in patch_size_to_check]
     ):
         return numlay
     else:
         # base2 = np.floor(np.log2(patch_size_to_check))
         base2 = np.array([getBase2(x) for x in patch_size_to_check])
-        remain = patch_size_to_check / 2**base2  # check that at least 1
+        remain = patch_size_to_check / 2 ** base2  # check that at least 1
 
         layers = np.where(remain == 1, base2 - 1, base2)
         return int(np.min(layers))
@@ -186,10 +186,9 @@ def get_array_from_image_or_tensor(
     Returns:
         np.ndarray: The numpy array.
     """
-    assert isinstance(
-        input_tensor_or_image, (torch.Tensor, sitk.Image, np.ndarray)
-    ), "Input must be a torch.Tensor or sitk.Image or np.ndarray, but got " + str(
-        type(input_tensor_or_image)
+    assert isinstance(input_tensor_or_image, (torch.Tensor, sitk.Image, np.ndarray)), (
+        "Input must be a torch.Tensor or sitk.Image or np.ndarray, but got "
+        + str(type(input_tensor_or_image))
     )
     if isinstance(input_tensor_or_image, torch.Tensor):
         return input_tensor_or_image.detach().cpu().numpy()

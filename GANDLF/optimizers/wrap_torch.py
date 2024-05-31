@@ -10,7 +10,7 @@ from torch.optim import (
     Adagrad,
     RMSprop,
     RAdam,
-    NAdam
+    NAdam,
 )
 
 

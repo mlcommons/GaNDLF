@@ -50,7 +50,7 @@ def base_triangle(parameters):
     """
 
     # pick defaults
-    parameters["scheduler"]["min_lr"] = parameters["scheduler"].get("min_lr", 10**-3)
+    parameters["scheduler"]["min_lr"] = parameters["scheduler"].get("min_lr", 10 ** -3)
     parameters["scheduler"]["max_lr"] = parameters["scheduler"].get("max_lr", 1)
 
     clr = cyclical_lr(

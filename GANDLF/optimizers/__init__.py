@@ -10,7 +10,7 @@ from .wrap_torch import (
     adagrad,
     rmsprop,
     radam,
-    nadam
+    nadam,
 )
 
 from .wrap_monai import novograd_wrapper
@@ -28,7 +28,7 @@ global_optimizer_dict = {
     "rmsprop": rmsprop,
     "radam": radam,
     "novograd": novograd_wrapper,
-    "nadam": nadam
+    "nadam": nadam,
 }
 
 
