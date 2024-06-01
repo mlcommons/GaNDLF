@@ -410,7 +410,7 @@ def is_mask_too_big(mask: np.ndarray) -> bool:
         bool: True if the mask is too big, False otherwise.
     """
 
-    if sys.getsizeof(mask) > 16 * (1024 ** 2):
+    if sys.getsizeof(mask) > 16 * (1024**2):
         return True
     else:
         return False
