@@ -10,6 +10,8 @@ model: {
     class_list: [0, 255], # Set the list of labels the model should train on and predict
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
+    kernel_size: [3, 3, 3, 1], #dynunet model parameter
+    strides: [1, 1, 1, 1], #dynunet model parameter
   }
 metrics:
   - dice
