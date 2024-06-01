@@ -35,7 +35,6 @@ class dynunet_wrapper(ModelBase):
         ) == True, "\033[0;31m`strides` key missing in parameters"
 
         # defining some defaults
-
         if not ("upsample_kernel_size" in parameters["model"]):
             parameters["model"]["upsample_kernel_size"] = parameters["model"][
                 "strides"
@@ -51,19 +50,19 @@ class dynunet_wrapper(ModelBase):
             )
 
         if not ("deep_supervision" in parameters["model"]):
-            parameters["model"]["deep_supervision"] = False
+            parameters["model"]["deep_supervision"] = True
 
         if not ("deep_supr_num" in parameters["model"]):
             parameters["model"]["deep_supr_num"] = 1
 
         if not ("res_block" in parameters["model"]):
-            parameters["model"]["res_block"] = False
+            parameters["model"]["res_block"] = True
 
         if not ("trans_bias" in parameters["model"]):
             parameters["model"]["trans_bias"] = False
 
-        # if not ("norm_type" in parameters["model"]):
-        #     self.norm_type = "INSTANCE"
+        if not ("norm_type" in parameters["model"]):
+            self.norm_type = "INSTANCE"
 
         if not ("dropout" in parameters):
             parameters["model"]["dropout"] = None
