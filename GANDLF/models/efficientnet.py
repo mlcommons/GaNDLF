@@ -329,8 +329,8 @@ def checkPatchDimensions(patch_size, numlay):
     if patch_size_to_check[-1] == 1:
         patch_size_to_check = patch_size_to_check[:-1]
 
-    if all(patch_size_to_check >= 2 ** numlay) and all(
-        patch_size_to_check % 2 ** numlay == 0
+    if all(patch_size_to_check >= 2**numlay) and all(
+        patch_size_to_check % 2**numlay == 0
     ):
         return numlay
     else:
