@@ -104,23 +104,7 @@ def new_way(
     delete_patterns: str,
 ):
     """Manages model transfers to and from the Hugging Face Hub"""
-    print(
-        upload,
-        repo_id,
-        token,
-        revision,
-        cache_dir,
-        local_dir,
-        force_download,
-        folder_path,
-        path_in_repo,
-        commit_message,
-        commit_description,
-        repo_type,
-        allow_patterns,
-        ignore_patterns,
-        delete_patterns,
-    )
+    
     if upload:
         push_to_model_hub(
             repo_id,
