@@ -3,18 +3,24 @@
 
 version: 1
 formatters:
-  simple:
+  detailed:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+filters:
+  (): GANDLF/utils/ganldf_logger.InfoOnlyFilter
 handlers:
-  console:
+  console: # only display info level
     class: logging.StreamHandler
     level: DEBUG
-    formatter: simple
+    formatter: detailed
+    filters: [info_only_filter]
     stream: ext://sys.stdout
+  debug_handeler:
+    class: logging.FileHandler
+    filename: gandlf.log
 loggers:
-  simpleExample:
+  debug_logger:
     level: DEBUG
-    handlers: [console]
+    handlers: [console, debug_handler]
     propagate: no
 root:
   level: DEBUG

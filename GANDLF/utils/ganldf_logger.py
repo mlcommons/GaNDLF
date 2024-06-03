@@ -19,3 +19,20 @@ def gandlf_logger(logger_name,config_path = "logging.yaml") ->logging.Logger:
 
     return logging.getLogger(logger_name)
 
+class InfoOnlyFilter(logging.Filter):
+    """
+    Display only INFO messages.
+    """
+    
+    def filter(self, record):
+        """
+        Determines if the specified record is to be logged.
+
+        Args:
+            record (logging.LogRecord): The log record to be evaluated.
+
+        Returns:
+            bool: True if the log record should be processed, False otherwise.
+        """
+        return record.levelno == logging.INFO
+      
