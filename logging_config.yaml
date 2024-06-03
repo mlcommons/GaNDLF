@@ -6,27 +6,30 @@ formatters:
   detailed:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 filters:
-  (): GANDLF/utils/ganldf_logger.InfoOnlyFilter
+  info_only_filter:
+    (): GANDLF.utils.gandlf_logger.InfoOnlyFilter
 handlers:
-  console: # only display info level
+  stdoutHandler: # only display info level
     class: logging.StreamHandler
-    level: DEBUG
+    level: INFO
     formatter: detailed
     filters: [info_only_filter]
     stream: ext://sys.stdout
-   stderrHandler: # display warning and above messages 
+  stderrHandler: # display warning and above messages
     class: logging.StreamHandler
-    level: WARNING
+    level: ERROR
     formatter: detailed
     stream: ext://sys.stderr
   debugHandler:
     class: logging.FileHandler
     filename: gandlf.log
+    formatter: detailed
+    level: DEBUG
 loggers:
   debug_logger:
     level: DEBUG
-    handlers: [console, debugHandler, stderrHandler]
+    handlers: [stdoutHandler, debugHandler, stderrHandler]
     propagate: no
 root:
   level: DEBUG
-  handlers: [console]
+  handlers: [stdoutHandler, debugHandler, stderrHandler]
