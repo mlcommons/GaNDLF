@@ -8,7 +8,7 @@ from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     parseTestingCSV,
-    gandlf_logger_setup
+    gandlf_logger_setup,
 )
 
 
@@ -61,7 +61,7 @@ def main_run(
     Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
     logger = gandlf_logger_setup(__name__)
-    
+
     if "-1" in device:
         device = "cpu"
 

@@ -19,7 +19,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     get_ground_truths_and_predictions_tensor,
     print_and_format_metrics,
-    gandlf_logger_setup
+    gandlf_logger_setup,
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
@@ -283,12 +283,12 @@ def validate_network(
                     label = label.to(params["device"])
                     if params["verbose"]:
                         logger.debug(
-                        "=== Current patch:",
-                        current_patch,
-                        ", time : ",
-                        get_date_time(),
-                        ", location :",
-                        patches_batch[torchio.LOCATION],
+                            "=== Current patch:",
+                            current_patch,
+                            ", time : ",
+                            get_date_time(),
+                            ", location :",
+                            patches_batch[torchio.LOCATION],
                         )
 
                 if is_inference:
@@ -432,11 +432,11 @@ def validate_network(
                 )
                 if params["verbose"]:
                     logger.debug(
-                    "Full image " + mode + ":: Loss: ",
-                    final_loss,
-                    "; Metric: ",
-                    final_metric,
-                )
+                        "Full image " + mode + ":: Loss: ",
+                        final_loss,
+                        "; Metric: ",
+                        final_metric,
+                    )
 
                 # # Non network validing related
                 # loss.cpu().data.item()
@@ -460,10 +460,10 @@ def validate_network(
                 if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
                     (batch_idx + 1) < len(valid_dataloader)
                 ):
-                   logger.debug(
-                    "\nHalf-Epoch Average " + mode + " loss : ",
-                    total_epoch_valid_loss / (batch_idx + 1),
-                )
+                    logger.debug(
+                        "\nHalf-Epoch Average " + mode + " loss : ",
+                        total_epoch_valid_loss / (batch_idx + 1),
+                    )
                 for metric in params["metrics"]:
                     if isinstance(total_epoch_valid_metric[metric], np.ndarray):
                         to_print = (
