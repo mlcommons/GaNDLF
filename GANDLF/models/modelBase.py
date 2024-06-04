@@ -13,8 +13,10 @@ from GANDLF.models.seg_modules.average_pool import (
     GlobalAveragePooling2D,
 )
 
+from huggingface_hub import PyTorchModelHubMixin
 
-class ModelBase(nn.Module):
+
+class ModelBase(nn.Module, PyTorchModelHubMixin, repo_url="https://github.com/mlcommons/GaNDLF/", tags=["segmentation", "medical", "pytorch"]):
     """
     This is the base model class that all other architectures will need to derive from
     """
