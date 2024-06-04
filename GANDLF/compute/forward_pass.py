@@ -19,7 +19,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     get_ground_truths_and_predictions_tensor,
     print_and_format_metrics,
-    gandlf_logger
+    gandlf_logger_setup
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
@@ -47,7 +47,7 @@ def validate_network(
     Returns:
         Tuple[float, dict]: The average validation loss and the average validation metrics.
     """
-    logger = gandlf_logger(__name__)
+    logger = gandlf_logger_setup(__name__)
     print("*" * 20)
     print("Starting " + mode + " : ")
     print("*" * 20)

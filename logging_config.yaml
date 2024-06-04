@@ -1,11 +1,13 @@
 # It contains the configuration for logging
 # You can find more info in https://docs.python.org/3/library/logging.config.html#logging-config-api
-
 version: 1
 formatters:
   detailed:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 filters:
+  warnings_filter:
+    (): logging.Filter
+    name: "py.warnings"
   info_only_filter:
     (): GANDLF.utils.gandlf_logger.InfoOnlyFilter
 handlers:
@@ -25,7 +27,7 @@ handlers:
     filename: gandlf.log
     formatter: detailed
     level: DEBUG
-loggers:
+loggers: # you can add your customized logger
   debug_logger:
     level: DEBUG
     handlers: [stdoutHandler, debugHandler, stderrHandler]

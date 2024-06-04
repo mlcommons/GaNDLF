@@ -2,9 +2,12 @@ import logging
 from logging import config
 import yaml
 
-def gandlf_logger(logger_name,config_path = "logging_config.yaml") ->logging.Logger:
+
+def gandlf_logger_setup(
+    logger_name, config_path="logging_config.yaml"
+) -> logging.Logger:
     """
-    It sets up the logger. Reads from the logging_config.
+    It sets up the logger. Read from logging_config.
 
     Args:
         logger_name (str): logger name, the name should be the same in the logging_config
@@ -13,17 +16,20 @@ def gandlf_logger(logger_name,config_path = "logging_config.yaml") ->logging.Log
     Returns:
         logging.Logger
     """
-    with open(config_path, 'r') as file:
-            config = yaml.safe_load(file)
-            logging.config.dictConfig(config)
+    with open(config_path, "r") as file:
+        config1 = yaml.safe_load(file)
+        logging.config.dictConfig(config1)
+
+    logging.captureWarnings(True)
 
     return logging.getLogger(logger_name)
+
 
 class InfoOnlyFilter(logging.Filter):
     """
     Display only INFO messages.
     """
-    
+
     def filter(self, record):
         """
         Determines if the specified record is to be logged.
@@ -35,4 +41,3 @@ class InfoOnlyFilter(logging.Filter):
             bool: True if the log record should be processed, False otherwise.
         """
         return record.levelno == logging.INFO
-      
