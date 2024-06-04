@@ -8,6 +8,7 @@ from GANDLF.utils import (
     populate_header_in_parameters,
     parseTrainingCSV,
     parseTestingCSV,
+    gandlf_logger
 )
 
 
@@ -59,6 +60,7 @@ def main_run(
         parameters["output_dir"] = model_dir
     Path(parameters["output_dir"]).mkdir(parents=True, exist_ok=True)
 
+    logger = gandlf_logger(__name__)
     if "-1" in device:
         device = "cpu"
 
@@ -87,7 +89,7 @@ def main_run(
         ), "The training and testing CSVs do not have the same header information."
 
         parameters = populate_header_in_parameters(parameters, headers_train)
-        # if we are here, it is assumed that the user wants to do training
+        logger.debug("if we are here, it is assumed that the user wants to do training")
         if train_mode:
             TrainingManager_split(
                 dataframe_train=data_train,
