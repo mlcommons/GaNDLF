@@ -40,39 +40,26 @@ class dynunet_wrapper(ModelBase):
         #         "strides"
         #     ][1:]
 
-        if not ("filters" in parameters["model"]):
-            parameters["model"]["filters"] = parameters["model"].get("filters", None)
+        parameters["model"]["filters"] = parameters["model"].get("filters", None)
+        parameters["model"]["act_name"] = parameters["model"].get(
+            "act_name", ("leakyrelu", {"inplace": True, "negative_slope": 0.01})
+        )
 
-        if not ("act_name" in parameters["model"]):
-            parameters["model"]["act_name"] = parameters["model"].get(
-                "act_name", ("leakyrelu", {"inplace": True, "negative_slope": 0.01})
-            )
+        parameters["model"]["deep_supervision"] = parameters["model"].get(
+            "deep_supervision", True
+        )
 
-        if not ("deep_supervision" in parameters["model"]):
-            parameters["model"]["deep_supervision"] = parameters["model"].get(
-                "deep_supervision", True
-            )
+        parameters["model"]["deep_supr_num"] = parameters["model"].get(
+            "deep_supr_num", 1
+        )
 
-        if not ("deep_supr_num" in parameters["model"]):
-            parameters["model"]["deep_supr_num"] = parameters["model"].get(
-                "deep_supr_num", 1
-            )
+        parameters["model"]["res_block"] = parameters["model"].get("res_block", True)
 
-        if not ("res_block" in parameters["model"]):
-            parameters["model"]["res_block"] = parameters["model"].get(
-                "res_block", True
-            )
-
-        if not ("trans_bias" in parameters["model"]):
-            parameters["model"]["trans_bias"] = parameters["model"].get(
-                "trans_bias", False
-            )
+        parameters["model"]["trans_bias"] = parameters["model"].get("trans_bias", False)
+        parameters["model"]["dropout"] = parameters["model"].get("dropout", None)
 
         if not ("norm_type" in parameters["model"]):
             self.norm_type = "INSTANCE"
-
-        if not ("dropout" in parameters):
-            parameters["model"]["dropout"] = parameters["model"].get("dropout", None)
 
         self.model = dynunet.DynUNet(
             spatial_dims=self.n_dimensions,
