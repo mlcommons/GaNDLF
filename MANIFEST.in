@@ -4,4 +4,3 @@ exclude *.toml
 include setup.py
 include .dockerignore
 include Dockerfile-*
-include gandlf_*

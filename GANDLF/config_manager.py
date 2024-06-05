@@ -1,3 +1,5 @@
+import logging
+import traceback
 from typing import Optional, Union
 import sys, yaml, ast
 import numpy as np
@@ -738,4 +740,10 @@ def ConfigManager(
     Returns:
         dict: The parameter dictionary.
     """
-    return _parseConfig(config_file_path, version_check_flag)
+    try:
+        return _parseConfig(config_file_path, version_check_flag)
+    except Exception as e:
+        logging.info(
+            f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        )
+        raise
