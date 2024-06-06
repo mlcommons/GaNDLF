@@ -74,9 +74,7 @@ def train_network(
     for metric in params["metrics"]:
         # TODO: can it be per-label for non-classif?
         if "per_label" in metric:
-            total_epoch_train_metric[metric] = np.zeros(
-                shape=params["model"]["num_classes"]
-            )
+            total_epoch_train_metric[metric] = np.zeros(1)  # real shape would be defined during execution
         else:
             total_epoch_train_metric[metric] = 0
 
@@ -168,7 +166,7 @@ def train_network(
         if not nan_loss:
             total_epoch_train_loss += loss.detach().cpu().item()
         for metric, metric_val in calculated_metrics.items():
-            total_epoch_train_metric[metric] += metric_val
+            total_epoch_train_metric[metric] = total_epoch_train_metric[metric] + metric_val
 
         if params["verbose"]:
             # For printing information at halftime during an epoch
