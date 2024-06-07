@@ -7,39 +7,48 @@ Created on Thu Mar 11 14:55:44 2021
 """
 
 import os
-from typing import Dict
+from typing import Dict, List, Union
 import torch
 
 
 class Logger:
-    def __init__(self, logger_csv_filename: str, metrics: Dict[str, float]) -> None:
+    def __init__(self, logger_csv_filename: str, metrics: List[str], mode: str) -> None:
         """
         Logger class to log the training and validation metrics to a csv file.
+            May append to existing file if headers match; elsewise raises an error.
 
         Args:
             logger_csv_filename (str): Path to a filename where the csv has to be stored.
             metrics (Dict[str, float]): The metrics to be logged.
         """
         self.filename = logger_csv_filename
-        self.metrics = metrics
+        mode = mode.lower()
+        self.mode = mode.lower()
 
-    def write_header(self, mode="train"):
-        self.csv = open(self.filename, "a")
-        if os.stat(self.filename).st_size == 0:
-            mode_lower = mode.lower()
-            row = "epoch_no," + mode_lower + "_loss,"
-            row += (
-                ",".join([mode_lower + "_" + metric for metric in self.metrics]) + ","
-            )
-            row = row[:-1]
-            row += "\n"
-            self.csv.write(row)
-        # else:
-        #     print("Found a pre-existing file for logging, now appending logs to that file!")
-        self.csv.close()
+        new_header = ["epoch_no", f"{mode}_loss"] + [
+            f"{mode}_{metric}" for metric in metrics
+        ]
+
+        # TODO: do we really need to support appending to existing files?
+        if os.path.exists(self.filename):
+            with open(self.filename, "r") as f:
+                existing_header = f.readline().strip().split(",")
+            if set(existing_header) != set(new_header):
+                raise ValueError(
+                    f"Logger file {self.filename} error: existing header does not match new header."
+                    f" Existing header: {existing_header}. New header: {new_header}"
+                )
+            self.ordered_header = existing_header
+        else:
+            with open(self.filename, "w") as f:
+                f.write(",".join(new_header) + "\n")
+            self.ordered_header = new_header
 
     def write(
-        self, epoch_number: int, loss: float, epoch_metrics: Dict[str, float]
+        self,
+        epoch_number: int,
+        loss: Union[float, torch.Tensor],
+        epoch_metrics: Dict[str, Union[float, torch.Tensor]],
     ) -> None:
         """
         Write the epoch number, loss and metrics to the csv file.
@@ -49,25 +58,18 @@ class Logger:
             loss (float): The loss value.
             epoch_metrics (Dict[str, float]): The metrics to be logged.
         """
-        self.csv = open(self.filename, "a")
-        row = ""
-        row += str(epoch_number) + ","
+
         if torch.is_tensor(loss):
-            row += str(loss.cpu().item())
-        else:
-            row += str(loss)
-        row += ","
+            loss = loss.cpu().item()
 
-        for metric in epoch_metrics:
-            if torch.is_tensor(epoch_metrics[metric]):
-                row += str(epoch_metrics[metric].cpu().item())
-            else:
-                row += str(epoch_metrics[metric])
-            row += ","
-        row = row[:-1]
-        self.csv.write(row)
-        self.csv.write("\n")
-        self.csv.close()
+        row = {"epoch_no": epoch_number, f"{self.mode}_loss": loss}
 
-    def close(self):
-        self.csv.close()
+        for metric, metric_val in epoch_metrics.items():
+            if torch.is_tensor(metric_val):
+                metric_val = metric_val.cpu().item()
+            row[f"{self.mode}_{metric}"] = metric_val
+
+        with open(self.filename, "a") as f:
+            line = [row.get(col, "") for col in self.ordered_header]
+            line = [str(x) for x in line]
+            f.write(",".join(line) + "\n")

@@ -231,6 +231,7 @@ def print_and_format_metrics(
 
     Args:
         cohort_level_metrics (dict): The cohort level metrics calculated from the GANDLF.metrics.overall_stats function.
+            May be empty dict if not classification/regression.
         sample_level_metrics (dict): The sample level metrics calculated from separate samples from the dataloader(s).
         metrics_dict_from_parameters (dict): The metrics dictionary to populate.
         mode (str): The mode of the metrics (train, val, test).
@@ -270,11 +271,8 @@ def print_and_format_metrics(
         else:
             to_print = sample_level_metrics[metric] / length_of_dataloader
         output_metrics_dict[metric] = to_print
-    for metric in output_metrics_dict.keys():
-        print(
-            "     Epoch Final   " + mode + " " + metric + " : ",
-            output_metrics_dict[metric],
-        )
+    for metric, metric_val in output_metrics_dict.items():
+        print("     Epoch Final   " + mode + " " + metric + " : ", metric_val)
     output_metrics_dict = __update_metric_from_list_to_single_string(
         output_metrics_dict
     )

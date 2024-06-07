@@ -1,4 +1,5 @@
-from typing import Optional, Tuple
+import warnings
+from typing import Optional, Tuple, Union
 import torch
 import psutil
 from .loss_and_metric import get_loss_and_metrics
@@ -7,22 +8,27 @@ from .loss_and_metric import get_loss_and_metrics
 def step(
     model: torch.nn.Module,
     image: torch.Tensor,
-    label: torch.Tensor,
+    label: Optional[torch.Tensor],
     params: dict,
     train: Optional[bool] = True,
-) -> Tuple[float, dict, torch.Tensor, torch.Tensor]:
+) -> Tuple[float, dict, Union[torch.Tensor, list[torch.Tensor]], torch.Tensor]:
     """
     This function performs a single step of training or validation.
 
     Args:
         model (torch.nn.Module): The model to process the input image with, it should support appropriate dimensions.
-        image (torch.Tensor): The input image stack according to requirements.
-        label (torch.Tensor): The input label for the corresponding image tensor.
+        image (torch.Tensor): The input image stack according to requirements. (B, C, H, W, D)
+        label Optional[torch.Tensor]: The input label for the corresponding image tensor.
+            If segmentation, (B, C, H, W, D);
+            if classification / regression (not multilabel), (B, 1)
+            if classif / reg (multilabel), (B, N_LABELS)
+
         params (dict): The parameters dictionary.
         train (Optional[bool], optional): Whether the step is for training or validation. Defaults to True.
 
     Returns:
-        Tuple[float, dict, torch.Tensor, torch.Tensor]: The loss, metrics, output, and attention map.
+        Tuple[float, dict, Union[torch.Tensor, list[torch.Tensor]], torch.Tensor]: The loss, metrics, output,
+            and attention map.
     """
     if params["verbose"]:
         if torch.cuda.is_available():
@@ -44,37 +50,34 @@ def step(
         if params["problem_type"] == "segmentation":
             if label.shape[1] == 3:
                 label = label[:, 0, ...].unsqueeze(1)
-                # this warning should only come up once
-                if params["print_rgb_label_warning"]:
-                    print(
-                        "WARNING: The label image is an RGB image, only the first channel will be used.",
-                        flush=True,
-                    )
-                    params["print_rgb_label_warning"] = False
+                warnings.warn(
+                    "The label image is an RGB image, only the first channel will be used."
+                )
 
-            if params["model"]["dimension"] == 2:
-                label = torch.squeeze(label, -1)
+        assert len(label) == len(image)
 
     if params["model"]["dimension"] == 2:
-        image = torch.squeeze(image, -1)
-        if "value_keys" in params:
-            if label is not None:
-                if len(label.shape) > 1:
-                    label = torch.squeeze(label, -1)
+        image = image.squeeze(-1)  # removing depth
 
-    if not (train) and params["model"]["type"].lower() == "openvino":
+    # for segmentation remove the depth dimension from the label.
+    # for classification / regression, flattens class / reg label from list (possible in multilabel) to scalar
+    # TODO: second condition is crutch - in some cases label is passed as 1-d Tensor (B,) and if Batch size is 1,
+    #  it is squeezed to scalar tensor (0-d) and the future logic fails
+    if label is not None and len(label.shape) != 1:
+        label = label.squeeze(-1)
+
+    if not train and params["model"]["type"].lower() == "openvino":
         output = torch.from_numpy(
             model(inputs={params["model"]["IO"][0][0]: image.cpu().numpy()})[
                 params["model"]["IO"][1][0]
             ]
         )
         output = output.to(params["device"])
-    else:
-        if params["model"]["amp"]:
-            with torch.cuda.amp.autocast():
-                output = model(image)
-        else:
+    elif params["model"]["amp"]:
+        with torch.cuda.amp.autocast():
             output = model(image)
+    else:
+        output = model(image)
 
     attention_map = None
     if "medcam_enabled" in params and params["medcam_enabled"]:
@@ -86,12 +89,24 @@ def step(
     else:
         loss, metric_output = None, None
 
-    if len(output) > 1:
-        output = output[0]
-
     if params["model"]["dimension"] == 2:
-        output = torch.unsqueeze(output, -1)
         if "medcam_enabled" in params and params["medcam_enabled"]:
             attention_map = torch.unsqueeze(attention_map, -1)
 
+    if not isinstance(output, torch.Tensor):
+        warnings.warn(
+            f"Model output is not a Tensor: {type(output)}. Say, `deep_resunet` and `deep_unet` may return "
+            f"list of tensors on different scales instead of just one prediction Tensor. However due to "
+            f"GaNDLF architecture it is expected that models return only one tensor. For deep_* models "
+            f"only the biggeest scale is processed. Use these models with caution till fix is implemented."
+        )
+        output = output[0]
+
+    if params["model"]["dimension"] == 2 and params["problem_type"] == "segmentation":
+        # for 2d images where the depth is removed, add it back
+        output = output.unsqueeze(-1)
+
+    assert len(output) == len(
+        image
+    ), f"Error: output({len(output)}) and batch({len(image)}) have different lengths. Both should be equal to batch size!"
     return loss, metric_output, output, attention_map

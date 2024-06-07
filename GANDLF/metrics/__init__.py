@@ -1,6 +1,8 @@
 """
 All the metrics are to be called from here
 """
+from typing import Union
+
 from GANDLF.losses.regression import MSE_loss, CEL
 from .segmentation import (
     multi_class_dice,
@@ -100,7 +102,7 @@ surface_distance_ids = [
 ]
 
 
-def overall_stats(predictions, ground_truth, params):
+def overall_stats(predictions, ground_truth, params) -> dict[str, Union[float, list]]:
     """
     Generates a dictionary of metrics calculated on the overall predictions and ground truths.
 

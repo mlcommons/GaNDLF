@@ -1,6 +1,7 @@
 """
 All the metrics are to be called from here
 """
+from typing import Union
 
 import torch
 from sklearn.metrics import balanced_accuracy_score
@@ -82,7 +83,9 @@ def per_label_accuracy(
         return balanced_acc_score(prediction, target, params)
 
 
-def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> dict:
+def overall_stats(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> dict[str, Union[float, list]]:
     """
     Generates a dictionary of metrics calculated on the overall predictions and ground truths.
 
