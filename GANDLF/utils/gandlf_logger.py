@@ -4,7 +4,7 @@ import yaml
 
 
 def gandlf_logger_setup(
-    logger_name, config_path="../../logging_config.yaml"
+    logger_name, config_path="../../../logging_config.yaml"
 ) -> logging.Logger:
     """
     It sets up the logger. Read from logging_config.
