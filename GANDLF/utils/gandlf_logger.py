@@ -1,22 +1,26 @@
 import logging
 from logging import config
 import yaml
+from pathlib import Path
 
 
 def gandlf_logger_setup(
-    logger_name, config_path="../../../logging_config.yaml"
+    logger_name, config_filename="logging_config.yaml"
 ) -> logging.Logger:
     """
     It sets up the logger. Read from logging_config.
 
     Args:
         logger_name (str): logger name, the name should be the same in the logging_config
-        config_path (str): file path for the configuration
+        config_filename (str): file path for the configuration
 
     Returns:
         logging.Logger
     """
-    with open(config_path, "r") as file:
+    current_dir = Path.cwd()
+    file_path = current_dir.parent.parent / config_filename
+
+    with open(file_path, "r") as file:
         config1 = yaml.safe_load(file)
         logging.config.dictConfig(config1)
 
