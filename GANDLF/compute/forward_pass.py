@@ -464,16 +464,19 @@ def validate_network(
                         "\nHalf-Epoch Average " + mode + " loss : ",
                         total_epoch_valid_loss / (batch_idx + 1),
                     )
-                  for metric in params["metrics"]:
-                      if isinstance(total_epoch_valid_metric[metric], np.ndarray):
-                          to_print = (
-                              total_epoch_valid_metric[metric] / (batch_idx + 1)
-                          ).tolist()
-                      else:
-                          to_print = total_epoch_valid_metric[metric] / (batch_idx + 1)
-                      logger.debug(
-                          "Half-Epoch Average " + mode + " " + metric + " : ", to_print
-                      )
+                    for metric in params["metrics"]:
+                        if isinstance(total_epoch_valid_metric[metric], np.ndarray):
+                            to_print = (
+                                total_epoch_valid_metric[metric] / (batch_idx + 1)
+                            ).tolist()
+                        else:
+                            to_print = total_epoch_valid_metric[metric] / (
+                                batch_idx + 1
+                            )
+                        logger.debug(
+                            "Half-Epoch Average " + mode + " " + metric + " : ",
+                            to_print,
+                        )
 
     if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.disable_medcam()
