@@ -19,7 +19,7 @@ handlers:
     stream: ext://sys.stdout
   stderrHandler: # display warning and above messages
     class: logging.StreamHandler
-    level: ERROR
+    level: WARNING
     formatter: detailed
     stream: ext://sys.stderr
   debugHandler:
