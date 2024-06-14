@@ -47,7 +47,9 @@ logging_config = {
 }
 
 
-def gandlf_logger_setup(logger_name) -> logging.Logger:
+def gandlf_logger_setup(
+    logger_name, config_path="logging_config.yaml"
+) -> logging.Logger:
     """
     It sets up the logger. Read from logging_config.
 
@@ -58,7 +60,10 @@ def gandlf_logger_setup(logger_name) -> logging.Logger:
     Returns:
         logging.Logger
     """
-    logging.config.dictConfig(logging_config)
+    with open(config_path, "r") as file:
+        config1 = yaml.safe_load(file)
+        logging.config.dictConfig(config1)
+   
 
     logging.captureWarnings(True)
 
