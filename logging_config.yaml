@@ -22,16 +22,18 @@ handlers:
     level: WARNING
     formatter: detailed
     stream: ext://sys.stderr
-  debugHandler:
-    class: logging.FileHandler
-    filename: gandlf.log
-    formatter: detailed
+  rotatingFileHandler:
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
+    formatter: detailed
+    filename: tmp/gandlf/gandlf.log
+    maxBytes: 2000
+    backupCount: 2
 loggers: # you can add your customized logger
   debug_logger:
     level: DEBUG
-    handlers: [stdoutHandler, debugHandler, stderrHandler]
+    handlers: [stdoutHandler, rotatingFileHandler, stderrHandler]
     propagate: no
 root:
   level: DEBUG
-  handlers: [stdoutHandler, debugHandler, stderrHandler]
+  handlers: [stdoutHandler, rotatingFileHandler, stderrHandler]
