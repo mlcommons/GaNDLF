@@ -1,6 +1,8 @@
 import torch
 import torchmetrics as tm
-from torch.nn.functional import one_hot
+from sklearn.metrics import matthews_corrcoef
+
+# from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
 from GANDLF.utils.generic import determine_classification_task_type
 
@@ -72,11 +74,17 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
             # TODO: AUROC needs to be properly debugged for multi-class problems - https://github.com/mlcommons/GaNDLF/issues/817
             if metric_name == "auroc" and params["model"]["num_classes"] == 2:
                 output_metrics[metric_name] = get_output_from_calculator(
-                prediction, target, calculator
-            )
+                    prediction, target, calculator
+                )
             else:
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
+
+    # Matthews correlation coefficient is only defined for classification
+    if params["problem_type"] == "classification":
+        output_metrics["mcc"] = matthews_corrcoef(
+            target.cpu().numpy(), prediction.cpu().numpy()
+        )
 
     return output_metrics
