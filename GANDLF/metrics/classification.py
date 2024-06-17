@@ -62,46 +62,21 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            # "aucroc": tm.AUROC(
-            #     task=task,
-            #     num_classes=params["model"]["num_classes"],
-            #     average=average_type_key if average_type_key != "micro" else "macro",
-            # ),
+            "auroc": tm.AUROC(
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key if average_type_key != "micro" else "macro",
+            ),
         }
         for metric_name, calculator in calculators.items():
-            if metric_name == "aucroc":
-                one_hot_preds = one_hot(
-                    prediction.long(), num_classes=params["model"]["num_classes"]
-                )
+            # TODO: AUROC needs to be properly debugged for multi-class problems - https://github.com/mlcommons/GaNDLF/issues/817
+            if metric_name == "auroc" and params["model"]["num_classes"] == 2:
                 output_metrics[metric_name] = get_output_from_calculator(
-                    one_hot_preds.float(), target, calculator
-                )
+                prediction, target, calculator
+            )
             else:
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
-
-    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCARD IT ####
-    # what is AUC metric telling at all? Computing it for prediction and ground truth
-    # is not making sense
-    # metrics that do not have any "average" parameter
-    # calculators = {
-    #
-    #     # "auc": tm.AUC(reorder=True),
-    #     ## weird error for multi-class problem, where pos_label is not getting set
-    #     "roc": tm.ROC(task=task, num_classes=params["model"]["num_classes"]),
-    # }
-    # for metric_name, calculator in calculators.items():
-    #     if metric_name == "roc":
-    #         one_hot_preds = one_hot(
-    #             prediction.long(), num_classes=params["model"]["num_classes"]
-    #         )
-    #         output_metrics[metric_name] = get_output_from_calculator(
-    #             one_hot_preds.float(), target, calculator
-    #         )
-    #     else:
-    #         output_metrics[metric_name] = get_output_from_calculator(
-    #             prediction, target, calculator
-    #         )
 
     return output_metrics
