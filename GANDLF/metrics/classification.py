@@ -76,7 +76,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
-            else:
+            elif metric_name != "auroc":
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
