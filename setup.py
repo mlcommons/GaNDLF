@@ -107,6 +107,8 @@ requirements = [
     "torchinfo==1.7.0",
     "segmentation-models-pytorch==0.3.3",
     "ACSConv==0.1.1",
+    # https://github.com/docker/docker-py/issues/3256
+    "requests<2.32.0",  # 2.32.0 are not compatible with docker 7.0.0; to remove restriction once docker is fixed
     "docker",
     "dicom-anonymizer==1.0.12",
     "twine",
