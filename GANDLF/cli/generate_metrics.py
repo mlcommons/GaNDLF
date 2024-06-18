@@ -1,5 +1,5 @@
 import sys
-import yaml
+import json
 from typing import Optional
 from pprint import pprint
 import pandas as pd
@@ -269,9 +269,9 @@ def generate_metrics_dict(
                     strictlyPositive=True,
                 )
 
-            overall_stats_dict[current_subject_id][
-                "ssim"
-            ] = structural_similarity_index(output_infill, gt_image_infill, mask).item()
+            overall_stats_dict[current_subject_id]["ssim"] = (
+                structural_similarity_index(output_infill, gt_image_infill, mask).item()
+            )
 
             # ncc metrics
             compute_ncc = parameters.get("compute_ncc", True)
@@ -312,32 +312,35 @@ def generate_metrics_dict(
             ).item()
 
             # same as above but with epsilon for robustness
-            overall_stats_dict[current_subject_id][
-                "psnr_eps"
-            ] = peak_signal_noise_ratio(
-                output_infill, gt_image_infill, epsilon=sys.float_info.epsilon
-            ).item()
+            overall_stats_dict[current_subject_id]["psnr_eps"] = (
+                peak_signal_noise_ratio(
+                    output_infill, gt_image_infill, epsilon=sys.float_info.epsilon
+                ).item()
+            )
 
             # only use fix data range to [0;1] if the data was normalized before
             if normalize:
                 # torchmetrics PSNR but with fixed data range of 0 to 1
-                overall_stats_dict[current_subject_id][
-                    "psnr_01"
-                ] = peak_signal_noise_ratio(
-                    output_infill, gt_image_infill, data_range=(0, 1)
-                ).item()
+                overall_stats_dict[current_subject_id]["psnr_01"] = (
+                    peak_signal_noise_ratio(
+                        output_infill, gt_image_infill, data_range=(0, 1)
+                    ).item()
+                )
 
                 # same as above but with epsilon for robustness
-                overall_stats_dict[current_subject_id][
-                    "psnr_01_eps"
-                ] = peak_signal_noise_ratio(
-                    output_infill,
-                    gt_image_infill,
-                    data_range=(0, 1),
-                    epsilon=sys.float_info.epsilon,
-                ).item()
+                overall_stats_dict[current_subject_id]["psnr_01_eps"] = (
+                    peak_signal_noise_ratio(
+                        output_infill,
+                        gt_image_infill,
+                        data_range=(0, 1),
+                        epsilon=sys.float_info.epsilon,
+                    ).item()
+                )
 
     pprint(overall_stats_dict)
     if outputfile is not None:
-        with open(outputfile, "w") as outfile:
-            yaml.dump(overall_stats_dict, outfile)
+        ## todo: needs debugging since this writes the file handler in some cases, so replaced with json
+        # with open(outputfile, "w") as outfile:
+        #     yaml.dump(overall_stats_dict, outfile)
+        with open(outputfile, "w") as file:
+            file.write(json.dumps(overall_stats_dict))
