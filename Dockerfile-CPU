@@ -5,7 +5,7 @@ LABEL version=1.0
 
 # Install fresh Python and dependencies for build-from-source
 RUN apt-get update && apt-get install -y software-properties-common
-RUN -E add-apt-repository ppa:deadsnakes/ppa
+RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update &&  apt-get install -y  python3.9 python3-pip libjpeg8-dev zlib1g-dev python3-dev libpython3.9-dev libffi-dev libgl1
 RUN python3.9 -m pip install --upgrade pip
 # EXPLICITLY install cpu versions of torch/torchvision (not all versions have +cpu modes on PyPI...)
