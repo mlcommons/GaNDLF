@@ -81,10 +81,8 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
                     prediction, target, calculator
                 )
 
-    # Matthews correlation coefficient is only defined for classification
-    if params["problem_type"] == "classification":
-        output_metrics["mcc"] = matthews_corrcoef(
-            target.cpu().numpy(), prediction.cpu().numpy()
-        )
+    output_metrics["mcc"] = matthews_corrcoef(
+        target.cpu().numpy(), prediction.cpu().numpy()
+    )
 
     return output_metrics
