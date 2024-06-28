@@ -1,6 +1,5 @@
 import torch
 import torchmetrics as tm
-from sklearn.metrics import matthews_corrcoef
 
 # from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
@@ -32,39 +31,39 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
         "per_class_weighted": "weighted",
     }
     task = determine_classification_task_type(params)
-    # consider adding a "multilabel field in the future"
-    # metrics that need the "average" parameter
+    # todo: consider adding a "multilabel field in the future"
 
-    for average_type_key in average_types_keys.values():
+    # metrics that need the "average" parameter
+    for average_type, average_type_key in average_types_keys.items():
         # multidim_average is not used when constructing these metrics
         # think of having it
         calculators = {
-            "accuracy": tm.Accuracy(
+            f"accuracy_{average_type}": tm.Accuracy(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "precision": tm.Precision(
+            f"precision_{average_type}": tm.Precision(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "recall": tm.Recall(
+            f"recall_{average_type}": tm.Recall(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "f1": tm.F1Score(
+            f"f1_{average_type}": tm.F1Score(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "specificity": tm.Specificity(
+            f"specificity_{average_type}": tm.Specificity(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "auroc": tm.AUROC(
+            f"auroc_{average_type}": tm.AUROC(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key if average_type_key != "micro" else "macro",
@@ -72,17 +71,24 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
         }
         for metric_name, calculator in calculators.items():
             # TODO: AUROC needs to be properly debugged for multi-class problems - https://github.com/mlcommons/GaNDLF/issues/817
-            if metric_name == "auroc" and params["model"]["num_classes"] == 2:
+            if "auroc" in metric_name and params["model"]["num_classes"] == 2:
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
-            elif metric_name != "auroc":
+            elif "auroc" not in metric_name:
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
 
-    output_metrics["mcc"] = matthews_corrcoef(
-        target.cpu().numpy(), prediction.cpu().numpy()
-    )
+    # metrics that do not need the "average" parameter
+    calculators = {
+        "mcc": tm.MatthewsCorrCoef(
+            task=task, num_classes=params["model"]["num_classes"]
+        )
+    }
+    for metric_name, calculator in calculators.items():
+        output_metrics[metric_name] = get_output_from_calculator(
+            prediction, target, calculator
+        )
 
     return output_metrics
