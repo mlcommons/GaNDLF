@@ -32,9 +32,7 @@ dockerfiles = [
 
 # Any extra files should be located at `GANDLF` module folder (not in repo root)
 extra_files = []
-toplevel_package_excludes = [
-    "testing*",
-]
+toplevel_package_excludes = ["testing*"]
 
 # specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
 black_version = "23.11.0"
