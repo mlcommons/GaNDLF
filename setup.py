@@ -5,9 +5,6 @@
 
 import sys, re, os
 from setuptools import setup, find_packages
-from setuptools.command.install import install
-from setuptools.command.develop import develop
-from setuptools.command.egg_info import egg_info
 
 try:
     with open("README.md") as readme_file:
@@ -15,21 +12,6 @@ try:
 except Exception as error:
     readme = "No README information found."
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
-
-
-class CustomInstallCommand(install):
-    def run(self):
-        install.run(self)
-
-
-class CustomDevelopCommand(develop):
-    def run(self):
-        develop.run(self)
-
-
-class CustomEggInfoCommand(egg_info):
-    def run(self):
-        egg_info.run(self)
 
 
 try:
@@ -47,25 +29,11 @@ dockerfiles = [
     for item in os.listdir(os.path.dirname(os.path.abspath(__file__)))
     if (os.path.isfile(item) and item.startswith("Dockerfile-"))
 ]
-setup_files = ["setup.py", ".dockerignore", "pyproject.toml", "MANIFEST.in"]
-all_extra_files = dockerfiles + setup_files
-all_extra_files_pathcorrected = [os.path.join("../", item) for item in all_extra_files]
-# find_packages should only ever find these as subpackages of gandlf, not as top-level packages
-# generate this dynamically?
-# GANDLF.GANDLF is needed to prevent recursion madness in deployments
+
+# Any extra files should be located at `GANDLF` module folder (not in repo root)
+extra_files = []
 toplevel_package_excludes = [
-    "GANDLF.GANDLF",
-    "anonymize",
-    "cli",
-    "compute",
-    "data",
-    "grad_clipping",
-    "losses",
-    "metrics",
-    "models",
-    "optimizers",
-    "schedulers",
-    "utils",
+    "testing*",
 ]
 
 # specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
@@ -127,11 +95,6 @@ if __name__ == "__main__":
             where=os.path.dirname(os.path.abspath(__file__)),
             exclude=toplevel_package_excludes,
         ),
-        cmdclass={
-            "install": CustomInstallCommand,
-            "develop": CustomDevelopCommand,
-            "egg_info": CustomEggInfoCommand,
-        },
         entry_points={
             "console_scripts": [
                 "gandlf=GANDLF.entrypoints.cli_tool:gandlf",
@@ -171,7 +134,7 @@ if __name__ == "__main__":
         long_description=readme,
         long_description_content_type="text/markdown",
         include_package_data=True,
-        package_data={"GANDLF": all_extra_files_pathcorrected},
+        package_data={"GANDLF": extra_files},
         keywords="semantic, segmentation, regression, classification, data-augmentation, medical-imaging, clinical-workflows, deep-learning, pytorch",
         zip_safe=False,
     )
