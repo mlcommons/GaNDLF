@@ -1,5 +1,6 @@
 import torch
 import torchmetrics as tm
+import torch.nn.functional as F
 
 # from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
@@ -21,6 +22,12 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
     assert (
         params["problem_type"] == "classification"
     ), "Only classification is supported for these stats"
+
+    # this is needed for auroc
+    predictions_one_hot = F.one_hot(
+        prediction, num_classes=params["model"]["num_classes"]
+    )
+    predictions_prob = F.softmax(predictions_one_hot.float(), dim=1)
 
     output_metrics = {}
 
@@ -70,12 +77,11 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
             ),
         }
         for metric_name, calculator in calculators.items():
-            # TODO: AUROC needs to be properly debugged for multi-class problems - https://github.com/mlcommons/GaNDLF/issues/817
-            if "auroc" in metric_name and params["model"]["num_classes"] == 2:
+            if "auroc" in metric_name:
                 output_metrics[metric_name] = get_output_from_calculator(
-                    prediction, target, calculator
+                    predictions_prob, target, calculator
                 )
-            elif "auroc" not in metric_name:
+            else:
                 output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
