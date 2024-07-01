@@ -68,11 +68,12 @@ def get_augmentation_transforms(
 
         if augmentation_type_lower in global_augs_dict:
             current_augmentations.append(
-                global_augs_dict[augmentation_type_lower](**augmentation_params)
+                global_augs_dict[augmentation_type_lower](augmentation_params)
             )
         else:
             warn(
                 f"Augmentation {augmentation_type} not found in the global augmentation dictionary.",
                 UserWarning,
             )
+
     return current_augmentations
