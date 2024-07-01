@@ -24,8 +24,12 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
     ), "Only classification is supported for these stats"
 
     # this is needed for auroc
+    # ensure that predictions are in integer format
+    prediction_wrap = prediction
+    if prediction.dtype != torch.long or prediction.dtype != torch.int:
+        prediction_wrap = prediction_wrap.long()
     predictions_one_hot = F.one_hot(
-        prediction, num_classes=params["model"]["num_classes"]
+        prediction_wrap, num_classes=params["model"]["num_classes"]
     )
     predictions_prob = F.softmax(predictions_one_hot.float(), dim=1)
 
