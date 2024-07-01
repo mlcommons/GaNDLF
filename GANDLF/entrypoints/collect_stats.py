@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import logging
 import os
 import argparse
+from typing import Optional
+
+import click
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
+from deprecated import deprecated
 
 from GANDLF.cli import copyrightMessage
+from GANDLF.entrypoints import append_copyright_to_help
 
 
 def plot_all(df_training, df_validation, df_testing, output_plot_dir):
@@ -129,7 +134,77 @@ def plot_all(df_training, df_validation, df_testing, output_plot_dir):
     return df_training, df_validation, df_testing
 
 
-if __name__ == "__main__":
+def _read_data_and_plot(
+    training_logs_path: str,
+    validation_logs_path: str,
+    testing_logs_path: Optional[str],
+    output_plot_path: str,
+    output_file: str,
+):
+    # moved out from _collect_stats for easier testing
+    # Read all the files
+    df_training = pd.read_csv(training_logs_path)
+    df_validation = pd.read_csv(validation_logs_path)
+    df_testing = pd.read_csv(testing_logs_path) if testing_logs_path else None
+
+    # Check for metrics in columns and do tight plots
+    plot_all(df_training, df_validation, df_testing, output_plot_path)
+
+    df_training["split"] = "train"
+    df_testing["split"] = "test"
+    df_validation["split"] = "validation"
+    pd.concat((df_training, df_testing, df_validation)).to_csv(output_file)
+
+
+def _collect_stats(model_dir: str, output_dir: str):
+    input_dir = os.path.normpath(model_dir)
+    output_dir = os.path.normpath(output_dir)
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    # TODO: here is bug? output_file is never used. We don't save data.csv at all?
+    output_file = os.path.join(output_dir, "data.csv")  # data file name
+    output_plot = os.path.join(output_dir, "plot.png")  # plot file
+
+    training_logs = os.path.join(input_dir, "logs_training.csv")
+    validation_logs = os.path.join(input_dir, "logs_validation.csv")
+    testing_logs = os.path.join(input_dir, "logs_testing.csv")
+    if not os.path.isfile(testing_logs):
+        logging.info(f"testing logs file was not found: {testing_logs}")
+        testing_logs = None
+
+    _read_data_and_plot(
+        training_logs, validation_logs, testing_logs, output_plot, output_file
+    )
+
+
+@click.command()
+@click.option(
+    "--model-dir",
+    "-m",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    required=True,
+    help="Input directory which contains testing and validation models log files",
+)
+@click.option(
+    "--output-dir",
+    "-o",
+    type=click.Path(file_okay=False, dir_okay=True),
+    required=True,
+    help="Output directory to save stats and plot",
+)
+@append_copyright_to_help
+def new_way(model_dir: str, output_dir: str):
+    """Collect statistics from different testing/validation combinations from output directory."""
+    _collect_stats(model_dir=model_dir, output_dir=output_dir)
+
+
+@deprecated(
+    "This is a deprecated way of running GanDLF. Please, use `gandlf collect-stats` cli command "
+    + "instead of `gandlf_collectStats`. Note that in new CLI tool params were renamed to snake-case:\n"
+    + "  --modeldir to --model-dir\n"
+    + "  --outputdir to --output-dir\n"
+    + "`gandlf_collectStats` script would be deprecated soon."
+)
+def old_way():
     parser = argparse.ArgumentParser(
         prog="GANDLF_CollectStats",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -152,21 +227,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    _collect_stats(args.modeldir, args.outputdir)
 
-    inputDir = os.path.normpath(args.modeldir)
-    outputDir = os.path.normpath(args.outputdir)
-    Path(outputDir).mkdir(parents=True, exist_ok=True)
-    outputFile = os.path.join(outputDir, "data.csv")  # data file name
-    outputPlot = os.path.join(outputDir, "plot.png")  # plot file
 
-    trainingLogs = os.path.join(inputDir, "logs_training.csv")
-    validationLogs = os.path.join(inputDir, "logs_validation.csv")
-    testingLogs = os.path.join(inputDir, "logs_testing.csv")
-
-    # Read all the files
-    df_training = pd.read_csv(trainingLogs)
-    df_validation = pd.read_csv(validationLogs)
-    df_testing = pd.read_csv(testingLogs) if os.path.isfile(testingLogs) else None
-
-    # Check for metrics in columns and do tight plots
-    plot_all(df_training, df_validation, df_testing, outputPlot)
+if __name__ == "__main__":
+    old_way()

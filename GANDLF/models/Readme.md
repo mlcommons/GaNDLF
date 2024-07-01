@@ -24,3 +24,4 @@
     - For example, `GANDLF.models.unet.unet` has a `residualConnections` parameter, which is not exposed to the parameters dict, and a separate class `GANDLF.models.unet.resunet` is defined which enables this flag.
 - Add the model's identifier to `GANDLF.models.__init__.global_model_dict` as appropriate.
 - Call the new mode from the config using the `model` key.
+- To update the tests, append the new model key to either in `all_models_segmentation`, `all_models_segmentation` or `all_models_classification` in [test_full.py](https://github.com/mlcommons/GaNDLF/blob/master/testing/test_full.py)

@@ -24,13 +24,12 @@ Please follow the [installation instructions](./setup.md#installation) to instal
 
 ### Anonymize Data
 
-A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf_anonymizer` script. It can be used as follows:
+A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf anonymizer` command. It can be used as follows:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_anonymizer
+(venv_gandlf) $> gandlf anonymizer
   # -h, --help         Show help message and exit
-  # -v, --version      Show program's version number and exit.
   -c ./samples/config_anonymizer.yaml \ # anonymizer configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./input_dir_or_file \ # input directory containing series of images to anonymize or a single image
   -o ./output_dir_or_file # output directory to save anonymized images or a single output image file (for a DICOM to NIfTi conversion specify a .nii.gz file)
@@ -73,7 +72,7 @@ Once these files are present, the patch miner can be run using the following com
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_patchMiner \ 
+(venv_gandlf) $> gandlf patch-miner \ 
   # -h, --help         Show help message and exit
   -c ./exp_patchMiner/config.yaml \ # patch extraction configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./exp_patchMiner/input.csv \ # data in CSV format 
@@ -86,7 +85,7 @@ Running preprocessing before training/inference is optional, but recommended. It
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_preprocess \
+(venv_gandlf) $> gandlf preprocess \
   # -h, --help         Show help message and exit
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
@@ -115,9 +114,9 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
     - Multiple segmentation classes should be in a single file with unique label numbers.
     - Multi-label classification/regression is currently not supported.
 
-### Using the `gandlf_constructCSV` application
+### Using the `gandlf construct-csv` command
 
-To make the process of creating the CSV easier, we have provided a utility application called `gandlf_constructCSV`. This script works when the data is arranged in the following format (example shown of the data directory arrangement from the [Brain Tumor Segmentation (BraTS) Challenge](https://www.synapse.org/brats)):
+To make the process of creating the CSV easier, we have provided a `gandlf construct-csv` command. This script works when the data is arranged in the following format (example shown of the data directory arrangement from the [Brain Tumor Segmentation (BraTS) Challenge](https://www.synapse.org/brats)):
 
 ```bash
 $DATA_DIRECTORY
@@ -150,7 +149,7 @@ The following command shows how the script works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_constructCSV \
+(venv_gandlf) $> gandlf construct-csv \
   # -h, --help         Show help message and exit
   -i $DATA_DIRECTORY # this is the main data directory 
   -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
@@ -164,15 +163,15 @@ The following command shows how the script works:
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 - For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. 
 
-### Using the `gandlf_splitCSV` application
+### Using the `gandlf split-csv` command
 
-To split the data CSV into training, validation, and testing CSVs, the `gandlf_splitCSV` script can be used. The following command shows how the script works:
+To split the data CSV into training, validation, and testing CSVs, the `gandlf split-csv` script can be used. The following command shows how the script works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_splitCSV \
+(venv_gandlf) $> gandlf split-csv \
   # -h, --help         Show help message and exit
-  -i ./experiment_0/train_data.csv \ # output CSV from the `gandlf_constructCSV` script
+  -i ./experiment_0/train_data.csv \ # output CSV from the `gandlf construct-csv` script
   -c $gandlf_config \ # the GaNDLF config (in YAML) with the `nested_training` key specified to the folds needed
   -o $output_dir # the output directory to save the split data
 ```
@@ -194,14 +193,14 @@ GaNDLF requires a YAML-based configuration that controls various aspects of the 
 
 ### Running multiple experiments (optional)
 
-1. The `gandlf_configGenerator` script can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
+1. The `gandlf config-generator` command can be used to generate a grid of configurations for tuning the hyperparameters of a baseline configuration that works for your dataset and problem. 
 2. Use a strategy file (example is shown in [samples/config_generator_strategy.yaml](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_generator_sample_strategy.yaml).
 3. Provide the baseline configuration which has enabled you to successfully train a model for `1` epoch for your dataset and problem at hand (regardless of the efficacy).
 4. Run the following command:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_configGenerator \
+(venv_gandlf) $> gandlf config-generator \
   # -h, --help         Show help message and exit
   -c ./samples/config_all_options.yaml \ # baseline configuration
   -s ./samples/config_generator_strategy.yaml \ # strategy file
@@ -223,16 +222,16 @@ You can use the following code snippet to run GaNDLF:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_run \
+(venv_gandlf) $> gandlf run \
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c ./experiment_0/model.yaml \ # model configuration - needs to be a valid YAML (check syntax using https://yamlchecker.com/)
   -i ./experiment_0/train.csv \ # data in CSV format 
-  -m ./experiment_0/model_dir/ \ # model directory (i.e., the `modeldir`) where the output of the training will be stored, created if not present
-  -t True \ # True == train, False == inference
+  -m ./experiment_0/model_dir/ \ # model directory (i.e., the `model-dir`) where the output of the training will be stored, created if not present
+  --train \ # --train/-t or --infer
   -d cuda # ensure CUDA_VISIBLE_DEVICES env variable is set for GPU device, use 'cpu' for CPU workloads
-  # -rt , --reset # [optional] completely resets the previous run by deleting `modeldir`
-  # -rm , --resume # [optional] resume previous training by only keeping model dict in `modeldir`
+  # -rt , --reset # [optional] completely resets the previous run by deleting `model-dir`
+  # -rm , --resume # [optional] resume previous training by only keeping model dict in `model-dir`
 ```
 
 ### Special notes for Inference for Histology images
@@ -247,12 +246,12 @@ GaNDLF provides a script to generate metrics after an inference process is done.
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_generateMetrics \
+(venv_gandlf) $> gandlf generate-metrics \
   # -h, --help         Show help message and exit
   # -v, --version      Show program's version number and exit.
   -c , --config       The configuration file (contains all the information related to the training/inference session)
-  -i , --inputdata    CSV file that is used to generate the metrics; should contain 3 columns: 'SubjectID,Target,Prediction'
-  -o , --outputfile   Location to save the output dictionary. If not provided, will print to stdout.
+  -i , --input-data    CSV file that is used to generate the metrics; should contain 3 columns: 'SubjectID,Target,Prediction'
+  -o , --output-file   Location to save the output dictionary. If not provided, will print to stdout.
 ```
 
 Once you have your CSV in the specific format, you can pass it on to generate the metrics. Here is an example for segmentation:
@@ -264,7 +263,7 @@ SubjectID,Target,Prediction
 ...
 ```
 
-Similarly for classification or regression (`A`, `B`, `C`, `D` are integers for classification and floats for regression):
+Similarly, for classification or regression (`A`, `B`, `C`, `D` are integers for classification and floats for regression):
 
 ```csv
 SubjectID,Target,Prediction
@@ -287,7 +286,7 @@ SubjectID,Target,Prediction,Mask
 
 ### Multi-GPU training
 
-GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf_run` script. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)] and pass `-d cuda` to the `gandlf_run` script.
+GaNDLF enables relatively straightforward multi-GPU training. Simply set the `CUDA_VISIBLE_DEVICES` environment variable to the list of GPUs you want to use, and pass `cuda` as the device to the `gandlf run` command. For example, if you want to use GPUs 0, 1, and 2, you would set `CUDA_VISIBLE_DEVICES=0,1,2` [[ref](https://developer.nvidia.com/blog/cuda-pro-tip-control-gpu-visibility-cuda_visible_devices/)] and pass `-d cuda` to the `gandlf run` command.
 
 ### Distributed training
 
@@ -316,18 +315,18 @@ ${architecture_name}_initial.{onnx/xml/bin} # [optional] if ${architecture_name}
 ### Inference
 
 - The output of inference will be predictions based on the model that was trained. 
-- The predictions will be saved in the same directory as the model if `outputdir` is not passed to `gandlf_run`.
+- The predictions will be saved in the same directory as the model if `output-dir` is not passed to `gandlf run`.
 - For segmentation, a directory will be created per subject ID in the input CSV.
-- For classification/regression, the predictions will be generated in the `outputdir` or `modeldir` as a CSV file.
+- For classification/regression, the predictions will be generated in the `output-dir` or `model-dir` as a CSV file.
 
 
 ## Plot the final results
 
-After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf_collectStats](https://github.com/mlcommons/GaNDLF/blob/master/gandlf_collectStats) can be used for plotting:
+After the testing/validation training is finished, GaNDLF enables the collection of all the statistics from the final models for testing and validation datasets and plot them. The [gandlf collect-stats](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/entrypoints/collect_stats.py) command can be used for plotting:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_collectStats \
+(venv_gandlf) $> gandlf collect-stats \
   -m /path/to/trained/models \  # directory which contains testing and validation models
   -o ./experiment_0/output_dir_stats/  # output directory to save stats and plot
 ```
@@ -360,11 +359,11 @@ All generated attention maps can be found in the experiment's output directory. 
 
 ## Post-Training Model Optimization
 
-If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf_optimize` script to do so. The following command shows how it works:
+If you have a model previously trained using GaNDLF that you wish to run graph optimizations on, you can use the `gandlf optimize-model` command to do so. The following command shows how it works:
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_optimizeModel \
+(venv_gandlf) $> gandlf optimize-model \
   -m /path/to/trained/${architecture_name}_best.pth.tar  # directory which contains testing and validation models
 ```
 
@@ -379,13 +378,13 @@ GaNDLF provides the ability to deploy models into easy-to-share, easy-to-use for
 
 The resulting image contains your specific version of GaNDLF (including any custom changes you have made) and your trained model and configuration. This ensures that upstream changes to GaNDLF will not break compatibility with your model.
 
-To deploy a model, simply run the `gandlf_deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
+To deploy a model, simply run the `gandlf deploy` command after training a model. You will need the [Docker engine](https://www.docker.com/get-started/) installed to build Docker images. This will create the image and, for MLCubes, generate an MLCube directory complete with an `mlcube.yaml` specifications file, along with the workspace directory copied from a pre-existing template. 
 
 ```bash
 # continue from previous shell
-(venv_gandlf) $> python gandlf_deploy \
+(venv_gandlf) $> gandlf deploy \
   # -h, --help         Show help message and exit
-  -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with gandlf_recoverConfig first if needed)
+  -c ./experiment_0/model.yaml \ # Configuration to bundle with the model (you can recover it with `gandlf recover-config` first if needed)
   -m ./experiment_0/model_dir/ \ # model directory (i.e., modeldir)
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
@@ -398,7 +397,7 @@ To deploy a model, simply run the `gandlf_deploy` command after training a model
 You can also deploy GaNDLF as a metrics generator (see the [Generate Metrics](#generate-metrics) section) as follows:
 
 ```bash
-(venv_gandlf) $> python gandlf_deploy \
+(venv_gandlf) $> gandlf deploy \
   ## -h, --help         show help message and exit
   --target docker \ # the target platform (--help will show all available targets)
   --mlcube-root ./my_new_mlcube_dir \ # Directory containing mlcube.yaml (used to configure your image base)
@@ -454,18 +453,18 @@ For example, you might run:
 (main) $> docker run -it --rm --name gandlf --volume /home/researcher/gandlf_input:/input:ro --volume /home/researcher/gandlf_output:/output cbica/gandlf:latest-cpu [command and args go here]
 ```
 
-Remember that the process running in the container only considers the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf_constructCSV` script will need to be made from the container and with input in the same locations. Expanding on our last example:
+Remember that the process running in the container only considers the filesystem inside the container, which is structured differently from that of your host machine. Therefore, you will need to give paths relative to the mount point *destination*. Additionally, any paths used internally by GaNDLF will refer to locations inside the container. This means that data CSVs produced by the `gandlf construct-csv` command will need to be made from the container and with input in the same locations. Expanding on our last example:
 
 ```bash
 (main) $> docker run -it --rm --name dataprep \
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
   --volume /home/researcher/gandlf_output:/output \ # output data is mounted as read-write
   cbica/gandlf:latest-cpu \ # change to appropriate docker image tag
-  gandlf_constructCSV \ # standard construct CSV API starts
-  --inputDir /input/data \
-  --outputFile /output/data.csv \
-  --channelsID _t1.nii.gz \
-  --labelID _seg.nii.gz
+  construct-csv \ # standard construct CSV API starts
+  --input-dir /input/data \
+  --output-file /output/data.csv \
+  --channels-id _t1.nii.gz \
+  --label-id _seg.nii.gz
 ```
 
 The previous command will generate a data CSV file that you can safely edit outside the container (such as by adding a `ValueToPredict` column). Then, you can refer to the same file when running again:
@@ -475,18 +474,18 @@ The previous command will generate a data CSV file that you can safely edit outs
   --volume /home/researcher/gandlf_input:/input:ro \ # input data is mounted as read-only
   --volume /home/researcher/gandlf_output:/output \ # output data is mounted as read-write
   cbica/gandlf:latest-cpu \ # change to appropriate docker image tag
-  gandlf_run --train True \ # standard training API starts
+  gandlf run --train \ # standard training API starts
   --config /input/config.yml \
   --inputdata /output/data.csv \
   --modeldir /output/model
 ```
 #### Special Case for Training
 
-Considering that you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf_deploy`), the output will be to a location embedded inside the container. Since you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward. For example, you can fine-tune a model on your own data using the following commands as a starting point:
+Considering that you want to train on an existing model that is inside the GaNDLF container (such as in an MLCube container created by `gandlf deploy`), the output will be to a location embedded inside the container. Since you cannot mount something into that spot without overwriting the model, you can instead use the built-in `docker cp` command to extract the model afterward. For example, you can fine-tune a model on your own data using the following commands as a starting point:
 
 ```bash
 # Run training on your new data
-(main) $> docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf_run -m /embedded_model/ [...] # Do not include "--rm" option!
+(main) $> docker run --name gandlf_training mlcommons/gandlf-pretrained:0.0.1 -v /my/input/data:/input gandlf run -m /embedded_model/ [...] # Do not include "--rm" option!
 # Copy the finetuned model out of the container, to a location on the host
 (main) $> docker cp gandlf_training:/embedded_model /home/researcher/extracted_model
 # Now you can remove the container to clean up
@@ -501,7 +500,7 @@ If using CUDA, GaNDLF also expects the environment variable `CUDA_VISIBLE_DEVICE
 
 For example:
 ```bash
-(main) $> docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf_run --device cuda [...]
+(main) $> docker run --gpus all -e CUDA_VISIBLE_DEVICES -it --rm --name gandlf cbica/gandlf:latest-cuda113 gandlf run --device cuda [...]
 ```
 
 This can be replicated for ROCm for AMD , by following the [instructions to set up the ROCm Container Toolkit](https://rocmdocs.amd.com/en/latest/ROCm_Virtualization_Containers/ROCm-Virtualization-&-Containers.html?highlight=docker).

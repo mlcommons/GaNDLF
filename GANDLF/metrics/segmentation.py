@@ -272,8 +272,9 @@ def _calculator_sensitivity_specificity(
     if per_label:
         return torch.tensor(sensitivity_per_label), torch.tensor(specificity_per_label)
     else:
-        return torch.tensor(sensitivity / avg_counter), torch.tensor(
-            specificity / avg_counter
+        return (
+            torch.tensor(sensitivity / avg_counter),
+            torch.tensor(specificity / avg_counter),
         )
 
 
