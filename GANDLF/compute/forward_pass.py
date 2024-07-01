@@ -19,6 +19,7 @@ from GANDLF.utils import (
     reverse_one_hot,
     get_ground_truths_and_predictions_tensor,
     print_and_format_metrics,
+    gandlf_logger_setup,
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
@@ -46,6 +47,7 @@ def validate_network(
     Returns:
         Tuple[float, dict]: The average validation loss and the average validation metrics.
     """
+    logger = gandlf_logger_setup(__name__)
     print("*" * 20)
     print("Starting " + mode + " : ")
     print("*" * 20)
@@ -116,7 +118,7 @@ def validate_network(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
         if params["verbose"]:
-            print("== Current subject:", subject["subject_id"], flush=True)
+            logger.debug("== Current subject:", subject["subject_id"])
 
         # ensure spacing is always present in params and is always subject-specific
         params["subject_spacing"] = None
@@ -280,12 +282,13 @@ def validate_network(
                 if label is not None:
                     label = label.to(params["device"])
                     if params["verbose"]:
-                        print(
-                            "=== Validation shapes : label:",
-                            label.shape,
-                            ", image:",
-                            image.shape,
-                            flush=True,
+                        logger.debug(
+                            "=== Current patch:",
+                            current_patch,
+                            ", time : ",
+                            get_date_time(),
+                            ", location :",
+                            patches_batch[torchio.LOCATION],
                         )
 
                 if is_inference:
@@ -428,12 +431,11 @@ def validate_network(
                     params,
                 )
                 if params["verbose"]:
-                    print(
+                    logger.debug(
                         "Full image " + mode + ":: Loss: ",
                         final_loss,
                         "; Metric: ",
                         final_metric,
-                        flush=True,
                     )
 
                 # # Non network validing related
@@ -458,7 +460,7 @@ def validate_network(
                 if ((batch_idx + 1) % (len(valid_dataloader) / 2) == 0) and (
                     (batch_idx + 1) < len(valid_dataloader)
                 ):
-                    print(
+                    logger.debug(
                         "\nHalf-Epoch Average " + mode + " loss : ",
                         total_epoch_valid_loss / (batch_idx + 1),
                     )
@@ -471,7 +473,7 @@ def validate_network(
                             to_print = total_epoch_valid_metric[metric] / (
                                 batch_idx + 1
                             )
-                        print(
+                        logger.debug(
                             "Half-Epoch Average " + mode + " " + metric + " : ",
                             to_print,
                         )
