@@ -9,6 +9,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils import get_git_hash
 from GANDLF.utils import gandlf_logger_setup
 
+
 def _debug_info():
     print(f"GANDLF version: {__version__}")
     print(f"Git hash: {get_git_hash()}")
