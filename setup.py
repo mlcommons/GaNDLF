@@ -80,7 +80,7 @@ requirements = [
     "deprecated",
     "packaging==24.0",
     "typer==0.9.0",
-    "huggingface-hub==0.23.4"
+    "huggingface-hub==0.23.4",
 ]
 
 if __name__ == "__main__":
