@@ -3,7 +3,7 @@ import logging
 import click
 from .subcommands import cli_subcommands
 from GANDLF.entrypoints import append_copyright_to_help
-
+from GANDLF.utils import gandlf_logger_setup
 from GANDLF import version
 
 
@@ -22,6 +22,7 @@ def setup_logging(loglevel):
 @append_copyright_to_help
 def gandlf(ctx, loglevel):
     """GANDLF command-line tool."""
+    logger = gandlf_logger_setup(__name__)
     ctx.ensure_object(dict)
     ctx.obj["LOGLEVEL"] = loglevel
     setup_logging(loglevel)
