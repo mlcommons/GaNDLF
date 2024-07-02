@@ -5,7 +5,9 @@ from pathlib import Path
 from importlib import resources
 
 
-def gandlf_logger_setup(logger_name,config_path = "logging_config.yaml") -> logging.Logger:
+def gandlf_logger_setup(
+    logger_name, config_path="logging_config.yaml"
+) -> logging.Logger:
     """
     It sets up the logger. Read from logging_config.
     Args:
@@ -14,10 +16,6 @@ def gandlf_logger_setup(logger_name,config_path = "logging_config.yaml") -> logg
     Returns:
         logging.Logger
     """
-
-    # if config_path == None:
-    #     config_dir = Path.cwd()
-    #     config_path = Path.joinpath(config_dir, "GANDLF/config_gandlf_logger.yaml")
 
     # create dir for storing the messages
     current_dir = Path.cwd()
