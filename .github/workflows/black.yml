@@ -15,7 +15,8 @@ jobs:
         run: |
           echo "BLACK_VERSION=$(python -c 'from setup import black_version; print(black_version)')" >> $GITHUB_ENV
 
-      - uses: psf/black@stable
+      # ensure conformity with https://github.com/mlcommons/GaNDLF/blob/master/setup.py#L77
+      - uses: psf/black@23.11.0
         with:
           version: ${{ env.BLACK_VERSION }}
 

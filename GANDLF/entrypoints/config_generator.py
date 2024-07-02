@@ -35,7 +35,7 @@ def _generate_config(config: str, strategy: str, output: str):
 )
 @append_copyright_to_help
 def new_way(config, strategy, output):
-    """ "Generate multiple GaNDLF configurations based on a single baseline GaNDLF for experimentation."""
+    """Generate multiple GaNDLF configurations based on a single baseline GaNDLF for experimentation."""
     _generate_config(config, strategy, output)
 
 

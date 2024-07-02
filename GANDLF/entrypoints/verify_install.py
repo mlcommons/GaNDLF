@@ -31,7 +31,7 @@ def _verify_install():
 @click.command()
 @append_copyright_to_help
 def new_way():
-    """ "Verify GaNDLF installation."""
+    """Verify GaNDLF installation."""
     _verify_install()
 
 
