@@ -13,6 +13,8 @@
   <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/Code%20Style-black-000000.svg"></a>
 </p>
 
+**IMPORTANT NOTE**: You are looking at the branch with the older API invokation. Please switch the `master` to get the new functionality.
+
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework for segmentation, regression and classification.
 
 <p align="center">
