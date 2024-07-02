@@ -7,7 +7,7 @@ import click
 from GANDLF import __version__
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils import get_git_hash
-
+from GANDLF.utils import gandlf_logger_setup
 
 def _debug_info():
     print(f"GANDLF version: {__version__}")
@@ -38,6 +38,7 @@ def new_way():
 )
 def old_way():
     _debug_info()
+    gandlf_logger_setup()
 
 
 if __name__ == "__main__":

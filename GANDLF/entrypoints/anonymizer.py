@@ -12,6 +12,7 @@ from deprecated import deprecated
 from GANDLF.anonymize import run_anonymizer
 from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils.gandlf_logger import gandlf_logger_setup
 
 
 def _anonymize_images(
@@ -77,6 +78,7 @@ def new_way(input_dir, config, modality, output_file):
     + "`gandlf_anonymizer` script would be deprecated soon."
 )
 def old_way():
+    gandlf_logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_Anonymize",
         formatter_class=argparse.RawTextHelpFormatter,

@@ -1,7 +1,7 @@
 import os
 import pathlib
 from typing import Optional, Tuple
-
+import logging
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
@@ -22,6 +22,7 @@ from GANDLF.utils import (
 )
 from GANDLF.metrics import overall_stats
 from tqdm import tqdm
+from GANDLF.utils import gandlf_logger_setup
 
 
 def validate_network(
@@ -116,7 +117,7 @@ def validate_network(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
         if params["verbose"]:
-            print("== Current subject:", subject["subject_id"], flush=True)
+           logging.debug(f'== Current subject: {subject["subject_id"]}')
 
         # ensure spacing is always present in params and is always subject-specific
         params["subject_spacing"] = None

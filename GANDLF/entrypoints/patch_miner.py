@@ -10,6 +10,7 @@ import click
 from GANDLF.cli.patch_extraction import patch_extraction
 from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils.gandlf_logger import gandlf_logger_setup
 
 
 def _mine_patches(input_path: str, output_dir: str, config: Optional[str]):
@@ -55,6 +56,7 @@ def new_way(input_csv: str, output_dir: str, config: Optional[str]):
     + "`gandlf_patchMiner` script would be deprecated soon."
 )
 def old_way():
+    gandlf_logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_PatchMiner",
         formatter_class=argparse.RawTextHelpFormatter,

@@ -14,6 +14,7 @@ import click
 from GANDLF import version
 from GANDLF.cli import main_run, copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils.gandlf_logger import gandlf_logger_setup
 
 
 def _run(
@@ -184,6 +185,7 @@ def new_way(
     + "`gandlf_run` script would be deprecated soon."
 )
 def old_way():
+    gandlf_logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF",
         formatter_class=argparse.RawTextHelpFormatter,

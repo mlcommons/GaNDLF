@@ -9,6 +9,7 @@ from deprecated import deprecated
 
 from GANDLF.cli import copyrightMessage, recover_config
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils.gandlf_logger import gandlf_logger_setup
 
 
 def _recover_config(model_dir: Optional[str], mlcube: bool, output_file: str):
@@ -63,6 +64,7 @@ def new_way(model_dir, mlcube, output_file):
     + "`gandlf_recoverConfig` script would be deprecated soon."
 )
 def old_way():
+    gandlf_logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_RecoverConfig",
         formatter_class=argparse.RawTextHelpFormatter,

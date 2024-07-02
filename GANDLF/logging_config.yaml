@@ -2,6 +2,8 @@ version: 1
 formatters:
   detailed:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  detailed1:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s"
 filters:
   warnings_filter:
     (): logging.Filter
@@ -12,20 +14,20 @@ handlers:
   stdoutHandler: # only display info level
     class: logging.StreamHandler
     level: INFO
-    formatter: detailed
+    formatter: detailed1
     filters: [info_only_filter]
     stream: ext://sys.stdout
   stderrHandler: # display warning and above messages
     class: logging.StreamHandler
     level: WARNING
-    formatter: detailed
+    formatter: detailed1
     stream: ext://sys.stderr
   rotatingFileHandler:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
-    formatter: detailed
+    formatter: detailed1
     filename: tmp/gandlf/gandlf.log
-    maxBytes: 51200
+    maxBytes: 10485760
     backupCount: 2
 loggers: # you can add your customized logger
   debug_logger:

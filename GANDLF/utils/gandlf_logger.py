@@ -6,7 +6,7 @@ from importlib import resources
 
 
 def gandlf_logger_setup(
-    logger_name, config_path="logging_config.yaml"
+     config_path="logging_config.yaml"
 ) -> logging.Logger:
     """
     It sets up the logger. Read from logging_config.
@@ -22,13 +22,14 @@ def gandlf_logger_setup(
     directory = Path.joinpath(current_dir, "tmp/gandlf")
     directory.mkdir(parents=True, exist_ok=True)
 
+
     with resources.open_text("GANDLF", config_path) as file:
         config_dict = yaml.safe_load(file)
         logging.config.dictConfig(config_dict)
 
     logging.captureWarnings(True)
 
-    return logging.getLogger(logger_name)
+    # return logging.getLogger(logger_name)
 
 
 class InfoOnlyFilter(logging.Filter):

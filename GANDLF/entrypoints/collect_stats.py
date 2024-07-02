@@ -14,6 +14,7 @@ from deprecated import deprecated
 
 from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils import gandlf_logger_setup
 
 
 def plot_all(df_training, df_validation, df_testing, output_plot_dir):
@@ -205,6 +206,7 @@ def new_way(model_dir: str, output_dir: str):
     + "`gandlf_collectStats` script would be deprecated soon."
 )
 def old_way():
+    gandlf_logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_CollectStats",
         formatter_class=argparse.RawTextHelpFormatter,
