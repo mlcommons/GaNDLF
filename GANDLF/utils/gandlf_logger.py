@@ -1,5 +1,4 @@
 import logging
-from logging import config
 import yaml
 from pathlib import Path
 from importlib import resources
