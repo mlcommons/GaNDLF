@@ -3161,7 +3161,7 @@ def test_generic_data_split():
     print("passed")
 
 
-def test_gandlf_logging(capsys):
+def test_generic_logging(capsys):
     print("52: Starting test for logging")
 
     gandlf_logger_setup()
