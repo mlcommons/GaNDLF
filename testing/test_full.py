@@ -241,8 +241,6 @@ def write_temp_config_path(parameters_to_write):
 
 
 # these are helper functions to be used in other tests
-
-
 def test_train_segmentation_rad_2d(device):
     print("03: Starting 2D Rad segmentation tests")
     # read and parse csv
@@ -3163,16 +3161,47 @@ def test_generic_data_split():
     print("passed")
 
 
-def test_gandlf_logging():
+def test_gandlf_logging(capsys):
     print("52: Starting test for logging")
 
     gandlf_logger_setup()
     message = "Testing logging"
 
-    logging.info(message)
+    logging.debug(message)
 
+    # tests if the message is in the file.log
     with open("tmp/gandlf/gandlf.log", "r") as log_file:
         logs = log_file.read()
         assert message in logs
 
+    # test the stout info level. The stout must show only INFO messages
+    message = "Testing stout logging"
+    logging.info(message)
+    capture = capsys.readouterr()
+    assert message in capture.out
+
+    # Test the stout not showing other messages
+    message = "Testing stout logging"
+    logging.debug(message)
+    logging.warning(message)
+    logging.error(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message not in capture.out
+
+    # test sterr must NOT show these messages.
+    message = "Testing sterr logging"
+    logging.info(message)
+    logging.debug(message)
+    capture = capsys.readouterr()
+    assert message not in capture.err
+
+    # test sterr must show these messages.
+    logging.error(message)
+    logging.warning(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message in capture.err
+
+    sanitize_outputDir()
     print("passed")
