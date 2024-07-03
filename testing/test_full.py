@@ -3,6 +3,7 @@ import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
+import logging
 
 from pydicom.data import get_testdata_file
 import cv2
@@ -3160,3 +3161,22 @@ def test_generic_data_split():
     sanitize_outputDir()
 
     print("passed")
+
+def test_gandlf_logging():
+    print("52: Starting test for logging")
+    
+    gandlf_logger_setup()
+    message = "Testing logging"
+
+    logging.info(message)
+
+    with open('tmp/gandlf/gandlf.log', 'r') as log_file:
+        logs = log_file.read()
+        assert message in logs
+    
+    print("passed")
+
+
+
+
+
