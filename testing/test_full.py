@@ -3162,21 +3162,17 @@ def test_generic_data_split():
 
     print("passed")
 
+
 def test_gandlf_logging():
     print("52: Starting test for logging")
-    
+
     gandlf_logger_setup()
     message = "Testing logging"
 
     logging.info(message)
 
-    with open('tmp/gandlf/gandlf.log', 'r') as log_file:
+    with open("tmp/gandlf/gandlf.log", "r") as log_file:
         logs = log_file.read()
         assert message in logs
-    
+
     print("passed")
-
-
-
-
-
