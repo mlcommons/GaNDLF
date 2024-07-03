@@ -24,7 +24,6 @@ from GANDLF.metrics import overall_stats
 from tqdm import tqdm
 
 
-
 def validate_network(
     model: torch.nn.Module,
     valid_dataloader: DataLoader,
