@@ -1,9 +1,11 @@
 version: 1
 formatters:
   detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  simple:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  detailed1:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
 filters:
   warnings_filter:
     (): logging.Filter
@@ -14,18 +16,18 @@ handlers:
   stdoutHandler: # only display info level
     class: logging.StreamHandler
     level: INFO
-    formatter: detailed1
+    formatter: simple
     filters: [info_only_filter]
     stream: ext://sys.stdout
   stderrHandler: # display warning and above messages
     class: logging.StreamHandler
     level: WARNING
-    formatter: detailed1
+    formatter: detailed
     stream: ext://sys.stderr
   rotatingFileHandler:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
-    formatter: detailed1
+    formatter: detailed
     filename: tmp/gandlf/gandlf.log
     maxBytes: 10485760
     backupCount: 2
