@@ -132,4 +132,40 @@ bash
 # continue from previous shell
 (venv_gandlf) $> coverage run -m pytest --device cuda; coverage report -m
 ```
+## Logging
+
+### Use loggers instead of print
+We use the native `logging` [library](https://docs.python.org/3/library/logging.html) for logs management.
+It is already configured. So, If you are extending the code, please use loggers instead of prints.
+
+Here is an example how logger can be used:
+
+```
+def my_new_cool_function(df: pd.DataFrame):
+    logger = logging.getLogger(__name__)  # you can use any your own logger name or just pass a current file name
+    logger.debug("Message for debug file only")
+    logger.info("Hi GaNDLF user, I greet you in the CLI output")
+    logger.error(f"A detailed message about any error if needed. Exception: {str(e)}, params: {params}, df shape: {df.shape}")
+    # print("Hi GaNDLF user!")  # don't use prints please.
+```
+
+### What and where is logged
+
+GaNDLF logs are splitted into multiple parts:
+- CLI output: only `info` messages are shown here
+- debug file: all messages are shown 
+- stderr: display `warning,error,critical` messages
+
+All the logs are saved in the `tmp/gandlf` directory
+
+Example of log message
+```
+#format: "%(asctime)s - %(name)s - %(levelname)s - %(pathname)s:%(lineno)d - %(message)s"
+2024-07-03 13:05:51,642 - root - DEBUG - GaNDLF/GANDLF/entrypoints/anonymizer.py:28 - input_dir='.'
+```
+
+### Create your own logger
+You can create and configure your own logger in the `GANDLF\logging_config.yaml`.
+
+
 
