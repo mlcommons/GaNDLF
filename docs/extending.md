@@ -153,7 +153,7 @@ def my_new_cool_function(df: pd.DataFrame):
 GaNDLF logs are splitted into multiple parts:
 - CLI output: only `info` messages are shown here
 - debug file: all messages are shown 
-- stderr: display `warning,error,critical` messages
+- stderr: display `warning`, `error`, or `critical` messages
 
 All the logs are saved in the `tmp/gandlf` directory
 
