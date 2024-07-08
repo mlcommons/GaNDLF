@@ -164,7 +164,7 @@ Example of log message
 ```
 
 ### Create your own logger
-You can create and configure your own logger in the `GANDLF\logging_config.yaml`.
+You can create and configure your own logger by updating the file `GANDLF/logging_config.yaml`.
 
 
 
