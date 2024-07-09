@@ -57,6 +57,6 @@ class DownsamplingModule(nn.Module):
         Returns:
             torch.Tensor: The output tensor, of shape (batch_size, output_channels, height // 2, width // 2).
         """
-        x = self.act(self.in_0(self.conv0(x)))
+        x = self.conv0(self.act(self.in_0(x)))
 
         return x
