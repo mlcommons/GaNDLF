@@ -49,7 +49,7 @@ class DownsamplingModule(nn.Module):
         """
         Applies a downsampling operation to the input tensor.
 
-        [input -- > in --> lrelu --> ConvDS --> output]
+        [input --> in --> lrelu --> ConvDS --> output]
 
         Args:
         x (torch.Tensor): Input tensor of shape (batch_size, channels, height, width)
