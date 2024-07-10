@@ -782,7 +782,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     # file_config_temp = write_temp_config_path(parameters_temp)
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization(model_path, config_path, outputDir)
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
