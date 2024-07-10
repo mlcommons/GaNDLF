@@ -32,7 +32,7 @@ def post_training_model_optimization(
     )
 
     output_dir = os.path.dirname(model_path) if output_dir is None else output_dir
-    Path.mkdir(output_dir, parents=True, exist_ok=True)
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
     optimized_model_path = os.path.join(
         output_dir, os.path.basename(model_path).replace("pth.tar", "onnx")
     )
