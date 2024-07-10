@@ -620,9 +620,7 @@ def _parseConfig(
             params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
-                params["model"]["class_list"] = ast.literal_eval(
-                    params["model"]["class_list"]
-                )
+                params["model"]["class_list"] = eval(params["model"]["class_list"])
             except AssertionError:
                 raise AssertionError("Could not evaluate the 'class_list' in 'model'")
 
