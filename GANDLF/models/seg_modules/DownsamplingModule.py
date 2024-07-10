@@ -39,7 +39,7 @@ class DownsamplingModule(nn.Module):
         if act_kwargs is None:
             act_kwargs = {"negative_slope": 1e-2, "inplace": True}
 
-        self.in_0 = norm(output_channels, **norm_kwargs)
+        self.in_0 = norm(input_channels, **norm_kwargs)
 
         self.conv0 = conv(input_channels, output_channels, **conv_kwargs)
 
