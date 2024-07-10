@@ -1,5 +1,5 @@
 import sys
-import yaml
+import json
 from typing import Optional
 from pprint import pprint
 import pandas as pd
@@ -339,5 +339,8 @@ def generate_metrics_dict(
 
     pprint(overall_stats_dict)
     if outputfile is not None:
-        with open(outputfile, "w") as outfile:
-            yaml.dump(overall_stats_dict, outfile)
+        ## todo: needs debugging since this writes the file handler in some cases, so replaced with json
+        # with open(outputfile, "w") as outfile:
+        #     yaml.dump(overall_stats_dict, outfile)
+        with open(outputfile, "w") as file:
+            file.write(json.dumps(overall_stats_dict))
