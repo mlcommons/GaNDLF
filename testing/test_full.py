@@ -3115,11 +3115,13 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             # # comma-separated input
             temp_infer_csv_gt = os.path.join(outputDir, "temp_csv_gt.csv")
             temp_infer_csv_pred = os.path.join(outputDir, "temp_csv_pred.csv")
-            target_data = training_data.copy()
-            target_data.drop("prediction", axis=1, inplace=True)
+
+            # create target_data from training_data using just subjectid and target columns
+            target_data = training_data[["SubjectID", "target"]].copy()
             target_data.to_csv(temp_infer_csv_gt, index=False)
-            prediction_data = training_data.copy()
-            prediction_data.drop("target", axis=1, inplace=True)
+
+            # create prediction_data from training_data using just subjectid and prediction columns
+            prediction_data = training_data[["SubjectID", "prediction"]].copy()
             prediction_data.to_csv(temp_infer_csv_pred, index=False)
             # run the metrics calculation
             output_file = os.path.join(outputDir, "output_comma-separated-csv.json")
