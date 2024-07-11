@@ -36,6 +36,7 @@ test_cases = [
             "model_path": "model.pth.tar",
             "config_path": "config.yaml",
             "output_dir": "output/",
+            "output_path": "output/",
         },
     ),
     CliCase(
@@ -54,6 +55,7 @@ test_cases = [
             "model_path": "model.pth.tar",
             "config_path": "config.yaml",
             "output_dir": None,
+            "output_path": None,
         },
     ),
     CliCase(
