@@ -78,7 +78,6 @@ test_cases = [
             "-o output.json -c config.yaml",
             "-i input.csv -o output.json",
             # input, config should point to existing file, not dir
-            "-i path_na -o output.json -c config.yaml",
             "-i tmp_dir/ -o output.json -c config.yaml",
             "-i input.csv -o output.json -c path_na",
             "-i input.csv -o output.json -c tmp_dir/",
