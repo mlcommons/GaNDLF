@@ -35,7 +35,7 @@ def _generate_metrics(input_data: str, config: str, output_file: Optional[str]):
     "--input-data",
     "-i",
     required=True,
-    # type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    type=str,
     help="The CSV file of input data that is used to generate the metrics; "
     "should contain 3 columns: 'SubjectID,Target,Prediction'",
 )
