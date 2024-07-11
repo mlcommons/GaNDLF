@@ -295,16 +295,17 @@ def generate_metrics_dict(
             )  # normalizes values to [0;1]
             return output_tensor
 
+        input_df = __update_header_location_case_insensitive(input_df, "Mask")
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row["SubjectID"]
             overall_stats_dict[current_subject_id] = {}
             target_image = __fix_2d_tensor(torchio.ScalarImage(row["Target"]).data)
             pred_image = __fix_2d_tensor(torchio.ScalarImage(row["Prediction"]).data)
-            # if "mask" is not in the row, we assume that the whole image is the mask
+            # if "Mask" is not in the row, we assume that the whole image is the mask
             # always cast to byte tensor
             mask = (
-                __fix_2d_tensor(torchio.LabelMap(row[headers["mask"]]).data)
-                if "mask" in row
+                __fix_2d_tensor(torchio.LabelMap(row["Mask"]).data)
+                if "Mask" in row
                 else torch.from_numpy(
                     np.ones(target_image.numpy().shape, dtype=np.uint8)
                 )
