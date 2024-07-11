@@ -31,29 +31,34 @@ from GANDLF.metrics.segmentation import (
 )
 
 
-def __update_header_location_case_insensitive(df, expected_column_name) -> pd.DataFrame:
+def __update_header_location_case_insensitive(
+    input_df: pd.DataFrame, expected_column_name: str, required: bool = True
+) -> pd.DataFrame:
     """
     This function checks for a column in the dataframe in a case-insensitive manner and renames it.
 
     Args:
-        df (pd.DataFrame): The input dataframe.
+        input_df (pd.DataFrame): The input dataframe.
         expected_column_name (str): The expected column name.
+        required (bool, optional): Whether the column is required. Defaults to True.
 
     Returns:
         pd.DataFrame: The updated dataframe.
     """
     actual_column_name = None
-    for col in df.columns:
+    for col in input_df.columns:
         if col.lower() == expected_column_name.lower():
             actual_column_name = col
             break
 
-    assert (
-        actual_column_name is not None
-    ), f"Column {expected_column_name} not found in the dataframe"
+    if required:
+        assert (
+            actual_column_name is not None
+        ), f"Column {expected_column_name} not found in the dataframe"
 
-    df_updated = df.rename(columns={actual_column_name: expected_column_name})
-    return df_updated
+        return input_df.rename(columns={actual_column_name: expected_column_name})
+    else:
+        return input_df
 
 
 def generate_metrics_dict(
@@ -295,7 +300,7 @@ def generate_metrics_dict(
             )  # normalizes values to [0;1]
             return output_tensor
 
-        input_df = __update_header_location_case_insensitive(input_df, "Mask")
+        input_df = __update_header_location_case_insensitive(input_df, "Mask", False)
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row["SubjectID"]
             overall_stats_dict[current_subject_id] = {}
