@@ -35,7 +35,7 @@ test_cases = [
         expected_args={
             "model_path": "model.pth.tar",
             "config_path": "config.yaml",
-            "output_path": "output/",
+            "output_dir": "output/",
         },
     ),
     CliCase(
@@ -53,7 +53,7 @@ test_cases = [
         expected_args={
             "model_path": "model.pth.tar",
             "config_path": "config.yaml",
-            "output_path": None,
+            "output_dir": None,
         },
     ),
     CliCase(
@@ -63,7 +63,12 @@ test_cases = [
             "-m model.pth.tar"
         ],
         old_way_lines=["-m model.pth.tar"],
-        expected_args={"model_path": "model.pth.tar", "config_path": None},
+        expected_args={
+            "model_path": "model.pth.tar",
+            "config_path": None,
+            "output_path": None,
+            "output_dir": None,
+        },
     ),
     CliCase(
         should_succeed=False,
