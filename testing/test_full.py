@@ -3074,11 +3074,6 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 labels_array = training_data["Channel_0"]
             else:
                 labels_array = training_data["ValueToPredict"]
-            training_data["target"] = labels_array
-            training_data["prediction"] = labels_array
-            if synthesis_detected:
-                # this optional
-                training_data["mask"] = training_data["Label"]
 
             # read and initialize parameters for specific data dimension
             parameters = ConfigManager(
@@ -3096,17 +3091,46 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             if synthesis_detected:
                 parameters["problem_type"] = problem_type
 
-            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
-            training_data.to_csv(temp_infer_csv, index=False)
-
-            output_file = os.path.join(outputDir, "output.yaml")
-
             temp_config = write_temp_config_path(parameters)
 
+            # check both single csv input and comma-separated input
+            # # single csv input
+            training_data["target"] = labels_array
+            training_data["prediction"] = labels_array
+            if synthesis_detected:
+                # this optional
+                training_data["mask"] = training_data["Label"]
+
+            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
+            training_data.to_csv(temp_infer_csv, index=False)
             # run the metrics calculation
+            output_file = os.path.join(outputDir, "output_single-csv.json")
             generate_metrics_dict(temp_infer_csv, temp_config, output_file)
 
-            assert os.path.isfile(output_file), "Metrics output file was not generated"
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated for single-csv input"
+
+            # # comma-separated input
+            temp_infer_csv_gt = os.path.join(outputDir, "temp_csv_gt.csv")
+            temp_infer_csv_pred = os.path.join(outputDir, "temp_csv_pred.csv")
+
+            # create target_data from training_data using just subjectid and target columns
+            target_data = training_data[["SubjectID", "target"]].copy()
+            target_data.to_csv(temp_infer_csv_gt, index=False)
+
+            # create prediction_data from training_data using just subjectid and prediction columns
+            prediction_data = training_data[["SubjectID", "prediction"]].copy()
+            prediction_data.to_csv(temp_infer_csv_pred, index=False)
+            # run the metrics calculation
+            output_file = os.path.join(outputDir, "output_comma-separated-csv.json")
+            generate_metrics_dict(
+                temp_infer_csv_gt + "," + temp_infer_csv_pred, temp_config, output_file
+            )
+
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated for comma-separated input"
 
             sanitize_outputDir()
 
