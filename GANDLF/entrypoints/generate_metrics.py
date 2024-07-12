@@ -51,7 +51,7 @@ def _generate_metrics(
     required=False,
     type=int,
     default=-1,
-    help="The value to use for missing predictions as penalty; if `-1`, this does not get added.",
+    help="The value to use for missing predictions as penalty; if `-1`, this does not get added. This is only used in the case where the targets and predictions are passed independently.",
 )
 @click.option("--raw-input", hidden=True)
 @append_copyright_to_help
