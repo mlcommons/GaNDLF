@@ -120,7 +120,7 @@ def old_way():
         metavar="",
         type=int,
         default=-1,
-        help="The value to use for missing predictions as penalty; if `-1`, this does not get added.",
+        help="The value to use for missing predictions as penalty; if `-1`, this does not get added. This is only used in the case where the targets and predictions are passed independently.",
     )
     parser.add_argument(
         "-v",
