@@ -32,8 +32,8 @@ test_cases = [
             "-i input.csv -o output.json -c config.yaml --raw-input 123321 -m 666",
         ],
         old_way_lines=[
-            "--inputdata input.csv --outputfile output.json --config config.yaml --missing_prediction 666",
-            "--data_path input.csv --output_path output.json --parameters_file config.yaml --missing_prediction 666",
+            "--inputdata input.csv --outputfile output.json --config config.yaml --missingprediction 666",
+            "--data_path input.csv --output_path output.json --parameters_file config.yaml --missingprediction 666",
             "-i input.csv -o output.json -c config.yaml -m 666",
             # --raw-input param exists that do nothing
             "-i input.csv -o output.json -c config.yaml --rawinput 123321 -m 666",
