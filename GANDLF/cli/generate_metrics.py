@@ -62,7 +62,10 @@ def __update_header_location_case_insensitive(
 
 
 def generate_metrics_dict(
-    input_csv: str, config: str, outputfile: Optional[str] = None
+    input_csv: str,
+    config: str,
+    outputfile: Optional[str] = None,
+    missing_prediction: int = -1,
 ) -> dict:
     """
     This function generates metrics from the input csv and the config.
@@ -71,6 +74,7 @@ def generate_metrics_dict(
         input_csv (str): The input CSV.
         config (str): The input yaml config.
         outputfile (str, optional): The output file to save the metrics. Defaults to None.
+        missing_prediction (int, optional): The value to use for missing predictions as penalty. Default is -1.
 
     Returns:
         dict: The metrics dictionary.
@@ -81,31 +85,41 @@ def generate_metrics_dict(
         target_df = pd.read_csv(target_csv)
         prediction_df = pd.read_csv(prediction_csv)
         ## start sanity checks
+        # if missing predictions are not to be penalized, check if the number of rows in the target and prediction files are the same
+        if missing_prediction == -1:
+            assert (
+                target_df.shape[0] == prediction_df.shape[0]
+            ), "The number of rows in the target and prediction files should be the same"
+
         # check if the number of columns in the target and prediction files are the same
         assert (
             target_df.shape[1] == prediction_df.shape[1]
         ), "The number of columns in the target and prediction files should be the same"
         assert (
             target_df.shape[1] == 2
-        ), "The target and prediction files should have exactly 2 columns"
+        ), "The target and prediction files should have *exactly* 2 columns"
 
         # find the correct header for the subjectID column
         target_df = __update_header_location_case_insensitive(target_df, "SubjectID")
         prediction_df = __update_header_location_case_insensitive(
             prediction_df, "SubjectID"
         )
-        # check if the "subjectID" column has duplicates
-        assert (
-            target_df["SubjectID"].duplicated().sum() == 0
-        ), "The `SubjectID` column in the target file should not have duplicates"
-        assert (
-            prediction_df["SubjectID"].duplicated().sum() == 0
-        ), "The `SubjectID` column in the prediction file should not have duplicates"
-
         # check if prediction_df has extra subjectIDs
         assert (
             prediction_df["SubjectID"].isin(target_df["SubjectID"]).all()
         ), "The `SubjectID` column in the prediction file should be a subset of the `SubjectID` column in the target file"
+
+        # individual checks for target and prediction dataframes
+        for df in [target_df, prediction_df]:
+            # check if the "subjectID" column has duplicates
+            assert (
+                df["SubjectID"].duplicated().sum() == 0
+            ), "The `SubjectID` column should not have duplicates"
+
+            # check if SubjectID is the first column
+            assert (
+                df.columns[0] == "SubjectID"
+            ), "The `SubjectID` column should be the first column in the target and prediction files"
 
         # change the column name after subjectID to target and prediction
         target_df = target_df.rename(columns={target_df.columns[1]: "Target"})
@@ -114,7 +128,9 @@ def generate_metrics_dict(
         )
 
         # combine the two dataframes
-        input_df = pd.merge(target_df, prediction_df, on="SubjectID")
+        input_df = target_df.merge(prediction_df, how="left", on="SubjectID").fillna(
+            missing_prediction
+        )
 
     else:
         # the case where the input is a single file with targets and predictions

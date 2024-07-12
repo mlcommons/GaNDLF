@@ -13,13 +13,13 @@ from GANDLF.cli.generate_metrics import generate_metrics_dict
 from GANDLF.entrypoints import append_copyright_to_help
 
 
-def _generate_metrics(input_data: str, config: str, output_file: Optional[str]):
-    try:
-        generate_metrics_dict(input_data, config, output_file)
-    except Exception as e:
-        # TODO: why catch this? why not rely on normal python behavior?
-        sys.exit("ERROR: " + str(e))
-
+def _generate_metrics(
+    input_data: str,
+    config: str,
+    output_file: Optional[str],
+    missing_prediction: int = -1,
+):
+    generate_metrics_dict(input_data, config, output_file, missing_prediction)
     print("Finished.")
 
 
@@ -45,11 +45,30 @@ def _generate_metrics(input_data: str, config: str, output_file: Optional[str]):
     type=click.Path(file_okay=True, dir_okay=False),
     help="Location to save the output dictionary. If not provided, will print to stdout.",
 )
+@click.option(
+    "--missing-prediction",
+    "-m",
+    required=False,
+    type=int,
+    default=-1,
+    help="The value to use for missing predictions as penalty; if `-1`, this does not get added.",
+)
 @click.option("--raw-input", hidden=True)
 @append_copyright_to_help
-def new_way(config: str, input_data: str, output_file: Optional[str], raw_input: str):
+def new_way(
+    config: str,
+    input_data: str,
+    output_file: Optional[str],
+    missing_prediction: int,
+    raw_input: str,
+):
     """Metrics calculator."""
-    _generate_metrics(input_data=input_data, config=config, output_file=output_file)
+    _generate_metrics(
+        input_data=input_data,
+        config=config,
+        output_file=output_file,
+        missing_prediction=missing_prediction,
+    )
 
 
 @deprecated(
@@ -96,6 +115,14 @@ def old_way():
         help="Location to save the output dictionary. If not provided, will print to stdout.",
     )
     parser.add_argument(
+        "-m",
+        "--missingprediction",
+        metavar="",
+        type=int,
+        default=-1,
+        help="The value to use for missing predictions as penalty; if `-1`, this does not get added.",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="version",
@@ -112,7 +139,10 @@ def old_way():
     assert args.inputdata is not None, "Missing required parameter: inputdata"
 
     _generate_metrics(
-        input_data=args.inputdata, config=args.config, output_file=args.outputfile
+        input_data=args.inputdata,
+        config=args.config,
+        output_file=args.outputfile,
+        missing_prediction=args.missingprediction,
     )
 
 
