@@ -35,8 +35,8 @@ test_cases = [
         expected_args={
             "model_path": "model.pth.tar",
             "config_path": "config.yaml",
-            "output_dir": "output/",
-            "output_path": None,
+            "output_path": "output/",
+            "output_dir": None,
         },
     ),
     CliCase(
