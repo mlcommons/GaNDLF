@@ -26,7 +26,10 @@ initial_model_path_end = "_initial.pth.tar"
 
 
 def optimize_and_save_model(
-    model: torch.nn.Module, params: dict, path: str, onnx_export: Optional[bool] = True
+    model: torch.nn.Module,
+    params: dict,
+    output_path: str,
+    onnx_export: Optional[bool] = True,
 ) -> None:
     """
     Perform post-training optimization and save it to a file.
@@ -34,7 +37,7 @@ def optimize_and_save_model(
     Args:
         model (torch.nn.Module): Trained torch model.
         params (dict): The parameter dictionary.
-        path (str): The path to save the model dictionary to.
+        output_path (str): The path to save the optimized model to.
         onnx_export (Optional[bool]): Whether to export to ONNX and OpenVINO. Defaults to True.
     """
     # Check if ONNX export is enabled in the parameter dictionary
@@ -59,9 +62,7 @@ def optimize_and_save_model(
             num_channel = params["model"]["num_channels"]
             model_dimension = params["model"]["dimension"]
             input_shape = params["patch_size"]
-            onnx_path = path
-            if not onnx_path.endswith(".onnx"):
-                onnx_path = onnx_path.replace("pth.tar", "onnx")
+            onnx_path = output_path.replace(".pth.tar", ".onnx")
 
             if model_dimension == 2:
                 dummy_input = torch.randn(
