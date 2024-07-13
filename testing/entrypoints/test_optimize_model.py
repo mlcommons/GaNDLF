@@ -17,8 +17,28 @@ test_file_system = [
     TmpFile("model.pth.tar", content="123321"),
     TmpFile("config.yaml", content="foo: bar"),
     TmpNoEx("path_na"),
+    TmpDire("output/"),
 ]
 test_cases = [
+    CliCase(
+        should_succeed=True,
+        new_way_lines=[
+            # full command with output
+            "--model model.pth.tar --config config.yaml --output-path output/",
+            # tests short arg aliases
+            "-m model.pth.tar -c config.yaml -o output/",
+        ],
+        old_way_lines=[
+            "--model model.pth.tar --config config.yaml --output_path output/",
+            "-m model.pth.tar -c config.yaml -o output/",
+        ],
+        expected_args={
+            "model_path": "model.pth.tar",
+            "config_path": "config.yaml",
+            "output_path": "output/",
+            "output_dir": None,
+        },
+    ),
     CliCase(
         should_succeed=True,
         new_way_lines=[
@@ -31,7 +51,12 @@ test_cases = [
             "--model model.pth.tar --config config.yaml",
             "-m model.pth.tar -c config.yaml",
         ],
-        expected_args={"model_path": "model.pth.tar", "config_path": "config.yaml"},
+        expected_args={
+            "model_path": "model.pth.tar",
+            "config_path": "config.yaml",
+            "output_dir": None,
+            "output_path": None,
+        },
     ),
     CliCase(
         should_succeed=True,
@@ -40,7 +65,12 @@ test_cases = [
             "-m model.pth.tar"
         ],
         old_way_lines=["-m model.pth.tar"],
-        expected_args={"model_path": "model.pth.tar", "config_path": None},
+        expected_args={
+            "model_path": "model.pth.tar",
+            "config_path": None,
+            "output_path": None,
+            "output_dir": None,
+        },
     ),
     CliCase(
         should_succeed=False,
