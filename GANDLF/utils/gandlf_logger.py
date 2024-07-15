@@ -2,7 +2,6 @@ import logging
 import yaml
 from pathlib import Path
 from importlib import resources
-import os
 import colorlog
 
 
