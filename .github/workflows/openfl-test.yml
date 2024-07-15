@@ -100,3 +100,4 @@ jobs:
           config_to_use=$(pwd)/testing/config_segmentation.yaml
           cd openfl
           python -m tests.github.test_gandlf --template gandlf_seg_test --fed_workspace aggregator --col1 one --col2 two --rounds-to-train 1 --gandlf_config $config_to_use
+
