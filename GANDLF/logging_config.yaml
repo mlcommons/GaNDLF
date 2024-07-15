@@ -3,8 +3,15 @@ formatters:
   detailed:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s"
     datefmt: "%Y-%m-%d %H:%M:%S"
+    log_colors:
+      DEBUG: "white"
+      INFO: "green"
+      WARNING: "yellow"
+      ERROR: "red"
+      CRITICAL: "bold_red"
   simple:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    (): colorlog.ColoredFormatter
+    format: "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     datefmt: "%Y-%m-%d %H:%M:%S"
 filters:
   warnings_filter:
@@ -28,7 +35,6 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: detailed
-    filename: tmp/gandlf/gandlf.log
     maxBytes: 10485760
     backupCount: 2
 loggers: # you can add your customized logger

@@ -31,7 +31,7 @@ dockerfiles = [
 ]
 
 # Any extra files should be located at `GANDLF` module folder (not in repo root)
-extra_files = ["logging_config.yml"]
+extra_files = ["logging_config.yaml"]
 toplevel_package_excludes = ["testing*"]
 
 # specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
@@ -80,6 +80,7 @@ requirements = [
     "deprecated",
     "packaging==24.0",
     "typer==0.9.0",
+    "colorlog",
 ]
 
 if __name__ == "__main__":
