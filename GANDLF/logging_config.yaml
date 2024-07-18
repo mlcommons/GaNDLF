@@ -11,7 +11,7 @@ formatters:
       CRITICAL: "bold_red"
   simple:
     (): colorlog.ColoredFormatter
-    format: "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format: "%(log_color)s%(asctime)s - %(levelname)s - %(message)s"
     datefmt: "%Y-%m-%d %H:%M:%S"
 filters:
   warnings_filter:
