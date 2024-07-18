@@ -5,7 +5,7 @@ from importlib import resources
 import colorlog
 
 
-def _flash_to_console():
+def _flush_to_console():
     formatter = colorlog.ColoredFormatter(
         "%(log_color)s%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
