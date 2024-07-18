@@ -56,9 +56,7 @@ def validate_network(
 
     for metric in params["metrics"]:
         if "per_label" in metric:
-            total_epoch_valid_metric[metric] = np.zeros(
-                shape=params["model"]["num_classes"]
-            )
+            total_epoch_valid_metric[metric] = np.zeros(1)
         else:
             total_epoch_valid_metric[metric] = 0
 
@@ -212,7 +210,9 @@ def validate_network(
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
             for metric, metric_val in final_metric.items():
-                total_epoch_valid_metric[metric] += metric_val
+                total_epoch_valid_metric[metric] = (
+                    total_epoch_valid_metric[metric] + metric_val
+                )
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
@@ -429,7 +429,9 @@ def validate_network(
                 # loss.cpu().data.item()
                 total_epoch_valid_loss += final_loss.cpu().item()
                 for metric in final_metric.keys():
-                    total_epoch_valid_metric[metric] += final_metric[metric]
+                    total_epoch_valid_metric[metric] = (
+                        total_epoch_valid_metric[metric] + final_metric[metric]
+                    )
 
         if label_ground_truth is not None:
             if params["verbose"]:
