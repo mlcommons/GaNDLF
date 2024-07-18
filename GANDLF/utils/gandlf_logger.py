@@ -48,8 +48,8 @@ def gandlf_logger_setup(log_file=None, config_path="logging_config.yaml"):
 
     logging.captureWarnings(True)
 
-    if log_file is None:  # flash logs
-        _flash_to_console()
+    if log_file is None:  # flush logs
+        _flush_to_console()
 
     else:  # create the log file
         try:
