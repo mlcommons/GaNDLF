@@ -3,6 +3,8 @@ import yaml
 from pathlib import Path
 from importlib import resources
 import colorlog
+import tempfile
+from GANDLF.utils import get_unique_timestamp
 
 
 def _flush_to_console():
@@ -23,13 +25,21 @@ def _flush_to_console():
     logging.root.addHandler(console_handler)
 
 
+def _create_tmp_log_file():
+    tmp_dir = Path(tempfile.gettempdir())
+    log_dir = Path.joinpath(tmp_dir, ".gandlf")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = Path.joinpath(log_dir, get_unique_timestamp() + ".log")
+    _create_log_file(log_file)
+    return log_file
+
+
 def _create_log_file(log_file):
     log_file = Path(log_file)
     log_file.write_text("Starting GaNDLF logging session \n")
 
 
 def _save_logs_in_file(log_file, config_path):
-    _create_log_file(log_file)
     with resources.open_text("GANDLF", config_path) as file:
         config_dict = yaml.safe_load(file)
         config_dict["handlers"]["rotatingFileHandler"]["filename"] = str(log_file)
@@ -47,16 +57,18 @@ def gandlf_logger_setup(log_file=None, config_path="logging_config.yaml"):
     """
 
     logging.captureWarnings(True)
-
-    if log_file is None:  # flush logs
-        _flush_to_console()
-
-    else:  # create the log file
-        try:
+    try:
+        if log_file is None:  # create tmp file
+            log_tmp_file = _create_tmp_log_file()
+            _save_logs_in_file(log_tmp_file, config_path)
+            logging.info(f"The logs are saved in {log_tmp_file}")
+        else:  # create the log file
+            _create_log_file(log_file)
             _save_logs_in_file(log_file, config_path)
-        except Exception as e:
-            logging.error(f"log_file:{e}")
-            logging.warning("The logs will be flushed to console")
+    except Exception as e:
+        _flush_to_console()
+        logging.error(f"log_file:{e}")
+        logging.warning("The logs will be flushed to console")
 
 
 class InfoOnlyFilter(logging.Filter):
