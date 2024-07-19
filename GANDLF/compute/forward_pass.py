@@ -1,7 +1,7 @@
 import os
 import pathlib
-from typing import Optional, Tuple
-import logging
+from typing import Optional, Tuple, Union
+
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
@@ -51,12 +51,12 @@ def validate_network(
     print("*" * 20)
     # Initialize a few things
     total_epoch_valid_loss = 0
-    total_epoch_valid_metric = {}
+    total_epoch_valid_metric: dict[str, Union[float, np.array]] = {}
     average_epoch_valid_metric = {}
 
     for metric in params["metrics"]:
         if "per_label" in metric:
-            total_epoch_valid_metric[metric] = []
+            total_epoch_valid_metric[metric] = np.zeros(1)
         else:
             total_epoch_valid_metric[metric] = 0
 
@@ -64,8 +64,7 @@ def validate_network(
     subject_id_list = []
     is_classification = params.get("problem_type") == "classification"
     calculate_overall_metrics = (
-        (params["problem_type"] == "classification")
-        or (params["problem_type"] == "regression")
+        params["problem_type"] in {"classification", "regression"}
     ) and mode == "validation"
     is_inference = mode == "inference"
 
@@ -107,10 +106,8 @@ def validate_network(
 
     # get ground truths for classification problem, validation set
     if calculate_overall_metrics:
-        (
-            ground_truth_array,
-            predictions_array,
-        ) = get_ground_truths_and_predictions_tensor(params, "validation_data")
+        ground_truth_array = []
+        predictions_array = []
 
     for batch_idx, (subject) in enumerate(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
@@ -193,6 +190,7 @@ def validate_network(
 
             if params["save_output"] or is_inference:
                 # we divide by scaling factor here because we multiply by it during loss/metric calculation
+                # TODO: regression-only, right?
                 outputToWrite += (
                     str(epoch)
                     + ","
@@ -206,23 +204,15 @@ def validate_network(
             )
 
             if calculate_overall_metrics:
-                predictions_array[batch_idx] = (
-                    torch.argmax(pred_output[0], 0).cpu().item()
-                )
+                ground_truth_array.append(label_ground_truth.item())
+                # TODO: that's for classification only. What about regression?
+                predictions_array.append(torch.argmax(pred_output[0], 0).cpu().item())
             # # Non network validation related
             total_epoch_valid_loss += final_loss.detach().cpu().item()
-            for metric in final_metric.keys():
-                if isinstance(total_epoch_valid_metric[metric], list):
-                    if len(total_epoch_valid_metric[metric]) == 0:
-                        total_epoch_valid_metric[metric] = np.array(
-                            final_metric[metric]
-                        )
-                    else:
-                        total_epoch_valid_metric[metric] += np.array(
-                            final_metric[metric]
-                        )
-                else:
-                    total_epoch_valid_metric[metric] += final_metric[metric]
+            for metric, metric_val in final_metric.items():
+                total_epoch_valid_metric[metric] = (
+                    total_epoch_valid_metric[metric] + metric_val
+                )
 
         else:  # for segmentation problems OR regression/classification when no label is present
             grid_sampler = torchio.inference.GridSampler(
@@ -315,8 +305,7 @@ def validate_network(
 
             # save outputs
             if params["problem_type"] == "segmentation":
-                output_prediction = aggregator.get_output_tensor()
-                output_prediction = output_prediction.unsqueeze(0)
+                output_prediction = aggregator.get_output_tensor().unsqueeze(0)
                 if params["save_output"]:
                     img_for_metadata = torchio.ScalarImage(
                         tensor=subject["1"]["data"].squeeze(0),
@@ -386,16 +375,18 @@ def validate_network(
                 # final regression output
                 output_prediction = output_prediction / len(patch_loader)
                 if calculate_overall_metrics:
-                    predictions_array[batch_idx] = (
+                    # TOD: what? regression and argmax?
+                    predictions_array.append(
                         torch.argmax(output_prediction[0], 0).cpu().item()
                     )
+                    ground_truth_array.append(label_ground_truth.item())
                 if params["save_output"]:
                     outputToWrite += (
                         str(epoch)
                         + ","
                         + subject["subject_id"][0]
                         + ","
-                        + str(output_prediction)
+                        + str(output_prediction[0])
                         + "\n"
                     )
 
@@ -407,7 +398,6 @@ def validate_network(
                         n.squeeze(), raw_input=image[i].squeeze(-1)
                     )
 
-            output_prediction = output_prediction.squeeze(-1)
             if is_inference and is_classification:
                 logits_list.append(output_prediction)
                 subject_id_list.append(subject.get("subject_id")[0])
@@ -418,9 +408,8 @@ def validate_network(
                 if label_ground_truth.shape[0] == 3:
                     label_ground_truth = label_ground_truth[0, ...].unsqueeze(0)
                 # we always want the ground truth to be in the same format as the prediction
+                # add batch dim
                 label_ground_truth = label_ground_truth.unsqueeze(0)
-                if label_ground_truth.shape[-1] == 1:
-                    label_ground_truth = label_ground_truth.squeeze(-1)
                 final_loss, final_metric = get_loss_and_metrics(
                     image,
                     label_ground_truth,
@@ -440,17 +429,9 @@ def validate_network(
                 # loss.cpu().data.item()
                 total_epoch_valid_loss += final_loss.cpu().item()
                 for metric in final_metric.keys():
-                    if isinstance(total_epoch_valid_metric[metric], list):
-                        if len(total_epoch_valid_metric[metric]) == 0:
-                            total_epoch_valid_metric[metric] = np.array(
-                                final_metric[metric]
-                            )
-                        else:
-                            total_epoch_valid_metric[metric] += np.array(
-                                final_metric[metric]
-                            )
-                    else:
-                        total_epoch_valid_metric[metric] += final_metric[metric]
+                    total_epoch_valid_metric[metric] = (
+                        total_epoch_valid_metric[metric] + final_metric[metric]
+                    )
 
         if label_ground_truth is not None:
             if params["verbose"]:
@@ -486,7 +467,9 @@ def validate_network(
         # get overall stats for classification
         if calculate_overall_metrics:
             average_epoch_valid_metric = overall_stats(
-                predictions_array, ground_truth_array, params
+                torch.Tensor(predictions_array),
+                torch.Tensor(ground_truth_array),
+                params,
             )
         average_epoch_valid_metric = print_and_format_metrics(
             average_epoch_valid_metric,
