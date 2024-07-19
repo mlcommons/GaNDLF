@@ -2,27 +2,8 @@ import logging
 import yaml
 from pathlib import Path
 from importlib import resources
-import colorlog
 import tempfile
 from GANDLF.utils import get_unique_timestamp
-
-
-def _flush_to_console():
-    formatter = colorlog.ColoredFormatter(
-        "%(log_color)s%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        log_colors={
-            "DEBUG": "blue",
-            "INFO": "green",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "CRITICAL": "bold_red",
-        },
-    )
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logging.root.setLevel(logging.DEBUG)
-    logging.root.addHandler(console_handler)
 
 
 def _create_tmp_log_file():
@@ -30,7 +11,6 @@ def _create_tmp_log_file():
     log_dir = Path.joinpath(tmp_dir, ".gandlf")
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = Path.joinpath(log_dir, get_unique_timestamp() + ".log")
-    _create_log_file(log_file)
     return log_file
 
 
@@ -57,18 +37,12 @@ def gandlf_logger_setup(log_file=None, config_path="logging_config.yaml") -> Non
     """
 
     logging.captureWarnings(True)
-    try:
-        if log_file is None:  # create tmp file
-            log_tmp_file = _create_tmp_log_file()
-            _save_logs_in_file(log_tmp_file, config_path)
-            logging.info(f"The logs are saved in {log_tmp_file}")
-        else:  # create the log file
-            _create_log_file(log_file)
-            _save_logs_in_file(log_file, config_path)
-    except Exception as e:
-        _flush_to_console()
-        logging.error(f"log_file:{e}")
-        logging.warning("The logs will be flushed to console")
+    log_tmp_file = log_file
+    if log_file is None:  # create tmp file
+        log_tmp_file = _create_tmp_log_file()
+        logging.info(f"The logs are saved in {log_tmp_file}")
+    _create_log_file(log_tmp_file)
+    _save_logs_in_file(log_tmp_file, config_path)
 
 
 class InfoOnlyFilter(logging.Filter):
