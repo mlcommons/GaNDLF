@@ -1,5 +1,3 @@
-from typing import Union
-
 import torch
 import torchmetrics as tm
 import torch.nn.functional as F
@@ -9,9 +7,7 @@ from ..utils import get_output_from_calculator
 from GANDLF.utils.generic import determine_classification_task_type
 
 
-def overall_stats(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> dict[str, Union[float, list]]:
+def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> dict:
     """
     Generates a dictionary of metrics calculated on the overall prediction and ground truths.
 
@@ -26,6 +22,26 @@ def overall_stats(
     assert (
         params["problem_type"] == "classification"
     ), "Only classification is supported for these stats"
+
+    def __convert_tensor_to_int(input_tensor: torch.Tensor) -> torch.Tensor:
+        """
+        Convert the input tensor to integer format.
+
+        Args:
+            input_tensor (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The tensor converted to integer format.
+        """
+        return_tensor = input_tensor
+        if return_tensor.dtype != torch.long or return_tensor.dtype != torch.int:
+            return_tensor = return_tensor.long()
+        return return_tensor
+
+    # this is needed for a few metrics
+    # ensure that predictions and target are in integer format
+    prediction_wrap = __convert_tensor_to_int(prediction)
+    target_wrap = __convert_tensor_to_int(target)
 
     # this is needed for auroc
     # ensure that predictions are in integer format
@@ -85,13 +101,12 @@ def overall_stats(
             ),
         }
         for metric_name, calculator in calculators.items():
-            avg_typed_metric_name = f"{metric_name}_{average_type_key}"
             if "auroc" in metric_name:
                 output_metrics[metric_name] = get_output_from_calculator(
-                    predictions_prob, target, calculator
+                    predictions_prob, target_wrap, calculator
                 )
             else:
-                output_metrics[avg_typed_metric_name] = get_output_from_calculator(
+                output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
 
