@@ -521,7 +521,7 @@ def get_ground_truths_and_predictions_tensor(
 
 def get_output_from_calculator(
     prediction: torch.Tensor, target: torch.tensor, calculator: torchmetrics.Metric
-) -> float:
+) -> Union[float, list]:
     """
     Helper function to get the output from a calculator.
 
