@@ -85,6 +85,7 @@ def overall_stats(
             ),
         }
         for metric_name, calculator in calculators.items():
+            avg_typed_metric_name = f"{metric_name}_{average_type_key}"
             if "auroc" in metric_name:
                 output_metrics[metric_name] = get_output_from_calculator(
                     predictions_prob, target, calculator
