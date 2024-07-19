@@ -103,11 +103,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
         for metric_name, calculator in calculators.items():
             if "auroc" in metric_name:
                 output_metrics[metric_name] = get_output_from_calculator(
-                    predictions_prob, target, calculator
-                )
-            elif "precision" in metric_name or "recall" in metric_name:
-                output_metrics[metric_name] = get_output_from_calculator(
-                    prediction_wrap, target_wrap, calculator
+                    predictions_prob, target_wrap, calculator
                 )
             else:
                 output_metrics[metric_name] = get_output_from_calculator(
