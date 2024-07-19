@@ -113,7 +113,7 @@ def validate_network(
         tqdm(valid_dataloader, desc="Looping over " + mode + " data")
     ):
         if params["verbose"]:
-            logging.debug(f'== Current subject: {subject["subject_id"]}')
+            print("== Current subject:", subject["subject_id"], flush=True)
 
         # ensure spacing is always present in params and is always subject-specific
         params["subject_spacing"] = None
