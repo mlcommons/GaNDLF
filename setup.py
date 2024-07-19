@@ -80,6 +80,7 @@ requirements = [
     "deprecated",
     "packaging==24.0",
     "typer==0.9.0",
+    "colorlog",
 ]
 
 if __name__ == "__main__":
