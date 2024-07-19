@@ -1,3 +1,5 @@
+from typing import Union
+
 import torch
 import torchmetrics as tm
 import torch.nn.functional as F
@@ -7,7 +9,9 @@ from ..utils import get_output_from_calculator
 from GANDLF.utils.generic import determine_classification_task_type
 
 
-def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> dict:
+def overall_stats(
+    prediction: torch.Tensor, target: torch.Tensor, params: dict
+) -> dict[str, Union[float, list]]:
     """
     Generates a dictionary of metrics calculated on the overall prediction and ground truths.
 
@@ -86,7 +90,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
                     predictions_prob, target, calculator
                 )
             else:
-                output_metrics[metric_name] = get_output_from_calculator(
+                output_metrics[avg_typed_metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
 
