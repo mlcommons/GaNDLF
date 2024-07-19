@@ -23,6 +23,26 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
         params["problem_type"] == "classification"
     ), "Only classification is supported for these stats"
 
+    def __convert_tensor_to_int(input_tensor: torch.Tensor) -> torch.Tensor:
+        """
+        Convert the input tensor to integer format.
+
+        Args:
+            input_tensor (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The tensor converted to integer format.
+        """
+        return_tensor = input_tensor
+        if return_tensor.dtype != torch.long or return_tensor.dtype != torch.int:
+            return_tensor = return_tensor.long()
+        return return_tensor
+
+    # this is needed for a few metrics
+    # ensure that predictions and target are in integer format
+    prediction_wrap = __convert_tensor_to_int(prediction)
+    target_wrap = __convert_tensor_to_int(target)
+
     # this is needed for auroc
     # ensure that predictions are in integer format
     prediction_wrap = prediction
@@ -84,6 +104,10 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
             if "auroc" in metric_name:
                 output_metrics[metric_name] = get_output_from_calculator(
                     predictions_prob, target, calculator
+                )
+            elif "precision" in metric_name or "recall" in metric_name:
+                output_metrics[metric_name] = get_output_from_calculator(
+                    prediction_wrap, target_wrap, calculator
                 )
             else:
                 output_metrics[metric_name] = get_output_from_calculator(
