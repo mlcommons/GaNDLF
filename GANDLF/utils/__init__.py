@@ -68,4 +68,4 @@ from .modelio import (
 )
 
 from .data_splitter import split_data
-from .gandlf_logger import gandlf_logger_setup, InfoOnlyFilter
+from .gandlf_logging import logger_setup, InfoOnlyFilter

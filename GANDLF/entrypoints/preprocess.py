@@ -8,7 +8,7 @@ import click
 from deprecated import deprecated
 from GANDLF.cli import preprocess_and_save, copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
-from GANDLF.utils.gandlf_logger import gandlf_logger_setup
+from GANDLF.utils import logger_setup
 
 
 def _preprocess(
@@ -111,7 +111,7 @@ def new_way(
     + "`gandlf_preprocess` script would be deprecated soon."
 )
 def old_way():
-    gandlf_logger_setup()
+    logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_Preprocess",
         formatter_class=argparse.RawTextHelpFormatter,

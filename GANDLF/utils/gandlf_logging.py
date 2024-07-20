@@ -26,7 +26,7 @@ def _save_logs_in_file(log_file, config_path):
         logging.config.dictConfig(config_dict)
 
 
-def gandlf_logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
+def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
     """
     It sets up the logger. Reads from logging_config.
 

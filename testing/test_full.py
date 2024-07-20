@@ -3190,7 +3190,7 @@ def test_generic_data_split():
 def test_generic_logging(capsys):
     print("52: Starting test for logging")
     log_file = "testing/gandlf.log"
-    gandlf_logger_setup(log_file)
+    logger_setup(log_file)
     message = "Testing logging"
 
     logging.debug(message)
