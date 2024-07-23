@@ -19,7 +19,7 @@ def _create_log_file(log_file):
     log_file.write_text("Starting GaNDLF logging session \n")
 
 
-def _save_logs_in_file(log_file, config_path):
+def _configure_logging_with_logfile(log_file, config_path):
     with resources.open_text("GANDLF", config_path) as file:
         config_dict = yaml.safe_load(file)
         config_dict["handlers"]["rotatingFileHandler"]["filename"] = str(log_file)
@@ -42,7 +42,7 @@ def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
         log_tmp_file = _create_tmp_log_file()
         logging.info(f"The logs are saved in {log_tmp_file}")
     _create_log_file(log_tmp_file)
-    _save_logs_in_file(log_tmp_file, config_path)
+    _configure_logging_with_logfile(log_tmp_file, config_path)
 
 
 class InfoOnlyFilter(logging.Filter):

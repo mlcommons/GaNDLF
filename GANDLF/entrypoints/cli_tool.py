@@ -7,24 +7,13 @@ from GANDLF.utils import logger_setup
 from GANDLF import version
 
 
-def setup_logging(loglevel):
-    logging.basicConfig(level=loglevel.upper())
-
-
 @click.group()
 @click.version_option(version, "--version", "-v", message="GANDLF Version: %(version)s")
-@click.option(
-    "--loglevel",
-    default="INFO",
-    help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
-)
 @click.pass_context  # Pass the context to subcommands
 @append_copyright_to_help
-def gandlf(ctx, loglevel):
+def gandlf(ctx):
     """GANDLF command-line tool."""
     ctx.ensure_object(dict)
-    ctx.obj["LOGLEVEL"] = loglevel
-    # setup_logging(loglevel)
     logger_setup()
 
 
