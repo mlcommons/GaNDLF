@@ -1,5 +1,3 @@
-import logging
-
 import click
 from .subcommands import cli_subcommands
 from GANDLF.entrypoints import append_copyright_to_help
