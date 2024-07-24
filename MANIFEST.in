@@ -4,3 +4,4 @@ exclude *.toml
 include setup.py
 include .dockerignore
 include Dockerfile-*
+include logging_config.yml

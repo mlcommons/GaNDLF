@@ -10,6 +10,7 @@ from GANDLF import version
 from GANDLF.cli import copyrightMessage
 from GANDLF.cli.generate_metrics import generate_metrics_dict
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils import logger_setup
 
 
 def _generate_metrics(
@@ -81,6 +82,7 @@ def new_way(
     + "`gandlf_generateMetrics` script would be deprecated soon."
 )
 def old_way():
+    logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_Metrics",
         formatter_class=argparse.RawTextHelpFormatter,

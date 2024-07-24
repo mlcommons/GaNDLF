@@ -12,6 +12,7 @@ from deprecated.classic import deprecated
 
 from GANDLF.cli import copyrightMessage, split_data_and_save_csvs
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils import logger_setup
 
 
 def _split_csv(input_csv: str, output_dir: str, config_path: Optional[str]):
@@ -64,6 +65,7 @@ def new_way(input_csv: str, output_dir: str, config: Optional[str]):
     + "`gandlf_splitCSV` script would be deprecated soon."
 )
 def old_way():
+    logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_SplitCSV",
         formatter_class=argparse.RawTextHelpFormatter,

@@ -3,6 +3,7 @@ import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
+import logging
 
 from pydicom.data import get_testdata_file
 import cv2
@@ -240,8 +241,6 @@ def write_temp_config_path(parameters_to_write):
 
 
 # these are helper functions to be used in other tests
-
-
 def test_train_segmentation_rad_2d(device):
     print("03: Starting 2D Rad segmentation tests")
     # read and parse csv
@@ -3185,4 +3184,52 @@ def test_generic_data_split():
 
     sanitize_outputDir()
 
+    print("passed")
+
+
+def test_generic_logging(capsys):
+    print("52: Starting test for logging")
+    log_file = "testing/gandlf.log"
+    logger_setup(log_file)
+    message = "Testing logging"
+
+    logging.debug(message)
+
+    # tests if the message is in the file.log
+    with open(log_file, "r") as file:
+        logs = file.read()
+        assert message in logs
+
+    os.remove(log_file)
+
+    # test the stout info level. The stout must show only INFO messages
+    message = "Testing stout logging"
+    logging.info(message)
+    capture = capsys.readouterr()
+    assert message in capture.out
+
+    # Test the stout not showing other messages
+    message = "Testing stout logging"
+    logging.debug(message)
+    logging.warning(message)
+    logging.error(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message not in capture.out
+
+    # test sterr must NOT show these messages.
+    message = "Testing sterr logging"
+    logging.info(message)
+    logging.debug(message)
+    capture = capsys.readouterr()
+    assert message not in capture.err
+
+    # test sterr must show these messages.
+    logging.error(message)
+    logging.warning(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message in capture.err
+
+    sanitize_outputDir()
     print("passed")
