@@ -6,6 +6,7 @@ import click
 from deprecated import deprecated
 
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils import logger_setup
 
 
 def _verify_install():
@@ -42,6 +43,7 @@ def new_way():
     + "`gandlf_verifyInstall` script would be deprecated soon."
 )
 def old_way():
+    logger_setup()
     argparse.ArgumentParser(
         prog="GANDLF_VerifyInstall",
         formatter_class=argparse.RawTextHelpFormatter,

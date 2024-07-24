@@ -9,6 +9,7 @@ import click
 from GANDLF import __version__
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils import get_git_hash
+from GANDLF.utils import logger_setup
 
 from GANDLF.cli import copyrightMessage
 
@@ -65,6 +66,7 @@ def old_way():
         help="If True, prints all packages installed as well.",
     )
     args = parser.parse_args()
+    logger_setup()
     _debug_info(verbose=args.verbose)
 
 

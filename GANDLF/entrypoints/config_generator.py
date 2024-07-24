@@ -4,6 +4,7 @@ import click
 
 from GANDLF.cli import config_generator, copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
+from GANDLF.utils import logger_setup
 
 
 def _generate_config(config: str, strategy: str, output: str):
@@ -46,6 +47,7 @@ def new_way(config, strategy, output):
     + "`gandlf_configGenerator` script would be deprecated soon."
 )
 def old_way():
+    logger_setup()
     parser = argparse.ArgumentParser(
         prog="GANDLF_ConfigGenerator",
         formatter_class=argparse.RawTextHelpFormatter,
