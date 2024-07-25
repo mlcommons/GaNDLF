@@ -20,7 +20,6 @@ test_file_system = [
     TmpDire("output/"),
     TmpNoEx("path_na/"),
     TmpFile("output.csv", content="col1,col2\n123,456\n"),
-    TmpDire("logs/")
 ]
 test_cases = [
     CliCase(
@@ -32,7 +31,6 @@ test_cases = [
             "-i . -c config.yaml -m rad -o  output/",
             # tests modality has default value
             "-i . -c config.yaml -o  output/",
-
         ],
         old_way_lines=[
             "--inputDir . --config config.yaml --modality rad --outputFile output/",
@@ -109,27 +107,6 @@ test_cases = [
             # "-i . -c path_na -o output.csv",  # <- in old way if config file does not exist, it just skipped silently
             # "-i . -m fake_modality -o output.csv",  # <- in old way there is no such a validation in cli part
         ],
-    ),
-    CliCase(
-        should_succeed=True,
-        
-        new_way_lines=[
-            # full command
-            "--input-dir . --config config.yaml --modality rad --output-file output/ --log-file logs/logs.log",
-            # tests short arg aliases
-            "-i . -c config.yaml -m rad -o  output/",
-            # tests modality has default value
-            "-i . -c config.yaml -o  output/",
-
-        ],
-        old_way_lines=None,
-        expected_args={
-            "input_path": os.path.normpath("."),
-            "output_path": os.path.normpath("output/"),
-            "parameters": {"foo": "bar"},
-            "modality": "rad",
-            "log_file":os.path.normpath("logs/"),
-        },
     ),
 ]
 

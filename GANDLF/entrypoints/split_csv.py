@@ -57,7 +57,7 @@ def _split_csv(input_csv: str, output_dir: str, config_path: Optional[str]):
     help="Output file which will contain the logs.",
 )
 @append_copyright_to_help
-def new_way(input_csv: str, output_dir: str, config: Optional[str], log_file):
+def new_way(input_csv: str, output_dir: str, config: Optional[str], log_file: str):
     """Split the data into training, validation, and testing sets and save them as csvs in the output directory."""
     if log_file is not None:
         logger_setup(log_file)
