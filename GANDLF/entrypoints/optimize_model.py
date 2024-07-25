@@ -46,11 +46,23 @@ def _optimize_model(
     required=False,
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
+@click.option(
+    "--log-file",
+    "-l",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
 def new_way(
-    model: str, config: Optional[str] = None, output_path: Optional[str] = None
+    model: str,
+    log_file: str,
+    config: Optional[str] = None,
+    output_path: Optional[str] = None,
 ):
     """Generate optimized versions of trained GaNDLF models."""
+    if log_file is not None:
+        logger_setup(log_file)
     _optimize_model(model=model, config=config, output_path=output_path)
 
 

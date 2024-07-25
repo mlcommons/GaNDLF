@@ -12,7 +12,7 @@ from deprecated import deprecated
 from GANDLF.anonymize import run_anonymizer
 from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
-from GANDLF.utils.gandlf_logging import logger_setup
+from GANDLF.utils import logger_setup
 
 
 def _anonymize_images(
@@ -63,9 +63,18 @@ def _anonymize_images(
     type=click.Path(),
     help="Output directory or file which will contain the image(s) after anonymization.",
 )
+@click.option(
+    "--log-file",
+    "-l",
+    type=click.Path(),
+    default=None,
+    help="Output  file which will contain the logs after anonymization.",
+)
 @append_copyright_to_help
-def new_way(input_dir, config, modality, output_file):
+def new_way(input_dir, config, modality, output_file, log_file):
     """Anonymize images/scans in the data directory."""
+    if log_file is not None:
+        logger_setup(log_file)
     _anonymize_images(input_dir, output_file, config, modality)
 
 

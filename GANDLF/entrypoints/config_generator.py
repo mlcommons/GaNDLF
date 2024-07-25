@@ -34,9 +34,18 @@ def _generate_config(config: str, strategy: str, output: str):
     type=click.Path(file_okay=False, dir_okay=True),
     help="Path to output directory.",
 )
+@click.option(
+    "--log-file",
+    "-l",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(config, strategy, output):
+def new_way(config, strategy, output, log_file):
     """Generate multiple GaNDLF configurations based on a single baseline GaNDLF for experimentation."""
+    if log_file is not None:
+        logger_setup(log_file)
     _generate_config(config, strategy, output)
 
 

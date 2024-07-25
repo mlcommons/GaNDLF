@@ -54,6 +54,13 @@ def _generate_metrics(
     help="The value to use for missing predictions as penalty; if `-1`, this does not get added. This is only used in the case where the targets and predictions are passed independently.",
 )
 @click.option("--raw-input", hidden=True)
+@click.option(
+    "--log-file",
+    "-l",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
 def new_way(
     config: str,
@@ -61,8 +68,11 @@ def new_way(
     output_file: Optional[str],
     missing_prediction: int,
     raw_input: str,
+    log_file: str,
 ):
     """Metrics calculator."""
+    if log_file is not None:
+        logger_setup(log_file)
     _generate_metrics(
         input_data=input_data,
         config=config,
