@@ -25,6 +25,7 @@ def _run(
     reset_flag: bool,
     resume_flag: bool,
     output_path: Optional[str],
+    profiling: bool
 ):
     if model_dir is None and output_path:
         model_dir = output_path
@@ -72,6 +73,7 @@ def _run(
             resume=resume_flag,
             reset=reset_flag,
             output_dir=output_path,
+            profiling=profiling
         )
     except Exception:
         # TODO: why so? Why not just default way when exception is printed
@@ -144,6 +146,12 @@ def _run(
     type=click.Path(file_okay=False, dir_okay=True),
     help="Location to save the output of the inference session. Not used for training.",
 )
+@click.option(
+    "--profiling",
+    "-pf",
+    is_flag=True,
+    help="Track the runtime & memory usage.",
+)
 @click.option("--raw-input", hidden=True)
 @append_copyright_to_help
 def new_way(
@@ -155,6 +163,7 @@ def new_way(
     reset: bool,
     resume: bool,
     output_path: str,
+    profiling: bool,
     raw_input: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
@@ -167,6 +176,7 @@ def new_way(
         reset_flag=reset,
         resume_flag=resume,
         output_path=output_path,
+        profiling=profiling
     )
 
 

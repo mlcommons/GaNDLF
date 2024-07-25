@@ -19,7 +19,8 @@ def main_run(
     device: str,
     resume: bool,
     reset: bool,
-    output_dir: Optional[str] = None,
+    profiling: bool,
+    output_dir: Optional[str] = None
 ) -> None:
     """
     Main function that runs the training and inference.
@@ -98,6 +99,7 @@ def main_run(
                 device=device,
                 resume=resume,
                 reset=reset,
+                profiling=profiling
             )
     else:
         data_full, headers = parseTrainingCSV(file_data_full, train=train_mode)
