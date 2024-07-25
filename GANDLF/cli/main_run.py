@@ -19,7 +19,7 @@ def main_run(
     device: str,
     resume: bool,
     reset: bool,
-    profiling: bool,
+    profiling: bool = False,
     output_dir: Optional[str] = None,
 ) -> None:
     """
