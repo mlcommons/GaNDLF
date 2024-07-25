@@ -27,7 +27,6 @@ def _debug_info():
 @click.command()
 @click.option(
     "--log-file",
-    "-l",
     type=click.Path(),
     default=None,
     help="Output file which will contain the logs.",

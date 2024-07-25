@@ -44,7 +44,6 @@ def _mine_patches(input_path: str, output_dir: str, config: Optional[str]):
 )
 @click.option(
     "--log-file",
-    "-l",
     type=click.Path(),
     default=None,
     help="Output file which will contain the logs.",

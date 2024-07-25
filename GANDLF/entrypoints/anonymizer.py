@@ -65,10 +65,9 @@ def _anonymize_images(
 )
 @click.option(
     "--log-file",
-    "-l",
     type=click.Path(),
     default=None,
-    help="Output  file which will contain the logs after anonymization.",
+    help="Output file which will contain the logs.",
 )
 @append_copyright_to_help
 def new_way(input_dir, config, modality, output_file, log_file):

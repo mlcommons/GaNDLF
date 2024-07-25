@@ -52,7 +52,6 @@ def _split_csv(input_csv: str, output_dir: str, config_path: Optional[str]):
 )
 @click.option(
     "--log-file",
-    "-l",
     type=click.Path(),
     default=None,
     help="Output file which will contain the logs.",

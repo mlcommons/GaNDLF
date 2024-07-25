@@ -56,7 +56,6 @@ def _generate_metrics(
 @click.option("--raw-input", hidden=True)
 @click.option(
     "--log-file",
-    "-l",
     type=click.Path(),
     default=None,
     help="Output file which will contain the logs.",

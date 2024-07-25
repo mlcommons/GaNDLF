@@ -49,7 +49,6 @@ def _recover_config(model_dir: Optional[str], mlcube: bool, output_file: str):
 )
 @click.option(
     "--log-file",
-    "-l",
     type=click.Path(),
     default=None,
     help="Output file which will contain the logs.",
