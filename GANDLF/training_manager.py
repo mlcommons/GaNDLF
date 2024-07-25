@@ -144,7 +144,7 @@ def TrainingManager_split(
     device: str,
     resume: bool,
     reset: bool,
-    profiling: bool
+    profiling: bool,
 ):
     """
     This is the training manager that ties all the training functionality together
@@ -172,42 +172,29 @@ def TrainingManager_split(
             )
             parameters = pickle.load(open(currentModelConfigPickle, "rb"))
 
-    if  profiling:       
-
-        with profile(activities=[ProfilerActivity.CPU,ProfilerActivity.CUDA],profile_memory=True,record_shapes=True) as prof:
-
+    if profiling:
+        with profile(
+            activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+            profile_memory=True,
+            record_shapes=True,
+        ) as prof:
             training_loop(
-
                 training_data=dataframe_train,
-
                 validation_data=dataframe_validation,
-
                 output_dir=outputDir,
-
                 device=device,
-
                 params=parameters,
-
                 testing_data=dataframe_testing,
-
             )
 
-        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))    
+        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
 
     else:
-
-             training_loop(
-
-                training_data=dataframe_train,
-
-                validation_data=dataframe_validation,
-
-                output_dir=outputDir,
-
-                device=device,
-
-                params=parameters,
-
-                testing_data=dataframe_testing,
-
-            )
+        training_loop(
+            training_data=dataframe_train,
+            validation_data=dataframe_validation,
+            output_dir=outputDir,
+            device=device,
+            params=parameters,
+            testing_data=dataframe_testing,
+        )
