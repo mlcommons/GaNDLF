@@ -1,7 +1,12 @@
 # Choose the segmentation model here
 # options: unet, resunet, fcn
-version: { minimum: 0.0.14, maximum: 0.1.0-dev }
-model: {
+version:
+  {
+    minimum: 0.0.14,
+    maximum: 0.1.0-dev
+  }
+model:
+  {
     dimension: 2, # the dimension of the model and dataset: defines dimensionality of computations
     base_filters: 32, # Set base filters: number of filters present in the initial module of the U-Net convolution; for IncU-Net, keep this divisible by 4
     architecture: resunet, # options: unet, resunet, fcn, uinc
