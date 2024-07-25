@@ -143,7 +143,7 @@ def new_way(
     output_dir: str,
     requires_gpu: bool,
     entrypoint: Optional[str],
-    log_file:str
+    log_file: str,
 ):
     """Generate frozen/deployable versions of trained GaNDLF models."""
     if log_file is not None:

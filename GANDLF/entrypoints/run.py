@@ -164,7 +164,7 @@ def new_way(
     resume: bool,
     output_path: str,
     raw_input: str,
-    log_file:str
+    log_file: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
     if log_file is not None:

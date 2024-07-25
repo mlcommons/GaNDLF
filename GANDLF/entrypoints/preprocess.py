@@ -96,7 +96,7 @@ def new_way(
     label_pad: str,
     apply_augs: bool,
     crop_zero: bool,
-    log_file: bool
+    log_file: bool,
 ):
     """Generate training/inference data which are preprocessed to reduce resource footprint during computation."""
     if log_file is not None:
