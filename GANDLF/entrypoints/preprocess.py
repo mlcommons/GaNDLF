@@ -163,23 +163,19 @@ def old_way():
     #  > gandlf_preprocess -i .. -o .. -c .. -a 0
     #  > gandlf_preprocess -i .. -o .. -c .. -a f
     #  > gandlf_preprocess -i .. -o .. -c .. -a blabla
+
     parser.add_argument(
         "-a",
         "--applyaugs",
-        metavar="",
-        type=bool,
-        default=False,
-        help="This specifies the whether to apply data augmentation during output creation. Defaults to False",
-        required=False,
+        action="store_true",
+        help="This specifies whether to apply data augmentation during output creation. Defaults to False",
     )
+
     parser.add_argument(
         "-z",
         "--cropzero",
-        metavar="",
-        type=bool,
-        default=False,
-        help="This specifies the whether to apply zero cropping during output creation. Defaults to False",
-        required=False,
+        action="store_true",
+        help="This specifies whether to apply zero cropping during output creation. Defaults to False",
     )
 
     args = parser.parse_args()
