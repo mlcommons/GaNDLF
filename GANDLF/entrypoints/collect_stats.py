@@ -161,7 +161,6 @@ def _collect_stats(model_dir: str, output_dir: str):
     input_dir = os.path.normpath(model_dir)
     output_dir = os.path.normpath(output_dir)
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-    # TODO: here is bug? output_file is never used. We don't save data.csv at all?
     output_file = os.path.join(output_dir, "data.csv")  # data file name
     output_plot = os.path.join(output_dir, "plot.png")  # plot file
 
