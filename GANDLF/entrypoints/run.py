@@ -77,7 +77,7 @@ def _run(
     except Exception:
         # TODO: why so? Why not just default way when exception is printed
         #  and process exits with code 1 automatically?
-        sys.exit("ERROR: " + traceback.format_exc())
+        logging.error(f"ERROR: {traceback.format_exc()}")
     print("Finished.")
 
 

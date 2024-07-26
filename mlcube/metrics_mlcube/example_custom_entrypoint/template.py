@@ -27,7 +27,7 @@ def run_gandlf(output_file, config):
         f"gandlf generate-metrics -c {config} -i ./data.csv -o {output_file}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
-    sys.exit(exit_code)
+    logging.error(exit_code)
 
 
 if __name__ == "__main__":

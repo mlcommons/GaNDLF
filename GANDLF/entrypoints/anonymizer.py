@@ -120,8 +120,7 @@ def old_way():
     # check for required parameters - this is needed here to keep the cli clean
     for param_name in ["inputDir", "outputFile"]:
         param_none_check = getattr(args, param_name)
-        if param_none_check is None:
-            sys.exit(f"ERROR: Missing required parameter: {param_name}")
+        assert param_none_check is not None, f"Missing required parameter: {param_name}"
 
     inputDir = args.inputDir
     outputFile = args.outputFile

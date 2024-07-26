@@ -1,3 +1,4 @@
+import logging
 import torch.nn as nn
 import sys
 import torchvision
@@ -27,7 +28,7 @@ def brainage(parameters):
         # Load the pretrained VGG16 model
         model = torchvision.models.vgg16(pretrained=True)
     except Exception:
-        sys.exit("Error: Failed to load VGG16 model: " + traceback.format_exc())
+        logging.error(f"Error: Failed to load VGG16 model: {traceback.format_exc()}")
 
     # Remove the final convolutional layer
     model.final_convolution_layer = None

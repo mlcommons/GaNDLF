@@ -186,7 +186,7 @@ class DenseNet(ModelBase):
             self.output_size = (1, 1, 1)
             self.conv_stride = (parameters["conv1_t_stride"], 2, 2)
         else:
-            sys.exit("Only 2D or 3D convolutions are supported.")
+            logging.error("Only 2D or 3D convolutions are supported.")
 
         # First convolution
         self.features = [

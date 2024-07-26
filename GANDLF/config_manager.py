@@ -499,7 +499,7 @@ def _parseConfig(
                                 "max"
                             ] = sys.float_info.max
                 elif key in thresholdOrClipDict:
-                    sys.exit("Use only 'threshold' or 'clip', not both")
+                    logging.error("Use only 'threshold' or 'clip', not both")
 
                 if key == "histogram_matching":
                     if params["data_preprocessing"][key] is not False:

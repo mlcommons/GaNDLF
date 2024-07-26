@@ -395,7 +395,7 @@ class EfficientNet(ModelBase):
         elif self.n_dimensions == 3:
             self.output_size = (1, 1, 1)
         else:
-            sys.exit("Only 2D or 3D convolutions are supported.")
+            logging.error("Only 2D or 3D convolutions are supported.")
         if self.Norm is None:
             sys.stderr.write(
                 "Warning: efficientnet is not defined without a normalization layer"
