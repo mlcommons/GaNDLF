@@ -621,8 +621,10 @@ def _parseConfig(
         else:
             try:
                 params["model"]["class_list"] = eval(params["model"]["class_list"])
-            except AssertionError:
-                raise AssertionError("Could not evaluate the 'class_list' in 'model'")
+            except Exception as e:
+                logging.error(
+                    f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
+                )
 
     assert (
         "nested_training" in params
@@ -741,7 +743,7 @@ def ConfigManager(
     try:
         return _parseConfig(config_file_path, version_check_flag)
     except Exception as e:
-        logging.info(
+        logging.error(
             f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
         )
         raise
