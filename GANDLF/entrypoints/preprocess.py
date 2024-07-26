@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import ast
 import logging
 
 import click
@@ -154,14 +155,20 @@ def old_way():
     parser.add_argument(
         "-a",
         "--applyaugs",
-        action="store_true",
-        help="This specifies whether to apply data augmentation during output creation. Defaults to False",
+        metavar="",
+        type=ast.literal_eval,
+        default=False,
+        help="This specifies the whether to apply data augmentation during output creation. Defaults to False",
+        required=False,
     )
     parser.add_argument(
         "-z",
         "--cropzero",
-        action="store_true",
-        help="This specifies whether to apply zero cropping during output creation. Defaults to False",
+        metavar="",
+        type=ast.literal_eval,
+        default=False,
+        help="This specifies the whether to apply zero cropping during output creation. Defaults to False",
+        required=False,
     )
 
     args = parser.parse_args()
