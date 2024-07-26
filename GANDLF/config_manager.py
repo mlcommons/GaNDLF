@@ -1,3 +1,5 @@
+import logging
+import traceback
 from typing import Optional, Union
 import sys, yaml, ast
 import numpy as np
@@ -618,9 +620,7 @@ def _parseConfig(
             params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
-                params["model"]["class_list"] = ast.literal_eval(
-                    params["model"]["class_list"]
-                )
+                params["model"]["class_list"] = eval(params["model"]["class_list"])
             except AssertionError:
                 raise AssertionError("Could not evaluate the 'class_list' in 'model'")
 
@@ -738,4 +738,10 @@ def ConfigManager(
     Returns:
         dict: The parameter dictionary.
     """
-    return _parseConfig(config_file_path, version_check_flag)
+    try:
+        return _parseConfig(config_file_path, version_check_flag)
+    except Exception as e:
+        logging.info(
+            f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        )
+        raise

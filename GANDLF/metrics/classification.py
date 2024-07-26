@@ -1,15 +1,13 @@
-from typing import Union
-
 import torch
 import torchmetrics as tm
-from torch.nn.functional import one_hot
+import torch.nn.functional as F
+
+# from torch.nn.functional import one_hot
 from ..utils import get_output_from_calculator
 from GANDLF.utils.generic import determine_classification_task_type
 
 
-def overall_stats(
-    prediction: torch.Tensor, target: torch.Tensor, params: dict
-) -> dict[str, Union[float, list]]:
+def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) -> dict:
     """
     Generates a dictionary of metrics calculated on the overall prediction and ground truths.
 
@@ -25,6 +23,36 @@ def overall_stats(
         params["problem_type"] == "classification"
     ), "Only classification is supported for these stats"
 
+    def __convert_tensor_to_int(input_tensor: torch.Tensor) -> torch.Tensor:
+        """
+        Convert the input tensor to integer format.
+
+        Args:
+            input_tensor (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The tensor converted to integer format.
+        """
+        return_tensor = input_tensor
+        if return_tensor.dtype != torch.long or return_tensor.dtype != torch.int:
+            return_tensor = return_tensor.long()
+        return return_tensor
+
+    # this is needed for a few metrics
+    # ensure that predictions and target are in integer format
+    prediction_wrap = __convert_tensor_to_int(prediction)
+    target_wrap = __convert_tensor_to_int(target)
+
+    # this is needed for auroc
+    # ensure that predictions are in integer format
+    prediction_wrap = prediction
+    if prediction.dtype != torch.long or prediction.dtype != torch.int:
+        prediction_wrap = prediction_wrap.long()
+    predictions_one_hot = F.one_hot(
+        prediction_wrap, num_classes=params["model"]["num_classes"]
+    )
+    predictions_prob = F.softmax(predictions_one_hot.float(), dim=1)
+
     output_metrics = {}
 
     average_types_keys = {
@@ -34,79 +62,63 @@ def overall_stats(
         "per_class_weighted": "weighted",
     }
     task = determine_classification_task_type(params)
-    # consider adding a "multilabel field in the future"
-    # metrics that need the "average" parameter
+    # todo: consider adding a "multilabel field in the future"
 
-    for average_type_key in average_types_keys.values():
+    # metrics that need the "average" parameter
+    for average_type, average_type_key in average_types_keys.items():
         # multidim_average is not used when constructing these metrics
         # think of having it
         calculators = {
-            "accuracy": tm.Accuracy(
+            f"accuracy_{average_type}": tm.Accuracy(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "precision": tm.Precision(
+            f"precision_{average_type}": tm.Precision(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "recall": tm.Recall(
+            f"recall_{average_type}": tm.Recall(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "f1": tm.F1Score(
+            f"f1_{average_type}": tm.F1Score(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            "specificity": tm.Specificity(
+            f"specificity_{average_type}": tm.Specificity(
                 task=task,
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            # "aucroc": tm.AUROC(
-            #     task=task,
-            #     num_classes=params["model"]["num_classes"],
-            #     average=average_type_key if average_type_key != "micro" else "macro",
-            # ),
+            f"auroc_{average_type}": tm.AUROC(
+                task=task,
+                num_classes=params["model"]["num_classes"],
+                average=average_type_key if average_type_key != "micro" else "macro",
+            ),
         }
         for metric_name, calculator in calculators.items():
-            avg_typed_metric_name = f"{metric_name}_{average_type_key}"
-            if metric_name == "aucroc":
-                one_hot_preds = one_hot(
-                    prediction.long(), num_classes=params["model"]["num_classes"]
-                )
-                output_metrics[avg_typed_metric_name] = get_output_from_calculator(
-                    one_hot_preds.float(), target, calculator
+            if "auroc" in metric_name:
+                output_metrics[metric_name] = get_output_from_calculator(
+                    predictions_prob, target_wrap, calculator
                 )
             else:
-                output_metrics[avg_typed_metric_name] = get_output_from_calculator(
+                output_metrics[metric_name] = get_output_from_calculator(
                     prediction, target, calculator
                 )
 
-    #### HERE WE NEED TO MODIFY TESTS - ROC IS RETURNING A TUPLE. WE MAY ALSO DISCARD IT ####
-    # what is AUC metric telling at all? Computing it for prediction and ground truth
-    # is not making sense
-    # metrics that do not have any "average" parameter
-    # calculators = {
-    #
-    #     # "auc": tm.AUC(reorder=True),
-    #     ## weird error for multi-class problem, where pos_label is not getting set
-    #     "roc": tm.ROC(task=task, num_classes=params["model"]["num_classes"]),
-    # }
-    # for metric_name, calculator in calculators.items():
-    #     if metric_name == "roc":
-    #         one_hot_preds = one_hot(
-    #             prediction.long(), num_classes=params["model"]["num_classes"]
-    #         )
-    #         output_metrics[metric_name] = get_output_from_calculator(
-    #             one_hot_preds.float(), target, calculator
-    #         )
-    #     else:
-    #         output_metrics[metric_name] = get_output_from_calculator(
-    #             prediction, target, calculator
-    #         )
+    # metrics that do not need the "average" parameter
+    calculators = {
+        "mcc": tm.MatthewsCorrCoef(
+            task=task, num_classes=params["model"]["num_classes"]
+        )
+    }
+    for metric_name, calculator in calculators.items():
+        output_metrics[metric_name] = get_output_from_calculator(
+            prediction, target, calculator
+        )
 
     return output_metrics

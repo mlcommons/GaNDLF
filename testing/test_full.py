@@ -3,6 +3,7 @@ import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
+import logging
 
 from pydicom.data import get_testdata_file
 import cv2
@@ -58,6 +59,7 @@ all_models_segmentation = [
     "uinc",
     "msdnet",
     "imagenet_unet",
+    "dynunet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
@@ -238,9 +240,7 @@ def write_temp_config_path(parameters_to_write):
     return temp_config_path
 
 
-# # these are helper functions to be used in other tests
-
-
+# these are helper functions to be used in other tests
 def test_train_segmentation_rad_2d(device):
     print("03: Starting 2D Rad segmentation tests")
     # read and parse csv
@@ -273,6 +273,13 @@ def test_train_segmentation_rad_2d(device):
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
+
+        if model == "dynunet":
+            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
+            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
+            parameters["model"]["strides"] = (1, 1, 1, 1)
+            parameters["model"]["deep_supervision"] = False
+
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -364,6 +371,13 @@ def test_train_segmentation_rad_3d(device):
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
+
+        if model == "dynunet":
+            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
+            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
+            parameters["model"]["strides"] = (1, 1, 1, 1)
+            parameters["model"]["deep_supervision"] = False
+
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -767,7 +781,9 @@ def test_train_inference_optimize_classification_rad_3d(device):
     # file_config_temp = write_temp_config_path(parameters_temp)
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization(
+        model_path, config_path, outputDir
+    )
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
@@ -3060,11 +3076,6 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 labels_array = training_data["Channel_0"]
             else:
                 labels_array = training_data["ValueToPredict"]
-            training_data["target"] = labels_array
-            training_data["prediction"] = labels_array
-            if synthesis_detected:
-                # this optional
-                training_data["mask"] = training_data["Label"]
 
             # read and initialize parameters for specific data dimension
             parameters = ConfigManager(
@@ -3082,17 +3093,46 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             if synthesis_detected:
                 parameters["problem_type"] = problem_type
 
-            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
-            training_data.to_csv(temp_infer_csv, index=False)
-
-            output_file = os.path.join(outputDir, "output.yaml")
-
             temp_config = write_temp_config_path(parameters)
 
+            # check both single csv input and comma-separated input
+            # # single csv input
+            training_data["target"] = labels_array
+            training_data["prediction"] = labels_array
+            if synthesis_detected:
+                # this optional
+                training_data["mask"] = training_data["Label"]
+
+            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
+            training_data.to_csv(temp_infer_csv, index=False)
             # run the metrics calculation
+            output_file = os.path.join(outputDir, "output_single-csv.json")
             generate_metrics_dict(temp_infer_csv, temp_config, output_file)
 
-            assert os.path.isfile(output_file), "Metrics output file was not generated"
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated for single-csv input"
+
+            # # comma-separated input
+            temp_infer_csv_gt = os.path.join(outputDir, "temp_csv_gt.csv")
+            temp_infer_csv_pred = os.path.join(outputDir, "temp_csv_pred.csv")
+
+            # create target_data from training_data using just subjectid and target columns
+            target_data = training_data[["SubjectID", "target"]].copy()
+            target_data.to_csv(temp_infer_csv_gt, index=False)
+
+            # create prediction_data from training_data using just subjectid and prediction columns
+            prediction_data = training_data[["SubjectID", "prediction"]].copy()
+            prediction_data.to_csv(temp_infer_csv_pred, index=False)
+            # run the metrics calculation
+            output_file = os.path.join(outputDir, "output_comma-separated-csv.json")
+            generate_metrics_dict(
+                temp_infer_csv_gt + "," + temp_infer_csv_pred, temp_config, output_file
+            )
+
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated for comma-separated input"
 
             sanitize_outputDir()
 
@@ -3144,4 +3184,52 @@ def test_generic_data_split():
 
     sanitize_outputDir()
 
+    print("passed")
+
+
+def test_generic_logging(capsys):
+    print("52: Starting test for logging")
+    log_file = "testing/gandlf.log"
+    logger_setup(log_file)
+    message = "Testing logging"
+
+    logging.debug(message)
+
+    # tests if the message is in the file.log
+    with open(log_file, "r") as file:
+        logs = file.read()
+        assert message in logs
+
+    os.remove(log_file)
+
+    # test the stout info level. The stout must show only INFO messages
+    message = "Testing stout logging"
+    logging.info(message)
+    capture = capsys.readouterr()
+    assert message in capture.out
+
+    # Test the stout not showing other messages
+    message = "Testing stout logging"
+    logging.debug(message)
+    logging.warning(message)
+    logging.error(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message not in capture.out
+
+    # test sterr must NOT show these messages.
+    message = "Testing sterr logging"
+    logging.info(message)
+    logging.debug(message)
+    capture = capsys.readouterr()
+    assert message not in capture.err
+
+    # test sterr must show these messages.
+    logging.error(message)
+    logging.warning(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message in capture.err
+
+    sanitize_outputDir()
     print("passed")

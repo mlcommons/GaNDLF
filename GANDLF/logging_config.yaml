@@ -1,0 +1,47 @@
+version: 1
+formatters:
+  detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    log_colors:
+      DEBUG: "white"
+      INFO: "green"
+      WARNING: "yellow"
+      ERROR: "red"
+      CRITICAL: "bold_red"
+  simple:
+    (): colorlog.ColoredFormatter
+    format: "%(log_color)s%(asctime)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+filters:
+  warnings_filter:
+    (): logging.Filter
+    name: "py.warnings"
+  info_only_filter:
+    (): GANDLF.utils.gandlf_logging.InfoOnlyFilter
+handlers:
+  stdoutHandler: # only display info level
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    filters: [info_only_filter]
+    stream: ext://sys.stdout
+  stderrHandler: # display warning and above messages
+    class: logging.StreamHandler
+    level: WARNING
+    formatter: detailed
+    stream: ext://sys.stderr
+  rotatingFileHandler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: detailed
+    maxBytes: 10485760
+    backupCount: 2
+loggers: # you can add your customized logger
+  debug_logger:
+    level: DEBUG
+    handlers: [stdoutHandler, rotatingFileHandler, stderrHandler]
+    propagate: no
+root:
+  level: DEBUG
+  handlers: [stdoutHandler, rotatingFileHandler, stderrHandler]
