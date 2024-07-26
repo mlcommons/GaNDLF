@@ -43,7 +43,8 @@ jobs:
         python-version: 3.9
     - name: Check dev version
       run: | # Get current canonical version, append current date as an identifier
-        currentVer=$(python -c "from GANDLF import version; print(version)")
+        currentVer=$(grep -oP '__version__ = \K.*' ./GANDLF/version.py)
+        currentVer=${currentVer//\"}
         if [[ $currentVer == *"dev"* ]]; then
           echo "publish_nightly=true" >> $GITHUB_ENV
         else
