@@ -45,9 +45,12 @@ jobs:
       run: | # Get current canonical version, append current date as an identifier
         currentVer=$(grep -oP '__version__ = \K.*' ./GANDLF/version.py)
         currentVer=${currentVer//\"}
+        echo "Current version is $currentVer"
         if [[ $currentVer == *"dev"* ]]; then
+          echo "Nightly will be published"
           echo "publish_nightly=true" >> $GITHUB_ENV
         else
+          echo "Nightly will not be published"
           echo "publish_nightly=false" >> $GITHUB_ENV
         fi  
     - name: Install dependencies
