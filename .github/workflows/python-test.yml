@@ -61,6 +61,18 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+    - name: Check dev version
+      run: | # Get current canonical version, append current date as an identifier
+        currentVer=$(grep -oP '__version__ = \K.*' ./GANDLF/version.py)
+        currentVer=${currentVer//\"}
+        echo "Current version is $currentVer"
+        if [[ $currentVer == *"dev"* ]]; then
+          echo "Nightly will be published"
+          echo "publish_nightly=true" >> $GITHUB_ENV
+        else
+          echo "Nightly will not be published"
+          echo "publish_nightly=false" >> $GITHUB_ENV
+        fi  
     - name: Set up Python 3.9
       if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
       uses: actions/setup-python@v4
