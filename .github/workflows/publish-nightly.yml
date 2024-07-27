@@ -43,10 +43,14 @@ jobs:
         python-version: 3.9
     - name: Check dev version
       run: | # Get current canonical version, append current date as an identifier
-        currentVer=$(python -c "from GANDLF import version; print(version)")
+        currentVer=$(grep -oP '__version__ = \K.*' ./GANDLF/version.py)
+        currentVer=${currentVer//\"}
+        echo "Current version is $currentVer"
         if [[ $currentVer == *"dev"* ]]; then
+          echo "Nightly will be published"
           echo "publish_nightly=true" >> $GITHUB_ENV
         else
+          echo "Nightly will not be published"
           echo "publish_nightly=false" >> $GITHUB_ENV
         fi  
     - name: Install dependencies
@@ -59,7 +63,8 @@ jobs:
     - name: Annotate version
       if: env.publish_nightly
       run: | # Get current canonical version, append current date as an identifier
-        currentVer=$(python -c "from GANDLF import version; print(version)")
+        currentVer=$(grep -oP '__version__ = \K.*' ./GANDLF/version.py)
+        currentVer=${currentVer//\"}
         datestampnow=$(date +'%Y%m%d')
         echo __version__ = \"$currentVer$datestampnow\" > ./GANDLF/version.py        
         
