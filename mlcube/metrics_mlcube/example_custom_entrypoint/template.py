@@ -7,6 +7,7 @@ i.e. it should expect the inputs and outputs defined in `mlcube.yaml` in the `ev
 import os
 import argparse
 import sys
+import logging
 
 
 def create_csv(predictions, labels):

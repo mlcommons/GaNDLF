@@ -8,6 +8,7 @@ with --device)."""
 import os
 import argparse
 import sys
+import logging
 
 
 def create_csv(data_path):
