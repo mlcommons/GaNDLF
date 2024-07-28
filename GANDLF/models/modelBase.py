@@ -53,6 +53,12 @@ class ModelBase(nn.Module):
 
         # based on dimensionality, the following need to defined:
         # convolution, batch_norm, instancenorm, dropout
+        assert self.n_dimensions in [
+            2,
+            3,
+        ], "GaNDLF only supports 2D and 3D computations. {}D computations are not currently supported".format(
+            self.n_dimensions
+        )
         if self.n_dimensions == 2:
             self.Conv = nn.Conv2d
             self.ConvTranspose = nn.ConvTranspose2d
@@ -87,13 +93,6 @@ class ModelBase(nn.Module):
                 self.converter = ACSConverter
             elif converter_type == "conv3d":
                 self.converter = Conv3dConverter
-
-        else:
-            raise ValueError(
-                "GaNDLF only supports 2D and 3D computations. {}D computations are not currently supported".format(
-                    self.n_dimensions
-                )
-            )
 
     def get_final_layer(self, final_convolution_layer: str) -> nn.Module:
         return get_modelbase_final_layer(final_convolution_layer)

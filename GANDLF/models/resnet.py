@@ -51,8 +51,6 @@ class ResNet(ModelBase):
             self.output_size = (1, 1)
         elif self.n_dimensions == 3:
             self.output_size = (1, 1, 1)
-        else:
-            logging.error("Only 2D or 3D convolutions are supported.")
 
         # If normalization layer is not defined, use Batch Normalization
         if self.Norm is None:
