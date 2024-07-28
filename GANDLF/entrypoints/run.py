@@ -4,7 +4,6 @@ import logging
 import os
 import argparse
 import ast
-import sys
 import traceback
 from typing import Optional
 

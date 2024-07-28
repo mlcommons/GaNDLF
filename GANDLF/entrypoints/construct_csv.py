@@ -3,7 +3,6 @@
 import logging
 import os
 import argparse
-import sys
 import ast
 from typing import Optional
 import yaml

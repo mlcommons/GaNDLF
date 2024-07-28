@@ -3,7 +3,6 @@
 import logging
 import os
 import argparse
-import sys
 import yaml
 from typing import Optional
 import click
