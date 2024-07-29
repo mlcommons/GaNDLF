@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, argparse
+import argparse
 import click
 from deprecated import deprecated
 

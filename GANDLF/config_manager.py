@@ -1,4 +1,4 @@
-import logging
+# import logging
 import traceback
 from typing import Optional, Union
 import sys, yaml, ast
@@ -627,7 +627,7 @@ def _parseConfig(
                 ## todo: ensure logging captures assertion errors
                 assert (
                     False
-                ), "Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
+                ), f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
                 # logging.error(
                 #     f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
                 # )

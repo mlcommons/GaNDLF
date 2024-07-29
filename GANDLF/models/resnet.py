@@ -32,9 +32,8 @@ class ResNet(ModelBase):
         ), "The patch size is not large enough for the desired number of layers. It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2."
         if allowedLay != len(block_config) and allowedLay >= 1:
             logging.info(
-                "The patch size is not large enough for the desired number of layers.",
-                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
-                "Only the first %d layers will run." % allowedLay,
+                "The patch size is not large enough for the desired number of layers. It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2. Only the first %d layers will run."
+                % allowedLay
             )
 
         block_config = block_config[:allowedLay]
