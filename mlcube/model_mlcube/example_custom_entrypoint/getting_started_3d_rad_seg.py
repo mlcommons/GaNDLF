@@ -38,7 +38,7 @@ def run_gandlf(output_path, model_dir, device):
         f"--model-dir /embedded_model/ -i ./data.csv -o {output_path}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
-    logging.error(exit_code)
+    logging.info(exit_code)
 
 
 if __name__ == "__main__":
