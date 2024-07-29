@@ -498,8 +498,10 @@ def _parseConfig(
                             params["data_preprocessing"][key][
                                 "max"
                             ] = sys.float_info.max
-                elif key in thresholdOrClipDict:
-                    logging.error("Use only 'threshold' or 'clip', not both")
+
+                assert not (
+                    key in thresholdOrClipDict
+                ), "Use only 'threshold' or 'clip', not both"
 
                 if key == "histogram_matching":
                     if params["data_preprocessing"][key] is not False:
@@ -622,9 +624,13 @@ def _parseConfig(
             try:
                 params["model"]["class_list"] = eval(params["model"]["class_list"])
             except Exception as e:
-                logging.error(
-                    f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
-                )
+                ## todo: ensure logging captures assertion errors
+                assert (
+                    False
+                ), "Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
+                # logging.error(
+                #     f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
+                # )
 
     assert (
         "nested_training" in params
@@ -743,7 +749,11 @@ def ConfigManager(
     try:
         return _parseConfig(config_file_path, version_check_flag)
     except Exception as e:
-        logging.error(
-            f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
-        )
-        raise
+        ## todo: ensure logging captures assertion errors
+        assert (
+            False
+        ), f"Config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        # logging.error(
+        #     f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        # )
+        # raise
