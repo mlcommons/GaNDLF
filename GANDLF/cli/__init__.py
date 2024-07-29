@@ -7,6 +7,22 @@ from .recover_config import recover_config
 from .post_training_model_optimization import post_training_model_optimization
 from .generate_metrics import generate_metrics_dict
 from .data_split_saver import split_data_and_save_csvs
+from .generate_Competition_metrics import generate_metrics_dict_competition
+
+__all__ = [
+    "patch_extraction",
+    "main_run",
+    "preprocess_and_save",
+    "config_generator",
+    "deploy_targets",
+    "mlcube_types",
+    "run_deployment",
+    "recover_config",
+    "post_training_model_optimization",
+    "generate_metrics_dict",
+    "split_data_and_save_csvs",
+    "generate_metrics_dict_competition",
+]
 
 from datetime import date
 
