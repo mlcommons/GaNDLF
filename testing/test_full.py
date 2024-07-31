@@ -45,6 +45,8 @@ from GANDLF.data.post_process import (
     cca,
 )
 from GANDLF.anonymize import run_anonymizer
+from GANDLF.entrypoints.debug_info import _debug_info
+
 
 device = "cpu"
 ## global defines
@@ -3236,4 +3238,10 @@ def test_generic_logging(capsys):
     assert message in capture.err
 
     sanitize_outputDir()
+    print("passed")
+
+
+def test_generic_debug_info():
+    print("53: Starting test for logging")
+    _debug_info(True)
     print("passed")
