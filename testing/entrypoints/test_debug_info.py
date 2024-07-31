@@ -16,8 +16,17 @@ OLD_SCRIPT_NAME = "gandlf_debugInfo"
 test_file_system = []
 test_cases = [
     CliCase(
-        should_succeed=True, new_way_lines=[""], old_way_lines=[""], expected_args={}
-    )
+        should_succeed=True,
+        new_way_lines=[""],
+        old_way_lines=[""],
+        expected_args={"verbose": False},
+    ),
+    CliCase(
+        should_succeed=True,
+        new_way_lines=["--verbose", "-v"],
+        old_way_lines=["--verbose", "-v"],
+        expected_args={"verbose": True},
+    ),
 ]
 
 
