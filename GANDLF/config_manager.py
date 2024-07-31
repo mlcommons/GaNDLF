@@ -1,3 +1,5 @@
+# import logging
+import traceback
 from typing import Optional, Union
 import sys, yaml, ast
 import numpy as np
@@ -478,26 +480,23 @@ def _parseConfig(
 
             # iterate through all keys
             for key in params["data_preprocessing"]:  # iterate through all keys
-                # for threshold or clip, ensure min and max are defined
-                if not thresholdOrClip:
-                    if key in thresholdOrClipDict:
-                        thresholdOrClip = True  # we only allow one of threshold or clip to occur and not both
-                        # initialize if nothing is present
-                        if not (isinstance(params["data_preprocessing"][key], dict)):
-                            params["data_preprocessing"][key] = {}
+                if key in thresholdOrClipDict:
+                    # we only allow one of threshold or clip to occur and not both
+                    assert not (
+                        thresholdOrClip
+                    ), "Use only `threshold` or `clip`, not both"
+                    thresholdOrClip = True
+                    # initialize if nothing is present
+                    if not (isinstance(params["data_preprocessing"][key], dict)):
+                        params["data_preprocessing"][key] = {}
 
-                        # if one of the required parameters is not present, initialize with lowest/highest possible values
-                        # this ensures the absence of a field doesn't affect processing
-                        if not "min" in params["data_preprocessing"][key]:
-                            params["data_preprocessing"][key][
-                                "min"
-                            ] = sys.float_info.min
-                        if not "max" in params["data_preprocessing"][key]:
-                            params["data_preprocessing"][key][
-                                "max"
-                            ] = sys.float_info.max
-                elif key in thresholdOrClipDict:
-                    sys.exit("Use only 'threshold' or 'clip', not both")
+                    # if one of the required parameters is not present, initialize with lowest/highest possible values
+                    # this ensures the absence of a field doesn't affect processing
+                    # for threshold or clip, ensure min and max are defined
+                    if not "min" in params["data_preprocessing"][key]:
+                        params["data_preprocessing"][key]["min"] = sys.float_info.min
+                    if not "max" in params["data_preprocessing"][key]:
+                        params["data_preprocessing"][key]["max"] = sys.float_info.max
 
                 if key == "histogram_matching":
                     if params["data_preprocessing"][key] is not False:
@@ -618,11 +617,15 @@ def _parseConfig(
             params["model"]["class_list"] = temp_classList.split(",")
         else:
             try:
-                params["model"]["class_list"] = ast.literal_eval(
-                    params["model"]["class_list"]
-                )
-            except AssertionError:
-                raise AssertionError("Could not evaluate the 'class_list' in 'model'")
+                params["model"]["class_list"] = eval(params["model"]["class_list"])
+            except Exception as e:
+                ## todo: ensure logging captures assertion errors
+                assert (
+                    False
+                ), f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
+                # logging.error(
+                #     f"Could not evaluate the `class_list` in `model`, Exception: {str(e)}, {traceback.format_exc()}"
+                # )
 
     assert (
         "nested_training" in params
@@ -738,4 +741,14 @@ def ConfigManager(
     Returns:
         dict: The parameter dictionary.
     """
-    return _parseConfig(config_file_path, version_check_flag)
+    try:
+        return _parseConfig(config_file_path, version_check_flag)
+    except Exception as e:
+        ## todo: ensure logging captures assertion errors
+        assert (
+            False
+        ), f"Config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        # logging.error(
+        #     f"gandlf config parsing failed: {config_file_path=}, {version_check_flag=}, Exception: {str(e)}, {traceback.format_exc()}"
+        # )
+        # raise

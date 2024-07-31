@@ -17,7 +17,7 @@ from GANDLF.utils import (
     get_correct_padding_size,
 )
 from .preprocessing import get_transforms_for_preprocessing
-from .augmentation import global_augs_dict
+from .augmentation import get_augmentation_transforms
 
 global_sampler_dict = {
     "uniform": torchio.data.UniformSampler,
@@ -171,7 +171,7 @@ def ImagesFromDataFrame(
         # if predictionHeaders:
         #     # get the mask
         #     if (subject_dict['label'] is None) and (class_list is not None):
-        #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
+        #         logging.error('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
             if not os.path.isfile(str(dataframe[labelHeader][patient])):
@@ -259,15 +259,16 @@ def ImagesFromDataFrame(
     ), f"The following subjects could not be loaded, please recheck or remove and retry: {subjects_with_error}"
 
     transformations_list = []
-
-    # augmentations are applied to the training set only
     if train and not (augmentations is None):
-        for aug in augmentations:
-            aug_lower = aug.lower()
-            if aug_lower in global_augs_dict:
-                transformations_list.append(
-                    global_augs_dict[aug_lower](augmentations[aug])
-                )
+        transformations_list.extend(get_augmentation_transforms(augmentations))
+    # augmentations are applied to the training set only
+    # if train and not (augmentations is None):
+    #     for aug in augmentations:
+    #         aug_lower = aug.lower()
+    #         if aug_lower in global_augs_dict:
+    #             transformations_list.append(
+    #                 global_augs_dict[aug_lower](augmentations[aug])
+    #             )
 
     transform = get_transforms_for_preprocessing(
         parameters, transformations_list, train, apply_zero_crop

@@ -1,4 +1,6 @@
 import os, pathlib, pytest
+
+from click.testing import CliRunner
 from pytest import fixture
 
 from .test_full import (
@@ -16,6 +18,12 @@ def pytest_addoption(parser):
 @fixture()
 def device(request):
     return request.config.getoption("--device")
+
+
+# Fixture for Click's CliRunner to test Click commands
+@pytest.fixture
+def cli_runner():
+    return CliRunner()
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
