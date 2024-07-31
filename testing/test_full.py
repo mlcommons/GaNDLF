@@ -45,6 +45,8 @@ from GANDLF.data.post_process import (
     cca,
 )
 from GANDLF.anonymize import run_anonymizer
+from GANDLF.entrypoints.debug_info import _debug_info
+
 
 device = "cpu"
 ## global defines
@@ -1759,10 +1761,14 @@ def test_generic_preprocess_functions():
     ## image rescaling test
     input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
     # try out different options
+    input_tensor_min, input_tensor_max = (
+        input_tensor.min().item(),
+        input_tensor.max().item(),
+    )
     for params in [
         {},
         None,
-        {"in_min_max": [5, 250], "out_min_max": [-1, 2]},
+        {"in_min_max": [input_tensor_min, input_tensor_max], "out_min_max": [-1, 2]},
         {"out_min_max": [0, 1], "percentiles": [5, 95]},
     ]:
         rescaler = global_preprocessing_dict["rescale"](params)
@@ -3232,4 +3238,10 @@ def test_generic_logging(capsys):
     assert message in capture.err
 
     sanitize_outputDir()
+    print("passed")
+
+
+def test_generic_debug_info():
+    print("53: Starting test for logging")
+    _debug_info(True)
     print("passed")

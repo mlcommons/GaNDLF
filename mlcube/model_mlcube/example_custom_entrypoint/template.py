@@ -8,6 +8,7 @@ with --device)."""
 import os
 import argparse
 import sys
+import logging
 
 
 def create_csv(data_path):
@@ -30,7 +31,7 @@ def run_gandlf(output_path, device):
         f"--model-dir /embedded_model/ -i ./data.csv -o {output_path}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
-    sys.exit(exit_code)
+    logging.info(exit_code)
 
 
 if __name__ == "__main__":

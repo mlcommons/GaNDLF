@@ -4,8 +4,8 @@ import logging
 import os
 import argparse
 import ast
-import sys
-import traceback
+
+# import traceback
 from typing import Optional
 
 from deprecated import deprecated
@@ -63,21 +63,16 @@ def _run(
     logging.debug(f"{resume_flag=}")
     logging.debug(f"{output_path=}")
 
-    try:
-        main_run(
-            data_csv=input_data,
-            config_file=config,
-            model_dir=model_dir,
-            train_mode=train_flag,
-            device=device,
-            resume=resume_flag,
-            reset=reset_flag,
-            output_dir=output_path,
-        )
-    except Exception:
-        # TODO: why so? Why not just default way when exception is printed
-        #  and process exits with code 1 automatically?
-        sys.exit("ERROR: " + traceback.format_exc())
+    main_run(
+        data_csv=input_data,
+        config_file=config,
+        model_dir=model_dir,
+        train_mode=train_flag,
+        device=device,
+        resume=resume_flag,
+        reset=reset_flag,
+        output_dir=output_path,
+    )
     print("Finished.")
 
 

@@ -171,7 +171,7 @@ def ImagesFromDataFrame(
         # if predictionHeaders:
         #     # get the mask
         #     if (subject_dict['label'] is None) and (class_list is not None):
-        #         sys.exit('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
+        #         logging.error('The \'class_list\' parameter has been defined but a label file is not present for patient: ', patient)
 
         if labelHeader is not None:
             if not os.path.isfile(str(dataframe[labelHeader][patient])):

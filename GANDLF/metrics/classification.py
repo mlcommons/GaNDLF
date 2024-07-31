@@ -33,7 +33,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
         Returns:
             torch.Tensor: The tensor converted to integer format.
         """
-        return_tensor = input_tensor
+        return_tensor = input_tensor.detach().clone()
         if return_tensor.dtype != torch.long or return_tensor.dtype != torch.int:
             return_tensor = return_tensor.long()
         return return_tensor
@@ -45,7 +45,7 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
 
     # this is needed for auroc
     # ensure that predictions are in integer format
-    prediction_wrap = prediction
+    prediction_wrap = prediction.detach().clone()
     if prediction.dtype != torch.long or prediction.dtype != torch.int:
         prediction_wrap = prediction_wrap.long()
     predictions_one_hot = F.one_hot(
