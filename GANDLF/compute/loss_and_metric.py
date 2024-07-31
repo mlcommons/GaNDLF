@@ -67,13 +67,10 @@ def get_loss_and_metrics(
         loss_function = global_losses_dict[list(params["loss_function"].keys())[0]]
     else:
         loss_str_lower = params["loss_function"].lower()
-        if loss_str_lower in global_losses_dict:
-            loss_function = global_losses_dict[loss_str_lower]
-        else:
-            sys.exit(
-                "WARNING: Could not find the requested loss function '"
-                + params["loss_function"]
-            )
+        assert (
+            loss_str_lower in global_losses_dict
+        ), f"Could not find the requested loss function '{params['loss_function']}'"
+        loss_function = global_losses_dict[loss_str_lower]
 
     loss = 0
     # specialized loss function for sdnet

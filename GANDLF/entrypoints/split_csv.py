@@ -3,7 +3,6 @@
 
 import argparse
 import os
-import sys
 import yaml
 from typing import Optional
 
@@ -105,8 +104,7 @@ def old_way():
     # check for required parameters - this is needed here to keep the cli clean
     for param_name in ["inputCSV", "outputDir", "config"]:
         param_none_check = getattr(args, param_name)
-        if param_none_check is None:
-            sys.exit(f"ERROR: Missing required parameter: {param_name}")
+        assert param_none_check is not None, f"Missing required parameter: {param_name}"
 
     _split_csv(
         input_csv=args.inputCSV, output_dir=args.outputDir, config_path=args.config

@@ -65,11 +65,7 @@ def centercrop_transform(patch_size):
 def rescale_transform(parameters=None):
     if parameters is None:
         parameters = {}
-    # get defaults from torchio
-    rescaler = RescaleIntensity()
-    rescaler.out_min_max = parameters.get("out_min_max", rescaler.out_min_max)
-    rescaler.percentiles = parameters.get("percentiles", rescaler.percentiles)
-    rescaler.in_min_max = parameters.get("in_min_max", None)
+    rescaler = RescaleIntensity(**parameters)
     return rescaler
 
 

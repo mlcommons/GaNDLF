@@ -1,4 +1,5 @@
 import sys
+import logging
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
@@ -26,18 +27,13 @@ class ResNet(ModelBase):
         allowedLay = checkPatchDimensions(parameters["patch_size"], len(block_config))
 
         # Display warning message if patch size is not large enough for desired number of layers
+        assert not (
+            allowedLay != len(block_config) and allowedLay <= 0
+        ), "The patch size is not large enough for the desired number of layers. It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2."
         if allowedLay != len(block_config) and allowedLay >= 1:
-            print(
-                "The patch size is not large enough for the desired number of layers.",
-                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
-                "Only the first %d layers will run." % allowedLay,
-            )
-
-        # Raise an error if the patch size is too small
-        elif allowedLay != len(block_config) and allowedLay <= 0:
-            sys.exit(
-                "The patch size is not large enough for the desired number of layers.",
-                " It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2.",
+            logging.info(
+                "The patch size is not large enough for the desired number of layers. It is expected that each dimension of the patch size is 2^(layers + 1)*i, where i is an integer greater than 2. Only the first %d layers will run."
+                % allowedLay
             )
 
         block_config = block_config[:allowedLay]
@@ -51,8 +47,6 @@ class ResNet(ModelBase):
             self.output_size = (1, 1)
         elif self.n_dimensions == 3:
             self.output_size = (1, 1, 1)
-        else:
-            sys.exit("Only 2D or 3D convolutions are supported.")
 
         # If normalization layer is not defined, use Batch Normalization
         if self.Norm is None:

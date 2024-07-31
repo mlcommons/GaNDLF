@@ -7,6 +7,7 @@ i.e. it should expect the inputs and outputs defined in `mlcube.yaml` in the `ev
 import os
 import argparse
 import sys
+import logging
 
 
 def create_csv(predictions, labels):
@@ -27,7 +28,7 @@ def run_gandlf(output_file, config):
         f"gandlf generate-metrics -c {config} -i ./data.csv -o {output_file}"
     )
     exit_code = os.WEXITSTATUS(exit_status)
-    sys.exit(exit_code)
+    logging.info(exit_code)
 
 
 if __name__ == "__main__":

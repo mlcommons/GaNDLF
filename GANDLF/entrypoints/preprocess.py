@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import ast
 import logging
 
 import click
@@ -151,23 +152,11 @@ def old_way():
         help="This specifies the padding strategy for the label when 'patch_sampler' is 'label'. Defaults to 'constant' [full list: https://numpy.org/doc/stable/reference/generated/numpy.pad.html]",
         required=False,
     )
-    # TODO: here is a big caveat. -a/-z require some additional value to be passed,
-    #  like `-a True`. However, __any__ passed string would be converted to True!
-    #  So this would disable flag:
-    #  > gandlf_preprocess -i .. -o .. -c ..
-    #  while all the following would enable flag:
-    #  > gandlf_preprocess -i .. -o .. -c .. -a True
-    #  > gandlf_preprocess -i .. -o .. -c .. -a False     <- !!!
-    #  > gandlf_preprocess -i .. -o .. -c .. -a false
-    #  > gandlf_preprocess -i .. -o .. -c .. -a 1
-    #  > gandlf_preprocess -i .. -o .. -c .. -a 0
-    #  > gandlf_preprocess -i .. -o .. -c .. -a f
-    #  > gandlf_preprocess -i .. -o .. -c .. -a blabla
     parser.add_argument(
         "-a",
         "--applyaugs",
         metavar="",
-        type=bool,
+        type=ast.literal_eval,
         default=False,
         help="This specifies the whether to apply data augmentation during output creation. Defaults to False",
         required=False,
@@ -176,7 +165,7 @@ def old_way():
         "-z",
         "--cropzero",
         metavar="",
-        type=bool,
+        type=ast.literal_eval,
         default=False,
         help="This specifies the whether to apply zero cropping during output creation. Defaults to False",
         required=False,

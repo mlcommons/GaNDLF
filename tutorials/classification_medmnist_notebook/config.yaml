@@ -5,7 +5,6 @@ version:
     maximum: 0.1.0-dev # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
-
 model:
   {
     dimension: 2, # the dimension of the model and dataset: defines dimensionality of computations
