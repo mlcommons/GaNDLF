@@ -137,6 +137,15 @@ bash
 ### Use loggers instead of print
 We use the native `logging` [library](https://docs.python.org/3/library/logging.html) for logs management. This gets automatically configured when GaNDLF gets launched. So, if you are extending the code, please use loggers instead of prints.
 
+Here is an example how `root logger` can be used
+```
+def my_new_cool_function(df: pd.DataFrame):
+    logging.debug("Message for debug file only")
+    logging.info("Hi GaNDLF user, I greet you in the CLI output")
+    logging.error(f"A detailed message about any error if needed. Exception: {str(e)}, params: {params}, df shape: {df.shape}")
+    # print("Hi GaNDLF user!")  # don't use prints please.
+```
+
 Here is an example how logger can be used:
 
 ```
@@ -147,6 +156,7 @@ def my_new_cool_function(df: pd.DataFrame):
     logger.error(f"A detailed message about any error if needed. Exception: {str(e)}, params: {params}, df shape: {df.shape}")
     # print("Hi GaNDLF user!")  # don't use prints please.
 ```
+
 
 ### What and where is logged
 
