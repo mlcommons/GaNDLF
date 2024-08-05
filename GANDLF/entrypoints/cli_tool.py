@@ -12,7 +12,7 @@ from GANDLF import version
 def gandlf(ctx):
     """GANDLF command-line tool."""
     ctx.ensure_object(dict)
-    logger_setup()
+    # logger_setup()
 
 
 # registers subcommands: `gandlf anonymizer`, `gandlf run`, etc.

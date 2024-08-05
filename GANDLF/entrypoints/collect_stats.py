@@ -191,9 +191,16 @@ def _collect_stats(model_dir: str, output_dir: str):
     required=True,
     help="Output directory to save stats and plot",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(model_dir: str, output_dir: str):
+def new_way(model_dir: str, output_dir: str, log_file: str):
     """Collect statistics from different testing/validation combinations from output directory."""
+    logger_setup(log_file)
     _collect_stats(model_dir=model_dir, output_dir=output_dir)
 
 

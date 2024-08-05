@@ -23,9 +23,16 @@ def _verify_install():
 
 
 @click.command()
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way():
+def new_way(log_file):
     """Verify GaNDLF installation."""
+    logger_setup(log_file)
     _verify_install()
 
 
