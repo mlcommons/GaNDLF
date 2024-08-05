@@ -155,9 +155,9 @@ GaNDLF logs are splitted into multiple parts:
 - debug file: all messages are shown 
 - stderr: display `warning`, `error`, or `critical` messages
 
-By default, the logs are flushed to console.
+By default, the logs are saved in the `/tmp/.gandlf` dir.
 The logs are **saved** in the path that is defined by the '--log-file' parameter in the CLI commands.
-If the path is not provided or an error is raised, the logs will be flushed to console.
+
 
 
 
