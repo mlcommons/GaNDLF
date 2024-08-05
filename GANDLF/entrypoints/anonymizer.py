@@ -28,7 +28,7 @@ def _anonymize_images(
     logging.debug(f"{output_file=}")
     logging.debug(f"{config=}")
     logging.debug(f"{modality=}")
-    # run_anonymizer(input_dir, output_file, config, modality)
+    run_anonymizer(input_dir, output_file, config, modality)
 
     logging.info("Finished successfully.")
 
