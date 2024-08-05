@@ -106,8 +106,8 @@ def new_way(
     log_file: str,
 ):
     """Generate training/inference CSV from data directory."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _construct_csv(
         input_dir=input_dir,
         channels_id=channels_id,

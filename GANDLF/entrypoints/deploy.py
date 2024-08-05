@@ -145,8 +145,7 @@ def new_way(
     log_file: str,
 ):
     """Generate frozen/deployable versions of trained GaNDLF models."""
-    if log_file is not None:
-        logger_setup(log_file)
+    logger_setup(log_file)
     _deploy(
         model=model,
         config=config,

@@ -60,8 +60,8 @@ def new_way(
     output_path: Optional[str] = None,
 ):
     """Generate optimized versions of trained GaNDLF models."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _optimize_model(model=model, config=config, output_path=output_path)
 
 

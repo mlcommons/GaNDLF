@@ -51,8 +51,8 @@ def _mine_patches(input_path: str, output_dir: str, config: Optional[str]):
 @append_copyright_to_help
 def new_way(input_csv: str, output_dir: str, log_file: str, config: Optional[str]):
     """Construct patches from whole slide image(s)."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _mine_patches(input_path=input_csv, output_dir=output_dir, config=config)
 
 

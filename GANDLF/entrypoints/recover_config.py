@@ -57,8 +57,8 @@ def _recover_config(model_dir: Optional[str], mlcube: bool, output_file: str):
 def new_way(model_dir, mlcube, output_file, log_file):
     """Recovers a config file from a GaNDLF model. If used from within a deployed GaNDLF MLCube,
     attempts to extract the config from the embedded model."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _recover_config(model_dir=model_dir, mlcube=mlcube, output_file=output_file)
 
 

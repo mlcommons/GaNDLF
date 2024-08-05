@@ -161,8 +161,8 @@ def new_way(
     log_file: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _run(
         config=config,
         input_data=input_data,

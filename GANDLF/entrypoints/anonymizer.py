@@ -28,7 +28,7 @@ def _anonymize_images(
     logging.debug(f"{output_file=}")
     logging.debug(f"{config=}")
     logging.debug(f"{modality=}")
-    run_anonymizer(input_dir, output_file, config, modality)
+    # run_anonymizer(input_dir, output_file, config, modality)
 
     logging.info("Finished successfully.")
 
@@ -71,8 +71,7 @@ def _anonymize_images(
 @append_copyright_to_help
 def new_way(input_dir, config, modality, output_file, log_file):
     """Anonymize images/scans in the data directory."""
-    if log_file is not None:
-        logger_setup(log_file)
+    logger_setup(log_file)
     _anonymize_images(input_dir, output_file, config, modality)
 
 

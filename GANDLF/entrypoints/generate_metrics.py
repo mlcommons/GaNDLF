@@ -70,8 +70,8 @@ def new_way(
     log_file: str,
 ):
     """Metrics calculator."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _generate_metrics(
         input_data=input_data,
         config=config,

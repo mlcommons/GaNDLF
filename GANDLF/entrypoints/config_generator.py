@@ -43,8 +43,8 @@ def _generate_config(config: str, strategy: str, output: str):
 @append_copyright_to_help
 def new_way(config, strategy, output, log_file):
     """Generate multiple GaNDLF configurations based on a single baseline GaNDLF for experimentation."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _generate_config(config, strategy, output)
 
 

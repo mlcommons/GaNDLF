@@ -48,8 +48,8 @@ def _debug_info(verbose: bool):
 @append_copyright_to_help
 def new_way(verbose: bool, log_file):
     """Displays detailed info about system environment: library versions, settings, etc."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _debug_info(verbose=verbose)
 
 

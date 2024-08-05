@@ -99,8 +99,8 @@ def new_way(
     log_file: str,
 ):
     """Generate training/inference data which are preprocessed to reduce resource footprint during computation."""
-    if log_file is not None:
-        logger_setup(log_file)
+
+    logger_setup(log_file)
     _preprocess(
         config=config,
         input_data=input_data,
