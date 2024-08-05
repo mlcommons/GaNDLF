@@ -42,9 +42,17 @@ def _mine_patches(input_path: str, output_dir: str, config: Optional[str]):
     help="config (in YAML) for running the patch miner. Needs 'scale' and 'patch_size' to be defined, "
     "otherwise defaults to 16 and (256, 256), respectively.",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(input_csv: str, output_dir: str, config: Optional[str]):
+def new_way(input_csv: str, output_dir: str, log_file: str, config: Optional[str]):
     """Construct patches from whole slide image(s)."""
+    if log_file is not None:
+        logger_setup(log_file)
     _mine_patches(input_path=input_csv, output_dir=output_dir, config=config)
 
 

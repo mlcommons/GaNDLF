@@ -47,10 +47,18 @@ def _recover_config(model_dir: Optional[str], mlcube: bool, output_file: str):
     type=click.Path(file_okay=True, dir_okay=False),
     help="Path to an output file where the config will be written.",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(model_dir, mlcube, output_file):
+def new_way(model_dir, mlcube, output_file, log_file):
     """Recovers a config file from a GaNDLF model. If used from within a deployed GaNDLF MLCube,
     attempts to extract the config from the embedded model."""
+    if log_file is not None:
+        logger_setup(log_file)
     _recover_config(model_dir=model_dir, mlcube=mlcube, output_file=output_file)
 
 

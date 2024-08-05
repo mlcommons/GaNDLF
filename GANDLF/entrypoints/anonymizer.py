@@ -69,7 +69,7 @@ def _anonymize_images(
     help="Output file which will contain the logs.",
 )
 @append_copyright_to_help
-def new_way(input_dir, config, modality, output_file,log_file):
+def new_way(input_dir, config, modality, output_file, log_file):
     """Anonymize images/scans in the data directory."""
     if log_file is not None:
         logger_setup(log_file)

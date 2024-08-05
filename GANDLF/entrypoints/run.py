@@ -141,6 +141,12 @@ def _run(
     help="Location to save the output of the inference session. Not used for training.",
 )
 @click.option("--raw-input", hidden=True)
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
 def new_way(
     config: str,
@@ -152,8 +158,11 @@ def new_way(
     resume: bool,
     output_path: str,
     raw_input: str,
+    log_file: str,
 ):
     """Semantic segmentation, regression, and classification for medical images using Deep Learning."""
+    if log_file is not None:
+        logger_setup(log_file)
     _run(
         config=config,
         input_data=input_data,

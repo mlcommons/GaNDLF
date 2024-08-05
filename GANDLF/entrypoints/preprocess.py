@@ -82,6 +82,12 @@ def _preprocess(
     is_flag=True,
     help="If passed, applies zero cropping during output creation.",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
 def new_way(
     config: str,
@@ -90,8 +96,11 @@ def new_way(
     label_pad: str,
     apply_augs: bool,
     crop_zero: bool,
+    log_file: str,
 ):
     """Generate training/inference data which are preprocessed to reduce resource footprint during computation."""
+    if log_file is not None:
+        logger_setup(log_file)
     _preprocess(
         config=config,
         input_data=input_data,
