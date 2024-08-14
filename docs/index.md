@@ -3,7 +3,12 @@
 The **G**ener**a**lly **N**uanced **D**eep **L**earning **F**ramework (GaNDLF) for segmentation and classification.
 
 ## Why use GaNDLF?
+GaNDLF was developed as a means to lower the barrier to AI, enabling reproducibility, translation, and deployment.
+As an out-of-the-box solution, GaNDLF alleviates the need to build from scratch, as the user may tackle by modifying
+only **a configuration (config) file** that provide guidelines for the wanted pipeline
+and **CSV inputs** that describe the training data. 
 
+## Range of GaNDLF functionalities:
 - Supports multiple
     - Deep Learning model architectures
     - Channels/modalities 
