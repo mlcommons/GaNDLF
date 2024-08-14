@@ -7,12 +7,13 @@ import yaml
 from typing import Optional
 import click
 from deprecated import deprecated
-from GANDLF.utils.exceptions import AssertionError 
+from GANDLF.utils.exceptions import AssertionError
 from GANDLF.anonymize import run_anonymizer
 from GANDLF.cli import copyrightMessage
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.utils.gandlf_logging import logger_setup
 import unittest
+
 
 def _anonymize_images(
     input_dir: str, output_file: str, config_path: Optional[str], modality: str
@@ -23,16 +24,12 @@ def _anonymize_images(
     config = None
     if config_path and os.path.isfile(config_path):
         config = yaml.safe_load(open(config_path, "r"))
-        
+
     logging.debug(f"{input_dir=}")
     logging.debug(f"{output_file=}")
     logging.debug(f"{config=}")
     logging.debug(f"{modality=}")
-    # run_anonymizer(input_dir, output_file, config, modality)
-
-    
-    assert 1 != 1, "mymessage"
-    
+    run_anonymizer(input_dir, output_file, config, modality)
 
     logging.info("Finished successfully.")
 

@@ -8,8 +8,6 @@ import sys
 import traceback
 
 
-
-
 def _create_tmp_log_file():
     tmp_dir = Path(tempfile.gettempdir())
     log_dir = Path.joinpath(tmp_dir, ".gandlf")
@@ -24,10 +22,14 @@ def _create_log_file(log_file):
 
 
 def gandlf_excepthook(exctype, value, tb):
-    if issubclass(exctype, AssertionError):       
-        logging.exception(f"{exctype.__name__}: {value}\n{''.join(traceback.format_exception(exctype, value, tb))}",exc_info=False)             
+    if issubclass(exctype, AssertionError):
+        logging.exception(
+            f"{exctype.__name__}: {value}\n{''.join(traceback.format_exception(exctype, value, tb))}",
+            exc_info=False,
+        )
     else:
-        sys.__excepthook__(exctype,value,tb)
+        sys.__excepthook__(exctype, value, tb)
+
 
 def _configure_logging_with_logfile(log_file, config_path):
     with resources.open_text("GANDLF", config_path) as file:
