@@ -143,7 +143,8 @@ def my_new_cool_function(df: pd.DataFrame):
     logging.debug("Message for debug file only")
     logging.info("Hi GaNDLF user, I greet you in the CLI output")
     logging.error(f"A detailed message about any error if needed. Exception: {str(e)}, params: {params}, df shape: {df.shape}")
-    # print("Hi GaNDLF user!")  # don't use prints please.
+    # do NOT use normal print statements
+    # print("Hi GaNDLF user!")
 ```
 
 Here is an example how logger can be used:
