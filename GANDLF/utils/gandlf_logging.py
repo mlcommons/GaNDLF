@@ -4,6 +4,10 @@ from pathlib import Path
 from importlib import resources
 import tempfile
 from GANDLF.utils import get_unique_timestamp
+import sys
+import traceback
+
+
 
 
 def _create_tmp_log_file():
@@ -18,6 +22,12 @@ def _create_log_file(log_file):
     log_file = Path(log_file)
     log_file.write_text("Starting GaNDLF logging session \n")
 
+
+def gandlf_excepthook(exctype, value, tb):
+    if issubclass(exctype, AssertionError):       
+        logging.exception(f"{exctype.__name__}: {value}\n{''.join(traceback.format_exception(exctype, value, tb))}",exc_info=False)             
+    else:
+        sys.__excepthook__(exctype,value,tb)
 
 def _configure_logging_with_logfile(log_file, config_path):
     with resources.open_text("GANDLF", config_path) as file:
@@ -43,6 +53,7 @@ def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
     _create_log_file(log_tmp_file)
     _configure_logging_with_logfile(log_tmp_file, config_path)
     logging.info(f"The logs are saved in {log_tmp_file}")
+    sys.excepthook = gandlf_excepthook
 
 
 class InfoOnlyFilter(logging.Filter):
