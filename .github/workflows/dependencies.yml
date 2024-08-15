@@ -1,6 +1,6 @@
 name: Dependencies
 
-on: [workflow_call]
+on: workflow_call
 
 jobs:
   build:
@@ -15,8 +15,8 @@ jobs:
           sudo rm -rf "$ANDROID_SDK_ROOT"
           df -h
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
 
       # Use changed-files-specific action to collect file changes.
       # The following commented condition applied to a step will run that step only if non-docs files have changed.
