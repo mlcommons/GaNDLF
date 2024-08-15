@@ -16,6 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: LS
+        run: |
+          ls -lt
+
       - name: Call reusable workflow to install dependencies
         uses: ./.github/workflows/dependencies.yml
 
