@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Call reusable workflow to install dependencies
-        uses: ./.github/workflows/install-dependencies.yml
+        uses: ./.github/workflows/dependencies.yml
 
       - name: Run mlcube deploy tests
         working-directory: ./testing
