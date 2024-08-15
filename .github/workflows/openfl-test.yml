@@ -9,11 +9,6 @@ on:
   pull_request: {}
 
 jobs:
-  install-dependencies:
-    permissions:
-      contents: none
-    uses: ./.github/workflows/dependencies.yml
-
   openfl-test:
     runs-on: ubuntu-latest
 
@@ -27,8 +22,8 @@ jobs:
           ls -lta
           file ./.github/workflows/dependencies.yml
 
-      # - name: Call reusable workflow to install dependencies
-      #   uses: ./.github/workflows/dependencies.yml
+      - name: Call reusable workflow to install dependencies
+        uses: ./.github/workflows/dependencies.yml
 
       - name: Run generic unit tests to download data and construct CSVs
         if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
