@@ -20,7 +20,7 @@ jobs:
         run: |
           pwd
           ls -lta
-          ls -lt .github/workflows
+          file ./.github/workflows/dependencies.yml
 
       - name: Call reusable workflow to install dependencies
         uses: ./.github/workflows/dependencies.yml
