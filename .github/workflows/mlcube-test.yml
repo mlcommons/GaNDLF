@@ -12,10 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      call-reusable-workflow:
-        uses: ./.github/workflows/dependencies.yml
-        with:
-          node-version: '14'
+      - name: Call reusable workflow to install dependencies
+        uses: ./.github/workflows/install-dependencies.yml
 
       - name: Run mlcube deploy tests
         working-directory: ./testing

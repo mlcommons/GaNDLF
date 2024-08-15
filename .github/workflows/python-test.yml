@@ -13,10 +13,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      call-reusable-workflow:
-        uses: ./.github/workflows/dependencies.yml
-        with:
-          node-version: '14'
+      - name: Call reusable workflow to install dependencies
+        uses: ./.github/workflows/install-dependencies.yml
 
       - name: Run generic unit tests
         if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
