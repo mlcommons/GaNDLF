@@ -1,4 +1,4 @@
-name: Reusable Workflow
+name: Dependencies
 
 on: [workflow_call]
 
