@@ -30,13 +30,13 @@ GaNDLF's primary computational foundation is built on PyTorch, and as such it su
 (venv_gandlf) $> ### subsequent commands go here
 ### PyTorch installation - https://pytorch.org/get-started/previous-versions/#v210
 ## CUDA 12.1
-# (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu121
+# (venv_gandlf) $> pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 ## CUDA 11.8
-# (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118
-## ROCm 5.7
-# (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/rocm5.7
+# (venv_gandlf) $> pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu118
+## ROCm 6.0
+# (venv_gandlf) $> pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/rocm6.0
 ## CPU-only
-# (venv_gandlf) $> pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cpu
+# (venv_gandlf) $> pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
 ```
 
 ### Optional Dependencies 
