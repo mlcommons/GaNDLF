@@ -20,13 +20,13 @@ jobs:
         uses: ./.github/workflows/dependencies
 
       - name: Run generic unit tests to download data and construct CSVs
-        if: ${{steps.changed-files-specific.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml -k "prepare_data_for_ci"
 
       # openfl tests start here
       - name: Run OpenFL tests
-        if: ${{steps.changed-files-specific.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           echo "Removing onnx because of protobuf version conflict"
           pip uninstall onnx -y

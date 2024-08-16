@@ -31,9 +31,9 @@ runs:
       # Use changed-files-specific action to collect file changes.
       # The following commented condition applied to a step will run that step only if non-docs files have changed.
       # It should be applied to all functionality-related steps.
-      # if: ${{steps.changed-files-specific.outputs.other_modified_files_count > 0}}
+      # if: ${{steps.changed-files.outputs.other_modified_files_count > 0}}
       - name: Detect and screen file changes
-        shell: bash
+        # shell: bash
         id: changed-files-specific
         uses: tj-actions/changed-files@v44
         with:
@@ -48,16 +48,18 @@ runs:
             *.md
             LICENSE
             Dockerfile-*
-        run: |
-          echo "other_modified_files_count=$(echo ${{ steps.changed-files-specific.outputs.other_modified_files_count }})" >> $GITHUB_OUTPUT
+        # run: |
+        #   echo "other_modified_files_count=$(echo ${{ steps.changed-files-specific.outputs.other_modified_files_count }})" >> $GITHUB_OUTPUT
 
       - name: Summarize docs and non-docs modifications
+        id: changed-files
         shell: bash
         run: |
           echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
           echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
           echo "Count of non-docs files changed: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}"
           echo "If only-modified is triggered: ${{ steps.changed-files-specific.outputs.only_modified }}"
+          echo "other_modified_files_count=$(echo ${{ steps.changed-files-specific.outputs.other_modified_files_count }})" >> $GITHUB_OUTPUT
 
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
@@ -72,14 +74,14 @@ runs:
 
       - name: Set up Python 3.9
         # shell: bash
-        if: ${{steps.changed-files-specific.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
       - name: Install dependencies and package
         shell: bash
-        if: ${{steps.changed-files-specific.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           sudo apt-get update
           sudo apt-get install libvips libvips-tools -y
