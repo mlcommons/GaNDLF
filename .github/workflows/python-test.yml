@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Call reusable workflow to install dependencies
-        uses: ./.github/workflows/dependencies.yml
+        uses: ./.github/workflows/dependencies
 
       - name: Run generic unit tests
         if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
