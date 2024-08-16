@@ -356,7 +356,7 @@ def validate_network(
                     if image.shape[-1] > 1:
                         result_image = sitk.GetImageFromArray(pred_mask)
                     else:
-                        result_image = sitk.GetImageFromArray(pred_mask.squeeze(0))
+                        result_image = sitk.GetImageFromArray(pred_mask.squeeze(-1))
                     result_image.CopyInformation(img_for_metadata)
 
                     # this handles cases that need resampling/resizing
