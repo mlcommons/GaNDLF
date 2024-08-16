@@ -16,10 +16,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Call reusable workflow to install dependencies
+        id: dependencies
         uses: ./.github/workflows/dependencies
 
       - name: Run mlcube deploy tests
         working-directory: ./testing
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           sh test_deploy.sh

@@ -17,44 +17,44 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Call reusable workflow to install dependencies
-        id: changed-files
+        id: dependencies
         uses: ./.github/workflows/dependencies
 
       - name: Run generic unit tests
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml -k "generic"
       - name: Run classification unit tests with histology
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "classification and histology"
       - name: Run classification unit tests
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "classification and not histology"
       - name: Run segmentation unit tests
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "segmentation and not transunet"
       - name: Run regression unit tests
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "regression"
       - name: Run transunet unit tests
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "transunet"
       - name: Run entrypoints tests
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "entrypoints"
       - name: Run test for update_version
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "update_version"
 
       - name: Upload coverage
-        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
