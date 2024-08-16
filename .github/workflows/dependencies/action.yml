@@ -16,6 +16,7 @@ runs:
     using: "composite"    
     steps:
       - name: Free space
+        shell: bash
         run: |
           df -h
           sudo rm -rf /opt/ghc
@@ -32,6 +33,7 @@ runs:
       # It should be applied to all functionality-related steps.
       # if: steps.changed-files-specific.outputs.only_modified == 'false'
       - name: Detect and screen file changes
+        shell: bash
         id: changed-files-specific
         uses: tj-actions/changed-files@v44
         with:
@@ -48,6 +50,7 @@ runs:
             Dockerfile-*
 
       - name: Summarize docs and non-docs modifications
+        shell: bash
         run: |
           echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
           echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
@@ -55,6 +58,7 @@ runs:
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
       - name: Cache pip
+        shell: bash
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
@@ -63,12 +67,14 @@ runs:
             ${{ runner.os }}-pip-
 
       - name: Set up Python 3.9
+        shell: bash
         if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
       - name: Install dependencies and package
+        shell: bash
         if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
         run: |
           sudo apt-get update
