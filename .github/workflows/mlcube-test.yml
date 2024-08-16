@@ -9,16 +9,14 @@ on:
 
 jobs:
   test-deploy:
-    uses: ./.github/workflows/dependencies.yml
-    
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Call reusable workflow to install dependencies
-      #   uses: ./.github/workflows/dependencies.yml
+      - name: Call reusable workflow to install dependencies
+        uses: ./.github/workflows/dependencies.yml
 
       - name: Run mlcube deploy tests
         working-directory: ./testing

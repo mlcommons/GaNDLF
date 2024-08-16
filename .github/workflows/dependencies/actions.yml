@@ -1,12 +1,19 @@
-name: dependencies
+name: 'Install Dependencies'
 
-on: 
-  workflow_call:
+description: 'Setup and install dependencies for GaNDLF'
 
-jobs:
-  install_dependencies:
-    runs-on: ubuntu-latest
-    
+outputs:
+    files-changed:
+      description: "Which files have changed"
+      value: ${{ steps.changed-files-specific.outputs.only_modified }}
+# on: 
+#   workflow_call:
+
+# jobs:
+#   install_dependencies:
+#     runs-on: ubuntu-latest
+runs:
+    using: "composite"    
     steps:
       - name: Free space
         run: |
