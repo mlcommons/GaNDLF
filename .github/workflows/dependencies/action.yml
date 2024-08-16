@@ -5,7 +5,7 @@ description: 'Setup and install dependencies for GaNDLF'
 outputs:
     files-changed:
       description: "Which files have changed"
-      value: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}
+      value: ${{ steps.changed-files.outputs.other_modified_files_count }}
 # on: 
 #   workflow_call:
 
