@@ -33,7 +33,7 @@ runs:
       # It should be applied to all functionality-related steps.
       # if: steps.changed-files-specific.outputs.only_modified == 'false'
       - name: Detect and screen file changes
-        shell: bash
+        # shell: bash
         id: changed-files-specific
         uses: tj-actions/changed-files@v44
         with:
@@ -58,7 +58,7 @@ runs:
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
       - name: Cache pip
-        shell: bash
+        # shell: bash
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
