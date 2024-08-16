@@ -5,7 +5,7 @@ description: 'Setup and install dependencies for GaNDLF'
 outputs:
     files-changed:
       description: "Which files have changed"
-      value: ${{ steps.changed-files-specific.outputs.only_modified }}
+      value: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}
 # on: 
 #   workflow_call:
 
@@ -56,6 +56,7 @@ runs:
           echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
           echo "Count of non-docs files changed: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}"
           echo "If only-modified is triggered: ${{ steps.changed-files-specific.outputs.only_modified }}"
+          # echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
 
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
