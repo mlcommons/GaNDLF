@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Call reusable workflow to install dependencies
+        id: changed-files
         uses: ./.github/workflows/dependencies
 
       - name: Run generic unit tests
