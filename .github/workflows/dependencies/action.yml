@@ -33,7 +33,7 @@ runs:
       # It should be applied to all functionality-related steps.
       # if: ${{steps.changed-files-specific.outputs.other_modified_files_count > 0}}
       - name: Detect and screen file changes
-        # shell: bash
+        shell: bash
         id: changed-files-specific
         uses: tj-actions/changed-files@v44
         with:
@@ -48,6 +48,8 @@ runs:
             *.md
             LICENSE
             Dockerfile-*
+        run: |
+          echo "other_modified_files_count=$(echo ${{ steps.changed-files-specific.outputs.other_modified_files_count }})" >> $GITHUB_OUTPUT
 
       - name: Summarize docs and non-docs modifications
         shell: bash
@@ -56,7 +58,6 @@ runs:
           echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
           echo "Count of non-docs files changed: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}"
           echo "If only-modified is triggered: ${{ steps.changed-files-specific.outputs.only_modified }}"
-          # echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
 
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
