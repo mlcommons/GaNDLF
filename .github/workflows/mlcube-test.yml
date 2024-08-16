@@ -20,6 +20,6 @@ jobs:
 
       - name: Run mlcube deploy tests
         working-directory: ./testing
-        if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+        if: steps.changed-files-specific.outputs.other_modified_files_count > 0 # Run on any non-docs change
         run: |
           sh test_deploy.sh
