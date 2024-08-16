@@ -41,11 +41,7 @@ runs:
             .github/*.md
             .github/ISSUE_TEMPLATE/*.md
             .github/workflows/devcontainer.yml
-            .github/workflows/devcontainer.yml
-            .github/workflows/main.yml
-            .github/workflows/mlcube-test.yml
-            .github/workflows/openfl-test.yml
-            .github/workflows/python-test.yml
+            .github/workflows/docker-image.yml
             .devcontainer/**
             docs/**
             mlcube/**
