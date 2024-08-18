@@ -1,11 +1,12 @@
 [tool.black]
-include = 'gandlf_*'
+line-length = 88
 extend-exclude = '''
-/(
+(
   testing/data
   | .*.md
-)/
+)
 '''
+skip_magic_trailing_comma = true
 
 [tool.coverage.run]
 source = ["./GANDLF"]
@@ -13,7 +14,6 @@ omit = [
   ".github/*",
   ".devcontainer/*",
   "./setup.py",
-  "./gandlf_*",
   "./testing/conftest.py",
   "./tutorials/*",
 ]

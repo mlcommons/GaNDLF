@@ -4,4 +4,4 @@ exclude *.toml
 include setup.py
 include .dockerignore
 include Dockerfile-*
-include gandlf_*
+include logging_config.yml

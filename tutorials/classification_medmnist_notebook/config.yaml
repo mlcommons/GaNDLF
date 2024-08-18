@@ -2,10 +2,9 @@
 version:
   {
     minimum: 0.0.14,
-    maximum: 0.0.19 # this should NOT be made a variable, but should be tested after every tag is created
+    maximum: 0.1.0-dev # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
-
 model:
   {
     dimension: 2, # the dimension of the model and dataset: defines dimensionality of computations

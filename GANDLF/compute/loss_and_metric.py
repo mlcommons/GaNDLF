@@ -1,5 +1,6 @@
 import sys
-from typing import Dict, Tuple
+import warnings
+from typing import Dict, Tuple, Union
 from GANDLF.losses import global_losses_dict
 from GANDLF.metrics import global_metrics_dict
 import torch
@@ -13,7 +14,7 @@ def get_metric_output(
     prediction: torch.Tensor,
     target: torch.Tensor,
     params: dict,
-) -> float:
+) -> Union[float, list]:
     """
     This function computes the metric output for a given metric function, prediction and target.
 
@@ -36,6 +37,12 @@ def get_metric_output(
         if len(temp) > 1:
             return temp
         else:
+            # TODO: this branch is extremely age case and is buggy.
+            #  Overall the case when metric returns a list but of length 1 is very rare. The only case is when
+            #  the metric returns Nx.. tensor (i.e. without aggregation by elements) and batch_size==N==1. This branch
+            #  would definitely fail for such a metrics like
+            #  MulticlassAccuracy(num_classes=3, multidim_average="samplewise")
+            #  Maybe the best solution is to raise an error here if metric is configured to return samplewise results?
             return metric_output.item()
 
 
@@ -60,13 +67,10 @@ def get_loss_and_metrics(
         loss_function = global_losses_dict[list(params["loss_function"].keys())[0]]
     else:
         loss_str_lower = params["loss_function"].lower()
-        if loss_str_lower in global_losses_dict:
-            loss_function = global_losses_dict[loss_str_lower]
-        else:
-            sys.exit(
-                "WARNING: Could not find the requested loss function '"
-                + params["loss_function"]
-            )
+        assert (
+            loss_str_lower in global_losses_dict
+        ), f"Could not find the requested loss function '{params['loss_function']}'"
+        loss_function = global_losses_dict[loss_str_lower]
 
     loss = 0
     # specialized loss function for sdnet
@@ -115,41 +119,38 @@ def get_loss_and_metrics(
         loss_kld = global_losses_dict["kld"](prediction[2], prediction[3])
         loss_cycle = global_losses_dict["mse"](prediction[2], prediction[4], None)
         loss = 0.01 * loss_kld + loss_reco + 10 * loss_seg + loss_cycle
+    elif deep_supervision_model:
+        # this is for models that have deep-supervision
+        for i, _ in enumerate(prediction):
+            # loss is calculated based on resampled "soft" labels using a pre-defined weights array
+            loss += (
+                loss_function(prediction[i], ground_truth_resampled[i], params)
+                * loss_weights[i]
+            )
     else:
-        if deep_supervision_model:
-            # this is for models that have deep-supervision
-            for i, _ in enumerate(prediction):
-                # loss is calculated based on resampled "soft" labels using a pre-defined weights array
-                loss += (
-                    loss_function(prediction[i], ground_truth_resampled[i], params)
-                    * loss_weights[i]
-                )
-        else:
-            loss = loss_function(prediction, target, params)
+        loss = loss_function(prediction, target, params)
     metric_output = {}
 
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_lower = metric.lower()
         metric_output[metric] = 0
-        if metric_lower in global_metrics_dict:
-            metric_function = global_metrics_dict[metric_lower]
-            if sdnet_check:
-                metric_output[metric] = get_metric_output(
-                    metric_function, prediction[0], target.squeeze(-1), params
-                )
-            else:
-                if deep_supervision_model:
-                    for i, _ in enumerate(prediction):
-                        metric_output[metric] += get_metric_output(
-                            metric_function,
-                            prediction[i],
-                            ground_truth_resampled[i],
-                            params,
-                        )
+        if metric_lower not in global_metrics_dict:
+            warnings.warn("WARNING: Could not find the requested metric '" + metric)
+            continue
 
-                else:
-                    metric_output[metric] = get_metric_output(
-                        metric_function, prediction, target, params
-                    )
+        metric_function = global_metrics_dict[metric_lower]
+        if sdnet_check:
+            metric_output[metric] = get_metric_output(
+                metric_function, prediction[0], target.squeeze(-1), params
+            )
+        elif deep_supervision_model:
+            for i, _ in enumerate(prediction):
+                metric_output[metric] += get_metric_output(
+                    metric_function, prediction[i], ground_truth_resampled[i], params
+                )
+        else:
+            metric_output[metric] = get_metric_output(
+                metric_function, prediction, target, params
+            )
     return loss, metric_output

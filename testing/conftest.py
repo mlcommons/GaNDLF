@@ -1,5 +1,12 @@
 import os, pathlib, pytest
+
+from click.testing import CliRunner
 from pytest import fixture
+
+from .test_full import (
+    prerequisites_hook_download_data,
+    prerequisites_constructTrainingCSV,
+)
 
 
 def pytest_addoption(parser):
@@ -11,6 +18,12 @@ def pytest_addoption(parser):
 @fixture()
 def device(request):
     return request.config.getoption("--device")
+
+
+# Fixture for Click's CliRunner to test Click commands
+@pytest.fixture
+def cli_runner():
+    return CliRunner()
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -27,3 +40,11 @@ def pytest_runtest_makereport(item, call):
         mode = "a" if os.path.exists(log_filename) else "w"
         with open(log_filename, mode) as f:
             f.write(rep.longreprtext + "\n")
+
+
+def pytest_sessionstart(session):
+    """
+    This hook is executed before the pytest session starts.
+    """
+    prerequisites_hook_download_data()
+    prerequisites_constructTrainingCSV()

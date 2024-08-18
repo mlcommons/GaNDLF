@@ -15,8 +15,8 @@ mkdir -p test_deploy
 cd test_deploy
 
 # Download the data
-FILENAME=y8162xkq1zz5555ye3pwadry2m2e39bs.zip
-wget https://upenn.box.com/shared/static/$FILENAME
+FILENAME=data.zip
+wget https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT --output-document=$FILENAME
 unzip $FILENAME
 mv data/3d_rad_segmentation .
 rm $FILENAME
@@ -42,11 +42,11 @@ cp ../../samples/config_getting_started_segmentation_rad3d.yaml .
 #### Training ####
 ##################
 
-gandlf_run \
+gandlf run \
   -c ./config_getting_started_segmentation_rad3d.yaml \
   -i ./data.csv \
   -m ./trained_model_output \
-  -t True \
+  -t \
   -d cpu
 
 # remove data.csv to assume that we need a custom script with gandlf deploy
@@ -56,25 +56,27 @@ rm data.csv
 #### deploy ####
 ################
 
+echo "Starting model deploy..."
 # deploy model
 mkdir model_mlcube
 cp $MODEL_MLCUBE_TEMPLATE model_mlcube/mlcube.yaml
 
-gandlf_deploy \
+gandlf deploy \
   -c ./config_getting_started_segmentation_rad3d.yaml \
   -m ./trained_model_output \
   --target docker \
   --mlcube-root ./model_mlcube \
   -o ./built_model_mlcube \
   --mlcube-type model \
-  -g False \
+  --no-gpu \
   --entrypoint $MODEL_MLCUBE_ENTRYPOINT
 
+echo "Starting metrics deploy..."
 # deploy metrics
 mkdir metrics_mlcube
 cp $METRICS_MLCUBE_TEMPLATE metrics_mlcube/mlcube.yaml
 
-gandlf_deploy \
+gandlf deploy \
   --target docker \
   --mlcube-root ./metrics_mlcube \
   -o ./built_metrics_mlcube \
@@ -85,24 +87,30 @@ gandlf_deploy \
 #### run pipeline ####
 ######################
 
+echo "Starting model pipeline run..."
+
 mlcube run \
     --mlcube ./built_model_mlcube \
     --task infer \
-    data_path=../../3d_rad_segmentation \
-    output_path=../../predictions
+    input-data=../../3d_rad_segmentation \
+    output-path=../../predictions
+
+echo "Starting metrics pipeline run..."
 
 mlcube run \
     --mlcube ./built_metrics_mlcube \
     --task evaluate \
     predictions=../../predictions \
     labels=../../3d_rad_segmentation \
-    output_path=../../results.yaml \
-    parameters_file=../../config_getting_started_segmentation_rad3d.yaml
+    output-file=../../results.yaml \
+    config=../../config_getting_started_segmentation_rad3d.yaml
 
 
 ###############
 #### check ####
 ###############
+
+echo "Checking results..."
 
 if [ -f "results.yaml" ]; then
     echo "Success"

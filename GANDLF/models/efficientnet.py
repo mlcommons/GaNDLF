@@ -385,11 +385,7 @@ class EfficientNet(ModelBase):
         scale_params (dict) - A dictionary defining scaling of depth and width for the model.
     """
 
-    def __init__(
-        self,
-        parameters: dict,
-        scale_params,  # how to scale depth and width
-    ):
+    def __init__(self, parameters: dict, scale_params):  # how to scale depth and width
         super(EfficientNet, self).__init__(parameters)
 
         # check/define defaults
@@ -398,8 +394,6 @@ class EfficientNet(ModelBase):
             self.output_size = (1, 1)
         elif self.n_dimensions == 3:
             self.output_size = (1, 1, 1)
-        else:
-            sys.exit("Only 2D or 3D convolutions are supported.")
         if self.Norm is None:
             sys.stderr.write(
                 "Warning: efficientnet is not defined without a normalization layer"

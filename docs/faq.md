@@ -5,13 +5,13 @@ This page contains answers to frequently asked questions about GaNDLF.
 
 The [usage guide](https://mlcommons.github.io/GaNDLF/usage) provides a good starting point for you to understand the application of GaNDLF. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
-### Why do I get the error `pkg_resources.DistributionNotFound: The 'GANDLF' distribution was not found`?
+### Why do I get the error `importlib.metadata.PackageNotFoundError: GANDLF`?
 
 This means that GaNDLF was not installed correctly. Please ensure you have followed the [installation guide](https://mlcommons.github.io/GaNDLF/setup) properly.
 
 ### Why is GaNDLF not working?
 
-Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has been done correctly by running `python ./gandlf_verifyInstall` after activating the correct virtual environment. If you are still having issues, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
+Verify that [the installation](https://mlcommons.github.io/GaNDLF/setup) has been done correctly by running `gandlf verify-install` after activating the correct virtual environment. If you are still having issues, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=), and we will do our best to address it ASAP.
 
 ### Which parts of a GaNDLF configuration are customizable?
 
@@ -32,8 +32,9 @@ If you have `data_preprocessing` enabled, GaNDLF will load all of the resized im
 ### How can I resume training from a previous checkpoint?
 
 GaNDLF allows you to resume training from a previous checkpoint in 2 ways:
-- By using the `--resume` CLI parameter in `gandlf_run`, only the model weights and state dictionary will be preserved, but parameters and data are taken from the new options in the CLI. This is helpful when you are updated the training data or **some** compatible options in the parameters.
-- If both `--resume` and `--reset` are `False` in `gandlf_run`, the model weights, state dictionary, and all previously saved information (parameters, training/validation/testing data) is used to resume training.
+- By using the `--resume` CLI parameter in `gandlf run`, only the model weights and state dictionary will be preserved, but parameters and data are taken from the new options in the CLI. This is helpful when you are updated the training data or **some** compatible options in the parameters.
+<!-- TODO: Is that true? Do we resume run if both flags are False??-->
+- If both `--resume` and `--reset` are skipped in `gandlf run`, the model weights, state dictionary, and all previously saved information (parameters, training/validation/testing data) is used to resume training.
 
 ### How can I update GaNDLF?
 

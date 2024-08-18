@@ -1,8 +1,8 @@
 # affix version
 version:
   {
-    minimum: 0.0.19,
-    maximum: 0.0.19 # this should NOT be made a variable, but should be tested after every tag is created
+    minimum: 0.1.0-dev,
+    maximum: 0.1.0-dev # this should NOT be made a variable, but should be tested after every tag is created
   }
 # Choose the model parameters here
 model:
@@ -14,6 +14,7 @@ model:
     final_layer: None, # can be either sigmoid, softmax or none (none == regression)
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
+    class_list: [0,1,2], # this is to classify 3 classes, denoted by 0,1,2 in the main csv file - change as needed
   }
 # metrics to evaluate the validation performance
 metrics:

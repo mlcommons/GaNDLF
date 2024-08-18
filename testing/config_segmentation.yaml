@@ -1,9 +1,9 @@
-# Choose the segmentation model here 
+# Choose the segmentation model here
 # options: unet, resunet, fcn
 version:
   {
     minimum: 0.0.14,
-    maximum: 0.0.19
+    maximum: 0.1.0-dev
   }
 model:
   {
@@ -12,7 +12,7 @@ model:
     architecture: resunet, # options: unet, resunet, fcn, uinc
     final_layer: sigmoid, # can be either sigmoid, softmax or none (none == regression)
     norm_type: instance, # can be either batch or instance
-    class_list: [0,255], # Set the list of labels the model should train on and predict
+    class_list: [0, 255], # Set the list of labels the model should train on and predict
     amp: False, # Set if you want to use Automatic Mixed Precision for your operations or not - options: True, False
     # n_channels: 3, # set the input channels - useful when reading RGB or images that have vectored pixel types
   }
@@ -21,17 +21,12 @@ metrics:
   - precision
   - iou
   - f1
-  - recall: {
-      average: macro,
-    }
+  - recall: { average: macro }
 verbose: True
-inference_mechanism: {
-  grid_aggregator_overlap: average,
-  patch_overlap: 0,
-}
+inference_mechanism: { grid_aggregator_overlap: average, patch_overlap: 0 }
 modality: rad
-# Patch size during training - 2D patch for breast images since third dimension is not patched 
-patch_size: [128,128]
+# Patch size during training - 2D patch for breast images since third dimension is not patched
+patch_size: [128, 128]
 # Number of epochs
 num_epochs: 1
 patience: 1
@@ -51,58 +46,52 @@ optimizer: adam
 # the value of 'k' for cross-validation, this is the percentage of total training data to use as validation;
 # randomized split is performed using sklearn's KFold method
 # for single fold run, use '-' before the fold number
-nested_training:
-  {
+nested_training: {
     testing: -5, # this controls the holdout data splits for final model evaluation; use '1' if this is to be disabled
-    validation: -5 # this controls the validation data splits for model training
+    validation: -5, # this controls the validation data splits for model training
   }
 # various data augmentation techniques
 # options: affine, elastic, downsample, motion, ghosting, bias, blur, gaussianNoise, swap
 # keep/edit as needed
 # all transforms: https://torchio.readthedocs.io/transforms/transforms.html?highlight=transforms
-data_augmentation:
-  {
-  # 'spatial':{
-  #   'probability': 0.5
-  # },
-  # 'kspace':{
-  #   'probability': 0.5
-  # },
-  # 'bias':{
-  #   'probability': 0.5
-  # },
-  # 'blur':{
-  #   'probability': 0.5
-  # },
-  # 'noise':{
-  #   'probability': 0.5
-  # },
-  # 'swap':{
-  #   'probability': 0.5
-  # }
-  }
-data_preprocessing:
-  {
+data_augmentation: {}
+# 'spatial':{
+#   'probability': 0.5
+# },
+# 'kspace':{
+#   'probability': 0.5
+# },
+# 'bias':{
+#   'probability': 0.5
+# },
+# 'blur':{
+#   'probability': 0.5
+# },
+# 'noise':{
+#   'probability': 0.5
+# },
+# 'swap':{
+#   'probability': 0.5
+# }
+data_preprocessing: {
     # 'threshold':{
-    #   'min': 10, 
+    #   'min': 10,
     #   'max': 75
     # },
     # 'clip':{
-    #   'min': 10, 
+    #   'min': 10,
     #   'max': 75
-    # }, 
-    'normalize',
+    # },
+    "normalize",
     # 'resample':{
     #   'resolution': [1,2,3]
     # },
     #'resize': [128,128], # this is generally not recommended, as it changes image properties in unexpected ways
   }
 # data postprocessing node
-data_postprocessing:
-  {
-    # 'largest_component',
-    # 'hole_filling'
-  }
+data_postprocessing: {}
+# 'largest_component',
+# 'hole_filling'
 # parallel training on HPC - here goes the command to prepend to send to a high performance computing
 # cluster for parallel computing during multi-fold training
 # not used for single fold training

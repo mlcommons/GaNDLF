@@ -3,6 +3,7 @@ import gdown, zipfile, os, csv, random, copy, shutil, yaml, torch, pytest
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
+import logging
 
 from pydicom.data import get_testdata_file
 import cv2
@@ -32,6 +33,7 @@ from GANDLF.cli import (
     recover_config,
     post_training_model_optimization,
     generate_metrics_dict,
+    split_data_and_save_csvs,
 )
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
@@ -43,6 +45,8 @@ from GANDLF.data.post_process import (
     cca,
 )
 from GANDLF.anonymize import run_anonymizer
+from GANDLF.entrypoints.debug_info import _debug_info
+
 
 device = "cpu"
 ## global defines
@@ -57,6 +61,7 @@ all_models_segmentation = [
     "uinc",
     "msdnet",
     "imagenet_unet",
+    "dynunet",
 ]
 # pre-defined regression/classification model types for testing
 all_models_regression = [
@@ -108,7 +113,7 @@ steps to follow to write tests:
 """
 
 
-def test_generic_download_data():
+def prerequisites_hook_download_data():
     print("00: Downloading the sample data")
     urlToDownload = "https://drive.google.com/uc?id=1c4Yrv-jnK6Tk7Ne1HmMTChv-4nYk43NT"
 
@@ -132,7 +137,7 @@ def test_generic_download_data():
     print("passed")
 
 
-def test_generic_constructTrainingCSV():
+def prerequisites_constructTrainingCSV():
     print("01: Constructing training CSVs")
     # delete previous csv files
     files = os.listdir(inputDir)
@@ -183,9 +188,7 @@ def test_generic_constructTrainingCSV():
         with open(
             inputDir + "/train_" + application_data + ".csv", "r"
         ) as read_f, open(
-            inputDir + "/train_" + application_data_regression + ".csv",
-            "w",
-            newline="",
+            inputDir + "/train_" + application_data_regression + ".csv", "w", newline=""
         ) as write_reg, open(
             inputDir + "/train_" + application_data_classification + ".csv",
             "w",
@@ -212,6 +215,13 @@ def test_generic_constructTrainingCSV():
                 i += 1
 
 
+def test_prepare_data_for_ci():
+    # is used to run pytest session (i.e. to prepare environment, download data etc)
+    # without any real test execution
+    # to see what happens, refer to `conftest.py:pytest_sessionstart`
+    pass
+
+
 # # these are helper functions to be used in other tests
 def sanitize_outputDir():
     print("02_1: Sanitizing outputDir")
@@ -232,9 +242,7 @@ def write_temp_config_path(parameters_to_write):
     return temp_config_path
 
 
-# # these are helper functions to be used in other tests
-
-
+# these are helper functions to be used in other tests
 def test_train_segmentation_rad_2d(device):
     print("03: Starting 2D Rad segmentation tests")
     # read and parse csv
@@ -267,6 +275,13 @@ def test_train_segmentation_rad_2d(device):
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
+
+        if model == "dynunet":
+            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
+            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
+            parameters["model"]["strides"] = (1, 1, 1, 1)
+            parameters["model"]["deep_supervision"] = False
+
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -358,6 +373,13 @@ def test_train_segmentation_rad_3d(device):
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
+
+        if model == "dynunet":
+            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
+            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
+            parameters["model"]["strides"] = (1, 1, 1, 1)
+            parameters["model"]["deep_supervision"] = False
+
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -475,7 +497,7 @@ def test_train_regression_brainage_rad_2d(device):
     parameters["model"]["architecture"] = "brain_age"
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters_temp = copy.deepcopy(parameters)
+    # parameters_temp = copy.deepcopy(parameters)
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
     sanitize_outputDir()
     TrainingManager(
@@ -747,7 +769,7 @@ def test_train_inference_optimize_classification_rad_3d(device):
     parameters["model"]["architecture"] = all_models_regression[0]
     parameters["model"]["onnx_export"] = False
     parameters["model"]["print_summary"] = False
-    parameters_temp = copy.deepcopy(parameters)
+    # parameters_temp = copy.deepcopy(parameters)
     sanitize_outputDir()
     TrainingManager(
         dataframe=training_data,
@@ -761,7 +783,9 @@ def test_train_inference_optimize_classification_rad_3d(device):
     # file_config_temp = write_temp_config_path(parameters_temp)
     model_path = os.path.join(outputDir, all_models_regression[0] + "_best.pth.tar")
     config_path = os.path.join(outputDir, "parameters.pkl")
-    optimization_result = post_training_model_optimization(model_path, config_path)
+    optimization_result = post_training_model_optimization(
+        model_path, config_path, outputDir
+    )
     assert optimization_result == True, "Optimization should pass"
 
     ## testing inference
@@ -837,6 +861,13 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     parameters["patch_size"] = patch_size["3D"]
     parameters["model"]["dimension"] = 3
     parameters["model"]["final_layer"] = "logits"
+    # loop through selected models and train for single epoch
+    model = all_models_regression[0]
+    parameters["model"]["architecture"] = model
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    ## add stratified splitting
+    parameters["nested_training"]["stratified"] = True
 
     # read and parse csv
     training_data, parameters["headers"] = parseTrainingCSV(
@@ -844,20 +875,30 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
     )
     parameters["model"]["num_channels"] = len(parameters["headers"]["channelHeaders"])
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
-    # loop through selected models and train for single epoch
-    model = all_models_regression[0]
-    parameters["model"]["architecture"] = model
-    parameters["model"]["onnx_export"] = False
-    parameters["model"]["print_summary"] = False
-    sanitize_outputDir()
-    TrainingManager(
-        dataframe=training_data,
-        outputDir=outputDir,
-        parameters=parameters,
-        device=device,
-        resume=False,
-        reset=True,
-    )
+    # duplicate the data to test stratified sampling
+    training_data_duplicate = training_data._append(training_data)
+    for _ in range(1):
+        training_data_duplicate = training_data_duplicate._append(
+            training_data_duplicate
+        )
+    training_data_duplicate.reset_index(drop=True, inplace=True)
+    # ensure subjects are not duplicated
+    training_data_duplicate["SubjectID"] = training_data_duplicate.index
+
+    # ensure every part of the code is tested
+    for folds in [2, 1, -5]:
+        ## add stratified folding information
+        parameters["nested_training"]["testing"] = folds
+        parameters["nested_training"]["validation"] = folds if folds != 1 else -5
+        sanitize_outputDir()
+        TrainingManager(
+            dataframe=training_data_duplicate,
+            outputDir=outputDir,
+            parameters=parameters,
+            device=device,
+            resume=False,
+            reset=True,
+        )
     ## this is to test if inference can run without having ground truth column
     training_data.drop("ValueToPredict", axis=1, inplace=True)
     training_data.drop("Label", axis=1, inplace=True)
@@ -868,7 +909,6 @@ def test_train_inference_classification_with_logits_single_fold_rad_3d(device):
         testingDir + "/config_classification.yaml", version_check_flag=False
     )
     training_data, parameters["headers"] = parseTrainingCSV(temp_infer_csv)
-    parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["output_dir"] = outputDir  # this is in inference mode
     parameters["modality"] = "rad"
     parameters["patch_size"] = patch_size["3D"]
@@ -943,8 +983,7 @@ def test_train_scheduler_classification_rad_2d(device):
     # loop through selected models and train for single epoch
     for scheduler in global_schedulers_dict:
         parameters = ConfigManager(
-            testingDir + "/config_classification.yaml",
-            version_check_flag=False,
+            testingDir + "/config_classification.yaml", version_check_flag=False
         )
         parameters["modality"] = "rad"
         parameters["patch_size"] = patch_size["2D"]
@@ -1266,8 +1305,7 @@ def test_train_losses_segmentation_rad_2d(device):
 def test_generic_config_read():
     print("24: Starting testing reading configuration")
     parameters = ConfigManager(
-        os.path.join(baseConfigDir, "config_all_options.yaml"),
-        version_check_flag=False,
+        os.path.join(baseConfigDir, "config_all_options.yaml"), version_check_flag=False
     )
     parameters["data_preprocessing"]["resize_image"] = [128, 128]
 
@@ -1459,9 +1497,7 @@ def test_generic_cli_function_mainrun(device):
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = [
-        "dice",
-    ]
+    parameters["metrics"] = ["dice"]
     parameters["model"]["architecture"] = "unet"
 
     file_config_temp = write_temp_config_path(parameters)
@@ -1469,13 +1505,7 @@ def test_generic_cli_function_mainrun(device):
     file_data = os.path.join(inputDir, "train_2d_rad_segmentation.csv")
 
     main_run(
-        file_data,
-        file_config_temp,
-        outputDir,
-        True,
-        device,
-        resume=False,
-        reset=True,
+        file_data, file_config_temp, outputDir, True, device, resume=False, reset=True
     )
     sanitize_outputDir()
 
@@ -1690,21 +1720,11 @@ def test_generic_preprocess_functions():
 
     cropper = global_preprocessing_dict["crop"]([64, 64, 64])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (
-        1,
-        128,
-        128,
-        128,
-    ), "Cropping should work"
+    assert input_transformed.shape == (1, 128, 128, 128), "Cropping should work"
 
     cropper = global_preprocessing_dict["centercrop"]([128, 128, 128])
     input_transformed = cropper(input_tensor)
-    assert input_transformed.shape == (
-        1,
-        128,
-        128,
-        128,
-    ), "Center-crop should work"
+    assert input_transformed.shape == (1, 128, 128, 128), "Center-crop should work"
 
     # test pure morphological operations
     input_tensor_3d = torch.rand(1, 1, 256, 256, 256)
@@ -1741,10 +1761,14 @@ def test_generic_preprocess_functions():
     ## image rescaling test
     input_tensor = torch.randint(0, 256, (1, 64, 64, 64))
     # try out different options
+    input_tensor_min, input_tensor_max = (
+        input_tensor.min().item(),
+        input_tensor.max().item(),
+    )
     for params in [
         {},
         None,
-        {"in_min_max": [5, 250], "out_min_max": [-1, 2]},
+        {"in_min_max": [input_tensor_min, input_tensor_max], "out_min_max": [-1, 2]},
         {"out_min_max": [0, 1], "percentiles": [5, 95]},
     ]:
         rescaler = global_preprocessing_dict["rescale"](params)
@@ -1893,11 +1917,7 @@ def test_generic_augmentation_functions():
 
     # additional test for elastic
     params_elastic = params_all_preprocessing_and_augs["data_augmentation"]["elastic"]
-    for key_to_pop in [
-        "num_control_points",
-        "max_displacement",
-        "locked_borders",
-    ]:
+    for key_to_pop in ["num_control_points", "max_displacement", "locked_borders"]:
         params_elastic.pop(key_to_pop, None)
     output_tensor = global_augs_dict["elastic"](params_elastic)(input_tensor)
     assert output_tensor != None, "Augmentation for base elastic transform should work"
@@ -2043,8 +2063,7 @@ def test_generic_one_hot_logic():
 
     # check combined foreground
     combined_array = np.logical_or(
-        np.logical_or((random_array == 1), (random_array == 2)),
-        (random_array == 3),
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
@@ -2090,8 +2109,7 @@ def test_generic_one_hot_logic():
 
     # check combined foreground
     combined_array = np.logical_or(
-        np.logical_or((random_array == 1), (random_array == 2)),
-        (random_array == 3),
+        np.logical_or((random_array == 1), (random_array == 2)), (random_array == 3)
     )
     comparison = combined_array == (img_tensor_oh_rev_array == 1)
     assert comparison.all(), "Arrays at the combined foreground are not equal"
@@ -2987,9 +3005,7 @@ def test_collision_subjectid_test_segmentation_rad_2d(device):
     parameters["model"]["amp"] = True
     parameters["model"]["print_summary"] = False
     parameters["model"]["num_channels"] = 3
-    parameters["metrics"] = [
-        "dice",
-    ]
+    parameters["metrics"] = ["dice"]
     parameters["model"]["architecture"] = "unet"
     outputDir = os.path.join(testingDir, "data_output")
 
@@ -3051,11 +3067,7 @@ def test_generic_random_numbers_are_deterministic_on_cpu():
 def test_generic_cli_function_metrics_cli_rad_nd():
     print("49: Starting metric calculation tests")
     for dim in ["2d", "3d"]:
-        for problem_type in [
-            "segmentation",
-            "classification",
-            "synthesis",
-        ]:
+        for problem_type in ["segmentation", "classification", "synthesis"]:
             synthesis_detected = problem_type == "synthesis"
             problem_type_wrap = problem_type
             if synthesis_detected:
@@ -3070,11 +3082,6 @@ def test_generic_cli_function_metrics_cli_rad_nd():
                 labels_array = training_data["Channel_0"]
             else:
                 labels_array = training_data["ValueToPredict"]
-            training_data["target"] = labels_array
-            training_data["prediction"] = labels_array
-            if synthesis_detected:
-                # this optional
-                training_data["mask"] = training_data["Label"]
 
             # read and initialize parameters for specific data dimension
             parameters = ConfigManager(
@@ -3092,17 +3099,46 @@ def test_generic_cli_function_metrics_cli_rad_nd():
             if synthesis_detected:
                 parameters["problem_type"] = problem_type
 
-            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
-            training_data.to_csv(temp_infer_csv, index=False)
-
-            output_file = os.path.join(outputDir, "output.yaml")
-
             temp_config = write_temp_config_path(parameters)
 
+            # check both single csv input and comma-separated input
+            # # single csv input
+            training_data["target"] = labels_array
+            training_data["prediction"] = labels_array
+            if synthesis_detected:
+                # this optional
+                training_data["mask"] = training_data["Label"]
+
+            temp_infer_csv = os.path.join(outputDir, "temp_csv.csv")
+            training_data.to_csv(temp_infer_csv, index=False)
             # run the metrics calculation
+            output_file = os.path.join(outputDir, "output_single-csv.json")
             generate_metrics_dict(temp_infer_csv, temp_config, output_file)
 
-            assert os.path.isfile(output_file), "Metrics output file was not generated"
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated for single-csv input"
+
+            # # comma-separated input
+            temp_infer_csv_gt = os.path.join(outputDir, "temp_csv_gt.csv")
+            temp_infer_csv_pred = os.path.join(outputDir, "temp_csv_pred.csv")
+
+            # create target_data from training_data using just subjectid and target columns
+            target_data = training_data[["SubjectID", "target"]].copy()
+            target_data.to_csv(temp_infer_csv_gt, index=False)
+
+            # create prediction_data from training_data using just subjectid and prediction columns
+            prediction_data = training_data[["SubjectID", "prediction"]].copy()
+            prediction_data.to_csv(temp_infer_csv_pred, index=False)
+            # run the metrics calculation
+            output_file = os.path.join(outputDir, "output_comma-separated-csv.json")
+            generate_metrics_dict(
+                temp_infer_csv_gt + "," + temp_infer_csv_pred, temp_config, output_file
+            )
+
+            assert os.path.isfile(
+                output_file
+            ), "Metrics output file was not generated for comma-separated input"
 
             sanitize_outputDir()
 
@@ -3125,6 +3161,87 @@ def test_generic_deploy_metrics_docker():
 
     print("passed")
 
+
+def test_generic_data_split():
+    print("51: Starting test for splitting and saving CSVs")
+    # read and initialize parameters for specific data dimension
+    parameters = ConfigManager(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["nested_training"] = {"testing": 5, "validation": 5, "stratified": True}
+    # read and parse csv
+    training_data, _ = parseTrainingCSV(inputDir + "/train_3d_rad_classification.csv")
+    # duplicate the data to test stratified sampling
+    training_data_duplicate = training_data._append(training_data)
+    for _ in range(1):
+        training_data_duplicate = training_data_duplicate._append(
+            training_data_duplicate
+        )
+    training_data_duplicate.reset_index(drop=True, inplace=True)
+    # ensure subjects are not duplicated
+    training_data_duplicate["SubjectID"] = training_data_duplicate.index
+
     sanitize_outputDir()
 
+    split_data_and_save_csvs(training_data_duplicate, outputDir, parameters)
+
+    files_in_outputDir = os.listdir(outputDir)
+    assert len(files_in_outputDir) == 15, "CSVs were not split correctly"
+
+    sanitize_outputDir()
+
+    print("passed")
+
+
+def test_generic_logging(capsys):
+    print("52: Starting test for logging")
+    log_file = "testing/gandlf.log"
+    logger_setup(log_file)
+    message = "Testing logging"
+
+    logging.debug(message)
+
+    # tests if the message is in the file.log
+    with open(log_file, "r") as file:
+        logs = file.read()
+        assert message in logs
+
+    os.remove(log_file)
+
+    # test the stout info level. The stout must show only INFO messages
+    message = "Testing stout logging"
+    logging.info(message)
+    capture = capsys.readouterr()
+    assert message in capture.out
+
+    # Test the stout not showing other messages
+    message = "Testing stout logging"
+    logging.debug(message)
+    logging.warning(message)
+    logging.error(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message not in capture.out
+
+    # test sterr must NOT show these messages.
+    message = "Testing sterr logging"
+    logging.info(message)
+    logging.debug(message)
+    capture = capsys.readouterr()
+    assert message not in capture.err
+
+    # test sterr must show these messages.
+    logging.error(message)
+    logging.warning(message)
+    logging.critical(message)
+    capture = capsys.readouterr()
+    assert message in capture.err
+
+    sanitize_outputDir()
+    print("passed")
+
+
+def test_generic_debug_info():
+    print("53: Starting test for logging")
+    _debug_info(True)
     print("passed")

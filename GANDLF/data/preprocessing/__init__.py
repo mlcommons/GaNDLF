@@ -2,10 +2,7 @@ import numpy as np
 
 from .crop_zero_planes import CropExternalZeroplanes
 from .non_zero_normalize import NonZeroNormalizeOnMaskedRegion
-from .threshold_and_clip import (
-    threshold_transform,
-    clip_transform,
-)
+from .threshold_and_clip import threshold_transform, clip_transform
 from .normalize_rgb import (
     normalize_by_val_transform,
     normalize_imagenet_transform,
@@ -40,12 +37,7 @@ def generic_3d_check(patch_size):
     """
     patch_size_new = np.array(patch_size)
     if len(patch_size) == 2:
-        patch_size_new = tuple(
-            np.append(
-                np.array(patch_size),
-                1,
-            )
-        )
+        patch_size_new = tuple(np.append(np.array(patch_size), 1))
 
     return patch_size_new
 
@@ -73,11 +65,7 @@ def centercrop_transform(patch_size):
 def rescale_transform(parameters=None):
     if parameters is None:
         parameters = {}
-    # get defaults from torchio
-    rescaler = RescaleIntensity()
-    rescaler.out_min_max = parameters.get("out_min_max", rescaler.out_min_max)
-    rescaler.percentiles = parameters.get("percentiles", rescaler.percentiles)
-    rescaler.in_min_max = parameters.get("in_min_max", None)
+    rescaler = RescaleIntensity(**parameters)
     return rescaler
 
 

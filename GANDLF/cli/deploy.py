@@ -113,9 +113,7 @@ def deploy_docker_mlcube(
     os.makedirs(output_workspace_folder, exist_ok=True)
     if os.path.exists(mlcube_workspace_folder):
         shutil.copytree(
-            mlcube_workspace_folder,
-            output_workspace_folder,
-            dirs_exist_ok=True,
+            mlcube_workspace_folder, output_workspace_folder, dirs_exist_ok=True
         )
 
     if config is not None:
@@ -151,13 +149,7 @@ def deploy_docker_mlcube(
             if os.path.isfile(os.path.join(gandlf_root, item))
             and item.startswith("Dockerfile-")
         ]
-        entrypoints = [
-            item
-            for item in os.listdir(gandlf_root)
-            if os.path.isfile(os.path.join(gandlf_root, item))
-            and item.startswith("gandlf_")
-        ]
-        for file in setup_files + dockerfiles + entrypoints:
+        for file in setup_files + dockerfiles:
             shutil.copy(
                 os.path.join(gandlf_root, file),
                 os.path.join(gandlf_root, "GANDLF", file),

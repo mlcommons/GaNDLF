@@ -55,9 +55,7 @@ class RandomNoiseEnhanced(RandomTransform, IntensityTransform):
         return transformed
 
     def get_params(
-        self,
-        mean_range: Tuple[float, float],
-        std_range: Tuple[float, float],
+        self, mean_range: Tuple[float, float], std_range: Tuple[float, float]
     ) -> Tuple[float, float]:
         mean = self.sample_uniform(*mean_range)
         std = self.sample_uniform(*std_range)
@@ -68,5 +66,5 @@ class RandomNoiseEnhanced(RandomTransform, IntensityTransform):
         std_ranges = self.std_original
         if self.std_original is None:
             # calculate the default std range based on 1.5% of the input image std - https://github.com/mlcommons/GaNDLF/issues/518
-            std_ranges = (0, 0.015 * torch.std(image.data).item())
+            std_ranges = (0, 0.015 * torch.std(image.data.float()).item())
         return self._parse_range(std_ranges, "std", min_constraint=0)

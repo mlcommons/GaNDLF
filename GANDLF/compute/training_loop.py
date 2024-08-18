@@ -1,5 +1,5 @@
 import os, time, psutil
-from typing import Tuple
+from typing import Tuple, Union
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -22,7 +22,6 @@ from GANDLF.utils import (
     version_check,
     write_training_patches,
     print_model_summary,
-    get_ground_truths_and_predictions_tensor,
     get_model_dict,
     print_and_format_metrics,
 )
@@ -59,15 +58,25 @@ def train_network(
     print("*" * 20)
     # Initialize a few things
     total_epoch_train_loss = 0
-    total_epoch_train_metric = {}
+    total_epoch_train_metric: dict[str, Union[float, np.array]] = {}
     average_epoch_train_metric = {}
-    calculate_overall_metrics = (params["problem_type"] == "classification") or (
-        params["problem_type"] == "regression"
-    )
+    # TODO: calculate metrics for segmentation and other problems. btw what are possible problem types?
+    calculate_overall_metrics = params["problem_type"] in {
+        "classification",
+        "regression",
+    }
+
+    # get ground truths
+    if calculate_overall_metrics:
+        ground_truth_array = []
+        predictions_array = []
 
     for metric in params["metrics"]:
+        # TODO: can it be per-label for non-classif?
         if "per_label" in metric:
-            total_epoch_train_metric[metric] = []
+            total_epoch_train_metric[metric] = np.zeros(
+                1
+            )  # real shape would be defined during execution
         else:
             total_epoch_train_metric[metric] = 0
 
@@ -77,41 +86,35 @@ def train_network(
         if params["verbose"]:
             print("Using Automatic mixed precision", flush=True)
 
-    # get ground truths
-    if calculate_overall_metrics:
-        (
-            ground_truth_array,
-            predictions_array,
-        ) = get_ground_truths_and_predictions_tensor(params, "training_data")
     # Set the model to train
     model.train()
     for batch_idx, (subject) in enumerate(
         tqdm(train_dataloader, desc="Looping over training data")
     ):
         optimizer.zero_grad()
-        image = (
+        image = (  # 5D tensor: (B, C, H, W, D)
             torch.cat(
                 [subject[key][torchio.DATA] for key in params["channel_keys"]], dim=1
             )
             .float()
             .to(params["device"])
         )
-        if "value_keys" in params:
+        if (
+            "value_keys" in params
+        ):  # classification / regression (when label is scalar) or multilabel classif/regression
             label = torch.cat([subject[key] for key in params["value_keys"]], dim=0)
             # min is needed because for certain cases, batch size becomes smaller than the total remaining labels
             label = label.reshape(
-                min(params["batch_size"], len(label)),
-                len(params["value_keys"]),
+                min(params["batch_size"], len(label)), len(params["value_keys"])
             )
         else:
-            label = subject["label"][torchio.DATA]
+            label = subject["label"][
+                torchio.DATA
+            ]  # segmentation; label is (B, C, H, W, D) image
         label = label.to(params["device"])
 
         if params["save_training"]:
-            write_training_patches(
-                subject,
-                params,
-            )
+            write_training_patches(subject, params)
 
         # ensure spacing is always present in params and is always subject-specific
         if "spacing" in subject:
@@ -121,13 +124,16 @@ def train_network(
         loss, calculated_metrics, output, _ = step(model, image, label, params)
         # store predictions for classification
         if calculate_overall_metrics:
-            predictions_array[
-                batch_idx
-                * params["batch_size"] : (batch_idx + 1)
-                * params["batch_size"]
-            ] = (torch.argmax(output[0], 0).cpu().item())
+            # TODO: smelly code. if segmentation, in some models output may be a list of tensors rather then a one
+            #  tensor. This is not handled here. However, `calculate_overall_metrics` is set to False for segmentation
+            ground_truth_array.extend(label.detach().cpu())
+            # TODO: output is BATCH_SIZE x N_CLASSES. What if not?
+            batch_predictions = torch.argmax(output, 1).cpu()
+            assert len(batch_predictions) == len(label)
+            predictions_array.extend(batch_predictions.detach().cpu())
 
         nan_loss = torch.isnan(loss)
+        # loss backward
         second_order = (
             hasattr(optimizer, "is_second_order") and optimizer.is_second_order
         )
@@ -161,18 +167,10 @@ def train_network(
         # Non network training related
         if not nan_loss:
             total_epoch_train_loss += loss.detach().cpu().item()
-        for metric in calculated_metrics.keys():
-            if isinstance(total_epoch_train_metric[metric], list):
-                if len(total_epoch_train_metric[metric]) == 0:
-                    total_epoch_train_metric[metric] = np.array(
-                        calculated_metrics[metric]
-                    )
-                else:
-                    total_epoch_train_metric[metric] += np.array(
-                        calculated_metrics[metric]
-                    )
-            else:
-                total_epoch_train_metric[metric] += calculated_metrics[metric]
+        for metric, metric_val in calculated_metrics.items():
+            total_epoch_train_metric[metric] = (
+                total_epoch_train_metric[metric] + metric_val
+            )
 
         if params["verbose"]:
             # For printing information at halftime during an epoch
@@ -190,10 +188,7 @@ def train_network(
                         ).tolist()
                     else:
                         to_print = total_epoch_train_metric[metric] / (batch_idx + 1)
-                    print(
-                        "Half-Epoch Average train " + metric + " : ",
-                        to_print,
-                    )
+                    print("Half-Epoch Average train " + metric + " : ", to_print)
 
     average_epoch_train_loss = total_epoch_train_loss / len(train_dataloader)
     print("     Epoch Final   train loss : ", average_epoch_train_loss)
@@ -201,8 +196,11 @@ def train_network(
     # get overall stats for classification
     if calculate_overall_metrics:
         average_epoch_train_metric = overall_stats(
-            predictions_array, ground_truth_array, params
+            torch.Tensor(predictions_array), torch.Tensor(ground_truth_array), params
         )
+    # TODO: the following not just prints and formats, but updates the dict also. Clean this code
+    #  1. average_epoch_train_metric and total_epoch_train_metric are combined
+    #  2. list values in total_epoch_train_metric are converted to strings by some logic (but not in avg_ep_tr_metr)
     average_epoch_train_metric = print_and_format_metrics(
         average_epoch_train_metric,
         total_epoch_train_metric,
@@ -244,9 +242,9 @@ def training_loop(
     params["validation_data"] = validation_data
     params["testing_data"] = testing_data
     testingDataDefined = True
-    if params["testing_data"] is None:
-        # testing_data = validation_data
-        testingDataDefined = False
+    if not isinstance(testing_data, pd.DataFrame):
+        if params["testing_data"] is None:
+            testingDataDefined = False
 
     # Setup a few variables for tracking
     best_loss = 1e7
@@ -332,46 +330,51 @@ def training_loop(
     # datetime object containing current date and time
     print("Initializing training at :", get_date_time(), flush=True)
 
-    calculate_overall_metrics = (params["problem_type"] == "classification") or (
-        params["problem_type"] == "regression"
-    )
+    metrics_log = list(params["metrics"])
 
-    # get the overall metrics that are calculated automatically for classification/regression problems
-    if params["problem_type"] == "regression":
-        overall_metrics = overall_stats(torch.Tensor([1]), torch.Tensor([1]), params)
-    elif params["problem_type"] == "classification":
-        # this is just used to generate the headers for the overall stats
-        temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
-        overall_metrics = overall_stats(
-            temp_tensor.to(dtype=torch.int32),
-            temp_tensor.to(dtype=torch.int32),
-            params,
-        )
+    calculate_overall_metrics = params["problem_type"] in {
+        "classification",
+        "regression",
+    }
 
-    metrics_log = params["metrics"].copy()
     if calculate_overall_metrics:
+        # get the overall metrics that are calculated automatically for classification/regression problems
+        if params["problem_type"] == "regression":
+            overall_metrics = overall_stats(
+                torch.Tensor([1]), torch.Tensor([1]), params
+            )
+        elif params["problem_type"] == "classification":
+            # this is just used to generate the headers for the overall stats
+            temp_tensor = torch.randint(0, params["model"]["num_classes"], (5,))
+            overall_metrics = overall_stats(
+                temp_tensor.to(dtype=torch.int32),
+                temp_tensor.to(dtype=torch.int32),
+                params,
+            )
+        else:
+            raise NotImplementedError("Problem type not implemented for overall stats")
+
         for metric in overall_metrics:
             if metric not in metrics_log:
-                metrics_log[metric] = 0
+                metrics_log.append(metric)
 
     # Setup a few loggers for tracking
     train_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_training.csv"),
         metrics=metrics_log,
+        mode="train",
     )
     valid_logger = Logger(
         logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=metrics_log,
+        mode="valid",
     )
     if testingDataDefined:
         test_logger = Logger(
             logger_csv_filename=os.path.join(output_dir, "logs_testing.csv"),
             metrics=metrics_log,
+            mode="test",
         )
-    train_logger.write_header(mode="train")
-    valid_logger.write_header(mode="valid")
-    if testingDataDefined:
-        test_logger.write_header(mode="test")
 
     if "medcam" in params:
         model = medcam.inject(
