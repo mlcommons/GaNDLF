@@ -3,7 +3,7 @@ This document will help you get started with GaNDLF using a few representative e
 
 ## Installation
 
-Please follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the shell that looks like the following, which indicates that the GaNDLF virtual environment has been activated:
+Follow the [installation instructions](./setup.md) to install GaNDLF. When the installation is complete, you should end up with the following shell, which indicates that the GaNDLF virtual environment has been activated:
 
 ```bash
 (venv_gandlf) $> ### subsequent commands go here
@@ -23,7 +23,7 @@ A codespace will open in a web-based version of [Visual Studio Code](https://cod
 
 ## Sample Data
 
-Sample data will be used for our extensive automated unit tests in all examples. You can download the sample data from [this link](https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip). Example of how to do this from the terminal is shown below:
+Sample data will be used for our extensive automated unit tests in all examples. You can download the sample data from [this link](https://upenn.box.com/shared/static/y8162xkq1zz5555ye3pwadry2m2e39bs.zip). An example is shown below:
 
 ```bash
 # continue from previous shell
