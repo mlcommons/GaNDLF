@@ -7,6 +7,7 @@ from GANDLF.utils import get_unique_timestamp
 import sys
 import traceback
 
+
 def _create_tmp_log_file():
     tmp_dir = Path(tempfile.gettempdir())
     log_dir = Path.joinpath(tmp_dir, ".gandlf")
@@ -26,6 +27,7 @@ def _configure_logging_with_logfile(log_file, config_path):
         config_dict["handlers"]["rotatingFileHandler"]["filename"] = str(log_file)
         logging.config.dictConfig(config_dict)
 
+
 def gandlf_excepthook(exctype, value, tb):
     if issubclass(exctype, AssertionError):
         logging.exception(
@@ -34,6 +36,7 @@ def gandlf_excepthook(exctype, value, tb):
         )
     else:
         sys.__excepthook__(exctype, value, tb)
+
 
 def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
     """
@@ -53,6 +56,7 @@ def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
     _create_log_file(log_tmp_file)
     _configure_logging_with_logfile(log_tmp_file, config_path)
     sys.excepthook = gandlf_excepthook
+
 
 class InfoOnlyFilter(logging.Filter):
     """
