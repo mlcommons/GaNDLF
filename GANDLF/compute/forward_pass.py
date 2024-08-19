@@ -337,11 +337,16 @@ def validate_network(
                     if ext in [".jpg", ".jpeg", ".png"]:
                         pred_mask = pred_mask.astype(np.uint8)
 
-                    ## special case for 2D
-                    if image.shape[-1] > 1:
-                        result_image = sitk.GetImageFromArray(pred_mask)
-                    else:
-                        result_image = sitk.GetImageFromArray(pred_mask.squeeze(-1))
+                    pred_mask = (
+                        pred_mask.squeeze(0)
+                        if pred_mask.shape[0] == 1
+                        else (
+                            pred_mask.squeeze(-1)
+                            if pred_mask.shape[-1] == 1
+                            else pred_mask
+                        )
+                    )
+                    result_image = sitk.GetImageFromArray(pred_mask)
                     result_image.CopyInformation(img_for_metadata)
 
                     # this handles cases that need resampling/resizing
