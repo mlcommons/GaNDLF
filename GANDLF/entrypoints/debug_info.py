@@ -39,9 +39,17 @@ def _debug_info(verbose: bool):
     is_flag=True,
     help="If passed, prints all packages installed as well",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(verbose: bool):
+def new_way(verbose: bool, log_file):
     """Displays detailed info about system environment: library versions, settings, etc."""
+
+    logger_setup(log_file)
     _debug_info(verbose=verbose)
 
 

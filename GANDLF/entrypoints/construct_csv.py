@@ -90,6 +90,12 @@ def _construct_csv(
     help="If True, paths in the output data CSV will always be relative to the location"
     " of the output data CSV itself.",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
 def new_way(
     input_dir: str,
@@ -97,8 +103,11 @@ def new_way(
     label_id: Optional[str],
     output_file: str,
     relativize_paths: bool,
+    log_file: str,
 ):
     """Generate training/inference CSV from data directory."""
+
+    logger_setup(log_file)
     _construct_csv(
         input_dir=input_dir,
         channels_id=channels_id,

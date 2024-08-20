@@ -52,10 +52,10 @@ def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
     log_tmp_file = log_file
     if log_file is None:  # create tmp file
         log_tmp_file = _create_tmp_log_file()
-        logging.info(f"The logs are saved in {log_tmp_file}")
     _create_log_file(log_tmp_file)
     _configure_logging_with_logfile(log_tmp_file, config_path)
     sys.excepthook = gandlf_excepthook
+    logging.info(f"The logs are saved in {log_tmp_file}")
 
 
 class InfoOnlyFilter(logging.Filter):
