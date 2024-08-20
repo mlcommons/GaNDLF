@@ -62,9 +62,16 @@ def _anonymize_images(
     type=click.Path(),
     help="Output directory or file which will contain the image(s) after anonymization.",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(input_dir, config, modality, output_file):
+def new_way(input_dir, config, modality, output_file, log_file):
     """Anonymize images/scans in the data directory."""
+    logger_setup(log_file)
     _anonymize_images(input_dir, output_file, config, modality)
 
 
