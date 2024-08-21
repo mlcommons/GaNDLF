@@ -23,3 +23,4 @@ Note that if a box is left unchecked, PR merges will take longer than usual.
 - [ ] [Usage documentation](https://github.com/mlcommons/GaNDLF/blob/master/docs) has been updated, if appropriate.
 - [ ] Tests added or modified to [cover the changes](https://app.codecov.io/gh/mlcommons/GaNDLF); if coverage is reduced, please give explanation.
 - [ ] If customized dependency installation is required (i.e., a separate `pip install` step is needed for PR to be functional), please ensure it is reflected in all the files that control the CI, namely: [python-test.yml](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/python-test.yml), and all docker files [[1](https://github.com/mlcommons/GaNDLF/blob/master/Dockerfile-CPU),[2](https://github.com/mlcommons/GaNDLF/blob/devcontainer_build_fix/Dockerfile-CUDA11.6),[3](https://github.com/mlcommons/GaNDLF/blob/master/Dockerfile-ROCm)].
+- [ ] The `logging` library is being used and no `print` statements are left.

@@ -137,6 +137,16 @@ bash
 ### Use loggers instead of print
 We use the native `logging` [library](https://docs.python.org/3/library/logging.html) for logs management. This gets automatically configured when GaNDLF gets launched. So, if you are extending the code, please use loggers instead of prints.
 
+Here is an example how `root logger` can be used
+```
+def my_new_cool_function(df: pd.DataFrame):
+    logging.debug("Message for debug file only")
+    logging.info("Hi GaNDLF user, I greet you in the CLI output")
+    logging.error(f"A detailed message about any error if needed. Exception: {str(e)}, params: {params}, df shape: {df.shape}")
+    # do NOT use normal print statements
+    # print("Hi GaNDLF user!")
+```
+
 Here is an example how logger can be used:
 
 ```
@@ -148,6 +158,7 @@ def my_new_cool_function(df: pd.DataFrame):
     # print("Hi GaNDLF user!")  # don't use prints please.
 ```
 
+
 ### What and where is logged
 
 GaNDLF logs are splitted into multiple parts:
@@ -155,9 +166,9 @@ GaNDLF logs are splitted into multiple parts:
 - debug file: all messages are shown 
 - stderr: display `warning`, `error`, or `critical` messages
 
-By default, the logs are flushed to console.
+By default, the logs are saved in the `/tmp/.gandlf` dir.
 The logs are **saved** in the path that is defined by the '--log-file' parameter in the CLI commands.
-If the path is not provided or an error is raised, the logs will be flushed to console.
+
 
 
 
