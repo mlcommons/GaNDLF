@@ -49,9 +49,17 @@ def _split_csv(input_csv: str, output_dir: str, config_path: Optional[str]):
     help="The GaNDLF config (in YAML) with the `nested_training` key specified to the folds needed.",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
-def new_way(input_csv: str, output_dir: str, config: Optional[str]):
+def new_way(input_csv: str, output_dir: str, log_file: str, config: Optional[str]):
     """Split the data into training, validation, and testing sets and save them as csvs in the output directory."""
+
+    logger_setup(log_file)
     _split_csv(input_csv, output_dir, config)
 
 
