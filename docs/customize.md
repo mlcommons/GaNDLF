@@ -119,17 +119,17 @@ This file contains mid-level information regarding various parameters that can b
 
 - These are various parameters that control the overall training process.
 - `verbose`: generate verbose messages on console; generally used for debugging.
-- `batch_size`: defines the batch size to be used for training.
-- `in_memory`: this is to enable or disable lazy loading - setting to true reads all data once during data loading, resulting in improvements.
-- `num_epochs`: defines the number of epochs to train for.
-- `patience`: defines the number of epochs to wait for improvement before early stopping.
-- `learning_rate`: defines the learning rate to be used for training.
-- `scheduler`: defines the learning rate scheduler to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/schedulers/__init__.py); can take the following sub-parameters:
+- `batch_size`: batch size to be used for training.
+- `in_memory`: this is to enable or disable lazy loading. If set to True, all data is loaded on RAM once during data loading, resulting in faster training. If set to False, data gets read into RAM on-the-go when needed, which slows down training but lessens the memory load. The latter is recommended if the user's RAM has limited capacity.
+- `num_epochs`: number of epochs to train for.
+- `patience`: number of epochs to wait for improvement before early stopping.
+- `learning_rate`: learning rate to be used for training.
+- `scheduler`: learning rate scheduler to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/schedulers/__init__.py); can take the following sub-parameters:
     - `type`: `triangle`, `triangle_modified`, `exp`, `step`, `reduce-on-plateau`, `cosineannealing`, `triangular`, `triangular2`, `exp_range`
-    - `min_lr`: defines the minimum learning rate to be used for training.
-    - `max_lr`: defines the maximum learning rate to be used for training.
-- `optimizer`: defines the optimizer to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/optimizers/__init__.py).
-- `nested_training`: defines the number of folds to use nested training, takes `testing` and `validation` as sub-parameters, with integer values defining the number of folds to use.
+    - `min_lr`: minimum learning rate to be used for training.
+    - `max_lr`: maximum learning rate to be used for training.
+- `optimizer`: optimizer to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/optimizers/__init__.py).
+- `nested_training`: number of folds to use nested training, takes `testing` and `validation` as sub-parameters, with integer values defining the number of folds to use.
 - `memory_save_mode`: if enabled, resize/resample operations in `data_preprocessing` will save files to disk instead of directly getting read into memory as tensors
 - **Queue configuration**: this defines how the queue for the input to the model is to be designed **after** the [patching strategy](#patching-strategy) has been applied, and more details are [here](https://torchio.readthedocs.io/data/patch_training.html?#queue). This takes the following sub-parameters:
     - `q_max_length`: his determines the maximum number of patches that can be stored in the queue. Using a large number means that the queue needs to be filled less often, but more CPU memory is needed to store the patches.

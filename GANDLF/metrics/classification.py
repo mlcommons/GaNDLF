@@ -94,11 +94,11 @@ def overall_stats(prediction: torch.Tensor, target: torch.Tensor, params: dict) 
                 num_classes=params["model"]["num_classes"],
                 average=average_type_key,
             ),
-            f"auroc_{average_type}": tm.AUROC(
-                task=task,
-                num_classes=params["model"]["num_classes"],
-                average=average_type_key if average_type_key != "micro" else "macro",
-            ),
+            # f"auroc_{average_type}": tm.AUROC(
+            #     task=task,
+            #     num_classes=params["model"]["num_classes"],
+            #     average=average_type_key if average_type_key != "micro" else "macro",
+            # ),
         }
         for metric_name, calculator in calculators.items():
             if "auroc" in metric_name:
