@@ -32,7 +32,7 @@ First, instantiate your environment
 (venv_gandlf) $> ### subsequent commands go here
 ```
 
-You may install pytorch to be compatible with CUDA, ROCm, or CPU-only. An exhaustive list of PyTorch installations can be found here: https://pytorch.org/get-started/previous-versions/#v210
+You may install pytorch to be compatible with CUDA, ROCm, or CPU-only. An exhaustive list of PyTorch installations for the specific version compatible with GaNDLF can be found here: https://pytorch.org/get-started/previous-versions/#v231
 Use one of the following depending on your needs:
 - CUDA 12.1
 ```bash
