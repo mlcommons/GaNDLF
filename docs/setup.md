@@ -36,19 +36,7 @@ You may install pytorch to be compatible with CUDA, ROCm, or CPU-only. An exhaus
 Use one of the following depending on your needs:
 - CUDA 12.1
 ```bash
- pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu121
-```
-- CUDA 11.8
-```bash
- pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cu118
-```
-- ROCm 5.7
-```bash
- pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/rocm5.7
-```
-- CPU-only
-```bash
- pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 --index-url https://download.pytorch.org/whl/cpu
+(venv_gandlf) $>pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 ```
 
 ### Optional Dependencies 
