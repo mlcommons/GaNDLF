@@ -44,8 +44,8 @@ Use one of the following depending on your needs:
 The following dependencies are **optional**, and are only needed to access specific features of GaNDLF.
 
 ```bash
-pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
-pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
+(venv_gandlf) $>pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
+(venv_gandlf) $>pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
 ```
 
 ### Install from Package Managers
@@ -53,22 +53,22 @@ pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-complia
 This option is recommended for most users, and allows for the quickest way to get started with GaNDLF.
 
 ```bash
-pip install gandlf # this will give you the latest stable release
+(venv_gandlf) $>pip install gandlf # this will give you the latest stable release
 ```
 You can also use conda
 ```bash
-conda install -c conda-forge gandlf -y
+(venv_gandlf) $>conda install -c conda-forge gandlf -y
 ```
 
 If you are interested in running the latest version of GaNDLF, you can install the nightly build by running the following command:
 
 ```bash
-pip install --pre gandlf
+(venv_gandlf) $>pip install --pre gandlf
 ```
 
 You can also use conda
 ```bash
-conda install -c conda-forge/label/gandlf_dev -c conda-forge gandlf -y
+(venv_gandlf) $>conda install -c conda-forge/label/gandlf_dev -c conda-forge gandlf -y
 ```
 
 ### Install from Sources
@@ -76,14 +76,14 @@ conda install -c conda-forge/label/gandlf_dev -c conda-forge gandlf -y
 Use this option if you want to [contribute to GaNDLF](https://github.com/mlcommons/GaNDLF/blob/master/CONTRIBUTING.md), or are interested to make other code-level changes for your own use.
 
 ```bash
-git clone https://github.com/mlcommons/GaNDLF.git
-cd GaNDLF
-pip install -e .
+(venv_gandlf) $>git clone https://github.com/mlcommons/GaNDLF.git
+(venv_gandlf) $>cd GaNDLF
+(venv_gandlf) $>pip install -e .
 ```
 
 Test your installation:
 ```bash
-gandlf --version
+(venv_gandlf) $>gandlf --version
 ```
 
 ## Docker Installation
