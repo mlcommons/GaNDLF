@@ -36,7 +36,7 @@ You may install pytorch to be compatible with CUDA, ROCm, or CPU-only. An exhaus
 Use one of the following depending on your needs:
 - CUDA 12.1
 ```bash
-(venv_gandlf) $>pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+(venv_gandlf) $> pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 ```
 
 ### Optional Dependencies 
@@ -44,8 +44,8 @@ Use one of the following depending on your needs:
 The following dependencies are **optional**, and are only needed to access specific features of GaNDLF.
 
 ```bash
-(venv_gandlf) $>pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
-(venv_gandlf) $>pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
+(venv_gandlf) $> pip install openvino-dev==2023.0.1 # [OPTIONAL] to generate post-training optimized models for inference
+(venv_gandlf) $> pip install mlcube_docker # [OPTIONAL] to deploy GaNDLF models as MLCube-compliant Docker containers
 ```
 
 ### Install from Package Managers
@@ -53,22 +53,22 @@ The following dependencies are **optional**, and are only needed to access speci
 This option is recommended for most users, and allows for the quickest way to get started with GaNDLF.
 
 ```bash
-(venv_gandlf) $>pip install gandlf # this will give you the latest stable release
+(venv_gandlf) $> pip install gandlf # this will give you the latest stable release
 ```
 You can also use conda
 ```bash
-(venv_gandlf) $>conda install -c conda-forge gandlf -y
+(venv_gandlf) $> conda install -c conda-forge gandlf -y
 ```
 
 If you are interested in running the latest version of GaNDLF, you can install the nightly build by running the following command:
 
 ```bash
-(venv_gandlf) $>pip install --pre gandlf
+(venv_gandlf) $> pip install --pre gandlf
 ```
 
 You can also use conda
 ```bash
-(venv_gandlf) $>conda install -c conda-forge/label/gandlf_dev -c conda-forge gandlf -y
+(venv_gandlf) $> conda install -c conda-forge/label/gandlf_dev -c conda-forge gandlf -y
 ```
 
 ### Install from Sources
@@ -76,14 +76,14 @@ You can also use conda
 Use this option if you want to [contribute to GaNDLF](https://github.com/mlcommons/GaNDLF/blob/master/CONTRIBUTING.md), or are interested to make other code-level changes for your own use.
 
 ```bash
-(venv_gandlf) $>git clone https://github.com/mlcommons/GaNDLF.git
-(venv_gandlf) $>cd GaNDLF
-(venv_gandlf) $>pip install -e .
+(venv_gandlf) $> git clone https://github.com/mlcommons/GaNDLF.git
+(venv_gandlf) $> cd GaNDLF
+(venv_gandlf) $> pip install -e .
 ```
 
 Test your installation:
 ```bash
-(venv_gandlf) $>gandlf --version
+(venv_gandlf) $> gandlf verify-install
 ```
 
 ## Docker Installation
