@@ -512,3 +512,93 @@ This can be replicated for ROCm for AMD , by following the [instructions to set 
 GaNDLF, and GaNDLF-created models, may be distributed as an [MLCube](https://mlcommons.github.io/mlcube/). This involves distributing an `mlcube.yaml` file. That file can be specified when using the [MLCube runners](https://mlcommons.github.io/mlcube/runners/). The runner will perform many aspects of configuring your container for you. Currently, only the `mlcube_docker` runner is supported. 
 
 See the [MLCube documentation](https://mlcommons.github.io/mlcube/) for more details.
+
+## HuggingFace CLI
+
+This tool allows you to interact with the Hugging Face Hub directly from a terminal. For example, you can create a repository, upload and download files, etc.
+
+### Download an entire repository
+GaNDLF's Hugging Face CLI allows you to download repositories through the command line. This can be done by just specifying the repo id:
+
+```bash
+(main) $> gandlf hf --download --repo-id HuggingFaceH4/zephyr-7b-beta
+```
+
+Apart from the Repo Id you can also provide other arguments.
+
+### Revision
+To download from a specific revision (commit hash, branch name or tag), use the --revision option:
+```bash
+(main) $> gandlf hf --download --repo-id distilbert-base-uncased revision --revision v1.1
+```
+### Specify a token
+To access private or gated repositories, you must use a token. You can do this using the --token option:
+
+```bash
+(main) $> gandlf hf --download --repo-id distilbert-base-uncased revision --revision v1.1 --token hf_****
+```
+
+### Specify cache directory
+If not using --local-dir, all files will be downloaded by default to the cache directory defined by the HF_HOME environment variable. You can specify a custom cache using --cache-dir:
+
+```bash
+(main) $> gandlf hf --download --repo-id distilbert-base-uncased revision --revision v1.1 --token hf_**** --cache-dir ./path/to/cache
+```
+
+### Download to a local folder
+The recommended (and default) way to download files from the Hub is to use the cache-system. However, in some cases you want to download files and move them to a specific folder. This is useful to get a workflow closer to what git commands offer. You can do that using the --local-dir option.
+
+A ./huggingface/ folder is created at the root of your local directory containing metadata about the downloaded files. This prevents re-downloading files if they’re already up-to-date. If the metadata has changed, then the new file version is downloaded. This makes the local-dir optimized for pulling only the latest changes.
+
+```bash
+(main) $> gandlf hf --download --repo-id distilbert-base-uncased revision --revision v1.1 --token hf_**** --cache-dir ./path/to/cache --local-dir ./path/to/dir
+```
+### Force Download
+To specify if the files should be downloaded even if it already exists in the local cache.
+
+```bash
+(main) $> gandlf hf --download --repo-id distilbert-base-uncased revision --revision v1.1 --token hf_**** --cache-dir ./path/to/cache --local-dir ./path/to/dir --force-download
+```
+
+### Upload an entire folder
+Use the `gandlf hf --upload` upload command to upload files to the Hub directly.
+
+```bash
+(main) $> gandlf hf --upload --repo-id Wauplin/my-cool-model --folder-path ./model --token hf_****
+```
+
+### Upload to a Specific Path in Repo
+Relative path of the directory in the repo. Will default to the root folder of the repository.
+```bash
+(main) $> gandlf hf --upload --repo-id Wauplin/my-cool-model --folder-path ./model/data --path-in-repo ./data --token hf_****
+```
+
+### Upload multiple files
+To upload multiple files from a folder at once without uploading the entire folder, use the --allow-patterns and --ignore-patterns patterns. It can also be combined with the --delete-patterns option to delete files on the repo while uploading new ones. In the example below, we sync the local Space by deleting remote files and uploading all files except the ones in /logs:
+
+```bash
+(main) $> gandlf hf Wauplin/space-example --repo-type=space --exclude="/logs/*" --delete="*" --commit-message="Sync local Space with Hub"
+```
+
+### Specify a token
+To upload files, you must use a token. By default, the token saved locally will be used. If you want to authenticate explicitly, use the --token option:
+
+```bash
+(main) $>gandlf hf --upload Wauplin/my-cool-model --folder-path ./model  --token=hf_****
+```
+
+### Specify a commit message
+Use the --commit-message and --commit-description to set a custom message and description for your commit instead of the default one
+
+```bash
+(main) $>gandlf hf --upload Wauplin/my-cool-model --folder-path ./model  --token=hf_****
+--commit-message "Epoch 34/50" --commit-description="Val accuracy: 68%. Check tensorboard for more details."
+```
+
+### Upload to a dataset or Space
+To upload to a dataset or a Space, use the --repo-type option:
+
+```bash
+(main) $>gandlf hf --upload Wauplin/my-cool-model --folder-path ./model  --token=hf_****
+--repo-type dataset
+```
