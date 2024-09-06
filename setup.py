@@ -80,8 +80,10 @@ requirements = [
     "deprecated",
     "packaging==24.0",
     "typer==0.9.0",
+    "colorlog",
     "huggingface-hub==0.23.4",
     "PyYAML==6.0.1",
+
 ]
 
 if __name__ == "__main__":
