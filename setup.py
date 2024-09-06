@@ -51,7 +51,7 @@ requirements = [
     "scikit-image>=0.19.1",
     "setuptools",
     "seaborn",
-    "pyyaml",
+    "pyyaml==6.0.1",
     "tiffslide",
     "matplotlib",
     "gdown==5.1.0",
@@ -82,7 +82,6 @@ requirements = [
     "typer==0.9.0",
     "colorlog",
     "huggingface-hub==0.23.4",
-    "PyYAML==6.0.1",
 ]
 
 if __name__ == "__main__":
