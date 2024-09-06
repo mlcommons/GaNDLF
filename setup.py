@@ -83,7 +83,6 @@ requirements = [
     "colorlog",
     "huggingface-hub==0.23.4",
     "PyYAML==6.0.1",
-
 ]
 
 if __name__ == "__main__":
