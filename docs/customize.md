@@ -120,9 +120,9 @@ This file contains mid-level information regarding various parameters that can b
 - These are various parameters that control the overall training process.
 - `verbose`: generate verbose messages on console; generally used for debugging.
 - `batch_size`: batch size to be used for training.
-- `in_memory`: this is to enable or disable lazy loading. If set to True, all data is loaded on RAM once during data loading, resulting in faster training. If set to False, data gets read into RAM on-the-go when needed, which slows down training but lessens the memory load. The latter is recommended if the user's RAM has limited capacity.
+- `in_memory`: this is to enable or disable lazy loading. If set to `True`, all data is loaded onto the RAM at once during the construction of the dataloader (either training/validation/testing), thus resulting in faster training. If set to `False`, data gets read into RAM on-the-go when needed (also called ["lazy loading"](https://en.wikipedia.org/wiki/Lazy_loading)), which slows down training but lessens the memory load. The latter is recommended if the user's RAM has limited capacity.
 - `num_epochs`: number of epochs to train for.
-- `patience`: number of epochs to wait for improvement before early stopping.
+- `patience`: number of epochs to wait for improvement in the validation loss before early stopping.
 - `learning_rate`: learning rate to be used for training.
 - `scheduler`: learning rate scheduler to be used for training, more details are [here](https://github.com/mlcommons/GaNDLF/blob/master/GANDLF/schedulers/__init__.py); can take the following sub-parameters:
     - `type`: `triangle`, `triangle_modified`, `exp`, `step`, `reduce-on-plateau`, `cosineannealing`, `triangular`, `triangular2`, `exp_range`
