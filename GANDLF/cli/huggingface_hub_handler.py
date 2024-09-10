@@ -200,9 +200,6 @@ Use the code below to get started with the model.
 def push_to_model_hub(
     repo_id: str,
     folder_path: str,
-    path_in_repo: Union[str, None] = None,
-    commit_message: Union[str, None] = None,
-    commit_description: Union[str, None] = None,
     token: Union[str, None] = None,
     revision: Union[str, None] = None,
 ):
