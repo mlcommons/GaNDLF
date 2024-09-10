@@ -206,9 +206,6 @@ def push_to_model_hub(
     token: Union[str, None] = None,
     repo_type: Union[str, None] = None,
     revision: Union[str, None] = None,
-    allow_patterns: Union[List[str], str, None] = None,
-    ignore_patterns: Union[List[str], str, None] = None,
-    delete_patterns: Union[List[str], str, None] = None,
 ):
     api = HfApi(token=token)
 
