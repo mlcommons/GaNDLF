@@ -58,7 +58,7 @@ def split_data(
         # put 2 just so that the first for-loop does not fail
         testing_folds = 2
         print(
-            "WARNING: Testing data is empty, which will result in scientifically incorrect results; use at your own risk."
+            "WARNING: Cross-validation is set to run on a train/validation scheme without testing data. For a more rigorous evaluation and if you wish to tune hyperparameters, make sure to use nested cross-validation."
         )
 
     # get unique subject IDs

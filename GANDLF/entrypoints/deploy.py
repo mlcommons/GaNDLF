@@ -126,6 +126,12 @@ def _deploy(
     help="An optional custom python entrypoint script to use instead of the default specified in mlcube.yaml."
     " (Only for inference and metrics)",
 )
+@click.option(
+    "--log-file",
+    type=click.Path(),
+    default=None,
+    help="Output file which will contain the logs.",
+)
 @append_copyright_to_help
 def new_way(
     model: Optional[str],
@@ -136,8 +142,10 @@ def new_way(
     output_dir: str,
     requires_gpu: bool,
     entrypoint: Optional[str],
+    log_file: str,
 ):
     """Generate frozen/deployable versions of trained GaNDLF models."""
+    logger_setup(log_file)
     _deploy(
         model=model,
         config=config,
