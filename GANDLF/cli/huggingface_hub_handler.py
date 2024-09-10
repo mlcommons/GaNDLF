@@ -214,7 +214,7 @@ def push_to_model_hub(
 
     repo_id = api.create_repo(repo_id, exist_ok=True).repo_id
 
-    tags = ["GaNDLFv" + version]
+    tags = ["v" + version]
 
     git_hash = get_git_hash()
 
