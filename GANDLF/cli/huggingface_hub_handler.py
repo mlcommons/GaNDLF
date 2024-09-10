@@ -230,7 +230,7 @@ def push_to_model_hub(
         path_in_repo=path_in_repo,
         commit_message=commit_message,
         commit_description=commit_description,
-        repo_type=repo_type,
+        repo_type="model",
         revision=revision,
         allow_patterns=allow_patterns,
         ignore_patterns=ignore_patterns,
