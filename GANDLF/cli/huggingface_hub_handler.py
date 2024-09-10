@@ -212,7 +212,7 @@ def push_to_model_hub(
 ):
     api = HfApi(token=token)
 
-    api.create_repo(repo_id, exist_ok=True)
+    repo_id = api.create_repo(repo_id, exist_ok=True).repo_id
 
     tags = ["GaNDLFv" + version]
 
