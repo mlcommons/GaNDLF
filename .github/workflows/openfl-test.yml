@@ -8,6 +8,10 @@ on:
     branches: [master]
   pull_request: {}
 
+env:
+  # A workaround for long FQDN names provided by GitHub actions.
+  FQDN: "localhost"
+
 jobs:
   openfl-test:
     runs-on: ubuntu-latest
