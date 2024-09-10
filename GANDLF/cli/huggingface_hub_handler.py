@@ -204,7 +204,6 @@ def push_to_model_hub(
     commit_message: Union[str, None] = None,
     commit_description: Union[str, None] = None,
     token: Union[str, None] = None,
-    repo_type: Union[str, None] = None,
     revision: Union[str, None] = None,
 ):
     api = HfApi(token=token)
