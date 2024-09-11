@@ -15,7 +15,7 @@ from .wrap_torch import (
 
 from .wrap_monai import novograd_wrapper
 
-from .ademamix import ademamix_functional
+from .ademamix import ademamix_wrapper
 
 global_optimizer_dict = {
     "sgd": sgd,
