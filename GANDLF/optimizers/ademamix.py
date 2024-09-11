@@ -5,11 +5,11 @@ import torch
 from torch import Tensor
 from torch.optim import Optimizer
 
-__all__ = ["AdEMAMix", "ademamix"]
-
 
 class AdEMAMix(Optimizer):
-    r"""Implements the AdEMAMix optimizer from `"The AdEMAMix Optimizer: Better, Faster, Older" <https://arxiv.org/pdf/2409.03137>`_.
+    r"""Adapted from https://github.com/frgfm/Holocron/blob/main/holocron/optim/ademamix.py
+    
+    Implements the AdEMAMix optimizer from `"The AdEMAMix Optimizer: Better, Faster, Older" <https://arxiv.org/pdf/2409.03137>`_.
 
     The estimation of momentums is described as follows, :math:`\forall t \geq 1`:
 
