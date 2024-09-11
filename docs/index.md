@@ -28,6 +28,7 @@ and **CSV inputs** that describe the training data.
 - [Usage](./usage.md)
     - [Customize the training and inference](./customize.md)
 - [Extending GaNDLF](./extending.md)
+- [ITCR Connectivity](./itcr_connectivity.md)
 - [FAQ](./faq.md)
 - [Acknowledgements](./acknowledgements.md)
 
