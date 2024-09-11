@@ -1,3 +1,4 @@
+import torch
 from torch.optim import (
     SGD,
     ASGD,
@@ -14,7 +15,7 @@ from torch.optim import (
 )
 
 
-def sgd(parameters):
+def sgd(parameters: dict) -> torch.optim.SGD:
     """
     Creates a Stochastic Gradient Descent optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -26,7 +27,7 @@ def sgd(parameters):
 
     """
     # Create the optimizer using the input parameters
-    optimizer = SGD(
+    return SGD(
         parameters["model_parameters"],
         lr=parameters.get("learning_rate"),
         momentum=parameters["optimizer"].get("momentum", 0.99),
@@ -35,10 +36,8 @@ def sgd(parameters):
         nesterov=parameters["optimizer"].get("nesterov", True),
     )
 
-    return optimizer
 
-
-def asgd(parameters):
+def asgd(parameters: dict) -> torch.optim.ASGD:
     """
     Creates an Averaged Stochastic Gradient Descent optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -60,7 +59,7 @@ def asgd(parameters):
     )
 
 
-def adam(parameters, opt_type="normal"):
+def adam(parameters: dict, opt_type: str = "normal") -> torch.optim.Adam:
     """
     Creates an Adam or AdamW optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -91,7 +90,7 @@ def adam(parameters, opt_type="normal"):
     )
 
 
-def adamw(parameters):
+def adamw(parameters: dict) -> torch.optim.AdamW:
     """
     Creates an AdamW optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -105,7 +104,7 @@ def adamw(parameters):
     return adam(parameters, opt_type="AdamW")
 
 
-def adamax(parameters):
+def adamax(parameters: dict) -> torch.optim.Adamax:
     """
     Creates an Adamax optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -141,7 +140,7 @@ def adamax(parameters):
 #     )
 
 
-def rprop(parameters):
+def rprop(parameters: dict) -> torch.optim.Rprop:
     """
     Creates a Resilient Backpropagation optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -161,7 +160,7 @@ def rprop(parameters):
     )
 
 
-def adadelta(parameters):
+def adadelta(parameters: dict) -> torch.optim.Adadelta:
     """
     Creates an Adadelta optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -182,7 +181,7 @@ def adadelta(parameters):
     )
 
 
-def adagrad(parameters):
+def adagrad(parameters: dict) -> torch.optim.Adagrad:
     """
     Creates an Adagrad optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -204,7 +203,7 @@ def adagrad(parameters):
     )
 
 
-def rmsprop(parameters):
+def rmsprop(parameters: dict) -> torch.optim.RMSprop:
     """
     Creates an RMSprop optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -227,7 +226,7 @@ def rmsprop(parameters):
     )
 
 
-def radam(parameters):
+def radam(parameters: dict) -> torch.optim.RAdam:
     """
     Creates a RAdam optimizer from the PyTorch `torch.optim` module using the input parameters.
 
@@ -248,7 +247,7 @@ def radam(parameters):
     )
 
 
-def nadam(parameters):
+def nadam(parameters: dict) -> torch.optim.NAdam:
     """
     Creates a NAdam optimizer from the PyTorch `torch.optim` module using the input parameters.
 
