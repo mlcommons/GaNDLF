@@ -28,7 +28,7 @@ def _configure_logging_with_logfile(log_file, config_path):
 
 
 def gandlf_excepthook(exctype, value, tb):
-    if issubclass(exctype, AssertionError):
+    if issubclass(exctype, Exception):
         logging.exception("Uncaught exception", exc_info=(exctype, value, tb))
     else:
         sys.__excepthook__(exctype, value, tb)
