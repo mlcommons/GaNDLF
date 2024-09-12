@@ -5,7 +5,6 @@ from importlib import resources
 import tempfile
 from GANDLF.utils import get_unique_timestamp
 import sys
-import traceback
 
 
 def _create_tmp_log_file():
