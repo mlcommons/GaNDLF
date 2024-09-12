@@ -49,7 +49,7 @@ Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-using
 
 Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-evaluation-using-medperf.
 
-### I was using GaNDLF version `0.0.19` or earlier, and now I am facing issues. What should I do?
+### I was using GaNDLF version `0.0.19` or earlier, and I am facing issues after updating to `0.0.20` or later. What should I do?
 
 Please read the [migration guide](https://mlcommons.github.io/GaNDLF/migration_guide) to understand the changes that have been made to GaNDLF. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
 
