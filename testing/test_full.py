@@ -35,7 +35,7 @@ from GANDLF.cli import (
     generate_metrics_dict,
     split_data_and_save_csvs,
 )
-from GANDLF.cli.huggingface_hub_handler import push_to_model_hub,download_from_hub
+from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_hub
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -3193,6 +3193,7 @@ def test_generic_data_split():
 
     print("passed")
 
+
 def test_upload_download_huggingface(device):
     print("52: Starting huggingface upload download  tests")
     # overwrite previous results
@@ -3252,7 +3253,7 @@ def test_upload_download_huggingface(device):
     inference_data, parameters["headers"] = parseTrainingCSV(
         inputDir + "/train_2d_histo_segmentation.csv", train=False
     )
-    
+
     inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
     InferenceManager(
         dataframe=inference_data,
@@ -3261,17 +3262,16 @@ def test_upload_download_huggingface(device):
         device=device,
     )
     # Upload the Model to Huggingface Hub
-    push_to_model_hub(repo_id = 'Ritesh43/gandlf-model',
-                     folder_path = modelDir,
-                     hf_template = testingDir +'/hugging_face.md',
-                     token = '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',
-                    )    
-    
+    push_to_model_hub(
+        repo_id="Ritesh43/gandlf-model",
+        folder_path=modelDir,
+        hf_template=testingDir + "/hugging_face.md",
+        token="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",
+    )
+
     sanitize_outputDir()
     # Download the Model from Huggingface Hub
-    download_from_hub(repo_id='Ritesh43/gandlf-model',
-                      local_dir = modelDir,
-                      )
+    download_from_hub(repo_id="Ritesh43/gandlf-model", local_dir=modelDir)
 
     sanitize_outputDir()
     print("passed")

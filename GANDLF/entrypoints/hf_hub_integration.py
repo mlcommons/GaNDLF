@@ -3,6 +3,7 @@ from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_hub
 from pathlib import Path
 
+
 @click.command()
 @click.option(
     "--upload/--download",
@@ -89,12 +90,9 @@ from pathlib import Path
     "--hf-template",
     "-hft",
     required=True,
-
     help="Adding the template path for the model card",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False)
-
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
-
 @append_copyright_to_help
 def new_way(
     upload: bool,
@@ -113,9 +111,7 @@ def new_way(
     allow_patterns: str,
     ignore_patterns: str,
     delete_patterns: str,
-    
 ):
-                                                              
     if upload:
         push_to_model_hub(
             repo_id,
