@@ -63,13 +63,16 @@ def validate_model_card(file_path: str):
 def push_to_model_hub(
     repo_id: str,
     folder_path: str,
+<<<<<<< HEAD
     hf_template,
     path_in_repo: Union[str, None] = None,
     commit_message: Union[str, None] = None,
     commit_description: Union[str, None] = None,
+=======
+>>>>>>> 4c3804fa3aff9c7f0388669bce279e160b647840
     token: Union[str, None] = None,
-    repo_type: Union[str, None] = None,
     revision: Union[str, None] = None,
+<<<<<<< HEAD
     allow_patterns: Union[List[str], str, None] = None,
     ignore_patterns: Union[List[str], str, None] = None,
     delete_patterns: Union[List[str], str, None] = None, 
@@ -82,8 +85,14 @@ def push_to_model_hub(
         print(f"Error: {e}")
 
 
+=======
+):
+    api = HfApi(token=token)
 
-    tags = ["GaNDLFv" + version]
+    repo_id = api.create_repo(repo_id, exist_ok=True).repo_id
+>>>>>>> 4c3804fa3aff9c7f0388669bce279e160b647840
+
+    tags = ["v" + version]
 
     git_hash = get_git_hash()
 
@@ -101,10 +110,7 @@ def push_to_model_hub(
         repo_id=repo_id,
         token=token,
         folder_path=folder_path,
-        path_in_repo=path_in_repo,
-        commit_message=commit_message,
-        commit_description=commit_description,
-        repo_type=repo_type,
+        repo_type="model",
         revision=revision,
         allow_patterns=allow_patterns,
         ignore_patterns=ignore_patterns,
