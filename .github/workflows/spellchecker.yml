@@ -59,12 +59,12 @@ name: Check Spelling
 on:
   push:
     branches:
-    - "**"
-    tags-ignore:
-    - "**"
+    - "master"
+    # tags-ignore:
+    # - "**"
   pull_request_target:
     branches:
-    - "**"
+    - "master"
     types:
     - 'opened'
     - 'reopened'
