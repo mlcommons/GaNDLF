@@ -24,7 +24,7 @@ Please follow the [installation instructions](./setup.md#installation) to instal
 
 ### Anonymize Data
 
-A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently encode protected health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize one or multiple images using the `gandlf anonymizer` command as follows:
+A major reason why one would want to anonymize data is to ensure that trained models do not inadvertently do not encode protect health information [[1](https://doi.org/10.1145/3436755),[2](https://doi.org/10.1038/s42256-020-0186-1)]. GaNDLF can anonymize single images or a collection of images using the `gandlf anonymizer` command. It can be used as follows:
 
 ```bash
 # continue from previous shell
@@ -81,7 +81,7 @@ Once these files are present, the patch miner can be run using the following com
 
 ### Running preprocessing before training/inference (optional)
 
-Running preprocessing before training/inference is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements. Use the following command, which will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration:
+Running preprocessing before training/inference is optional, but recommended. It will significantly reduce the computational footprint during training/inference at the expense of larger storage requirements. To run preprocessing before training/inference you can use the following command, which will save the processed data in `./experiment_0/output_dir/` with a new data CSV and the corresponding model configuration:
 
 ```bash
 # continue from previous shell
@@ -108,7 +108,7 @@ N,/full/path/N/0.nii.gz,/full/path/N/1.nii.gz,...,/full/path/N/X.nii.gz,/full/pa
 **Notes:**
 
 - `Channel` can be substituted with `Modality` or `Image`
-- `Label` can be substituted with `Mask` or `Segmentation` and is used to specify the annotation file for segmentation models
+- `Label` can be substituted with `Mask` or `Segmentation`and is used to specify the annotation file for segmentation models
 - For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - Only a single `Label` or `ValueToPredict` header should be passed 
     - Multiple segmentation classes should be in a single file with unique label numbers.
@@ -152,14 +152,14 @@ The following command shows how the script works:
 (venv_gandlf) $> gandlf construct-csv \
   # -h, --help         Show help message and exit
   -i $DATA_DIRECTORY # this is the main data directory 
-  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data. In the simplest case of a single modality, a ".nii.gz" will suffice
+  -c _t1.nii.gz,_t1ce.nii.gz,_t2.nii.gz,_flair.nii.gz \ # an example image identifier for 4 structural brain MR sequences for BraTS, and can be changed based on your data
   -l _seg.nii.gz \ # an example label identifier - not needed for regression/classification, and can be changed based on your data
   -o ./experiment_0/train_data.csv # output CSV to be used for training
 ```
 
 **Notes**:
 
-- For classification/regression, add a column called `ValueToPredict`. Currently, we support only a single value prediction per model.
+- For classification/regression, add a column called `ValueToPredict`. Currently, we are supporting only a single value prediction per model.
 - `SubjectID` or `PatientName` is used to ensure that the randomized split is done per-subject rather than per-image.
 - For data arrangement different to what is described above, a customized script will need to be written to generate the CSV, or you can enter the data manually into the CSV. 
 
@@ -179,14 +179,12 @@ To split the data CSV into training, validation, and testing CSVs, the `gandlf s
 
 ## Customize the Training
 
-Adapting GaNDLF to your needs boils down to modifying a YAML-based configuration file which controls the parameters of training and inference. Below is a list of available samples for users to start as their baseline for further customization:
+GaNDLF requires a YAML-based configuration that controls various aspects of the training/inference process. There are multiple samples for users to start as their baseline for further customization. A list of the available samples is presented as follows:
 
+- [Sample showing all the available options](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml)
 - [Segmentation example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_segmentation_brats.yaml)
 - [Regression example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_regression.yaml)
 - [Classification example](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_classification.yaml)
-
-To find **all the parameters** a GaNDLF config may modify, consult the following file: 
-- [All available options](https://github.com/mlcommons/GaNDLF/blob/master/samples/config_all_options.yaml)
 
 **Notes**: 
 
@@ -601,4 +599,22 @@ To upload to a dataset or a Space, use the --repo-type option:
 ```bash
 (main) $>gandlf hf --upload Wauplin/my-cool-model --folder-path ./model  --token=hf_****
 --repo-type dataset
+```
+
+### Huggingface Template For Upload
+#### Design and Modify Template 
+To design the huggingface template use the hugging_face.md file change the medatory field 
+[REQUIRED_FOR_GANDLF] to it's respective name don't  leave it blank other wise it may through error, other field can be modeified by the user as per his convenience
+
+```bash
+# Here the required field change  from [REQUIRED_FOR_GANDLF] to [GANDLF]
+**Developed by:** {{ developers | default("[GANDLF]", true)}}
+```
+#### Mentioned The Huggingface Template 
+To mentioned the Huggingface Template , use the --hf-template option:
+
+```bash
+(main) $>gandlf hf --upload Wauplin/my-cool-model --folder-path ./model  --token=hf_****
+--repo-type dataset --hf-template /hugging_face.md
+
 ```

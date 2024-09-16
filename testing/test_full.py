@@ -35,6 +35,7 @@ from GANDLF.cli import (
     generate_metrics_dict,
     split_data_and_save_csvs,
 )
+from GANDLF.cli.huggingface_hub_handler import push_to_model_hub,download_from_hub
 from GANDLF.schedulers import global_schedulers_dict
 from GANDLF.optimizers import global_optimizer_dict
 from GANDLF.models import global_models_dict
@@ -3192,9 +3193,92 @@ def test_generic_data_split():
 
     print("passed")
 
+def test_upload_download_huggingface(device):
+    print("52: Starting huggingface upload download  tests")
+    # overwrite previous results
+    sanitize_outputDir()
+    output_dir_patches = os.path.join(outputDir, "histo_patches")
+    if os.path.isdir(output_dir_patches):
+        shutil.rmtree(output_dir_patches)
+    Path(output_dir_patches).mkdir(parents=True, exist_ok=True)
+    output_dir_patches_output = os.path.join(output_dir_patches, "histo_patches_output")
+    Path(output_dir_patches_output).mkdir(parents=True, exist_ok=True)
+
+    parameters_patch = {}
+    # extracting minimal number of patches to ensure that the test does not take too long
+    parameters_patch["num_patches"] = 10
+    parameters_patch["read_type"] = "sequential"
+    # define patches to be extracted in terms of microns
+    parameters_patch["patch_size"] = ["1000m", "1000m"]
+
+    file_config_temp = write_temp_config_path(parameters_patch)
+
+    patch_extraction(
+        inputDir + "/train_2d_histo_segmentation.csv",
+        output_dir_patches_output,
+        file_config_temp,
+    )
+
+    file_for_Training = os.path.join(output_dir_patches_output, "opm_train.csv")
+    # read and parse csv
+    parameters = ConfigManager(
+        testingDir + "/config_segmentation.yaml", version_check_flag=False
+    )
+    training_data, parameters["headers"] = parseTrainingCSV(file_for_Training)
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["modality"] = "histo"
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["architecture"] = "resunet"
+    parameters["nested_training"]["testing"] = 1
+    parameters["nested_training"]["validation"] = -2
+    parameters["metrics"] = ["dice"]
+    parameters["model"]["onnx_export"] = True
+    parameters["model"]["print_summary"] = True
+    parameters["data_preprocessing"]["resize_image"] = [128, 128]
+    modelDir = os.path.join(outputDir, "modelDir")
+    Path(modelDir).mkdir(parents=True, exist_ok=True)
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=modelDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    inference_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_histo_segmentation.csv", train=False
+    )
+    
+    inference_data.drop(index=inference_data.index[-1], axis=0, inplace=True)
+    InferenceManager(
+        dataframe=inference_data,
+        modelDir=modelDir,
+        parameters=parameters,
+        device=device,
+    )
+    # Upload the Model to Huggingface Hub
+    push_to_model_hub(repo_id = 'Ritesh43/gandlf-model',
+                     folder_path = modelDir,
+                     hf_template = testingDir +'/hugging_face.md',
+                     token = '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',
+                    )    
+    
+    sanitize_outputDir()
+    # Download the Model from Huggingface Hub
+    download_from_hub(repo_id='Ritesh43/gandlf-model',
+                      local_dir = modelDir,
+                      )
+
+    sanitize_outputDir()
+    print("passed")
+
 
 def test_generic_logging(capsys):
-    print("52: Starting test for logging")
+    print("53: Starting test for logging")
     log_file = "testing/gandlf.log"
     logger_setup(log_file)
     message = "Testing logging"
@@ -3242,6 +3326,6 @@ def test_generic_logging(capsys):
 
 
 def test_generic_debug_info():
-    print("53: Starting test for logging")
+    print("54: Starting test for logging")
     _debug_info(True)
     print("passed")

@@ -3,203 +3,67 @@ from typing import List, Union
 from GANDLF import version
 from pathlib import Path
 from GANDLF.utils import get_git_hash
+import re
 
-readme_template = """
----
-# For reference on model card metadata, see the spec: https://github.com/huggingface/hub-docs/blob/main/modelcard.md?plain=1
-# Doc / guide: https://huggingface.co/docs/hub/model-cards
-{{ card_data }}
----
+def validate_model_card(file_path: str):
+    """
+    Validate that the required fields in the model card are not null, empty, or set to 'REQUIRED_FOR_GANDLF'.
+    The fields must contain valid alphabetic or alphanumeric values.
 
-# Model Card for {{ model_id | default("Model ID", true) }}
+    Args:
+        file_path (str): The path to the Markdown file to validate.
 
-<!-- Provide a quick summary of what the model is/does. -->
+    Raises:
+        AssertionError: If any required field is missing, empty, null, or contains 'REQUIRED_FOR_GANDLF'.
+    """
+    #Read the Markdown file
+    path = Path(file_path)
+    with path.open('r') as file:
 
-{{ model_summary | default("", true) }}
+        template_str = file.read()
 
-## Model Details
 
-### Model Description
+    # Define required fields and their regex patterns to capture the values
+    patterns = {
+        'Developed by': re.compile(r'\*\*Developed by:\*\*\s*\{\{\s*developers\s*\|\s*default\("(.+?)",\s*true\)\s*\}\}', re.MULTILINE),
+        'License': re.compile(r'\*\*License:\*\*\s*\{\{\s*license\s*\|\s*default\("(.+?)",\s*true\)\s*\}\}', re.MULTILINE),
+        'Primary Organization': re.compile(r'\*\*Primary Organization:\*\*\s*\{\{\s*primary_organization\s*\|\s*default\("(.+?)",\s*true\)\s*\}\}', re.MULTILINE),
+        'Commercial use policy': re.compile(r'\*\*Commercial use policy:\*\*\s*\{\{\s*commercial_use\s*\|\s*default\("(.+?)",\s*true\)\s*\}\}', re.MULTILINE)
+    }
+     
 
-<!-- Provide a longer summary of what this model is. -->
 
-{{ model_description | default("", true) }}
+    # Iterate through the required fields and validate
+    for field, pattern in patterns.items():
+        match = pattern.search(template_str)
+        
+        # Ensure the field is present and does not contain 'REQUIRED_FOR_GANDLF'
+        assert match, f"Field '{field}' is missing or not found in the file."
+        
 
-- **Developed by:** {{ developers | default("[More Information Needed]", true)}}
-- **Primary Organization:** {{ primary_org | default("[More Information Needed]", true)}}
-- **Commercial use Policy:** {{ commercial_policy | default("[More Information Needed]", true)}}
-- **Funded by [optional]:** {{ funded_by | default("[More Information Needed]", true)}}
-- **Shared by [optional]:** {{ shared_by | default("[More Information Needed]", true)}}
-- **Model type:** {{ model_type | default("[More Information Needed]", true)}}
-- **Language(s) (NLP):** {{ language | default("[More Information Needed]", true)}}
-- **License:** {{ license | default("[More Information Needed]", true)}}
-- **Finetuned from model [optional]:** {{ base_model | default("[More Information Needed]", true)}}
+        extract_value = match.group(1)
 
-### Model Sources [optional]
+        # Get the field value
+        value = re.search(r'\[([^\]]+)\]', extract_value).group(1) if re.search(r'\[([^\]]+)\]', extract_value) else None
 
-<!-- Provide the basic links for the model. -->
 
-- **Repository:** {{ repo | default("[More Information Needed]", true)}}
-- **Paper [optional]:** {{ paper | default("[More Information Needed]", true)}}
-- **Demo [optional]:** {{ demo | default("[More Information Needed]", true)}}
+        
+        # Ensure the field is not set to 'REQUIRED_FOR_GANDLF' or empty
+        assert value != 'REQUIRED_FOR_GANDLF', f"The value for '{field}' is set to the default placeholder '[REQUIRED_FOR_GANDLF]'. It must be a valid value."
+        assert value, f"The value for '{field}' is empty or null."
 
-## Uses
+        # Ensure the value contains only alphabetic or alphanumeric characters
+        assert re.match(r'^[a-zA-Z0-9]+$', value), f"The value for '{field}' must be alphabetic or alphanumeric, but got: '{value}'"
 
-<!-- Address questions around how the model is intended to be used, including the foreseeable users of the model and those affected by the model. -->
+    print("All required fields are valid, non-empty, properly filled, and do not contain '[REQUIRED_FOR_GANDLF]'.")
 
-### Direct Use
-
-<!-- This section is for the model use without fine-tuning or plugging into a larger ecosystem/app. -->
-
-{{ direct_use | default("[More Information Needed]", true)}}
-
-### Downstream Use [optional]
-
-<!-- This section is for the model use when fine-tuned for a task, or when plugged into a larger ecosystem/app -->
-
-{{ downstream_use | default("[More Information Needed]", true)}}
-
-### Out-of-Scope Use
-
-<!-- This section addresses misuse, malicious use, and uses that the model will not work well for. -->
-
-{{ out_of_scope_use | default("[More Information Needed]", true)}}
-
-## Bias, Risks, and Limitations
-
-<!-- This section is meant to convey both technical and sociotechnical limitations. -->
-
-{{ bias_risks_limitations | default("[More Information Needed]", true)}}
-
-### Recommendations
-
-<!-- This section is meant to convey recommendations with respect to the bias, risk, and technical limitations. -->
-
-{{ bias_recommendations | default("Users (both direct and downstream) should be made aware of the risks, biases and limitations of the model. More information needed for further recommendations.", true)}}
-
-## How to Get Started with the Model
-
-Use the code below to get started with the model.
-
-{{ get_started_code | default("[More Information Needed]", true)}}
-
-## Training Details
-
-### Training Data
-
-<!-- This should link to a Dataset Card, perhaps with a short stub of information on what the training data is all about as well as documentation related to data pre-processing or additional filtering. -->
-
-{{ training_data | default("[More Information Needed]", true)}}
-
-### Training Procedure
-
-<!-- This relates heavily to the Technical Specifications. Content here should link to that section when it is relevant to the training procedure. -->
-
-#### Preprocessing [optional]
-
-{{ preprocessing | default("[More Information Needed]", true)}}
-
-
-#### Training Hyperparameters
-
-- **Training regime:** {{ training_regime | default("[More Information Needed]", true)}} <!--fp32, fp16 mixed precision, bf16 mixed precision, bf16 non-mixed precision, fp16 non-mixed precision, fp8 mixed precision -->
-
-#### Speeds, Sizes, Times [optional]
-
-<!-- This section provides information about throughput, start/end time, checkpoint size if relevant, etc. -->
-
-{{ speeds_sizes_times | default("[More Information Needed]", true)}}
-
-## Evaluation
-
-<!-- This section describes the evaluation protocols and provides the results. -->
-
-### Testing Data, Factors & Metrics
-
-#### Testing Data
-
-<!-- This should link to a Dataset Card if possible. -->
-
-{{ testing_data | default("[More Information Needed]", true)}}
-
-#### Factors
-
-<!-- These are the things the evaluation is disaggregating by, e.g., subpopulations or domains. -->
-
-{{ testing_factors | default("[More Information Needed]", true)}}
-
-#### Metrics
-
-<!-- These are the evaluation metrics being used, ideally with a description of why. -->
-
-{{ testing_metrics | default("[More Information Needed]", true)}}
-
-### Results
-
-{{ results | default("[More Information Needed]", true)}}
-
-#### Summary
-
-{{ results_summary | default("", true) }}
-
-## Model Examination [optional]
-
-<!-- Relevant interpretability work for the model goes here -->
-
-{{ model_examination | default("[More Information Needed]", true)}}
-
-## Technical Specifications [optional]
-
-### Model Architecture and Objective
-
-{{ model_specs | default("[More Information Needed]", true)}}
-
-### Compute Infrastructure
-
-{{ compute_infrastructure | default("[More Information Needed]", true)}}
-
-#### Hardware
-
-{{ hardware_requirements | default("[More Information Needed]", true)}}
-
-#### Software
-
-{{ software | default("[More Information Needed]", true)}}
-
-## Citation [optional]
-
-<!-- If there is a paper or blog post introducing the model, the APA and Bibtex information for that should go in this section. -->
-
-**BibTeX:**
-
-{{ citation_bibtex | default("[More Information Needed]", true)}}
-
-**APA:**
-
-{{ citation_apa | default("[More Information Needed]", true)}}
-
-## Glossary [optional]
-
-<!-- If relevant, include terms and calculations in this section that can help readers understand the model or model card. -->
-
-{{ glossary | default("[More Information Needed]", true)}}
-
-## More Information [optional]
-
-{{ more_information | default("[More Information Needed]", true)}}
-
-## Model Card Authors [optional]
-
-{{ model_card_authors | default("[More Information Needed]", true)}}
-
-## Model Card Contact
-
-{{ model_card_contact | default("[More Information Needed]", true)}}"""
-
+    # Example usage
+    return template_str
 
 def push_to_model_hub(
     repo_id: str,
     folder_path: str,
+    hf_template,
     path_in_repo: Union[str, None] = None,
     commit_message: Union[str, None] = None,
     commit_description: Union[str, None] = None,
@@ -208,11 +72,16 @@ def push_to_model_hub(
     revision: Union[str, None] = None,
     allow_patterns: Union[List[str], str, None] = None,
     ignore_patterns: Union[List[str], str, None] = None,
-    delete_patterns: Union[List[str], str, None] = None,
+    delete_patterns: Union[List[str], str, None] = None, 
 ):
     api = HfApi(token=token)
 
-    api.create_repo(repo_id, exist_ok=True)
+    try:
+        api.create_repo(repo_id)
+    except Exception as e:
+        print(f"Error: {e}")
+
+
 
     tags = ["GaNDLFv" + version]
 
@@ -221,6 +90,8 @@ def push_to_model_hub(
     if not git_hash == "None":
         tags += [git_hash]
 
+    readme_template = validate_model_card(hf_template)
+        
     card_data = ModelCardData(library_name="GaNDLF", tags=tags)
     card = ModelCard.from_template(card_data, template_str=readme_template)
 
@@ -239,7 +110,7 @@ def push_to_model_hub(
         ignore_patterns=ignore_patterns,
         delete_patterns=delete_patterns,
     )
-
+    print("Model Sucessfully Uploded")
 
 def download_from_hub(
     repo_id: str,
@@ -257,3 +128,4 @@ def download_from_hub(
         force_download=force_download,
         token=token,
     )
+    

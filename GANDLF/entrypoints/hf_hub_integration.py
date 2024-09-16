@@ -1,7 +1,7 @@
 import click
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_hub
-
+from pathlib import Path
 
 @click.command()
 @click.option(
@@ -85,11 +85,22 @@ from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_
     "-dp",
     help="Uploading: If provided, remote files matching any of the patterns will be deleted from the repo while committing new files. This is useful if you don't know which files have already been uploaded.",
 )
+@click.option(
+    "--hf-template",
+    "-hft",
+    required=True,
+
+    help="Adding the template path for the model card",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False)
+
+)
+
 @append_copyright_to_help
 def new_way(
     upload: bool,
     repo_id: str,
     token: str,
+    hf_template: str,
     revision: str,
     cache_dir: str,
     local_dir: str,
@@ -102,13 +113,14 @@ def new_way(
     allow_patterns: str,
     ignore_patterns: str,
     delete_patterns: str,
+    
 ):
-    """Manages model transfers to and from the Hugging Face Hub"""
-
+                                                              
     if upload:
         push_to_model_hub(
             repo_id,
             folder_path,
+            hf_template,
             path_in_repo,
             commit_message,
             commit_description,
