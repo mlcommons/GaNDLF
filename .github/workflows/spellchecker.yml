@@ -59,12 +59,12 @@ name: Check Spelling
 on:
   push:
     branches:
-    - "master"
-    # tags-ignore:
-    # - "**"
+    - "**"
+    tags-ignore:
+    - "**"
   pull_request_target:
     branches:
-    - "master"
+    - "**"
     types:
     - 'opened'
     - 'reopened'
@@ -107,6 +107,22 @@ jobs:
         extra_dictionary_limit: 20
         extra_dictionaries:
           cspell:software-terms/dict/softwareTerms.txt
+          cspell:python/src/python/python-lib.txt
+          cspell:python/src/python/python.txt
+          cspell:python/src/common/extra.txt
+          cspell:php/dict/php.txt
+          cspell:r/src/r.txt
+          cspell:aws/aws.txt
+          cspell:django/dict/django.txt
+          cspell:filetypes/filetypes.txt
+          cspell:node/dict/node.txt
+          cspell:golang/dict/go.txt
+          cspell:fullstack/dict/fullstack.txt
+          cspell:java/src/java.txt
+          cspell:k8s/dict/k8s.txt
+          cspell:css/dict/css.txt
+          cspell:npm/dict/npm.txt
+          cspell:latex/dict/latex.txt
 
   comment-push:
     name: Report (Push)
