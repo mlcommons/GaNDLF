@@ -123,6 +123,11 @@ jobs:
           cspell:css/dict/css.txt
           cspell:npm/dict/npm.txt
           cspell:latex/dict/latex.txt
+          cspell:latex/samples/sample-words.txt
+          cspell:html-symbol-entities/entities.txt
+          cspell:html/dict/html.txt
+          cspell:cpp/src/ecosystem.txt
+          cspell:mnemonics/src/mnemonics.txt
 
   comment-push:
     name: Report (Push)
