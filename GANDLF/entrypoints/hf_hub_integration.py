@@ -1,7 +1,6 @@
 import click
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_hub
-from pathlib import Path
 
 
 @click.command()
@@ -130,3 +129,4 @@ def new_way(
         download_from_hub(
             repo_id, revision, cache_dir, local_dir, force_download, token
         )
+    
