@@ -89,8 +89,7 @@ from pathlib import Path
 @click.option(
     "--hf-template",
     "-hft",
-    required=True,
-    help="Adding the template path for the model card",
+    help="Adding the template path for the model card it is Required during Uploaing a model",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @append_copyright_to_help
