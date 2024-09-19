@@ -3194,7 +3194,7 @@ def test_generic_data_split():
     print("passed")
 
 
-def test_upload_download_huggingface(device):
+def test_train_inference_segmentation_histology_2d_huggingface(device):
     print("52: Starting huggingface upload download  tests")
     # overwrite previous results
     sanitize_outputDir()
