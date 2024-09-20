@@ -44,7 +44,7 @@ requirements = [
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
     "torchvision",
-    "tqdm",
+    "tqdm",872
     "torchio==0.19.6",
     "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
@@ -70,7 +70,7 @@ requirements = [
     "ACSConv==0.1.1",
     # https://github.com/docker/docker-py/issues/3256
     "requests>=2.32.2",
-    "docker==7.1.0",
+    "docker",
     "dicom-anonymizer==1.0.12",
     "twine",
     "zarr",
