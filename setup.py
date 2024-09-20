@@ -44,7 +44,7 @@ requirements = [
     "SimpleITK!=2.0.*",
     "SimpleITK!=2.2.1",  # https://github.com/mlcommons/GaNDLF/issues/536
     "torchvision",
-    "tqdm",872
+    "tqdm",
     "torchio==0.19.6",
     "pandas>=2.0.0",
     "scikit-learn>=0.23.2",
