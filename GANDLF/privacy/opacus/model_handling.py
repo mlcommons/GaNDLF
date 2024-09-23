@@ -32,8 +32,7 @@ def opacus_model_fix(model: torch.nn.Module, params: dict) -> torch.nn.Module:
         ), f"Training parameters are set to not allow Opacus to try to fix incompatible model components, and the following issues were detected: {opacus_errors_detected}"
     elif opacus_errors_detected != []:
         print(
-            f"Allowing Opacus to try and patch the model due to the following issues: ",
-            opacus_errors_detected,
+            f"Allowing Opacus to try and patch the model due to the following issues: {opacus_errors_detected}"
         )
         print()
         model = ModuleValidator.fix(model)

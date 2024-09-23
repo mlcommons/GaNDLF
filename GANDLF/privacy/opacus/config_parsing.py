@@ -1,11 +1,14 @@
-def parse_opacus_params(params: dict, initialize_key: function) -> dict:
+from typing import Callable
+
+
+def parse_opacus_params(params: dict, initialize_key: Callable) -> dict:
     """
     Function to set defaults and augment the parameters related to making a trained model differentially
     private with respect to the training data.
 
     Args:
         params (dict): Training parameters.
-        initialize_key (function): Function to fill in value for a missing key.
+        initialize_key (Callable): Function to fill in value for a missing key.
 
     Returns:
         dict: Updated training parameters.
