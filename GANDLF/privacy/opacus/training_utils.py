@@ -15,7 +15,7 @@ def handle_nonempty_batch(subject: dict, params: dict) -> Tuple[dict, int]:
         Tuple[dict, int]: Modified subject dictionary and batch size.
     """
     batch_size = len(subject[params["channel_keys"][0]][torchio.DATA])
-    return Tuple(subject, batch_size)
+    return subject, batch_size
 
 
 def handle_empty_batch(subject: dict, params: dict, feature_shape: list) -> dict:

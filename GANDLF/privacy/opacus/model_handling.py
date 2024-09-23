@@ -83,7 +83,7 @@ def prep_for_opacus_training(
             target_epsilon=params["differential_privacy"]["epsilon"],
             target_delta=params["differential_privacy"]["delta"],
         )
-    return Tuple[model, optimizer, train_dataloader, privacy_engine]
+    return model, optimizer, train_dataloader, privacy_engine
 
 
 def build_empty_batch_value(
