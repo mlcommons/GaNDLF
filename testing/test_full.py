@@ -47,6 +47,7 @@ from GANDLF.data.post_process import (
 )
 from GANDLF.anonymize import run_anonymizer
 from GANDLF.entrypoints.debug_info import _debug_info
+from huggingface_hub import HfApi
 
 
 device = "cpu"
@@ -3261,19 +3262,30 @@ def test_upload_download_huggingface(device):
         parameters=parameters,
         device=device,
     )
+
+    # Initialize the Hugging Face API instance
+    api = HfApi(token='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')
+    try:
+       api.create_repo(repo_id='Ritesh43/ndlf_model')
+    except:
+        pass    
     # Upload the Model to Huggingface Hub
     push_to_model_hub(
-        repo_id="Ritesh43/gandlf-model",
+        repo_id="Ritesh43/ndlf_model",
         folder_path=modelDir,
         hf_template=testingDir + "/hugging_face.md",
         token="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",
     )
+    #Download the Model from Huggingface Hub
+    download_from_hub(repo_id="Ritesh43/ndlf_model", local_dir=modelDir)
+
+    api.delete_repo(repo_id='Ritesh43/ndlf_model')
 
     sanitize_outputDir()
     # Download the Model from Huggingface Hub
-    download_from_hub(repo_id="Ritesh43/gandlf-model", local_dir=modelDir)
+    #download_from_hub(repo_id="Ritesh43/Gandlf_new_pr", local_dir=modelDir)
 
-    sanitize_outputDir()
+    #sanitize_outputDir()
     print("passed")
 
 
