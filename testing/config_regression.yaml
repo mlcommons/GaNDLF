@@ -38,7 +38,7 @@ save_output: false
 scaling_factor: 1
 scheduler: triangle
 version:
-  maximum: 0.1.0-dev
+  maximum: 0.1.0
   minimum: 0.0.14
 weighted_loss: false
 
