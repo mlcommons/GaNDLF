@@ -18,7 +18,7 @@ jobs:
 
       - name: Call reusable workflow to install dependencies
         id: dependencies
-        uses: ./.github/workflows/dependencies
+        uses: mlcommons/GaNDLF/.github/workflows/dependencies
 
       - name: Run generic unit tests
         if: ${{steps.dependencies.outputs.other_modified_files_count > 0}} # Run on any non-docs change
