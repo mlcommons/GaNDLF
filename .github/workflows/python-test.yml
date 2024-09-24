@@ -106,10 +106,17 @@ jobs:
         run: |
           pytest --cov=. --cov-report=xml --cov-append -k "update_version"
 
-      - name: Upload coverage
+      - name: Upload coverage to CodeCov
         if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           flags: unittests
+
+      - name: Upload coverage to Codacy
+        if: steps.changed-files-specific.outputs.only_modified == 'false' # Run on any non-docs change
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ./coverage.xml
