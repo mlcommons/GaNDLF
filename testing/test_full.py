@@ -3267,8 +3267,8 @@ def test_train_inference_segmentation_histology_2d_huggingface(device):
     api = HfApi(token="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")
     try:
         api.create_repo(repo_id="Ritesh43/ndlf_model")
-    except:
-        pass
+    except Exception as e:
+        print(e)
     # Upload the Model to Huggingface Hub
     push_to_model_hub(
         repo_id="Ritesh43/ndlf_model",
