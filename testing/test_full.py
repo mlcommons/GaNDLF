@@ -3264,11 +3264,11 @@ def test_upload_download_huggingface(device):
     )
 
     # Initialize the Hugging Face API instance
-    api = HfApi(token='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')
+    api = HfApi(token="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")
     try:
-       api.create_repo(repo_id='Ritesh43/ndlf_model')
+        api.create_repo(repo_id="Ritesh43/ndlf_model")
     except:
-        pass    
+        pass
     # Upload the Model to Huggingface Hub
     push_to_model_hub(
         repo_id="Ritesh43/ndlf_model",
@@ -3276,16 +3276,16 @@ def test_upload_download_huggingface(device):
         hf_template=testingDir + "/hugging_face.md",
         token="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",
     )
-    #Download the Model from Huggingface Hub
+    # Download the Model from Huggingface Hub
     download_from_hub(repo_id="Ritesh43/ndlf_model", local_dir=modelDir)
 
-    api.delete_repo(repo_id='Ritesh43/ndlf_model')
+    api.delete_repo(repo_id="Ritesh43/ndlf_model")
 
     sanitize_outputDir()
     # Download the Model from Huggingface Hub
-    #download_from_hub(repo_id="Ritesh43/Gandlf_new_pr", local_dir=modelDir)
+    # download_from_hub(repo_id="Ritesh43/Gandlf_new_pr", local_dir=modelDir)
 
-    #sanitize_outputDir()
+    # sanitize_outputDir()
     print("passed")
 
 
