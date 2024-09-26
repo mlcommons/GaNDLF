@@ -60,7 +60,8 @@ runs:
           echo "Count of non-docs files changed: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}"
           echo "If only-modified is triggered: ${{ steps.changed-files-specific.outputs.only_modified }}"
           echo "other_modified_files_count=${{ steps.changed-files-specific.outputs.other_modified_files_count }}" >> $GITHUB_OUTPUT
-          echo "GITHUB_OUTPUT:${{ GITHUB_OUTPUT }}"
+          # echo "GITHUB_OUTPUT:${{ GITHUB_OUTPUT }}"
+          echo "$GITHUB_OUTPUT"
 
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
