@@ -61,6 +61,7 @@ runs:
           echo "If only-modified is triggered: ${{ steps.changed-files-specific.outputs.only_modified }}"
 
       - name: Set output
+        shell: bash
         run: echo "other_modified_files_count=${{ steps.changed-files-specific.outputs.other_modified_files_count }}" >> $GITHUB_OUTPUT
 
 
