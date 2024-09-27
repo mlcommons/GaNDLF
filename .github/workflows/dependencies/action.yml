@@ -64,6 +64,9 @@ runs:
         shell: bash
         run: echo "other_modified_files_count=${{ steps.changed-files-specific.outputs.other_modified_files_count }}" >> $GITHUB_OUTPUT
 
+      - name: Check saved output
+        shell: bash
+        run: echo "$GITHUB_OUTPUT"
 
       # This second step is unnecessary but highly recommended because
       # It will cache database and saves time re-downloading it if database isn't stale.
