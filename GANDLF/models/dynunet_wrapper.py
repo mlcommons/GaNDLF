@@ -1,6 +1,34 @@
+from testing.test_full import patch_size
 from .modelBase import ModelBase
 import monai.networks.nets.dynunet as dynunet
 
+
+def get_kernels_strides(sizes,spacings):
+    """
+    https://github.com/Project-MONAI/tutorials/blob/main/modules/dynunet_pipeline/create_network.py#L19
+
+    """
+    input_size = sizes
+    strides, kernels = [], []
+    while True:
+        spacing_ratio = [sp / min(spacings) for sp in spacings]
+        stride = [2 if ratio <= 2 and size >= 8 else 1 for (ratio, size) in zip(spacing_ratio, sizes)]
+        kernel = [3 if ratio <= 2 else 1 for ratio in spacing_ratio]
+        if all(s == 1 for s in stride):
+            break
+        for idx, (i, j) in enumerate(zip(sizes, stride)):
+            if i % j != 0:
+                raise ValueError(
+                    f"Patch size is not supported, please try to modify the size {input_size[idx]} in the spatial dimension {idx}."
+                )
+        sizes = [i / j for i, j in zip(sizes, stride)]
+        spacings = [i * j for i, j in zip(spacings, stride)]
+        kernels.append(kernel)
+        strides.append(stride)
+
+    strides.insert(0, len(spacings) * [1])
+    kernels.append(len(spacings) * [3])
+    return kernels, strides
 
 class dynunet_wrapper(ModelBase):
     """
@@ -57,7 +85,11 @@ class dynunet_wrapper(ModelBase):
 
         parameters["model"]["trans_bias"] = parameters["model"].get("trans_bias", False)
         parameters["model"]["dropout"] = parameters["model"].get("dropout", None)
-
+        parameters["model"]["auto_calculation_kernel_stripes"] = parameters["model"].get("auto_calculation_kernel_stripes", True)
+        if parameters["model"]["auto_calculation_kernel_stripes"] == True:
+            patch_size = parameters.get("patch_size", None)
+            spacing = parameters.get("spacing", None)
+            parameters["model"]["kernel_size"], parameters["model"]["strides"] = get_kernels_strides(patch_size, spacing)
         if not ("norm_type" in parameters["model"]):
             self.norm_type = "INSTANCE"
 
