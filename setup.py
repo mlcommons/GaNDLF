@@ -81,6 +81,7 @@ requirements = [
     "packaging==24.0",
     "typer==0.9.0",
     "colorlog",
+    "opacus==1.5.2",
     "huggingface-hub==0.23.4",
 ]
 
