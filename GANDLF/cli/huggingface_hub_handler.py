@@ -113,7 +113,6 @@ def push_to_model_hub(
 
     api.upload_folder(
         repo_id=repo_id,
-        token=token,
         folder_path=folder_path,
         repo_type="model",
         revision=revision,
