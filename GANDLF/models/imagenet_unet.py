@@ -252,6 +252,10 @@ class ImageNet_UNet(ModelBase):
             aux_params=classifier_head_parameters,
         )
 
+        # all BatchNorm should be replaced with InstanceNorm for DP experiments
+        if "differential_privacy" in parameters:
+            self.replace_batchnorm(self.model)
+
         if self.n_dimensions == 3:
             self.model = self.converter(self.model).model
 

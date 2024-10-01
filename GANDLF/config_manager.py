@@ -7,6 +7,7 @@ from copy import deepcopy
 
 from .utils import version_check
 from GANDLF.data.post_process import postprocessing_after_reverse_one_hot_encoding
+from GANDLF.privacy.opacus import parse_opacus_params
 
 from GANDLF.metrics import surface_distance_ids
 from importlib.metadata import version
@@ -709,6 +710,10 @@ def _parseConfig(
         temp_dict = {}
         temp_dict["type"] = params["optimizer"]
         params["optimizer"] = temp_dict
+
+    # initialize defaults for DP
+    if params.get("differential_privacy"):
+        params = parse_opacus_params(params, initialize_key)
 
     # initialize defaults for inference mechanism
     inference_mechanism = {"grid_aggregator_overlap": "crop", "patch_overlap": 0}

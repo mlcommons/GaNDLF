@@ -89,7 +89,16 @@ def inference_loop(
             assert file_to_load != None, "The 'best_file' was not found"
 
         main_dict = torch.load(file_to_load, map_location=parameters["device"])
-        model.load_state_dict(main_dict["model_state_dict"])
+        state_dict = main_dict["model_state_dict"]
+        if parameters.get("differential_privacy"):
+            # this is required for torch==1.11 and for DP inference
+            new_state_dict = {}
+            for key, val in state_dict.items():
+                new_key = key.replace("_module.", "")
+                new_state_dict[new_key] = val  # remove `module.`
+            state_dict = new_state_dict
+
+        model.load_state_dict(state_dict)
         parameters["previous_parameters"] = main_dict.get("parameters", None)
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":

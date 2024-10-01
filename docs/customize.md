@@ -136,3 +136,18 @@ This file contains mid-level information regarding various parameters that can b
     - `q_samples_per_volume`: this determines the number of patches to extract from each volume. A small number of patches ensures a large variability in the queue, but training will be slower.
     - `q_num_workers`: this determines the number subprocesses to use for data loading; '0' means main process is used, scale this according to available CPU resources.
     - `q_verbose`: used to debug the queue
+
+## Differentially Private Training
+
+GaNDLF supports training differentially private models using [Opacus](https://opacus.ai/). Here are some resources using which one can train private models:
+
+- TLDR on DP and private training: read [this paper](https://arxiv.org/pdf/1607.00133) and [this blog post](https://medium.com/pytorch/differential-privacy-series-part-1-dp-sgd-algorithm-explained-12512c3959a3).
+- All options are present in a new key called `differential_privacy` in the config file. It has the following options:
+  - `noise_multiplier`: The ratio of the standard deviation of the Gaussian noise to the L2-sensitivity of the function to which the noise is added.
+  - `max_grad_norm`: The maximum norm of the per-sample gradients. Any gradient with norm higher than this will be clipped to this value.
+  - `accountant`: Accounting mechanism. Currently supported: `rdp` (RDPAccountant), `gdp` (GaussianAccountant), `prv` (PRVAccountant)
+  - `secure_mode`: Set to `True` if cryptographically strong DP guarantee is required. `secure_mode=True` uses secure random number generator for noise and shuffling (as opposed to `pseudo-rng` in vanilla PyTorch) and prevents certain floating-point arithmetic-based attacks.
+  - `allow_opacus_model_fix`: Enabled automated fixing of the model based on Opacus [[ref](https://opacus.ai/api/validator.html)]
+  - `delta`: Target delta to be achieved. Probability of information being leaked. Use either this or `epsilon`.
+  - `epsilon`: Target epsilon to be achieved, a metric of privacy loss at differential changes in data. Use either this or `delta`.
+  - `physical_batch_size`: The batch size to use for DP computation (it is usually set lower than the baseline or non-DP batch size). Defaults to `batch_size`.

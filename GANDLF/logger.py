@@ -12,14 +12,21 @@ import torch
 
 
 class Logger:
-    def __init__(self, logger_csv_filename: str, metrics: List[str], mode: str) -> None:
+    def __init__(
+        self,
+        logger_csv_filename: str,
+        metrics: List[str],
+        mode: str,
+        add_epsilon: bool = False,
+    ) -> None:
         """
-        Logger class to log the training and validation metrics to a csv file.
-            May append to existing file if headers match; elsewise raises an error.
+        Logger class to log the training and validation metrics to a csv file. May append to existing file if headers match; elsewise raises an error.
 
         Args:
             logger_csv_filename (str): Path to a filename where the csv has to be stored.
             metrics (Dict[str, float]): The metrics to be logged.
+            mode (str): The mode of the logger, used as suffix to metric names. Normally may be `train` / `val` / `test`
+            add_epsilon (bool): Whether to log epsilon values or not (differential privacy measurement)
         """
         self.filename = logger_csv_filename
         mode = mode.lower()
@@ -28,6 +35,8 @@ class Logger:
         new_header = ["epoch_no", f"{mode}_loss"] + [
             f"{mode}_{metric}" for metric in metrics
         ]
+        if add_epsilon:
+            new_header.append(f"{self.mode}_epsilon")
 
         # TODO: do we really need to support appending to existing files?
         if os.path.exists(self.filename):
