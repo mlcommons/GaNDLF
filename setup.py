@@ -82,7 +82,7 @@ requirements = [
     "typer==0.9.0",
     "colorlog",
     "opacus==1.5.2",
-    "huggingface-hub==0.23.4",
+    "huggingface-hub==0.25.1",
 ]
 
 if __name__ == "__main__":
