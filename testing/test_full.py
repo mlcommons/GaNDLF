@@ -276,7 +276,6 @@ def test_train_segmentation_rad_2d(device):
                 ["acs", "soft", "conv3d"]
             )
 
-
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -369,7 +368,6 @@ def test_train_segmentation_rad_3d(device):
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
-
 
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
