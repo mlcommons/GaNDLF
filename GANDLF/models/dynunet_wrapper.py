@@ -64,13 +64,19 @@ class dynunet_wrapper(ModelBase):
 
         patch_size = parameters.get("patch_size", None)
         spacing = parameters.get(
-            "spacing", [1.0 for i in range(parameters["model"]["dimension"])]
+            "spacing_for_internal_computations", [1.0 for i in range(parameters["model"]["dimension"])]
         )
-        kernel_size, strides = get_kernels_strides(patch_size, spacing)
         parameters["model"]["kernel_size"] = parameters["model"].get(
-            "kernel_size", kernel_size
+            "kernel_size", None
         )
-        parameters["model"]["strides"] = parameters["model"].get("strides", strides)
+        parameters["model"]["strides"] = parameters["model"].get("strides", None)
+        if (parameters["model"]["kernel_size"] is None) or (
+            parameters["model"]["strides"] is None
+        ):
+            kernel_size, strides = get_kernels_strides(patch_size, spacing)
+            parameters["model"]["kernel_size"] = kernel_size
+            parameters["model"]["strides"] = strides
+
         parameters["model"]["filters"] = parameters["model"].get("filters", None)
         parameters["model"]["act_name"] = parameters["model"].get(
             "act_name", ("leakyrelu", {"inplace": True, "negative_slope": 0.01})
