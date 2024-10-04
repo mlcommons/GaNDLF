@@ -64,7 +64,8 @@ class dynunet_wrapper(ModelBase):
 
         patch_size = parameters.get("patch_size", None)
         spacing = parameters.get(
-            "spacing_for_internal_computations", [1.0 for i in range(parameters["model"]["dimension"])]
+            "spacing_for_internal_computations",
+            [1.0 for i in range(parameters["model"]["dimension"])],
         )
         parameters["model"]["kernel_size"] = parameters["model"].get(
             "kernel_size", None
