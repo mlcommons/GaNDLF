@@ -52,15 +52,15 @@ device = "cpu"
 ## global defines
 # pre-defined segmentation model types for testing
 all_models_segmentation = [
-    # "lightunet",
-    # "lightunet_multilayer",
-    # "unet",
-    # "unet_multilayer",
-    # "deep_resunet",
-    # "fcn",
-    # "uinc",
-    # "msdnet",
-    # "imagenet_unet",
+    "lightunet",
+    "lightunet_multilayer",
+    "unet",
+    "unet_multilayer",
+    "deep_resunet",
+    "fcn",
+    "uinc",
+    "msdnet",
+    "imagenet_unet",
     "dynunet",
 ]
 # pre-defined regression/classification model types for testing
@@ -276,13 +276,6 @@ def test_train_segmentation_rad_2d(device):
                 ["acs", "soft", "conv3d"]
             )
 
-        if model == "dynunet":
-            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
-            # parameters["model"]["kernel_size"] = (3, 3, 3, 1)
-            ["model"]["auto_calculation_kernel_stripes"] = True
-            parameters["spacing"] = [[1.0, 1.0, 1.0]]
-            # parameters["model"]["strides"] = (1, 1, 1, 1)
-            parameters["model"]["deep_supervision"] = False
 
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
@@ -296,6 +289,7 @@ def test_train_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
+        print(parameters["model"]["strides"])
 
     sanitize_outputDir()
 
@@ -376,11 +370,6 @@ def test_train_segmentation_rad_3d(device):
                 ["acs", "soft", "conv3d"]
             )
 
-        if model == "dynunet":
-            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
-            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
-            parameters["model"]["strides"] = (1, 1, 1, 1)
-            parameters["model"]["deep_supervision"] = False
 
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
