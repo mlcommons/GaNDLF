@@ -288,7 +288,7 @@ def test_train_segmentation_rad_2d(device):
             resume=False,
             reset=True,
         )
-        print(parameters["model"]["strides"])
+
 
     sanitize_outputDir()
 
