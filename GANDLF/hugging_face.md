@@ -19,15 +19,15 @@
 
 {{ model_description | default("", true) }}
 
-- **Developed by:** {{ developers | default("[REQUIRED_FOR_GANDLF]", true)}}
-- **License:** {{ license | default("[REQUIRED_FOR_GANDLF]", true)}}
+- **Developed by:** {{ developers | default("[GANDLF]", true)}}
+- **License:** {{ license | default("[GANDLF]", true)}}
 - **Funded by [optional]:** {{ funded_by | default("[More Information Needed]", true)}}
 - **Shared by [optional]:** {{ shared_by | default("[More Information Needed]", true)}}
 - **Model type:** {{ model_type | default("[More Information Needed]", true)}}
 - **Language(s) (NLP):** {{ language | default("[More Information Needed]", true)}}
 - **Finetuned from model [optional]:** {{ base_model | default("[More Information Needed]", true)}}
-- **Primary Organization:** {{ primary_organization | default("[REQUIRED_FOR_GANDLF]", true)}}
-- **Commercial use policy:** {{ commercial_use | default("[REQUIRED_FOR_GANDLF]", true)}}
+- **Primary Organization:** {{ primary_organization | default("[GANDLF]", true)}}
+- **Commercial use policy:** {{ commercial_use | default("[GANDLF]", true)}}
 
 ### Model Sources [optional]
 

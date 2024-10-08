@@ -1,6 +1,14 @@
 import click
 from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_hub
+from pathlib import Path
+
+huggingfaceDir = Path(__file__).parent.absolute()
+
+huggingfaceDir=huggingfaceDir.parent.absolute().__str__()
+
+# Huggingface template  Path for Model deployment 
+huggingface_file_path = huggingfaceDir + "\hugging_face.md"
 
 
 @click.command()
@@ -89,6 +97,7 @@ from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_
     "--hf-template",
     "-hft",
     help="Adding the template path for the model card it is Required during Uploaing a model",
+    default= huggingface_file_path,
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
 @append_copyright_to_help
