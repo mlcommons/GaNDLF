@@ -80,7 +80,7 @@ def validate_model_card(file_path: str):
 def push_to_model_hub(
     repo_id: str,
     folder_path: str,
-    hf_template: str ,
+    hf_template: str,
     path_in_repo: Union[str, None] = None,
     commit_message: Union[str, None] = None,
     commit_description: Union[str, None] = None,
