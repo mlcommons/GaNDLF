@@ -79,21 +79,6 @@ huggingface_file_path = huggingfaceDir + "\hugging_face.md"
     help='Uploading: Set to "dataset" or "space" if uploading to a dataset or space, "model" if uploading to a model. Default is model',
 )
 @click.option(
-    "--allow-patterns",
-    "-ap",
-    help="Uploading: If provided, only files matching at least one pattern are uploaded.",
-)
-@click.option(
-    "--ignore-patterns",
-    "-ip",
-    help="Uploading: If provided, files matching any of the patterns are not uploaded.",
-)
-@click.option(
-    "--delete-patterns",
-    "-dp",
-    help="Uploading: If provided, remote files matching any of the patterns will be deleted from the repo while committing new files. This is useful if you don't know which files have already been uploaded.",
-)
-@click.option(
     "--hf-template",
     "-hft",
     help="Adding the template path for the model card it is Required during Uploaing a model",

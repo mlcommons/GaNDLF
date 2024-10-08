@@ -31,6 +31,10 @@ from .step import step
 from .forward_pass import validate_network
 from .generic import create_pytorch_objects
 
+from GANDLF.privacy.opacus.model_handling import empty_collate
+from GANDLF.privacy.opacus import handle_dynamic_batch_size, prep_for_opacus_training
+from opacus.utils.batch_memory_manager import wrap_data_loader
+
 # hides torchio citation request, see https://github.com/fepegar/torchio/issues/235
 os.environ["TORCHIO_HIDE_CITATION_PROMPT"] = "1"
 
@@ -91,6 +95,14 @@ def train_network(
     for batch_idx, (subject) in enumerate(
         tqdm(train_dataloader, desc="Looping over training data")
     ):
+        if params.get("differential_privacy"):
+            subject, params["batch_size"] = handle_dynamic_batch_size(
+                subject=subject, params=params
+            )
+            assert not isinstance(
+                model, torch.nn.DataParallel
+            ), "Differential privacy is not supported with DataParallel or DistributedDataParallel. Please use a single GPU or DDP with Opacus."
+
         optimizer.zero_grad()
         image = (  # 5D tensor: (B, C, H, W, D)
             torch.cat(
@@ -210,6 +222,23 @@ def train_network(
     )
 
     return average_epoch_train_loss, average_epoch_train_metric
+
+
+def train_network_wrapper(model, train_dataloader, optimizer, params):
+    """
+    Wrapper Function to handle train_dataloader for benign and DP cases and pass on to train a network for a single epoch
+    """
+
+    if params.get("differential_privacy"):
+        with train_dataloader as memory_safe_data_loader:
+            epoch_train_loss, epoch_train_metric = train_network(
+                model, memory_safe_data_loader, optimizer, params
+            )
+    else:
+        epoch_train_loss, epoch_train_metric = train_network(
+            model, train_dataloader, optimizer, params
+        )
+    return epoch_train_loss, epoch_train_metric
 
 
 def training_loop(
@@ -368,6 +397,7 @@ def training_loop(
         logger_csv_filename=os.path.join(output_dir, "logs_validation.csv"),
         metrics=metrics_log,
         mode="valid",
+        add_epsilon=bool(params.get("differential_privacy")),
     )
     if testingDataDefined:
         test_logger = Logger(
@@ -391,6 +421,36 @@ def training_loop(
         params["medcam_enabled"] = False
 
     print("Using device:", device, flush=True)
+
+    if params.get("differential_privacy"):
+        print(
+            "Using Opacus to make training differentially private with respect to the training data."
+        )
+
+        model, optimizer, train_dataloader, privacy_engine = prep_for_opacus_training(
+            model=model,
+            optimizer=optimizer,
+            train_dataloader=train_dataloader,
+            params=params,
+        )
+
+        train_dataloader.collate_fn = empty_collate(train_dataloader.dataset[0])
+
+        # train_dataloader = BatchMemoryManager(
+        #     data_loader=train_dataloader,
+        #     max_physical_batch_size=MAX_PHYSICAL_BATCH_SIZE,
+        #     optimizer=optimizer,
+        # )
+        batch_size = params["batch_size"]
+        max_physical_batch_size = params["differential_privacy"].get(
+            "physical_batch_size"
+        )
+        if max_physical_batch_size and max_physical_batch_size != batch_size:
+            train_dataloader = wrap_data_loader(
+                data_loader=train_dataloader,
+                max_batch_size=max_physical_batch_size,
+                optimizer=optimizer,
+            )
 
     # Iterate for number of epochs
     for epoch in range(start_epoch, epochs):
@@ -452,6 +512,14 @@ def training_loop(
         )
 
         patience += 1
+
+        # if training with differential privacy, print privacy epsilon
+        if params.get("differential_privacy"):
+            delta = params["differential_privacy"]["delta"]
+            this_epsilon = privacy_engine.get_epsilon(delta)
+            print(f"     Epoch Final   Privacy: (ε = {this_epsilon:.2f}, δ = {delta})")
+            # save for logging
+            epoch_valid_metric["epsilon"] = this_epsilon
 
         # Write the losses to a logger
         train_logger.write(epoch, epoch_train_loss, epoch_train_metric)

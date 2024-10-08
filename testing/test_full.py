@@ -3341,3 +3341,91 @@ def test_generic_debug_info():
     print("54: Starting test for logging")
     _debug_info(True)
     print("passed")
+
+
+def test_differential_privacy_epsilon_classification_rad_2d(device):
+    print("54: Testing complex DP training for 2D classification")
+    # overwrite previous results
+    sanitize_outputDir()
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["opt"] = "adam"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["batch_size"] = 32  # needs to be revised
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = True
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["norm_type"] = "instance"
+    parameters["differential_privacy"] = {"epsilon": 25.0, "physical_batch_size": 4}
+    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    sanitize_outputDir()
+
+    print("passed")
+
+
+def test_differential_privacy_simple_classification_rad_2d(device):
+    print("55: Testing simple DP")
+    # overwrite previous results
+    sanitize_outputDir()
+    # read and initialize parameters for specific data dimension
+    parameters = parseConfig(
+        testingDir + "/config_classification.yaml", version_check_flag=False
+    )
+    parameters["modality"] = "rad"
+    parameters["opt"] = "adam"
+    parameters["patch_size"] = patch_size["2D"]
+    parameters["batch_size"] = 32  # needs to be revised
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["amp"] = False
+    # read and parse csv
+    training_data, parameters["headers"] = parseTrainingCSV(
+        inputDir + "/train_2d_rad_classification.csv"
+    )
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["norm_type"] = "instance"
+    parameters["differential_privacy"] = True
+    file_config_temp = os.path.join(outputDir, "config_classification_temp.yaml")
+    # if found in previous run, discard.
+    if os.path.exists(file_config_temp):
+        os.remove(file_config_temp)
+
+    with open(file_config_temp, "w") as file:
+        yaml.dump(parameters, file)
+    parameters = parseConfig(file_config_temp, version_check_flag=True)
+
+    TrainingManager(
+        dataframe=training_data,
+        outputDir=outputDir,
+        parameters=parameters,
+        device=device,
+        resume=False,
+        reset=True,
+    )
+    sanitize_outputDir()
+
+    print("passed")

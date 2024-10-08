@@ -94,13 +94,9 @@ def push_to_model_hub(
     api = HfApi(token=token)
 
     try:
-        api.create_repo(repo_id)
+        repo_id = api.create_repo(repo_id).repo_id
     except Exception as e:
         print(f"Error: {e}")
-
-    api = HfApi(token=token)
-
-    repo_id = api.create_repo(repo_id, exist_ok=True).repo_id
 
     tags = ["v" + version]
 
@@ -118,7 +114,6 @@ def push_to_model_hub(
 
     api.upload_folder(
         repo_id=repo_id,
-        token=token,
         folder_path=folder_path,
         repo_type="model",
         revision=revision,
