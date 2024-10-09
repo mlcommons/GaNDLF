@@ -276,12 +276,6 @@ def test_train_segmentation_rad_2d(device):
                 ["acs", "soft", "conv3d"]
             )
 
-        if model == "dynunet":
-            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
-            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
-            parameters["model"]["strides"] = (1, 1, 1, 1)
-            parameters["model"]["deep_supervision"] = False
-
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
         parameters["nested_training"]["validation"] = -5
@@ -373,12 +367,6 @@ def test_train_segmentation_rad_3d(device):
             parameters["model"]["converter_type"] = random.choice(
                 ["acs", "soft", "conv3d"]
             )
-
-        if model == "dynunet":
-            # More info: https://github.com/Project-MONAI/MONAI/blob/96bfda00c6bd290297f5e3514ea227c6be4d08b4/tests/test_dynunet.py
-            parameters["model"]["kernel_size"] = (3, 3, 3, 1)
-            parameters["model"]["strides"] = (1, 1, 1, 1)
-            parameters["model"]["deep_supervision"] = False
 
         parameters["model"]["architecture"] = model
         parameters["nested_training"]["testing"] = -5
