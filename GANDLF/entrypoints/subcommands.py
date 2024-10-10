@@ -12,6 +12,7 @@ from GANDLF.entrypoints.optimize_model import new_way as optimize_model_command
 from GANDLF.entrypoints.generate_metrics import new_way as generate_metrics_command
 from GANDLF.entrypoints.debug_info import new_way as debug_info_command
 from GANDLF.entrypoints.split_csv import new_way as split_csv_command
+from GANDLF.entrypoints.hf_hub_integration import new_way as hf_command
 
 
 cli_subcommands = {
@@ -29,4 +30,5 @@ cli_subcommands = {
     "generate-metrics": generate_metrics_command,
     "debug-info": debug_info_command,
     "split-csv": split_csv_command,
+    "hf": hf_command,
 }
