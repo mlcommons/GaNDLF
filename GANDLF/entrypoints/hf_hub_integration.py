@@ -5,10 +5,11 @@ from pathlib import Path
 
 huggingfaceDir = Path(__file__).parent.absolute()
 
-huggingfaceDir = huggingfaceDir.parent.absolute().__str__()
+huggingfaceDir=huggingfaceDir.parent
 
-# Huggingface template  Path for Model deployment
-huggingface_file_path = huggingfaceDir + "\hugging_face.md"
+# Huggingface template by default Path for the Model Deployment 
+huggingface_file_path = huggingfaceDir / "hugging_face.md"
+print(huggingface_file_path)
 
 
 @click.command()
@@ -79,12 +80,29 @@ huggingface_file_path = huggingfaceDir + "\hugging_face.md"
     help='Uploading: Set to "dataset" or "space" if uploading to a dataset or space, "model" if uploading to a model. Default is model',
 )
 @click.option(
+    "--allow-patterns",
+    "-ap",
+    help="Uploading: If provided, only files matching at least one pattern are uploaded.",
+)
+@click.option(
+    "--ignore-patterns",
+    "-ip",
+    help="Uploading: If provided, files matching any of the patterns are not uploaded.",
+)
+@click.option(
+    "--delete-patterns",
+    "-dp",
+    help="Uploading: If provided, remote files matching any of the patterns will be deleted from the repo while committing new files. This is useful if you don't know which files have already been uploaded.",
+)
+@click.option(
     "--hf-template",
     "-hft",
     help="Adding the template path for the model card it is Required during Uploaing a model",
-    default=huggingface_file_path,
-    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    default= huggingface_file_path,
+    type=click.Path(exists=True,file_okay=True ,dir_okay=False)
+
 )
+
 @append_copyright_to_help
 def new_way(
     upload: bool,
@@ -103,7 +121,26 @@ def new_way(
     allow_patterns: str,
     ignore_patterns: str,
     delete_patterns: str,
+    
 ):
+    # """Manages model transfers to and from the Hugging Face Hub"""
+    # """Manages model transfers to and from the Hugging Face Hub"""
+    
+    # # Ensure the hf_template is being passed and loaded correctly
+    # template_path = Path(hf_template)
+    
+    # # Check if file exists and is readable
+    # if not template_path.exists():
+    #     raise FileNotFoundError(f"Model card template file '{hf_template}' not found.")
+        
+    # with template_path.open('r') as f:
+    #     hf_template = f.read()
+        
+    # # Debug print the content to ensure it's being read
+    # print(f"Template content: {type(hf_template)}...")  # Print the first 100 chars as a preview
+
+    
+                                                                
     if upload:
         push_to_model_hub(
             repo_id,
@@ -123,3 +160,4 @@ def new_way(
         download_from_hub(
             repo_id, revision, cache_dir, local_dir, force_download, token
         )
+                
