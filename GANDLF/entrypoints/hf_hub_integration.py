@@ -5,11 +5,11 @@ from pathlib import Path
 
 huggingfaceDir = Path(__file__).parent.absolute()
 
-huggingfaceDir=huggingfaceDir.parent
+huggingfaceDir = huggingfaceDir.parent
 
-# Huggingface template by default Path for the Model Deployment 
+# Huggingface template by default Path for the Model Deployment
 huggingface_file_path = huggingfaceDir / "hugging_face.md"
-print(huggingface_file_path)
+
 
 
 @click.command()
@@ -98,11 +98,9 @@ print(huggingface_file_path)
     "--hf-template",
     "-hft",
     help="Adding the template path for the model card it is Required during Uploaing a model",
-    default= huggingface_file_path,
-    type=click.Path(exists=True,file_okay=True ,dir_okay=False)
-
+    default=huggingface_file_path,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
-
 @append_copyright_to_help
 def new_way(
     upload: bool,
@@ -121,26 +119,23 @@ def new_way(
     allow_patterns: str,
     ignore_patterns: str,
     delete_patterns: str,
-    
 ):
     # """Manages model transfers to and from the Hugging Face Hub"""
     # """Manages model transfers to and from the Hugging Face Hub"""
-    
+
     # # Ensure the hf_template is being passed and loaded correctly
     # template_path = Path(hf_template)
-    
+
     # # Check if file exists and is readable
     # if not template_path.exists():
     #     raise FileNotFoundError(f"Model card template file '{hf_template}' not found.")
-        
+
     # with template_path.open('r') as f:
     #     hf_template = f.read()
-        
+
     # # Debug print the content to ensure it's being read
     # print(f"Template content: {type(hf_template)}...")  # Print the first 100 chars as a preview
 
-    
-                                                                
     if upload:
         push_to_model_hub(
             repo_id,
@@ -160,4 +155,3 @@ def new_way(
         download_from_hub(
             repo_id, revision, cache_dir, local_dir, force_download, token
         )
-                
