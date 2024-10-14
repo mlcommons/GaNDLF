@@ -3,13 +3,12 @@ from GANDLF.entrypoints import append_copyright_to_help
 from GANDLF.cli.huggingface_hub_handler import push_to_model_hub, download_from_hub
 from pathlib import Path
 
-huggingfaceDir = Path(__file__).parent.absolute()
+huggingfaceDir_ = Path(__file__).parent.absolute()
 
-huggingfaceDir = huggingfaceDir.parent
+huggingfaceDir = huggingfaceDir_.parent
 
 # Huggingface template by default Path for the Model Deployment
 huggingface_file_path = huggingfaceDir / "hugging_face.md"
-
 
 
 @click.command()
