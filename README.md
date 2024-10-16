@@ -5,7 +5,8 @@
   <a href="https://github.com/mlcommons/GaNDLF/actions/workflows/codeql-analysis.yml" alt="Code Analysis"><img src="https://github.com/mlcommons/GaNDLF/workflows/CodeQL/badge.svg" /></a>
   <a href="https://hub.docker.com/repository/docker/cbica/gandlf" alt="Docker CI"><img src="https://github.com/mlcommons/GaNDLF/actions/workflows/docker-image.yml/badge.svg" /></a>
   <a href="https://codecov.io/gh/mlcommons/GaNDLF" alt="Code Coverage"><img src="https://codecov.io/gh/mlcommons/GaNDLF/branch/master/graph/badge.svg?token=4I54XEI3WE" /></a>
-  <a href="https://app.codacy.com/gh/mlcommons/GaNDLF?utm_source=github.com&utm_medium=referral&utm_content=mlcommons/GaNDLF&utm_campaign=Badge_Grade_Settings"><img alt="Codacy" src="https://api.codacy.com/project/badge/Grade/b2cf27ddce1b4907abb47a82931dcbca"></a><br>
+  <a href="https://app.codacy.com/gh/mlcommons/GaNDLF/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage" alt="Codacy Code Coverage"><img src="https://app.codacy.com/project/badge/Coverage/51a47165e3644ec6acdfbac345843b7c" /></a><br>
+  <a href="https://app.codacy.com/gh/mlcommons/GaNDLF/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="Codacy" src="https://app.codacy.com/project/badge/Grade/51a47165e3644ec6acdfbac345843b7c"></a>
   <a href="https://pypi.org/project/GANDLF/" alt="Install"><img src="https://img.shields.io/pypi/v/gandlf?color=blue" /></a>
   <a href="https://anaconda.org/conda-forge/gandlf" alt="Install"><img src="https://img.shields.io/conda/vn/conda-forge/gandlf?color=green" /></a>
   <a href="https://github.com/mlcommons/GaNDLF/discussions" alt="Issues"><img src="https://img.shields.io/badge/Support-Discussion-blue?color=red" /></a>

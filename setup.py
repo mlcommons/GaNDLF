@@ -51,7 +51,7 @@ requirements = [
     "scikit-image>=0.19.1",
     "setuptools",
     "seaborn",
-    "pyyaml",
+    "pyyaml==6.0.1",
     "tiffslide",
     "matplotlib",
     "gdown==5.1.0",
@@ -69,7 +69,7 @@ requirements = [
     "segmentation-models-pytorch==0.3.3",
     "ACSConv==0.1.1",
     # https://github.com/docker/docker-py/issues/3256
-    "requests<2.32.0",  # 2.32.0 are not compatible with docker 7.0.0; to remove restriction once docker is fixed
+    "requests>=2.32.2",
     "docker",
     "dicom-anonymizer==1.0.12",
     "twine",
@@ -81,6 +81,8 @@ requirements = [
     "packaging==24.0",
     "typer==0.9.0",
     "colorlog",
+    "opacus==1.5.2",
+    "huggingface-hub==0.25.1",
 ]
 
 if __name__ == "__main__":
