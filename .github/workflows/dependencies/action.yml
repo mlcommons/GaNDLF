@@ -3,7 +3,7 @@ name: 'Install Dependencies'
 description: 'Setup and install dependencies for GaNDLF'
 
 outputs:
-    files-changed:
+    other_modified_files_count:
       description: "Which files have changed"
       value: ${{ steps.changed-files.outputs.other_modified_files_count }}
 # on: 
