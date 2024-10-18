@@ -1,0 +1,13 @@
+version: '1'
+
+services:
+  gandlf:
+    build:
+      context: .
+      dockerfile: Dockerfile-CPU #choose the dockerfile
+#    volumes: ## mount the files in the host and the docker container
+#     - .:/GaNDLF
+    entrypoint: ["gandlf"]
+    command: [] #put gandlf commands with their parameters.For example ["run","-c"]
+
+
