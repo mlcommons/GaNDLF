@@ -2,4 +2,4 @@
 # -*- coding: UTF-8 -*-
 
 # check GaNDLF wiki for versioning and release guidelines: https://github.com/mlcommons/GaNDLF/wiki
-__version__ = "0.1.666-dev"
+__version__ = "0.1.1-dev"
