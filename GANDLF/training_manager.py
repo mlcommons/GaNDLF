@@ -5,6 +5,8 @@ from pathlib import Path
 from GANDLF.compute import training_loop
 from GANDLF.utils import get_dataframe, split_data
 
+import yaml
+
 
 def TrainingManager(
     dataframe: pd.DataFrame,
@@ -158,6 +160,8 @@ def TrainingManager_split(
         reset (bool): Whether the previous run will be reset or not.
     """
     currentModelConfigPickle = os.path.join(outputDir, "parameters.pkl")
+    currentModelConfigYaml = os.path.join(outputDir, "config.yaml")
+
     if (not os.path.exists(currentModelConfigPickle)) or reset or resume:
         with open(currentModelConfigPickle, "wb") as handle:
             pickle.dump(parameters, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -169,6 +173,10 @@ def TrainingManager_split(
                 flush=True,
             )
             parameters = pickle.load(open(currentModelConfigPickle, "rb"))
+
+    if (not os.path.exists(currentModelConfigYaml)) or reset or resume:
+        with open(currentModelConfigYaml, "w") as handle:
+            yaml.dump(parameters, handle, default_flow_style=False)
 
     training_loop(
         training_data=dataframe_train,
