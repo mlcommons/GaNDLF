@@ -226,7 +226,7 @@ def _calculator_sensitivity_specificity(
         float, float: The sensitivity and specificity between the object(s) in ```inp``` and the object(s) in ```target```.
     """
     # inMask is mask of input array equal to a certain tissue (ie. all one's in tumor core)
-    # Ref mask is mask of certain tissue in ground truth (ie. all one's in refernce core )
+    # Ref mask is mask of certain tissue in ground truth (ie. all one's in reference core )
     # overlap is mask where the two equal each other
     # They are of the total number of voxels of the ground truth brain mask
 

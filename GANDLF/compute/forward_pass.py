@@ -89,7 +89,7 @@ def validate_network(
 
     # # putting stuff in individual arrays for correlation analysis
     # all_targets = []
-    # all_predics = []
+    # all_predicts = []
     if params["medcam_enabled"] and params["model"]["type"] == "torch":
         model.enable_medcam()
         params["medcam_enabled"] = True
