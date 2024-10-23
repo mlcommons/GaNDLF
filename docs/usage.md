@@ -603,7 +603,7 @@ To upload to a dataset or a Space, use the --repo-type option:
 
 ### Huggingface Template For Upload
 #### Design and Modify Template 
-To design the huggingface template use the hugging_face.md file change the medatory field 
+To design the huggingface template use the hugging_face.md file change the mandatory field 
 [REQUIRED_FOR_GANDLF] to it's respective name don't  leave it blank other wise it may through error, other field can be modeified by the user as per his convenience
 
 ```bash

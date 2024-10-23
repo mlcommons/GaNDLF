@@ -98,7 +98,7 @@ def step(
             f"Model output is not a Tensor: {type(output)}. Say, `deep_resunet` and `deep_unet` may return "
             f"list of tensors on different scales instead of just one prediction Tensor. However due to "
             f"GaNDLF architecture it is expected that models return only one tensor. For deep_* models "
-            f"only the biggeest scale is processed. Use these models with caution till fix is implemented."
+            f"only the biggest scale is processed. Use these models with caution till fix is implemented."
         )
         output = output[0]
 

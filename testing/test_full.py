@@ -2110,7 +2110,7 @@ def test_generic_one_hot_logic():
 
 
 def test_generic_anonymizer():
-    print("33: Starting anomymizer tests")
+    print("33: Starting anonymizer tests")
     input_file = get_testdata_file("MR_small.dcm")
 
     output_file = os.path.join(outputDir, "MR_small_anonymized.dcm")
@@ -3292,14 +3292,14 @@ def test_generic_logging(capsys):
 
     os.remove(log_file)
 
-    # test the stout info level. The stout must show only INFO messages
-    message = "Testing stout logging"
+    # test the stdout info level. The stdout must show only INFO messages
+    message = "Testing stdout logging"
     logging.info(message)
     capture = capsys.readouterr()
     assert message in capture.out
 
-    # Test the stout not showing other messages
-    message = "Testing stout logging"
+    # Test the stdout not showing other messages
+    message = "Testing stdout logging"
     logging.debug(message)
     logging.warning(message)
     logging.error(message)
@@ -3307,14 +3307,14 @@ def test_generic_logging(capsys):
     capture = capsys.readouterr()
     assert message not in capture.out
 
-    # test sterr must NOT show these messages.
-    message = "Testing sterr logging"
+    # test stderr must NOT show these messages.
+    message = "Testing stderr logging"
     logging.info(message)
     logging.debug(message)
     capture = capsys.readouterr()
     assert message not in capture.err
 
-    # test sterr must show these messages.
+    # test stderr must show these messages.
     logging.error(message)
     logging.warning(message)
     logging.critical(message)
