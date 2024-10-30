@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
-import tiffslide as openslide
+import openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     best_model_path_end,
@@ -344,11 +344,12 @@ def inference_loop(
                         )
                         cv2.imwrite(file_to_write, heatmaps[key])
 
-                        os_image_array = os_image.read_region(
-                            (0, 0),
-                            parameters["slide_level"],
-                            (level_width, level_height),
-                            as_array=True,
+                        os_image_array = np.asarray(
+                            os_image.read_region(
+                                (0, 0),
+                                parameters["slide_level"],
+                                (level_width, level_height),
+                            ).convert("RGB")
                         )
                         blended_image = cv2.addWeighted(
                             os_image_array,

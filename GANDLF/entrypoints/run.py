@@ -5,9 +5,7 @@ import os
 import argparse
 import ast
 
-# import traceback
 from typing import Optional
-
 from deprecated import deprecated
 import click
 

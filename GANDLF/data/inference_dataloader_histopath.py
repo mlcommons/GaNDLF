@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 import numpy as np
-import tiffslide
+import openslide
 from GANDLF.data.patch_miner.opm.utils import get_patch_size_in_microns, tissue_mask
 from skimage.transform import resize
 from torch.utils.data.dataset import Dataset
@@ -51,7 +51,7 @@ class InferTumorSegDataset(Dataset):
         self._stride_size = get_patch_size_in_microns(wsi_path, self._stride_size)
         self._selected_level = selected_level
         self._mask_level = mask_level
-        self._os_image = tiffslide.open_slide(os.path.join(self._wsi_path))
+        self._os_image = openslide.open_slide(os.path.join(self._wsi_path))
         self._points = []
         self._basic_preprocessing()
 
@@ -61,11 +61,12 @@ class InferTumorSegDataset(Dataset):
         try:
             mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
             mask = get_tissue_mask(
-                self._os_image.read_region(
-                    (0, 0), self._mask_level, (mask_xdim, mask_ydim), as_array=True
+                np.asarray(
+                    self._os_image.read_region(
+                        (0, 0), self._mask_level, (mask_xdim, mask_ydim)
+                    ).convert("RGB")
                 )
             )
-
             if self._selected_level != self._mask_level:
                 mask = resize(mask, (height, width))
             mask = (mask > 0).astype(np.ubyte)
@@ -134,9 +135,10 @@ class InferTumorSegDataset(Dataset):
             (x_loc, y_loc),
             self._selected_level,
             (self._patch_size[0], self._patch_size[1]),
-            as_array=True,
-        )
+            # as_array=True, openslide-python doesn't return a ndarray, return an image
+        ).convert("RGB")
 
+        patch = np.asarray(patch)  # convert the image to ndarray
         # this is to ensure that channels come at the beginning
         patch = patch.transpose([2, 0, 1])
         # this is to ensure that we always have a z-stack before applying any torchio transforms

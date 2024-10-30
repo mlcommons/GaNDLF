@@ -32,7 +32,7 @@ CMD run
 # See https://github.com/hexops/dockerfile as a best practices guide.
 #RUN addgroup --gid 10001 --system nonroot \
 # && adduser  --uid 10000 --system --ingroup nonroot --home /home/nonroot nonroot
-# 
+#
 #USER nonroot
 
 # Prepare the container for possible model embedding later.

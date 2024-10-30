@@ -46,7 +46,7 @@ class Patch:
         return np.asarray(
             self.slide_object.read_region(
                 (self.coordinates[1], self.coordinates[0]), self.level, self.size
-            )
+            ).convert("RGB")
         )
 
     def copy(self):
