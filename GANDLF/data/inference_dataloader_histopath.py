@@ -61,6 +61,7 @@ class InferTumorSegDataset(Dataset):
         try:
             mask_xdim, mask_ydim = self._os_image.level_dimensions[self._mask_level]
             mask = get_tissue_mask(
+                # this is needed because openslide returns an RGBA image
                 np.asarray(
                     self._os_image.read_region(
                         (0, 0), self._mask_level, (mask_xdim, mask_ydim)
