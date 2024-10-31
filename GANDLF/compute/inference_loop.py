@@ -344,6 +344,7 @@ def inference_loop(
                         )
                         cv2.imwrite(file_to_write, heatmaps[key])
 
+                        # this is needed because openslide returns an RGBA image
                         os_image_array = np.asarray(
                             os_image.read_region(
                                 (0, 0),
