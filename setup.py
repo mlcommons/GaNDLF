@@ -6,13 +6,13 @@
 import sys, re, os
 from setuptools import setup, find_packages
 
+
 try:
     with open("README.md") as readme_file:
         readme = readme_file.read()
 except Exception as error:
     readme = "No README information found."
     sys.stderr.write("Warning: Could not open '%s' due %s\n" % ("README.md", error))
-
 
 try:
     filepath = "GANDLF/version.py"
@@ -52,7 +52,6 @@ requirements = [
     "setuptools",
     "seaborn",
     "pyyaml==6.0.1",
-    "tiffslide",
     "matplotlib",
     "gdown==5.1.0",
     "pytest",
@@ -83,6 +82,8 @@ requirements = [
     "colorlog",
     "opacus==1.5.2",
     "huggingface-hub==0.25.1",
+    "openslide-bin",
+    "openslide-python==1.4.1",
 ]
 
 if __name__ == "__main__":
