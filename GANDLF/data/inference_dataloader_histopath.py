@@ -136,7 +136,7 @@ class InferTumorSegDataset(Dataset):
             (x_loc, y_loc),
             self._selected_level,
             (self._patch_size[0], self._patch_size[1]),
-            # as_array=True, openslide-python doesn't return a ndarray, return an image
+            # as_array=True, openslide-python returns an RGBA PIL image
         ).convert("RGB")
 
         patch = np.asarray(patch)  # convert the image to ndarray
