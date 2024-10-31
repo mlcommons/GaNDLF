@@ -83,7 +83,7 @@ requirements = [
     "opacus==1.5.2",
     "huggingface-hub==0.25.1",
     "openslide-bin",
-    "openslide-python",
+    "openslide-python==1.4.1",
 ]
 
 if __name__ == "__main__":
