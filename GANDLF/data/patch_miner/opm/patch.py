@@ -46,7 +46,9 @@ class Patch:
         return np.asarray(
             self.slide_object.read_region(
                 (self.coordinates[1], self.coordinates[0]), self.level, self.size
-            ).convert("RGB")  # openslide-python returns an RGBA PIL image
+            ).convert(
+                "RGB"
+            )  # openslide-python returns an RGBA PIL image
         )
 
     def copy(self):
