@@ -15,8 +15,8 @@ The [0.0.20 release](https://github.com/mlcommons/GaNDLF/releases/tag/0.0.20) wa
 - The main change is the use of the [Version package](https://github.com/keleshev/version) for systematic semantic versioning [[ref](https://github.com/mlcommons/GaNDLF/pull/841)]. 
 - No change is needed if you are using a [stable version](https://docs.mlcommons.org/GaNDLF/setup/#install-from-package-managers).
 - If you have installed GaNDLF [from source](https://docs.mlcommons.org/GaNDLF/setup/#install-from-sources) or using a [nightly build](https://docs.mlcommons.org/GaNDLF/setup/#install-from-package-managers), you will need to ensure that the `maximum` key under `version` in the configuration file contains the correct version number:
-  - Either **including** the `-dev` identifier of the current version (e.g., if the current version is `0.1.0-dev`, then the `maximum` key should be `0.1.0-dev`).
-  - Or **excluding** the `-dev` identifier of the current version, but increasing the version number by one on any level (e.g., if the current version is `0.1.0-dev`, then the `maximum` key should be `0.1.1`).
+  - Either **including** the `-dev` identifier of the current version (e.g., if the current version is `0.X.Y-dev`, then the `maximum` key should be `0.X.Y-dev`).
+  - Or **excluding** the `-dev` identifier of the current version, but increasing the version number by one on any level (e.g., if the current version is `0.X.Y-dev`, then the `maximum` key should be `0.X.Y`).
 
 ### Use in HPC Environments
 

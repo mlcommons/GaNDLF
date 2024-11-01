@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from skimage.io import imsave
 from tqdm import tqdm
 from torch.cuda.amp import autocast
-import tiffslide as openslide
+import openslide
 from GANDLF.data import get_testing_loader
 from GANDLF.utils import (
     best_model_path_end,
@@ -89,7 +89,16 @@ def inference_loop(
             assert file_to_load != None, "The 'best_file' was not found"
 
         main_dict = torch.load(file_to_load, map_location=parameters["device"])
-        model.load_state_dict(main_dict["model_state_dict"])
+        state_dict = main_dict["model_state_dict"]
+        if parameters.get("differential_privacy"):
+            # this is required for torch==1.11 and for DP inference
+            new_state_dict = {}
+            for key, val in state_dict.items():
+                new_key = key.replace("_module.", "")
+                new_state_dict[new_key] = val  # remove `module.`
+            state_dict = new_state_dict
+
+        model.load_state_dict(state_dict)
         parameters["previous_parameters"] = main_dict.get("parameters", None)
         model.eval()
     elif parameters["model"]["type"].lower() == "openvino":
@@ -335,11 +344,13 @@ def inference_loop(
                         )
                         cv2.imwrite(file_to_write, heatmaps[key])
 
-                        os_image_array = os_image.read_region(
-                            (0, 0),
-                            parameters["slide_level"],
-                            (level_width, level_height),
-                            as_array=True,
+                        # this is needed because openslide returns an RGBA image
+                        os_image_array = np.asarray(
+                            os_image.read_region(
+                                (0, 0),
+                                parameters["slide_level"],
+                                (level_width, level_height),
+                            ).convert("RGB")
                         )
                         blended_image = cv2.addWeighted(
                             os_image_array,
