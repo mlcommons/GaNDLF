@@ -180,7 +180,7 @@ def generate_metrics_dict(
         cwd = Path(__file__).resolve().parent
         for column in input_df.columns:
             loc = input_df.columns.get_loc(column)
-            if (loc == "Target") or (loc in "Prediction"):
+            if (loc == "Target") or (loc == "Prediction"):
                 # These entries can be considered as paths to files
                 for index, entry in enumerate(input_df[column]):
                     if isinstance(entry, str):
