@@ -8,7 +8,7 @@ import sys
 
 
 def _create_tmp_log_file():
-    tmp_dir = Path(tempfile.gettempdir())
+    tmp_dir = Path(Path.home())
     log_dir = Path.joinpath(tmp_dir, ".gandlf")
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = Path.joinpath(log_dir, get_unique_timestamp() + ".log")
