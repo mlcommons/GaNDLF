@@ -9,9 +9,7 @@ class AbstractLossFunction(nn.Module, ABC):
         self.params = params
 
     @abstractmethod
-    def forward(
-        self, prediction: torch.Tensor, target: torch.Tensor, *args
-    ) -> torch.Tensor:
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         pass
 
 
@@ -49,9 +47,7 @@ class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
         """Compute loss for a pair of prediction and target tensors. To be implemented by child classes."""
         pass
 
-    def forward(
-        self, prediction: torch.Tensor, target: torch.Tensor, *args
-    ) -> torch.Tensor:
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         accumulated_loss = torch.tensor(0.0, device=prediction.device)
 
         for class_idx in range(self.num_classes):
@@ -64,6 +60,7 @@ class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
                 current_loss = current_loss * self.penalty_weights[class_idx]
             accumulated_loss += current_loss
 
+        # TODO shouldn't we always divide by the number of classes?
         if self.penalty_weights is None:
             accumulated_loss /= self.num_classes
 
