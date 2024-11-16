@@ -3,39 +3,68 @@ from torch import nn
 from abc import ABC, abstractmethod
 
 
-class AbstractLossFunction(ABC, nn.Module):
+class AbstractLossFunction(nn.Module, ABC):
     def __init__(self, params: dict):
-        super().__init__()
+        nn.Module.__init__(self)
         self.params = params
 
     @abstractmethod
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, prediction: torch.Tensor, target: torch.Tensor, *args
+    ) -> torch.Tensor:
         pass
 
 
-class WeightedCE(AbstractLossFunction):
+class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
+    """
+    Base class for loss funcions that are used for multi-class segmentation tasks.
+    """
+
     def __init__(self, params: dict):
-        """
-        Cross entropy loss using class weights if provided.
-        """
         super().__init__(params)
+        self.num_classes = len(params["model"]["class_list"])
+        self.penalty_weights = params["penalty_weights"]
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        if len(target.shape) > 1 and target.shape[-1] == 1:
-            target = torch.squeeze(target, -1)
+    def _compute_single_class_loss(
+        self, prediction: torch.Tensor, target: torch.Tensor, class_idx: int
+    ) -> torch.Tensor:
+        """Compute loss for a single class."""
+        loss_value = self._single_class_loss_calculator(
+            prediction[:, class_idx, ...], target[:, class_idx, ...]
+        )
+        return 1 - loss_value
 
-        weights = None
-        if self.params.get("penalty_weights") is not None:
-            num_classes = len(self.params["penalty_weights"])
-            assert (
-                prediction.shape[-1] == num_classes
-            ), f"Number of classes {num_classes} does not match prediction shape {prediction.shape[-1]}"
+    def _optional_loss_operations(self, loss: torch.Tensor) -> torch.Tensor:
+        """
+        Perform addtional operations of the loss value. Defaults to identity operation.
+        If needed, child classes can override this method. Useful in the cases where
+        for example, the loss value needs to log-transformed or clipped.
+        """
+        return loss
 
-            weights = torch.tensor(
-                list(self.params["penalty_weights"].values()),
-                dtype=torch.float32,
-                device=target.device,
+    @abstractmethod
+    def _single_class_loss_calculator(
+        self, prediction: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
+        """Compute loss for a pair of prediction and target tensors. To be implemented by child classes."""
+        pass
+
+    def forward(
+        self, prediction: torch.Tensor, target: torch.Tensor, *args
+    ) -> torch.Tensor:
+        accumulated_loss = torch.tensor(0.0, device=prediction.device)
+
+        for class_idx in range(self.num_classes):
+            current_loss = self._compute_single_class_loss(
+                prediction, target, class_idx
             )
+            current_loss = self._optional_loss_operations(current_loss)
 
-        cel = nn.CrossEntropyLoss(weight=weights)
-        return cel(prediction, target)
+            if self.penalty_weights is not None:
+                current_loss = current_loss * self.penalty_weights[class_idx]
+            accumulated_loss += current_loss
+
+        if self.penalty_weights is None:
+            accumulated_loss /= self.num_classes
+
+        return accumulated_loss
