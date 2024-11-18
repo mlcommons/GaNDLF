@@ -41,8 +41,8 @@ class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
 
     def _optional_loss_operations(self, loss: torch.Tensor) -> torch.Tensor:
         """
-        Perform addtional operations of the loss value. Defaults to identity operation.
-        If needed, child classes can override this method. Useful in the cases where
+        Perform addtional operations on the loss value. Defaults to identity operation.
+        If needed, child classes can override this method. Useful in cases where
         for example, the loss value needs to log-transformed or clipped.
         """
         return loss
@@ -66,9 +66,7 @@ class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
                 * self.penalty_weights[class_idx]
             )
 
-        # TODO shouldn't we always divide by the number of classes?
-        if self.penalty_weights is None:
-            accumulated_loss /= self.num_classes
+        accumulated_loss /= self.num_classes
 
         return accumulated_loss
 
@@ -123,7 +121,6 @@ class AbstractRegressionLoss(AbstractLossFunction):
                 * self.penalty_weights[class_idx]
             )
 
-        # TODO I Believe this is how it should be, also for segmentation - take average from all classes, despite weights being present or no
         accumulated_loss /= self.num_classes
 
         return accumulated_loss
