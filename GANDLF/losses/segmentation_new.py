@@ -91,8 +91,12 @@ class MulticlassTverskyLoss(AbstractSegmentationMultiClassLoss):
 
     def __init__(self, params: dict):
         super().__init__(params)
-        self.alpha = params.get("alpha", 0.5)
-        self.beta = params.get("beta", 0.5)
+        loss_params = params["loss_function"]
+        self.alpha = 0.5
+        self.beta = 0.5
+        if isinstance(loss_params, dict):
+            self.alpha = loss_params.get("alpha", self.alpha)
+            self.beta = loss_params.get("beta", self.beta)
 
     def _single_class_loss_calculator(
         self, prediction: torch.Tensor, target: torch.Tensor
