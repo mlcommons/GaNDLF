@@ -1,5 +1,4 @@
 import torch
-
 from .segmentation import MCD_loss, FocalLoss
 from .regression import CCE_Generic, CE, CE_Logits
 

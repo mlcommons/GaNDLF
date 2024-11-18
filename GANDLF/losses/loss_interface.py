@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from abc import ABC, abstractmethod
+from typing import List
 
 
 class AbstractLossFunction(nn.Module, ABC):
@@ -124,5 +125,26 @@ class AbstractRegressionLoss(AbstractLossFunction):
 
         # TODO I Believe this is how it should be, also for segmentation - take average from all classes, despite weights being present or no
         accumulated_loss /= self.num_classes
+
+        return accumulated_loss
+
+
+class AbstractHybridLoss(AbstractLossFunction):
+    def __init__(self, params: dict):
+        super().__init__(params)
+        self.loss_calculators = self._initialize_all_loss_calculators()
+
+    @abstractmethod
+    def _initialize_all_loss_calculators(self) -> List[AbstractLossFunction]:
+        """
+        Each hybrid loss should implement this method, creating all loss functions as a list that
+        will be used during the forward pass.
+        """
+        pass
+
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        accumulated_loss = torch.tensor(0.0, device=prediction.device)
+        for loss_calculator in self._initialize_all_loss_calculators():
+            accumulated_loss += loss_calculator(prediction, target)
 
         return accumulated_loss
