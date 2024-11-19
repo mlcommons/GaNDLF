@@ -1,9 +1,9 @@
 import sys
 import torch
-from .loss_interface import AbstractSegmentationMultiClassLoss, AbstractLossFunction
+from .loss_interface import AbstractSegmentationLoss, AbstractLossFunction
 
 
-class MulticlassDiceLoss(AbstractSegmentationMultiClassLoss):
+class MulticlassDiceLoss(AbstractSegmentationLoss):
     """
     This class computes the Dice loss between two tensors.
     """
@@ -39,7 +39,7 @@ class MulticlassDiceLogLoss(MulticlassDiceLoss):
         )  # epsilon for numerical stability
 
 
-class MulticlassMCCLoss(AbstractSegmentationMultiClassLoss):
+class MulticlassMCCLoss(AbstractSegmentationLoss):
     """
     This class computes the Matthews Correlation Coefficient (MCC) loss between two tensors.
     """
@@ -84,7 +84,7 @@ class MulticlassMCLLogLoss(MulticlassMCCLoss):
         )  # epsilon for numerical stability
 
 
-class MulticlassTverskyLoss(AbstractSegmentationMultiClassLoss):
+class MulticlassTverskyLoss(AbstractSegmentationLoss):
     """
     This class computes the Tversky loss between two tensors.
     """
@@ -127,7 +127,7 @@ class MulticlassTverskyLoss(AbstractSegmentationMultiClassLoss):
         return loss
 
 
-class MulticlassFocalLoss(AbstractSegmentationMultiClassLoss):
+class MulticlassFocalLoss(AbstractSegmentationLoss):
     """
     This class computes the Focal loss between two tensors.
     """

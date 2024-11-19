@@ -1,6 +1,5 @@
 from typing import Optional
 import torch
-from torch import nn
 import torch.nn.functional as F
 from GANDLF.utils import one_hot
 from torch.nn import CrossEntropyLoss

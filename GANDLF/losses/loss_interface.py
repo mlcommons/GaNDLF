@@ -19,12 +19,14 @@ class AbstractLossFunction(nn.Module, ABC):
 
     @abstractmethod
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        pass
+        """
+        Forward pass of the loss function. To be implemented by child classes.
+        """
 
 
-class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
+class AbstractSegmentationLoss(AbstractLossFunction):
     """
-    Base class for loss funcions that are used for multi-class segmentation tasks.
+    Base class for loss funcions that are used for segmentation tasks.
     """
 
     def __init__(self, params: dict):
@@ -51,8 +53,9 @@ class AbstractSegmentationMultiClassLoss(AbstractLossFunction):
     def _single_class_loss_calculator(
         self, prediction: torch.Tensor, target: torch.Tensor
     ) -> torch.Tensor:
-        """Compute loss for a pair of prediction and target tensors. To be implemented by child classes."""
-        pass
+        """
+        Compute loss for a pair of prediction and target tensors. To be implemented by child classes.
+        """
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         accumulated_loss = torch.tensor(0.0, device=prediction.device)
@@ -109,7 +112,6 @@ class AbstractRegressionLoss(AbstractLossFunction):
         Initialize the loss function object used in the forward method. Has to return
         callable pytorch loss function object.
         """
-        pass
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         accumulated_loss = torch.tensor(0.0, device=prediction.device)
@@ -127,6 +129,10 @@ class AbstractRegressionLoss(AbstractLossFunction):
 
 
 class AbstractHybridLoss(AbstractLossFunction):
+    """
+    Base class for hybrid loss functions that are used for segmentation tasks.
+    """
+
     def __init__(self, params: dict):
         super().__init__(params)
         self.loss_calculators = self._initialize_all_loss_calculators()
