@@ -1,8 +1,8 @@
 from typing import Optional
 import torch
 import torch.nn.functional as F
-from torch.nn import CrossEntropyLoss
 from GANDLF.utils import one_hot
+from torch.nn import CrossEntropyLoss
 
 
 def CEL(
