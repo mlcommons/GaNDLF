@@ -4,10 +4,11 @@ from pathlib import Path
 from importlib import resources
 import tempfile
 from GANDLF.utils import get_unique_timestamp
+import sys
 
 
 def _create_tmp_log_file():
-    tmp_dir = Path(tempfile.gettempdir())
+    tmp_dir = Path(Path.home())
     log_dir = Path.joinpath(tmp_dir, ".gandlf")
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = Path.joinpath(log_dir, get_unique_timestamp() + ".log")
@@ -26,6 +27,13 @@ def _configure_logging_with_logfile(log_file, config_path):
         logging.config.dictConfig(config_dict)
 
 
+def gandlf_excepthook(exctype, value, tb):
+    if issubclass(exctype, Exception):
+        logging.exception("Uncaught exception", exc_info=(exctype, value, tb))
+    else:
+        sys.__excepthook__(exctype, value, tb)
+
+
 def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
     """
     It sets up the logger. Reads from logging_config.
@@ -42,6 +50,7 @@ def logger_setup(log_file=None, config_path="logging_config.yaml") -> None:
         log_tmp_file = _create_tmp_log_file()
     _create_log_file(log_tmp_file)
     _configure_logging_with_logfile(log_tmp_file, config_path)
+    sys.excepthook = gandlf_excepthook
     logging.info(f"The logs are saved in {log_tmp_file}")
 
 

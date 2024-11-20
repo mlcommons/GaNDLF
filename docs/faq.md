@@ -49,6 +49,14 @@ Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-using
 
 Please see https://mlcommons.github.io/GaNDLF/usage/#federating-your-model-evaluation-using-medperf.
 
+### I was using GaNDLF version `0.0.19` or earlier, and I am facing issues after updating to `0.0.20` or later. What should I do?
+
+Please read the [migration guide](https://mlcommons.github.io/GaNDLF/migration_guide) to understand the changes that have been made to GaNDLF. If you have any questions, please feel free to [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).
+
+### I am getting an error realted to version mismatch (greater or smaller) between the configuration and GaNDLF version. What should I do?
+
+This is a safety feature to ensure a tight integartion between the configuration used to define a model and the code version used to perform the training. Ensure that you have all requirements satisfied, and then check the ``version`` key in the configration, and ensure it appropriately matches the output of ``gandlf run --version``.
+
 ### What if I have another question?
 
 Please [post a support request](https://github.com/mlcommons/GaNDLF/issues/new?assignees=&labels=&template=--questions-help-support.md&title=).

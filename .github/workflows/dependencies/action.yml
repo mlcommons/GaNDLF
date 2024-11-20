@@ -1,0 +1,104 @@
+name: 'Install Dependencies'
+
+description: 'Setup and install dependencies for GaNDLF'
+
+outputs:
+    other_modified_files_count:
+      description: "Which files have changed"
+      value: ${{ steps.changed-files.outputs.other_modified_files_count }}
+# on: 
+#   workflow_call:
+
+# jobs:
+#   install_dependencies:
+#     runs-on: ubuntu-latest
+runs:
+    using: "composite"    
+    steps:
+      - name: Free space
+        shell: bash
+        run: |
+          df -h
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf "$ANDROID_SDK_ROOT"
+          df -h
+
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
+
+      # Use changed-files-specific action to collect file changes.
+      # The following commented condition applied to a step will run that step only if non-docs files have changed.
+      # It should be applied to all functionality-related steps.
+      # if: ${{steps.dependencies.outputs.other_modified_files_count > 0}}
+      - name: Detect and screen file changes
+        # shell: bash
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            .github/*.md
+            .github/ISSUE_TEMPLATE/*.md
+            .github/workflows/devcontainer.yml
+            .github/workflows/docker-image.yml
+            .devcontainer/**
+            docs/**
+            mlcube/**
+            *.md
+            LICENSE
+            Dockerfile-*
+        # run: |
+        #   echo "other_modified_files_count=$(echo ${{ steps.changed-files-specific.outputs.other_modified_files_count }})" >> $GITHUB_OUTPUT
+
+      - name: Summarize docs and non-docs modifications
+        id: changed-files
+        shell: bash
+        run: |
+          echo "List of docs files that have changed: ${{ steps.changed-files-specific.outputs.all_modified_files }}"
+          echo "Changed non-docs files: ${{ steps.changed-files-specific.outputs.other_modified_files }}"
+          echo "Count of non-docs files changed: ${{ steps.changed-files-specific.outputs.other_modified_files_count }}"
+          echo "If only-modified is triggered: ${{ steps.changed-files-specific.outputs.only_modified }}"
+          echo "other_modified_files_count=${{ steps.changed-files-specific.outputs.other_modified_files_count }}" >> $GITHUB_OUTPUT
+          echo "$GITHUB_OUTPUT"
+
+
+      ## this did NOT work
+      # - name: Set output
+      #   shell: bash
+      #   run: echo "other_modified_files_count=${{ steps.changed-files-specific.outputs.other_modified_files_count }}" >> $GITHUB_OUTPUT
+
+      ## this did NOT work
+      # - name: Check saved output
+      #   shell: bash
+      #   run: echo "GITHUB_OUTPUT:${{ GITHUB_OUTPUT }}"
+
+      # This second step is unnecessary but highly recommended because
+      # It will cache database and saves time re-downloading it if database isn't stale.
+      - name: Cache pip
+        # shell: bash
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python 3.9
+        # shell: bash
+        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies and package
+        shell: bash
+        if: ${{steps.changed-files.outputs.other_modified_files_count > 0}} # Run on any non-docs change
+        run: |
+          sudo apt-get update
+          sudo apt-get install libvips libvips-tools -y
+          python -m pip install --upgrade pip==24.0
+          python -m pip install wheel
+          python -m pip install openvino-dev==2023.0.1 mlcube_docker
+          pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -e .
