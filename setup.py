@@ -84,6 +84,7 @@ requirements = [
     "huggingface-hub==0.25.1",
     "openslide-bin",
     "openslide-python==1.4.1",
+    "lion-pytorch==0.2.2",
 ]
 
 if __name__ == "__main__":
