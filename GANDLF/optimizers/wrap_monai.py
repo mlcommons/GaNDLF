@@ -1,4 +1,4 @@
-from torch.optim.optimizer import Optimizer
+from torch.optim import Optimizer
 
 from monai.optimizers import Novograd
 

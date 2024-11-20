@@ -1,6 +1,5 @@
-from torch.optim.optimizer import Optimizer
-
 from torch.optim import (
+    Optimizer,
     SGD,
     ASGD,
     Rprop,
