@@ -62,6 +62,6 @@ scheduler:
 track_memory_usage: false
 verbose: false
 version:
-  maximum: 0.1.2
+  maximum: 0.1.3-dev
   minimum: 0.0.14
 weighted_loss: false
