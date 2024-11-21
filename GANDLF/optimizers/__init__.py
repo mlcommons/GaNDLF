@@ -15,7 +15,7 @@ from .wrap_torch import (
 
 from .wrap_monai import novograd_wrapper
 
-from .ademamix import ademamix_wrapper
+from .thirdparty import ademamix_wrapper, lion_wrapper, adopt_wrapper
 
 global_optimizer_dict = {
     "sgd": sgd,
@@ -32,6 +32,8 @@ global_optimizer_dict = {
     "novograd": novograd_wrapper,
     "nadam": nadam,
     "ademamix": ademamix_wrapper,
+    "lion": lion_wrapper,
+    "adopt": adopt_wrapper,
 }
 
 
@@ -49,9 +51,10 @@ def get_optimizer(params):
     # Retrieve the optimizer type from the input parameters
     optimizer_type = params["optimizer"]["type"]
 
+    assert (
+        optimizer_type in global_optimizer_dict
+    ), f"Optimizer type {optimizer_type} not found"
+
     # Create the optimizer instance using the specified type and input parameters
-    if optimizer_type in global_optimizer_dict:
-        optimizer_function = global_optimizer_dict[optimizer_type]
-        return optimizer_function(params)
-    else:
-        raise ValueError("Optimizer type %s not found" % optimizer_type)
+    optimizer_function = global_optimizer_dict[optimizer_type]
+    return optimizer_function(params)
