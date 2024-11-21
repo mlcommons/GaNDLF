@@ -431,7 +431,7 @@ def generate_initial_mask(slide_path: str, scale: int) -> Tuple[np.ndarray, tupl
     slide = openslide.open_slide(slide_path)
     slide_dims = slide.dimensions
 
-    # Call thumbnail for effiency, calculate scale relative to whole slide
+    # Call thumbnail for efficiency, calculate scale relative to whole slide
     slide_thumbnail = np.asarray(
         slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale))
     )

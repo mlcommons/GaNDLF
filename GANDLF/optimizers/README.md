@@ -8,7 +8,7 @@
   - Add the relevant code under the `GANDLF.optimizers.thirdparty` submodule. 
   - Add a wrapper which takes in GaNDLF's `parameter` dictionary as input and creates a `torch.optim.Optimizer` object as output.
   - Add the wrapper to the `GANDLF.optimizers.thirdparty.__init__.py` so that it can be called from `GANDLF.optimizers.__init__.py`.
-  - See `GANDLF.optimizers.thirdparty.adopy.py` as an example.
+  - See `GANDLF.optimizers.thirdparty.adopt.py` as an example.
 - If a new dependency needs to be used, update GaNDLF's [`setup.py`](https://github.com/mlcommons/GaNDLF/blob/master/setup.py) with the new requirement.
   - Define a new submodule under `GANDLF.optimizers` as `GANDLF.optimizers.wrap_${package_name}.py`.
   - Ensure that the new algorithm is wrapped in a function which returns an object with the PyTorch optimizer type. Use any of the optimizers in `GANDLF.optimizers.wrap_torch.py` as an example.
