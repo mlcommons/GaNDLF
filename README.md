@@ -1,4 +1,6 @@
-# GaNDLF
+![GitHub-Mark-Light](https://github.com/mlcommons/GaNDLF/blob/master/docs/images/logo/full.png?raw=true#gh-light-mode-only)
+
+![GitHub-Mark-Dark](https://github.com/mlcommons/GaNDLF/blob/master/docs/images/logo/full_black.png?raw=true#gh-dark-mode-only)
 
 <p align="center">
   <a href="https://github.com/mlcommons/GaNDLF/actions/workflows/python-test.yml" alt="Build Status"><img src="https://github.com/mlcommons/GaNDLF/actions/workflows/python-test.yml/badge.svg" /></a>

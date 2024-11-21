@@ -17,7 +17,7 @@ import cv2
 
 # import matplotlib.pyplot as plt
 import yaml
-import tiffslide
+import openslide
 
 # RGB Masking (pen) constants
 RGB_RED_CHANNEL = 0
@@ -428,7 +428,7 @@ def generate_initial_mask(slide_path: str, scale: int) -> Tuple[np.ndarray, tupl
         Tuple[np.ndarray, tuple]: The valid mask and the real scale.
     """
     # Open slide and get properties
-    slide = tiffslide.open_slide(slide_path)
+    slide = openslide.open_slide(slide_path)
     slide_dims = slide.dimensions
 
     # Call thumbnail for efficiency, calculate scale relative to whole slide
@@ -505,26 +505,26 @@ def get_patch_size_in_microns(
                         "Using mpp to calculate patch size for dimension {}".format(i)
                     )
                 # only enter if "m" is present in patch size
-                input_slide = tiffslide.open_slide(input_slide_path)
+                input_slide = openslide.open_slide(input_slide_path)
                 metadata = input_slide.properties
                 if i == 0:
                     for _property in [
-                        tiffslide.PROPERTY_NAME_MPP_X,
+                        openslide.PROPERTY_NAME_MPP_X,
                         "tiff.XResolution",
                         "XResolution",
                     ]:
                         if _property in metadata:
-                            magnification = metadata[_property]
+                            magnification = float(metadata[_property])
                             magnification_prev = magnification
                             break
                 elif i == 1:
                     for _property in [
-                        tiffslide.PROPERTY_NAME_MPP_Y,
+                        openslide.PROPERTY_NAME_MPP_Y,
                         "tiff.YResolution",
                         "YResolution",
                     ]:
                         if _property in metadata:
-                            magnification = metadata[_property]
+                            magnification = float(metadata[_property])
                             break
                     if magnification == -1:
                         # if y-axis data is missing, use x-axis data
