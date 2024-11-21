@@ -514,7 +514,6 @@ def adopt_wrapper(parameters: dict) -> torch.optim.Optimizer:
         lr=parameters.get("learning_rate", 1e-3),
         betas=parameters.get("betas", (0.9, 0.999, 0.9999)),
         eps=parameters.get("eps", 1e-8),
-        alpha=parameters.get("alpha", 5.0),
         weight_decay=parameters.get("weight_decay", 0.0),
         decoupled=parameters["optimizer"].get("decoupled", False),
         foreach=parameters.get("foreach", None),
