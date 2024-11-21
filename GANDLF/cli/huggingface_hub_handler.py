@@ -121,7 +121,7 @@ def push_to_model_hub(
         ignore_patterns=ignore_patterns,
         delete_patterns=delete_patterns,
     )
-    print("Model Successfully Uploded")
+    print("Model Successfully Uploaded")
 
 
 def download_from_hub(
