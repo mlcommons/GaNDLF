@@ -1,8 +1,5 @@
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Dict, Any, List, Optional
-from enum import Enum
-from GANDLF.models.modelBase import ModelBase
-from typing import Union
+from pydantic import BaseModel, ConfigDict
+from typing import Dict, List, Optional, Union
 
 
 class Version(BaseModel):
