@@ -20,7 +20,6 @@ from GANDLF.data.patch_miner.opm.utils import (
     get_patch_size_in_microns,
     convert_to_tiff,
 )
-from GANDLF.utils.pydantic_config import Parameters
 from GANDLF.config_manager import ConfigManager
 from GANDLF.parseConfig import parseConfig
 from GANDLF.training_manager import TrainingManager
