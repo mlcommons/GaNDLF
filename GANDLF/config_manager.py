@@ -11,6 +11,7 @@ from GANDLF.privacy.opacus import parse_opacus_params
 
 from GANDLF.metrics import surface_distance_ids
 from importlib.metadata import version
+from GANDLF.utils.pydantic_config import Parameters
 
 ## dictionary to define defaults for appropriate options, which are evaluated
 parameter_defaults = {
@@ -653,6 +654,7 @@ def _parseConfig(
     if "opt" in params:
         print("DeprecationWarning: 'opt' has been superseded by 'optimizer'")
         params["optimizer"] = params["opt"]
+        params.pop("opt")
 
     # initialize defaults for patch sampler
     temp_patch_sampler_dict = {
@@ -747,7 +749,10 @@ def ConfigManager(
         dict: The parameter dictionary.
     """
     try:
-        return _parseConfig(config_file_path, version_check_flag)
+        parameters = Parameters(
+            **_parseConfig(config_file_path, version_check_flag)
+        ).model_dump()
+        return parameters
     except Exception as e:
         ## todo: ensure logging captures assertion errors
         assert (
