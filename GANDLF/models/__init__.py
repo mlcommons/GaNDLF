@@ -36,6 +36,7 @@ from .MSDNet import MSDNet
 from .brain_age import brainage
 from .unetr import unetr
 from .transunet import transunet
+from .modelBase import ModelBase
 
 # Define a dictionary of model architectures and corresponding functions
 global_models_dict = {
@@ -110,7 +111,7 @@ global_models_dict = {
 }
 
 
-def get_model(params):
+def get_model(params: dict) -> ModelBase:
     """
     Function to get the model definition.
 
@@ -118,6 +119,10 @@ def get_model(params):
         params (dict): The parameters' dictionary.
 
     Returns:
-        model (torch.nn.Module): The model definition.
+        model (ModelBase): The model definition.
     """
-    return global_models_dict[params["model"]["architecture"]](parameters=params)
+    chosen_model = params["model"]["architecture"].lower()
+    assert (
+        chosen_model in global_models_dict
+    ), f"Could not find the requested model '{params['model']['architecture']}'"
+    return global_models_dict[chosen_model](parameters=params)

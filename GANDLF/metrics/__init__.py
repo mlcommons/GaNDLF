@@ -102,6 +102,26 @@ surface_distance_ids = [
 ]
 
 
+def get_metrics(params: dict) -> dict:
+    """
+    Returns an dictionary of containing calculators of the specified metric functions
+
+    Args:
+        params (dict): A dictionary containing the overall training parameters.
+
+    Returns:
+        metric_calculators (dict): A dictionary containing the calculators of the specified metric functions.
+    """
+    metric_calculators = {}
+    for metric_name in params["metrics"]:
+        metric_name = metric_name.lower()
+        assert (
+            metric_name in global_metrics_dict
+        ), f"Could not find the requested metric '{metric_name}'"
+        metric_calculators[metric_name] = global_metrics_dict[metric_name]
+    return metric_calculators
+
+
 def overall_stats(predictions, ground_truth, params) -> dict[str, Union[float, list]]:
     """
     Generates a dictionary of metrics calculated on the overall predictions and ground truths.
