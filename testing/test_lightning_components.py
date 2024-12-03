@@ -4,6 +4,7 @@ import torch
 import math
 import pytest
 from pathlib import Path
+import lightning.pytorch as pl
 from GANDLF.models.lightning_module import GandlfLightningModule
 from GANDLF.losses.loss_calculators import (
     LossCalculatorFactory,
@@ -26,10 +27,13 @@ from GANDLF.utils.pred_target_processors import (
     DeepSupervisionPredictionTargetProcessor,
 )
 from GANDLF.parseConfig import parseConfig
+from GANDLF.data.ImagesFromDataFrame import ImagesFromDataFrame
 from GANDLF.utils.write_parse import parseTrainingCSV
-from GANDLF.utils import populate_header_in_parameters
+from GANDLF.utils import populate_header_in_parameters, populate_channel_keys_in_params
 
-testingDir = Path(__file__).parent.absolute().__str__()
+TESTS_DIRPATH = Path(__file__).parent.absolute().__str__()
+TEST_DATA_DIRPATH = os.path.join(TESTS_DIRPATH, "data")
+PATCH_SIZE = {"2D": [128, 128, 1], "3D": [32, 32, 32]}
 
 
 def add_mock_config_params(config):
@@ -38,9 +42,9 @@ def add_mock_config_params(config):
 
 
 def read_config():
-    config_path = Path(os.path.join(testingDir, "config_segmentation.yaml"))
+    config_path = Path(os.path.join(TESTS_DIRPATH, "config_segmentation.yaml"))
 
-    csv_path = os.path.join(testingDir, "data/train_2d_rad_segmentation.csv")
+    csv_path = os.path.join(TESTS_DIRPATH, "data/train_2d_rad_segmentation.csv")
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
     parsed_config = parseConfig(config)
@@ -224,3 +228,43 @@ def test_port_model_initialization():
     assert isinstance(
         configured_scheduler, torch.optim.lr_scheduler.LRScheduler
     ), f"Expected instance subclassing  {torch.optim.lr_scheduler.LRScheduler}, got {type(configured_scheduler)}"
+
+
+def test_port_model_forward_2d_rad_segmentation(device):
+    parameters = parseConfig(
+        TESTS_DIRPATH + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        TEST_DATA_DIRPATH + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = PATCH_SIZE["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["penalty_weights"] = [0.5, 0.25, 0.175, 0.075]
+    parameters["class_weights"] = [1.0, 1.0]
+    parameters["sampling_weights"] = [1.0, 1.0]
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+
+    dataset = ImagesFromDataFrame(
+        training_data, parameters, train=True, loader_type="train"
+    )
+    loader = torch.utils.data.DataLoader(
+        dataset, batch_size=parameters["batch_size"], shuffle=True
+    )
+    parameters = populate_channel_keys_in_params(loader, parameters)
+
+    module = GandlfLightningModule(parameters, output_dir=TESTS_DIRPATH)
+    trainer = pl.Trainer(
+        accelerator="auto",
+        strategy="auto",
+        fast_dev_run=False,
+        num_nodes=1,
+        max_epochs=2,
+    )
+    trainer.fit(module, loader)

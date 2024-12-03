@@ -1,8 +1,13 @@
+import os
 import torch
 import torchio
 import warnings
+from medcam import medcam
 from copy import deepcopy
+from statistics import mean
 import lightning.pytorch as pl
+from lightning.pytorch.utilities import rank_zero_only
+from GANDLF.logger import Logger
 from GANDLF.models import get_model
 from GANDLF.optimizers import get_optimizer
 from GANDLF.schedulers import get_scheduler
@@ -16,8 +21,9 @@ from typing import Tuple, Union, Dict, List
 
 
 class GandlfLightningModule(pl.LightningModule):
-    def __init__(self, params: dict):
+    def __init__(self, params: dict, output_dir: str):
         super().__init__()
+        self.output_dir = output_dir
         self.params = deepcopy(params)
         self._initialize_model()
         self._initialize_loss()
@@ -48,12 +54,31 @@ class GandlfLightningModule(pl.LightningModule):
             params["optimizer_object"] = optimizer
             scheduler = get_scheduler(params)
             return [optimizer], [scheduler]
+
         return optimizer
 
-    def _handle_dynamic_batch_size_in_differential_privacy_mode(self, subject):
-        raise NotImplementedError(
-            "Differential privacy is not implemented yet in lightning version"
-        )
+    def transfer_batch_to_device(self, batch, device, dataloader_idx):
+        batch = self._move_image_data_to_device(batch, device)
+        batch = self._move_labels_or_values_to_device(batch, device)
+
+        return batch
+
+    def _move_image_data_to_device(self, subject, device):
+        for channel_key in self.params["channel_keys"]:
+            subject[channel_key][torchio.DATA] = subject[channel_key][torchio.DATA].to(
+                device
+            )
+
+        return subject
+
+    def _move_labels_or_values_to_device(self, subject, device):
+        if "value_keys" in self.params:
+            for value_key in self.params["value_keys"]:
+                subject[value_key] = subject[value_key].to(device)
+        else:
+            subject["label"][torchio.DATA] = subject["label"][torchio.DATA].to(device)
+
+        return subject
 
     def forward(
         self, images: torch.Tensor
@@ -69,32 +94,61 @@ class GandlfLightningModule(pl.LightningModule):
         return output, attention_map
 
     def on_train_start(self):
-        self.training_metrics: List[Dict[str, float]] = []
+        self.train_losses = []
+        self.training_metric_values: List[Dict[str, float]] = []
+        self.train_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="train",
+        )
+        if "medcam" in self.params:
+            self._enable_medcam()
 
-    def on_train_end(self):
-        self.training_metrics = [
-            {
-                key: sum([metric[key] for metric in self.training_metrics])
-                / len(self.training_metrics)
-            }
-            for key in self.training_metrics[0]
-        ]
-        self.log_dict(self.training_metrics, on_epoch=True, prog_bar=True)
+        if "differential_privacy" in self.params:
+            self._initialize_differential_privacy()
 
-        # TODO
-        self._print_and_format_metrics()
+    def _enable_medcam(self):
+        self.model = medcam.inject(
+            self.model,
+            output_dir=os.path.join(
+                self.output_dir, "attention_maps", self.params["medcam"]["backend"]
+            ),
+            backend=self.params["medcam"]["backend"],
+            layer=self.params["medcam"]["layer"],
+            save_maps=False,
+            return_attention=True,
+            enabled=False,
+        )
+        # Should it really be set to false here? Seems like we are forcing it to be disabled
+        # as in later stages we are checking if it is true or not
+        self.params["medcam_enabled"] = False
 
-        self.training_metrics = []
+    def on_validation_start(self):
+        self.validation_metric_values: List[Dict[str, float]] = []
+        self.val_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="val",
+            add_epsilon=bool(self.params.get("differential_privacy")),
+        )
+
+    def on_test_start(self):
+        self.test_metric_values: List[Dict[str, float]] = []
+        self.test_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_test.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="test",
+        )
 
     def training_step(self, subject, batch_idx):
-        if self.params["save_training"]:
+        if self.params.get("save_training"):
             write_training_patches(subject, self.params)
 
         if self.params.get("differential_privacy"):
             self._handle_dynamic_batch_size_in_differential_privacy_mode(subject)
 
-        images = self._prepare_input_batch_from_subject_data(subject)
-        labels = self._prepare_label_batch_from_subject_data(subject)
+        images = self._prepare_images_batch_from_subject_data(subject)
+        labels = self._prepare_labels_batch_from_subject_data(subject)
         self._set_spacing_params_for_subject(subject)
         images, labels = self._process_inputs(images, labels)
 
@@ -103,23 +157,20 @@ class GandlfLightningModule(pl.LightningModule):
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(model_output, labels)
 
-        self.training_metrics.append(metric_results)
+        self.train_losses.append(loss.detach().cpu().item())
+        self.training_metric_values.append(metric_results)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log_dict(metric_results, on_step=True, on_epoch=True, prog_bar=True)
 
         return loss
 
-    def _prepare_input_batch_from_subject_data(self, subject):
-        image = (  # 5D tensor: (B, C, H, W, D)
-            torch.cat(
-                [subject[key][torchio.DATA] for key in self.params["channel_keys"]],
-                dim=1,
-            )
-            .float()
-            .to(self.device)
+    def _prepare_images_batch_from_subject_data(self, subject):
+        images_batch = torch.cat(  # 5D tensor: (B,C, H, W, D)
+            [subject[key][torchio.DATA] for key in self.params["channel_keys"]], dim=1
         )
-        return image
+        return images_batch
 
-    def _prepare_label_batch_from_subject_data(self, subject):
+    def _prepare_labels_batch_from_subject_data(self, subject):
         if "value_keys" in self.params:
             # classification / regression (when label is scalar) or multilabel classif/regression
             label = torch.cat(
@@ -134,7 +185,8 @@ class GandlfLightningModule(pl.LightningModule):
             label = subject["label"][
                 torchio.DATA
             ]  # segmentation; label is (B, C, H, W, D) image
-        return label.to(self.device)
+
+        return label
 
     def _set_spacing_params_for_subject(self, subject):
         if "spacing" in subject:
@@ -177,5 +229,30 @@ class GandlfLightningModule(pl.LightningModule):
 
         return images, labels
 
-    def _print_and_format_metrics(self):
-        pass
+    def _handle_dynamic_batch_size_in_differential_privacy_mode(self, subject):
+        raise NotImplementedError(
+            "Differential privacy is not implemented yet in lightning version"
+        )
+
+    def _initialize_differential_privacy(self):
+        raise NotImplementedError(
+            "Differential privacy is not implemented yet in lightning version"
+        )
+
+    # TODO when used with multple GPUs, thil will produce multiple logs
+    # for each GPU. We should think on doing allgather here
+    def on_train_epoch_end(self):
+        training_epoch_average_metrics = {}
+        metric_names = self.training_metric_values[0].keys()
+        for metric_name in metric_names:
+            metric_values = [x[metric_name] for x in self.training_metric_values]
+            training_epoch_average_metrics[metric_name] = mean(metric_values)
+        mean_loss = mean(self.train_losses)
+        # Note that we DO NOT have overall stats calculators here as in the original code
+        # Is it valid? Should we add it?
+        self.train_logger.write(
+            self.current_epoch, mean_loss, training_epoch_average_metrics
+        )
+        self.log_dict(training_epoch_average_metrics, on_epoch=True, prog_bar=True)
+        self.training_metric_values = []
+        self.train_losses = []
