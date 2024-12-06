@@ -252,6 +252,7 @@ def test_port_model_forward_2d_rad_segmentation_single_gpu_single_node(device):
     parameters["model"]["print_summary"] = True
     parameters["track_memory_usage"] = True
     parameters["verbose"] = True
+    parameters["model"]["save_at_every_epoch"] = True
     parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
     dataset = ImagesFromDataFrame(

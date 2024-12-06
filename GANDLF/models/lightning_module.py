@@ -80,12 +80,15 @@ class GandlfLightningModule(pl.LightningModule):
 
     @rank_zero_only
     def _save_model(self, epoch, save_path, onnx_export):
+        current_tracked_loss = 1e7
+        if "val_loss" in self.trainer.callback_metrics:
+            current_tracked_loss = self.trainer.callback_metrics["val_loss"]
         save_model(
             {
                 "epoch": epoch,
                 "model_state_dict": self.model.state_dict(),
                 "optimizer_state_dict": self.optimizers().optimizer.state_dict(),
-                "loss": self.trainer.callback_metrics["val_loss"],
+                "loss": current_tracked_loss,
             },
             model=self.model,
             params=self.params,
