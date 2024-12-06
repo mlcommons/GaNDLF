@@ -1,6 +1,7 @@
 """
 All the metrics are to be called from here
 """
+from warnings import warn
 from typing import Union
 
 from GANDLF.losses.regression import MSE_loss, CEL
@@ -115,10 +116,14 @@ def get_metrics(params: dict) -> dict:
     metric_calculators = {}
     for metric_name in params["metrics"]:
         metric_name = metric_name.lower()
-        assert (
-            metric_name in global_metrics_dict
-        ), f"Could not find the requested metric '{metric_name}'"
-        metric_calculators[metric_name] = global_metrics_dict[metric_name]
+        if metric_name not in global_metrics_dict:
+            warn(
+                f"Metric {metric_name} not found in global metrics dictionary, it will not be used.",
+                UserWarning,
+            )
+            continue
+        else:
+            metric_calculators[metric_name] = global_metrics_dict[metric_name]
     return metric_calculators
 
 

@@ -25,7 +25,6 @@ class GandlfLightningModule(pl.LightningModule):
         self.loss = LossCalculatorFactory(self.params).get_loss_calculator()
 
     def _initialize_metric_calculators(self):
-        # TODO can we have situation that metrics are empty?
         self.metric_calculators = MetricCalculatorFactory(
             self.params
         ).get_metric_calculator()

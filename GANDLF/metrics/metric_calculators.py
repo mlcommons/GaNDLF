@@ -32,7 +32,6 @@ class MetricCalculatorSDNet(AbstractMetricCalculator):
 
     def __call__(self, prediction: torch.Tensor, target: torch.Tensor, *args):
         metric_results = {}
-        # TODO what do we do with edge case in GaNDLF/GANDLF/compute/loss_and_metric.py?
         for metric_name, metric_calculator in self.metrics_calculators.items():
             metric_value = (
                 metric_calculator(prediction, target, self.params).detach().cpu()
