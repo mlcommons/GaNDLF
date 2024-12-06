@@ -9,6 +9,7 @@ from copy import deepcopy
 from statistics import mean
 import lightning.pytorch as pl
 from lightning.pytorch.utilities import rank_zero_only
+from lightning.pytorch.callbacks import EarlyStopping
 from GANDLF.logger import Logger
 from GANDLF.models import get_model
 from GANDLF.optimizers import get_optimizer
@@ -23,6 +24,9 @@ from GANDLF.utils import (
     one_hot,
     print_model_summary,
     get_date_time,
+    save_model,
+    load_model,
+    version_check,
     BEST_MODEL_PATH_END,
     INITIAL_MODEL_PATH_END,
     LATEST_MODEL_PATH_END,
@@ -74,6 +78,61 @@ class GandlfLightningModule(pl.LightningModule):
             ),
         }
 
+    @rank_zero_only
+    def _save_model(self, epoch, save_path, onnx_export):
+        save_model(
+            {
+                "epoch": epoch,
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizers().optimizer.state_dict(),
+                "loss": self.trainer.callback_metrics["val_loss"],
+            },
+            model=self.model,
+            params=self.params,
+            path=save_path,
+            onnx_export=onnx_export,
+        )
+
+    def _try_to_load_previous_best_model(self):
+        if os.path.exists(self.model_paths["best"]):
+            try:
+                checkpoint_dict = load_model(self.model_paths["best"], self.device)
+                version_check(
+                    self.params["version"], version_to_check=checkpoint_dict["version"]
+                )
+                # I am purposefully ommiting this here, as "previous_parameters" are not used anywhere
+                # params["previous_parameters"] = main_dict.get("parameters", None)
+                self.model.load_state_dict(checkpoint_dict["model_state_dict"])
+                self.optimizers().optimizer.load_state_dict(
+                    checkpoint_dict["optimizer_state_dict"]
+                )
+                self.current_epoch = checkpoint_dict["epoch"]
+                self.trainer.callback_metrics["val_loss"] = checkpoint_dict["loss"]
+            except Exception as e:
+                warnings.warn(
+                    f"Previous best model found under path {self.model_paths['best']}, but error occured during loading: {e}; Continuing training with new model"
+                )
+        else:
+            warnings.warn(
+                f"No previous best model found under the path {self.model_paths['best']}; Training from scratch"
+            )
+
+    def _try_to_save_initial_model(self):
+        if not os.path.exists(self.model_paths["initial"]):
+            self._save_model(self.current_epoch, self.model_paths["initial"], False)
+            print(f"Initial model saved at {self.model_paths['initial']}")
+        else:
+            print(
+                f"Initial model already exists at {self.model_paths['initial']}; Skipping saving"
+            )
+
+    # TODO write wrapper for early stopping that uses our SaveModelFunction
+    def configure_callbacks(self):
+        early_stopping = EarlyStopping(
+            "val_loss", strict=False, patience=self.params["patience"]
+        )
+        return [early_stopping]
+
     def configure_optimizers(self):
         params = deepcopy(self.params)
         params["model_parameters"] = self.model.parameters()
@@ -124,6 +183,9 @@ class GandlfLightningModule(pl.LightningModule):
     def on_train_start(self):
         self._print_initialization_info()
         self._set_training_start_time()
+        self._print_channels_info()
+        self._try_to_load_previous_best_model()
+        self._try_to_save_initial_model()
         self.train_losses = []
         self.training_metric_values: List[Dict[str, float]] = []
         self.train_logger = Logger(
@@ -179,6 +241,10 @@ class GandlfLightningModule(pl.LightningModule):
             self.params["model"]["num_channels"],
             self.params["patch_size"],
         )
+
+    @rank_zero_only
+    def _print_channels_info(self):
+        print("Number of channels : ", self.params["model"]["num_channels"])
 
     def on_validation_start(self):
         self.validation_metric_values: List[Dict[str, float]] = []
@@ -373,6 +439,22 @@ class GandlfLightningModule(pl.LightningModule):
         self.train_losses = []
         if self.params["verbose"]:
             self._print_epoch_end_time()
+        if self.params["model"]["save_at_every_epoch"]:
+            epoch_save_path = (
+                os.path.join(
+                    self.output_dir,
+                    self.params["model"]["architecture"]
+                    + "_epoch_"
+                    + str(self.current_epoch)
+                    + ".pth.tar",
+                ),
+            )
+            self._save_model(self.current_epoch, epoch_save_path, False)
+            print(f"Epoch model saved.")
+        if os.path.exists(self.model_paths["latest"]):
+            os.remove(self.model_paths["latest"])
+        self._save_model(self.current_epoch, self.model_paths["latest"], False)
+        print(f"Latest model saved")
 
     @rank_zero_only
     def _print_epoch_end_time(self):
@@ -385,6 +467,7 @@ class GandlfLightningModule(pl.LightningModule):
 
     def on_train_end(self):
         if os.path.exists(self.model_paths["best"]):
+            # Why don't we handle it here with the full save_model version?
             optimize_and_save_model(
                 self.model, self.params, self.model_paths["best"], onnx_export=True
             )
