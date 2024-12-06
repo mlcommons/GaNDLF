@@ -1,4 +1,6 @@
 import os
+import time
+import psutil
 import torch
 import torchio
 import warnings
@@ -15,7 +17,16 @@ from GANDLF.losses.loss_calculators import LossCalculatorFactory
 from GANDLF.metrics.metric_calculators import MetricCalculatorFactory
 from GANDLF.utils.pred_target_processors import PredictionTargetProcessorFactory
 
-from GANDLF.utils import write_training_patches, one_hot
+from GANDLF.utils import (
+    optimize_and_save_model,
+    write_training_patches,
+    one_hot,
+    print_model_summary,
+    get_date_time,
+    BEST_MODEL_PATH_END,
+    INITIAL_MODEL_PATH_END,
+    LATEST_MODEL_PATH_END,
+)
 
 from typing import Tuple, Union, Dict, List
 
@@ -29,6 +40,7 @@ class GandlfLightningModule(pl.LightningModule):
         self._initialize_loss()
         self._initialize_metric_calculators()
         self._initialize_preds_target_processor()
+        self._initialize_model_save_paths()
 
     def _initialize_model(self):
         self.model = get_model(self.params)
@@ -45,6 +57,22 @@ class GandlfLightningModule(pl.LightningModule):
         self.pred_target_processor = PredictionTargetProcessorFactory(
             self.params
         ).get_prediction_target_processor()
+
+    def _initialize_model_save_paths(self):
+        self.model_paths = {
+            "best": os.path.join(
+                self.output_dir,
+                self.params["model"]["architecture"] + BEST_MODEL_PATH_END,
+            ),
+            "initial": os.path.join(
+                self.output_dir,
+                self.params["model"]["architecture"] + INITIAL_MODEL_PATH_END,
+            ),
+            "latest": os.path.join(
+                self.output_dir,
+                self.params["model"]["architecture"] + LATEST_MODEL_PATH_END,
+            ),
+        }
 
     def configure_optimizers(self):
         params = deepcopy(self.params)
@@ -94,12 +122,20 @@ class GandlfLightningModule(pl.LightningModule):
         return output, attention_map
 
     def on_train_start(self):
+        self._print_initialization_info()
+        self._set_training_start_time()
         self.train_losses = []
         self.training_metric_values: List[Dict[str, float]] = []
         self.train_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
             metrics=list(self.params["metrics"]),
             mode="train",
+        )
+        self.val_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="val",
+            add_epsilon=bool(self.params.get("differential_privacy")),
         )
         if "medcam" in self.params:
             self._enable_medcam()
@@ -123,14 +159,29 @@ class GandlfLightningModule(pl.LightningModule):
         # as in later stages we are checking if it is true or not
         self.params["medcam_enabled"] = False
 
+    @rank_zero_only
+    def _set_training_start_time(self):
+        self.training_start_time = time.time()
+
+    @rank_zero_only
+    def _print_initialization_info(self):
+        if not (os.environ.get("HOSTNAME") is None):
+            print("Hostname :", os.environ.get("HOSTNAME"), flush=True)
+        if self.params["verbose"]:
+            print("Initializing training at :", get_date_time(), flush=True)
+        if self.params["model"]["print_summary"]:
+            self._print_model_summary()
+
+    def _print_model_summary(self):
+        print_model_summary(
+            self.model,
+            self.params["batch_size"],
+            self.params["model"]["num_channels"],
+            self.params["patch_size"],
+        )
+
     def on_validation_start(self):
         self.validation_metric_values: List[Dict[str, float]] = []
-        self.val_logger = Logger(
-            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
-            metrics=list(self.params["metrics"]),
-            mode="val",
-            add_epsilon=bool(self.params.get("differential_privacy")),
-        )
 
     def on_test_start(self):
         self.test_metric_values: List[Dict[str, float]] = []
@@ -239,20 +290,111 @@ class GandlfLightningModule(pl.LightningModule):
             "Differential privacy is not implemented yet in lightning version"
         )
 
+    def on_train_epoch_start(self):
+        self._set_epoch_start_time()
+        if self.params["track_memory_usage"]:
+            self._write_epoch_start_process_resource_usage(self.current_epoch)
+        if self.params["verbose"]:
+            self._print_epoch_start_time()
+
+    def _write_epoch_start_process_resource_usage(self, epoch):
+        filename = f"memory_usage_local_rank_{self.local_rank}_global_rank_{self.global_rank}.csv"
+        memory_stats_dir = self._prepare_memory_stats_save_dir()
+        full_filepath = os.path.join(memory_stats_dir, filename)
+        file_write_mode = "a" if os.path.exists(full_filepath) else "w"
+        using_cuda = "cuda" in self.device.type
+
+        memory_info_string = "Epoch,Memory_Total,Memory_Available,Memory_Percent_Free,Memory_Usage,"  # used to write output
+        if using_cuda:
+            memory_info_string += (
+                "CUDA_active.all.peak,CUDA_active.all.current,CUDA_active.all.allocated"
+            )
+        memory_info_string += "\n"
+
+        host_memory_stats = psutil.virtual_memory()
+        memory_info_string += (
+            str(epoch)
+            + ","
+            + str(host_memory_stats[0])
+            + ","
+            + str(host_memory_stats[1])
+            + ","
+            + str(host_memory_stats[2])
+            + ","
+            + str(host_memory_stats[3])
+        )
+        if using_cuda:
+            cuda_memory_stats = torch.cuda.memory_stats()
+            memory_info_string += (
+                ","
+                + str(cuda_memory_stats["active.all.peak"])
+                + ","
+                + str(cuda_memory_stats["active.all.current"])
+                + ","
+                + str(cuda_memory_stats["active.all.allocated"])
+            )
+        memory_info_string += ",\n"
+        with open(full_filepath, file_write_mode) as file_mem:
+            file_mem.write(memory_info_string)
+
+    @rank_zero_only
+    def _prepare_memory_stats_save_dir(self):
+        memory_stats_dir = os.path.join(self.output_dir, "memory_stats")
+        os.makedirs(memory_stats_dir, exist_ok=True)
+        return memory_stats_dir
+
+    @rank_zero_only
+    def _print_epoch_start_time(self):
+        print("Epoch start time : ", get_date_time(), flush=True)
+
+    @rank_zero_only
+    def _set_epoch_start_time(self):
+        self.epoch_start_time = time.time()
+
     # TODO when used with multple GPUs, thil will produce multiple logs
-    # for each GPU. We should think on doing allgather here
+    # for each GPU. We should think on doing allgather here in a function
+    # that is called on the main process (rank 0)
     def on_train_epoch_end(self):
         training_epoch_average_metrics = {}
         metric_names = self.training_metric_values[0].keys()
         for metric_name in metric_names:
             metric_values = [x[metric_name] for x in self.training_metric_values]
             training_epoch_average_metrics[metric_name] = mean(metric_values)
+
         mean_loss = mean(self.train_losses)
         # Note that we DO NOT have overall stats calculators here as in the original code
-        # Is it valid? Should we add it?
+        # Is it valid? Should we add it? This woudl require accumulation of all the predictions and labels
+        # thus greatly increasing memory usage, especially in segmentation tasks
         self.train_logger.write(
             self.current_epoch, mean_loss, training_epoch_average_metrics
         )
         self.log_dict(training_epoch_average_metrics, on_epoch=True, prog_bar=True)
         self.training_metric_values = []
         self.train_losses = []
+        if self.params["verbose"]:
+            self._print_epoch_end_time()
+
+    @rank_zero_only
+    def _print_epoch_end_time(self):
+        print(
+            "Time taken for epoch : ",
+            (time.time() - self.epoch_start_time) / 60,
+            " mins",
+            flush=True,
+        )
+
+    def on_train_end(self):
+        if os.path.exists(self.model_paths["best"]):
+            optimize_and_save_model(
+                self.model, self.params, self.model_paths["best"], onnx_export=True
+            )
+        self._print_total_training_time()
+
+    @rank_zero_only
+    def _print_total_training_time(self):
+        print(
+            "Total time taken for training : ",
+            (time.time() - self.training_start_time) / 60,
+            " mins",
+            flush=True,
+        )

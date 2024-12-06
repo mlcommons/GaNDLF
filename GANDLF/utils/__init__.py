@@ -58,9 +58,9 @@ from .generic import (
 )
 
 from .modelio import (
-    best_model_path_end,
-    latest_model_path_end,
-    initial_model_path_end,
+    BEST_MODEL_PATH_END,
+    LATEST_MODEL_PATH_END,
+    INITIAL_MODEL_PATH_END,
     load_model,
     load_ov_model,
     save_model,

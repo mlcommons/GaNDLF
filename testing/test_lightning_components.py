@@ -205,7 +205,7 @@ def test_port_metric_calculator_deep_supervision():
 
 def test_port_model_initialization():
     config = read_config()
-    module = GandlfLightningModule(config)
+    module = GandlfLightningModule(config, output_dir=TESTS_DIRPATH)
     assert module is not None, "Lightning module is None"
     assert module.model is not None, "Model architecture not initialized in the module"
     assert isinstance(
@@ -230,7 +230,58 @@ def test_port_model_initialization():
     ), f"Expected instance subclassing  {torch.optim.lr_scheduler.LRScheduler}, got {type(configured_scheduler)}"
 
 
-def test_port_model_forward_2d_rad_segmentation(device):
+def test_port_model_forward_2d_rad_segmentation_single_gpu_single_node(device):
+    parameters = parseConfig(
+        TESTS_DIRPATH + "/config_segmentation.yaml", version_check_flag=False
+    )
+
+    training_data, parameters["headers"] = parseTrainingCSV(
+        TEST_DATA_DIRPATH + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = PATCH_SIZE["2D"]
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["penalty_weights"] = [0.5, 0.25, 0.175, 0.075]
+    parameters["class_weights"] = [1.0, 1.0]
+    parameters["sampling_weights"] = [1.0, 1.0]
+    parameters["model"]["print_summary"] = True
+    parameters["track_memory_usage"] = True
+    parameters["verbose"] = True
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
+
+    dataset = ImagesFromDataFrame(
+        training_data, parameters, train=True, loader_type="train"
+    )
+    loader = torch.utils.data.DataLoader(
+        dataset, batch_size=parameters["batch_size"], shuffle=True
+    )
+    parameters = populate_channel_keys_in_params(loader, parameters)
+
+    module = GandlfLightningModule(parameters, output_dir=TESTS_DIRPATH)
+    trainer = pl.Trainer(
+        accelerator="auto",
+        strategy="auto",
+        fast_dev_run=False,
+        devices=1,
+        num_nodes=1,
+        max_epochs=1,
+        sync_batchnorm=True,
+    )
+    trainer.fit(module, loader)
+
+
+# @pytest.mark.skipif(
+#     torch.cuda.device_count() < 2, reason="Test requires at least 2 GPUs to run"
+# )
+@pytest.mark.skip(
+    reason="This test is failing due to a torchio problems with distributed data parallel"
+)
+def test_port_model_forward_2d_rad_segmentation_multi_gpu_single_node(device):
     parameters = parseConfig(
         TESTS_DIRPATH + "/config_segmentation.yaml", version_check_flag=False
     )
@@ -264,7 +315,9 @@ def test_port_model_forward_2d_rad_segmentation(device):
         accelerator="auto",
         strategy="auto",
         fast_dev_run=False,
+        devices="auto",
         num_nodes=1,
-        max_epochs=2,
+        max_epochs=1,
+        sync_batchnorm=True,
     )
     trainer.fit(module, loader)
