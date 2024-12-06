@@ -1,0 +1,32 @@
+# Metadata. If you are an author, change this to reflect your organization and metrics specifics.
+name: MLCommons GaNDLF Generic MLCube
+description: MLCommons GaNDLF MLCube, containing functionality for calculating metrics.
+authors: 
+ - {name: "MLCommons Medical Working Group", email: "gandlf@mlcommons.org", org: "MLCommons" }
+
+
+docker:
+  # The image tag that will be built/pulled/used. Change to suit your organization/model:version.
+  image: mlcommons/gandlf-metrics-mlcube:0.0.1
+  
+  build_context: "../project"
+  # Docker file name within docker build context, default is `Dockerfile`.
+  build_file: "Dockerfile"
+
+## Everything below this point affects how the GaNDLF container is invoked.
+## If you are an author, it is strongly recommended that you do not edit these.
+## Please request any new features for deployed containers from the GaNDLF maintainers:
+## https://github.com/mlcommons/GaNDLF/issues/new?template=---feature-request.md
+
+tasks:
+  evaluate:
+  # Runs metrics calculation on predictions
+    entrypoint: "python3.9 /entrypoint.py"
+    parameters:
+      inputs: {
+        predictions: predictions/,
+        labels: labels/,
+        # GaNDLF config file. The name should be `parameters.yaml`
+        config: {type: file, default: parameters.yaml}
+      }
+      outputs: { output-file: { type: "file", default: "results.yaml" } }

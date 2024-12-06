@@ -2,6 +2,8 @@ import sys
 import json
 from typing import Optional
 from pprint import pprint
+from pathlib import Path
+
 import pandas as pd
 from tqdm import tqdm
 import torch
@@ -174,6 +176,23 @@ def generate_metrics_dict(
     elif problem_type == "segmentation":
         # read images and then calculate metrics
         class_list = parameters["model"]["class_list"]
+        # check if the paths are relative or absolute, and convert them to absolute paths
+        cwd = Path(__file__).resolve().parent
+        for column in input_df.columns:
+            loc = input_df.columns.get_loc(column)
+            if (loc == "Target") or (loc == "Prediction"):
+                # These entries can be considered as paths to files
+                for index, entry in enumerate(input_df[column]):
+                    if isinstance(entry, str):
+                        this_path = Path(entry)
+                        start_path = Path(cwd)
+                        if start_path.is_file():
+                            start_path = start_path.parent
+                        if not this_path.is_file():
+                            if not this_path.is_absolute():
+                                input_df.loc[index, column] = str(
+                                    start_path.joinpath(this_path)
+                                )
         for _, row in tqdm(input_df.iterrows(), total=input_df.shape[0]):
             current_subject_id = row["SubjectID"]
             overall_stats_dict[current_subject_id] = {}
