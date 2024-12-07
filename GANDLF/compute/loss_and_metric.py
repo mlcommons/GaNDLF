@@ -37,7 +37,7 @@ def get_metric_output(
         if len(temp) > 1:
             return temp
         else:
-            # TODO: this branch is extremely age case and is buggy.
+            # TODO: this branch is extremely edge case and is buggy.
             #  Overall the case when metric returns a list but of length 1 is very rare. The only case is when
             #  the metric returns Nx.. tensor (i.e. without aggregation by elements) and batch_size==N==1. This branch
             #  would definitely fail for such a metrics like
@@ -134,7 +134,7 @@ def get_loss_and_metrics(
     # Metrics should be a list
     for metric in params["metrics"]:
         metric_lower = metric.lower()
-        metric_output[metric] = 0
+        metric_output[metric] = 0.0
         if metric_lower not in global_metrics_dict:
             warnings.warn("WARNING: Could not find the requested metric '" + metric)
             continue
