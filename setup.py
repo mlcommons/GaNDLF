@@ -55,6 +55,7 @@ requirements = [
     "pyyaml==6.0.1",
     "matplotlib",
     "gdown==5.1.0",
+    "overrides==7.7.0",
     "pytest",
     "coverage",
     "pytest-cov",

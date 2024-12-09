@@ -32,6 +32,7 @@ from GANDLF.utils import (
     LATEST_MODEL_PATH_END,
 )
 
+from overrides import override
 from typing import Tuple, Union, Dict, List
 
 
@@ -40,6 +41,8 @@ class GandlfLightningModule(pl.LightningModule):
         super().__init__()
         self.output_dir = output_dir
         self.params = deepcopy(params)
+        self.current_best_loss = 1e7
+        self.wait_count_before_early_stopping = 0
         self._initialize_model()
         self._initialize_loss()
         self._initialize_metric_calculators()
@@ -80,15 +83,12 @@ class GandlfLightningModule(pl.LightningModule):
 
     @rank_zero_only
     def _save_model(self, epoch, save_path, onnx_export):
-        current_tracked_loss = 1e7
-        if "val_loss" in self.trainer.callback_metrics:
-            current_tracked_loss = self.trainer.callback_metrics["val_loss"]
         save_model(
             {
                 "epoch": epoch,
                 "model_state_dict": self.model.state_dict(),
                 "optimizer_state_dict": self.optimizers().optimizer.state_dict(),
-                "loss": current_tracked_loss,
+                "loss": self.current_best_loss,
             },
             model=self.model,
             params=self.params,
@@ -103,8 +103,9 @@ class GandlfLightningModule(pl.LightningModule):
                 version_check(
                     self.params["version"], version_to_check=checkpoint_dict["version"]
                 )
-                # I am purposefully ommiting this here, as "previous_parameters" are not used anywhere
+                # I am purposefully ommiting the line below, as "previous_parameters" are not used anywhere
                 # params["previous_parameters"] = main_dict.get("parameters", None)
+
                 self.model.load_state_dict(checkpoint_dict["model_state_dict"])
                 self.optimizers().optimizer.load_state_dict(
                     checkpoint_dict["optimizer_state_dict"]
@@ -128,13 +129,6 @@ class GandlfLightningModule(pl.LightningModule):
             print(
                 f"Initial model already exists at {self.model_paths['initial']}; Skipping saving"
             )
-
-    # TODO write wrapper for early stopping that uses our SaveModelFunction
-    def configure_callbacks(self):
-        early_stopping = EarlyStopping(
-            "val_loss", strict=False, patience=self.params["patience"]
-        )
-        return [early_stopping]
 
     def configure_optimizers(self):
         params = deepcopy(self.params)
@@ -189,7 +183,7 @@ class GandlfLightningModule(pl.LightningModule):
         self._print_channels_info()
         self._try_to_load_previous_best_model()
         self._try_to_save_initial_model()
-        self.train_losses = []
+        self.train_losses: List[torch.Tensor] = []
         self.training_metric_values: List[Dict[str, float]] = []
         self.train_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
@@ -249,17 +243,6 @@ class GandlfLightningModule(pl.LightningModule):
     def _print_channels_info(self):
         print("Number of channels : ", self.params["model"]["num_channels"])
 
-    def on_validation_start(self):
-        self.validation_metric_values: List[Dict[str, float]] = []
-
-    def on_test_start(self):
-        self.test_metric_values: List[Dict[str, float]] = []
-        self.test_logger = Logger(
-            logger_csv_filename=os.path.join(self.output_dir, "logs_test.csv"),
-            metrics=list(self.params["metrics"]),
-            mode="test",
-        )
-
     def training_step(self, subject, batch_idx):
         if self.params.get("save_training"):
             write_training_patches(subject, self.params)
@@ -277,7 +260,7 @@ class GandlfLightningModule(pl.LightningModule):
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(model_output, labels)
 
-        self.train_losses.append(loss.detach().cpu().item())
+        self.train_losses.append(loss.detach().cpu())
         self.training_metric_values.append(metric_results)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log_dict(metric_results, on_step=True, on_epoch=True, prog_bar=True)
@@ -423,6 +406,7 @@ class GandlfLightningModule(pl.LightningModule):
     # TODO when used with multple GPUs, thil will produce multiple logs
     # for each GPU. We should think on doing allgather here in a function
     # that is called on the main process (rank 0)
+
     def on_train_epoch_end(self):
         training_epoch_average_metrics = {}
         metric_names = self.training_metric_values[0].keys()
@@ -430,7 +414,8 @@ class GandlfLightningModule(pl.LightningModule):
             metric_values = [x[metric_name] for x in self.training_metric_values]
             training_epoch_average_metrics[metric_name] = mean(metric_values)
 
-        mean_loss = mean(self.train_losses)
+        train_losses_gathered = self.all_gather(self.train_losses)
+        mean_loss = torch.mean(torch.stack(train_losses_gathered)).item()
         # Note that we DO NOT have overall stats calculators here as in the original code
         # Is it valid? Should we add it? This woudl require accumulation of all the predictions and labels
         # thus greatly increasing memory usage, especially in segmentation tasks
@@ -443,14 +428,12 @@ class GandlfLightningModule(pl.LightningModule):
         if self.params["verbose"]:
             self._print_epoch_end_time()
         if self.params["model"]["save_at_every_epoch"]:
-            epoch_save_path = (
-                os.path.join(
-                    self.output_dir,
-                    self.params["model"]["architecture"]
-                    + "_epoch_"
-                    + str(self.current_epoch)
-                    + ".pth.tar",
-                ),
+            epoch_save_path = os.path.join(
+                self.output_dir,
+                self.params["model"]["architecture"]
+                + "_epoch_"
+                + str(self.current_epoch)
+                + ".pth.tar",
             )
             self._save_model(self.current_epoch, epoch_save_path, False)
             print(f"Epoch model saved.")
@@ -470,7 +453,7 @@ class GandlfLightningModule(pl.LightningModule):
 
     def on_train_end(self):
         if os.path.exists(self.model_paths["best"]):
-            # Why don't we handle it here with the full save_model version?
+            # Why don't we handle it here with the full save_model function?
             optimize_and_save_model(
                 self.model, self.params, self.model_paths["best"], onnx_export=True
             )
@@ -483,4 +466,53 @@ class GandlfLightningModule(pl.LightningModule):
             (time.time() - self.training_start_time) / 60,
             " mins",
             flush=True,
+        )
+
+    def on_validation_start(self):
+        self.val_losses: List[torch.Tensor] = []
+        self.validation_metric_values: List[Dict[str, float]] = []
+
+    # TODO placeholder for now
+    def validation_step(self, subject, batch_idx):
+        loss = torch.randn([1])
+        self.val_losses.append(loss)
+        self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        return loss
+
+    # TODO to be extended
+    def on_validation_epoch_end(self):
+        val_losses_gathered = self.all_gather(self.val_losses)
+        mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
+        self._check_if_early_stopping(mean_loss)
+
+    def _check_if_early_stopping(self, val_loss):
+        previous_best_loss = deepcopy(self.current_best_loss)
+        if val_loss < self.current_best_loss:
+            self.current_best_loss = val_loss
+            self._save_model(self.current_epoch, self.model_paths["best"], False)
+            print(
+                f"Loss value improved. Previous best loss :{previous_best_loss}, new best loss: {val_loss} Saving best model from epoch {self.current_epoch}",
+                flush=True,
+            )
+            self.wait_count_before_early_stopping = 0
+        else:
+            self.wait_count_before_early_stopping += 1
+            print(
+                f"Validation loss did not improve. Waiting count before early stopping: {self.wait_count_before_early_stopping} / {self.params['patience']}",
+                flush=True,
+            )
+            if self.wait_count_before_early_stopping >= self.params["patience"]:
+                self.trainer.should_stop = True
+                print(
+                    f"Early stopping triggered at epoch {self.current_epoch}, validation loss did not improve for {self.params['patience']} epochs, with the best loss value being {self.current_best_loss}. Stopping training.",
+                    flush=True,
+                )
+        del previous_best_loss
+
+    def on_test_start(self):
+        self.test_metric_values: List[Dict[str, float]] = []
+        self.test_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_test.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="test",
         )

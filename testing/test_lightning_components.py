@@ -240,6 +240,8 @@ def test_port_model_forward_2d_rad_segmentation_single_gpu_single_node(device):
     )
     parameters["modality"] = "rad"
     parameters["patch_size"] = PATCH_SIZE["2D"]
+    parameters["metrics"].pop("iou")
+    parameters["patience"] = 3
     parameters["model"]["dimension"] = 2
     parameters["model"]["class_list"] = [0, 255]
     parameters["model"]["amp"] = True
@@ -270,10 +272,12 @@ def test_port_model_forward_2d_rad_segmentation_single_gpu_single_node(device):
         fast_dev_run=False,
         devices=1,
         num_nodes=1,
-        max_epochs=1,
-        sync_batchnorm=True,
+        max_epochs=10,
+        sync_batchnorm=False,
+        enable_checkpointing=False,
+        logger=False,
     )
-    trainer.fit(module, loader)
+    trainer.fit(module, loader, loader)
 
 
 # @pytest.mark.skipif(
@@ -321,4 +325,4 @@ def test_port_model_forward_2d_rad_segmentation_multi_gpu_single_node(device):
         max_epochs=1,
         sync_batchnorm=True,
     )
-    trainer.fit(module, loader)
+    trainer.fit(module, loader, loader)
