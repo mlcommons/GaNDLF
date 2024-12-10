@@ -419,7 +419,7 @@ class GandlfLightningModule(pl.LightningModule):
         train_losses_gathered = self.all_gather(self.train_losses)
         mean_loss = torch.mean(torch.stack(train_losses_gathered)).item()
         # Note that we DO NOT have overall stats calculators here as in the original code
-        # Is it valid? Should we add it? This woudl require accumulation of all the predictions and labels
+        # Is it valid? Should we add it? This would require accumulation of all the predictions and labels
         # thus greatly increasing memory usage, especially in segmentation tasks
         self.train_logger.write(
             self.current_epoch, mean_loss, training_epoch_average_metrics
