@@ -41,7 +41,7 @@ class GandlfLightningModule(pl.LightningModule):
         super().__init__()
         self.output_dir = output_dir
         self.params = deepcopy(params)
-        self.current_best_loss = 1e7
+        self.current_best_loss = sys.float_info.max
         self.wait_count_before_early_stopping = 0
         self._initialize_model()
         self._initialize_loss()
