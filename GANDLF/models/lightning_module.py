@@ -327,9 +327,10 @@ class GandlfLightningModule(pl.LightningModule):
             labels = one_hot(labels, self.params["model"]["class_list"])
 
         if self.params["model"]["dimension"] == 2:
+            # removing depth, as torchio adds last dimension for 2D images
             images = images.squeeze(
                 -1
-            )  # removing depth, as torchio adds last dimension for 2D images
+            )
 
         return images, labels
 
