@@ -114,7 +114,7 @@ class GandlfLightningModule(pl.LightningModule):
                 self.trainer.callback_metrics["val_loss"] = checkpoint_dict["loss"]
             except Exception as e:
                 warnings.warn(
-                    f"Previous best model found under path {self.model_paths['best']}, but error occured during loading: {e}; Continuing training with new model"
+                    f"Previous best model found under path {self.model_paths['best']}, but error occurred during loading: {e}; Continuing training with new model"
                 )
         else:
             warnings.warn(
