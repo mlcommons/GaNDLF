@@ -404,7 +404,7 @@ class GandlfLightningModule(pl.LightningModule):
     def _set_epoch_start_time(self):
         self.epoch_start_time = time.time()
 
-    # TODO when used with multple GPUs, thil will produce multiple logs
+    # TODO when used with multiple GPUs, this should produce multiple logs
     # for each GPU. We should think on doing allgather here in a function
     # that is called on the main process (rank 0)
 
