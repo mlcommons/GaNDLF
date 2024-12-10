@@ -285,9 +285,10 @@ class GandlfLightningModule(pl.LightningModule):
                 len(self.params["value_keys"]),
             )
         else:
+            # segmentation; label is (B, C, H, W, D) image
             label = subject["label"][
                 torchio.DATA
-            ]  # segmentation; label is (B, C, H, W, D) image
+            ]  
 
         return label
 
