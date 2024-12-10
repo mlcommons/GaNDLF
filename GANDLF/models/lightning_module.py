@@ -103,7 +103,7 @@ class GandlfLightningModule(pl.LightningModule):
                 version_check(
                     self.params["version"], version_to_check=checkpoint_dict["version"]
                 )
-                # I am purposefully ommiting the line below, as "previous_parameters" are not used anywhere
+                # I am purposefully omitting the line below, as "previous_parameters" are not used anywhere
                 # params["previous_parameters"] = main_dict.get("parameters", None)
 
                 self.model.load_state_dict(checkpoint_dict["model_state_dict"])
