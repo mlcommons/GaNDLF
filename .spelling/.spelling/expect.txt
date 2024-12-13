@@ -736,3 +736,4 @@ torchscript
 Stdnet
 allgather
 skipif
+progbar
