@@ -38,14 +38,17 @@ from typing import Tuple, Union, Dict, List, Any
 
 
 class GandlfLightningModule(pl.LightningModule):
+    CLASSIFICATION_REGRESSION_RESULTS_HEADER = "Epoch,SubjectID,PredictedValue\n"
+
     def __init__(self, params: dict, output_dir: str):
         super().__init__()
         self.output_dir = output_dir
         self.params = deepcopy(params)
         self.current_best_loss = sys.float_info.max
         self.wait_count_before_early_stopping = 0
-        self._problem_type_is_regression_or_classification = (
-            self._check_if_regression_or_classification()
+        self._problem_type_is_regression = params["problem_type"] == "regression"
+        self._problem_type_is_classification = (
+            params["problem_type"] == "classification"
         )
         self._initialize_model()
         self._initialize_loss()
@@ -84,9 +87,6 @@ class GandlfLightningModule(pl.LightningModule):
                 self.params["model"]["architecture"] + LATEST_MODEL_PATH_END,
             ),
         }
-
-    def _check_if_regression_or_classification(self) -> bool:
-        return self.params["problem_type"] in ["classification", "regression"]
 
     @rank_zero_only
     def _save_model(self, epoch, save_path, onnx_export):
@@ -127,7 +127,6 @@ class GandlfLightningModule(pl.LightningModule):
                 attention_map = torch.unsqueeze(attention_map, -1)
         else:
             output = self.model(images)
-
         return output, attention_map
 
     def on_train_start(self):
@@ -136,12 +135,12 @@ class GandlfLightningModule(pl.LightningModule):
         self._print_channels_info()
         self._try_to_load_previous_best_model()
         self._try_to_save_initial_model()
-        self._initialize_train_and_validation_loggers()
+        self._initialize_train_logger()
         self._initialize_training_epoch_containers()
 
         if "medcam" in self.params:
-            self._enable_medcam()
-
+            self._inject_medcam_module()
+            self.params["medcam_enabled"] = False  # Medcam
         if "differential_privacy" in self.params:
             self._initialize_differential_privacy()
 
@@ -179,7 +178,7 @@ class GandlfLightningModule(pl.LightningModule):
                 f"Initial model already exists at {self.model_paths['initial']}; Skipping saving"
             )
 
-    def _enable_medcam(self):
+    def _inject_medcam_module(self):
         self.model = medcam.inject(
             self.model,
             output_dir=os.path.join(
@@ -191,21 +190,12 @@ class GandlfLightningModule(pl.LightningModule):
             return_attention=True,
             enabled=False,
         )
-        # Should it really be set to false here? Seems like we are forcing it to be disabled
-        # as in later stages we are checking if it is true or not
-        self.params["medcam_enabled"] = False
 
-    def _initialize_train_and_validation_loggers(self):
+    def _initialize_train_logger(self):
         self.train_logger = Logger(
             logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
             metrics=list(self.params["metrics"]),
             mode="train",
-        )
-        self.val_logger = Logger(
-            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
-            metrics=list(self.params["metrics"]),
-            mode="val",
-            add_epsilon=bool(self.params.get("differential_privacy")),
         )
 
     @rank_zero_only
@@ -232,7 +222,7 @@ class GandlfLightningModule(pl.LightningModule):
     def _initialize_training_epoch_containers(self):
         self.train_losses: List[torch.Tensor] = []
         self.training_metric_values: List[Dict[str, float]] = []
-        if self._problem_type_is_regression_or_classification:
+        if self._problem_type_is_regression or self._problem_type_is_classification:
             self.train_predictions: List[torch.Tensor] = []
             self.train_labels: List[torch.Tensor] = []
 
@@ -257,7 +247,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(model_output, labels)
-        if self._problem_type_is_regression_or_classification:
+        if self._problem_type_is_regression or self._problem_type_is_classification:
             self.train_labels.append(labels.detach().cpu())
             self.train_predictions.append(
                 torch.argmax(model_output, dim=1).detach().cpu()
@@ -422,7 +412,7 @@ class GandlfLightningModule(pl.LightningModule):
                 metric_name
             ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
-        if self._problem_type_is_regression_or_classification:
+        if self._problem_type_is_regression or self._problem_type_is_classification:
             training_epoch_average_metrics_overall = overall_stats(
                 torch.cat(self.train_predictions),
                 torch.cat(self.train_labels),
@@ -510,7 +500,7 @@ class GandlfLightningModule(pl.LightningModule):
     def _clear_training_epoch_containers(self):
         self.train_losses = []
         self.training_metric_values = []
-        if self._problem_type_is_regression_or_classification:
+        if self._problem_type_is_regression or self._problem_type_is_classification:
             self.train_predictions = []
             self.train_labels = []
 
@@ -532,21 +522,158 @@ class GandlfLightningModule(pl.LightningModule):
         )
 
     def on_validation_start(self):
+        self._initialize_validation_epoch_containers()
+        self._initialize_validation_logger()
+
+    def _initialize_validation_epoch_containers(self):
         self.val_losses: List[torch.Tensor] = []
         self.validation_metric_values: List[Dict[str, float]] = []
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.val_predictions: List[torch.Tensor] = []
+            self.val_labels: List[torch.Tensor] = []
+
+    def _initialize_validation_logger(self):
+        self.val_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="val",
+            add_epsilon=bool(self.params.get("differential_privacy")),
+        )
+
+    def on_validation_epoch_start(self):
+        # TODO this is dead code both here and in original loops
+        # by default medcam is injected at the training and ["medcam_enabled"] is set to False
+        # so this block is never executed
+        if self.params["medcam_enabled"]:
+            self.model.enable_medcam()
+            self.params["medcam_enabled"] = True
+        self._current_validation_epoch_save_dir = os.path.join(
+            self.output_dir, f"output_validation", f"epoch_{self.current_epoch}"
+        )
+        self._ensure_path_exists(self._current_validation_epoch_save_dir)
 
     # TODO placeholder for now
     def validation_step(self, subject, batch_idx):
+        if self.params["verbose"]:
+            self._print_currently_processed_validation_subject(subject)
+        subject_spacing = subject.get("spacing", None)
+        subject_dict = self._initialize_validation_subject_dict(subject)
+        subject_dict = self._add_channel_keys_to_subject_dict(subject_dict, subject)
+
         loss = torch.randn([1])
         self.val_losses.append(loss)
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         return loss
+
+    def _print_currently_processed_validation_subject(self, subject):
+        print("== Current subject:", subject["subject_id"], flush=True)
+
+    def _initialize_validation_subject_dict(self, subject):
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            return (
+                self._initialize_validation_subject_dict_classification_or_regression(
+                    subject
+                )
+            )
+        return self._initialize_validation_subject_dict_segmentation(subject)
+
+    def _initialize_validation_subject_dict_classification_or_regression(self, subject):
+        """
+        Constructs a dictionary describing the subject properties that will later be
+        converted to a torchio.Subject object.
+        """
+        subject_dict = {}
+        for key in self.params["value_keys"]:
+            subject_dict["value_" + key] = subject[key]
+        return subject_dict
+
+    def _initialize_validation_label_ground_truth_classification_or_regression(
+        self, subject
+    ):
+        return torch.cat([subject[key] for key in self.params["value_keys"]], dim=0)
+
+    def _initialize_validation_subject_dict_segmentation(self, subject):
+        subject_dict = {}
+        subject_dict["label"] = torchio.LabelMap(
+            path=subject["label"]["path"],
+            tensor=subject["label"]["data"].squeeze(0),
+            affine=subject["label"]["affine"].squeeze(0),
+        )
+        return subject_dict
+
+    def _initialize_validation_label_ground_truth_segmentation(self, subject):
+        return subject["label"]["data"].squeeze(0)
+
+    def _add_channel_keys_to_subject_dict(self, subject_dict, subject):
+        for channel_key in self.params["channel_keys"]:
+            subject_dict[channel_key] = torchio.ScalarImage(
+                path=subject[channel_key]["path"],
+                tensor=subject[channel_key]["data"].squeeze(0),
+                affine=subject[channel_key]["affine"].squeeze(0),
+            )
+        return subject_dict
+
+    def _regression_or_classification_validation_step(self, subject_dict):
+        sampler = torchio.data.LabelSampler(self.params["patch_size"])
+        tio_subject = torchio.Subject(subject_dict)
+        generator = sampler(
+            tio_subject, num_patches=self.params["q_samples_per_volume"]
+        )
+        for patches_batch in generator:
+            pass
+
+    # TODO think about adding segmentation and classification/regression validation steps
+    # TODO think if squeeze/unsqueeze operations are needed as maybe the perparators will handle it
+    # look into training logic
+    def _prepare_images_batch_from_patch(self, patches_batch):
+        images_batch = torch.cat(
+            [patches_batch[key][torchio.DATA] for key in self.params["channel_keys"]],
+            dim=1,
+        ).unsqueeze(0)
+        if images_batch.shape[-1] == 1:
+            images_batch = torch.squeeze(images_batch, -1)
+        return images_batch
+
+    # TODO think about adding segmentation here
+    def _prepare_labels_batch_from_patch(self, patches_batch):
+        if self._problem_type_is_classification or self._problem_type_is_regression:
+            labels_batch = torch.cat(
+                [patches_batch["value_" + key] for key in self.params["value_keys"]],
+                dim=0,
+            )
 
     # TODO to be extended
     def on_validation_epoch_end(self):
         val_losses_gathered = self.all_gather(self.val_losses)
         mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
         self._check_if_early_stopping(mean_loss)
+        if self.params["save_outputs"]:
+            if self._problem_type_is_regression:
+                # Do allgather for predictions and labels
+                self._save_outputs_regression()
+            elif self._problem_type_is_classification:
+                # Do allgather for predictions and labels
+
+                self._save_outputs_classification()
+
+    @rank_zero_only
+    def _ensure_path_exists(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    def _save_outputs_segmentation(self):
+        pass  # TODO
+
+    @rank_zero_only
+    def _save_outputs_classification(self, rows_to_write: List[List[str]]):
+        # flow here - this function takes a list of rows to write to the csv file
+        # rows are gathered from all replicas for the case of distributed training
+        # then the rows are written to the csv file
+        pass  # TODO
+
+    @rank_zero_only
+    def _save_outputs_regression(self):
+        pass  # TODO
 
     def _check_if_early_stopping(self, val_loss):
         previous_best_loss = deepcopy(self.current_best_loss)
