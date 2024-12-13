@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import psutil
 import torch
@@ -9,9 +10,9 @@ from copy import deepcopy
 from statistics import mean
 import lightning.pytorch as pl
 from lightning.pytorch.utilities import rank_zero_only
-from lightning.pytorch.callbacks import EarlyStopping
 from GANDLF.logger import Logger
 from GANDLF.models import get_model
+from GANDLF.metrics import overall_stats
 from GANDLF.optimizers import get_optimizer
 from GANDLF.schedulers import get_scheduler
 from GANDLF.losses.loss_calculators import LossCalculatorFactory
@@ -33,7 +34,7 @@ from GANDLF.utils import (
 )
 
 from overrides import override
-from typing import Tuple, Union, Dict, List
+from typing import Tuple, Union, Dict, List, Any
 
 
 class GandlfLightningModule(pl.LightningModule):
@@ -43,6 +44,9 @@ class GandlfLightningModule(pl.LightningModule):
         self.params = deepcopy(params)
         self.current_best_loss = sys.float_info.max
         self.wait_count_before_early_stopping = 0
+        self._problem_type_is_regression_or_classification = (
+            self._check_if_regression_or_classification()
+        )
         self._initialize_model()
         self._initialize_loss()
         self._initialize_metric_calculators()
@@ -81,6 +85,9 @@ class GandlfLightningModule(pl.LightningModule):
             ),
         }
 
+    def _check_if_regression_or_classification(self) -> bool:
+        return self.params["problem_type"] in ["classification", "regression"]
+
     @rank_zero_only
     def _save_model(self, epoch, save_path, onnx_export):
         save_model(
@@ -95,6 +102,48 @@ class GandlfLightningModule(pl.LightningModule):
             path=save_path,
             onnx_export=onnx_export,
         )
+
+    @staticmethod
+    def _ensure_proper_type_of_metric_values_for_progbar(
+        metric_results_dict: Dict[str, Any]
+    ) -> Dict[str, float]:
+        parsed_results_dict = deepcopy(metric_results_dict)
+        for metric_name, metric_value in metric_results_dict.items():
+            if isinstance(metric_value, list):
+                for n, metric_value_for_given_class in enumerate(metric_value):
+                    parsed_results_dict[
+                        metric_name + f"_class_{n}"
+                    ] = metric_value_for_given_class
+                del parsed_results_dict[metric_name]
+        return parsed_results_dict
+
+    def forward(
+        self, images: torch.Tensor
+    ) -> Tuple[torch.Tensor, Union[torch.Tensor, None]]:
+        attention_map = None
+        if "medcam_enabled" in self.params and self.params["medcam_enabled"]:
+            output, attention_map = self.model(images)
+            if self.params["model"]["dimension"] == 2:
+                attention_map = torch.unsqueeze(attention_map, -1)
+        else:
+            output = self.model(images)
+
+        return output, attention_map
+
+    def on_train_start(self):
+        self._print_initialization_info()
+        self._set_training_start_time()
+        self._print_channels_info()
+        self._try_to_load_previous_best_model()
+        self._try_to_save_initial_model()
+        self._initialize_train_and_validation_loggers()
+        self._initialize_training_epoch_containers()
+
+        if "medcam" in self.params:
+            self._enable_medcam()
+
+        if "differential_privacy" in self.params:
+            self._initialize_differential_privacy()
 
     def _try_to_load_previous_best_model(self):
         if os.path.exists(self.model_paths["best"]):
@@ -130,78 +179,6 @@ class GandlfLightningModule(pl.LightningModule):
                 f"Initial model already exists at {self.model_paths['initial']}; Skipping saving"
             )
 
-    def configure_optimizers(self):
-        params = deepcopy(self.params)
-        params["model_parameters"] = self.model.parameters()
-        optimizer = get_optimizer(params)
-        if "scheduler" in self.params:
-            params["optimizer_object"] = optimizer
-            scheduler = get_scheduler(params)
-            return [optimizer], [scheduler]
-
-        return optimizer
-
-    def transfer_batch_to_device(self, batch, device, dataloader_idx):
-        batch = self._move_image_data_to_device(batch, device)
-        batch = self._move_labels_or_values_to_device(batch, device)
-
-        return batch
-
-    def _move_image_data_to_device(self, subject, device):
-        for channel_key in self.params["channel_keys"]:
-            subject[channel_key][torchio.DATA] = subject[channel_key][torchio.DATA].to(
-                device
-            )
-
-        return subject
-
-    def _move_labels_or_values_to_device(self, subject, device):
-        if "value_keys" in self.params:
-            for value_key in self.params["value_keys"]:
-                subject[value_key] = subject[value_key].to(device)
-        else:
-            subject["label"][torchio.DATA] = subject["label"][torchio.DATA].to(device)
-
-        return subject
-
-    def forward(
-        self, images: torch.Tensor
-    ) -> Tuple[torch.Tensor, Union[torch.Tensor, None]]:
-        attention_map = None
-        if "medcam_enabled" in self.params and self.params["medcam_enabled"]:
-            output, attention_map = self.model(images)
-            if self.params["model"]["dimension"] == 2:
-                attention_map = torch.unsqueeze(attention_map, -1)
-        else:
-            output = self.model(images)
-
-        return output, attention_map
-
-    def on_train_start(self):
-        self._print_initialization_info()
-        self._set_training_start_time()
-        self._print_channels_info()
-        self._try_to_load_previous_best_model()
-        self._try_to_save_initial_model()
-        self.train_losses: List[torch.Tensor] = []
-        self.training_metric_values: List[Dict[str, float]] = []
-        self.train_logger = Logger(
-            logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
-            metrics=list(self.params["metrics"]),
-            mode="train",
-        )
-        self.val_logger = Logger(
-            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
-            metrics=list(self.params["metrics"]),
-            mode="val",
-            add_epsilon=bool(self.params.get("differential_privacy")),
-        )
-        if "medcam" in self.params:
-            self._enable_medcam()
-
-        if "differential_privacy" in self.params:
-            self._initialize_differential_privacy()
-
     def _enable_medcam(self):
         self.model = medcam.inject(
             self.model,
@@ -217,6 +194,19 @@ class GandlfLightningModule(pl.LightningModule):
         # Should it really be set to false here? Seems like we are forcing it to be disabled
         # as in later stages we are checking if it is true or not
         self.params["medcam_enabled"] = False
+
+    def _initialize_train_and_validation_loggers(self):
+        self.train_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_training.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="train",
+        )
+        self.val_logger = Logger(
+            logger_csv_filename=os.path.join(self.output_dir, "logs_validation.csv"),
+            metrics=list(self.params["metrics"]),
+            mode="val",
+            add_epsilon=bool(self.params.get("differential_privacy")),
+        )
 
     @rank_zero_only
     def _set_training_start_time(self):
@@ -239,6 +229,13 @@ class GandlfLightningModule(pl.LightningModule):
             self.params["patch_size"],
         )
 
+    def _initialize_training_epoch_containers(self):
+        self.train_losses: List[torch.Tensor] = []
+        self.training_metric_values: List[Dict[str, float]] = []
+        if self._problem_type_is_regression_or_classification:
+            self.train_predictions: List[torch.Tensor] = []
+            self.train_labels: List[torch.Tensor] = []
+
     @rank_zero_only
     def _print_channels_info(self):
         print("Number of channels : ", self.params["model"]["num_channels"])
@@ -257,13 +254,24 @@ class GandlfLightningModule(pl.LightningModule):
 
         model_output, _ = self.forward(images)
         model_output, labels = self.pred_target_processor(model_output, labels)
+
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(model_output, labels)
+        if self._problem_type_is_regression_or_classification:
+            self.train_labels.append(labels.detach().cpu())
+            self.train_predictions.append(
+                torch.argmax(model_output, dim=1).detach().cpu()
+            )
 
         self.train_losses.append(loss.detach().cpu())
         self.training_metric_values.append(metric_results)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log_dict(metric_results, on_step=True, on_epoch=True, prog_bar=True)
+        self.log_dict(
+            self._ensure_proper_type_of_metric_values_for_progbar(metric_results),
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
 
         return loss
 
@@ -286,9 +294,7 @@ class GandlfLightningModule(pl.LightningModule):
             )
         else:
             # segmentation; label is (B, C, H, W, D) image
-            label = subject["label"][
-                torchio.DATA
-            ]  
+            label = subject["label"][torchio.DATA]
 
         return label
 
@@ -328,9 +334,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         if self.params["model"]["dimension"] == 2:
             # removing depth, as torchio adds last dimension for 2D images
-            images = images.squeeze(
-                -1
-            )
+            images = images.squeeze(-1)
 
         return images, labels
 
@@ -410,39 +414,89 @@ class GandlfLightningModule(pl.LightningModule):
     # that is called on the main process (rank 0)
 
     def on_train_epoch_end(self):
-        training_epoch_average_metrics = {}
+        epoch_metrics = {}
         metric_names = self.training_metric_values[0].keys()
         for metric_name in metric_names:
             metric_values = [x[metric_name] for x in self.training_metric_values]
-            training_epoch_average_metrics[metric_name] = mean(metric_values)
+            epoch_metrics[
+                metric_name
+            ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
+        if self._problem_type_is_regression_or_classification:
+            training_epoch_average_metrics_overall = overall_stats(
+                torch.cat(self.train_predictions),
+                torch.cat(self.train_labels),
+                self.params,
+            )
+            epoch_metrics.update(training_epoch_average_metrics_overall)
         train_losses_gathered = self.all_gather(self.train_losses)
         mean_loss = torch.mean(torch.stack(train_losses_gathered)).item()
-        # Note that we DO NOT have overall stats calculators here as in the original code
-        # Is it valid? Should we add it? This would require accumulation of all the predictions and labels
-        # thus greatly increasing memory usage, especially in segmentation tasks
+
+        self._clear_training_epoch_containers()
+
         self.train_logger.write(
-            self.current_epoch, mean_loss, training_epoch_average_metrics
+            self.current_epoch,
+            mean_loss,
+            self._ensure_proper_metric_formatting_for_logging(epoch_metrics),
         )
-        self.log_dict(training_epoch_average_metrics, on_epoch=True, prog_bar=True)
-        self.training_metric_values = []
-        self.train_losses = []
+        self.log_dict(
+            self._ensure_proper_type_of_metric_values_for_progbar(epoch_metrics),
+            on_epoch=True,
+            prog_bar=True,
+        )
+
         if self.params["verbose"]:
             self._print_epoch_end_time()
         if self.params["model"]["save_at_every_epoch"]:
-            epoch_save_path = os.path.join(
-                self.output_dir,
-                self.params["model"]["architecture"]
-                + "_epoch_"
-                + str(self.current_epoch)
-                + ".pth.tar",
-            )
-            self._save_model(self.current_epoch, epoch_save_path, False)
-            print(f"Epoch model saved.")
+            self._save_epoch_end_checkpoint()
         if os.path.exists(self.model_paths["latest"]):
             os.remove(self.model_paths["latest"])
         self._save_model(self.current_epoch, self.model_paths["latest"], False)
         print(f"Latest model saved")
+
+    @staticmethod
+    def _compute_metric_mean_across_values_from_batches(
+        metric_values: List[Union[float, List[float]]]
+    ) -> Union[float, List[float]]:
+        """
+        Given a list of metrics calculated for each batch, computes the mean across all batches.
+        Takes into account case where metric is a list of values (e.g. for each class).
+        """
+        if isinstance(metric_values[0], list):
+            return [
+                mean([batch_metrics[i] for batch_metrics in metric_values])
+                for i in range(len(metric_values[0]))
+            ]
+        return mean(metric_values)
+
+    @staticmethod
+    def _ensure_proper_metric_formatting_for_logging(metrics_dict: dict) -> dict:
+        """
+        Helper function to ensure that all metric values are in the correct format for logging.
+        """
+        output_metrics_dict = deepcopy(metrics_dict)
+        for metric in metrics_dict.keys():
+            if isinstance(metrics_dict[metric], list):
+                output_metrics_dict[metric] = ("_").join(
+                    str(metrics_dict[metric])
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", "")
+                    .split(",")
+                )
+
+        return output_metrics_dict
+
+    def _save_epoch_end_checkpoint(self):
+        epoch_save_path = os.path.join(
+            self.output_dir,
+            self.params["model"]["architecture"]
+            + "_epoch_"
+            + str(self.current_epoch)
+            + ".pth.tar",
+        )
+        self._save_model(self.current_epoch, epoch_save_path, False)
+        print(f"Epoch model saved.")
 
     @rank_zero_only
     def _print_epoch_end_time(self):
@@ -452,6 +506,13 @@ class GandlfLightningModule(pl.LightningModule):
             " mins",
             flush=True,
         )
+
+    def _clear_training_epoch_containers(self):
+        self.train_losses = []
+        self.training_metric_values = []
+        if self._problem_type_is_regression_or_classification:
+            self.train_predictions = []
+            self.train_labels = []
 
     def on_train_end(self):
         if os.path.exists(self.model_paths["best"]):
@@ -518,3 +579,37 @@ class GandlfLightningModule(pl.LightningModule):
             metrics=list(self.params["metrics"]),
             mode="test",
         )
+
+    def configure_optimizers(self):
+        params = deepcopy(self.params)
+        params["model_parameters"] = self.model.parameters()
+        optimizer = get_optimizer(params)
+        if "scheduler" in self.params:
+            params["optimizer_object"] = optimizer
+            scheduler = get_scheduler(params)
+            return [optimizer], [scheduler]
+
+        return optimizer
+
+    def transfer_batch_to_device(self, batch, device, dataloader_idx):
+        batch = self._move_image_data_to_device(batch, device)
+        batch = self._move_labels_or_values_to_device(batch, device)
+
+        return batch
+
+    def _move_image_data_to_device(self, subject, device):
+        for channel_key in self.params["channel_keys"]:
+            subject[channel_key][torchio.DATA] = subject[channel_key][torchio.DATA].to(
+                device
+            )
+
+        return subject
+
+    def _move_labels_or_values_to_device(self, subject, device):
+        if "value_keys" in self.params:
+            for value_key in self.params["value_keys"]:
+                subject[value_key] = subject[value_key].to(device)
+        else:
+            subject["label"][torchio.DATA] = subject["label"][torchio.DATA].to(device)
+
+        return subject
