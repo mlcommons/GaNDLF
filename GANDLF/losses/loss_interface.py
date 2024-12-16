@@ -26,7 +26,7 @@ class AbstractLossFunction(nn.Module, ABC):
 
 class AbstractSegmentationLoss(AbstractLossFunction):
     """
-    Base class for loss funcions that are used for segmentation tasks.
+    Base class for loss functions that are used for segmentation tasks.
     """
 
     def __init__(self, params: dict):
@@ -43,7 +43,7 @@ class AbstractSegmentationLoss(AbstractLossFunction):
 
     def _optional_loss_operations(self, loss: torch.Tensor) -> torch.Tensor:
         """
-        Perform addtional operations on the loss value. Defaults to identity operation.
+        Perform additional operations on the loss value. Defaults to identity operation.
         If needed, child classes can override this method. Useful in cases where
         for example, the loss value needs to log-transformed or clipped.
         """
