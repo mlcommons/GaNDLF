@@ -37,7 +37,7 @@ toplevel_package_excludes = ["testing*"]
 # specifying version for `black` separately because it is also used to [check for lint](https://github.com/mlcommons/GaNDLF/blob/master/.github/workflows/black.yml)
 black_version = "23.11.0"
 requirements = [
-    "torch==2.3.1",
+    "torch==2.5.0",
     f"black=={black_version}",
     "numpy==1.25.0",
     "scipy",
@@ -84,6 +84,7 @@ requirements = [
     "huggingface-hub==0.25.1",
     "openslide-bin",
     "openslide-python==1.4.1",
+    "lion-pytorch==0.2.2",
 ]
 
 if __name__ == "__main__":

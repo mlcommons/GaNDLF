@@ -25,6 +25,7 @@ testing/config_segmentation_temp.yaml
 testing/failures.log
 coverage.xml
 mlcube/workspace/*
+!.spelling/.spelling/expect.txt
 !mlcube/workspace/config.yml
 !mlcube/workspace/channelIDs.yml
 tutorials/classification_medmnist_notebook/dataset/pathmnist

@@ -176,6 +176,14 @@ To split the data CSV into training, validation, and testing CSVs, the `gandlf s
   -o $output_dir # the output directory to save the split data
 ```
 
+### Using the `--log-file` parameter
+By default, only the `info` and `error` logs will be **displayed** in the console and
+the log file will be **saved** in `$(home)/.gandlf/<timestamp>.log`.
+
+Also, you can use the `--log-file` and provide the file that you want to save the logs
+```bash
+(venv_gandlf) $> gandlf <command> --log-file <log_file_path>
+```
 
 ## Customize the Training
 
@@ -603,7 +611,7 @@ To upload to a dataset or a Space, use the --repo-type option:
 
 ### Huggingface Template For Upload
 #### Design and Modify Template 
-To design the huggingface template use the hugging_face.md file change the medatory field 
+To design the huggingface template use the hugging_face.md file change the mandatory field 
 [REQUIRED_FOR_GANDLF] to it's respective name don't  leave it blank other wise it may through error, other field can be modeified by the user as per his convenience
 
 ```bash
