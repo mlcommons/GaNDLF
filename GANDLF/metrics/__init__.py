@@ -32,6 +32,7 @@ from .generic import (
 from .synthesis import (
     structural_similarity_index,
     mean_squared_error,
+    root_mean_squared_error,
     peak_signal_noise_ratio,
     mean_squared_log_error,
     mean_absolute_error,

@@ -15,6 +15,7 @@ from GANDLF.metrics import (
     overall_stats,
     structural_similarity_index,
     mean_squared_error,
+    root_mean_squared_error,
     peak_signal_noise_ratio,
     mean_squared_log_error,
     mean_absolute_error,
@@ -385,8 +386,8 @@ def generate_metrics_dict(
                 output_infill, gt_image_infill
             ).item()
 
-            overall_stats_dict[current_subject_id]["rmse"] = mean_squared_error(
-                output_infill, gt_image_infill, squared=False
+            overall_stats_dict[current_subject_id]["rmse"] = root_mean_squared_error(
+                output_infill, gt_image_infill
             ).item()
 
             overall_stats_dict[current_subject_id]["msle"] = mean_squared_log_error(

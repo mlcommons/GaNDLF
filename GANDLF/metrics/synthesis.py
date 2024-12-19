@@ -39,8 +39,23 @@ def structural_similarity_index(
     return ssim_idx.mean()
 
 
-def mean_squared_error(
-    prediction: torch.Tensor, target: torch.Tensor, squared: bool = True
+def mean_squared_error(prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    """
+    Computes the mean squared error between the target and prediction.
+
+    Args:
+        prediction (torch.Tensor): The prediction tensor.
+        target (torch.Tensor): The target tensor.
+
+    Returns:
+        torch.Tensor: The mean squared error or its square root.
+    """
+    mse = MeanSquaredError(squared=True)
+    return mse(preds=prediction, target=target)
+
+
+def root_mean_squared_error(
+    prediction: torch.Tensor, target: torch.Tensor
 ) -> torch.Tensor:
     """
     Computes the mean squared error between the target and prediction.
@@ -48,12 +63,11 @@ def mean_squared_error(
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
-        squared (bool, optional): Whether to return squared error. Defaults to True.
 
     Returns:
         torch.Tensor: The mean squared error or its square root.
     """
-    mse = MeanSquaredError(squared=squared)
+    mse = MeanSquaredError(squared=False)
     return mse(preds=prediction, target=target)
 
 
