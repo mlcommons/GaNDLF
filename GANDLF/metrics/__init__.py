@@ -35,10 +35,7 @@ from .synthesis import (
     peak_signal_noise_ratio,
     mean_squared_log_error,
     mean_absolute_error,
-    ncc_mean,
-    ncc_std,
-    ncc_max,
-    ncc_min,
+    ncc_metrics,
 )
 import GANDLF.metrics.classification as classification
 import GANDLF.metrics.regression as regression

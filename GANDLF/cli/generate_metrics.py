@@ -18,10 +18,7 @@ from GANDLF.metrics import (
     peak_signal_noise_ratio,
     mean_squared_log_error,
     mean_absolute_error,
-    ncc_mean,
-    ncc_std,
-    ncc_max,
-    ncc_min,
+    ncc_metrics,
 )
 from GANDLF.losses.segmentation import dice
 from GANDLF.metrics.segmentation import (
@@ -375,18 +372,9 @@ def generate_metrics_dict(
             # ncc metrics
             compute_ncc = parameters.get("compute_ncc", True)
             if compute_ncc:
-                overall_stats_dict[current_subject_id]["ncc_mean"] = ncc_mean(
-                    output_infill, gt_image_infill
-                )
-                overall_stats_dict[current_subject_id]["ncc_std"] = ncc_std(
-                    output_infill, gt_image_infill
-                )
-                overall_stats_dict[current_subject_id]["ncc_max"] = ncc_max(
-                    output_infill, gt_image_infill
-                )
-                overall_stats_dict[current_subject_id]["ncc_min"] = ncc_min(
-                    output_infill, gt_image_infill
-                )
+                calculated_ncc_metrics = ncc_metrics(output_infill, gt_image_infill)
+                for key, value in calculated_ncc_metrics.items():
+                    overall_stats_dict[current_subject_id][key] = value.item()
 
             # only voxels that are to be inferred (-> flat array)
             # these are required for mse, psnr, etc.

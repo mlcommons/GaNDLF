@@ -163,69 +163,27 @@ def _get_ncc_image(prediction: torch.Tensor, target: torch.Tensor) -> sitk.Image
     return correlation_filter.Execute(target_image, pred_image)
 
 
-def ncc_mean(prediction: torch.Tensor, target: torch.Tensor) -> float:
+def ncc_metrics(prediction: torch.Tensor, target: torch.Tensor) -> dict:
     """
-    Computes normalized cross correlation mean between target and prediction.
+    Computes normalized cross correlation metrics between target and prediction.
 
     Args:
         prediction (torch.Tensor): The prediction tensor.
         target (torch.Tensor): The target tensor.
 
     Returns:
-        float: The normalized cross correlation mean.
+        dict: The normalized cross correlation metrics.
     """
-    stats_filter = sitk.StatisticsImageFilter()
     corr_image = _get_ncc_image(target, prediction)
-    stats_filter.Execute(corr_image)
-    return stats_filter.GetMean()
-
-
-def ncc_std(prediction: torch.Tensor, target: torch.Tensor) -> float:
-    """
-    Computes normalized cross correlation standard deviation between target and prediction.
-
-    Args:
-        prediction (torch.Tensor): The prediction tensor.
-        target (torch.Tensor): The target tensor.
-
-    Returns:
-        float: The normalized cross correlation standard deviation.
-    """
-    stats_filter = sitk.StatisticsImageFilter()
-    corr_image = _get_ncc_image(target, prediction)
-    stats_filter.Execute(corr_image)
-    return stats_filter.GetSigma()
-
-
-def ncc_max(prediction: torch.Tensor, target: torch.Tensor) -> float:
-    """
-    Computes normalized cross correlation maximum between target and prediction.
-
-    Args:
-        prediction (torch.Tensor): The prediction tensor.
-        target (torch.Tensor): The target tensor.
-
-    Returns:
-        float: The normalized cross correlation maximum.
-    """
-    stats_filter = sitk.StatisticsImageFilter()
-    corr_image = _get_ncc_image(target, prediction)
-    stats_filter.Execute(corr_image)
-    return stats_filter.GetMaximum()
-
-
-def ncc_min(prediction: torch.Tensor, target: torch.Tensor) -> float:
-    """
-    Computes normalized cross correlation minimum between target and prediction.
-
-    Args:
-        prediction (torch.Tensor): The prediction tensor.
-        target (torch.Tensor): The target tensor.
-
-    Returns:
-        float: The normalized cross correlation minimum.
-    """
-    stats_filter = sitk.StatisticsImageFilter()
-    corr_image = _get_ncc_image(target, prediction)
-    stats_filter.Execute(corr_image)
-    return stats_filter.GetMinimum()
+    stats_filter = sitk.LabelStatisticsImageFilter()
+    stats_filter.UseHistogramsOn()
+    # ensure that we are not considering zeros
+    onesImage = corr_image == corr_image
+    stats_filter.Execute(corr_image, onesImage)
+    return {
+        "mean": stats_filter.GetMean(1),
+        "std": stats_filter.GetSigma(1),
+        "max": stats_filter.GetMaximum(1),
+        "min": stats_filter.GetMinimum(1),
+        "median": stats_filter.GetMedian(1),
+    }
