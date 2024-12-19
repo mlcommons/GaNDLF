@@ -487,6 +487,7 @@ rgbatorgb
 rgbtorgba
 rigourous
 Ritesh
+rmse
 rmsprop
 rocm
 rocmdocs
@@ -561,7 +562,6 @@ thresholded
 thresholding
 Thu
 tiatoolbox
-tiffslide
 timepoints
 timm
 tio
@@ -597,8 +597,6 @@ unittests
 unitwise
 unsqueeze
 upenn
-Uploaing
-Uploded
 upsample
 upsampled
 upsampling
@@ -725,7 +723,6 @@ zsuokb
 zwezggl
 zzokqk
 thirdparty
-adopy
 Shohei
 crcrpar
 lrs
