@@ -195,9 +195,9 @@ def ncc_metrics(prediction: torch.Tensor, target: torch.Tensor) -> dict:
     onesImage = corr_image == corr_image
     stats_filter.Execute(corr_image, onesImage)
     return {
-        "mean": stats_filter.GetMean(1),
-        "std": stats_filter.GetSigma(1),
-        "max": stats_filter.GetMaximum(1),
-        "min": stats_filter.GetMinimum(1),
-        "median": stats_filter.GetMedian(1),
+        "ncc_mean": stats_filter.GetMean(1),
+        "ncc_std": stats_filter.GetSigma(1),
+        "ncc_max": stats_filter.GetMaximum(1),
+        "ncc_min": stats_filter.GetMinimum(1),
+        "ncc_median": stats_filter.GetMedian(1),
     }

@@ -375,7 +375,7 @@ def generate_metrics_dict(
             if compute_ncc:
                 calculated_ncc_metrics = ncc_metrics(output_infill, gt_image_infill)
                 for key, value in calculated_ncc_metrics.items():
-                    overall_stats_dict[current_subject_id][f"ncc_{key}"] = value.item()
+                    overall_stats_dict[current_subject_id][key] = value.item()
 
             # only voxels that are to be inferred (-> flat array)
             # these are required for mse, psnr, etc.
