@@ -96,7 +96,7 @@ huggingface_file_path = huggingfaceDir / "hugging_face.md"
 @click.option(
     "--hf-template",
     "-hft",
-    help="Adding the template path for the model card it is Required during Uploaing a model",
+    help="Adding the template path for the model card: it is required during model upload",
     default=huggingface_file_path,
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
