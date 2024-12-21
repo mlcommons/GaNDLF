@@ -547,8 +547,8 @@ class GandlfLightningModule(pl.LightningModule):
         self.val_losses: List[torch.Tensor] = []
         self.validation_metric_values: List[Dict[str, float]] = []
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            self.val_predictions: List[torch.Tensor] = []
-            self.val_labels: List[torch.Tensor] = []
+            self.val_predictions: List[float] = []
+            self.val_labels: List[float] = []
             if self.params["save_outputs"]:
                 self.rows_to_write: List[str] = []
 
@@ -575,15 +575,13 @@ class GandlfLightningModule(pl.LightningModule):
     def validation_step(self, subject, batch_idx):
         if self.params["verbose"]:
             self._print_currently_processed_validation_subject(subject)
-        # TODO this is going to effectively block any paralllelism, as the
+        # TODO spacing in global params is going to effectively block any paralllelism, as the
         # spacing is going to unpredicatably change across GPUs
         self.params["subject_spacing"] = subject.get("spacing", None)
         subject_dict = self._initialize_validation_subject_dict(subject)
-        subject_dict = self._add_channel_keys_to_subject_dict(subject_dict, subject)
-
         if self._problem_type_is_regression or self._problem_type_is_classification:
             model_output = self._regression_or_classification_validation_step(
-                subject_dict
+                subject_dict, subject["subject_id"][0]
             )
             label = self._initialize_validation_label_ground_truth_classification_or_regression(
                 subject
@@ -598,8 +596,13 @@ class GandlfLightningModule(pl.LightningModule):
         self.val_losses.append(loss)
         self.validation_metric_values.append(metric_results)
         if self._problem_type_is_regression or self._problem_type_is_classification:
-            self.val_predictions.append(model_output)
-            self.val_labels.append(label)
+            model_prediction = (
+                torch.argmax(model_output[0], 0)
+                if self._problem_type_is_classification
+                else model_output[0]
+            )  # TODO am I right here? For regression, we should not take argmax
+            self.val_predictions.append(model_prediction.item())
+            self.val_labels.append(label.item())
 
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log_dict(
@@ -615,42 +618,17 @@ class GandlfLightningModule(pl.LightningModule):
         print("== Current subject:", subject["subject_id"], flush=True)
 
     def _initialize_validation_subject_dict(self, subject):
-        if self._problem_type_is_regression or self._problem_type_is_classification:
-            return (
-                self._initialize_validation_subject_dict_classification_or_regression(
-                    subject
-                )
-            )
-        return self._initialize_validation_subject_dict_segmentation(subject)
-
-    def _initialize_validation_subject_dict_classification_or_regression(self, subject):
-        """
-        Constructs a dictionary describing the subject properties that will later be
-        converted to a torchio.Subject object.
-        """
-        subject_dict = {}
-        for key in self.params["value_keys"]:
-            subject_dict["value_" + key] = subject[key]
-        return subject_dict
-
-    def _initialize_validation_label_ground_truth_classification_or_regression(
-        self, subject
-    ):
-        return torch.cat([subject[key] for key in self.params["value_keys"]], dim=0)
-
-    def _initialize_validation_subject_dict_segmentation(self, subject):
         subject_dict = {}
         subject_dict["label"] = torchio.LabelMap(
             path=subject["label"]["path"],
             tensor=subject["label"]["data"].squeeze(0),
             affine=subject["label"]["affine"].squeeze(0),
         )
-        return subject_dict
 
-    def _initialize_validation_label_ground_truth_segmentation(self, subject):
-        return subject["label"]["data"].squeeze(0)
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            for key in self.params["value_keys"]:
+                subject_dict["value_" + key] = subject[key]
 
-    def _add_channel_keys_to_subject_dict(self, subject_dict, subject):
         for channel_key in self.params["channel_keys"]:
             subject_dict[channel_key] = torchio.ScalarImage(
                 path=subject[channel_key]["path"],
@@ -658,6 +636,14 @@ class GandlfLightningModule(pl.LightningModule):
                 affine=subject[channel_key]["affine"].squeeze(0),
             )
         return subject_dict
+
+    def _initialize_validation_label_ground_truth_classification_or_regression(
+        self, subject
+    ):
+        return torch.cat([subject[key] for key in self.params["value_keys"]], dim=0)
+
+    def _initialize_validation_label_ground_truth_segmentation(self, subject):
+        return subject["label"]["data"].squeeze(0)
 
     def _regression_or_classification_validation_step(self, subject_dict, subject_id):
         def _prepare_row_for_output_csv(
@@ -695,7 +681,11 @@ class GandlfLightningModule(pl.LightningModule):
             a different approach to preparing the images batch.
             """
             images_batch_from_patches = torch.cat(
-                [patches_batch[key][torchio.DATA] for key in patches_batch], dim=0
+                [
+                    patches_batch[key][torchio.DATA]
+                    for key in self.params["channel_keys"]
+                ],
+                dim=0,
             ).unsqueeze(0)
             if images_batch_from_patches.shape[-1] == 1:
                 images_batch_from_patches = torch.squeeze(images_batch_from_patches, -1)
@@ -780,7 +770,9 @@ class GandlfLightningModule(pl.LightningModule):
 
         if self._problem_type_is_regression or self._problem_type_is_classification:
             validation_epoch_average_metrics_overall = overall_stats(
-                torch.cat(self.val_predictions), torch.cat(self.val_labels), self.params
+                torch.tensor(self.val_predictions),
+                torch.tensor(self.val_labels),
+                self.params,
             )
             validation_epoch_average_metrics.update(
                 validation_epoch_average_metrics_overall
@@ -800,13 +792,23 @@ class GandlfLightningModule(pl.LightningModule):
         )
 
         self._check_if_early_stopping(mean_loss)
-        # val_losses_gathered = self.all_gather(self.val_losses)
-        # mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
-        # self._check_if_early_stopping(mean_loss)
-        # if self.params["save_outputs"]:
-        #     if self._problem_type_is_regression or self._problem_type_is_classification:
-        #         # Do allgather for predictions and labels
-        #         self._save_predictions_for_regression_or_classification()
+        if self.params["save_outputs"]:
+            if self._problem_type_is_regression or self._problem_type_is_classification:
+                # Do allgather for predictions and labels
+                self._save_predictions_for_regression_or_classification(
+                    self.rows_to_write
+                )
+            # else:
+            #     self._save_predictions_for_segmentation()
+
+    def _clear_validation_epoch_containers(self):
+        self.val_losses = []
+        self.validation_metric_values = []
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.val_predictions = []
+            self.val_labels = []
+            if self.params["save_outputs"]:
+                self.rows_to_write = []
 
     @rank_zero_only
     def _ensure_path_exists(self, path):

@@ -316,16 +316,22 @@ def test_port_model_forward_2d_rad_regression_single_device_single_node(device):
         parameters["scaling_factor"] = 1
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
+        parameters["save_outputs"] = True
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
         dataset = ImagesFromDataFrame(
             training_data, parameters, train=True, loader_type="train"
         )
-        loader = torch.utils.data.DataLoader(
+        dataset_val = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="validation"
+        )
+        train_dataloader = torch.utils.data.DataLoader(
             dataset, batch_size=parameters["batch_size"], shuffle=True
         )
-        parameters = populate_channel_keys_in_params(loader, parameters)
-
+        val_dataloader = torch.utils.data.DataLoader(
+            dataset_val, batch_size=parameters["batch_size"], shuffle=False
+        )
+        parameters = populate_channel_keys_in_params(train_dataloader, parameters)
         module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
         trainer = pl.Trainer(
             accelerator="auto",
@@ -338,8 +344,7 @@ def test_port_model_forward_2d_rad_regression_single_device_single_node(device):
             enable_checkpointing=False,
             logger=False,
         )
-
-        trainer.fit(module, loader, loader)
+        trainer.fit(module, train_dataloader, val_dataloader)
 
 
 def test_port_model_forward_2d_rad_classification_single_device_single_node(device):
@@ -357,14 +362,22 @@ def test_port_model_forward_2d_rad_classification_single_device_single_node(devi
         parameters["model"]["num_channels"] = 3
         parameters["model"]["onnx_export"] = False
         parameters["model"]["print_summary"] = False
+        parameters["save_outputs"] = True
+        parameters["model"]["architecture"] = "densenet121"
         parameters = populate_header_in_parameters(parameters, parameters["headers"])
         dataset = ImagesFromDataFrame(
             training_data, parameters, train=True, loader_type="train"
         )
-        loader = torch.utils.data.DataLoader(
+        dataset_val = ImagesFromDataFrame(
+            training_data, parameters, train=False, loader_type="validation"
+        )
+        train_dataloader = torch.utils.data.DataLoader(
             dataset, batch_size=parameters["batch_size"], shuffle=True
         )
-        parameters = populate_channel_keys_in_params(loader, parameters)
+        val_dataloader = torch.utils.data.DataLoader(
+            dataset_val, batch_size=parameters["batch_size"], shuffle=False
+        )
+        parameters = populate_channel_keys_in_params(train_dataloader, parameters)
         module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
         trainer = pl.Trainer(
             accelerator="auto",
@@ -377,4 +390,4 @@ def test_port_model_forward_2d_rad_classification_single_device_single_node(devi
             enable_checkpointing=False,
             logger=False,
         )
-        trainer.fit(module, loader, loader)
+        trainer.fit(module, train_dataloader, val_dataloader)
