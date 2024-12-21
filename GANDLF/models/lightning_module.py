@@ -5,6 +5,8 @@ import psutil
 import torch
 import torchio
 import warnings
+import numpy as np
+import SimpleITK as sitk
 from medcam import medcam
 from copy import deepcopy
 from statistics import mean
@@ -15,6 +17,7 @@ from GANDLF.models import get_model
 from GANDLF.metrics import overall_stats
 from GANDLF.optimizers import get_optimizer
 from GANDLF.schedulers import get_scheduler
+from GANDLF.data.post_process import global_postprocessing_dict
 from GANDLF.losses.loss_calculators import LossCalculatorFactory
 from GANDLF.metrics.metric_calculators import MetricCalculatorFactory
 from GANDLF.utils.pred_target_processors import PredictionTargetProcessorFactory
@@ -23,11 +26,14 @@ from GANDLF.utils import (
     optimize_and_save_model,
     write_training_patches,
     one_hot,
+    reverse_one_hot,
     print_model_summary,
     get_date_time,
     save_model,
     load_model,
     version_check,
+    get_filename_extension_sanitized,
+    resample_image,
     BEST_MODEL_PATH_END,
     INITIAL_MODEL_PATH_END,
     LATEST_MODEL_PATH_END,
@@ -265,15 +271,27 @@ class GandlfLightningModule(pl.LightningModule):
 
         return loss
 
-    def _prepare_images_batch_from_subject_data(self, subject):
-        images_batch = torch.cat(  # 5D tensor: (B,C, H, W, D)
-            [subject[key][torchio.DATA] for key in self.params["channel_keys"]], dim=1
+    def _prepare_images_batch_from_subject_data(self, subject_data: torchio.Subject):
+        """
+        Concatenates the images from the subject data into a single tensor.
+
+        Args:
+            subject_data (torchio.Subject): The torchio.Subject object containing the images.
+        Can be also a set of already extracted patches.
+
+        Returns:
+            images_batch (torch.Tensor): The concatenated images from the subject data
+        of shape (B, C, H, W, D).
+
+        """
+        images_batch = torch.cat(
+            [subject_data[key][torchio.DATA] for key in self.params["channel_keys"]],
+            dim=1,
         )
         return images_batch
 
-    def _prepare_labels_batch_from_subject_data(self, subject):
-        if "value_keys" in self.params:
-            # classification / regression (when label is scalar) or multilabel classif/regression
+    def _prepare_labels_batch_from_subject_data(self, subject: torchio.Subject):
+        if self._problem_type_is_regression or self._problem_type_is_classification:
             label = torch.cat(
                 [subject[key] for key in self.params["value_keys"]], dim=0
             )
@@ -531,6 +549,8 @@ class GandlfLightningModule(pl.LightningModule):
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.val_predictions: List[torch.Tensor] = []
             self.val_labels: List[torch.Tensor] = []
+            if self.params["save_outputs"]:
+                self.rows_to_write: List[str] = []
 
     def _initialize_validation_logger(self):
         self.val_logger = Logger(
@@ -552,17 +572,43 @@ class GandlfLightningModule(pl.LightningModule):
         )
         self._ensure_path_exists(self._current_validation_epoch_save_dir)
 
-    # TODO placeholder for now
     def validation_step(self, subject, batch_idx):
         if self.params["verbose"]:
             self._print_currently_processed_validation_subject(subject)
-        subject_spacing = subject.get("spacing", None)
+        # TODO this is going to effectively block any paralllelism, as the
+        # spacing is going to unpredicatably change across GPUs
+        self.params["subject_spacing"] = subject.get("spacing", None)
         subject_dict = self._initialize_validation_subject_dict(subject)
         subject_dict = self._add_channel_keys_to_subject_dict(subject_dict, subject)
 
-        loss = torch.randn([1])
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            model_output = self._regression_or_classification_validation_step(
+                subject_dict
+            )
+            label = self._initialize_validation_label_ground_truth_classification_or_regression(
+                subject
+            )
+        else:
+            model_output = self._segmentation_validation_step(subject, subject_dict)
+            label = self._initialize_validation_label_ground_truth_segmentation(subject)
+
+        model_output, label = self.pred_target_processor(model_output, label)
+        loss = self.loss(model_output, label)
+        metric_results = self.metric_calculators(model_output, label)
         self.val_losses.append(loss)
+        self.validation_metric_values.append(metric_results)
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            self.val_predictions.append(model_output)
+            self.val_labels.append(label)
+
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log_dict(
+            self._ensure_proper_type_of_metric_values_for_progbar(metric_results),
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+
         return loss
 
     def _print_currently_processed_validation_subject(self, subject):
@@ -613,67 +659,269 @@ class GandlfLightningModule(pl.LightningModule):
             )
         return subject_dict
 
-    def _regression_or_classification_validation_step(self, subject_dict):
+    def _regression_or_classification_validation_step(self, subject_dict, subject_id):
+        def _prepare_row_for_output_csv(
+            subject_id: str, prediction_logit: float, epoch: int
+        ):
+            return f"{epoch},{subject_id},{prediction_logit}\n"
+
+        def _process_prediction_logit_for_row_writing(
+            prediction_logit: torch.Tensor, scaling_factor: float
+        ):
+            return prediction_logit.cpu().max().item() / scaling_factor
+
+        prediction_logit = self._get_predictions_on_subject_using_label_sampler(
+            subject_dict
+        )
+        if self.params["save_outputs"]:
+            processed_logit = _process_prediction_logit_for_row_writing(
+                prediction_logit, self.params["scaling_factor"]
+            )
+            self.rows_to_write.append(
+                _prepare_row_for_output_csv(
+                    subject_id, processed_logit, self.current_epoch
+                )
+            )
+        return prediction_logit
+
+    # TODO this whole logic can be packed into something separate, as it is only used
+    # in validation of regression and classification problems
+    def _get_predictions_on_subject_using_label_sampler(self, subject_dict):
+        def _prepare_images_batch_from_patch_regression_or_classification_validation_mode(
+            patches_batch,
+        ):
+            """
+            Validation mode processing for regression and classification problems requires
+            a different approach to preparing the images batch.
+            """
+            images_batch_from_patches = torch.cat(
+                [patches_batch[key][torchio.DATA] for key in patches_batch], dim=0
+            ).unsqueeze(0)
+            if images_batch_from_patches.shape[-1] == 1:
+                images_batch_from_patches = torch.squeeze(images_batch_from_patches, -1)
+            return images_batch_from_patches
+
         sampler = torchio.data.LabelSampler(self.params["patch_size"])
         tio_subject = torchio.Subject(subject_dict)
         generator = sampler(
             tio_subject, num_patches=self.params["q_samples_per_volume"]
         )
+
+        total_logits_for_all_patches = 0.0
         for patches_batch in generator:
-            pass
+            images_from_patches = _prepare_images_batch_from_patch_regression_or_classification_validation_mode(
+                patches_batch
+            )
+            model_output, _ = self.forward(images_from_patches)
+            total_logits_for_all_patches += model_output
 
-    # TODO think about adding segmentation and classification/regression validation steps
-    # TODO think if squeeze/unsqueeze operations are needed as maybe the perparators will handle it
-    # look into training logic
-    def _prepare_images_batch_from_patch(self, patches_batch):
-        images_batch = torch.cat(
-            [patches_batch[key][torchio.DATA] for key in self.params["channel_keys"]],
-            dim=1,
-        ).unsqueeze(0)
-        if images_batch.shape[-1] == 1:
-            images_batch = torch.squeeze(images_batch, -1)
-        return images_batch
+        return total_logits_for_all_patches / self.params["q_samples_per_volume"]
 
-    # TODO think about adding segmentation here
-    def _prepare_labels_batch_from_patch(self, patches_batch):
-        if self._problem_type_is_classification or self._problem_type_is_regression:
-            labels_batch = torch.cat(
-                [patches_batch["value_" + key] for key in self.params["value_keys"]],
-                dim=0,
+    def _segmentation_validation_step(self, subject, subject_dict):
+        predicted_segmentation_mask = (
+            self._get_predictions_on_subject_using_grid_sampler(subject_dict)
+        )
+        if self.params["save_outputs"]:
+            self._save_predictions_for_segmentation_subject(
+                predicted_segmentation_mask, subject
             )
 
-    # TODO to be extended
+    def _get_predictions_on_subject_using_grid_sampler(self, subject_dict):
+        grid_sampler, patch_loader = self._prepare_grid_aggregator_and_patch_loader(
+            subject_dict
+        )
+        prediction_aggregator = torchio.inference.GridAggregator(
+            grid_sampler,
+            overlap_mode=self.params["inference_mechanism"]["grid_aggregator_overlap"],
+        )
+        if self.params["medcam_enabled"]:
+            medcam_attention_map_aggregator = torchio.inference.GridAggregator(
+                grid_sampler,
+                overlap_mode=self.params["inference_mechanism"][
+                    "grid_aggregator_overlap"
+                ],
+            )
+        for patches_batch in patch_loader:
+            images_batch = self._prepare_images_batch_from_subject_data(patches_batch)
+            model_output, attention_map = self.forward(images_batch)
+            if self.params["medcam_enabled"]:
+                medcam_attention_map_aggregator.add_batch(attention_map)
+            prediction_aggregator.add_batch(
+                model_output, patches_batch[torchio.LOCATION]
+            )
+        if self.params["medcam_enabled"]:
+            attention_map = medcam_attention_map_aggregator.get_output_tensor()
+            for i, n in enumerate(attention_map):
+                self.model.save_attention_map(
+                    n.squeeze(), raw_input=images_batch[i].squeeze(-1)
+                )
+        return prediction_aggregator.get_output_tensor().unsqueeze(0)
+
+    def _prepare_grid_aggregator_and_patch_loader(self, subject_dict):
+        grid_sampler = torchio.inference.GridSampler(
+            torchio.Subject(subject_dict),
+            self.params["patch_size"],
+            patch_overlap=self.params["inference_mechanism"]["patch_overlap"],
+        )
+        patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=1)
+
+        return grid_sampler, patch_loader
+
+    # TODO will also suffer from the same issue as the training step with
+    # synchronization across GPUs
     def on_validation_epoch_end(self):
+        validation_epoch_average_metrics = {}
+        metric_names = self.validation_metric_values[0].keys()
+        for metric_name in metric_names:
+            metric_values = [x[metric_name] for x in self.validation_metric_values]
+            validation_epoch_average_metrics[
+                metric_name
+            ] = self._compute_metric_mean_across_values_from_batches(metric_values)
+
+        if self._problem_type_is_regression or self._problem_type_is_classification:
+            validation_epoch_average_metrics_overall = overall_stats(
+                torch.cat(self.val_predictions), torch.cat(self.val_labels), self.params
+            )
+            validation_epoch_average_metrics.update(
+                validation_epoch_average_metrics_overall
+            )
+
         val_losses_gathered = self.all_gather(self.val_losses)
         mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
-        self._check_if_early_stopping(mean_loss)
-        if self.params["save_outputs"]:
-            if self._problem_type_is_regression:
-                # Do allgather for predictions and labels
-                self._save_outputs_regression()
-            elif self._problem_type_is_classification:
-                # Do allgather for predictions and labels
 
-                self._save_outputs_classification()
+        self._clear_validation_epoch_containers()
+
+        self.val_logger.write(
+            self.current_epoch,
+            mean_loss,
+            self._ensure_proper_metric_formatting_for_logging(
+                validation_epoch_average_metrics
+            ),
+        )
+
+        self._check_if_early_stopping(mean_loss)
+        # val_losses_gathered = self.all_gather(self.val_losses)
+        # mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
+        # self._check_if_early_stopping(mean_loss)
+        # if self.params["save_outputs"]:
+        #     if self._problem_type_is_regression or self._problem_type_is_classification:
+        #         # Do allgather for predictions and labels
+        #         self._save_predictions_for_regression_or_classification()
 
     @rank_zero_only
     def _ensure_path_exists(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def _save_outputs_segmentation(self):
-        pass  # TODO
+    # TODO called at the validation step, NOT at the end of the epoch - we want to avoid
+    # saving all predictions for all subjects for the end of the epoch
+    def _save_predictions_for_segmentation_subject(
+        self, predicted_segmentation_mask: torch.Tensor, subject: torchio.Subject
+    ):
+        """
+        Saves the predicted segmentation mask for a given subject.
 
-    @rank_zero_only
-    def _save_outputs_classification(self, rows_to_write: List[List[str]]):
-        # flow here - this function takes a list of rows to write to the csv file
-        # rows are gathered from all replicas for the case of distributed training
-        # then the rows are written to the csv file
-        pass  # TODO
+        Args:
+            predicted_segmentation_mask: The predicted segmentation mask, extracted
+        from the grid aggregator when all validation patches for this subject have
+        been processed.
+            subject: The subject for which the segmentation mask was predicted, used
+        to extract the metadata.
+        """
 
-    @rank_zero_only
-    def _save_outputs_regression(self):
-        pass  # TODO
+        def _convert_subject_to_sikt_format(subject: torchio.Subject):
+            return torchio.ScalarImage(
+                tensor=subject["1"]["data"].squeeze(0),
+                affine=subject["1"]["affine"].squeeze(0),
+            ).as_sitk()
+
+        def _postprocess_raw_segmentation_mask(
+            segmentation_mask: np.ndarray, params: dict
+        ):
+            for postprocessor in params["data_postprocessing"]:
+                for _class in range(0, params["model"]["num_classes"]):
+                    segmentation_mask[0, _class, ...] = global_postprocessing_dict[
+                        postprocessor
+                    ](segmentation_mask[0, _class, ...], params)
+
+            return segmentation_mask
+
+        def _swap_mask_axes_for_sikt_save_format_compatibility(
+            segmentation_mask: np.ndarray,
+        ):
+            return np.swapaxes(segmentation_mask, 0, 2)
+
+        def _postprocess_one_hot_reversed_segmentation_mask(
+            segmentation_mask: np.ndarray, params: dict
+        ):
+            for postprocessor in params[
+                "data_postprocessing_after_reverse_one_hot_encoding"
+            ]:
+                segmentation_mask = global_postprocessing_dict[postprocessor](
+                    segmentation_mask, params
+                )
+
+            return segmentation_mask
+
+        def _determine_final_prediction_mask_shape(segmentation_mask: np.ndarray):
+            if segmentation_mask.shape[0] == 1:
+                return segmentation_mask.squeeze(0)
+            elif segmentation_mask.shape[-1] == 1:
+                return segmentation_mask.squeeze(-1)
+            else:
+                return segmentation_mask
+
+        predicted_segmentation_mask_numpy = predicted_segmentation_mask.numpy()
+        predicted_segmentation_mask_numpy = _postprocess_raw_segmentation_mask(
+            predicted_segmentation_mask_numpy, self.params
+        )
+        decoded_segmentation_mask = reverse_one_hot(
+            predicted_segmentation_mask_numpy, self.params["model"]["class_list"]
+        )
+        decoded_segmentation_mask = _swap_mask_axes_for_sikt_save_format_compatibility(
+            decoded_segmentation_mask
+        )
+        decoded_segmentation_mask = _postprocess_one_hot_reversed_segmentation_mask(
+            decoded_segmentation_mask, self.params
+        )
+        decoded_segmentation_mask = _determine_final_prediction_mask_shape(
+            decoded_segmentation_mask
+        )
+
+        image_save_format = get_filename_extension_sanitized(subject["1"]["path"][0])
+        if image_save_format in [".jpg", ".jpeg", ".png"]:
+            decoded_segmentation_mask = decoded_segmentation_mask.astype(np.uint8)
+
+        subject_converted_to_sikt_format = _convert_subject_to_sikt_format(subject)
+        result_sikt_image = sitk.GetImageFromArray(decoded_segmentation_mask)
+        result_sikt_image.CopyInformation(subject_converted_to_sikt_format)
+
+        if "resample" in self.params["data_preprocessing"]:
+            result_sikt_image = resample_image(
+                result_sikt_image,
+                subject_converted_to_sikt_format.GetSpacing(),
+                interpolator=sitk.sitkNearestNeighbor,
+            )
+        segmentation_mask_save_path = os.path.join(
+            self._current_validation_epoch_save_dir,
+            "testing",
+            subject["subject_id"][0],
+            f"{subject['subject_id'][0]}_seg_process_rank_{self.global_rank}{image_save_format}",
+        )
+        self._ensure_path_exists(os.path.dirname(segmentation_mask_save_path))
+        sitk.WriteImage(result_sikt_image, segmentation_mask_save_path)
+
+    def _save_predictions_for_regression_or_classification(
+        self, rows_to_write: List[List[str]]
+    ):
+        csv_save_path = os.path.join(
+            self._current_validation_epoch_save_dir, "output_predictions.csv"
+        )
+        file_contents_merged = self.CLASSIFICATION_REGRESSION_RESULTS_HEADER.join(
+            [",".join(row) for row in rows_to_write]
+        )
+        with open(csv_save_path, "w") as file:
+            file.write(file_contents_merged)
 
     def _check_if_early_stopping(self, val_loss):
         previous_best_loss = deepcopy(self.current_best_loss)
