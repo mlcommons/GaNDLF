@@ -56,6 +56,7 @@ class GandlfLightningModule(pl.LightningModule):
         self._problem_type_is_classification = (
             params["problem_type"] == "classification"
         )
+        self._problem_type_is_segmentation = params["problem_type"] == "segmentation"
         self._initialize_model()
         self._initialize_loss()
         self._initialize_metric_calculators()
@@ -246,8 +247,8 @@ class GandlfLightningModule(pl.LightningModule):
         images = self._prepare_images_batch_from_subject_data(subject)
         labels = self._prepare_labels_batch_from_subject_data(subject)
         self._set_spacing_params_for_subject(subject)
-        images, labels = self._process_inputs(images, labels)
-
+        images = self._process_images(images)
+        labels = self._process_labels(labels)
         model_output, _ = self.forward(images)
         model_output, labels = self.pred_target_processor(model_output, labels)
 
@@ -312,39 +313,43 @@ class GandlfLightningModule(pl.LightningModule):
         else:
             self.params["subject_spacing"] = None
 
-    def _process_inputs(
-        self, images: torch.Tensor, labels: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    # TODO this shoudl be separate for
+    def _process_images(self, images: torch.Tensor):
         """
         Modify the input images and labels as needed for forward pass, loss
         and metric calculations.
         """
 
-        if labels is not None:
-            if self.params["problem_type"] == "segmentation":
-                if labels.shape[1] == 3:
-                    labels = labels[:, 0, ...].unsqueeze(1)
-                    warnings.warn(
-                        "The label image is an RGB image, only the first channel will be used."
-                    )
+        if self.params["model"]["dimension"] == 2:
+            # removing depth, as torchio adds last dimension for 2D images
+            images = images.squeeze(-1)
 
-            assert len(labels) == len(images)
+        return images
+
+    def _process_labels(self, labels: torch.Tensor):
+        """
+        Modify the input labels as needed for forward pass, loss
+        and metric calculations.
+        """
+
+        if self._problem_type_is_segmentation:
+            if labels.shape[1] == 3:
+                labels = labels[:, 0, ...].unsqueeze(1)
+                warnings.warn(
+                    "The label image is an RGB image, only the first channel will be used."
+                )
 
         # for segmentation remove the depth dimension from the label.
         # for classification / regression, flattens class / reg label from list (possible in multilabel) to scalar
         # TODO: second condition is crutch - in some cases label is passed as 1-d Tensor (B,) and if Batch size is 1,
         #  it is squeezed to scalar tensor (0-d) and the future logic fails
-        if labels is not None and len(labels.shape) != 1:
+        if len(labels.shape) != 1:
             labels = labels.squeeze(-1)
 
-        if self.params["problem_type"] == "segmentation":
+        if self._problem_type_is_segmentation:
             labels = one_hot(labels, self.params["model"]["class_list"])
 
-        if self.params["model"]["dimension"] == 2:
-            # removing depth, as torchio adds last dimension for 2D images
-            images = images.squeeze(-1)
-
-        return images, labels
+        return labels
 
     def _handle_dynamic_batch_size_in_differential_privacy_mode(self, subject):
         raise NotImplementedError(
@@ -591,6 +596,12 @@ class GandlfLightningModule(pl.LightningModule):
             label = self._initialize_validation_label_ground_truth_segmentation(subject)
 
         model_output, label = self.pred_target_processor(model_output, label)
+        # TODO do something with 4 lines below because I can't look at it
+        if label.shape[0] == 3:
+            label = label[0, ...].unsqueeze(0)
+        label = label.unsqueeze(0)
+        label = self._process_labels(label)
+
         loss = self.loss(model_output, label)
         metric_results = self.metric_calculators(model_output, label)
         self.val_losses.append(loss)
@@ -693,15 +704,16 @@ class GandlfLightningModule(pl.LightningModule):
 
         sampler = torchio.data.LabelSampler(self.params["patch_size"])
         tio_subject = torchio.Subject(subject_dict)
-        generator = sampler(
+        patch_loader = sampler(
             tio_subject, num_patches=self.params["q_samples_per_volume"]
         )
 
         total_logits_for_all_patches = 0.0
-        for patches_batch in generator:
+        for patches_batch in patch_loader:
             images_from_patches = _prepare_images_batch_from_patch_regression_or_classification_validation_mode(
                 patches_batch
             )
+            images_from_patches = self._process_images(images_from_patches)
             model_output, _ = self.forward(images_from_patches)
             total_logits_for_all_patches += model_output
 
@@ -715,8 +727,18 @@ class GandlfLightningModule(pl.LightningModule):
             self._save_predictions_for_segmentation_subject(
                 predicted_segmentation_mask, subject
             )
+        return predicted_segmentation_mask
 
     def _get_predictions_on_subject_using_grid_sampler(self, subject_dict):
+        def _ensure_output_shape_compatibility_with_torchio(model_output: torch.Tensor):
+            # for 2d images where the depth is removed, add it back
+            if (
+                self.params["model"]["dimension"] == 2
+                and self._problem_type_is_segmentation
+            ):
+                model_output = model_output.unsqueeze(-1)
+            return model_output
+
         grid_sampler, patch_loader = self._prepare_grid_aggregator_and_patch_loader(
             subject_dict
         )
@@ -732,8 +754,12 @@ class GandlfLightningModule(pl.LightningModule):
                 ],
             )
         for patches_batch in patch_loader:
-            images_batch = self._prepare_images_batch_from_subject_data(patches_batch)
-            model_output, attention_map = self.forward(images_batch)
+            images_from_patches = self._prepare_images_batch_from_subject_data(
+                patches_batch
+            )
+            images_from_patches = self._process_images(images_from_patches)
+            model_output, attention_map = self.forward(images_from_patches)
+            model_output = _ensure_output_shape_compatibility_with_torchio(model_output)
             if self.params["medcam_enabled"]:
                 medcam_attention_map_aggregator.add_batch(attention_map)
             prediction_aggregator.add_batch(
@@ -743,7 +769,7 @@ class GandlfLightningModule(pl.LightningModule):
             attention_map = medcam_attention_map_aggregator.get_output_tensor()
             for i, n in enumerate(attention_map):
                 self.model.save_attention_map(
-                    n.squeeze(), raw_input=images_batch[i].squeeze(-1)
+                    n.squeeze(), raw_input=images_from_patches[i].squeeze(-1)
                 )
         return prediction_aggregator.get_output_tensor().unsqueeze(0)
 
