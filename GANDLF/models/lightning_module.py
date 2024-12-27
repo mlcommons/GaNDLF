@@ -595,17 +595,15 @@ class GandlfLightningModule(pl.LightningModule):
             model_output = self._segmentation_validation_step(subject, subject_dict)
             label = self._initialize_validation_label_ground_truth_segmentation(subject)
 
-        model_output, label = self.pred_target_processor(model_output, label)
-        # TODO do something with 4 lines below because I can't look at it
-        if label.shape[0] == 3:
-            label = label[0, ...].unsqueeze(0)
-        label = label.unsqueeze(0)
         label = self._process_labels(label)
+        model_output, label = self.pred_target_processor(model_output, label)
 
         loss = self.loss(model_output, label)
         metric_results = self.metric_calculators(model_output, label)
+
         self.val_losses.append(loss)
         self.validation_metric_values.append(metric_results)
+
         if self._problem_type_is_regression or self._problem_type_is_classification:
             model_prediction = (
                 torch.argmax(model_output[0], 0)
@@ -654,7 +652,7 @@ class GandlfLightningModule(pl.LightningModule):
         return torch.cat([subject[key] for key in self.params["value_keys"]], dim=0)
 
     def _initialize_validation_label_ground_truth_segmentation(self, subject):
-        return subject["label"]["data"].squeeze(0)
+        return subject["label"]["data"]
 
     def _regression_or_classification_validation_step(self, subject_dict, subject_id):
         def _prepare_row_for_output_csv(
@@ -951,6 +949,7 @@ class GandlfLightningModule(pl.LightningModule):
         with open(csv_save_path, "w") as file:
             file.write(file_contents_merged)
 
+    @rank_zero_only
     def _check_if_early_stopping(self, val_loss):
         previous_best_loss = deepcopy(self.current_best_loss)
         if val_loss < self.current_best_loss:
