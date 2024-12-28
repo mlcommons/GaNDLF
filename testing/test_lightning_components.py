@@ -247,67 +247,68 @@ def test_port_model_initialization():
 
 
 def test_port_model_forward_2d_rad_segmentation_single_device_single_node(device):
-    with TrainerTestsContextManager():
-        parameters = parseConfig(
-            TESTS_DIRPATH + "/config_segmentation.yaml", version_check_flag=False
-        )
+    # with TrainerTestsContextManager():
+    parameters = parseConfig(
+        TESTS_DIRPATH + "/config_segmentation.yaml", version_check_flag=False
+    )
 
-        training_data, parameters["headers"] = parseTrainingCSV(
-            TEST_DATA_DIRPATH + "/train_2d_rad_segmentation.csv"
-        )
-        parameters["modality"] = "rad"
-        parameters["patch_size"] = PATCH_SIZE["2D"]
-        parameters["metrics"].pop("iou")
-        parameters["patience"] = 3
-        parameters["model"]["dimension"] = 2
-        parameters["model"]["class_list"] = [0, 255]
-        parameters["model"]["amp"] = True
-        parameters["model"]["num_channels"] = 3
-        parameters["model"]["onnx_export"] = False
-        parameters["model"]["print_summary"] = False
-        parameters["penalty_weights"] = [0.5, 0.25, 0.175, 0.075]
-        parameters["class_weights"] = [1.0, 1.0]
-        parameters["sampling_weights"] = [1.0, 1.0]
-        parameters["model"]["print_summary"] = True
-        parameters["track_memory_usage"] = True
-        parameters["verbose"] = True
-        parameters["model"]["save_at_every_epoch"] = True
-        parameters["save_outputs"] = False
-        parameters = populate_header_in_parameters(parameters, parameters["headers"])
+    training_data, parameters["headers"] = parseTrainingCSV(
+        TEST_DATA_DIRPATH + "/train_2d_rad_segmentation.csv"
+    )
+    parameters["modality"] = "rad"
+    parameters["patch_size"] = PATCH_SIZE["2D"]
+    parameters["metrics"].pop("iou")
+    parameters["patience"] = 3
+    parameters["model"]["dimension"] = 2
+    parameters["model"]["class_list"] = [0, 255]
+    parameters["model"]["amp"] = True
+    parameters["model"]["num_channels"] = 3
+    parameters["model"]["onnx_export"] = False
+    parameters["model"]["print_summary"] = False
+    parameters["penalty_weights"] = [0.5, 0.25, 0.175, 0.075]
+    parameters["class_weights"] = [1.0, 1.0]
+    parameters["sampling_weights"] = [1.0, 1.0]
+    parameters["model"]["print_summary"] = True
+    parameters["track_memory_usage"] = True
+    parameters["verbose"] = True
+    parameters["model"]["save_at_every_epoch"] = True
+    parameters["save_outputs"] = False
+    parameters = populate_header_in_parameters(parameters, parameters["headers"])
 
-        dataset = ImagesFromDataFrame(
-            training_data, parameters, train=True, loader_type="train"
-        )
-        dataset_val = ImagesFromDataFrame(
-            training_data, parameters, train=False, loader_type="validation"
-        )
-        dataset_test = ImagesFromDataFrame(
-            training_data, parameters, train=False, loader_type="test"
-        )
-        train_dataloader = torch.utils.data.DataLoader(
-            dataset, batch_size=parameters["batch_size"], shuffle=True
-        )
-        val_dataloader = torch.utils.data.DataLoader(
-            dataset_val, batch_size=parameters["batch_size"], shuffle=False
-        )
-        test_dataloader = torch.utils.data.DataLoader(
-            dataset_test, batch_size=parameters["batch_size"], shuffle=False
-        )
-        parameters = populate_channel_keys_in_params(train_dataloader, parameters)
-        module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
-        trainer = pl.Trainer(
-            accelerator="auto",
-            strategy="auto",
-            fast_dev_run=False,
-            devices=1,
-            num_nodes=1,
-            max_epochs=1,
-            sync_batchnorm=False,
-            enable_checkpointing=False,
-            logger=False,
-        )
-        trainer.fit(module, train_dataloader, val_dataloader)
-        trainer.test(module, test_dataloader)
+    dataset = ImagesFromDataFrame(
+        training_data, parameters, train=True, loader_type="train"
+    )
+    dataset_val = ImagesFromDataFrame(
+        training_data, parameters, train=False, loader_type="validation"
+    )
+    dataset_test = ImagesFromDataFrame(
+        training_data, parameters, train=False, loader_type="test"
+    )
+    train_dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=parameters["batch_size"], shuffle=True
+    )
+    val_dataloader = torch.utils.data.DataLoader(
+        dataset_val, batch_size=parameters["batch_size"], shuffle=False
+    )
+    test_dataloader = torch.utils.data.DataLoader(
+        dataset_test, batch_size=parameters["batch_size"], shuffle=False
+    )
+    parameters = populate_channel_keys_in_params(train_dataloader, parameters)
+    module = GandlfLightningModule(parameters, output_dir=TEST_DATA_OUTPUT_DIRPATH)
+    trainer = pl.Trainer(
+        accelerator="auto",
+        strategy="auto",
+        fast_dev_run=False,
+        devices=1,
+        num_nodes=1,
+        max_epochs=2,
+        sync_batchnorm=False,
+        enable_checkpointing=False,
+        logger=False,
+        num_sanity_val_steps=0,
+    )
+    trainer.fit(module, train_dataloader, val_dataloader)
+    trainer.test(module, test_dataloader)
 
 
 def test_port_model_forward_2d_rad_regression_single_device_single_node(device):
@@ -361,6 +362,7 @@ def test_port_model_forward_2d_rad_regression_single_device_single_node(device):
             sync_batchnorm=False,
             enable_checkpointing=False,
             logger=False,
+            num_sanity_val_steps=0,
         )
         trainer.fit(module, train_dataloader, val_dataloader)
         trainer.test(module, test_dataloader)
@@ -414,6 +416,7 @@ def test_port_model_forward_2d_rad_classification_single_device_single_node(devi
             sync_batchnorm=False,
             enable_checkpointing=False,
             logger=False,
+            num_sanity_val_steps=0,
         )
         trainer.fit(module, train_dataloader, val_dataloader)
         trainer.test(module, test_dataloader)

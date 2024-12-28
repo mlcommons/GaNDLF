@@ -45,6 +45,7 @@ from typing import Tuple, Union, Dict, List, Any
 
 class GandlfLightningModule(pl.LightningModule):
     CLASSIFICATION_REGRESSION_RESULTS_HEADER = "Epoch,SubjectID,PredictedValue\n"
+    FLOAT_FORMATTING_PRECISION = 4
 
     def __init__(self, params: dict, output_dir: str):
         super().__init__()
@@ -110,6 +111,23 @@ class GandlfLightningModule(pl.LightningModule):
             onnx_export=onnx_export,
         )
 
+    def _prepare_metrics_dict_for_progbar_logging(
+        self, metric_results_dict: Dict[str, float]
+    ):
+        metric_results_dict_with_updated_suffix = (
+            self._add_stage_suffix_to_metric_results_dict(
+                metric_results_dict, self._determine_trainer_stage_string()
+            )
+        )
+        metric_results_dict_with_values_formatted = (
+            self._ensure_proper_type_of_metric_values_for_progbar(
+                metric_results_dict_with_updated_suffix
+            )
+        )
+        return self._round_metric_values_in_dict(
+            metric_results_dict_with_values_formatted
+        )
+
     @staticmethod
     def _ensure_proper_type_of_metric_values_for_progbar(
         metric_results_dict: Dict[str, Any]
@@ -123,6 +141,24 @@ class GandlfLightningModule(pl.LightningModule):
                     ] = metric_value_for_given_class
                 del parsed_results_dict[metric_name]
         return parsed_results_dict
+
+    @staticmethod
+    def _add_stage_suffix_to_metric_results_dict(
+        metric_results_dict: Dict[str, float], stage: str
+    ):
+        metric_results_dict_with_updated_suffix = {
+            f"{stage}_{metric_name}": metric_value
+            for metric_name, metric_value in metric_results_dict.items()
+        }
+        return metric_results_dict_with_updated_suffix
+
+    def _round_metric_values_in_dict(self, metric_results_dict: Dict[str, float]):
+        return {
+            k: self._round_value_to_precision(v) for k, v in metric_results_dict.items()
+        }
+
+    def _round_value_to_precision(self, value: float):
+        return round(value, self.FLOAT_FORMATTING_PRECISION)
 
     def forward(
         self, images: torch.Tensor
@@ -260,9 +296,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         loss = self.loss(model_output, labels)
         metric_results = self.metric_calculators(model_output, labels)
-        metric_results = self._add_stage_suffix_to_metric_results_dict(
-            metric_results, "train"
-        )
+
         if self._problem_type_is_regression or self._problem_type_is_classification:
             self.train_labels.append(labels.detach().cpu())
             self.train_predictions.append(
@@ -271,14 +305,6 @@ class GandlfLightningModule(pl.LightningModule):
 
         self.train_losses.append(loss.detach().cpu())
         self.training_metric_values.append(metric_results)
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log_dict(
-            self._ensure_proper_type_of_metric_values_for_progbar(metric_results),
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
 
         return loss
 
@@ -449,7 +475,9 @@ class GandlfLightningModule(pl.LightningModule):
             )
             epoch_metrics.update(training_epoch_average_metrics_overall)
         train_losses_gathered = self.all_gather(self.train_losses)
-        mean_loss = torch.mean(torch.stack(train_losses_gathered)).item()
+        mean_loss = self._round_value_to_precision(
+            torch.mean(torch.stack(train_losses_gathered)).item()
+        )
 
         self._clear_training_epoch_containers()
 
@@ -458,8 +486,9 @@ class GandlfLightningModule(pl.LightningModule):
             mean_loss,
             self._ensure_proper_metric_formatting_for_logging(epoch_metrics),
         )
+        self.log("train_loss", mean_loss, on_epoch=True, prog_bar=True)
         self.log_dict(
-            self._ensure_proper_type_of_metric_values_for_progbar(epoch_metrics),
+            self._prepare_metrics_dict_for_progbar_logging(epoch_metrics),
             on_epoch=True,
             prog_bar=True,
             sync_dist=True,
@@ -474,9 +503,8 @@ class GandlfLightningModule(pl.LightningModule):
         self._save_model(self.current_epoch, self.model_paths["latest"], False)
         print(f"Latest model saved")
 
-    @staticmethod
     def _compute_metric_mean_across_values_from_batches(
-        metric_values: List[Union[float, List[float]]]
+        self, metric_values: List[Union[float, List[float]]]
     ) -> Union[float, List[float]]:
         """
         Given a list of metrics calculated for each batch, computes the mean across all batches.
@@ -487,7 +515,7 @@ class GandlfLightningModule(pl.LightningModule):
                 mean([batch_metrics[i] for batch_metrics in metric_values])
                 for i in range(len(metric_values[0]))
             ]
-        return mean(metric_values)
+        return self._round_value_to_precision(mean(metric_values))
 
     @staticmethod
     def _ensure_proper_metric_formatting_for_logging(metrics_dict: dict) -> dict:
@@ -609,9 +637,7 @@ class GandlfLightningModule(pl.LightningModule):
 
         loss = self.loss(model_output, label)
         metric_results = self.metric_calculators(model_output, label)
-        metric_results = self._add_stage_suffix_to_metric_results_dict(
-            metric_results, "val"
-        )
+
         self.val_losses.append(loss)
         self.validation_metric_values.append(metric_results)
 
@@ -623,15 +649,6 @@ class GandlfLightningModule(pl.LightningModule):
             )  # TODO am I right here? For regression, we should not take argmax
             self.val_predictions.append(model_prediction.item())
             self.val_labels.append(label.item())
-
-        self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log_dict(
-            self._ensure_proper_type_of_metric_values_for_progbar(metric_results),
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
 
         return loss
 
@@ -739,8 +756,18 @@ class GandlfLightningModule(pl.LightningModule):
             )
         return predicted_segmentation_mask
 
+    def _determine_trainer_stage_string(self):
+        if self.trainer.validating:
+            return "val"
+        elif self.trainer.testing:
+            return "test"
+        elif self.trainer.predicting:
+            return "inference"
+        else:
+            return "train"
+
     def _determine_save_path_to_use(self):
-        if self.trainer.validating or self.trainer.sanity_checking:
+        if self.trainer.validating:
             return self._current_validation_epoch_save_dir
         elif self.trainer.testing:
             return self._current_test_epoch_save_dir
@@ -824,7 +851,9 @@ class GandlfLightningModule(pl.LightningModule):
                 validation_epoch_average_metrics_overall
             )
         val_losses_gathered = self.all_gather(self.val_losses)
-        mean_loss = torch.mean(torch.stack(val_losses_gathered)).item()
+        mean_loss = self._round_value_to_precision(
+            torch.mean(torch.stack(val_losses_gathered)).item()
+        )
 
         self._clear_validation_epoch_containers()
 
@@ -835,23 +864,24 @@ class GandlfLightningModule(pl.LightningModule):
                 validation_epoch_average_metrics
             ),
         )
-        if not self.trainer.sanity_checking:
-            self._check_if_early_stopping(mean_loss)
+
+        self.log("val_loss", mean_loss, on_epoch=True, prog_bar=True)
+        self.log_dict(
+            self._prepare_metrics_dict_for_progbar_logging(
+                validation_epoch_average_metrics
+            ),
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
+
+        self._check_if_early_stopping(mean_loss)
+
         if self.params["save_outputs"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
             # TODO here rows to write also needs to be gathered across all GPUs
             self._save_predictions_for_regression_or_classification(self.rows_to_write)
-
-    @staticmethod
-    def _add_stage_suffix_to_metric_results_dict(
-        metric_results_dict: Dict[str, float], stage: str
-    ):
-        metric_results_dict_with_updated_suffix = {
-            f"{stage}_{metric_name}": metric_value
-            for metric_name, metric_value in metric_results_dict.items()
-        }
-        return metric_results_dict_with_updated_suffix
 
     def _clear_validation_epoch_containers(self):
         self.val_losses = []
@@ -1051,20 +1081,9 @@ class GandlfLightningModule(pl.LightningModule):
 
         loss = self.loss(model_output, label)
         metric_results = self.metric_calculators(model_output, label)
-        metric_results = self._add_stage_suffix_to_metric_results_dict(
-            metric_results, "test"
-        )
+
         self.test_losses.append(loss)
         self.test_metric_values.append(metric_results)
-
-        self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log_dict(
-            self._ensure_proper_type_of_metric_values_for_progbar(metric_results),
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
 
         return loss
 
@@ -1078,7 +1097,9 @@ class GandlfLightningModule(pl.LightningModule):
             ] = self._compute_metric_mean_across_values_from_batches(metric_values)
 
         test_losses_gathered = self.all_gather(self.test_losses)
-        mean_loss = torch.mean(torch.stack(test_losses_gathered)).item()
+        mean_loss = self._round_value_to_precision(
+            torch.mean(torch.stack(test_losses_gathered)).item()
+        )
 
         self._clear_test_epoch_containers()
 
@@ -1090,6 +1111,13 @@ class GandlfLightningModule(pl.LightningModule):
             ),
         )
 
+        self.log("test_loss", mean_loss, on_epoch=True, prog_bar=True)
+        self.log_dict(
+            self._prepare_metrics_dict_for_progbar_logging(test_epoch_average_metrics),
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
         if self.params["save_outputs"] and (
             self._problem_type_is_regression or self._problem_type_is_classification
         ):
